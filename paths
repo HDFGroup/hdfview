@@ -1,69 +1,62 @@
-D
-dir
-/branches/hdfview-2/src/test/modules
-
-
-
-
-M
-dir
-/branches/hdfview-2
-
-
-
-
-D
+A
 dir
 /branches/hdfview-2/src/examples/groups
 
 
 
 
-D
-dir
-/branches/hdfview-2/src/examples/testfiles
-
-
-
-
-D
+A
 dir
 /branches/hdfview-2/src/test/object
 
 
 
 
-D
+A
 dir
 /branches/hdfview-2/src/examples/datasets
 
 
 
 
-D
+A
 dir
 /branches/hdfview-2/src/examples/intro
 
 
 
 
-D
+A
+dir
+/branches/hdfview-2/src/test/object/misc
+
+
+
+
+A
+dir
+/branches/hdfview-2/src/test/modules
+
+
+
+
+A
+dir
+/branches/hdfview-2/src/examples/datatypes
+
+
+
+
+A
 dir
 /branches/hdfview-2/src/test/uitest
 
 
 
 
-D
+A
 dir
-/branches/hdfview-2/config
-
-
-
-
-D
-dir
-/branches/hdfview-2/src/examples/datatypes
+/branches/hdfview-2/src/examples/testfiles
 
 
 
