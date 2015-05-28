@@ -1,0 +1,65 @@
+************************************************************************
+* How to use logging in HDFView and HDF-JAVA Library                   *
+************************************************************************
+
+HDFView 2.11 implemented logging in the java code with support for the
+slf4j 1.7.5 package. HDFView by default uses the slf4j-nop-1.7.5.jar. 
+This suppresses any logging information. See http://www.slf4j.org/ for
+more information on the slf4j package.
+
+To enable logging in HDFView or HDF-JAVA Library, you must include the
+slf4j-simple-1.7.5 jar (or other slf4j compatible jar file) by overriding
+the default jar file.
+
+HDFView:
+  To enable logging in HDFView requires that HDFView uses an alternate
+  classpath. This can be accomplished by changing the command line in the
+  hdfview script in the bin folder.
+  
+  Windows:
+      start "HDFView" "%JAVABIN%\javaw.exe" -Xmx1024M -Djava.library.path="%INSTALLDIR%\lib;%INSTALLDIR%\lib\ext" -Dhdfview.root="%INSTALLDIR%" -jar "%INSTALLDIR%\lib\jhdfview.jar" -root "%INSTALLDIR%\share" %1
+    to
+      start "HDFView" "%JAVABIN%\javaw.exe" -Xmx1024M -Djava.library.path="%INSTALLDIR%\lib;%INSTALLDIR%\lib\ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="%INSTALLDIR%" -cp "%INSTALLDIR%\lib\jhdfview.jar;%INSTALLDIR%\lib\ext\slf4j-simple-1.7.5.jar;%INSTALLDIR%\lib\slf4j-api-1.7.5.jar;%INSTALLDIR%\lib" hdf.view.HDFView -root "%INSTALLDIR%\share" %1
+  
+  Linux:
+      $JAVABIN/java -Xmx1024M -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dhdfview.root="$INSTALLDIR" -jar "$INSTALLDIR/lib/jhdfview.jar" -root "$INSTALLDIR/share" $*
+    to
+      $JAVABIN/java -Xmx1024M -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="$INSTALLDIR -cp $INSTALLDIR/lib/jhdfview.jar:$INSTALLDIR/lib/ext/slf4j-simple-1.7.5.jar:$INSTALLDIR/lib/slf4j-api-1.7.5.jar:$INSTALLDIR/lib hdf.view.HDFView -root $INSTALLDIR/share $*
+
+NOTE that the "-jar $INSTALLDIR/lib/jhdfview.jar" section is changed to 
+     "-cp <list of jars>" and add the -Dorg.slf4j.simpleLogger.defaultLogLevel
+
+org.slf4j.simpleLogger.defaultLogLevel is the default log level for all instances of SimpleLogger. 
+It must be one of ("trace", "debug", "info", "warn", or "error"). If not specified, defaults to "info".
+ 
+************************************************************************
+* Example use of logging and HDF-JAVA Library                          *
+************************************************************************
+
+public class H5test {
+    /**
+     * Add logger for this class
+     */
+
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5test.class);
+    
+    ...
+    public int H5function (int arg)
+    {
+        log.info("H5function called with {}", arg);
+        if (arg < 0) {
+            log.warn("H5function with negative argument");
+            return 0;
+        }
+        try {
+            some_function();
+        }
+        catch (Exception ex) {
+            log.debug("some_function failed: ", ex);
+        }
+
+        log.trace("H5function finished");
+
+        return (arg * 3);
+    }
+    
