@@ -70,7 +70,7 @@ import hdf.object.ScalarDS;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class HDFView implements ViewManager {
+public class HDFView implements ViewManager, DropTargetListener {
 	private static final long     serialVersionUID = 2211017444445918998L;	
 	
 	private static Display display = new Display();
@@ -125,14 +125,14 @@ public class HDFView implements ViewManager {
 	
 	private static final String 	HDF4_VERSION = "HDF 4.2.10";
 	private static final String 	HDF5_VERSION = "HDF5 1.8.13";
-	private static final String 	HDFVIEW_VERSION = "HDFView 2.99";
+	private static final String 	HDFVIEW_VERSION = "HDFView 3.99";
 	private static final String 	HDFVIEW_USERSGUIDE_URL = "http://www.hdfgroup.org/products/java/hdfview/UsersGuide/index.html";
 	private static final String 	JAVA_COMPILER = "jdk 1.7";
 	private static final String		JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
 	
 	private static final String		aboutHDFView = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
     + "For " + System.getProperty("os.name") + "\n\n"
-    + "Copyright " + '\u00a9' + " 2006-2014 The HDF Group.\n"
+    + "Copyright " + '\u00a9' + " 2006-2015 The HDF Group.\n"
     + "All rights reserved.";
 	
 	/* String buffer holding the status message */
@@ -379,8 +379,18 @@ public class HDFView implements ViewManager {
 		mainWindow = new Shell(display);
 		mainWindow.setImage(ViewProperties.getHdfIcon());
 		mainWindow.setText(HDFVIEW_VERSION);
-		
 		mainWindow.setLayout(new BorderLayout(0, 0));
+		
+		try {
+			mainWindow.setImage(ViewProperties.getHdfIcon());
+		} catch (Exception ex) {
+			log.debug("Failed to set window icon");
+		}
+		
+		createMenuBar();
+		createToolBar();
+		createUrlToolbar();
+		createContentArea();
 		
 		// Set size of main window
 		// float inset = 0.17f; // for UG only.
@@ -396,20 +406,16 @@ public class HDFView implements ViewManager {
 			winDim.x = (int) (0.9 * (double) mainWindow.getSize().y);
 		}
 		
-		mainWindow.setLocation(x, y);
-		mainWindow.setSize(winDim);
-		// mainWindow.setBounds(x, y, winDim.x, winDim.y);
-		
-		try {
-			mainWindow.setImage(ViewProperties.getHdfIcon());
-		} catch (Exception ex) {
-			log.debug("Failed to set window icon");
-		}
-		
-		createMenuBar();
-		createToolBar();
-		createUrlToolbar();
-		createContentArea();
+		// TEST
+        //if (treeView.getClass().getName().startsWith("ext.erdc")) {
+        //    topSplitPane.setDividerLocation(500);
+        //    winDim.x = (int) (0.9 * mainWindow.getSize().x);
+        //    winDim.y = (int) (winDim.x * 0.618);
+        //}
+        
+        // splitPane.setDividerLocation(d.height - 180);	
+		mainWindow.setLocation(0, 0);
+		mainWindow.setMinimumSize(winDim.x, winDim.y);
 		
 		log.info("Main Window created");
 	}
@@ -427,10 +433,21 @@ public class HDFView implements ViewManager {
 		MenuItem menuItem_1 = new MenuItem(menu_2, SWT.NONE);
 		menuItem_1.setText("&Open \tCtrl-O");
 		menuItem_1.setAccelerator(SWT.MOD1 + 'O');
+		menuItem_1.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				
+			}
+		});
 		
 		if(!ViewProperties.isReadOnly()) {
 			MenuItem menuItem_2 = new MenuItem(menu_2, SWT.NONE);
 			menuItem_2.setText("Open &Read-Only");
+			menuItem_2.setAccelerator(SWT.MOD1 + 'R');
+			menuItem_2.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					
+				}
+			});
 		}
 		
 		// boolean isSrbSupported = true;
@@ -447,8 +464,7 @@ public class HDFView implements ViewManager {
         // fileMenu.add(item);
         // }
 
-
-		MenuItem menuItem_3 = new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(menu_2, SWT.SEPARATOR);
 		
 		MenuItem menuItem_4 = new MenuItem(menu_2, SWT.CASCADE);
 		menuItem_4.setText("New");
@@ -459,12 +475,70 @@ public class HDFView implements ViewManager {
 		MenuItem menuItem_5 = new MenuItem(menu_3, SWT.NONE);
 		menuItem_5.setText("HDF&4");
 		h4GUIs.add(menuItem_5);
+		menuItem_5.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				NewFileDialog dialog = new NewFileDialog(null, currentDir, FileFormat.FILE_TYPE_HDF4, treeView.getCurrentFiles());
+				dialog.setName("newfiledialog");
+				String filename = dialog.getFile();
+				
+				if(!dialog.isFileCreated() || filename == null)
+					return;
+				
+				try {
+					treeView.openFile(filename, FileFormat.WRITE);
+					currentFile = filename;
+					
+					try {
+						url_bar.remove(filename);
+						url_bar.add(filename, 0);
+						url_bar.select(0);
+					} catch (Exception ex) {
+						
+					}
+				} catch (Exception ex) {
+					display.beep();
+					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+					error.setText(mainWindow.getText());
+					error.setMessage(ex.getMessage() + "\n" + filename);
+					error.open();
+				}
+			}
+		});
 		
 		MenuItem menuItem_6 = new MenuItem(menu_3, SWT.NONE);
 		menuItem_6.setText("HDF&5");
 		h5GUIs.add(menuItem_6);
+		menuItem_6.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				NewFileDialog dialog = new NewFileDialog(null, currentDir, FileFormat.FILE_TYPE_HDF5, treeView.getCurrentFiles());
+				dialog.setName("newfiledialog");
+				String filename = dialog.getFile();
+				
+				if(!dialog.isFileCreated() || filename == null)
+					return;
+				
+				try {
+					treeView.openFile(filename, FileFormat.WRITE);
+					currentFile = filename;
+					
+					try {
+						url_bar.remove(filename);
+						url_bar.add(filename, 0);
+						url_bar.select(0);
+					} catch (Exception ex) {
+						
+					}
+				} catch (Exception ex) {
+					display.beep();
+					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+					error.setText(mainWindow.getText());
+					error.setMessage(ex.getMessage() + "\n" + filename);
+					error.open();
+				}
+			}
+		});
 		
-		MenuItem menuItem_7 = new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(menu_2, SWT.SEPARATOR);
 		
 		MenuItem menuItem_8 = new MenuItem(menu_2, SWT.NONE);
 		menuItem_8.setText("&Close");
@@ -494,13 +568,11 @@ public class HDFView implements ViewManager {
 			}
 		});
 		
-		MenuItem menuItem_10 = new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(menu_2, SWT.SEPARATOR);
 		
 		MenuItem menuItem_11 = new MenuItem(menu_2, SWT.NONE);
 		menuItem_11.setText("&Save");
-		
-		/*
-		menuItem_11.addSelectionListener(new SelectionAdapter() {
+		/*menuItem_11.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected() {
 				// Save what has been changed in memory into file
 				try {
@@ -533,11 +605,13 @@ public class HDFView implements ViewManager {
 					}
 				} catch (Exception ex) {
 					display.beep();
-					// #Show error message dialog#
+					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+					error.setText(mainWindow.getText());
+					error.setMessage(ex.getMessage());
+					error.open();
 				}
 			}
-		});
-		*/
+		});*/
 		
 		MenuItem menuItem_12 = new MenuItem(menu_2, SWT.NONE);
 		menuItem_12.setText("S&ave As");
@@ -547,12 +621,15 @@ public class HDFView implements ViewManager {
 					treeView.saveFile(treeView.getSelectedFile());
 				} catch (Exception ex) {
 					display.beep();
-					// #Show error message dialog#
+					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+					error.setText(mainWindow.getText());
+					error.setMessage(ex.getMessage());
+					error.open();
 				}
 			}
 		});
 		
-		MenuItem menuItem_13 = new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(menu_2, SWT.SEPARATOR);
 		
 		MenuItem menuItem_14 = new MenuItem(menu_2, SWT.NONE);
 		menuItem_14.setText("E&xit \tCtrl-Q");
@@ -585,7 +662,7 @@ public class HDFView implements ViewManager {
 			}
 		});
 		
-		MenuItem menuItem_18 = new MenuItem(menu_4, SWT.SEPARATOR);
+		new MenuItem(menu_4, SWT.SEPARATOR);
 		
 		MenuItem menuItem_19 = new MenuItem(menu_4, SWT.NONE);
 		menuItem_19.setText("Close &Window");
@@ -636,7 +713,7 @@ public class HDFView implements ViewManager {
 		});
 		h5GUIs.add(menuItem_24);
 		
-		MenuItem menuItem_25 = new MenuItem(menu_5, SWT.SEPARATOR);
+		new MenuItem(menu_5, SWT.SEPARATOR);
 		
 		MenuItem menuItem_26 = new MenuItem(menu_5, SWT.NONE);
 		menuItem_26.setText("User &Options");
@@ -665,13 +742,23 @@ public class HDFView implements ViewManager {
 			}
 		});
 		
-		MenuItem menuItem_27 = new MenuItem(menu_5, SWT.SEPARATOR);
+		new MenuItem(menu_5, SWT.SEPARATOR);
 		
 		MenuItem menuItem_28 = new MenuItem(menu_5, SWT.NONE);
 		menuItem_28.setText("&Register File Format");
+		menuItem_28.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				registerFileFormat();
+			}
+		});
 		
 		MenuItem menuItem_29 = new MenuItem(menu_5, SWT.NONE);
 		menuItem_29.setText("&Unregister File Format");
+		menuItem_29.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				unregisterFileFormat();
+			}
+		});
 		
 		MenuItem menuItem_30 = new MenuItem(menu, SWT.CASCADE);
 		menuItem_30.setText("&Help");
@@ -700,36 +787,72 @@ public class HDFView implements ViewManager {
             menu.addSeparator();
         }*/
 		
-		MenuItem menuItem_32 = new MenuItem(menu_7, SWT.SEPARATOR);
+		new MenuItem(menu_7, SWT.SEPARATOR);
 		
 		MenuItem menuItem_33 = new MenuItem(menu_7, SWT.NONE);
 		menuItem_33.setText("HDF&4 Library Version");
 		h4GUIs.add(menuItem_33);
+		menuItem_22.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				hdfLibraryVersionInfo(HDF4_VERSION);
+			}
+		});
 		
 		MenuItem menuItem_34 = new MenuItem(menu_7, SWT.NONE);
 		menuItem_34.setText("HDF&5 Library Version");
 		h5GUIs.add(menuItem_34);
+		menuItem_34.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				hdfLibraryVersionInfo(HDF5_VERSION);
+			}
+		});
 		
 		MenuItem menuItem_35 = new MenuItem(menu_7, SWT.NONE);
 		menuItem_35.setText("&Java Version");
 		menuItem_35.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				MessageBox version = new MessageBox(mainWindow, SWT.OK);
-				version.setText("HDFView");
-				version.setMessage(JAVA_VER_INFO);
-				
+				MessageBox versionInfo = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
+				versionInfo.setText(mainWindow.getText());
+				versionInfo.setMessage(JAVA_VER_INFO);
+				// Add custom HDF Icon
+				versionInfo.open();
 			}
 		});
 		
-		MenuItem menuItem_36 = new MenuItem(menu_7, SWT.SEPARATOR);
+		new MenuItem(menu_7, SWT.SEPARATOR);
 		
 		MenuItem menuItem_37 = new MenuItem(menu_7, SWT.NONE);
 		menuItem_37.setText("Supported Fi&le Formats");
+		menuItem_37.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Enumeration<?> formatKeys = FileFormat.getFileFormatKeys();
+				
+				String formats = "\nSupported File Formats: \n";
+				while (formatKeys.hasMoreElements()) {
+					formats += "    " + formatKeys.nextElement() + "\n";
+				}
+				formats += "\n";
+				
+				MessageBox message = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
+				message.setText(mainWindow.getText());
+				message.setMessage(formats);
+				message.open();
+			}
+		});
 		
-		MenuItem menuItem_38 = new MenuItem(menu_7, SWT.SEPARATOR);
+		new MenuItem(menu_7, SWT.SEPARATOR);
 		
 		MenuItem menuItem_39 = new MenuItem(menu_7, SWT.NONE);
 		menuItem_39.setText("&About...");
+		menuItem_39.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				MessageBox info = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
+				info.setText(mainWindow.getText());
+				info.setMessage(aboutHDFView);
+				// Add HDF Icon
+				info.open();
+			}
+		});
 		
 		log.info("Menubar created");
 	}
@@ -752,6 +875,11 @@ public class HDFView implements ViewManager {
 		ToolItem tltmNewItem_1 = new ToolItem(toolBar, SWT.NONE);
 		tltmNewItem_1.setImage(ViewProperties.getFilecloseIcon());
 		tltmNewItem_1.setToolTipText("Close");
+		tltmNewItem_1.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				closeFile(treeView.getSelectedFile());
+			}
+		});
 		
 		ToolItem toolItem = new ToolItem(toolBar, SWT.SEPARATOR);
 		toolItem.setWidth(20);
@@ -783,7 +911,11 @@ public class HDFView implements ViewManager {
 				try {
 					org.eclipse.swt.program.Program.launch(ugPath);
 				} catch (Exception ex) {
-					//MessageBox;
+					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+					error.setText(mainWindow.getText());
+					error.setMessage(ex.getMessage());
+					// Add HDF Icon
+					error.open();
 				}
 			}
 		});
@@ -793,7 +925,7 @@ public class HDFView implements ViewManager {
 		tltmNewItem_3.setToolTipText("HDF4 Library Version");
 		tltmNewItem_3.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//hdf4LibraryVersion();
+				hdfLibraryVersionInfo(HDF4_VERSION);
 			}
 		});
 		
@@ -805,9 +937,8 @@ public class HDFView implements ViewManager {
 		tltmNewItem_4.setImage(ViewProperties.getH5Icon());
 		tltmNewItem_4.setToolTipText("HDF5 Library Version");
 		tltmNewItem_4.addSelectionListener(new SelectionAdapter() {
-			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//hdf5LibraryVersion();
+				hdfLibraryVersionInfo(HDF5_VERSION);
 			}
 		});
 		
@@ -834,7 +965,6 @@ public class HDFView implements ViewManager {
 		btnRecentFiles.setToolTipText("List of recent files");
 		btnRecentFiles.setLayoutData(BorderLayout.WEST);
 		btnRecentFiles.addSelectionListener(new SelectionAdapter() {
-			@Override
 			public void widgetSelected(SelectionEvent e) {
 				url_bar.setListVisible(true);
 			}
@@ -845,7 +975,6 @@ public class HDFView implements ViewManager {
 		btnClearText.setLayoutData(BorderLayout.EAST);
 		btnClearText.setText("Clear Text");
 		btnClearText.addSelectionListener(new SelectionAdapter() {
-			@Override
 			public void widgetSelected(SelectionEvent e) {
 				url_bar.clearSelection();
 			}
@@ -955,11 +1084,12 @@ public class HDFView implements ViewManager {
 		
 	}
 	
-	private void hdf4LibraryVersion(Display display) {
+	private void hdfLibraryVersionInfo(final String version) {
 		final Shell dialog = new Shell(mainWindow, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 		dialog.setText("HDFView");
 		dialog.setSize(mainWindow.getSize().x / 3, mainWindow.getSize().y / 3);
 		dialog.setLayout(new BorderLayout(0, 0));
+		// Add HDF Icon
 		
 		Composite canvasComposite = new Composite(dialog, SWT.NONE);
 		canvasComposite.setLayoutData(BorderLayout.NORTH);
@@ -973,12 +1103,12 @@ public class HDFView implements ViewManager {
 		buttonLayout.type = SWT.HORIZONTAL;
 		buttonComposite.setLayout(buttonLayout);
 		
-		final Canvas canvas = new Canvas(canvasComposite, SWT.NO_REDRAW_RESIZE);
+		Canvas canvas = new Canvas(canvasComposite, SWT.NO_REDRAW_RESIZE);
 		final Image hdfLarge = new Image(display, HDFView.class.getResourceAsStream("/icons/hdf_large.gif"));
 		canvas.addPaintListener(new PaintListener() {
 			public void paintControl(PaintEvent e) {
 				e.gc.drawImage(hdfLarge, 10, 20);
-				e.gc.drawText(HDF4_VERSION, 100, 40);
+				e.gc.drawText(version, 100, 40);
 			}
 		});
 		
@@ -1008,57 +1138,29 @@ public class HDFView implements ViewManager {
 		dialog.open();
 	}
 	
-	private void hdf5LibraryVersion(Display display) {
-		final Shell dialog = new Shell(mainWindow, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-		dialog.setText("HDFView");
-		dialog.setSize(mainWindow.getSize().x / 3, mainWindow.getSize().y / 3);
-		dialog.setLayout(new BorderLayout(0, 0));
+	private void registerFileFormat() {
 		
-		Composite canvasComposite = new Composite(dialog, SWT.NONE);
-		canvasComposite.setLayoutData(BorderLayout.NORTH);
-		canvasComposite.setLayout(new FillLayout());
+	}
+	
+	
+	private void unregisterFileFormat() {
+		/*
+		Enumeration<Object> keys = FileFormat.getFileFormatKeys();
+		ArrayList<Object> keyList = new ArrayList<Object>();
 		
-		Composite buttonComposite = new Composite(dialog, SWT.NONE);
-		buttonComposite.setLayoutData(BorderLayout.SOUTH);
-		RowLayout buttonLayout = new RowLayout();
-		buttonLayout.center = true;
-		buttonLayout.justify = true;
-		buttonLayout.type = SWT.HORIZONTAL;
-		buttonComposite.setLayout(buttonLayout);
+		while (keys.hasMoreElements())
+			keyList.add((Object) keys.nextElement());
 		
-		final Canvas canvas = new Canvas(canvasComposite, SWT.NO_REDRAW_RESIZE);
-		final Image hdfLarge = new Image(display, HDFView.class.getResourceAsStream("/icons/hdf_large.gif"));
-		canvas.addPaintListener(new PaintListener() {
-			public void paintControl(PaintEvent e) {
-				e.gc.drawImage(hdfLarge, 10, 20);
-				e.gc.drawText(HDF4_VERSION, 100, 40);
-			}
-		});
+		// Subclass SWT Dialog and create new Dialog for file format input
+		String theKey = (String) JOptionPane.showInputDialog(this, "Unregister a file format",
+                "Unregister a file format", JOptionPane.WARNING_MESSAGE, ViewProperties.getLargeHdfIcon(),
+                keyList.toArray(), null);
 		
-		Button okButton = new Button(buttonComposite, SWT.PUSH);
-		okButton.setText("OK");
-		okButton.addSelectionListener(new SelectionAdapter() {
-			
-			public void widgetSelected(SelectionEvent e) {
-				dialog.dispose();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
+		if (theKey == null)
+			return;
 		
-		});
-		dialog.setDefaultButton(okButton);
-		
-		// Center the window relative to the main window
-		Point winCenter = new Point(mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
-				mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
-		
-		dialog.setBounds(winCenter.x - (dialog.getSize().x / 2), 
-				winCenter.y - (dialog.getSize().y / 2), 
-				dialog.getSize().x, dialog.getSize().y);
-		
-		dialog.open();
+		FileFormat.removeFileFormat(theKey);
+		*/
 	}
 	
 	/**
@@ -1159,15 +1261,44 @@ public class HDFView implements ViewManager {
     public void mouseEventFired(java.awt.event.MouseEvent e) {
     	
     }
+    
+    public void dragEnter(DropTargetEvent evt) {
+    }
+    
+    public void dragLeave(DropTargetEvent evt) {
+    }
+    
+    public void dragOperationChanged(DropTargetEvent evt) {
+    }
+    
+    public void dragOver(DropTargetEvent evt) {
+    }
+    
+    public void drop(DropTargetEvent evt) {
+    	
+    }
+    
+    public void dropAccept(DropTargetEvent evt) {
+    }
 
     /**
      * Set default UI fonts.
      */
     private void updateFontSize(Font font) {
-    	if (font == null)
+    	/*if (font == null)
     		return;
     	
-    	
+    	UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+
+        for (Iterator<?> i = defaults.keySet().iterator(); i.hasNext();) {
+            Object key = i.next();
+            if (defaults.getFont(key) != null) {
+                UIManager.put(key, new javax.swing.plaf.FontUIResource(font));
+            }
+        }
+        
+        SwingUtilities.updateComponentTreeUI(this);
+        */
     }
     
     /**
@@ -1284,12 +1415,29 @@ public class HDFView implements ViewManager {
     private void closeFile(FileFormat theFile) {
     	if (theFile == null) {
     		display.beep();
-    		// #Show error message dialog#
+    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+    		error.setText(mainWindow.getText());
+    		error.setMessage("Select a file to close");
+    		error.open();
     		return;
     	}
     	
     	// Close all the data windows of this file
-    	
+    	/*JInternalFrame[] frames = contentPane.getAllFrames();
+        if (frames != null) {
+            for (int i = 0; i < frames.length; i++) {
+                HObject obj = (HObject) (((DataView) frames[i]).getDataObject());
+                if (obj == null) {
+                    continue;
+                }
+
+                if (obj.getFileFormat().equals(theFile)) {
+                    frames[i].dispose();
+                    frames[i] = null;
+                }
+            }
+        }
+        */
     	
     	String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
     	if (theFile.getFilePath().equals(fName)) {
