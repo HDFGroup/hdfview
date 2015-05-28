@@ -1,48 +1,41 @@
 A
 dir
-/branches/hdfview-3/docs
+/branches/hdfview-3/src/hdf
 
 
 
 
 A
 dir
-/branches/hdfview-3/docs/javadocs
+/branches/hdfview-3/src/test
 
 
 
 
 A
 dir
-/branches/hdfview-3/.settings
+/branches/hdfview-3/src/hdf/view
 
 
 
 
 A
 dir
-/branches/hdfview-3/src
+/branches/hdfview-3/src/hdf/view/icons
 
 
 
 
 A
 dir
-/branches/hdfview-3/lib
+/branches/hdfview-3/src/hdf/object
 
 
 
 
 A
 dir
-/branches/hdfview-3/bin
-
-
-
-
-A
-dir
-/branches/hdfview-3/docs/samples
+/branches/hdfview-3/src/examples
 
 
 
