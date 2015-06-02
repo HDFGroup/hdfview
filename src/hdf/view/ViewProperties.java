@@ -603,287 +603,287 @@ public class ViewProperties extends Properties {
 
         // load icon images
         if (hdfIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/hdf.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/hdf.gif");
             if (u != null) {
                 hdfIcon = new Image(null, u.getFile());
             }
         }
 
         if (h4Icon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/hdf4.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/hdf4.gif");
             if (u != null) {
                 h4Icon = new Image(null, u.getFile());
             }
         }
 
         if (h5Icon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/hdf5.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/hdf5.gif");
             if (u != null) {
                 h5Icon = new Image(null, u.getFile());
             }
         }
 
         if (foldercloseIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/folderclose.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/folderclose.gif");
             if (u != null) {
                 foldercloseIcon = new Image(null, u.getFile());
             }
         }
 
         if (foldercloseIconA == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/foldercloseA.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/foldercloseA.gif");
             if (u != null) {
                 foldercloseIconA = new Image(null, u.getFile());
             }
         }
 
         if (folderopenIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/folderopen.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/folderopen.gif");
             if (u != null) {
                 folderopenIcon = new Image(null, u.getFile());
             }
         }
 
         if (folderopenIconA == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/folderopenA.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/folderopenA.gif");
             if (u != null) {
                 folderopenIconA = new Image(null, u.getFile());
             }
         }
 
         if (datasetIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/dataset.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/dataset.gif");
             if (u != null) {
                 datasetIcon = new Image(null, u.getFile());
             }
         }
 
         if (datasetIconA == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/datasetA.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/datasetA.gif");
             if (u != null) {
                 datasetIconA = new Image(null, u.getFile());
             }
         }
 
         if (datatypeIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/datatype.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/datatype.gif");
             if (u != null) {
                 datatypeIcon = new Image(null, u.getFile());
             }
         }
 
         if (datatypeIconA == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/datatypeA.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/datatypeA.gif");
             if (u != null) {
                 datatypeIconA = new Image(null, u.getFile());
             }
         }
 
         if (linkIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/link.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/link.gif");
             if (u != null) {
                 linkIcon = new Image(null, u.getFile());
             }
         }
 
         if (fileopenIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/fileopen.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/fileopen.gif");
             if (u != null) {
                 fileopenIcon = new Image(null, u.getFile());
             }
         }
 
         if (filesaveIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/filesave.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/filesave.gif");
             if (u != null) {
                 filesaveIcon = new Image(null, u.getFile());
             }
         }
 
         if (filenewIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/filenew.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/filenew.gif");
             if (u != null) {
                 filenewIcon = new Image(null, u.getFile());
             }
         }
 
         if (filecloseIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/fileclose.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/fileclose.gif");
             if (u != null) {
                 filecloseIcon = new Image(null, u.getFile());
             }
         }
 
         if (paletteIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/palette.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/palette.gif");
             if (u != null) {
                 paletteIcon = new Image(null, u.getFile());
             }
         }
 
         if (brightIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/brightness.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/brightness.gif");
             if (u != null) {
                 brightIcon = new Image(null, u.getFile());
             }
         }
 
         if (autocontrastIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/autocontrast.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/autocontrast.gif");
             if (u != null) {
                 autocontrastIcon = new Image(null, u.getFile());
             }
         }
 
         if (imageIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/image.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/image.gif");
             if (u != null) {
                 imageIcon = new Image(null, u.getFile());
             }
         }
 
         if (imageIconA == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/imageA.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/imageA.gif");
             if (u != null) {
                 imageIconA = new Image(null, u.getFile());
             }
         }
 
         if (tableIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/table.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/table.gif");
             if (u != null) {
                 tableIcon = new Image(null, u.getFile());
             }
         }
 
         if (tableIconA == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/tableA.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/tableA.gif");
             if (u != null) {
                 tableIconA = new Image(null, u.getFile());
             }
         }
 
         if (textIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/text.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/text.gif");
             if (u != null) {
                 textIcon = new Image(null, u.getFile());
             }
         }
 
         if (textIconA == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/textA.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/textA.gif");
             if (u != null) {
                 textIconA = new Image(null, u.getFile());
             }
         }
 
         if (zoominIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/zoomin.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/zoomin.gif");
             if (u != null) {
                 zoominIcon = new Image(null, u.getFile());
             }
         }
 
         if (zoomoutIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/zoomout.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/zoomout.gif");
             if (u != null) {
                 zoomoutIcon = new Image(null, u.getFile());
             }
         }
 
         if (blankIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/blank.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/blank.gif");
             if (u != null) {
                 blankIcon = new Image(null, u.getFile());
             }
         }
 
         if (helpIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/help.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/help.gif");
             if (u != null) {
                 helpIcon = new Image(null, u.getFile());
             }
         }
 
         if (copyIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/copy.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/copy.gif");
             if (u != null) {
                 copyIcon = new Image(null, u.getFile());
             }
         }
 
         if (cutIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/cut.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/cut.gif");
             if (u != null) {
                 cutIcon = new Image(null, u.getFile());
             }
         }
 
         if (pasteIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/paste.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/paste.gif");
             if (u != null) {
                 pasteIcon = new Image(null, u.getFile());
             }
         }
 
         if (largeHdfIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/hdf_large.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/hdf_large.gif");
             if (u != null) {
                 largeHdfIcon = new Image(null, u.getFile());
             }
         }
 
         if (previousIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/previous.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/previous.gif");
             if (u != null) {
                 previousIcon = new Image(null, u.getFile());
             }
         }
 
         if (nextIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/next.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/next.gif");
             if (u != null) {
                 nextIcon = new Image(null, u.getFile());
             }
         }
 
         if (firstIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/first.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/first.gif");
             if (u != null) {
                 firstIcon = new Image(null, u.getFile());
             }
         }
 
         if (lastIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/last.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/last.gif");
             if (u != null) {
                 lastIcon = new Image(null, u.getFile());
             }
         }
 
         if (chartIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/chart.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/chart.gif");
             if (u != null) {
                 chartIcon = new Image(null, u.getFile());
             }
         }
 
         if (animationIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/animation.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/animation.gif");
             if (u != null) {
                 animationIcon = new Image(null, u.getFile());
             }
         }
 
         if (questionIcon == null) {
-            u = ViewProperties.class.getResource("/hdf/view/icons/question.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/question.gif");
             if (u != null) {
                 questionIcon = new Image(null, u.getFile());
             }
         }
 
         try {
-            u = ViewProperties.class.getResource("/hdf/view/icons/audio.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/audio.gif");
             iconAUDIO = new Image(null, u.getFile());
         }
         catch (Exception ex) {
@@ -891,7 +891,7 @@ public class ViewProperties extends Properties {
         }
 
         try {
-            u = ViewProperties.class.getResource("/hdf/view/icons/xls.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/xls.gif");
             iconXLS = new Image(null, u.getFile());
         }
         catch (Exception ex) {
@@ -899,7 +899,7 @@ public class ViewProperties extends Properties {
         }
 
         try {
-            u = ViewProperties.class.getResource("/hdf/view/icons/pdf.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/pdf.gif");
             iconPDF = new Image(null, u.getFile());
         }
         catch (Exception ex) {
@@ -907,7 +907,7 @@ public class ViewProperties extends Properties {
         }
 
         try {
-            u = ViewProperties.class.getResource("/hdf/view/icons/apps.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/apps.gif");
             iconAPPS = new Image(null, u.getFile());
         }
         catch (Exception ex) {
@@ -915,7 +915,7 @@ public class ViewProperties extends Properties {
         }
 
         try {
-            u = ViewProperties.class.getResource("/hdf/view/icons/url.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/url.gif");
             iconURL = new Image(null, u.getFile());
         }
         catch (Exception ex) {
@@ -923,7 +923,7 @@ public class ViewProperties extends Properties {
         }
 
         try {
-            u = ViewProperties.class.getResource("/hdf/view/icons/video.gif");
+            u = ViewProperties.class.getResource("hdf/view/icons/video.gif");
             iconVIDEO = new Image(null, u.getFile());
         }
         catch (Exception ex) {

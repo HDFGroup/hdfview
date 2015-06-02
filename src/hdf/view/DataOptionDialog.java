@@ -273,12 +273,12 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         applyBitmaskButton.addItemListener(this);
         applyBitmaskButton.setName("applybitmask");
 
-        bitmaskHelp = new JButton(ViewProperties.getHelpIcon());
-        bitmaskHelp.setEnabled(false);
-        bitmaskHelp.setToolTipText("Help on how to set bitmask");
-        bitmaskHelp.setMargin(new Insets(0, 0, 0, 0));
-        bitmaskHelp.addActionListener(this);
-        bitmaskHelp.setActionCommand("Help on how to set bitmask");
+        //bitmaskHelp = new JButton(ViewProperties.getHelpIcon());
+        //bitmaskHelp.setEnabled(false);
+        //bitmaskHelp.setToolTipText("Help on how to set bitmask");
+        //bitmaskHelp.setMargin(new Insets(0, 0, 0, 0));
+        //bitmaskHelp.addActionListener(this);
+        //bitmaskHelp.setActionCommand("Help on how to set bitmask");
 
         // layout the components
         JPanel contentPane = (JPanel) getContentPane();

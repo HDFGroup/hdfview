@@ -290,7 +290,7 @@ ActionListener {
 		super();
 
 		setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-		setFrameIcon(ViewProperties.getImageIcon());
+		//setFrameIcon(ViewProperties.getImageIcon());
 
 		viewer = theView;
 		zoomFactor = 1.0f;
@@ -708,30 +708,30 @@ ActionListener {
 		Insets margin = new Insets(0, 2, 0, 2);
 
 		// chart button
-		button = new JButton(ViewProperties.getChartIcon());
-		bar.add(button);
-		button.setToolTipText("Histogram");
-		button.setMargin(margin);
-		button.addActionListener(this);
-		button.setActionCommand("Show chart");
-		button.setEnabled(!isTrueColor);
+		//button = new JButton(ViewProperties.getChartIcon());
+		//bar.add(button);
+		//button.setToolTipText("Histogram");
+		//button.setMargin(margin);
+		//button.addActionListener(this);
+		//button.setActionCommand("Show chart");
+		//button.setEnabled(!isTrueColor);
 
 		// palette button
-		button = new JButton(ViewProperties.getPaletteIcon());
-		bar.add(button);
-		button.setToolTipText("Palette");
-		button.setMargin(margin);
-		button.addActionListener(this);
-		button.setActionCommand("Edit palette");
-		button.setEnabled(!isTrueColor);
+		//button = new JButton(ViewProperties.getPaletteIcon());
+		//bar.add(button);
+		//button.setToolTipText("Palette");
+		//button.setMargin(margin);
+		//button.addActionListener(this);
+		//button.setActionCommand("Edit palette");
+		//button.setEnabled(!isTrueColor);
 
 		// brightness button
-		button = new JButton(ViewProperties.getBrightIcon());
-		bar.add(button);
-		button.setToolTipText("Brightness");
-		button.setMargin(margin);
-		button.addActionListener(this);
-		button.setActionCommand("Brightness");
+		//button = new JButton(ViewProperties.getBrightIcon());
+		//bar.add(button);
+		//button.setToolTipText("Brightness");
+		//button.setMargin(margin);
+		//button.addActionListener(this);
+		//button.setActionCommand("Brightness");
 
 		// brightness button
 		//        button = new JButton(ViewProperties.getAutocontrastIcon());
@@ -742,43 +742,43 @@ ActionListener {
 		//        button.setActionCommand("Calculate AutoGain");
 		//        button.setEnabled(ViewProperties.isAutoContrast());
 
-		button = new JButton(ViewProperties.getZoominIcon());
-		bar.add(button);
-		button.addActionListener(this);
-		button.setMargin(margin);
-		button.setActionCommand("Zoom in");
-		button.setToolTipText("Zoom In");
-		button.setName("zoomin");
+		//button = new JButton(ViewProperties.getZoominIcon());
+		//bar.add(button);
+		//button.addActionListener(this);
+		//button.setMargin(margin);
+		//button.setActionCommand("Zoom in");
+		//button.setToolTipText("Zoom In");
+		//button.setName("zoomin");
 
 		// zoom out button
-		button = new JButton(ViewProperties.getZoomoutIcon());
-		bar.add(button);
-		button.setToolTipText("Zoom Out");
-		button.setMargin(margin);
-		button.addActionListener(this);
-		button.setActionCommand("Zoom out");
-		button.setName("zoomout");
+		//button = new JButton(ViewProperties.getZoomoutIcon());
+		//bar.add(button);
+		//button.setToolTipText("Zoom Out");
+		//button.setMargin(margin);
+		//button.addActionListener(this);
+		//button.setActionCommand("Zoom out");
+		//button.setName("zoomout");
 
 		if (is3D) {
 			bar.add(new JLabel("     "));
 
 			// first button
-			button = new JButton(ViewProperties.getFirstIcon());
-			bar.add(button);
-			button.setToolTipText("First");
-			button.setMargin(margin);
-			button.addActionListener(this);
-			button.setActionCommand("First page");
-			button.setName("firstframebutton");
+			//button = new JButton(ViewProperties.getFirstIcon());
+			//bar.add(button);
+			//button.setToolTipText("First");
+			//button.setMargin(margin);
+			//button.addActionListener(this);
+			//button.setActionCommand("First page");
+			//button.setName("firstframebutton");
 
 			// previous button
-			button = new JButton(ViewProperties.getPreviousIcon());
-			bar.add(button);
-			button.setToolTipText("Previous");
-			button.setMargin(margin);
-			button.addActionListener(this);
-			button.setActionCommand("Previous page");
-			button.setName("prevframebutton");
+			//button = new JButton(ViewProperties.getPreviousIcon());
+			//bar.add(button);
+			//button.setToolTipText("Previous");
+			//button.setMargin(margin);
+			//button.addActionListener(this);
+			//button.setActionCommand("Previous page");
+			//button.setName("prevframebutton");
 
 			frameField = new JTextField(String.valueOf(curFrame));
 			frameField.setMaximumSize(new Dimension(50, 30));
@@ -794,29 +794,29 @@ ActionListener {
 			bar.add(tmpField);
 
 			// next button
-			button = new JButton(ViewProperties.getNextIcon());
-			bar.add(button);
-			button.setToolTipText("Next");
-			button.setMargin(margin);
-			button.addActionListener(this);
-			button.setActionCommand("Next page");
-			button.setName("nextframebutton");
+			//button = new JButton(ViewProperties.getNextIcon());
+			//bar.add(button);
+			//button.setToolTipText("Next");
+			//button.setMargin(margin);
+			//button.addActionListener(this);
+			//button.setActionCommand("Next page");
+			//button.setName("nextframebutton");
 
 			// last button
-			button = new JButton(ViewProperties.getLastIcon());
-			bar.add(button);
-			button.setToolTipText("Last");
-			button.setMargin(margin);
-			button.addActionListener(this);
-			button.setActionCommand("Last page");
-			button.setName("lastframebutton");
+			//button = new JButton(ViewProperties.getLastIcon());
+			//bar.add(button);
+			//button.setToolTipText("Last");
+			//button.setMargin(margin);
+			//button.addActionListener(this);
+			//button.setActionCommand("Last page");
+			//button.setName("lastframebutton");
 
-			button = new JButton(ViewProperties.getAnimationIcon());
-			bar.add(button);
-			button.setToolTipText("Animation");
-			button.setMargin(margin);
-			button.addActionListener(this);
-			button.setActionCommand("Show animation");
+			//button = new JButton(ViewProperties.getAnimationIcon());
+			//bar.add(button);
+			//button.setToolTipText("Animation");
+			//button.setMargin(margin);
+			//button.addActionListener(this);
+			//button.setActionCommand("Show animation");
 
 		}
 

@@ -346,12 +346,12 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
         checkAutoContrast.setSelected(ViewProperties.isAutoContrast());
         checkAutoContrast.setName("autogain");
         p00.add(checkAutoContrast, BorderLayout.CENTER);
-        JButton button = new JButton(ViewProperties.getHelpIcon());
-        button.setToolTipText("Help on Auto Contrast");
-        button.setMargin(new Insets(0, 0, 0, 0));
-        button.addActionListener(this);
-        button.setActionCommand("Help on Auto Contrast");
-        p00.add(button, BorderLayout.WEST);
+        //JButton button = new JButton(ViewProperties.getHelpIcon());
+        //button.setToolTipText("Help on Auto Contrast");
+        //button.setMargin(new Insets(0, 0, 0, 0));
+        //button.addActionListener(this);
+        //button.setActionCommand("Help on Auto Contrast");
+        //p00.add(button, BorderLayout.WEST);
         p0.add(p00);
 
         p0.add(checkShowValues = new JCheckBox("Show Values"));
@@ -375,12 +375,12 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
 
         p00 = new JPanel();
         p00.setLayout(new BorderLayout());
-        button = new JButton(ViewProperties.getHelpIcon());
-        button.setToolTipText("Help on Convert Enum");
-        button.setMargin(new Insets(0, 0, 0, 0));
-        button.addActionListener(this);
-        button.setActionCommand("Help on Convert Enum");
-        p00.add(button, BorderLayout.WEST);
+        //button = new JButton(ViewProperties.getHelpIcon());
+        //button.setToolTipText("Help on Convert Enum");
+        //button.setMargin(new Insets(0, 0, 0, 0));
+        //button.addActionListener(this);
+        //button.setActionCommand("Help on Convert Enum");
+        //p00.add(button, BorderLayout.WEST);
         checkConvertEnum = new JCheckBox("Convert Enum");
         checkConvertEnum.setSelected(ViewProperties.isConvertEnum());
         p00.add(checkConvertEnum, BorderLayout.CENTER);

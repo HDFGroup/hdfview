@@ -194,7 +194,7 @@ public class DefaultTextView extends JInternalFrame implements TextView,
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         this.setTitle("TextView  -  " + dataset.getName() + "  -  "
                 + dataset.getPath() + "  -  " + fname);
-        this.setFrameIcon(ViewProperties.getTextIcon());
+        //this.setFrameIcon(ViewProperties.getTextIcon());
         this.setName("textdata");
         
         int rank = dataset.getRank();

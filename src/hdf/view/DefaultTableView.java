@@ -355,11 +355,11 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         // create the table and its columnHeader
         if (dataset instanceof CompoundDS) {
             isDataTransposed = false; // disable transpose for compound dataset
-            this.setFrameIcon(ViewProperties.getTableIcon());
+            //this.setFrameIcon(ViewProperties.getTableIcon());
             table = createTable((CompoundDS) dataset);
         }
         else { /* if (dataset instanceof ScalarDS) */
-            this.setFrameIcon(ViewProperties.getDatasetIcon());
+            //this.setFrameIcon(ViewProperties.getDatasetIcon());
             table = createTable((ScalarDS) dataset);
             log.trace("createTable((ScalarDS) dataset) dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
 
@@ -679,18 +679,20 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         Insets margin = new Insets(0, 2, 0, 2);
 
         // chart button
+        /*
         button = new JButton(ViewProperties.getChartIcon());
         bar.add(button);
         button.setToolTipText("Line Plot");
         button.setMargin(margin);
         button.addActionListener(this);
         button.setActionCommand("Show chart");
+		*/
 
         if (is3D) {
             bar.add(new JLabel("     "));
 
             // first button
-            button = new JButton(ViewProperties.getFirstIcon());
+            /*button = new JButton(ViewProperties.getFirstIcon());
             bar.add(button);
             button.setToolTipText("First");
             button.setMargin(margin);
@@ -706,6 +708,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             button.setName("prevbutton");
             button.addActionListener(this);
             button.setActionCommand("Previous page");
+			*/
 
             frameField = new JTextField(String.valueOf(curFrame));
             frameField.setMaximumSize(new Dimension(50, 30));
@@ -720,6 +723,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             bar.add(tmpField);
 
             // next button
+            /*
             button = new JButton(ViewProperties.getNextIcon());
             bar.add(button);
             button.setToolTipText("Next");
@@ -736,6 +740,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             button.setName("lastbutton");
             button.addActionListener(this);
             button.setActionCommand("Last page");
+            */
         }
 
         return bar;
@@ -953,13 +958,13 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
                         + "\n\nFor example, "
                         + "\n\t the normalized scientific notation format is \"#.0###E0##\""
                         + "\n\t to make the digits required \"0.00000E000\"\n\n";
-                String str = (String) JOptionPane.showInputDialog(this, msg, "Create a custom number format",
-                        JOptionPane.PLAIN_MESSAGE, ViewProperties.getLargeHdfIcon(), null, null);
-                if ((str == null) || (str.length() < 1)) {
-                    return;
-                }
+                // String str = (String) JOptionPane.showInputDialog(this, msg, "Create a custom number format",
+                //        JOptionPane.PLAIN_MESSAGE, ViewProperties.getLargeHdfIcon(), null, null);
+                //if ((str == null) || (str.length() < 1)) {
+                //    return;
+                //}
 
-                customFormat.applyPattern(str);
+                //customFormat.applyPattern(str);
 
             }
             else if (cmd.equals("Show custom notation")) {

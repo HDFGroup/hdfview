@@ -210,13 +210,13 @@ public class NewGroupDialog extends JDialog implements ActionListener, ItemListe
         nameField.setName("groupname");
         parentChoice.setName("groupparent");
 
-        creationOrderHelpButton = new JButton(ViewProperties.getHelpIcon());
+        //creationOrderHelpButton = new JButton(ViewProperties.getHelpIcon());
         creationOrderHelpButton.setToolTipText("Help on Creation Order");
         creationOrderHelpButton.setMargin(new Insets(0, 0, 0, 0));
         creationOrderHelpButton.addActionListener(this);
         creationOrderHelpButton.setActionCommand("Help on Creation Order");
 
-        storageTypeHelpButton = new JButton(ViewProperties.getHelpIcon());
+        //storageTypeHelpButton = new JButton(ViewProperties.getHelpIcon());
         storageTypeHelpButton.setToolTipText("Help on set Link Storage");
         storageTypeHelpButton.setMargin(new Insets(0, 0, 0, 0));
         storageTypeHelpButton.addActionListener(this);

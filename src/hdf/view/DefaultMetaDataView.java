@@ -1469,7 +1469,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
 
             // close the file
             ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Close file");
-            ((HDFView) viewer).actionPerformed(e);
+            //((HDFView) viewer).actionPerformed(e);
 
             if (DefaultFileFilter.setHDF5UserBlock(fin, fout, buf)) {
                 if (op == JOptionPane.NO_OPTION) {
@@ -1498,7 +1498,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
             // reopen the file
             dispose();
             e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Open file://" + fin);
-            ((HDFView) viewer).actionPerformed(e);
+            //((HDFView) viewer).actionPerformed(e);
         }
     }
 

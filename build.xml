@@ -1,0 +1,204 @@
+<?xml version="1.0"?>
+<project name="HDFView" basedir="." default="main">
+    <property environment="env"/>
+	
+	<property file="build.properties" />
+	
+    <!-- Sets variables which can later be used. -->
+	<!-- The value of a property is accessed via ${} -->
+    <property name="src.dir"      value="src"/>
+    <property name="test.dir"     value="${src.dir}/test"/>
+    <property name="examples.dir" value="${src.dir}/examples"/>
+
+    <property name="build.dir"    value="build"/>
+    <property name="classes.dir"  value="${build.dir}/classes"/>
+    <property name="jar.dir"      value="${build.dir}/jar"/>
+    <property name="report.dir"   value="${build.dir}/junitreport"/>
+
+    <property name="javadoc.dir"  value="docs"/>
+    <property name="bin.dir"      value="bin"/>
+    <property name="lib.dir"      value="lib"/>
+	<property name="dist.dir"     value="dist"/>
+	<property name='app.version'  value='3.99'/>
+	<property name="includeantruntime" value="false" />
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="fits.jar,netcdf.jar,slf4j-api*.jar,jarhdf*.jar" excludes="*sources.jar"/>
+        <fileset dir="${hdf.lib.dir}" includes="*.jar"/>
+    	<fileset dir="${lib.dir}/ext/swt" includes="*.jar"/>
+    	<fileset dir="${lib.dir}/ext/swt/linux/x86_64" includes="*.jar"/>
+    </path>
+	<property name="project_classpath" refid="classpath" />
+    <path id="log-classpath">
+        <path refid="classpath"/>
+        <fileset dir="${lib.dir}" includes="slf4j-simple*.jar" excludes="*sources.jar"/>
+    </path>
+    <path id="fest-classpath">
+        <path refid="classpath"/>
+        <fileset dir="${lib.dir}" includes="fest*.jar,junit.jar,hamcrest-core.jar" excludes="*sources.jar"/>
+    </path>
+
+    <property name="main-class"  value="hdf.view.HDFView"/>
+
+	<echo>
+	   Application: ${ant.project.name} ${app.version}
+	   Build File : ${ant.file} 
+		<!-- Run Date   : ${build.time} -->
+	   Run by     : ${user.name}
+	   Build Dir  : ${build.dir}
+	   Base Dir   : ${basedir}
+	   Java Home  : ${java.home}
+	   Java Home  : ${java.home}
+	   Classpath  : ${project_classpath}
+	   HDF libpath: ${env.HDFLIBS}
+	</echo>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    	<delete dir="${docs.dir}"/>
+        <delete dir="${jar.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" 
+        	classpathref="classpath" 
+        	excludes="examples/** test/**"
+        	includeantruntime="false"
+        />
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" excludes=" **/*.in **/*.java"/>
+        </copy>
+    </target>
+
+    <target name="compile-examples" depends="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" 
+        	classpathref="classpath" 
+        	includes="examples/**"
+            includeantruntime="false"
+        />
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" excludes=" **/*.in **/*.java"/>
+        </copy>
+    </target>
+    <path id="example-classes" location="${classes.dir}/examples"/>
+
+    <target name="compile-test" depends="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" 
+        	classpathref="fest-classpath" 
+        	includes="test/**"
+            includeantruntime="false"
+        />
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" excludes=" **/*.in **/*.java"/>
+        </copy>
+    </target>
+    <path id="test-classes" location="${classes.dir}/test"/>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}"
+            excludes="examples/** test/**">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+    <path id="application" location="${jar.dir}/${ant.project.name}.jar"/>
+
+    <target name="run" depends="jar">
+        <java fork="true" classname="${main-class}">
+        	<jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+        	<!-- 
+        	 -->
+            <classpath>
+                <path refid="classpath"/>
+                <path refid="application"/>
+                <path refid="log-classpath" />
+                <!-- 
+                 -->
+            </classpath>
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}"/>
+        </java>
+    </target>
+
+    <target name="junit" depends="jar,compile-test">
+        <mkdir dir="${report.dir}"/>
+        <junit printsummary="yes">
+            <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+            <classpath>
+                <path refid="fest-classpath"/>
+                <path refid="test-classes"/>
+                <path refid="application"/>
+                <path refid="log-classpath" />
+            </classpath>
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}"/>
+
+            <formatter type="xml"/>
+
+            <batchtest fork="yes" todir="${report.dir}">
+                <fileset dir="${test.dir}"/>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="junitreport">
+        <junitreport todir="${report.dir}">
+            <fileset dir="${report.dir}" includes="TEST-*.xml"/>
+            <report todir="${report.dir}"/>
+        </junitreport>
+    </target>
+
+    <target name = "javadoc">
+       <javadoc packagenames="hdf.*" sourcepath="${src.dir}"
+          use='true' author='true' version = "true"
+          overview='overview.html'
+          access='package'
+          destdir = "${javadoc.dir}" windowtitle = "${app.name} ${app.version}">
+          noqualifier='java.*:javax.*:com.sun.*'
+          linksource='true'
+
+          <doctitle><![CDATA[= HDFView Application =]]></doctitle>
+
+          <bottom>
+             <![CDATA[Copyright © 2015. All Rights Reserved.]]>
+          </bottom>
+
+          <group title = "object packages" packages = "hdf.object.*"/>
+          <group title = "view packages" packages = "hdf.view.*"/>
+          <classpath>
+              <path refid="classpath"/>
+              <path refid="application"/>
+          </classpath>
+          <link href='http://java.sun.com/javase/6/docs/api/'/>
+       </javadoc>
+    </target>
+
+    <target name="deploy" depends="jar,javadoc">
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${dist.dir}/bin"/>
+        <mkdir dir="${dist.dir}/lib"/>
+        <mkdir dir="${dist.dir}/doc"/>
+      <!-- Copy the application -->
+      <copy todir="${dist.dir}/lib">
+            <fileset dir="${jar.dir}" includes="${ant.project.name}.jar"/>
+      </copy>
+        <!-- Copy the documentation -->
+        <copy todir="${dist.dir}/doc">
+            <fileset dir="${doc.dir}"/>
+        </copy>
+        <!-- Copy the scripts -->
+        <copy todir="${dist.dir}/lib">
+            <fileset dir="${bin.dir}" includes="${ant.project.name}.sh"/>
+            <fileset dir="${bin.dir}" includes="${ant.project.name}.bat"/>
+        </copy>
+    </target>
+
+    <target name="clean-build" depends="clean,jar"/>
+
+    <target name="main" depends="clean,run"/>
+
+</project>

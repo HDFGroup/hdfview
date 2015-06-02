@@ -203,12 +203,12 @@ public class NewLinkDialog extends JDialog implements ActionListener,DocumentLis
         JPanel tmpLinkJPanel = new JPanel();
         tmpLinkJPanel.setLayout(new GridLayout(2, 1));
         tmpLinkJPanel.add(new JLabel("Type of Link: "));
-        JButton helpButton = new JButton(ViewProperties.getHelpIcon());
-        helpButton.setToolTipText("Help on Links");
-        helpButton.setMargin(new Insets(0, 0, 0, 0));
-        helpButton.addActionListener(this);
-        helpButton.setActionCommand("Help on Links");
-        tmpLinkJPanel.add(helpButton);
+        //JButton helpButton = new JButton(ViewProperties.getHelpIcon());
+        //helpButton.setToolTipText("Help on Links");
+        //helpButton.setMargin(new Insets(0, 0, 0, 0));
+        //helpButton.addActionListener(this);
+        //helpButton.setActionCommand("Help on Links");
+        //tmpLinkJPanel.add(helpButton);
         tmpP.add(tmpLinkJPanel);
         tmpP.add(new JLabel("Target File: "));
         tmpP.add(new JLabel("Target Object: "));

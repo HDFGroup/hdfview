@@ -205,19 +205,19 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         moveFlag = false;
         currentSelectionsForMove = null;
 
-        addDatasetMenuItem = new JMenuItem("Dataset", ViewProperties.getDatasetIcon());
+        //addDatasetMenuItem = new JMenuItem("Dataset", ViewProperties.getDatasetIcon());
         addDatasetMenuItem.addActionListener(this);
         addDatasetMenuItem.setActionCommand("Add dataset");
 
-        addTableMenuItem = new JMenuItem("Compound DS", ViewProperties.getTableIcon());
+        //addTableMenuItem = new JMenuItem("Compound DS", ViewProperties.getTableIcon());
         addTableMenuItem.addActionListener(this);
         addTableMenuItem.setActionCommand("Add table");
 
-        addDatatypeMenuItem = new JMenuItem("Datatype", ViewProperties.getDatatypeIcon());
+        //addDatatypeMenuItem = new JMenuItem("Datatype", ViewProperties.getDatatypeIcon());
         addDatatypeMenuItem.addActionListener(this);
         addDatatypeMenuItem.setActionCommand("Add datatype");
 
-        addLinkMenuItem = new JMenuItem("Link", ViewProperties.getLinkIcon());
+        //addLinkMenuItem = new JMenuItem("Link", ViewProperties.getLinkIcon());
         addLinkMenuItem.addActionListener(this);
         addLinkMenuItem.setActionCommand("Add link");
 
@@ -313,14 +313,14 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         menu.add(newOjbectMenu);
         editGUIs.add(newOjbectMenu);
 
-        item = new JMenuItem("Group", ViewProperties.getFoldercloseIcon());
+        //item = new JMenuItem("Group", ViewProperties.getFoldercloseIcon());
         item.addActionListener(this);
         item.setActionCommand("Add group");
         newOjbectMenu.add(item);
 
         newOjbectMenu.add(addDatasetMenuItem);
 
-        item = new JMenuItem("Image", ViewProperties.getImageIcon());
+        //item = new JMenuItem("Image", ViewProperties.getImageIcon());
         item.addActionListener(this);
         item.setActionCommand("Add image");
         newOjbectMenu.add(item);
@@ -1546,10 +1546,10 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         String cmd = e.getActionCommand();
 
         if (cmd.equals("Close file")) {
-            ((HDFView) viewer).actionPerformed(e);
+            //((HDFView) viewer).actionPerformed(e);
         }
         else if (cmd.equals("Reload file")) {
-            ((HDFView) viewer).actionPerformed(e);
+            //((HDFView) viewer).actionPerformed(e);
         }
         else if (cmd.equals("Add group")) {
             addGroup();
@@ -1932,7 +1932,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         }
 
         // write the change of the data into file before save the file
-        List<?> views = ((HDFView) viewer).getDataViews();
+        /*List<?> views = ((HDFView) viewer).getDataViews();
         Object theView = null;
         TableView tableView = null;
         TextView textView = null;
@@ -1956,7 +1956,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
                     }
                 }
             }
-        }
+        }*/
 
         if (isH5) {
             saveAsHDF5(file);
@@ -2321,6 +2321,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         private HTreeCellRenderer() {
             super();
 
+            /*
             openFolder = ViewProperties.getFolderopenIcon();
             closeFolder = ViewProperties.getFoldercloseIcon();
             datasetIcon = ViewProperties.getDatasetIcon();
@@ -2340,6 +2341,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             datatypeIconA = ViewProperties.getDatatypeIconA();
 
             questionIcon = ViewProperties.getQuestionIcon();
+			*/
 
             if (openFolder != null) {
                 openIcon = openFolder;
@@ -2597,7 +2599,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
                         tree.setSelectionPath(selPath);
                     }
 
-                    ((HDFView) viewer).showMetaData(selectedObject);
+                    //((HDFView) viewer).showMetaData(selectedObject);
                 }
             }
         }
