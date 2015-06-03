@@ -42,6 +42,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.PaintEvent;
@@ -185,7 +187,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      *            a list of files to open.
      */	
 	public HDFView(Display D, String root, List<File> flist, int width, int height, int x, int y) {		
-		log.debug("root is {}", root);
+		log.debug("Root is {}", root);
 		
 		rootDir = root;
 		currentFile = null;
@@ -435,7 +437,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_1.setAccelerator(SWT.MOD1 + 'O');
 		menuItem_1.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				
+				openLocalFile(null, FileFormat.WRITE);
 			}
 		});
 		
@@ -445,7 +447,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 			menuItem_2.setAccelerator(SWT.MOD1 + 'R');
 			menuItem_2.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					
+					openLocalFile(null, FileFormat.READ);
 				}
 			});
 		}
@@ -871,6 +873,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 		ToolItem tltmNewItem = new ToolItem(toolBar, SWT.NONE);
 		tltmNewItem.setToolTipText("Open");
 		tltmNewItem.setImage(ViewProperties.getFileopenIcon());
+		tltmNewItem.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				openLocalFile(null, FileFormat.WRITE);
+			}
+		});
 		
 		ToolItem tltmNewItem_1 = new ToolItem(toolBar, SWT.NONE);
 		tltmNewItem_1.setImage(ViewProperties.getFilecloseIcon());
@@ -958,6 +965,28 @@ public class HDFView implements ViewManager, DropTargetListener {
 		url_bar.setItems(ViewProperties.getMRF().toArray(new String[0]));
 		url_bar.setText("/root/workspace/hdf-java/build/test/uitest/hdf5_test.h5");
 		url_bar.setVisibleItemCount(ViewProperties.MAX_RECENT_FILES);
+		url_bar.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.keyCode == SWT.CR) {
+					String filename = url_bar.getText();
+					if (filename == null || filename.length() < 1 || filename.equals(currentFile))
+						return;
+					
+					if(!(filename.startsWith("http://") || filename.startsWith("ftp://"))) {
+						File tmpFile = new File(filename);
+						if(!tmpFile.exists())
+							return;
+						
+						if(tmpFile.isDirectory()) {
+							currentDir = filename;
+							openLocalFile(null, FileFormat.WRITE);
+						}
+					} else {
+						openRemoteFile(filename);
+					}
+				}
+			}
+		});
 		url_bar.deselectAll();
 		
 		Button btnRecentFiles = new Button(url_toolbar, SWT.NONE);
@@ -1285,9 +1314,10 @@ public class HDFView implements ViewManager, DropTargetListener {
      * Set default UI fonts.
      */
     private void updateFontSize(Font font) {
-    	/*if (font == null)
+    	if (font == null)
     		return;
     	
+    	/*
     	UIDefaults defaults = UIManager.getLookAndFeelDefaults();
 
         for (Iterator<?> i = defaults.keySet().iterator(); i.hasNext();) {
@@ -1408,8 +1438,163 @@ public class HDFView implements ViewManager, DropTargetListener {
     private static void setEnabled(List<MenuItem> list, boolean b) {
     	Iterator<MenuItem> it = list.iterator();
     	
-    	while(it.hasNext())
+    	while (it.hasNext())
     		it.next().setEnabled(b);
+    }
+    
+    /** Open local file */
+    private void openLocalFile(String filename, int fileAccessID) {
+    	int accessMode = fileAccessID;
+    	if (ViewProperties.isReadOnly()) accessMode = FileFormat.READ;
+    	
+    	if (filename != null) {
+    		File file = new File(filename);
+    		if (file == null)
+    			return;
+    		
+    		currentFile = filename;
+    	} else {
+    		FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN);
+    		//fChooser.setFilterExtensions();
+    	
+    	
+    		File chosenFile = new File(fChooser.open());
+    		if (chosenFile == null)
+    			return;
+    	
+    		if (chosenFile.isDirectory()) {
+    			currentDir = chosenFile.getPath();
+    		} else {
+    			currentDir = chosenFile.getParent();
+    		}
+    		
+    		currentFile = chosenFile.getAbsolutePath();
+    	}
+    		
+    	try {
+    		url_bar.remove(currentFile);
+    		url_bar.add(currentFile, 0);
+    		url_bar.select(0);
+    	}
+    	catch (Exception ex) {
+    	}
+    	
+    	try {
+    		treeView.openFile(currentFile, accessMode + FileFormat.OPEN_NEW);
+    	}
+    	catch (Throwable ex) {
+    		try {
+    			treeView.openFile(currentFile, FileFormat.READ);
+    		}
+    		catch (Throwable ex2) {
+    			String msg = "Failed to open file " + currentFile + "\n" + ex2;
+    			display.beep();
+    			currentFile = null;
+    			url_bar.deselectAll();
+    			MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+    			error.setText(mainWindow.getText());
+    			error.setMessage(msg);
+    			error.open();
+    		}
+    	}
+    }
+    
+    /** Load remote file and save it to local temporary directory */
+    private String openRemoteFile(String urlStr) {
+    	if (urlStr == null)
+    		return null;
+    	
+    	String localFile = null;
+    	
+    	if(urlStr.startsWith("http://")) {
+    		localFile = urlStr.substring(7);
+    	}
+    	else if (urlStr.startsWith("ftp://")) {
+    		localFile = urlStr.substring(6);
+    	}
+    	else {
+    		return null;
+    	}
+    	
+    	localFile = localFile.replace('/', '@');
+    	localFile = localFile.replace('\\', '@');
+    	
+    	// Search the local file cache
+    	String tmpDir = System.getProperty("java.io.tmpdir");
+    	
+    	File tmpFile = new File(tmpDir);
+    	if (!tmpFile.canWrite()) tmpDir = System.getProperty("user.home");
+    	
+    	localFile = tmpDir + localFile;
+    	
+    	tmpFile = new File(localFile);
+    	if (tmpFile.exists())
+    		return localFile;
+    	
+    	URL url = null;
+    	
+    	try {
+    		url = new URL(urlStr);
+    	} catch (Exception ex) {
+    		url = null;
+    		display.beep();
+    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+    		error.setText(mainWindow.getText());
+    		error.setMessage(ex.getMessage());
+    		error.open();
+    		return null;
+    	}
+    	
+    	BufferedInputStream in = null;
+    	BufferedOutputStream out = null;
+    	
+    	try {
+    		in = new BufferedInputStream(url.openStream());
+    		out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+    	} catch (Exception ex) {
+    		in = null;
+    		display.beep();
+    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+    		error.setText(mainWindow.getText());
+    		error.setMessage(ex.getMessage());
+    		error.open();
+    		
+    		try {
+    			out.close();
+    		} catch (Exception ex2) {
+    			log.debug("Remote file: ", ex2);
+    		}
+    		
+    		return null;
+    	}
+    	
+    	//setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
+    	byte[] buff = new byte[512]; // set default buffer size to 512
+    	try {
+    		int n = 0;
+    		while ((n = in.read(buff)) > 0) {
+    			out.write(buff, 0, n);
+    		}
+    	}
+    	catch (Exception ex) {
+    		log.debug("Remote file: ", ex);
+    	}
+    	
+    	try {
+    		in.close();
+    	} catch (Exception ex) {
+    		log.debug("Remote file: ", ex);
+    	}
+    	
+    	try {
+    		out.close();
+    	} catch (Exception ex) {
+    		log.debug("Remote file: ", ex);
+    	}
+    	
+    	//setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
+    	
+    	return localFile;
     }
     
     private void closeFile(FileFormat theFile) {
