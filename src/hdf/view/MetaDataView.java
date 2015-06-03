@@ -25,10 +25,10 @@ import hdf.object.HObject;
  * @version 2.4 9/6/2007
  */
 public abstract interface MetaDataView extends DataView {
-    /** add an attribute to a data object. */
+    /** Add an attribute to a data object. */
     public abstract Attribute addAttribute(HObject obj);
 
-    /** delete an attribribute from a data object. */
+    /** Delete an attribute from a data object. */
     public abstract Attribute deleteAttribute(HObject obj);
 
 }

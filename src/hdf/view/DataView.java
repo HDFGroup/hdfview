@@ -35,10 +35,10 @@ public abstract interface DataView {
     /** The text view type */
     public final static int DATAVIEW_TEXT = 3;
 
-    /** returns the data object displayed in this data viewer */
+    /** Returns the data object displayed in this data viewer */
     public abstract HObject getDataObject();
 
-    /** Disposes this datao viewer */
+    /** Disposes this data viewer */
     public abstract void dispose();
 
 }

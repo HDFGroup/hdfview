@@ -14,7 +14,7 @@
 
 package hdf.view;
 
-import javax.swing.JTable;
+import org.eclipse.swt.widgets.Table;
 
 /**
  * 
@@ -24,10 +24,10 @@ import javax.swing.JTable;
  * @version 2.4 9/6/2007
  */
 public abstract interface TableView extends DataView {
-    /** returns the table */
-    public abstract JTable getTable();
+    /** Returns the table */
+    public abstract Table getTable();
 
-    /** returns array of selected data */
+    /** Returns array of selected data */
     public abstract Object getSelectedData();
 
     /** Write the change of a dataset into file. */

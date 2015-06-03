@@ -16,8 +16,8 @@ package hdf.view;
 
 import java.util.List;
 
-import javax.swing.JTree;
-import javax.swing.tree.TreeNode;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -143,11 +143,11 @@ public abstract interface TreeView {
             throws Exception;
 
     /**
-     * Returns the JTree which holds the file structure.
+     * Returns the Tree which holds the file structure.
      * 
-     * @return the JTree which holds the file structure.
+     * @return the Tree which holds the file structure.
      */
-    public abstract JTree getTree();
+    public abstract Tree getTree();
 
     /**
      * Returns the list of current open files..
@@ -155,8 +155,8 @@ public abstract interface TreeView {
     public abstract List<FileFormat> getCurrentFiles();
 
     /**
-     * Returns the tree node that contains the given data object.
+     * Returns the tree item that contains the given data object.
      */
-    public abstract TreeNode findTreeNode(HObject obj);
+    public abstract TreeItem findTreeItem(HObject obj);
 
 }

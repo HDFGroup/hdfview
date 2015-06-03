@@ -14,19 +14,6 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -42,14 +29,29 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.*;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
@@ -57,9 +59,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
-import javax.swing.JTree;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
@@ -105,7 +104,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
 
-    /** the owner of this treeview */
+    /** The owner of this treeview */
     private ViewManager                  viewer;
 
     /**
@@ -116,7 +115,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
     /**
      * The tree which holds file structures.
      */
-    private final JTree                  tree;
+    private final Tree                  tree;
 
     /**
      * The tree model
@@ -146,29 +145,31 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
     /**
      * The popup menu used to display user choice of actions on data object.
      */
-    private final JPopupMenu             popupMenu;
+    private final Menu             		 popupMenu;
 
-    private JSeparator                   separator;
+    private MenuItem                     separator;
 
     /** a list of editing GUI components */
-    private List<JMenuItem>              editGUIs;
+    private List<MenuItem>               editGUIs;
 
     /** the list of current selected objects */
     private List<Object>                 objectsToCopy;
 
-    private JMenu                        exportDatasetMenu;
+    private Menu                     	 exportDatasetMenu;
+    
+    private Menu					 	 newObjectMenu;
+    
+    private MenuItem                     addTableMenuItem;
 
-    private JMenuItem                    addTableMenuItem;
+    private MenuItem                     addDatasetMenuItem;
 
-    private JMenuItem                    addDatasetMenuItem;
+    private MenuItem                     addDatatypeMenuItem;
 
-    private JMenuItem                    addDatatypeMenuItem;
+    private MenuItem                     addLinkMenuItem;
 
-    private JMenuItem                    addLinkMenuItem;
+    private MenuItem                     setLibVerBoundsItem;
 
-    private JMenuItem                    setLibVerBoundsItem;
-
-    private JMenuItem                    changeIndexItem;
+    private MenuItem                     changeIndexItem;
 
     private String                       currentSearchPhrase = null;
 
@@ -197,7 +198,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
         fileList = new Vector<FileFormat>();
         toolkit = Toolkit.getDefaultToolkit();
-        editGUIs = new Vector<JMenuItem>();
+        editGUIs = new Vector<MenuItem>();
         objectsToCopy = null;
         isDefaultDisplay = true;
         selectedTreePath = null;
@@ -205,33 +206,9 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         moveFlag = false;
         currentSelectionsForMove = null;
 
-        //addDatasetMenuItem = new JMenuItem("Dataset", ViewProperties.getDatasetIcon());
-        addDatasetMenuItem.addActionListener(this);
-        addDatasetMenuItem.setActionCommand("Add dataset");
-
-        //addTableMenuItem = new JMenuItem("Compound DS", ViewProperties.getTableIcon());
-        addTableMenuItem.addActionListener(this);
-        addTableMenuItem.setActionCommand("Add table");
-
-        //addDatatypeMenuItem = new JMenuItem("Datatype", ViewProperties.getDatatypeIcon());
-        addDatatypeMenuItem.addActionListener(this);
-        addDatatypeMenuItem.setActionCommand("Add datatype");
-
-        //addLinkMenuItem = new JMenuItem("Link", ViewProperties.getLinkIcon());
-        addLinkMenuItem.addActionListener(this);
-        addLinkMenuItem.setActionCommand("Add link");
-
-        setLibVerBoundsItem = new JMenuItem("Set Lib version bounds");
-        setLibVerBoundsItem.addActionListener(this);
-        setLibVerBoundsItem.setActionCommand("Set Lib version bounds");
-
-        changeIndexItem = new JMenuItem("Change file indexing");
-        changeIndexItem.addActionListener(this);
-        changeIndexItem.setActionCommand("Change file indexing");
-
         // initialize the tree and root
         treeModel = new DefaultTreeModel(root);
-        tree = new JTree(treeModel);
+        tree = new Tree(mainWindow, treeModel);
 
         tree.setLargeModel(true);
         tree.setCellRenderer(new HTreeCellRenderer());
@@ -242,28 +219,25 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         int rowheight = 23 + (int) ((tree.getFont().getSize() - 12) * 0.5);
         tree.setRowHeight(rowheight);
 
-        // create the separator
-        separator = new JPopupMenu.Separator();
-
         // create the popupmenu
         popupMenu = createPopupMenu();
 
-        // reset the scroll increament
+        // reset the scroll increment
         // layout GUI component
         this.setLayout(new BorderLayout());
         this.add(tree, BorderLayout.CENTER);
     }
 
     /**
-     * Insert a node into the tree.
+     * Insert an item into the tree.
      * 
-     * @param node
-     *            the node to insert.
-     * @param pnode
-     *            the parent node.
+     * @param item
+     *            the item to insert.
+     * @param pitem
+     *            the parent item.
      */
-    private void insertNode(TreeNode node, TreeNode pnode) {
-        if ((node == null) || (pnode == null)) {
+    private void insertItem(TreeItem item, TreeItem pitem) {
+        if ((item == null) || (pitem == null)) {
             return;
         }
 
@@ -290,164 +264,175 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         return isOpen;
     }
 
-    /** creates a popup menu for a right mouse click on a data object */
-    private JPopupMenu createPopupMenu() {
-        JPopupMenu menu = new JPopupMenu();
-        JMenuItem item;
+    /** Creates a popup menu for a right mouse click on a data object */
+    private Menu createPopupMenu() {
+        Menu menu = new Menu(TREE);
+        MenuItem item;
 
-        item = new JMenuItem("Open");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Open");
         item.setMnemonic(KeyEvent.VK_O);
-        item.addActionListener(this);
         item.setActionCommand("Open data");
-        menu.add(item);
 
-        item = new JMenuItem("Open As");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Open As");
         item.setMnemonic(KeyEvent.VK_A);
-        item.addActionListener(this);
         item.setActionCommand("Open data as");
-        menu.add(item);
+        
+        MenuItem newObjectMenuItem = new MenuItem(menu, SWT.CASCADE);
+        newObjectMenuItem.setText("New");
 
-        menu.addSeparator();
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        JMenu newOjbectMenu = new JMenu("New");
-        menu.add(newOjbectMenu);
-        editGUIs.add(newOjbectMenu);
-
-        //item = new JMenuItem("Group", ViewProperties.getFoldercloseIcon());
-        item.addActionListener(this);
-        item.setActionCommand("Add group");
-        newOjbectMenu.add(item);
-
-        newOjbectMenu.add(addDatasetMenuItem);
-
-        //item = new JMenuItem("Image", ViewProperties.getImageIcon());
-        item.addActionListener(this);
-        item.setActionCommand("Add image");
-        newOjbectMenu.add(item);
-
-        newOjbectMenu.add(addTableMenuItem);
-        newOjbectMenu.add(addDatatypeMenuItem);
-        newOjbectMenu.add(addLinkMenuItem);
-
-        menu.addSeparator();
-
-        item = new JMenuItem("Copy");
-        item.setMnemonic(KeyEvent.VK_C);
-        item.addActionListener(this);
-        item.setActionCommand("Copy object");
-        menu.add(item);
-
-        item = new JMenuItem("Paste");
-        item.setMnemonic(KeyEvent.VK_P);
-        item.addActionListener(this);
-        item.setActionCommand("Paste object");
-        menu.add(item);
-        editGUIs.add(item);
-
-        item = new JMenuItem("Delete");
-        item.setMnemonic(KeyEvent.VK_D);
-        item.addActionListener(this);
-        item.setActionCommand("Cut object");
-        menu.add(item);
-        editGUIs.add(item);
-
-        item = new JMenuItem("Cut");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Cut");
         item.setMnemonic(KeyEvent.VK_T);
-        item.addActionListener(this);
         item.setActionCommand("Move object");
-        menu.add(item);
+        editGUIs.add(item);
+
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Copy");
+        item.setMnemonic(KeyEvent.VK_C);
+        item.setActionCommand("Copy object");
+
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Paste");
+        item.setMnemonic(KeyEvent.VK_P);
+        item.setActionCommand("Paste object");
+        editGUIs.add(item);
+
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Delete");
+        item.setMnemonic(KeyEvent.VK_D);
+        item.setActionCommand("Cut object");
+        editGUIs.add(item);
+
+        MenuItem exportDatasetMenuItem = new MenuItem(menu, SWT.CASCADE);
+        exportDatasetMenuItem.setText("Export Dataset");
+        
+        new MenuItem(menu, SWT.SEPARATOR);
+        
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Save to");
+        item.setMnemonic(KeyEvent.VK_S);
+        item.setActionCommand("Save object to file");
+
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Rename");
+        item.setMnemonic(KeyEvent.VK_R);
+        item.setActionCommand("Rename object");
         editGUIs.add(item);
         
-        exportDatasetMenu = new JMenu("Export Dataset");
-        menu.add(exportDatasetMenu);
-        item = new JMenuItem("Export Data to Text File");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as text");
-        exportDatasetMenu.add(item);
-    
-        item = new JMenuItem("Export Data as Native Order");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as binary Native Order");
-        exportDatasetMenu.add(item);
-        item = new JMenuItem("Export Data as Little Endian");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as binary Little Endian");
-        exportDatasetMenu.add(item);
-        item = new JMenuItem("Export Data as Big Endian");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as binary Big Endian");
-        exportDatasetMenu.add(item);
-
-        menu.addSeparator();
-
-        item = new JMenuItem("Save to");
-        item.setMnemonic(KeyEvent.VK_S);
-        item.addActionListener(this);
-        item.setActionCommand("Save object to file");
-        menu.add(item);
-
-        item = new JMenuItem("Rename");
-        item.setMnemonic(KeyEvent.VK_R);
-        item.addActionListener(this);
-        item.setActionCommand("Rename object");
-        menu.add(item);
-        editGUIs.add(item);
-
-        menu.addSeparator();
-
-        item = new JMenuItem("Show Properties");
-        item.addActionListener(this);
+        new MenuItem(menu, SWT.SEPARATOR);
+        
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Show Properties");
         item.setActionCommand("Show object properties");
-        menu.add(item);
 
-        item = new JMenuItem("Show Properties As");
-        item.addActionListener(this);
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Show Properties As");
         item.setActionCommand("Show object properties as");
-        menu.add(item);
+        
+        changeIndexItem = new MenuItem(menu, SWT.NONE);
+        changeIndexItem.setText("Change file indexing");
+        changeIndexItem.setActionCommand("Change file indexing");
 
-        menu.add(changeIndexItem);
-
-        menu.addSeparator();
-
-        item = new JMenuItem("Find");
+        new MenuItem(menu, SWT.SEPARATOR);
+        
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Find");
         item.setMnemonic(KeyEvent.VK_F);
-        item.addActionListener(this);
         item.setActionCommand("Find");
-        menu.add(item);
 
-        // item = new JMenuItem( "Find Next");
+        // item = new MenuItem(menu, SWT.NONE);
+        // item.setText("Find Next");
         // item.setMnemonic(KeyEvent.VK_N);
         // item.addActionListener(this);
         // item.setActionCommand("Find next");
-        // menu.add(item);
-
-        menu.addSeparator();
-
-        item = new JMenuItem("Expand All");
-        item.addActionListener(this);
+        
+        new MenuItem(menu, SWT.SEPARATOR);
+        
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Expand All");
         item.setActionCommand("Expand all");
-        menu.add(item);
-        item = new JMenuItem("Collapse All");
-        item.addActionListener(this);
+        
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Collapse All");
         item.setActionCommand("Collapse all");
-        menu.add(item);
 
-        menu.addSeparator();
-
-        item = new JMenuItem("Close File");
+        new MenuItem(menu, SWT.SEPARATOR);
+        
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Close File");
         item.setMnemonic(KeyEvent.VK_E);
-        item.addActionListener(this);
         item.setActionCommand("Close file");
-        menu.add(item);
 
-        item = new JMenuItem("Reload File");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Reload File");
         // item.setMnemonic(KeyEvent.VK_R);
-        item.addActionListener(this);
         item.setActionCommand("Reload file");
-        menu.add(item);
 
-        menu.add(separator);
-        menu.add(setLibVerBoundsItem);
+        separator = new MenuItem(menu, SWT.SEPARATOR);
+        
+        setLibVerBoundsItem = new MenuItem(menu, SWT.NONE);
+        setLibVerBoundsItem.setText("Set Lib version bounds");
+        setLibVerBoundsItem.setActionCommand("Set Lib version bounds");
+        
+        
+        // Add new object menu
+        newObjectMenu = new Menu(menu);
+        newObjectMenuItem.setMenu(newObjectMenu);
+        
+        item = new MenuItem(newObjectMenu, SWT.NONE);
+        item.setText("Group");
+        // Set icon to ViewProperties.getFoldercloseIcon()
+        item.setActionCommand("Add group");
+        
+        addDatasetMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
+        addDatasetMenuItem.setText("Dataset");
+        // Set icon to ViewProperties.getDatasetIcon()
+        addDatasetMenuItem.setActionCommand("Add dataset");
+
+        item = new MenuItem(newObjectMenu, SWT.NONE);
+        item.setText("Image");
+        // Set icon to ViewProperties.getImageIcon()
+        item.setActionCommand("Add image");
+        
+        addTableMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
+        addTableMenuItem.setText("Compound DS");
+        // Set icon to ViewProperties.getTableIcon()
+        addTableMenuItem.setActionCommand("Add table");
+
+        addDatatypeMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
+        addDatatypeMenuItem.setText("Datatype");
+        // Set icon to ViewProperties.getDatatypeIcon()
+        addDatatypeMenuItem.setActionCommand("Add datatype");
+
+        addLinkMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
+        addLinkMenuItem.setText("Link");
+        // Set icon to ViewProperties.getLinkIcon()
+        addLinkMenuItem.setActionCommand("Add link");
+        
+        
+        // Add export dataset menu
+        exportDatasetMenu = new Menu(menu);
+        exportDatasetMenuItem.setMenu(exportDatasetMenu);
+        
+        item = new MenuItem(exportDatasetMenu, SWT.NONE);
+        item.setText("Export Data to Text File");
+        item.setActionCommand("Save table as text");
+    
+        item = new MenuItem(exportDatasetMenu, SWT.NONE);
+        item.setText("Export Data as Native Order");
+        item.setActionCommand("Save table as binary Native Order");
+        
+        item = new MenuItem(exportDatasetMenu, SWT.NONE);
+        item.setText("Export Data as Little Endian");
+        item.setActionCommand("Save table as binary Little Endian");
+        
+        item = new MenuItem(exportDatasetMenu, SWT.NONE);
+        item.setText("Export Data as Big Endian");
+        item.setActionCommand("Save table as binary Big Endian");
 
         return menu;
     }
@@ -545,9 +530,9 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
     }
 
     /** disable/enable GUI components */
-    private static void setEnabled(List<JMenuItem> list, boolean b) {
-        Component item = null;
-        Iterator<JMenuItem> it = list.iterator();
+    private static void setEnabled(List<MenuItem> list, boolean b) {
+        MenuItem item = null;
+        Iterator<MenuItem> it = list.iterator();
         while (it.hasNext()) {
             item = it.next();
             item.setEnabled(b);
@@ -560,8 +545,10 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
      */
     private final void saveAsHDF4(FileFormat srcFile) {
         if (srcFile == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Select a file to save.", "HDFView", JOptionPane.ERROR_MESSAGE);
+            display.beep();
+            MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+            error.setText(mainWindow.getText());
+            error.setMessage("Select a file to save.");
             return;
         }
 
@@ -995,12 +982,11 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         } // for (int i=0; i< currentSelections.length; i++) {
     }
 
-    private void removeNode(DefaultMutableTreeNode node) {
-        if (node == null) {
+    private void removeItem(TreeItem item) {
+        if (item == null)
             return;
-        }
 
-        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) (node.getParent());
+        TreeItem parentItem = (TreeItem) (item.getParent());
         if (parentNode != null) {
             treeModel.removeNodeFromParent(node);
 

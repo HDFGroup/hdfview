@@ -1491,7 +1491,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     			display.beep();
     			currentFile = null;
     			url_bar.deselectAll();
-    			MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+    			MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
     			error.setText(mainWindow.getText());
     			error.setMessage(msg);
     			error.open();
@@ -1538,7 +1538,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	} catch (Exception ex) {
     		url = null;
     		display.beep();
-    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
     		error.setText(mainWindow.getText());
     		error.setMessage(ex.getMessage());
     		error.open();
@@ -1554,7 +1554,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	} catch (Exception ex) {
     		in = null;
     		display.beep();
-    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
     		error.setText(mainWindow.getText());
     		error.setMessage(ex.getMessage());
     		error.open();

@@ -14,8 +14,8 @@
 
 package hdf.view;
 
-import java.awt.Image;
-import java.awt.Rectangle;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 
 /**
  * The image view interface for displaying image object
@@ -25,7 +25,7 @@ import java.awt.Rectangle;
  */
 public abstract interface ImageView extends DataView {
     /**
-     * returns the selected area of the image
+     * Returns the selected area of the image
      * 
      * @return the rectangle of the selected image area.
      */
@@ -37,22 +37,22 @@ public abstract interface ImageView extends DataView {
     /** @return true if the image interlace is plance interlace. */
     public abstract boolean isPlaneInterlace();
 
-    /** returns array of selected data */
+    /** Returns array of selected data */
     public abstract Object getSelectedData();
 
-    /** returns the image displayed in this imageView */
+    /** Returns the image displayed in this imageView */
     public abstract Image getImage();
 
-    /** sets the image */
+    /** Sets the image */
     public abstract void setImage(Image img);
 
-    /** returns the palette of the image */
+    /** Returns the palette of the image */
     public abstract byte[][] getPalette();
 
-    /** sets the image palette */
+    /** Sets the image palette */
     public abstract void setPalette(byte[][] palette);
 
-    /** returns the byte array of the image data */
+    /** Returns the byte array of the image data */
     public abstract byte[] getImageByteData();
 
 }
