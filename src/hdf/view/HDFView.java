@@ -546,7 +546,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_8.setText("&Close");
 		menuItem_8.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				closeFile(treeView.getSelectedFile());
+				//closeFile(treeView.getSelectedFile());
+				notYetImplemented();
 			}
 		});
 		
@@ -556,14 +557,15 @@ public class HDFView implements ViewManager, DropTargetListener {
 			public void widgetSelected(SelectionEvent e) {
 				closeAllWindows();
 				
-				List<FileFormat> files = treeView.getCurrentFiles();
-				while (!files.isEmpty()) {
-					try {
-						treeView.closeFile(files.get(0));
-					} catch (Exception ex) {
-						
-					}
-				}
+				//List<FileFormat> files = treeView.getCurrentFiles();
+				//while (!files.isEmpty()) {
+				//	try {
+				//		treeView.closeFile(files.get(0));
+				//	} catch (Exception ex) {
+				//		
+				//	}
+				//}
+				notYetImplemented();
 				
 				currentFile = null;
 				attributeArea.setText("");
@@ -574,8 +576,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		MenuItem menuItem_11 = new MenuItem(menu_2, SWT.NONE);
 		menuItem_11.setText("&Save");
-		/*menuItem_11.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected() {
+		menuItem_11.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				/*
 				// Save what has been changed in memory into file
 				try {
 					FileFormat file = treeView.getSelectedFile();
@@ -612,13 +615,16 @@ public class HDFView implements ViewManager, DropTargetListener {
 					error.setMessage(ex.getMessage());
 					error.open();
 				}
+				*/
+				notYetImplemented();
 			}
-		});*/
+		});
 		
 		MenuItem menuItem_12 = new MenuItem(menu_2, SWT.NONE);
 		menuItem_12.setText("S&ave As");
 		menuItem_12.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				try {
 					treeView.saveFile(treeView.getSelectedFile());
 				} catch (Exception ex) {
@@ -628,6 +634,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 					error.setMessage(ex.getMessage());
 					error.open();
 				}
+				*/
+				notYetImplemented();
 			}
 		});
 		
@@ -652,7 +660,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_16.setText("&Cascade");
 		menuItem_16.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				cascadeWindows();
+				//cascadeWindows();
+				notYetImplemented();
 			}
 		});
 		
@@ -660,7 +669,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_17.setText("&Tile");
 		menuItem_17.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				tileWindows();
+				//tileWindows();
+				notYetImplemented();
 			}
 		});
 		
@@ -721,6 +731,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_26.setText("User &Options");
 		menuItem_26.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				if (userOptionDialog == null)
 					// userOptionDialog = new UserOptionsDialog(display, rootDir);
 				
@@ -741,6 +752,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 					if (font != null)
 						updateFontSize(font);
 				}
+				*/
+				notYetImplemented();
 			}
 		});
 		
@@ -750,7 +763,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_28.setText("&Register File Format");
 		menuItem_28.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				registerFileFormat();
+				//registerFileFormat();
+				notYetImplemented();
 			}
 		});
 		
@@ -758,7 +772,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_29.setText("&Unregister File Format");
 		menuItem_29.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				unregisterFileFormat();
+				//unregisterFileFormat();
+				notYetImplemented();
 			}
 		});
 		
@@ -884,7 +899,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		tltmNewItem_1.setToolTipText("Close");
 		tltmNewItem_1.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				closeFile(treeView.getSelectedFile());
+				//closeFile(treeView.getSelectedFile());
+				notYetImplemented();
 			}
 		});
 		
@@ -1672,6 +1688,13 @@ public class HDFView implements ViewManager, DropTargetListener {
     	}
     }
     
+    private void notYetImplemented() {
+    	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+    	error.setText(mainWindow.getText());
+    	error.setMessage("Functionality not yet implemented.");
+    	error.open();
+    }
+    
     /**
      * The starting point of this application.
      * 
@@ -1777,10 +1800,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		display.syncExec(new Runnable() {
 			public void run() {
-				/*
-				HDFView frame = new HDFView(the_rootDir, the_fList, the_W, the_H, the_X, the_Y);
-				*/
-				new HDFView(display, null, null, 600, 600, 0, 0);
+				HDFView frame = new HDFView(display, the_rootDir, the_fList, the_W, the_H, the_X, the_Y);
+				//new HDFView(display, null, null, 600, 600, 0, 0);
 			}
 		});
 	}
