@@ -59,6 +59,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JTree;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
@@ -101,6 +102,9 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
  */
 public class DefaultTreeView extends JPanel implements TreeView, ActionListener {
     private static final long            serialVersionUID    = 4092566164712521186L;
+    
+    private Display display;
+    private Shell shell;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
 
@@ -208,16 +212,16 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
         // initialize the tree and root
         treeModel = new DefaultTreeModel(root);
-        tree = new Tree(mainWindow, treeModel);
+        tree = new Tree(null, 0);
 
-        tree.setLargeModel(true);
-        tree.setCellRenderer(new HTreeCellRenderer());
-        tree.addMouseListener(new HTreeMouseAdapter());
-        tree.addKeyListener(new HTreeKeyAdapter());
-        tree.setRootVisible(false);
+        //tree.setLargeModel(true);
+        //tree.setCellRenderer(new HTreeCellRenderer());
+        //tree.addMouseListener(new HTreeMouseAdapter());
+        //tree.addKeyListener(new HTreeKeyAdapter());
+        //tree.setRootVisible(false);
         // tree.setShowsRootHandles(true);
-        int rowheight = 23 + (int) ((tree.getFont().getSize() - 12) * 0.5);
-        tree.setRowHeight(rowheight);
+        //int rowheight = 23 + (int) ((tree.getFont().getSize() - 12) * 0.5);
+        //tree.setRowHeight(rowheight);
 
         // create the popupmenu
         popupMenu = createPopupMenu();
@@ -225,7 +229,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         // reset the scroll increment
         // layout GUI component
         this.setLayout(new BorderLayout());
-        this.add(tree, BorderLayout.CENTER);
+        //this.add(tree, BorderLayout.CENTER);
     }
 
     /**
@@ -241,7 +245,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             return;
         }
 
-        treeModel.insertNodeInto((DefaultMutableTreeNode) node, (DefaultMutableTreeNode) pnode, pnode.getChildCount());
+        //treeModel.insertNodeInto((DefaultMutableTreeNode) node, (DefaultMutableTreeNode) pnode, pnode.getChildCount());
     }
 
     /**
@@ -266,18 +270,18 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
     /** Creates a popup menu for a right mouse click on a data object */
     private Menu createPopupMenu() {
-        Menu menu = new Menu(TREE);
+        Menu menu = new Menu(shell);
         MenuItem item;
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Open");
-        item.setMnemonic(KeyEvent.VK_O);
-        item.setActionCommand("Open data");
+        //item.setMnemonic(KeyEvent.VK_O);
+        //item.setActionCommand("Open data");
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Open As");
-        item.setMnemonic(KeyEvent.VK_A);
-        item.setActionCommand("Open data as");
+        //item.setMnemonic(KeyEvent.VK_A);
+        //item.setActionCommand("Open data as");
         
         MenuItem newObjectMenuItem = new MenuItem(menu, SWT.CASCADE);
         newObjectMenuItem.setText("New");
@@ -286,25 +290,25 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Cut");
-        item.setMnemonic(KeyEvent.VK_T);
-        item.setActionCommand("Move object");
+        //item.setMnemonic(KeyEvent.VK_T);
+        //item.setActionCommand("Move object");
         editGUIs.add(item);
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Copy");
-        item.setMnemonic(KeyEvent.VK_C);
-        item.setActionCommand("Copy object");
+        //item.setMnemonic(KeyEvent.VK_C);
+        //item.setActionCommand("Copy object");
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Paste");
-        item.setMnemonic(KeyEvent.VK_P);
-        item.setActionCommand("Paste object");
+        //item.setMnemonic(KeyEvent.VK_P);
+        //item.setActionCommand("Paste object");
         editGUIs.add(item);
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Delete");
-        item.setMnemonic(KeyEvent.VK_D);
-        item.setActionCommand("Cut object");
+        //item.setMnemonic(KeyEvent.VK_D);
+        //item.setActionCommand("Cut object");
         editGUIs.add(item);
 
         MenuItem exportDatasetMenuItem = new MenuItem(menu, SWT.CASCADE);
@@ -314,35 +318,35 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Save to");
-        item.setMnemonic(KeyEvent.VK_S);
-        item.setActionCommand("Save object to file");
+        //item.setMnemonic(KeyEvent.VK_S);
+        //item.setActionCommand("Save object to file");
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Rename");
-        item.setMnemonic(KeyEvent.VK_R);
-        item.setActionCommand("Rename object");
+        //item.setMnemonic(KeyEvent.VK_R);
+        //item.setActionCommand("Rename object");
         editGUIs.add(item);
         
         new MenuItem(menu, SWT.SEPARATOR);
         
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Show Properties");
-        item.setActionCommand("Show object properties");
+        //item.setActionCommand("Show object properties");
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Show Properties As");
-        item.setActionCommand("Show object properties as");
+        //item.setActionCommand("Show object properties as");
         
         changeIndexItem = new MenuItem(menu, SWT.NONE);
         changeIndexItem.setText("Change file indexing");
-        changeIndexItem.setActionCommand("Change file indexing");
+        //changeIndexItem.setActionCommand("Change file indexing");
 
         new MenuItem(menu, SWT.SEPARATOR);
         
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Find");
-        item.setMnemonic(KeyEvent.VK_F);
-        item.setActionCommand("Find");
+        //item.setMnemonic(KeyEvent.VK_F);
+        //item.setActionCommand("Find");
 
         // item = new MenuItem(menu, SWT.NONE);
         // item.setText("Find Next");
@@ -354,29 +358,29 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Expand All");
-        item.setActionCommand("Expand all");
+        //item.setActionCommand("Expand all");
         
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Collapse All");
-        item.setActionCommand("Collapse all");
+        //item.setActionCommand("Collapse all");
 
         new MenuItem(menu, SWT.SEPARATOR);
         
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Close File");
-        item.setMnemonic(KeyEvent.VK_E);
-        item.setActionCommand("Close file");
+        //item.setMnemonic(KeyEvent.VK_E);
+        //item.setActionCommand("Close file");
 
         item = new MenuItem(menu, SWT.NONE);
         item.setText("Reload File");
         // item.setMnemonic(KeyEvent.VK_R);
-        item.setActionCommand("Reload file");
+        //item.setActionCommand("Reload file");
 
         separator = new MenuItem(menu, SWT.SEPARATOR);
         
         setLibVerBoundsItem = new MenuItem(menu, SWT.NONE);
         setLibVerBoundsItem.setText("Set Lib version bounds");
-        setLibVerBoundsItem.setActionCommand("Set Lib version bounds");
+        //setLibVerBoundsItem.setActionCommand("Set Lib version bounds");
         
         
         // Add new object menu
@@ -386,32 +390,32 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         item = new MenuItem(newObjectMenu, SWT.NONE);
         item.setText("Group");
         // Set icon to ViewProperties.getFoldercloseIcon()
-        item.setActionCommand("Add group");
+        //item.setActionCommand("Add group");
         
         addDatasetMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
         addDatasetMenuItem.setText("Dataset");
         // Set icon to ViewProperties.getDatasetIcon()
-        addDatasetMenuItem.setActionCommand("Add dataset");
+        //addDatasetMenuItem.setActionCommand("Add dataset");
 
         item = new MenuItem(newObjectMenu, SWT.NONE);
         item.setText("Image");
         // Set icon to ViewProperties.getImageIcon()
-        item.setActionCommand("Add image");
+        //item.setActionCommand("Add image");
         
         addTableMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
         addTableMenuItem.setText("Compound DS");
         // Set icon to ViewProperties.getTableIcon()
-        addTableMenuItem.setActionCommand("Add table");
+        //addTableMenuItem.setActionCommand("Add table");
 
         addDatatypeMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
         addDatatypeMenuItem.setText("Datatype");
         // Set icon to ViewProperties.getDatatypeIcon()
-        addDatatypeMenuItem.setActionCommand("Add datatype");
+        //addDatatypeMenuItem.setActionCommand("Add datatype");
 
         addLinkMenuItem = new MenuItem(newObjectMenu, SWT.NONE);
         addLinkMenuItem.setText("Link");
         // Set icon to ViewProperties.getLinkIcon()
-        addLinkMenuItem.setActionCommand("Add link");
+        //addLinkMenuItem.setActionCommand("Add link");
         
         
         // Add export dataset menu
@@ -420,19 +424,19 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         
         item = new MenuItem(exportDatasetMenu, SWT.NONE);
         item.setText("Export Data to Text File");
-        item.setActionCommand("Save table as text");
+        //item.setActionCommand("Save table as text");
     
         item = new MenuItem(exportDatasetMenu, SWT.NONE);
         item.setText("Export Data as Native Order");
-        item.setActionCommand("Save table as binary Native Order");
+        //item.setActionCommand("Save table as binary Native Order");
         
         item = new MenuItem(exportDatasetMenu, SWT.NONE);
         item.setText("Export Data as Little Endian");
-        item.setActionCommand("Save table as binary Little Endian");
+        //item.setActionCommand("Save table as binary Little Endian");
         
         item = new MenuItem(exportDatasetMenu, SWT.NONE);
         item.setText("Export Data as Big Endian");
-        item.setActionCommand("Save table as binary Big Endian");
+        //item.setActionCommand("Save table as binary Big Endian");
 
         return menu;
     }
@@ -449,65 +453,65 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
         boolean isWritable = !selectedObject.getFileFormat().isReadOnly();
         if (selectedObject instanceof Group) {
-            popupMenu.getComponent(0).setEnabled(false); // "open" menuitem
-            popupMenu.getComponent(1).setEnabled(false); // "open as" menuitem
+            //popupMenu.getComponent(0).setEnabled(false); // "open" menuitem
+            //popupMenu.getComponent(1).setEnabled(false); // "open as" menuitem
 
             boolean state = !(((Group) selectedObject).isRoot());
-            popupMenu.getComponent(5).setEnabled(state); // "Copy" menuitem
-            popupMenu.getComponent(6).setEnabled(isWritable); // "Paste"
+            //popupMenu.getComponent(5).setEnabled(state); // "Copy" menuitem
+            //popupMenu.getComponent(6).setEnabled(isWritable); // "Paste"
             // menuitem
-            popupMenu.getComponent(7).setEnabled(state && isWritable); // "Delete"
+            //popupMenu.getComponent(7).setEnabled(state && isWritable); // "Delete"
             // menuitem
-            popupMenu.getComponent(11).setEnabled(state); // "save to" menuitem
-            popupMenu.getComponent(12).setEnabled(state && isWritable); // "rename"
+            //popupMenu.getComponent(11).setEnabled(state); // "save to" menuitem
+            //popupMenu.getComponent(12).setEnabled(state && isWritable); // "rename"
             // menuitem
-            popupMenu.getComponent(8).setEnabled(
-                    (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
-                    && state && isWritable); // "cut" menuitem
+            //popupMenu.getComponent(8).setEnabled(
+            //        (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
+            //        && state && isWritable); // "cut" menuitem
         }
         else {
-            popupMenu.getComponent(0).setEnabled(true);
-            popupMenu.getComponent(1).setEnabled(true);
-            popupMenu.getComponent(5).setEnabled(true); // "Copy" menuitem
-            popupMenu.getComponent(6).setEnabled(isWritable); // "Paste"
+            //popupMenu.getComponent(0).setEnabled(true);
+            //popupMenu.getComponent(1).setEnabled(true);
+            //popupMenu.getComponent(5).setEnabled(true); // "Copy" menuitem
+            //popupMenu.getComponent(6).setEnabled(isWritable); // "Paste"
             // menuitem
-            popupMenu.getComponent(7).setEnabled(isWritable); // "Delete"
+            //popupMenu.getComponent(7).setEnabled(isWritable); // "Delete"
             // menuitem
-            popupMenu.getComponent(11).setEnabled(true); // "save to" menuitem
-            popupMenu.getComponent(12).setEnabled(isWritable); // "rename"
+            //popupMenu.getComponent(11).setEnabled(true); // "save to" menuitem
+            //popupMenu.getComponent(12).setEnabled(isWritable); // "rename"
             // menuitem
-            popupMenu.getComponent(8).setEnabled(
-                    (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
-                    && isWritable); // "cut" menuitem
+            //popupMenu.getComponent(8).setEnabled(
+            //        (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
+            //        && isWritable); // "cut" menuitem
         }
 
         // adding table is only supported by HDF5
         if ((selectedFile != null) && selectedFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
             addDatasetMenuItem.setText("Dataset");
-            addTableMenuItem.setVisible(true);
-            addDatatypeMenuItem.setVisible(true);
-            addLinkMenuItem.setVisible(true);
+            //addTableMenuItem.setVisible(true);
+            //addDatatypeMenuItem.setVisible(true);
+            //addLinkMenuItem.setVisible(true);
             boolean state = false;
             if ((selectedObject instanceof Group)) {
                 state = (((Group) selectedObject).isRoot());
-                separator.setVisible(isWritable && state);
-                setLibVerBoundsItem.setVisible(isWritable && state); 
+                //separator.setVisible(isWritable && state);
+                //setLibVerBoundsItem.setVisible(isWritable && state); 
                 // added only if it is HDF5format, iswritable & isroot
             }
             else {
-                separator.setVisible(false);
-                setLibVerBoundsItem.setVisible(false);
+                //separator.setVisible(false);
+                //setLibVerBoundsItem.setVisible(false);
             }
-            changeIndexItem.setVisible(state);
+            //changeIndexItem.setVisible(state);
         }
         else {
             addDatasetMenuItem.setText("SDS");
-            addTableMenuItem.setVisible(false);
-            addDatatypeMenuItem.setVisible(false);
-            addLinkMenuItem.setVisible(false);
-            separator.setVisible(false);
-            setLibVerBoundsItem.setVisible(false);
-            changeIndexItem.setVisible(false);
+            //addTableMenuItem.setVisible(false);
+            //addDatatypeMenuItem.setVisible(false);
+            //addLinkMenuItem.setVisible(false);
+            //separator.setVisible(false);
+            //setLibVerBoundsItem.setVisible(false);
+            //changeIndexItem.setVisible(false);
         }
     
         // export table is only supported by HDF5
@@ -526,7 +530,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             exportDatasetMenu.setVisible(false);
         }
     
-        popupMenu.show((JComponent) e.getSource(), x, y);
+        //popupMenu.show((JComponent) e.getSource(), x, y);
     }
 
     /** disable/enable GUI components */
@@ -545,10 +549,10 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
      */
     private final void saveAsHDF4(FileFormat srcFile) {
         if (srcFile == null) {
-            display.beep();
-            MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-            error.setText(mainWindow.getText());
-            error.setMessage("Select a file to save.");
+            //display.beep();
+            //MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+            //error.setText(mainWindow.getText());
+            //error.setMessage("Select a file to save.");
             return;
         }
 
@@ -741,7 +745,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
     private void moveObject() {
         objectsToCopy = getSelectedObjects();
         moveFlag = true;
-        currentSelectionsForMove = tree.getSelectionPaths();
+        //currentSelectionsForMove = tree.getSelectionPaths();
     }
 
     /** paste selected objects */
@@ -907,7 +911,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
             // add the node to the tree
             if (newNode != null) {
-                insertNode(newNode, pnode);
+                //insertNode(newNode, pnode);
             }
 
         } // while (iterator.hasNext())
@@ -923,14 +927,14 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             return;
         }
 
-        TreePath[] currentSelections = tree.getSelectionPaths();
+        //TreePath[] currentSelections = tree.getSelectionPaths();
 
-        if (moveFlag == true) {
-            currentSelections = currentSelectionsForMove;
-        }
-        if ((currentSelections == null) || (currentSelections.length <= 0)) {
-            return;
-        }
+        //if (moveFlag == true) {
+        //    currentSelections = currentSelectionsForMove;
+        //}
+        //if ((currentSelections == null) || (currentSelections.length <= 0)) {
+        //    return;
+        //}
         if (moveFlag != true) {
             int op = JOptionPane.showConfirmDialog(this, "Do you want to remove all the selected object(s) ?",
                     "Remove object", JOptionPane.YES_NO_OPTION);
@@ -940,7 +944,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             }
         }
         HObject theObj = null;
-        for (int i = 0; i < currentSelections.length; i++) {
+        /*for (int i = 0; i < currentSelections.length; i++) {
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) (currentSelections[i].getLastPathComponent());
             theObj = (HObject) currentNode.getUserObject();
 
@@ -980,12 +984,14 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
 
             removeNode(currentNode);
         } // for (int i=0; i< currentSelections.length; i++) {
+        */
     }
 
     private void removeItem(TreeItem item) {
         if (item == null)
             return;
 
+        /*
         TreeItem parentItem = (TreeItem) (item.getParent());
         if (parentNode != null) {
             treeModel.removeNodeFromParent(node);
@@ -1002,6 +1008,7 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
                 selectedFile = null;
             }
         } // if (parentNode != null) {
+        */
     }
 
     private boolean isObjectOpen(HObject obj) {
@@ -1366,30 +1373,30 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             return;
         }
         Dataset dataset = (Dataset) selectedObject;
-        final JFileChooser fchooser = new JFileChooser(dataset.getFile());
-        fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
+        //final JFileChooser fchooser = new JFileChooser(dataset.getFile());
+        //fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
         // fchooser.changeToParentDirectory();
         File choosedFile = null;
         
         if(binaryOrder == 99) {
-            fchooser.setDialogTitle("Save Dataset Data To Text File --- " + dataset.getName());
+            //fchooser.setDialogTitle("Save Dataset Data To Text File --- " + dataset.getName());
     
             choosedFile = new File(dataset.getName() + ".txt");
         }
         else {
-            fchooser.setDialogTitle("Save Current Data To Binary File --- " + dataset.getName());
+            //fchooser.setDialogTitle("Save Current Data To Binary File --- " + dataset.getName());
 
             choosedFile = new File(dataset.getName() + ".bin");
         }
 
-        fchooser.setSelectedFile(choosedFile);
-        int returnVal = fchooser.showSaveDialog(this);
+        //fchooser.setSelectedFile(choosedFile);
+        //int returnVal = fchooser.showSaveDialog(this);
 
-        if (returnVal != JFileChooser.APPROVE_OPTION) {
-            return;
-        }
+        //if (returnVal != JFileChooser.APPROVE_OPTION) {
+        //    return;
+        //}
 
-        choosedFile = fchooser.getSelectedFile();
+        //choosedFile = fchooser.getSelectedFile();
         if (choosedFile == null) {
             return;
         }
@@ -1485,22 +1492,22 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
     private void setLibVersionBounds() {
         Object[] lowValues = { "Earliest", "Latest" };
         Object[] highValues = { "Latest" };
-        JComboBox lowComboBox = new JComboBox(lowValues);
-        lowComboBox.setName("earliestversion");
-        JComboBox highComboBox = new JComboBox(highValues);
-        highComboBox.setName("latestversion");
+        //JComboBox lowComboBox = new JComboBox(lowValues);
+        //lowComboBox.setName("earliestversion");
+        //JComboBox highComboBox = new JComboBox(highValues);
+        //highComboBox.setName("latestversion");
 
-        Object[] msg = { "Earliest Version:", lowComboBox, "Latest Version:", highComboBox };
+        //Object[] msg = { "Earliest Version:", lowComboBox, "Latest Version:", highComboBox };
         Object[] options = { "Ok", "Cancel" };
-        JOptionPane op = new JOptionPane(msg, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
+        //JOptionPane op = new JOptionPane(msg, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
 
-        op.setName("libselect");
-        JDialog dialog = op.createDialog(this, "Set the library version bounds: ");
-        dialog.setVisible(true);
+        //op.setName("libselect");
+        //JDialog dialog = op.createDialog(this, "Set the library version bounds: ");
+        //dialog.setVisible(true);
 
         String result = null;
         try {
-            result = (String) op.getValue();
+           // result = (String) op.getValue();
         }
         catch (Exception err) {
             // err.printStackTrace();
@@ -1509,10 +1516,10 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         if ((result != null) && (result.equals("Ok"))) {
             int low = -1;
             int high = 1;
-            if ((lowComboBox.getSelectedItem()).equals("Earliest"))
-                low = 0;
-            else
-                low = 1;
+            //if ((lowComboBox.getSelectedItem()).equals("Earliest"))
+            //    low = 0;
+            //else
+            //    low = 1;
             try {
                 selectedObject.getFileFormat().setLibBounds(low, high);
             }
@@ -1678,21 +1685,21 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
                 if (findStr != null && findStr.length() > 0) currentSearchPhrase = findStr;
             }
 
-            find(currentSearchPhrase, selectedTreePath, tree);
+            //find(currentSearchPhrase, selectedTreePath, tree);
         }
         else if (cmd.startsWith("Expand all")) {
             int row = 0;
-            while (row < tree.getRowCount()) {
-                tree.expandRow(row);
-                row++;
-            }
+            //while (row < tree.getRowCount()) {
+            //    tree.expandRow(row);
+            //    row++;
+            //}
         }
         else if (cmd.startsWith("Collapse all")) {
-            int row = tree.getRowCount() - 1;
-            while (row >= 0) {
-                tree.collapseRow(row);
-                row--;
-            }
+            //int row = tree.getRowCount() - 1;
+            //while (row >= 0) {
+            //   tree.collapseRow(row);
+            //    row--;
+            //}
         }
         else if (cmd.startsWith("Set Lib version bounds")) {
             setLibVersionBounds();
@@ -1842,12 +1849,12 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         else  {
             fileRoot = (MutableTreeNode) fileFormat.getRootNode();
             if (fileRoot != null) {
-                insertNode(fileRoot, root);
+                //insertNode(fileRoot, root);
 
-                int currentRowCount = tree.getRowCount();
-                if (currentRowCount > 0) {
-                    tree.expandRow(tree.getRowCount() - 1);
-                }
+                //int currentRowCount = tree.getRowCount();
+                //if (currentRowCount > 0) {
+                //    tree.expandRow(tree.getRowCount() - 1);
+                //}
 
                 fileList.add(fileFormat);
             }       	
@@ -1969,7 +1976,8 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
      * @return a list of selected object in the tree.
      */
     public List<Object> getSelectedObjects() {
-        TreePath[] paths = tree.getSelectionPaths();
+        /*
+    	TreePath[] paths = tree.getSelectionPaths();
         if ((paths == null) || (paths.length <= 0)) {
             return null;
         }
@@ -1993,6 +2001,9 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         }
 
         return objs;
+        */
+    	
+    	return null; // Remove when finished
     }
 
     /**
@@ -2253,7 +2264,8 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
      * @return the JTree which holds the file structure.
      */
     public JTree getTree() {
-        return tree;
+        // return tree;
+    	return null; // Remove when fixed
     }
 
     /**
@@ -2488,26 +2500,26 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
     private class HTreeMouseAdapter extends MouseAdapter {
         // public void mousePressed(MouseEvent e)
         public void mouseReleased(MouseEvent e) {
-            TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-            if (selPath == null) {
-                return;
-            }
+            //TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+            //if (selPath == null) {
+            //    return;
+            // }
 
-            DefaultMutableTreeNode theNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
-            if (!theNode.equals(selectedNode)) {
-                selectedTreePath = selPath;
-                selectedNode = theNode;
-                selectedObject = ((HObject) (selectedNode.getUserObject()));
-                FileFormat theFile = selectedObject.getFileFormat();
-                if ((theFile != null) && !theFile.equals(selectedFile)) {
-                    // a different file is selected, handle only one file a time
-                    selectedFile = theFile;
-                    tree.clearSelection();
-                    tree.setSelectionPath(selPath);
-                }
+            //DefaultMutableTreeNode theNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+            //if (!theNode.equals(selectedNode)) {
+            //    selectedTreePath = selPath;
+            //    selectedNode = theNode;
+            //    selectedObject = ((HObject) (selectedNode.getUserObject()));
+            //    FileFormat theFile = selectedObject.getFileFormat();
+            //    if ((theFile != null) && !theFile.equals(selectedFile)) {
+            //        // a different file is selected, handle only one file a time
+            //        selectedFile = theFile;
+            //        tree.clearSelection();
+            //        tree.setSelectionPath(selPath);
+            //    }
 
-                viewer.mouseEventFired(e);
-            }
+            //    viewer.mouseEventFired(e);
+            //}
 
             // ***************************************************************
             // Different platforms have different ways to show popups
@@ -2524,13 +2536,13 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             if (e.isPopupTrigger()
                     || (eMod == MouseEvent.BUTTON3_MASK)
                     || (System.getProperty("os.name").startsWith("Mac") && (eMod == (MouseEvent.BUTTON1_MASK | Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())))) {
-                int selRow = tree.getRowForLocation(e.getX(), e.getY());
+                //int selRow = tree.getRowForLocation(e.getX(), e.getY());
 
-                if (!tree.isRowSelected(selRow)) {
-                    // reselect the node
-                    tree.clearSelection();
-                    tree.setSelectionRow(selRow);
-                }
+                //if (!tree.isRowSelected(selRow)) {
+                //    // reselect the node
+                //    tree.clearSelection();
+                //    tree.setSelectionRow(selRow);
+                //}
                 showPopupMenu(e);
             }
             // double click to open data content
@@ -2581,8 +2593,8 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
                         // a different file is selected, handle only one file a
                         // time
                         selectedFile = theFile;
-                        tree.clearSelection();
-                        tree.setSelectionPath(selPath);
+                        //tree.clearSelection();
+                        //tree.setSelectionPath(selPath);
                     }
 
                     //((HDFView) viewer).showMetaData(selectedObject);
@@ -2597,9 +2609,9 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
     private class ChangeIndexingDialog extends JDialog implements ActionListener {
         private static final long serialVersionUID = 1048114401768228742L;
     
-        private JRadioButton checkIndexType;
-        private JRadioButton checkIndexOrder;
-        private JRadioButton checkIndexNative;
+        //private JRadioButton checkIndexType;
+        //private JRadioButton checkIndexOrder;
+        //private JRadioButton checkIndexNative;
     
         private boolean reloadFile;
         
@@ -2638,15 +2650,15 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             tborder.setTitleColor(Color.darkGray);
             pType.setBorder(tborder);
             pType.setLayout(new GridLayout(1, 2, 8, 8));
-            checkIndexType = new JRadioButton("By Name", (indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
-            checkIndexType.setName("Index by Name");
-            pType.add(checkIndexType);
-            JRadioButton checkIndexCreateOrder = new JRadioButton("By Creation Order", (indexType) == selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
-            checkIndexCreateOrder.setName("Index by Creation Order");
-            pType.add(checkIndexCreateOrder);
+            //checkIndexType = new JRadioButton("By Name", (indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
+            //checkIndexType.setName("Index by Name");
+            //pType.add(checkIndexType);
+            //JRadioButton checkIndexCreateOrder = new JRadioButton("By Creation Order", (indexType) == selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
+            //checkIndexCreateOrder.setName("Index by Creation Order");
+            //pType.add(checkIndexCreateOrder);
             ButtonGroup bTypegrp = new ButtonGroup();
-            bTypegrp.add(checkIndexType);
-            bTypegrp.add(checkIndexCreateOrder);
+            //bTypegrp.add(checkIndexType);
+            //bTypegrp.add(checkIndexCreateOrder);
             indexP.add(pType);
     
             JPanel pOrder = new JPanel();
@@ -2654,32 +2666,32 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
             tborder.setTitleColor(Color.darkGray);
             pOrder.setBorder(tborder);
             pOrder.setLayout(new GridLayout(1, 3, 8, 8));
-            checkIndexOrder = new JRadioButton("Increments", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
-            checkIndexOrder.setName("Index Increments");
-            pOrder.add(checkIndexOrder);
-            JRadioButton checkIndexDecrement = new JRadioButton("Decrements", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_DEC"));
-            checkIndexDecrement.setName("Index Decrements");
-            pOrder.add(checkIndexDecrement);
-            checkIndexNative = new JRadioButton("Native", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
-            checkIndexNative.setName("Index Native");
-            pOrder.add(checkIndexNative);
+            //checkIndexOrder = new JRadioButton("Increments", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
+            //checkIndexOrder.setName("Index Increments");
+            //pOrder.add(checkIndexOrder);
+            //JRadioButton checkIndexDecrement = new JRadioButton("Decrements", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_DEC"));
+            //checkIndexDecrement.setName("Index Decrements");
+            //pOrder.add(checkIndexDecrement);
+            //checkIndexNative = new JRadioButton("Native", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
+            //checkIndexNative.setName("Index Native");
+            //pOrder.add(checkIndexNative);
             ButtonGroup bOrdergrp = new ButtonGroup();
-            bOrdergrp.add(checkIndexOrder);
-            bOrdergrp.add(checkIndexDecrement);
-            bOrdergrp.add(checkIndexNative);
+            //bOrdergrp.add(checkIndexOrder);
+            //bOrdergrp.add(checkIndexDecrement);
+            //bOrdergrp.add(checkIndexNative);
             indexP.add(pOrder);
     
             JPanel buttonP = new JPanel();
-            JButton b = new JButton("Reload File");
-            b.setName("Reload File");
-            b.setActionCommand("Reload File");
-            b.addActionListener(this);
-            buttonP.add(b);
-            b = new JButton("Cancel");
-            b.setName("Cancel");
-            b.setActionCommand("Cancel");
-            b.addActionListener(this);
-            buttonP.add(b);
+            //JButton b = new JButton("Reload File");
+            //b.setName("Reload File");
+            //b.setActionCommand("Reload File");
+            //b.addActionListener(this);
+            //buttonP.add(b);
+            //b = new JButton("Cancel");
+            //b.setName("Cancel");
+            //b.setActionCommand("Cancel");
+            //b.addActionListener(this);
+            //buttonP.add(b);
     
             contentPane.add("Center", indexP);
             contentPane.add("South", buttonP);
@@ -2711,19 +2723,19 @@ public class DefaultTreeView extends JPanel implements TreeView, ActionListener 
         }
     
         private void setIndexOptions() {
-            if (checkIndexType.isSelected())
-                selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_NAME"));
-            else
-                selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
-            indexType = selectedFile.getIndexType(null);
+            //if (checkIndexType.isSelected())
+            //    selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_NAME"));
+            //else
+            //    selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
+            //indexType = selectedFile.getIndexType(null);
             
-            if (checkIndexOrder.isSelected())
-                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_INC"));
-            else if (checkIndexNative.isSelected())
-                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_NATIVE"));
-            else
-                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_DEC"));
-            indexOrder = selectedFile.getIndexOrder(null);
+            //if (checkIndexOrder.isSelected())
+            //    selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_INC"));
+            //else if (checkIndexNative.isSelected())
+            //    selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_NATIVE"));
+            //else
+            //    selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_DEC"));
+            //indexOrder = selectedFile.getIndexOrder(null);
             
             reloadFile = true;
         }

@@ -1206,7 +1206,7 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
             return null;
         }
 
-        int w = tableView.getTable().getSelectedColumnCount();
+        /*int w = tableView.getTable().getSelectedColumnCount();
         int h = tableView.getTable().getSelectedRowCount();
         Dataset dataset = (Dataset) tableView.getDataObject();
         if (dataset instanceof ScalarDS) {
@@ -1225,6 +1225,7 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
             JOptionPane.showMessageDialog(this, ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
             return null;
         }
+        */
 
         return obj;
     }

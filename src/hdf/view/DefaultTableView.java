@@ -746,7 +746,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         return bar;
     }
 
-    @Override
+    //@Override
     public void actionPerformed (ActionEvent e) {
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -1078,7 +1078,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing DataView.
-    @Override
+    //@Override
     public HObject getDataObject ( ) {
         return dataset;
     }
@@ -1193,7 +1193,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing TableObserver.
-    @Override
+    //@Override
     public JTable getTable ( ) {
         return table;
     }
@@ -1412,7 +1412,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     /**
      * Returns the selected data values.
      */
-    @Override
+    //@Override
     public Object getSelectedData ( ) {
         if (dataset instanceof CompoundDS) {
             return getSelectedCompoundData();
@@ -1713,12 +1713,12 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             boolean                    isNaturalOrder   = (dataset.getRank() == 1 || (dataset.getSelectedIndex()[0] < dataset
                                                                 .getSelectedIndex()[1]));
 
-            @Override
+            //@Override
             public int getColumnCount ( ) {
                 return columnNames.length;
             }
 
-            @Override
+            //@Override
             public int getRowCount ( ) {
                 return rowCount;
             }
@@ -1728,7 +1728,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
                 return columnNames[col];
             }
 
-            @Override
+            //@Override
             public Object getValueAt (int row, int column) {
                 if (startEditing[0]) return "";
                 log.trace("ScalarDS:createTable:AbstractTableModel:getValueAt({},{}) start", row, column);
@@ -2299,12 +2299,12 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             int                       nRows            = getRowCount();
             int                       nSubColumns      = (nFields > 0) ? getColumnCount() / nFields : 0;
 
-            @Override
+            //@Override
             public int getColumnCount ( ) {
                 return allColumnNames.length;
             }
 
-            @Override
+            //@Override
             public int getRowCount ( ) {
                 return rows;
             }
@@ -2314,7 +2314,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
                 return allColumnNames[col];
             }
 
-            @Override
+            //@Override
             public Object getValueAt (int row, int col) {
                 if (startEditing[0]) return "";
 
@@ -3453,7 +3453,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     /**
      * update dataset value in file. The change will go to file.
      */
-    @Override
+    //@Override
     public void updateValueInFile ( ) {
         log.trace("DefaultTableView updateValueInFile enter");
         if (isReadOnly || showAsBin || showAsHex) {
@@ -3935,7 +3935,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             return plotType;
         }
 
-        @Override
+        //@Override
         public void actionPerformed (ActionEvent e) {
             e.getSource();
             String cmd = e.getActionCommand();
@@ -3958,7 +3958,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             }
         }
 
-        @Override
+        //@Override
         public void itemStateChanged (ItemEvent e) {
             Object source = e.getSource();
 
@@ -4077,12 +4077,12 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             AbstractTableModel tm = new AbstractTableModel() {
                 private static final long serialVersionUID = -8117073107569884677L;
 
-                @Override
+                //@Override
                 public int getColumnCount ( ) {
                     return 1;
                 }
 
-                @Override
+                //@Override
                 public int getRowCount ( ) {
                     return rowCount;
                 }
@@ -4092,7 +4092,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
                     return " ";
                 }
 
-                @Override
+                //@Override
                 public Object getValueAt (int row, int column) {
                     log.trace("RowHeader:AbstractTableModel:getValueAt");
                     return String.valueOf(start + indexBase + row * stride);
@@ -4213,7 +4213,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         }
 
         /** Configures the button for the current cell, and returns it. */
-        @Override
+        //@Override
         public Component getTableCellRendererComponent (JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
             setFont(table.getFont());
@@ -4244,7 +4244,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             setBackground(UIManager.getColor("TableHeader.background"));
         }
 
-        @Override
+        //@Override
         public Component getTableCellRendererComponent (JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
             setFont(table.getFont());
@@ -4281,7 +4281,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     // //
     // ////////////////////////////////////////////////////////////////////////
 
-    @Override
+    //@Override
     public void mouseClicked (MouseEvent e) {
         // only deal with reg. ref
         if (!(isRegRef || isObjRef)) return;
@@ -4332,19 +4332,19 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         }
     }
 
-    @Override
+    //@Override
     public void mouseEntered (MouseEvent e) {
     }
 
-    @Override
+    //@Override
     public void mouseExited (MouseEvent e) {
     }
 
-    @Override
+    //@Override
     public void mousePressed (MouseEvent e) {
     }
 
-    @Override
+    //@Override
     public void mouseReleased (MouseEvent e) {
     }
 

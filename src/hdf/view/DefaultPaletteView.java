@@ -14,12 +14,13 @@
 
 package hdf.view;
 
+import org.eclipse.swt.graphics.Image;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -166,7 +167,7 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
         chartP.addMouseMotionListener(this);
 
         x0 = y0 = 0;
-        originalImage = currentImage = imageView.getImage();
+        //originalImage = currentImage = imageView.getImage();
         palette = new byte[3][256];
 
         createUI();
@@ -372,7 +373,7 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
         MemoryImageSource memoryImageSource = null;
 
         try {
-            memoryImageSource = (MemoryImageSource) originalImage.getSource();
+            //memoryImageSource = (MemoryImageSource) originalImage.getSource();
         }
         catch (Throwable err) {
             memoryImageSource = null;
@@ -387,8 +388,8 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
                     colorModel, 0, w);
         }
 
-        currentImage = Toolkit.getDefaultToolkit().createImage(
-                memoryImageSource);
+        //currentImage = Toolkit.getDefaultToolkit().createImage(
+        //        memoryImageSource);
     }
 
     public void mouseClicked(MouseEvent e) {

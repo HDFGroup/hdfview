@@ -638,7 +638,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         pack();
     }
 
-    @Override
+    //@Override
     public void actionPerformed (ActionEvent e) {
         String cmd = e.getActionCommand();
 
@@ -756,7 +756,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         }
     }
 
-    @Override
+    //@Override
     public void itemStateChanged (ItemEvent e) {
         Object source = e.getSource();
 
@@ -1435,20 +1435,20 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             }
         }
 
-        @Override
+        //@Override
         public void mousePressed (MouseEvent e) {
             startPosition = e.getPoint();
             selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
         }
 
-        @Override
+        //@Override
         public void mouseClicked (MouseEvent e) {
             startPosition = e.getPoint();
             selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
             repaint();
         }
 
-        @Override
+        //@Override
         public void mouseDragged (MouseEvent e) {
             Point p0 = startPosition;
             Point p1 = e.getPoint();
@@ -1509,19 +1509,19 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             selLabel.setText(selStr);
         }
 
-        @Override
+        //@Override
         public void mouseReleased (MouseEvent e) {
         }
 
-        @Override
+        //@Override
         public void mouseEntered (MouseEvent e) {
         }
 
-        @Override
+        //@Override
         public void mouseExited (MouseEvent e) {
         }
 
-        @Override
+        //@Override
         public void mouseMoved (MouseEvent e) {
         }
 

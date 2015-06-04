@@ -986,7 +986,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
         return isWorkDirChanged;
     }
 
-    @Override
+    //@Override
     public void itemStateChanged(ItemEvent e) {
         Object source = e.getSource();
 

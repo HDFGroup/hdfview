@@ -14,6 +14,9 @@
 
 package hdf.view;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -22,10 +25,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -1178,7 +1179,7 @@ ActionListener {
 					getTitle(), JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-
+        /*
 		if ((rec == null) || (rec.getWidth() <= 0) || (rec.getHeight() <= 0)) {
 			toolkit.beep();
 			JOptionPane
@@ -1188,6 +1189,7 @@ ActionListener {
 					getTitle(), JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+		*/
 
 		double chartData[][] = new double[1][256];
 		for (int i = 0; i < 256; i++) {
@@ -1329,9 +1331,9 @@ ActionListener {
 			return null;
 		}
 
-		if (image instanceof BufferedImage) {
+		/*if (image instanceof BufferedImage) {
 			return (BufferedImage) image;
-		}
+		}*/
 
 		// !!!!!!!!!!!!!!!!!! NOTICE !!!!!!!!!!!!!!!!!!!!!
 		// the following way of creating a buffered image is using
@@ -1343,7 +1345,7 @@ ActionListener {
 		// It does not work well with JavaTM Advanced Imaging
 		// com.sun.media.jai.codec.*;
 		// if the screen setting is less than 32-bit color
-		int w = image.getWidth(null);
+		/*int w = image.getWidth(null);
 		int h = image.getHeight(null);
 		BufferedImage bimage = (BufferedImage) createImage(w, h);
 		Graphics g = bimage.createGraphics();
@@ -1351,6 +1353,8 @@ ActionListener {
 
 		g.dispose();
 		return bimage;
+		*/
+		return null; // Remove once fixed
 	}
 
 	/**
@@ -1487,9 +1491,9 @@ ActionListener {
 				}
 
 				TreeView treeView = viewer.getTreeView();
-				TreeNode node = treeView.findTreeNode(dataset);
-				Group pGroup = (Group) ((DefaultMutableTreeNode) node
-						.getParent()).getUserObject();
+				//TreeNode node = treeView.findTreeNode(dataset);
+				//Group pGroup = (Group) ((DefaultMutableTreeNode) node
+				//		.getParent()).getUserObject();
 				TreeNode root = dataset.getFileFormat().getRootNode();
 
 				if (root == null) {
@@ -1507,6 +1511,7 @@ ActionListener {
 					list.add(theNode.getUserObject());
 				}
 
+				/*
 				NewDatasetDialog dialog = new NewDatasetDialog((JFrame) viewer,
 						pGroup, list, this);
 				dialog.setVisible(true);
@@ -1521,6 +1526,7 @@ ActionListener {
 						log.debug("Write selection to image:", ex);
 					}
 				}
+				*/
 
 				list.setSize(0);
 			}
@@ -1685,7 +1691,7 @@ ActionListener {
 			}
 			else if (cmd.startsWith("Brightness")) {
 				if (contrastSlider == null) {
-					contrastSlider = new ContrastSlider((JFrame) viewer, image.getSource());
+					//contrastSlider = new ContrastSlider((JFrame) viewer, image.getSource());
 				}
 				contrastSlider.setVisible(true);
 			}
@@ -2009,10 +2015,13 @@ ActionListener {
 	 */
 	private Image createIndexedImage(byte[] imageData, byte[][] palette, int w, int h) 
 	{
+		/*
 		bufferedImage = (BufferedImage)Tools.createIndexedImage(bufferedImage, imageData, palette, w, h);
 		adjustAlpha(bufferedImage, 0, invalidValueIndex);        
 
 		return bufferedImage;
+		*/
+		return null; // Remove when fixed
 	}
 
 	/**
@@ -2075,15 +2084,16 @@ ActionListener {
 		} 
 
 		adjustAlpha(bufferedImage, 0, invalidValueIndex);        
-		return bufferedImage;
+		//return bufferedImage;
+		return null; // Remove when fixed
 	}
 
 	private boolean applyImageFilter(ImageFilter filter) {
 		boolean status = true;
-		ImageProducer imageProducer = image.getSource();
+		//ImageProducer imageProducer = image.getSource();
 
 		try {
-			image = createImage(new FilteredImageSource(imageProducer, filter));
+			//image = createImage(new FilteredImageSource(imageProducer, filter));
 			imageComponent.setImage(image);
 			zoomTo(zoomFactor);
 		}
@@ -2233,11 +2243,11 @@ ActionListener {
 
 		private ImageComponent(Image img) {
 			image = img;
-			imageSize = new Dimension(image.getWidth(this), image
-					.getHeight(this));
+			//imageSize = new Dimension(image.getWidth(this), image
+			//		.getHeight(this));
 			originalSize = imageSize;
-			selectedArea = new Rectangle();
-			originalSelectedArea = new Rectangle();
+			//selectedArea = new Rectangle();
+			//originalSelectedArea = new Rectangle();
 			setPreferredSize(imageSize);
 			strBuff = new StringBuffer();
 
@@ -2253,11 +2263,11 @@ ActionListener {
 				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 						RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 				Image scaledImg = multiBiliner(image, imageSize.width, imageSize.height, true);
-				g2.drawImage(scaledImg, 0, 0, imageSize.width, imageSize.height, this);
+				//g2.drawImage(scaledImg, 0, 0, imageSize.width, imageSize.height, this);
 
 			} 
 			else
-				g.drawImage(image, 0, 0, imageSize.width, imageSize.height, this);
+				//g.drawImage(image, 0, 0, imageSize.width, imageSize.height, this);
 
 			if ((selectedArea.width > 0) && (selectedArea.height > 0)) {
 				g.setColor(Color.red);
@@ -2278,51 +2288,51 @@ ActionListener {
 		private Image multiBiliner(Image img, int targetWidth, int targetHeight, boolean highquality)
 		{
 			Image ret = img;
-			int w = img.getWidth(null)/2;
-			int h = img.getHeight(null)/2;
+			//int w = img.getWidth(null)/2;
+			//int h = img.getHeight(null)/2;
 
 			// only do multiple step bilinear for down scale more than two times
-			if (!highquality || w <=targetWidth || h <=targetHeight)
-				return ret;
+			//if (!highquality || w <=targetWidth || h <=targetHeight)
+			//	return ret;
 
 			int type = BufferedImage.TYPE_INT_RGB;
-			if (image instanceof BufferedImage) {
-				BufferedImage tmp = (BufferedImage)image;
-				if (tmp.getColorModel().hasAlpha())
-					type = BufferedImage.TYPE_INT_ARGB;
-			} 
-			else {
-				PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-				ColorModel cm = pg.getColorModel();
-				if (cm!=null && cm.hasAlpha())
-					type = BufferedImage.TYPE_INT_ARGB;
-			}
+			//if (image instanceof BufferedImage) {
+			//	BufferedImage tmp = (BufferedImage)image;
+			//	if (tmp.getColorModel().hasAlpha())
+			//		type = BufferedImage.TYPE_INT_ARGB;
+			//} 
+			//else {
+			//	PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
+			//	ColorModel cm = pg.getColorModel();
+			//	if (cm!=null && cm.hasAlpha())
+			//		type = BufferedImage.TYPE_INT_ARGB;
+			//}
 
-			do {
-				BufferedImage tmp = new BufferedImage(w, h, type);
-				Graphics2D g2 = tmp.createGraphics();
-				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-				g2.drawImage(ret, 0, 0, w, h, null);
-				g2.dispose();
-				ret = tmp;
+			//do {
+			//	BufferedImage tmp = new BufferedImage(w, h, type);
+			//	Graphics2D g2 = tmp.createGraphics();
+			//	g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			//	//g2.drawImage(ret, 0, 0, w, h, null);
+			//	g2.dispose();
+			//	//ret = tmp;
 
-				w /= 2;
-				if (w < targetWidth) {
-					w = targetWidth;
-				}
+			//	w /= 2;
+			//	if (w < targetWidth) {
+			//		w = targetWidth;
+			//	}
 
-				h /= 2;
-				if (h < targetHeight) {
-					h = targetHeight;
-				}
+			//	h /= 2;
+			//	if (h < targetHeight) {
+			//		h = targetHeight;
+			//	}
 
-			} while (w != targetWidth || h != targetHeight);
+			//} while (w != targetWidth || h != targetHeight);
 
 			return ret;
 		}
 		public void mousePressed(MouseEvent e) {
 			startPosition = e.getPoint();
-			selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
+			//selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
 			scrollDim = imageScroller.getSize();
 			hbar = imageScroller.getHorizontalScrollBar();
 			vbar = imageScroller.getVerticalScrollBar();
@@ -2337,7 +2347,7 @@ ActionListener {
 
 		public void mouseClicked(MouseEvent e) {
 			startPosition = e.getPoint();
-			selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
+			//selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
 
 			if (hbar.isVisible()) {
 				hbar.setValue(startPosition.x - scrollDim.width / 2);
@@ -2373,12 +2383,12 @@ ActionListener {
 				int w = x1 - x0;
 				int h = y1 - y0;
 
-				selectedArea.setBounds(x0, y0, w, h);
+				//selectedArea.setBounds(x0, y0, w, h);
 				double ratio = 1.0 / zoomFactor;
 
-				originalSelectedArea.setBounds((int) (x0 * ratio),
-						(int) (y0 * ratio), (int) (w * ratio),
-						(int) (h * ratio));
+				//originalSelectedArea.setBounds((int) (x0 * ratio),
+				//		(int) (y0 * ratio), (int) (w * ratio),
+				//		(int) (h * ratio));
 
 				repaint();
 			}
@@ -2515,9 +2525,9 @@ ActionListener {
 		} // private void showPixelValue
 
 		private void selectAll() {
-			selectedArea.setBounds(0, 0, imageSize.width, imageSize.height);
-			originalSelectedArea.setBounds(0, 0, originalSize.width,
-					originalSize.height);
+			//selectedArea.setBounds(0, 0, imageSize.width, imageSize.height);
+			//originalSelectedArea.setBounds(0, 0, originalSize.width,
+			//		originalSize.height);
 			repaint();
 		}
 
@@ -2564,11 +2574,11 @@ ActionListener {
 			int h = selectedArea.height;
 			if ((w > 0) && (h > 0)) {
 				// use fixed selected area to reduce the rounding error
-				selectedArea.setBounds(
-						(int) (originalSelectedArea.x * zoomFactor),
-						(int) (originalSelectedArea.y * zoomFactor),
-						(int) (originalSelectedArea.width * zoomFactor),
-						(int) (originalSelectedArea.height * zoomFactor));
+				//selectedArea.setBounds(
+				//		(int) (originalSelectedArea.x * zoomFactor),
+				//		(int) (originalSelectedArea.y * zoomFactor),
+				//		(int) (originalSelectedArea.width * zoomFactor),
+				//		(int) (originalSelectedArea.height * zoomFactor));
 			}
 
 			repaint();
@@ -2576,10 +2586,10 @@ ActionListener {
 
 		private void setImage(Image img) {
 			image = img;
-			imageSize = new Dimension(image.getWidth(this), image
-					.getHeight(this));
+			//imageSize = new Dimension(image.getWidth(this), image
+			//		.getHeight(this));
 			originalSize = imageSize;
-			selectedArea.setSize(0, 0);
+			//selectedArea.setSize(0, 0);
 			setPreferredSize(imageSize);
 
 			setImageSize(new Dimension((int) (originalSize.width * zoomFactor),
@@ -3321,8 +3331,8 @@ ActionListener {
 				System.arraycopy(tstride, 0, stride, 0, rank);
 			}
 
-			offScrImage = owner.createImage(w, h);
-			offScrGC = offScrImage.getGraphics();
+			//offScrImage = owner.createImage(w, h);
+			//offScrGC = offScrImage.getGraphics();
 			x0 = Math.max((MAX_ANIMATION_IMAGE_SIZE - w) / 2, 0);
 			y0 = Math.max((MAX_ANIMATION_IMAGE_SIZE - h) / 2, 0);
 
@@ -3337,8 +3347,8 @@ ActionListener {
 						return;
 					}
 
-					offScrGC.drawImage(frames[currentFrame], 0, 0, owner);
-					g.drawImage(offScrImage, x0, y0, owner);
+					//offScrGC.drawImage(frames[currentFrame], 0, 0, owner);
+					//g.drawImage(offScrImage, x0, y0, owner);
 				}
 			};
 
@@ -3892,7 +3902,7 @@ ActionListener {
 			} 
 			else {
 				ImageFilter filter = new BrightnessFilter(blevel, clevel);
-				image = createImage(new FilteredImageSource(imageProducer, filter));
+				//image = createImage(new FilteredImageSource(imageProducer, filter));
 				imageComponent.setImage(image);
 				zoomTo(zoomFactor);           
 			}
