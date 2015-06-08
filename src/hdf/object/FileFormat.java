@@ -21,9 +21,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+import org.eclipse.swt.widgets.TreeItem;
 
 /**
  * FileFormat defines general interfaces for working with files whose data is
@@ -179,12 +177,8 @@ public abstract class FileFormat extends File {
      * starting with the <i>start_members</i> -th object. The implementing class
      * has freedom in its interpretation of how to "count" objects in the file.
      */
-    private int                                  max_members        = 10000;                                // 10,000
-    // by
-    // default
-    private int                                  start_members      = 0;                                    // 0
-    // by
-    // default
+    private int                                  max_members        = 10000;                                // 10,000 by default
+    private int                                  start_members      = 0;                                    // 0 by default
 
     /**
      * File identifier. -1 indicates the file is not open.
@@ -942,15 +936,15 @@ public abstract class FileFormat extends File {
      */
     public final int getNumberOfMembers() {
         int n_members = 0;
-        TreeNode rootNode = getRootNode();
+        TreeItem rootItem = getRootItem();
 
-        if (rootNode != null) {
-            Enumeration local_enum = ((DefaultMutableTreeNode) rootNode).depthFirstEnumeration();
+        if (rootItem != null) {
+            //Enumeration local_enum = ((TreeItem) rootItem).depthFirstEnumeration();
 
-            while (local_enum.hasMoreElements()) {
-                local_enum.nextElement();
-                n_members++;
-            }
+            //while (local_enum.hasMoreElements()) {
+            //    local_enum.nextElement();
+            //    n_members++;
+            //}
         }
         return n_members;
     }
@@ -984,7 +978,7 @@ public abstract class FileFormat extends File {
      * @see #createFile(String, int)
      * @see #createInstance(String, int)
      * @see #getInstance(String)
-     * @see #getRootNode()
+     * @see #getRootItem()
      */
     public abstract int open() throws Exception;
 
@@ -1008,24 +1002,24 @@ public abstract class FileFormat extends File {
     // Can we doc exceptions better or in implementation methods?
 
     /**
-     * Returns the root node for the file associated with this instance.
+     * Returns the root item for the file associated with this instance.
      * <p>
-     * The root node is a Java TreeNode object
-     * (javax.swing.tree.DefaultMutableTreeNode) that represents the root group
+     * The root item is a Java TreeItem object
+     * (org.eclipse.swt.widgets.TreeItem) that represents the root group
      * of a file. If the file has not yet been opened, or if there is no file
      * associated with this instance, <code>null</code> will be returned.
      * <p>
      * Starting from the root, applications can descend through the tree
      * structure and navigate among the file's objects. In the tree structure,
-     * internal nodes represent non-empty groups. Leaf nodes represent datasets,
+     * internal items represent non-empty groups. Leaf items represent datasets,
      * named datatypes, or empty groups.
      * 
-     * @return The root node of the file, or <code>null</code> there is no
+     * @return The root item of the file, or <code>null</code> if there is no
      *         associated file or if the associated file has not yet been
      *         opened.
      * @see #open()
      */
-    public abstract TreeNode getRootNode();
+    public abstract TreeItem getRootItem();
 
     /**
      * Gets the HObject with the specified path from the file.
@@ -1605,7 +1599,7 @@ public abstract class FileFormat extends File {
      *             SRC.copy not DEST.copy. Also what is returned on failure.
      *             ALSO exceptions. ALSO, does it copy data or just structure?
      */
-    public abstract TreeNode copy(HObject srcObj, Group dstGroup, String dstName) throws Exception;
+    public abstract TreeItem copy(HObject srcObj, Group dstGroup, String dstName) throws Exception;
 
     // REVIEW DOCS for copy().
     // CONFIRM USE SRC.copy not DEST.copy. Also what is returned on
@@ -1704,7 +1698,7 @@ public abstract class FileFormat extends File {
      *             parameter.
      */
     @Deprecated
-    public final TreeNode copy(HObject srcObj, Group dstGroup) throws Exception {
+    public final TreeItem copy(HObject srcObj, Group dstGroup) throws Exception {
         return copy(srcObj, dstGroup, null);
     }
 
@@ -1807,21 +1801,21 @@ public abstract class FileFormat extends File {
         }
 
         HObject theObj = null;
-        DefaultMutableTreeNode theNode = null;
+        TreeItem theItem = null;
 
-        MutableTreeNode theRoot = (MutableTreeNode) file.getRootNode();
+        TreeItem theRoot = (TreeItem) file.getRootItem();
         if (theRoot == null) {
             return null;
         }
 
-        Enumeration local_enum = ((DefaultMutableTreeNode) theRoot).breadthFirstEnumeration();
-        while (local_enum.hasMoreElements()) {
-            theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-            theObj = (HObject) theNode.getUserObject();
-            if (theObj.equalsOID(oid)) {
-                break;
-            }
-        }
+        //Enumeration local_enum = ((TreeItem) theRoot).breadthFirstEnumeration();
+        //while (local_enum.hasMoreElements()) {
+        //    theItem = (TreeItem) local_enum.nextElement();
+        //    theObj = (HObject) theItem.getData();
+        //    if (theObj.equalsOID(oid)) {
+        //        break;
+        //    }
+        //}
 
         return theObj;
     }
@@ -1844,30 +1838,30 @@ public abstract class FileFormat extends File {
             path = path + "/";
         }
 
-        DefaultMutableTreeNode theRoot = (DefaultMutableTreeNode) file.getRootNode();
+        TreeItem theRoot = file.getRootItem();
 
         if (theRoot == null) {
             return null;
         }
         else if (path.equals("/")) {
-            return (HObject) theRoot.getUserObject();
+            return (HObject) theRoot.getData();
         }
 
-        Enumeration local_enum = (theRoot).breadthFirstEnumeration();
-        DefaultMutableTreeNode theNode = null;
+        //Enumeration local_enum = (theRoot).breadthFirstEnumeration();
+        TreeItem theItem = null;
         HObject theObj = null;
-        while (local_enum.hasMoreElements()) {
-            theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-            theObj = (HObject) theNode.getUserObject();
-            String fullPath = theObj.getFullName() + "/";
+        //while (local_enum.hasMoreElements()) {
+        //    theItem = (TreeItem) local_enum.nextElement();
+        //    theObj = (HObject) theItem.getData();
+        //    String fullPath = theObj.getFullName() + "/";
 
-            if (path.equals(fullPath) && theObj.getPath() != null) {
-                break;
-            }
-            else {
-                theObj = null;
-            }
-        }
+        //    if (path.equals(fullPath) && theObj.getPath() != null) {
+        //        break;
+        //    }
+        //    else {
+        //        theObj = null;
+        //    }
+        //}
 
         return theObj;
     }

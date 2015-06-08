@@ -18,7 +18,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import org.eclipse.swt.widgets.TreeItem;
 
 /**
  * Group is an abstract class. Current implementing classes are the H4Group and
@@ -172,34 +172,30 @@ public abstract class Group extends HObject {
                 ;
             }
 
-            DefaultMutableTreeNode root = (DefaultMutableTreeNode) theFile
-                    .getRootNode();
+            TreeItem root = (TreeItem) theFile.getRootItem();
+            if (root == null) return memberList;
 
-            if (root == null) {
-                return memberList;
-            }
-
-            Enumeration<?> emu = root.depthFirstEnumeration();
+            //Enumeration<?> emu = root.depthFirstEnumeration();
 
             Group g = null;
             Object uObj = null;
-            while (emu.hasMoreElements()) {
-                uObj = ((DefaultMutableTreeNode) emu.nextElement())
-                        .getUserObject();
-                if (uObj instanceof Group) {
-                    g = (Group) uObj;
-                    if (g.getPath() != null) // add this check to get rid of
+            //while (emu.hasMoreElements()) {
+            //    uObj = ((DefaultMutableTreeNode) emu.nextElement())
+            //            .getUserObject();
+            //    if (uObj instanceof Group) {
+            //        g = (Group) uObj;
+            //        if (g.getPath() != null) // add this check to get rid of
                                              // null exception
-                    {
-                        if ((this.isRoot() && g.isRoot())
-                                || (thePath.equals(g.getPath()) && g.getName()
-                                        .endsWith(theName))) {
-                            memberList = g.getMemberList();
-                            break;
-                        }
-                    }
-                }
-            }
+            //        {
+            //            if ((this.isRoot() && g.isRoot())
+            //                    || (thePath.equals(g.getPath()) && g.getName()
+            //                            .endsWith(theName))) {
+            //                memberList = g.getMemberList();
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         return memberList;

@@ -27,6 +27,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JDialog;
+import javax.swing.JInternalFrame;
+
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -256,9 +259,6 @@ public class HDFView implements ViewManager, DropTargetListener {
         		treeView = null;
         	}
         }
-        
-        // Could not load user's treeview, use default treeview.
-        // if (treeView == null) treeView = new DefaultTreeView(this);
         
         // Initialize all GUI components
 		createMainWindow(width, height, x, y);
@@ -1042,50 +1042,12 @@ public class HDFView implements ViewManager, DropTargetListener {
 		SashForm sashForm_1 = new SashForm(data, SWT.NONE);
 		sashForm_1.setSashWidth(10);
 		
-		ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm_1, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		scrolledComposite.setExpandHorizontal(true);
-		scrolledComposite.setExpandVertical(true);
+		ScrolledComposite treeArea = new ScrolledComposite(sashForm_1, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		treeArea.setExpandHorizontal(true);
+		treeArea.setExpandVertical(true);
 		
-		Tree tree = new Tree(scrolledComposite, SWT.NONE);
-		tree.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		
-		TreeItem trtmNewTreeitem = new TreeItem(tree, SWT.NONE);
-		trtmNewTreeitem.setImage(ViewProperties.getH5Icon());
-		trtmNewTreeitem.setText("hdf5_test.h5");
-		
-		TreeItem trtmNotes = new TreeItem(trtmNewTreeitem, SWT.NONE);
-		trtmNotes.setImage(ViewProperties.getTextIcon());
-		trtmNotes.setText("Notes");
-		
-		TreeItem trtmNewTreeitem_1 = new TreeItem(trtmNewTreeitem, SWT.NONE);
-		trtmNewTreeitem_1.setImage(ViewProperties.getFoldercloseIcon());
-		trtmNewTreeitem_1.setText("arrays");
-		
-		TreeItem trtmdIntArray = new TreeItem(trtmNewTreeitem_1, SWT.NONE);
-		trtmdIntArray.setImage(ViewProperties.getDatasetIcon());
-		trtmdIntArray.setText("2D int array");
-		trtmNewTreeitem_1.setExpanded(true);
-		
-		TreeItem trtmNewTreeitem_2 = new TreeItem(trtmNewTreeitem, SWT.NONE);
-		trtmNewTreeitem_2.setImage(ViewProperties.getFoldercloseIcon());
-		trtmNewTreeitem_2.setText("datatypes");
-		
-		TreeItem trtmNewTreeitem_4 = new TreeItem(trtmNewTreeitem_2, SWT.NONE);
-		trtmNewTreeitem_4.setImage(ViewProperties.getDatatypeIcon());
-		trtmNewTreeitem_4.setText("H5T_NATIVE_INT");
-		trtmNewTreeitem_2.setExpanded(true);
-		
-		TreeItem trtmNewTreeitem_3 = new TreeItem(trtmNewTreeitem, SWT.NONE);
-		trtmNewTreeitem_3.setImage(ViewProperties.getFoldercloseIcon());
-		trtmNewTreeitem_3.setText("images");
-		
-		TreeItem trtmdThg = new TreeItem(trtmNewTreeitem_3, SWT.NONE);
-		trtmdThg.setImage(ViewProperties.getImageIconA());
-		trtmdThg.setText("3D THG");
-		trtmNewTreeitem_3.setExpanded(true);
-		trtmNewTreeitem.setExpanded(true);
-		scrolledComposite.setContent(tree);
-		scrolledComposite.setMinSize(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		// Could not load user's treeview, use default treeview.
+        if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
 		
 		contentArea = new Composite(sashForm_1, SWT.BORDER);
 		contentArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
@@ -1116,7 +1078,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		attributeArea = new Text(tabFolder, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		attributeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-		attributeArea.setText("/ (928)\n    Group size = 4\n    Number of attributes = 1\n        test = this is a test");
 		attributeArea.setEditable(false);
 		tbtmNewItem.setControl(attributeArea);
 		sashForm.setWeights(new int[] {4, 1});
@@ -1160,7 +1121,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 		Button okButton = new Button(buttonComposite, SWT.PUSH);
 		okButton.setText("OK");
 		okButton.addSelectionListener(new SelectionAdapter() {
-			
 			public void widgetSelected(SelectionEvent e) {
 				dialog.dispose();
 			}
@@ -1168,7 +1128,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				
 			}
-		
 		});
 		dialog.setDefaultButton(okButton);
 		
@@ -1184,9 +1143,95 @@ public class HDFView implements ViewManager, DropTargetListener {
 	}
 	
 	private void registerFileFormat() {
-		
+		String msg = "Register a new file format by \nKEY:FILE_FORMAT:FILE_EXTENSION\n"
+            + "where, KEY: the unique identifier for the file format"
+            + "\n           FILE_FORMAT: the full class name of the file format"
+            + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
+            + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
+            + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
+		//String str = (String) JOptionPane.showInputDialog(this, msg, "Register a file format",
+        //    JOptionPane.PLAIN_MESSAGE, ViewProperties.getLargeHdfIcon(), null, null);
+    	//if ((str == null) || (str.length() < 1)) {
+        //	return;
+    	//}
+
+    	//int idx1 = str.indexOf(':');
+    	//int idx2 = str.lastIndexOf(':');
+
+    	//if ((idx1 < 0) || (idx2 <= idx1)) {
+    	//	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+    	//	error.setText("Register File Format");
+    	//	error.setMessage("Failed to register " + str
+        //       	+ "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION");
+    	//	error.open();
+        //	return;
+    	//}
+
+    	//String key = str.substring(0, idx1);
+    	//String className = str.substring(idx1 + 1, idx2);
+    	//String extension = str.substring(idx2 + 1);
+
+    	// check is the file format has been registered or the key is taken.
+    	String theKey = null;
+    	String theClassName = null;
+    	Enumeration<?> local_enum = FileFormat.getFileFormatKeys();
+    	while (local_enum.hasMoreElements()) {
+        	theKey = (String) local_enum.nextElement();
+        	//if (theKey.endsWith(key)) {
+        	//	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+        	//	error.setText("Register File Format");
+        	//	error.setMessage("Invalid key: " + key + " is taken.");
+        	//	error.open();
+            //	return;
+        	//}
+
+        	theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
+        	//if (theClassName.endsWith(className)) {
+        	//	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+        	//	error.setText("Register File Format");
+        	//	error.setMessage("The file format has already been registered: " + className);
+        	//	error.open();
+            //	return;
+        	//}
+    	}
+
+    	// enables use of JHDF5 in JNLP (Web Start) applications, the system
+    	// class loader with reflection first.
+    	Class<?> theClass = null;
+    	try {
+        	//theClass = Class.forName(className);
+    	}
+    	catch (Exception ex) {
+        	try {
+            	//theClass = ViewProperties.loadExtClass().loadClass(className);
+        	}
+        	catch (Exception ex2) {
+            	theClass = null;
+        	}
+    	}
+    	if (theClass == null) {
+    		return;
+    	}
+
+    	try {
+        	Object theObject = theClass.newInstance();
+        	if (theObject instanceof FileFormat) {
+        		//FileFormat.addFileFormat(key, (FileFormat) theObject);
+        	}
+    	}
+    	catch (Throwable ex) {
+        	//JOptionPane.showMessageDialog(this, "Failed to register " + str + "\n\n" + ex, "Register File Format",
+        	//	JOptionPane.ERROR_MESSAGE);
+        	return;
+    	}
+
+    	//if ((extension != null) && (extension.length() > 0)) {
+        //	extension = extension.trim();
+        //	String ext = ViewProperties.getFileExtension();
+        //	ext += ", " + extension;
+        //	ViewProperties.setFileExtension(ext);
+    	//}
 	}
-	
 	
 	private void unregisterFileFormat() {
 		/*
@@ -1207,6 +1252,32 @@ public class HDFView implements ViewManager, DropTargetListener {
 		FileFormat.removeFileFormat(theKey);
 		*/
 	}
+	
+    /**
+     * Returns a list of all open DataViews
+     */
+    public List<JInternalFrame> getDataViews() {
+        // check if the data content is already displayed
+        //JInternalFrame[] frames = contentPane.getAllFrames();
+
+        //if ((frames == null) || (frames.length <= 0)) {
+        //    return null;
+        //}
+
+        //Vector<JInternalFrame> views = new Vector<JInternalFrame>(frames.length);
+        //for (int i = 0; i < frames.length; i++) {
+        //    if (!(frames[i] instanceof DataView)) {
+        //        continue;
+        //    }
+        //    else {
+        //        views.add(frames[i]);
+        //    }
+        //}
+
+        //return views;
+        
+        return null; // Remove when finished
+    }
 	
 	/**
      * @return a list of treeview implementations.
@@ -1264,6 +1335,101 @@ public class HDFView implements ViewManager, DropTargetListener {
         message.append(msg);
         message.append("\n");
         statusArea.setText(message.toString());
+    }
+    
+    public void showMetaData(HObject obj) {
+        if (obj == null || currentFile == null) return;
+
+        log.trace("showMetaData: start");
+        metadata.setLength(0);
+        metadata.append(obj.getName());
+
+        String oidStr = null;
+        long[] OID = obj.getOID();
+        if (OID != null) {
+            oidStr = String.valueOf(OID[0]);
+            for (int i = 1; i < OID.length; i++) {
+                oidStr += ", " + OID[i];
+            }
+        }
+        metadata.append(" (");
+        metadata.append(oidStr);
+        metadata.append(")");
+
+        if (obj instanceof Group) {
+            log.trace("showMetaData: instanceof Group");
+            Group g = (Group) obj;
+            metadata.append("\n    Group size = ");
+            metadata.append(g.getMemberList().size());
+        }
+        else if (obj instanceof Dataset) {
+            log.trace("showMetaData: instanceof Dataset");
+            Dataset d = (Dataset) obj;
+            if (d.getRank() <= 0) {
+                d.init();
+            }
+            log.trace("showMetaData: inited");
+
+            metadata.append("\n    ");
+            if (d instanceof ScalarDS) {
+                Datatype dtype = d.getDatatype();
+                if (dtype != null) metadata.append(dtype.getDatatypeDescription());
+            }
+            else if (d instanceof CompoundDS) {
+                metadata.append("Compound/Vdata");
+            }
+            metadata.append(",    ");
+
+            long dims[] = d.getDims();
+
+            if (dims != null) {
+                metadata.append(dims[0]);
+                for (int i = 1; i < dims.length; i++) {
+                    metadata.append(" x ");
+                    metadata.append(dims[i]);
+                }
+            }
+        } // else if (obj instanceof Dataset)
+        else {
+            log.debug("obj not instanceof Group or Dataset");
+        }
+
+        List<?> attrList = null;
+        try {
+            log.trace("showMetaData: getMetadata");
+            attrList = obj.getMetadata();
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata failure: ", ex);
+        }
+
+        if (attrList == null) {
+            metadata.append("\n    Number of attributes = 0");
+        }
+        else {
+            int n = attrList.size();
+            log.trace("showMetaData: append {} attributes", n);
+            metadata.append("\n    Number of attributes = ");
+            metadata.append(n);
+
+            for (int i = 0; i < n; i++) {
+                log.trace("showMetaData: append Object[{}]", i);
+                Object attrObj = attrList.get(i);
+                if (!(attrObj instanceof Attribute)) {
+                    continue;
+                }
+                Attribute attr = (Attribute) attrObj;
+                metadata.append("\n        ");
+                metadata.append(attr.getName());
+                metadata.append(" = ");
+                metadata.append(attr.toString(","));
+                log.trace("showMetaData: append Object[{}]={}", i, attr.getName());
+            }
+        }
+
+        attributeArea.setText(metadata.toString());
+        //attributeArea.setCaretPosition(0);
+        log.trace("showMetaData: finish");
     }
     
     public void reloadFile() {
@@ -1613,6 +1779,47 @@ public class HDFView implements ViewManager, DropTargetListener {
     	return localFile;
     }
     
+    /** open file from SRB server */
+    private void openFromSRB() throws Exception {
+        if (ctrSrbFileDialog == null) {
+            Class<?> theClass = null;
+
+            try {
+                theClass = Class.forName("hdf.srb.SRBFileDialog");
+            }
+            catch (Exception ex) {
+                theClass = null;
+                showStatus(ex.toString());
+                throw (new ClassNotFoundException("Cannot find SRBFileDialog"));
+            }
+
+            try {
+                @SuppressWarnings("rawtypes")
+                Class[] paramClass = { Class.forName("java.awt.Frame") };
+                ctrSrbFileDialog = theClass.getConstructor(paramClass);
+            }
+            catch (Exception ex) {
+                ctrSrbFileDialog = null;
+                throw (new InstantiationException("Cannot construct SRBFileDialog"));
+            }
+        }
+
+        if (srbFileDialog == null) {
+            //try {
+            //    Object[] paramObj = { (java.awt.Frame) this };
+            //   srbFileDialog = (JDialog) ctrSrbFileDialog.newInstance(paramObj);
+            //}
+            //catch (Exception ex) {
+            //    throw ex;
+            //}
+        }
+        else {
+            //srbFileDialog.setVisible(true);
+        }
+
+        // currentFile = srbFileDialog.getName();
+    }
+    
     private void closeFile(FileFormat theFile) {
     	if (theFile == null) {
     		display.beep();
@@ -1695,6 +1902,41 @@ public class HDFView implements ViewManager, DropTargetListener {
     	error.open();
     }
     
+    private class LibraryVersionDialog extends Dialog {
+    	private String message;
+    	
+    	public LibraryVersionDialog(Shell parent, String version) {
+    		super(parent, SWT.APPLICATION_MODAL);
+    		this.message = version;
+    	}
+    	
+    	public String getMessage() {
+    		return message;
+    	}
+    	
+    	public void setMessage(String message) {
+    		this.message = message;
+    	}
+    	
+    	public void open() {
+    		Shell shell = new Shell(getParent(), getStyle());
+    		shell.setText(getText());
+    		createContents(shell);
+    		shell.pack();
+    		shell.open();
+    		Display display = getParent().getDisplay();
+    		while (!shell.isDisposed()) {
+    			if (!display.readAndDispatch()) {
+    				display.sleep();
+    			}
+    		}
+    	}
+    	
+    	private void createContents(final Shell shell) {
+    		
+    	}
+    }
+    
     /**
      * The starting point of this application.
      * 
@@ -1708,8 +1950,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      */
 	public static void main(String[] args) {
 		String rootDir = System.getProperty("hdfview.root");
-		if(rootDir == null)
-			rootDir = System.getProperty("user.dir");
+		if(rootDir == null) rootDir = System.getProperty("user.dir");
 		
 		File tmpFile = null;
 		int j = args.length;
@@ -1801,7 +2042,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 		display.syncExec(new Runnable() {
 			public void run() {
 				HDFView frame = new HDFView(display, the_rootDir, the_fList, the_W, the_H, the_X, the_Y);
-				//new HDFView(display, null, null, 600, 600, 0, 0);
 			}
 		});
 	}
