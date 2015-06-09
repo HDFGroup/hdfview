@@ -35,8 +35,9 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.swt.widgets.TreeItem;
+
 import javax.imageio.ImageIO;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -176,7 +177,7 @@ public final class Tools {
         if (thefile != null) {
             newfile = thefile.createInstance(hFileName, FileFormat.CREATE);
             newfile.open();
-            pgroup = (Group) ((DefaultMutableTreeNode) newfile.getRootNode()).getUserObject();
+            pgroup = (Group) ((TreeItem) newfile.getRootItem()).getData();
             type = newfile.createDatatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
             newfile.createImage(imgName, pgroup, type, dims, null, null, -1, 3, ScalarDS.INTERLACE_PIXEL, data);
             newfile.close();

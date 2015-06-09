@@ -187,9 +187,11 @@ public class DefaultTreeView implements TreeView {
         viewer = theView;
         
         // Initialize the tree and root item
-        tree = new Tree(parent, SWT.SINGLE | SWT.VIRTUAL);
+        tree = new Tree(parent, SWT.SINGLE | SWT.V_SCROLL);
 
         root = new TreeItem(tree, SWT.NONE);
+        
+        System.out.println(tree.getParent().toString());
         
             //private static final long serialVersionUID = -6829919815424470510L;
 
@@ -323,10 +325,6 @@ public class DefaultTreeView implements TreeView {
 
         // Create the popup menu displayed when tree items are right-clicked
         popupMenu = createPopupMenu();
-
-        // reset the scroll increment
-        // layout GUI component
-        // this.setLayout(new BorderLayout());
     }
 
     /**
@@ -340,7 +338,8 @@ public class DefaultTreeView implements TreeView {
     private void insertItem(TreeItem item, TreeItem pitem) {
         if ((item == null) || (pitem == null)) return;
 
-        //item = new TreeItem(tree);
+        TreeItem newItem = new TreeItem(pitem, SWT.NONE);
+        newItem.setData(item.getData());
         //tree.insertItemInto((TreeItem) item, (TreeItem) pitem, pitem.getItemCount());
     }
 
@@ -1297,10 +1296,8 @@ public class DefaultTreeView implements TreeView {
     private void removeItem(TreeItem item) {
         if (item == null) return;
         
-        TreeItem parentItem = (TreeItem) (item.getParentItem());
+        TreeItem parentItem = item.getParentItem();
         if (parentItem != null) {
-            // treeModel.removeNodeFromParent(item);
-
             // Add the two lines to fix bug in HDFView 1.2. Delete a subgroup
             // and then copy the group to another group, the deleted group still
             // exists.
@@ -1312,6 +1309,8 @@ public class DefaultTreeView implements TreeView {
                 selectedFile = null;
             }
         } // if (parentNode != null) {
+        
+        item.dispose();
     }
 
     private boolean isObjectOpen(HObject obj) {
@@ -1348,10 +1347,10 @@ public class DefaultTreeView implements TreeView {
 
     /**
      * Returns a list of all user objects that traverses the subtree rooted at
-     * this node in breadth-first order..
+     * this item in breadth-first order..
      * 
-     * @param node
-     *            the node to start with.
+     * @param item
+     *            the item to start with.
      */
     private final List<Object> breadthFirstUserObjects(TreeItem item) {
         if (item == null) return null;
@@ -1788,7 +1787,6 @@ public class DefaultTreeView implements TreeView {
             }
             else {
                 try {
-
                     FileFormat theformat = FileFormat.getFileFormat(theKey);
                     if (theformat.isThisType(filename)) {
                         fileFormat = theformat.createInstance(filename, accessID);
@@ -1800,10 +1798,10 @@ public class DefaultTreeView implements TreeView {
                 }
             }
         }
-
+        
         if (fileFormat == null) throw new java.io.IOException("Unsupported fileformat - " + filename);
 
-        ((JFrame) viewer).setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        //((JFrame) viewer).setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         try {
             fileFormat.setMaxMembers(ViewProperties.getMaxMembers());
             fileFormat.setStartMembers(ViewProperties.getStartMembers());
@@ -1823,14 +1821,16 @@ public class DefaultTreeView implements TreeView {
         	fileFormat = null;
         }
         finally {
-            ((JFrame) viewer).setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            //((JFrame) viewer).setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
 
         if (fileFormat == null) {
             throw new java.io.IOException("Failed to open file - " + filename);
         } 
         else  {
-            fileRoot = (TreeItem) fileFormat.getRootItem();
+            fileRoot = new TreeItem(tree, SWT.NONE, 0);
+            
+            fileFormat.getRootItem();
             if (fileRoot != null) {
                 insertItem(fileRoot, root);
 
@@ -1840,7 +1840,7 @@ public class DefaultTreeView implements TreeView {
                 //}
 
                 fileList.add(fileFormat);
-            }       	
+            }
         }
 
         return fileFormat;

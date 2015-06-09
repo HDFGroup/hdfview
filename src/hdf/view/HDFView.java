@@ -1631,8 +1631,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	
     	if (filename != null) {
     		File file = new File(filename);
-    		if (file == null)
-    			return;
+    		if (file == null) return;
     		
     		currentFile = filename;
     	} else {
@@ -1641,8 +1640,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	
     	
     		File chosenFile = new File(fChooser.open());
-    		if (chosenFile == null)
-    			return;
+    		if (chosenFile == null) return;
     	
     		if (chosenFile.isDirectory()) {
     			currentDir = chosenFile.getPath();

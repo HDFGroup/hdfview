@@ -16,6 +16,7 @@ package hdf.view;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.TreeItem;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -90,7 +91,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.NumberFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 import hdf.object.Datatype;
 import hdf.object.Group;
@@ -1494,7 +1494,7 @@ ActionListener {
 				//TreeNode node = treeView.findTreeNode(dataset);
 				//Group pGroup = (Group) ((DefaultMutableTreeNode) node
 				//		.getParent()).getUserObject();
-				TreeNode root = dataset.getFileFormat().getRootNode();
+				TreeItem root = dataset.getFileFormat().getRootItem();
 
 				if (root == null) {
 					return;
@@ -1503,8 +1503,7 @@ ActionListener {
 				Vector list = new Vector(dataset.getFileFormat()
 						.getNumberOfMembers() + 5);
 				DefaultMutableTreeNode theNode = null;
-				Enumeration local_enum = ((DefaultMutableTreeNode) root)
-				.depthFirstEnumeration();
+				Enumeration local_enum = ((TreeItem) root).depthFirstEnumeration();
 
 				while (local_enum.hasMoreElements()) {
 					theNode = (DefaultMutableTreeNode) local_enum.nextElement();
