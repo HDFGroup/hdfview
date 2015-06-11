@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.eclipse.swt.widgets.TreeItem;
-
 /**
  * FileFormat defines general interfaces for working with files whose data is
  * organized according to a supported format.
@@ -936,9 +934,9 @@ public abstract class FileFormat extends File {
      */
     public final int getNumberOfMembers() {
         int n_members = 0;
-        TreeItem rootItem = getRootItem();
+        HObject rootObject = getRootObject();
 
-        if (rootItem != null) {
+        if (rootObject != null) {
             //Enumeration local_enum = ((TreeItem) rootItem).depthFirstEnumeration();
 
             //while (local_enum.hasMoreElements()) {
@@ -946,6 +944,7 @@ public abstract class FileFormat extends File {
             //    n_members++;
             //}
         }
+        
         return n_members;
     }
 
@@ -1002,11 +1001,10 @@ public abstract class FileFormat extends File {
     // Can we doc exceptions better or in implementation methods?
 
     /**
-     * Returns the root item for the file associated with this instance.
+     * Returns the root object for the file associated with this instance.
      * <p>
-     * The root item is a Java TreeItem object
-     * (org.eclipse.swt.widgets.TreeItem) that represents the root group
-     * of a file. If the file has not yet been opened, or if there is no file
+     * The root item is an HObject that represents the root group of a
+     * file. If the file has not yet been opened, or if there is no file
      * associated with this instance, <code>null</code> will be returned.
      * <p>
      * Starting from the root, applications can descend through the tree
@@ -1014,12 +1012,12 @@ public abstract class FileFormat extends File {
      * internal items represent non-empty groups. Leaf items represent datasets,
      * named datatypes, or empty groups.
      * 
-     * @return The root item of the file, or <code>null</code> if there is no
+     * @return The root object of the file, or <code>null</code> if there is no
      *         associated file or if the associated file has not yet been
      *         opened.
      * @see #open()
      */
-    public abstract TreeItem getRootItem();
+    public abstract HObject getRootObject();
 
     /**
      * Gets the HObject with the specified path from the file.
@@ -1599,7 +1597,7 @@ public abstract class FileFormat extends File {
      *             SRC.copy not DEST.copy. Also what is returned on failure.
      *             ALSO exceptions. ALSO, does it copy data or just structure?
      */
-    public abstract TreeItem copy(HObject srcObj, Group dstGroup, String dstName) throws Exception;
+    public abstract HObject copy(HObject srcObj, Group dstGroup, String dstName) throws Exception;
 
     // REVIEW DOCS for copy().
     // CONFIRM USE SRC.copy not DEST.copy. Also what is returned on
@@ -1698,7 +1696,7 @@ public abstract class FileFormat extends File {
      *             parameter.
      */
     @Deprecated
-    public final TreeItem copy(HObject srcObj, Group dstGroup) throws Exception {
+    public final HObject copy(HObject srcObj, Group dstGroup) throws Exception {
         return copy(srcObj, dstGroup, null);
     }
 
@@ -1801,9 +1799,9 @@ public abstract class FileFormat extends File {
         }
 
         HObject theObj = null;
-        TreeItem theItem = null;
+        HObject theItem = null;
 
-        TreeItem theRoot = (TreeItem) file.getRootItem();
+        HObject theRoot = file.getRootObject();
         if (theRoot == null) {
             return null;
         }
@@ -1838,17 +1836,17 @@ public abstract class FileFormat extends File {
             path = path + "/";
         }
 
-        TreeItem theRoot = file.getRootItem();
+        HObject theRoot = file.getRootObject();
 
         if (theRoot == null) {
             return null;
         }
         else if (path.equals("/")) {
-            return (HObject) theRoot.getData();
+            return theRoot;
         }
 
         //Enumeration local_enum = (theRoot).breadthFirstEnumeration();
-        TreeItem theItem = null;
+        HObject theItem = null;
         HObject theObj = null;
         //while (local_enum.hasMoreElements()) {
         //    theItem = (TreeItem) local_enum.nextElement();

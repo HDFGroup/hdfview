@@ -35,6 +35,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.swt.dnd.*;
 
@@ -152,11 +153,14 @@ public class HDFView implements ViewManager, DropTargetListener {
 	/* GUI component: Container for the button toolbar and url toolbar */
 	private Composite 				toolbarContainer;
 	
-	/* GUI component: Area to display data content */
+	/* GUI component: Area to hold file structure tree and data content pane */
 	private Composite				contentArea;
 	
+	/* GUI component: Area where data view windows are shown */
+	private Composite				dataArea;
+	
 	/* GUI component: The text area for showing status messages */
-	private Text					statusArea;
+	private Text    				status;
 	
 	/* GUI component: The text area for quick attribute view */
 	private Text					attributeArea;
@@ -194,7 +198,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		rootDir = root;
 		currentFile = null;
-		//frameOffset = 0;
+		frameOffset = 0;
 		//userOptionsDialog = null;
 		//ctrSrbFileDialog = null;
 		
@@ -214,8 +218,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		// recentFiles = ViewProperties.getMRF();
 		currentDir = ViewProperties.getWorkDir();
-		if (currentDir == null)
-		   currentDir = System.getProperty("user.home");
+		if (currentDir == null) currentDir = System.getProperty("user.home");
 		
 		log.info("Current directory is {}", currentDir);
 		
@@ -336,7 +339,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 		try {
 			props.save();
 		} catch (Exception ex) {
-			
 		}
 		
 		// Close all open files
@@ -355,7 +357,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 				}
 			}
 		} catch (Exception ex) {
-			
 		}
 		
 		display.dispose();
@@ -479,9 +480,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h4GUIs.add(menuItem_5);
 		menuItem_5.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				NewFileDialog dialog = new NewFileDialog(null, currentDir, FileFormat.FILE_TYPE_HDF4, treeView.getCurrentFiles());
-				dialog.setName("newfiledialog");
-				String filename = dialog.getFile();
+				NewFileDialog dialog = new NewFileDialog(mainWindow, currentDir, FileFormat.FILE_TYPE_HDF4, treeView.getCurrentFiles());
+				String filename = dialog.open();
 				
 				if(!dialog.isFileCreated() || filename == null)
 					return;
@@ -499,10 +499,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 					}
 				} catch (Exception ex) {
 					display.beep();
-					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-					error.setText(mainWindow.getText());
-					error.setMessage(ex.getMessage() + "\n" + filename);
-					error.open();
+					showError(ex.getMessage() + "\n" + filename, null);
 				}
 			}
 		});
@@ -512,9 +509,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h5GUIs.add(menuItem_6);
 		menuItem_6.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				NewFileDialog dialog = new NewFileDialog(null, currentDir, FileFormat.FILE_TYPE_HDF5, treeView.getCurrentFiles());
-				dialog.setName("newfiledialog");
-				String filename = dialog.getFile();
+				NewFileDialog dialog = new NewFileDialog(mainWindow, currentDir, FileFormat.FILE_TYPE_HDF5, treeView.getCurrentFiles());
+				String filename = dialog.open();
 				
 				if(!dialog.isFileCreated() || filename == null)
 					return;
@@ -532,10 +528,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 					}
 				} catch (Exception ex) {
 					display.beep();
-					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-					error.setText(mainWindow.getText());
-					error.setMessage(ex.getMessage() + "\n" + filename);
-					error.open();
+					showError(ex.getMessage() + "\n" + filename, null);
 				}
 			}
 		});
@@ -1029,49 +1022,50 @@ public class HDFView implements ViewManager, DropTargetListener {
 	}
 	
 	private void createContentArea() {
-		Composite content = new Composite(mainWindow, SWT.NONE);
-		content.setLayoutData(BorderLayout.CENTER);
-		content.setLayout(new FillLayout(SWT.HORIZONTAL));
+		//Composite content = new Composite(mainWindow, SWT.NONE);
+		//content.setLayoutData(BorderLayout.CENTER);
+		//content.setLayout(new FillLayout(SWT.HORIZONTAL));
 		
-		SashForm sashForm = new SashForm(content, SWT.VERTICAL);
-		sashForm.setSashWidth(10);
+		SashForm content = new SashForm(mainWindow, SWT.VERTICAL);
+		content.setSashWidth(10);
 		
-		Composite data = new Composite(sashForm, SWT.NONE);
-		data.setLayout(new FillLayout(SWT.HORIZONTAL));
-		
-		SashForm sashForm_1 = new SashForm(data, SWT.NONE);
-		sashForm_1.setSashWidth(10);
-		
-		ScrolledComposite treeArea = new ScrolledComposite(sashForm_1, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		// Add Data content area and Status Area to main window
+		SashForm contentArea = new SashForm(content, SWT.HORIZONTAL);
+	    contentArea.setSashWidth(10);
+	    
+	    Composite statusArea = new Composite(content, SWT.NONE);
+	    statusArea.setLayout(new FillLayout(SWT.HORIZONTAL));
+	    
+	    // Add TreeView and DataView to content area pane
+		ScrolledComposite treeArea = new ScrolledComposite(contentArea, SWT.H_SCROLL | SWT.V_SCROLL);
+		treeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		treeArea.setExpandHorizontal(true);
 		treeArea.setExpandVertical(true);
 		
+		dataArea = new Composite(contentArea, SWT.NONE);
+		dataArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		
 		// Could not load user's treeview, use default treeview.
-        if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
+		if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
+		treeArea.setContent(treeView.getTree());
 		
-		contentArea = new Composite(sashForm_1, SWT.BORDER);
-		contentArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		sashForm_1.setWeights(new int[] {1, 1});
-		
-		Composite status = new Composite(sashForm, SWT.NONE);
-		status.setLayout(new FillLayout(SWT.HORIZONTAL));
-		
-		CTabFolder tabFolder = new CTabFolder(status, SWT.BORDER | SWT.FLAT);
+        // Create status area for displaying messages and metadata
+        CTabFolder tabFolder = new CTabFolder(statusArea, SWT.BORDER | SWT.FLAT);
 		tabFolder.setTabPosition(SWT.BOTTOM);
 		tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		CTabItem tbtmLogInfo = new CTabItem(tabFolder, SWT.NONE);
 		tbtmLogInfo.setText("Log Info");
 		
-		statusArea = new Text(tabFolder, SWT.V_SCROLL | SWT.MULTI);
-		statusArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-		statusArea.setEditable(false);
+		status = new Text(tabFolder, SWT.V_SCROLL | SWT.MULTI);
+		status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+		status.setEditable(false);
 		message = new StringBuffer();
 		metadata = new StringBuffer();
 		showStatus("HDFView root - " + rootDir);
 		showStatus("User property file - " + ViewProperties.getPropertyFile());
 		
-		tbtmLogInfo.setControl(statusArea);
+		tbtmLogInfo.setControl(status);
 		
 		CTabItem tbtmNewItem = new CTabItem(tabFolder, SWT.NONE);
 		tbtmNewItem.setText("Metadata");
@@ -1080,14 +1074,12 @@ public class HDFView implements ViewManager, DropTargetListener {
 		attributeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		attributeArea.setEditable(false);
 		tbtmNewItem.setControl(attributeArea);
-		sashForm.setWeights(new int[] {4, 1});
 		
 		// Set Log Info to show first in status area
 		tabFolder.setSelection(0);
-	}
-	
-	private void createStatusArea() {
 		
+		content.setWeights(new int[] {4, 1});
+		contentArea.setWeights(new int[] {1, 1});
 	}
 	
 	private void hdfLibraryVersionInfo(final String version) {
@@ -1256,27 +1248,17 @@ public class HDFView implements ViewManager, DropTargetListener {
     /**
      * Returns a list of all open DataViews
      */
-    public List<JInternalFrame> getDataViews() {
-        // check if the data content is already displayed
-        //JInternalFrame[] frames = contentPane.getAllFrames();
+    public List<Shell> getDataViews() {
+        Shell[] openShells = mainWindow.getShells();
+        if ((openShells == null) || (openShells.length <= 0)) return null;
 
-        //if ((frames == null) || (frames.length <= 0)) {
-        //    return null;
-        //}
+        Vector<Shell> views = new Vector<Shell>(openShells.length);
+        for (int i = 0; i < openShells.length; i++) {
+        	if (openShells[i] instanceof DataView)
+        		views.add(openShells[i]);
+        }
 
-        //Vector<JInternalFrame> views = new Vector<JInternalFrame>(frames.length);
-        //for (int i = 0; i < frames.length; i++) {
-        //    if (!(frames[i] instanceof DataView)) {
-        //        continue;
-        //    }
-        //    else {
-        //        views.add(frames[i]);
-        //    }
-        //}
-
-        //return views;
-        
-        return null; // Remove when finished
+        return views;
     }
 	
 	/**
@@ -1334,7 +1316,17 @@ public class HDFView implements ViewManager, DropTargetListener {
     public void showStatus(String msg) {
         message.append(msg);
         message.append("\n");
-        statusArea.setText(message.toString());
+        status.setText(message.toString());
+    }
+    
+    private void showError(String errorMsg, String title) {
+    	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
+    	if (title == null)
+    		error.setText(((Shell) mainWindow.getParent()).getText());
+    	else
+    		error.setText(title);
+    	error.setMessage(errorMsg);
+    	error.open();
     }
     
     public void showMetaData(HObject obj) {
@@ -1428,7 +1420,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
 
         attributeArea.setText(metadata.toString());
-        //attributeArea.setCaretPosition(0);
+        attributeArea.setSelection(0);
         log.trace("showMetaData: finish");
     }
     
@@ -1451,7 +1443,6 @@ public class HDFView implements ViewManager, DropTargetListener {
     	try {
     		treeView.reopenFile(theFile);
     	} catch (Exception ex) {
-    		
     	}
     }
     
@@ -1496,8 +1487,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      * Set default UI fonts.
      */
     private void updateFontSize(Font font) {
-    	if (font == null)
-    		return;
+    	if (font == null) return;
     	
     	/*
     	UIDefaults defaults = UIManager.getLookAndFeelDefaults();
@@ -1522,8 +1512,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      */
     private void showWindow(final Shell shell) {
     	// Return if main window (shell) is the only open shell
-    	if (display.getShells().length <= 1)
-    		return;
+    	if (mainWindow.getShells().length < 1) return;
     	
     	shell.getDisplay().asyncExec(new Runnable() {
     		public void run() {
@@ -1536,16 +1525,14 @@ public class HDFView implements ViewManager, DropTargetListener {
      * Cascade all windows.
      */
     private void cascadeWindows() {
-    	int x = 2, y = 2;
-    	Shell shell = null;
-    	Shell[] sList = display.getShells();
+    	Shell[] sList = mainWindow.getShells();
     	
     	// Return if main window (shell) is the only open shell
-    	// or if no shells are open
-    	if ((sList == null) || (sList.length <= 1))
-    		return;
+    	if (sList.length < 1) return;
     	
-    	Point p = contentArea.getSize();
+    	int x = 2, y = 2;
+    	Shell shell = null;    	
+    	Point p = dataArea.getSize();
     	int w = Math.max(50, p.x - 100);
     	int h = Math.max(50, p.y - 100);
     	
@@ -1562,14 +1549,13 @@ public class HDFView implements ViewManager, DropTargetListener {
      * Tile all windows.
      */
     private void tileWindows() {
-    	int x = 0, y = 0, idx = 0;
-    	Shell shell = null;
-    	Shell[] sList = display.getShells();
+    	Shell[] sList = mainWindow.getShells();
     	
     	// Return if main window (shell) is the only open shell
-    	// or if no shells are open
-    	if ((sList == null) || (sList.length <= 1))
-    		return;
+    	if (sList.length < 1) return;
+    	
+    	int x = 0, y = 0, idx = 0;
+    	Shell shell = null;
     	
     	int n = sList.length;
     	int cols = (int) Math.sqrt(n);
@@ -1600,14 +1586,12 @@ public class HDFView implements ViewManager, DropTargetListener {
      * Closes all windows.
      */
     private void closeAllWindows() {
-    	Shell shell = null;
-    	Shell[] sList = display.getShells();
+    	Shell[] sList = mainWindow.getShells();
     	
     	// Return if main window (shell) is the only open shell
-    	// or if no shells are open
-    	if ((sList == null) | (sList.length <= 1))
-    		return;
+    	if (sList.length < 1) return;
     	
+    	Shell shell = null;
     	for (int i = 0; i < sList.length; i++) {
     		shell = sList[i];
     		shell.dispose();
@@ -1638,7 +1622,6 @@ public class HDFView implements ViewManager, DropTargetListener {
     		FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN);
     		//fChooser.setFilterExtensions();
     	
-    	
     		File chosenFile = new File(fChooser.open());
     		if (chosenFile == null) return;
     	
@@ -1660,21 +1643,17 @@ public class HDFView implements ViewManager, DropTargetListener {
     	}
     	
     	try {
-    		treeView.openFile(currentFile, accessMode + FileFormat.OPEN_NEW);
+    		treeView.openFile(currentFile, accessMode + FileFormat.READ);
     	}
     	catch (Throwable ex) {
     		try {
-    			treeView.openFile(currentFile, FileFormat.READ);
+    			treeView.openFile(currentFile, FileFormat.OPEN_NEW);
     		}
     		catch (Throwable ex2) {
-    			String msg = "Failed to open file " + currentFile + "\n" + ex2;
     			display.beep();
-    			currentFile = null;
     			url_bar.deselectAll();
-    			MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-    			error.setText(mainWindow.getText());
-    			error.setMessage(msg);
-    			error.open();
+    			showError("Failed to open file " + currentFile + "\n" + ex2, null);
+    			currentFile = null;
     		}
     	}
     }
@@ -1718,10 +1697,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	} catch (Exception ex) {
     		url = null;
     		display.beep();
-    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-    		error.setText(mainWindow.getText());
-    		error.setMessage(ex.getMessage());
-    		error.open();
+    		showError(ex.getMessage(), null)
     		return null;
     	}
     	
@@ -1734,10 +1710,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	} catch (Exception ex) {
     		in = null;
     		display.beep();
-    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-    		error.setText(mainWindow.getText());
-    		error.setMessage(ex.getMessage());
-    		error.open();
+    		showError(ex.getMessage(), null);
     		
     		try {
     			out.close();
@@ -1777,7 +1750,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	return localFile;
     }
     
-    /** open file from SRB server */
+    /** Open file from SRB server */
     private void openFromSRB() throws Exception {
         if (ctrSrbFileDialog == null) {
             Class<?> theClass = null;
@@ -1821,29 +1794,25 @@ public class HDFView implements ViewManager, DropTargetListener {
     private void closeFile(FileFormat theFile) {
     	if (theFile == null) {
     		display.beep();
-    		MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-    		error.setText(mainWindow.getText());
-    		error.setMessage("Select a file to close");
-    		error.open();
+    		showError("Select a file to close", null);
     		return;
     	}
     	
     	// Close all the data windows of this file
-    	/*JInternalFrame[] frames = contentPane.getAllFrames();
-        if (frames != null) {
-            for (int i = 0; i < frames.length; i++) {
-                HObject obj = (HObject) (((DataView) frames[i]).getDataObject());
+    	Shell[] views = mainWindow.getShells();
+        if (views != null) {
+            for (int i = 0; i < views.length; i++) {
+                HObject obj = (HObject) (((DataView) views[i]).getDataObject());
                 if (obj == null) {
                     continue;
                 }
 
                 if (obj.getFileFormat().equals(theFile)) {
-                    frames[i].dispose();
-                    frames[i] = null;
+                    views[i].dispose();
+                    views[i] = null;
                 }
             }
         }
-        */
     	
     	String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
     	if (theFile.getFilePath().equals(fName)) {
@@ -1853,8 +1822,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	
     	try {
     		treeView.closeFile(theFile);
-    	} catch (Exception ex) {
-    		
+    	} catch (Exception ex) {	
     	}
     	
     	theFile = null;
@@ -1871,8 +1839,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     		String filename = dialog.getConvertedFile();
     		File theFile = new File(filename);
     		
-    		if (!theFile.exists())
-    			return;
+    		if (!theFile.exists()) return;
     			
     		currentDir = theFile.getParentFile().getAbsolutePath();
     		currentFile = theFile.getAbsolutePath();
@@ -1885,7 +1852,6 @@ public class HDFView implements ViewManager, DropTargetListener {
     				url_bar.add(filename, 0);
     				url_bar.select(0);
     			} catch (Exception ex) {
-    				
     			}
     		} catch (Exception ex) {
     			showStatus(ex.toString());
@@ -1894,10 +1860,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
     
     private void notYetImplemented() {
-    	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-    	error.setText(mainWindow.getText());
-    	error.setMessage("Functionality not yet implemented.");
-    	error.open();
+    	showError("Functionality not yet implemented.", null);
     }
     
     private class LibraryVersionDialog extends Dialog {

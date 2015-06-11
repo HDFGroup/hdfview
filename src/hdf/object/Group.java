@@ -18,8 +18,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.swt.widgets.TreeItem;
-
 /**
  * Group is an abstract class. Current implementing classes are the H4Group and
  * H5Group. This class includes general information of a group object such as
@@ -172,7 +170,7 @@ public abstract class Group extends HObject {
                 ;
             }
 
-            TreeItem root = (TreeItem) theFile.getRootItem();
+            HObject root = theFile.getRootObject();
             if (root == null) return memberList;
 
             //Enumeration<?> emu = root.depthFirstEnumeration();

@@ -177,7 +177,7 @@ public final class Tools {
         if (thefile != null) {
             newfile = thefile.createInstance(hFileName, FileFormat.CREATE);
             newfile.open();
-            pgroup = (Group) ((TreeItem) newfile.getRootItem()).getData();
+            pgroup = (Group) newfile.getRootObject();
             type = newfile.createDatatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
             newfile.createImage(imgName, pgroup, type, dims, null, null, -1, 3, ScalarDS.INTERLACE_PIXEL, data);
             newfile.close();

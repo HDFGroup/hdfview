@@ -1494,7 +1494,7 @@ ActionListener {
 				//TreeNode node = treeView.findTreeNode(dataset);
 				//Group pGroup = (Group) ((DefaultMutableTreeNode) node
 				//		.getParent()).getUserObject();
-				TreeItem root = dataset.getFileFormat().getRootItem();
+				HObject root = dataset.getFileFormat().getRootObject();
 
 				if (root == null) {
 					return;
@@ -1503,7 +1503,7 @@ ActionListener {
 				Vector list = new Vector(dataset.getFileFormat()
 						.getNumberOfMembers() + 5);
 				DefaultMutableTreeNode theNode = null;
-				Enumeration local_enum = ((TreeItem) root).depthFirstEnumeration();
+				Enumeration local_enum = root.depthFirstEnumeration();
 
 				while (local_enum.hasMoreElements()) {
 					theNode = (DefaultMutableTreeNode) local_enum.nextElement();

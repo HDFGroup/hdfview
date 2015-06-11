@@ -14,13 +14,6 @@
 
 package hdf.view;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -41,33 +34,9 @@ import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
 import javax.print.StreamPrintServiceFactory;
-import javax.swing.CellEditor;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+
+import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.SWT;
 
 import hdf.object.Dataset;
 import hdf.object.FileFormat;
@@ -80,8 +49,7 @@ import hdf.object.ScalarDS;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class DefaultTextView extends JInternalFrame implements TextView,
-        ActionListener, KeyListener {
+public class DefaultTextView extends Shell implements TextView {
     private static final long serialVersionUID = 3892752752951438428L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTextView.class);
@@ -102,7 +70,7 @@ public class DefaultTextView extends JInternalFrame implements TextView,
     private String[] text;
 
     /** The table to display the text content */
-    private JTable table;
+    private Table table;
 
     // Text areas to hold the text.
     // private JTextArea[] textAreas;

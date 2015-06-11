@@ -14,26 +14,6 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -67,50 +47,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.swing.border.Border;
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.CellEditor;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.WindowConstants;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.SWT;
 
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -129,11 +68,16 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class DefaultTableView extends JInternalFrame implements TableView, ActionListener, MouseListener {
+public class DefaultTableView extends Shell implements TableView {
     private static final long             serialVersionUID = -7452459299532863847L;
 
     private final static org.slf4j.Logger log              = org.slf4j.LoggerFactory.getLogger(DefaultTableView.class);
 
+    /**
+     * The shell to display the TableView in.
+     */
+    private final Shell 				  shell;
+    
     /**
      * The main HDFView.
      */
@@ -158,17 +102,15 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     /**
      * The table used to hold the table data.
      */
-    private JTable                        table;
+    private Table                         table;
 
     /** Label to indicate the current cell location. */
-    private JLabel                        cellLabel;
+    private Label                         cellLabel;
 
-    /** Text field to display the value of of the current cell. */
-    private JTextArea                     cellValueField;
+    /** Text field to display the value of the current cell. */
+    private Text                          cellValueField;
 
     private boolean                       isValueChanged;
-
-    private final Toolkit                 toolkit;
 
     private boolean                       isReadOnly;
 
@@ -179,12 +121,12 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     private boolean                       isRegRef;
     private boolean                       isObjRef;
 
-    private final JCheckBoxMenuItem       checkFixedDataLength;
+    private final Button                  checkFixedDataLength;
     private int                           fixedDataLength;
-    private final JCheckBoxMenuItem       checkCustomNotation;
-    private final JCheckBoxMenuItem       checkScientificNotation;
-    private final JCheckBoxMenuItem       checkHex;
-    private final JCheckBoxMenuItem       checkBin;
+    private final Button                  checkCustomNotation;
+    private final Button                  checkScientificNotation;
+    private final Button                  checkHex;
+    private final Button                  checkBin;
 
     // changed to use normalized scientific notation (1 <= coefficient < 10).
     // private final DecimalFormat scientificFormat = new DecimalFormat("###.#####E0#");
@@ -194,7 +136,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     private NumberFormat                  numberFormat     = normalFormat;
     private boolean                       showAsHex        = false, showAsBin = false;
     private final boolean                 startEditing[]   = { false };
-    private JPopupMenu                    popupMenu;
+    private Menu                          popupMenu;
 
     private enum ViewType {
         TABLE, IMAGE, TEXT
@@ -202,7 +144,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
 
     private ViewType         viewType;
 
-    private JTextField       frameField;
+    private Text             frameField;
 
     private long             curFrame                = 0;
     private long             maxFrame                = 1;
@@ -258,11 +200,9 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     public DefaultTableView(ViewManager theView, HashMap map) {
         super();
 
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         log.trace("DefaultTableView start");
 
         viewer = theView;
-        toolkit = Toolkit.getDefaultToolkit();
         isValueChanged = false;
         isReadOnly = false;
         isRegRef = false;
@@ -276,11 +216,16 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         if (ViewProperties.isIndexBase1()) indexBase = 1;
         log.trace("isIndexBase1() is {}", indexBase);
 
-        checkFixedDataLength = new JCheckBoxMenuItem("Fixed Data Length", false);
-        checkCustomNotation = new JCheckBoxMenuItem("Show Custom Notation", false);
-        checkScientificNotation = new JCheckBoxMenuItem("Show Scientific Notation", false);
-        checkHex = new JCheckBoxMenuItem("Show Hexadecimal", false);
-        checkBin = new JCheckBoxMenuItem("Show Binary", false);
+        checkFixedDataLength = new Button(shell, SWT.CHECK);
+        checkFixedDataLength.setText("Fixed Data Length");
+        checkCustomNotation = new Button(shell, SWT.CHECK);
+        checkCustomNotation.setText("Show Custom Notation");
+        checkScientificNotation = new Button(shell, SWT.CHECK);
+        checkScientificNotation.setText("Show Scientific Notation");
+        checkHex = new Button(shell, SWT.CHECK);
+        checkHex.setText("Show Hexadecimal");
+        checkBin = new Button(shell, SWT.CHECK);
+        checkBin.setText("Show Binary");
 
         if (map != null) {
             hobject = (HObject) map.get(ViewProperties.DATA_VIEW_KEY.OBJECT);
@@ -375,10 +320,10 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             }
             else if ((dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) || (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE)) {
                 showAsHex = true;
-                checkHex.setSelected(true);
-                checkScientificNotation.setSelected(false);
-                checkCustomNotation.setSelected(false);
-                checkBin.setSelected(false);
+                checkHex.setSelection(true);
+                checkScientificNotation.setSelection(false);
+                checkCustomNotation.setSelection(false);
+                checkBin.setSelection(false);
                 showAsBin = false;
                 numberFormat = normalFormat;
             }
@@ -388,7 +333,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         if (table == null) {
             viewer.showStatus("Creating table failed - " + dataset.getName());
             dataset = null;
-            super.dispose();
+            this.dispose();
             return;
         }
         table.setName("data");
@@ -402,7 +347,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         table.setGridColor(Color.gray);
 
         // add the table to a scroller
-        JScrollPane scrollingTable = new JScrollPane(table);
+        ScrolledComposite scrollingTable = new ScrolledComposite(table);
         scrollingTable.getVerticalScrollBar().setUnitIncrement(100);
         scrollingTable.getHorizontalScrollBar().setUnitIncrement(100);
 
@@ -507,17 +452,17 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         log.trace("DefaultTableView finish");
    }
 
-    private JMenuBar createMenuBar ( ) {
-        JMenuBar bar = new JMenuBar();
-        JButton button;
+    private Menu createMenuBar() {
+        Menu menuBar = new Menu(shell);
+        Button button;
         boolean isEditable = !isReadOnly;
         boolean is3D = (dataset.getRank() > 2);
 
-        JMenu menu = new JMenu("Table", false);
-        menu.setMnemonic('T');
-        bar.add(menu);
+        Menu menu = new Menu("Table", false);
+        menu.setText("&Table");
+        bar.setMenu(menu);
 
-        JMenuItem item = new JMenuItem("Export Data to Text File");
+        MenuItem item = new MenuItem("Export Data to Text File");
         item.addActionListener(this);
         item.setActionCommand("Save table as text");
         menu.add(item);
@@ -1078,23 +1023,19 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing DataView.
-    //@Override
-    public HObject getDataObject ( ) {
+    public HObject getDataObject() {
         return dataset;
     }
 
-    @Override
-    public void dispose ( ) {
+    public void dispose() {
         if (isValueChanged && !isReadOnly) {
-            int op = JOptionPane.showConfirmDialog(this, "\"" + dataset.getName() + "\" has changed.\n"
-                    + "Do you want to save the changes?", getTitle(), JOptionPane.YES_NO_OPTION);
-
-            if (op == JOptionPane.YES_OPTION) {
+        	MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+        	confirm.setText(shell.getText());
+        	confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
+            if (confirm.open() == SWT.YES) {
                 updateValueInFile();
             }
-            else
-                dataset.clearData(); // reload data
-
+            else dataset.clearData(); // reload data
         }
 
         if (dataset instanceof ScalarDS) {
@@ -1117,7 +1058,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing DataObserver.
-    private void previousPage ( ) {
+    private void previousPage() {
         int rank = dataset.getRank();
 
         if (rank < 3) {
@@ -1136,7 +1077,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing DataObserver.
-    private void nextPage ( ) {
+    private void nextPage() {
         int rank = dataset.getRank();
 
         if (rank < 3) {
@@ -1155,7 +1096,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing DataObserver.
-    private void firstPage ( ) {
+    private void firstPage() {
         int rank = dataset.getRank();
 
         if (rank < 3) {
@@ -1174,7 +1115,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing DataObserver.
-    private void lastPage ( ) {
+    private void lastPage() {
         int rank = dataset.getRank();
 
         if (rank < 3) {
@@ -1193,19 +1134,18 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     // Implementing TableObserver.
-    //@Override
-    public JTable getTable ( ) {
+    public Table getTable() {
         return table;
     }
 
     // Implementing TableObserver.
-    private void showLineplot ( ) {
+    private void showLineplot() {
         int[] rows = table.getSelectedRows();
         int[] cols = table.getSelectedColumns();
 
         if ((rows == null) || (cols == null) || (rows.length <= 0) || (cols.length <= 0)) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Select rows/columns to draw line plot.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("Select rows/columns to draw line plot.");
             return;
         }
 
@@ -1281,10 +1221,12 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             title += " - by column";
             nLines = cols.length;
             if (nLines > 10) {
-                toolkit.beep();
+                Display.getCurrent().beep();
                 nLines = 10;
-                JOptionPane.showMessageDialog(this, "More than 10 columns are selected.\n"
-                        + "The first 10 columns will be displayed.", getTitle(), JOptionPane.WARNING_MESSAGE);
+                MessageBox warning = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                warning.setText(shell.getText());
+                warning.setMessage("More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
+                warning.open();
             }
             lineLabels = new String[nLines];
             data = new double[nLines][rows.length];
@@ -1341,10 +1283,9 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             yRange[0] -= 1;
         }
         else if (yRange[0] > yRange[1]) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this,
-                    "Cannot show line plot for the selected data. \n" + "Please check the data range: ("
-                            + yRange[0] + ", " + yRange[1] + ").", getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("Cannot show line plot for the selected data. \n" + "Please check the data range: ("
+                    + yRange[0] + ", " + yRange[1] + ").");
             data = null;
             return;
         }
@@ -1413,7 +1354,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
      * Returns the selected data values.
      */
     //@Override
-    public Object getSelectedData ( ) {
+    public Object getSelectedData() {
         if (dataset instanceof CompoundDS) {
             return getSelectedCompoundData();
         }
@@ -1425,7 +1366,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     /**
      * Returns the selected data values.
      */
-    private Object getSelectedScalarData ( ) {
+    private Object getSelectedScalarData() {
         Object selectedData = null;
 
         int[] selectedRows = table.getSelectedRows();
@@ -1474,8 +1415,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         }
 
         if (selectedData == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Unsupported data type.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("Unsupported data type.");
             return null;
         }
         log.trace("DefaultTableView getSelectedScalarData: selectedData is type {}", NT);
@@ -1517,8 +1458,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         int rows = table.getSelectedRowCount();
 
         if ((cols <= 0) || (rows <= 0)) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "No data is selected.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("No data is selected.");
             return null;
         }
 
@@ -1559,8 +1500,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             selectedData = new double[size];
         }
         else {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Unsupported data type.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("Unsupported data type.");
             return null;
         }
         log.trace("DefaultTableView getSelectedCompoundData: selectedData={}", selectedData);
@@ -1573,8 +1514,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     /**
      * Creates a JTable to hold a scalar dataset.
      */
-    private JTable createTable (ScalarDS d) {
-        JTable theTable = null;
+    private Table createTable (ScalarDS d) {
+        Table theTable = null;
         int rows = 0;
         int cols = 0;
 
@@ -1586,8 +1527,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
                 log.trace("createTable: d.inited");
             }
             catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, ex, "createTable:" + getTitle(), JOptionPane.ERROR_MESSAGE);
-                dataValue = null;
+            	showError(ex.getMessage(), "createTable:" + shell.getText());
+            	dataValue = null;
                 return null;
             }
 
@@ -1607,8 +1548,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         try {
             dataValue = d.getData();
             if (dataValue == null) {
-                JOptionPane.showMessageDialog(this, "No data read", "ScalarDS createTable:" + getTitle(),
-                        JOptionPane.WARNING_MESSAGE);
+            	showError("No data read", "ScalarDS createTable:" + shell.getText());
                 return null;
             }
 
@@ -1633,7 +1573,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             if (Array.getLength(dataValue) <= rows) cols = 1;
         }
         catch (Throwable ex) {
-            JOptionPane.showMessageDialog(this, ex, "ScalarDS createTable:" + getTitle(), JOptionPane.ERROR_MESSAGE);
+        	showError(ex.getMessage(), "ScalarDS createTable:" + getTitle());
             dataValue = null;
         }
 
@@ -2216,10 +2156,10 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     /**
-     * Creates a JTable to hold a compound dataset.
+     * Creates a Table to hold a compound dataset.
      */
-    private JTable createTable (CompoundDS d) {
-        JTable theTable = null;
+    private Table createTable (CompoundDS d) {
+        Table theTable = null;
         log.trace("createTable: CompoundDS start");
 
         int rank = d.getRank();
@@ -2243,8 +2183,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             dataValue = d.getData();
         }
         catch (Throwable ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex, "TableView" + getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError(ex.getMessage(), "TableView" + getTitle());
             dataValue = null;
         }
 
@@ -2545,9 +2485,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         long[] dims = dataset.getDims();
 
         if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Frame number must be between" + indexBase + " and "
-                    + (dims[selectedIndex[2]] - 1 + indexBase), getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("Frame number must be between" + indexBase + " and " + (dims[selectedIndex[2]] - 1 + indexBase), null);
             return;
         }
 
@@ -2567,7 +2506,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         catch (Exception ex) {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             dataValue = null;
-            JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
+            showError(ex.getMessage(), null);
             return;
         }
 
@@ -2577,8 +2516,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         updateUI();
     }
 
-    /** copy data from the spreadsheet to the system clipboard. */
-    private void copyData ( ) {
+    /** Copy data from the spreadsheet to the system clipboard. */
+    private void copyData() {
         StringBuffer sb = new StringBuffer();
 
         int r0 = table.getSelectedRow(); // starting row
@@ -2604,10 +2543,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             }
         }
         catch (java.lang.OutOfMemoryError err) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog((JFrame) viewer,
-                    "Copying data to system clipboard failed. \nUsing \"export/import data\" for copying/pasting large data.",
-                    getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("Copying data to system clipboard failed. \nUsing \"export/import data\" for copying/pasting large data.", null);
             return;
         }
 
@@ -2616,13 +2553,12 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         cb.setContents(contents, null);
     }
 
-    /** paste data from the system clipboard to the spreadsheet. */
-    private void pasteData ( ) {
-        int pasteDataFlag = JOptionPane.showConfirmDialog(this, "Do you want to paste selected data?", this.getTitle(),
-                JOptionPane.YES_NO_OPTION);
-        if (pasteDataFlag == JOptionPane.NO_OPTION) {
-            return;
-        }
+    /** Paste data from the system clipboard to the spreadsheet. */
+    private void pasteData() {
+    	MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+    	confirm.setText(shell.getText());
+    	confirm.setMessage("Do you want to paste selected data?");
+    	if (confirm.open() == SWT.NO) return;
 
         int cols = table.getColumnCount();
         int rows = table.getRowCount();
@@ -2682,22 +2618,22 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             }
         }
         catch (Throwable ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError(ex.getMessage(), null);
         }
 
         table.updateUI();
     }
 
     /**
-     * import data values from text file.
+     * Import data values from text file.
      */
     private void importTextData (String fname) {
-        int pasteDataFlag = JOptionPane.showConfirmDialog(this, "Do you want to paste selected data?", this.getTitle(),
-                JOptionPane.YES_NO_OPTION);
-        if (pasteDataFlag == JOptionPane.NO_OPTION) {
-            return;
-        }
+    	MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+    	confirm.setText(shell.getText());
+    	confirm.setMessage("Do you want to paste selected data?");
+    	if (confirm.open() == SWT.NO) return;
+    	
         int cols = table.getColumnCount();
         int rows = table.getRowCount();
         int r0 = table.getSelectedRow();
@@ -2801,8 +2737,9 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
                     } // while (tokenizer1.hasMoreTokens() && index < size)
                 }
                 catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
-                    try {
+                	showError(ex.getMessage(), null);
+                    
+                	try {
                         in.close();
                     }
                     catch (IOException ex2) {
@@ -2834,9 +2771,9 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     /**
-     * import data values from binary file.
+     * Import data values from binary file.
      */
-    private void importBinaryData ( ) {
+    private void importBinaryData() {
         String currentDir = dataset.getFileFormat().getParent();
         JFileChooser fchooser = new JFileChooser(currentDir);
         fchooser.setFileFilter(DefaultFileFilter.getFileFilterBinary());
@@ -2851,11 +2788,11 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         }
         String fname = choosedFile.getAbsolutePath();
 
-        int pasteDataFlag = JOptionPane.showConfirmDialog(this, "Do you want to paste selected data?", this.getTitle(),
-                JOptionPane.YES_NO_OPTION);
-        if (pasteDataFlag == JOptionPane.NO_OPTION) {
-            return;
-        }
+        
+        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+        confirm.setText(shell.getText());
+        confirm.setMessage("Do you want to paste selected data?");
+        if (confirm.open() == SWT.NO) return;
 
         getBinaryDatafromFile(fname);
     }
@@ -3103,7 +3040,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     /** Save data as text. */
-    private void saveAsText ( ) throws Exception {
+    private void saveAsText() throws Exception {
         final JFileChooser fchooser = new JFileChooser(dataset.getFile());
         fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
         // fchooser.changeToParentDirectory();
@@ -3133,20 +3070,18 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(fname)) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Unable to save data to file \"" + fname + "\". \nThe file is being used.",
-                            getTitle(), JOptionPane.ERROR_MESSAGE);
+                    Display.getCurrent().beep();
+                    showError("Unable to save data to file \"" + fname + "\". \nThe file is being used.", null);
                     return;
                 }
             }
         }
 
         if (choosedFile.exists()) {
-            int newFileFlag = JOptionPane.showConfirmDialog(this, "File exists. Do you want to replace it?", this.getTitle(),
-                    JOptionPane.YES_NO_OPTION);
-            if (newFileFlag == JOptionPane.NO_OPTION) {
-                return;
-            }
+        	MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+        	confirm.setText(shell.getText());
+        	confirm.setMessage("File exists. Do you want to replace it?");
+        	if (confirm.open() == SWT.NO) return;
         }
 
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(choosedFile)));
@@ -3193,7 +3128,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     /** Save data as binary. */
-    private void saveAsBinary ( ) throws Exception {
+    private void saveAsBinary() throws Exception {
         final JFileChooser fchooser = new JFileChooser(dataset.getFile());
         fchooser.setFileFilter(DefaultFileFilter.getFileFilterBinary());
         // fchooser.changeToParentDirectory();
@@ -3454,7 +3389,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
      * update dataset value in file. The change will go to file.
      */
     //@Override
-    public void updateValueInFile ( ) {
+    public void updateValueInFile() {
         log.trace("DefaultTableView updateValueInFile enter");
         if (isReadOnly || showAsBin || showAsHex) {
             return;
@@ -3469,8 +3404,8 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             dataset.write();
         }
         catch (Exception ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError(ex.getMessage(), null);
             return;
         }
 
@@ -3496,16 +3431,15 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
         int cols = table.getSelectedColumnCount();
         // if (!(dataset instanceof ScalarDS)) return;
         if ((dataset instanceof CompoundDS) && (cols > 1)) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Please select one colunm a time for math conversion for compound dataset.",
-                    getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("Please select one colunm a time for math conversion for compound dataset.", null);
             return;
         }
 
         Object theData = getSelectedData();
         if (theData == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "No data is selected.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            Display.getCurrent().beep();
+            showError("No data is selected.", null);
             return;
         }
 
@@ -3550,7 +3484,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     /**
-     * update cell value in memory. It does not change the dataset value in file.
+     * Update cell value in memory. It does not change the dataset value in file.
      * 
      * @param cellValue
      *            the string value of input.
@@ -3575,7 +3509,7 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     /**
-     * update cell value in memory. It does not change the dataset value in file.
+     * Update cell value in memory. It does not change the dataset value in file.
      * 
      * @param cellValue
      *            the string value of input.
@@ -4349,21 +4283,18 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
     }
 
     /** creates a popup menu for a right mouse click on a data object */
-    private JPopupMenu createPopupMenu ( ) {
-        JPopupMenu menu = new JPopupMenu();
-        JMenuItem item;
+    private Menu createPopupMenu() {
+        Menu menu = new Menu(SWT.POP_UP);
+        table.setMenu(menu);
+        MenuItem item;
 
-        item = new JMenuItem("Show As Table");
-        item.setMnemonic(KeyEvent.VK_T);
-        item.addActionListener(this);
+        item = new MenuItem(menu);
+        item.setText("Show As &Table");
         item.setActionCommand("Show data as table");
-        menu.add(item);
 
-        item = new JMenuItem("Show As Image");
-        item.setMnemonic(KeyEvent.VK_I);
-        item.addActionListener(this);
+        item = new MenuItem(menu);
+        item.setText("Show As &Image");
         item.setActionCommand("Show data as image");
-        menu.add(item);
 
         // item = new JMenuItem( "Show As Text");
         // item.setMnemonic(KeyEvent.VK_I);
@@ -4405,13 +4336,13 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             data = dset_copy.getData();
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex, "Object Reference:" + getTitle(), JOptionPane.ERROR_MESSAGE);
+        	showError(ex.getMessage(), "Object Reference:" + shell.getText());
             data = null;
         }
 
         if (data == null) return;
 
-        JInternalFrame dataView = null;
+        Shell dataView = null;
         HashMap map = new HashMap(1);
         map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
         switch (viewType) {
@@ -4567,10 +4498,10 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
                 dset_copy.getData();
             }
             catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, ex, "Region Reference:" + getTitle(), JOptionPane.ERROR_MESSAGE);
+            	showError(ex.getMessage(), "Region Reference:" + shell.getText());
             }
 
-            JInternalFrame dataView = null;
+            Shell dataView = null;
             HashMap map = new HashMap(1);
             map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
             switch (viewType) {
@@ -4592,4 +4523,14 @@ public class DefaultTableView extends JInternalFrame implements TableView, Actio
             log.trace("DefaultTableView showRegRefData: st.hasMoreTokens() end");
         } // while (st.hasMoreTokens())
     } // private void showRegRefData(String reg)
+    
+    private void showError(String errorMsg, String title) {
+    	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+    	if (title == null)
+    		error.setText(((Shell) shell.getParent()).getText());
+    	else
+    		error.setText(title);
+    	error.setMessage(errorMsg);
+    	error.open();
+    }
 }
