@@ -1322,7 +1322,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     private void showError(String errorMsg, String title) {
     	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
     	if (title == null)
-    		error.setText(((Shell) mainWindow.getParent()).getText());
+    		error.setText(mainWindow.getText());
     	else
     		error.setText(title);
     	error.setMessage(errorMsg);
@@ -1697,7 +1697,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	} catch (Exception ex) {
     		url = null;
     		display.beep();
-    		showError(ex.getMessage(), null)
+    		showError(ex.getMessage(), null);
     		return null;
     	}
     	
@@ -1814,11 +1814,11 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
     	
-    	String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
-    	if (theFile.getFilePath().equals(fName)) {
-    		currentFile = null;
-    		url_bar.clearSelection();
-    	}
+    	//String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
+    	//if (theFile.getFilePath().equals(fName)) {
+    	//	currentFile = null;
+    	//	url_bar.clearSelection();
+    	//}
     	
     	try {
     		treeView.closeFile(theFile);

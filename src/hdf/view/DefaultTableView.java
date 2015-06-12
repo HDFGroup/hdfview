@@ -132,7 +132,7 @@ public class DefaultTableView extends Shell implements TableView {
     // private final DecimalFormat scientificFormat = new DecimalFormat("###.#####E0#");
     private final DecimalFormat           scientificFormat = new DecimalFormat("0.0###E0###");
     private DecimalFormat                 customFormat     = new DecimalFormat("###.#####");
-    private final NumberFormat            normalFormat     = null;                                                     // NumberFormat.getInstance();
+    private final NumberFormat            normalFormat     = null;                           // NumberFormat.getInstance();
     private NumberFormat                  numberFormat     = normalFormat;
     private boolean                       showAsHex        = false, showAsBin = false;
     private final boolean                 startEditing[]   = { false };
@@ -4527,7 +4527,7 @@ public class DefaultTableView extends Shell implements TableView {
     private void showError(String errorMsg, String title) {
     	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
     	if (title == null)
-    		error.setText(((Shell) shell.getParent()).getText());
+    		error.setText(shell.getText());
     	else
     		error.setText(title);
     	error.setMessage(errorMsg);

@@ -94,15 +94,7 @@ public abstract interface TreeView {
      * @return the FileFormat of the selected file.
      */
     public abstract FileFormat getSelectedFile();
-
-    /**
-     * Gets a list of selected objects in the tree. Obtaining a list of current
-     * selected objects is necessary for copy/paste/delete objects.
-     * 
-     * @return a list of selected object in the tree.
-     */
-    public abstract List<?> getSelectedObjects();
-
+    
     /**
      * @return the current selected object in the tree.
      */

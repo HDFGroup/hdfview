@@ -32,6 +32,9 @@ import java.util.Vector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
 
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MenuAdapter;
@@ -77,9 +80,9 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
  * @version 2.4 9/6/2007
  */
 public class DefaultTreeView implements TreeView {
-    private static final long            serialVersionUID    = 4092566164712521186L;
+    private static final long             serialVersionUID    = 4092566164712521186L;
     
-    private Shell shell;
+    private Shell                         shell;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
 
@@ -117,52 +120,52 @@ public class DefaultTreeView implements TreeView {
     private HObject                       selectedObject;
 
     /** Flag to indicate if the dataset is displayed as default */
-    private boolean                      isDefaultDisplay;
+    private boolean                       isDefaultDisplay;
 
     /**
      * The popup menu used to display user choice of actions on data object.
      */
-    private final Menu             		 popupMenu;
+    private final Menu             		  popupMenu;
 
-    private MenuItem                     separator;
+    private MenuItem                      separator;
 
     /** A list of editing GUI components */
-    private List<MenuItem>               editGUIs;
+    private List<MenuItem>                editGUIs;
 
     /** The list of current selected objects */
-    private List<Object>                 objectsToCopy;
+    private TreeItem[]                    objectsToCopy;
 
-    private Menu                     	 exportDatasetMenu;
+    private Menu                     	  exportDatasetMenu;
     
-    private Menu					 	 newObjectMenu;
+    private Menu					 	  newObjectMenu;
     
-    private MenuItem                     addTableMenuItem;
+    private MenuItem                      addTableMenuItem;
 
-    private MenuItem                     addDatasetMenuItem;
+    private MenuItem                      addDatasetMenuItem;
 
-    private MenuItem                     addDatatypeMenuItem;
+    private MenuItem                      addDatatypeMenuItem;
 
-    private MenuItem                     addLinkMenuItem;
+    private MenuItem                      addLinkMenuItem;
 
-    private MenuItem                     setLibVerBoundsItem;
+    private MenuItem                      setLibVerBoundsItem;
 
-    private MenuItem                     changeIndexItem;
+    private MenuItem                      changeIndexItem;
 
-    private String                       currentSearchPhrase = null;
+    private String                        currentSearchPhrase = null;
 
-    private boolean                      moveFlag;
+    private boolean                       moveFlag;
 
-    //private TreePath[]                   currentSelectionsForMove;
+    //private TreePath[]                    currentSelectionsForMove;
 
-    private boolean                      isApplyBitmaskOnly  = false;
+    private boolean                       isApplyBitmaskOnly  = false;
 
-    private int                          currentIndexType;
+    private int                           currentIndexType;
 
-    private int                          currentIndexOrder;
+    private int                           currentIndexOrder;
 
-    private int                          binaryOrder;
+    private int                           binaryOrder;
     
-    private enum OBJECT_TYPE {GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK};
+    private enum OBJECT_TYPE              {GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK};
 
     public DefaultTreeView(ViewManager theView, Composite parent) {
         viewer = theView;
@@ -179,7 +182,9 @@ public class DefaultTreeView implements TreeView {
         // Initialize the tree and root item
         tree = new Tree(parent, SWT.MULTI | SWT.VIRTUAL);
         tree.setSize(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        tree.setMenu(popupMenu = createPopupMenu());
+        
+        // Create the context menu for the Tree
+        popupMenu = createPopupMenu();
          
             //private static final long serialVersionUID = -6829919815424470510L;
 
@@ -196,10 +201,7 @@ public class DefaultTreeView implements TreeView {
         //tree.setRowHeight(rowheight);
         
         // Handle tree key events
-        tree.addKeyListener(new KeyListener() {
-			public void keyPressed(KeyEvent e) {	
-			}
-
+        tree.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
 				int key = e.keyCode;
 				
@@ -247,57 +249,49 @@ public class DefaultTreeView implements TreeView {
         		}
         	}
         	
-        	public void mouseDown(MouseEvent e) {
-        		
-        	}
-        	
+        	// When a mouse release is detected, attempt to set the selected item
+        	// and object to the TreeItem under the pointer
         	public void mouseUp(MouseEvent e) {
-        		selectedItem = tree.getItem(new Point(e.x, e.y));
-        		selectedObject = (HObject) selectedItem.getData();
+        		// Make sure user clicked on a TreeItem
+        		TreeItem theItem = tree.getItem(new Point(e.x, e.y));
         		
-        		//TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+        		if (theItem == null) {
+        			tree.deselectAll();
+        			selectedItem = null;
+        			selectedObject = null;
+        			selectedFile = null;
+        			return;
+        		}
+        		
+        		//TreePath selPath = tree.getPathForLocation(e.x, e.y);
         		//if (selPath == null) return;
         		
-        		//TreeItem theItem = (TreeItem) selPath.getLastPathComponent();
-        		//if (!theItem.equals(selectedItem)) {
-        		//	selectedTreePath = selPath;
-        		//	selectedItem = theItem;
-        		//	selectedObject = ((HObject) (selectedItem.getData()));
-        		//	FileFormat theFile = selectedObject.getFileFormat();
-        		//	if ((theFile != null) && !theFile.equals(selectedFile)) {
-        				// A different file is selected, handle only one file at a time
-        		//		selectedFile = theFile;
-        		//		tree.clearSelection();
-        		//		tree.setSelectionPath(selPath);
-        		//	}
+        		if (!theItem.equals(selectedItem)) {
+        			//selectedTreePath = selPath;
+        			selectedItem = theItem;
+        			selectedObject = (HObject) selectedItem.getData();
         			
-        		//	viewer.mouseEventFired(e);
-        		//}
+        			FileFormat theFile = selectedObject.getFileFormat();
+        			if ((theFile != null) && !theFile.equals(selectedFile)) {
+        				// A different file is selected, handle only one file at a time
+        				selectedFile = theFile;
+        				tree.deselectAll();
+        				//tree.setSelection(selPath);
+        			}
+        			
+        			//viewer.mouseEventFired(e);
+        		}
+        	}
+        });
+        
+        // Show context menu only if user has selected a data object
+        tree.addListener(SWT.MenuDetect, new Listener() {
+        	public void handleEvent(Event e) {
+        		if (selectedItem == null | selectedObject == null | selectedFile == null) return;
         		
-        		// ***************************************************************
-                // Different platforms have different ways to show popups
-                // if (e.getModifiers() == MouseEvent.BUTTON3_MASK) works for all
-                // but mac
-                // mouseReleased() and e.isPopupTrigger() work on windows and mac
-                // but not unix,
-                // mouseClicked() and e.isPopupTrigger() work on unix and mac but
-                // not windows,
-                // to solve the problem, we use both.
-                // 7/25/06 bug 517. e.isPopupTrigger does not work on one mouse Mac.
-                // add (MouseEvent.BUTTON1_MASK|MouseEvent.CTRL_MASK) for MAC
-                
-        		//int eMod = e.getModifiers();
-                //if (e.isPopupTrigger()
-                //        || (eMod == MouseEvent.BUTTON3_MASK)
-                //        || (System.getProperty("os.name").startsWith("Mac") && (eMod == (MouseEvent.BUTTON1_MASK | Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())))) {
-                    //int selRow = tree.getRowForLocation(e.getX(), e.getY());
-
-                    //if (!tree.isRowSelected(selRow)) {
-                    //    // reselect the node
-                    //    tree.clearSelection();
-                    //    tree.setSelectionRow(selRow);
-                    //}
-                //}
+        		Point pt = new Point(e.x, e.y);
+        		popupMenu.setLocation(pt);
+        		popupMenu.setVisible(true);
         	}
         });
     }
@@ -742,6 +736,8 @@ public class DefaultTreeView implements TreeView {
         // on selection in tree
         menu.addMenuListener(new MenuAdapter() {
         	public void menuShown(MenuEvent e) {
+        		if (selectedItem == null || selectedObject == null || selectedFile == null) return;
+        		
         		boolean isReadOnly = selectedObject.getFileFormat().isReadOnly();
         		boolean isWritable = !isReadOnly;
         		
@@ -1017,13 +1013,13 @@ public class DefaultTreeView implements TreeView {
 
     /** Copy selected objects */
     private void copyObject() {
-        objectsToCopy = getSelectedObjects();
+        objectsToCopy = tree.getSelection();
         moveFlag = false;
     }
 
     /** Move selected objects */
     private void moveObject() {
-        objectsToCopy = getSelectedObjects();
+        objectsToCopy = tree.getSelection();
         moveFlag = true;
         //currentSelectionsForMove = tree.getSelectionPaths();
     }
@@ -1055,9 +1051,9 @@ public class DefaultTreeView implements TreeView {
 
         TreeItem pitem = selectedItem;
 
-        if ((objectsToCopy == null) || (objectsToCopy.size() <= 0) || (pitem == null)) return;
+        if ((objectsToCopy == null) || (objectsToCopy.length <= 0) || (pitem == null)) return;
 
-        FileFormat srcFile = ((HObject) objectsToCopy.get(0)).getFileFormat();
+        FileFormat srcFile = ((HObject) objectsToCopy[0].getData()).getFileFormat();
         FileFormat dstFile = getSelectedFile();
         FileFormat h5file = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         FileFormat h4file = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
@@ -1255,26 +1251,6 @@ public class DefaultTreeView implements TreeView {
 
         //    removeItem(currentItem);
         //} // for (int i=0; i< currentSelections.length; i++) {
-    }
-
-    private void removeItem(TreeItem item) {
-        if (item == null) return;
-        
-        TreeItem parentItem = item.getParentItem();
-        if (parentItem != null) {
-            // Add the two lines to fix bug in HDFView 1.2. Delete a subgroup
-            // and then copy the group to another group, the deleted group still
-            // exists.
-            Group pgroup = (Group) parentItem.getData();
-            pgroup.removeFromMemberList((HObject) item.getData());
-
-            if (item.equals(selectedItem)) {
-                selectedItem = null;
-                selectedFile = null;
-            }
-        } // if (parentNode != null) {
-        
-        item.dispose();
     }
 
     private boolean isObjectOpen(HObject obj) {
@@ -1662,7 +1638,7 @@ public class DefaultTreeView implements TreeView {
     private void showError(String errorMsg, String title) {
     	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
     	if (title == null)
-    		error.setText(((Shell) shell.getParent()).getText());
+    		error.setText(shell.getText());
     	else
     		error.setText(title);
     	error.setMessage(errorMsg);
@@ -1833,31 +1809,33 @@ public class DefaultTreeView implements TreeView {
     public void closeFile(FileFormat file) throws Exception {
         if (file == null) return;
 
-        // Find the file item in the tree and remove it from the tree first
+        // Find the file item in the tree and remove it
         FileFormat theFile = null;
-        TreeItem theItem = null;
-        //Enumeration<?> enumeration = root.getItems();
-        //while (enumeration.hasMoreElements()) {
-        //    theItem = (TreeItem) enumeration.nextElement();
-        //    Group g = (Group) theItem.getData();
-        //    theFile = g.getFileFormat();
-
-        //    if (theFile.equals(file)) {
-              //treeModel.removeNodeFromParent(theItem);
-        //        try {
-        //            theFile.close();
-        //        }
-        //        catch (Exception ex) {
-        //        	log.debug("close {}:", theFile.getFilePath(), ex);
-        //        }
-        //        fileList.remove(theFile);
-        //        if (theFile.equals(selectedFile)) {
-        //            selectedFile = null;
-        //            selectedItem = null;
-        //       }
-        //        break;
-        //    }
-        //} // while(enumeration.hasMoreElements())
+        TreeItem[] openFiles = tree.getItems();
+        
+        for (int i = 0; i < openFiles.length; i++) {
+            theFile = ((Group) openFiles[i].getData()).getFileFormat();
+            
+            if (theFile.equals(file)) {
+            	// Remove TreeItem from the view
+                openFiles[i].dispose();
+            	
+            	try {
+                    theFile.close();
+                }
+                catch (Exception ex) {
+                	log.debug("close {}:", theFile.getFilePath(), ex);
+                }
+                
+                fileList.remove(theFile);
+                if (theFile.equals(selectedFile)) {
+                    selectedFile = null;
+                    selectedItem = null;
+                }
+                
+                break;
+            }
+        }
     }
 
     /**
@@ -1926,44 +1904,7 @@ public class DefaultTreeView implements TreeView {
     public FileFormat getSelectedFile() {
         return selectedFile;
     }
-
-    /**
-     * Gets a list of selected objects in the tree. Obtaining a list of current
-     * selected objects is necessary for copy/paste/delete objects.
-     * 
-     * @return a list of selected object in the tree.
-     */
-    public List<Object> getSelectedObjects() {
-        /*
-    	TreePath[] paths = tree.getSelectionPaths();
-        if ((paths == null) || (paths.length <= 0)) {
-            return null;
-        }
-
-        List<Object> objs = new Vector<Object>(paths.length);
-        HObject theObject = null, parentObject;
-        DefaultMutableTreeNode currentNode = null, parentNode = null;
-        for (int i = 0; i < paths.length; i++) {
-            currentNode = (DefaultMutableTreeNode) (paths[i].getLastPathComponent());
-            theObject = (HObject) currentNode.getUserObject();
-
-            if (theObject != null) {
-                objs.add(theObject);
-                // removed the group from the selected list if some of its
-                // members are selected
-                // to avoid duplicated copy/paste when a group is pasted.
-                parentNode = (DefaultMutableTreeNode) currentNode.getParent();
-                parentObject = (HObject) parentNode.getUserObject();
-                objs.remove(parentObject);
-            }
-        }
-
-        return objs;
-        */
-    	
-    	return null; // Remove when finished
-    }
-
+    
     /**
      * @return the current selected object in the tree.
      */
@@ -1983,7 +1924,7 @@ public class DefaultTreeView implements TreeView {
         log.trace("showDataContent: start");
 
         if ((dataObject == null) || !(dataObject instanceof Dataset)) {
-            return null; // can only display dataset
+        	return null; // can only display dataset
         }
 
         Dataset d = (Dataset) dataObject;
@@ -2127,9 +2068,9 @@ public class DefaultTreeView implements TreeView {
             initargs = tmpargs;
         }
 
-        Cursor cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
-        shell.setCursor(cursor);
-        cursor.dispose();
+        //Cursor cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
+        //shell.setCursor(cursor);
+        //cursor.dispose();
         
         try {
             theView = Tools.newInstance(theClass, initargs);
@@ -2138,9 +2079,9 @@ public class DefaultTreeView implements TreeView {
             viewer.addDataView((DataView) theView);
         }
         finally {
-        	cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_ARROW);
-        	shell.setCursor(cursor);
-        	cursor.dispose();
+        	//cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_ARROW);
+        	//shell.setCursor(cursor);
+        	//cursor.dispose();
         }
 
         log.trace("showDataContent: finish");
@@ -2199,11 +2140,30 @@ public class DefaultTreeView implements TreeView {
      * @throws Exception
      */
     public void addObject(HObject newObject, Group parentGroup) throws Exception {
-        if ((newObject == null) || (parentGroup == null)) return;
+        if (newObject == null) return;
 
         TreeItem pitem = findTreeItem(parentGroup);
-        TreeItem newitem = new TreeItem(pitem, SWT.NONE);
-        newitem.setData(newObject);
+        TreeItem newItem = new TreeItem(pitem, SWT.NONE);
+        newItem.setData(newObject);
+        
+        // When a TreeItem is disposed, it should be removed from its parent
+        // items member list
+        newItem.addDisposeListener(new DisposeListener() {
+        	public void widgetDisposed(DisposeEvent e) {
+        		TreeItem thisItem = (TreeItem) e.getSource();
+        		TreeItem parentItem = thisItem.getParentItem();
+        		
+        		if (parentItem != null) {
+        			Group parentGroup = (Group) parentItem.getData();
+        			parentGroup.removeFromMemberList((HObject) thisItem.getData());
+        		}
+        		
+        		if (thisItem.equals(selectedItem)) {
+        			selectedItem = null;
+        			selectedFile = null;
+        		}
+        	}
+        });
         
         //private static final long serialVersionUID = -8852535261445958398L;
 
