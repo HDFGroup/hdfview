@@ -275,7 +275,7 @@ public class DefaultTreeView implements TreeView {
         			if ((theFile != null) && !theFile.equals(selectedFile)) {
         				// A different file is selected, handle only one file at a time
         				selectedFile = theFile;
-        				tree.deselectAll();
+        				//tree.deselectAll();
         				//tree.setSelection(selPath);
         			}
         			
@@ -450,7 +450,7 @@ public class DefaultTreeView implements TreeView {
         		
         		List<Object> objList = new Vector<Object>(2);
         		objList.add(selectedObject);
-        		pasteObject(objList, dstFile.getRootObject(), dstFile);
+        		//pasteObject(objList, dstFile.getRootObject(), dstFile);
         	}
         });
         
@@ -1090,9 +1090,10 @@ public class DefaultTreeView implements TreeView {
             }
         }
 
-        //if (pitem.isLeaf()) {
-        //    pitem = pitem.getParentItem();
-        //}
+        if (pitem.getParentItem() != null) {
+            pitem = pitem.getParentItem();
+        }
+        
         Group pgroup = (Group) pitem.getData();
         String fullPath = pgroup.getPath() + pgroup.getName();
         if (pgroup.isRoot()) {
@@ -1126,9 +1127,8 @@ public class DefaultTreeView implements TreeView {
         log.trace("pasteObject(): op={}", op);
         if (op == SWT.NO) return;
 
-        //pasteObject(objectsToCopy, pitem, dstFile);
+        pasteObject(objectsToCopy, pitem, dstFile);
 
-        // objectsToCopy = null;
         if (moveFlag == true) {
             removeSelectedObjects();
             moveFlag = false;
@@ -1140,19 +1140,18 @@ public class DefaultTreeView implements TreeView {
     }
 
     /** Paste selected objects */
-    private void pasteObject(List<Object> objList, HObject pobj, FileFormat dstFile) {
-        if ((objList == null) || (objList.size() <= 0) || (pobj == null)) return;
+    private void pasteObject(TreeItem[] objList, TreeItem pobj, FileFormat dstFile) {
+        if ((objList == null) || (objList.length <= 0) || (pobj == null)) return;
 
-        ((HObject) objList.get(0)).getFileFormat();
-        Group pgroup = (Group) pobj;
+        ((HObject) objList[0].getData()).getFileFormat();
+        Group pgroup = (Group) pobj.getData();
         log.trace("pasteObject(...): start");
 
         HObject theObj = null;
         HObject newItem = null;
-        Iterator<Object> iterator = objList.iterator();
-        while (iterator.hasNext()) {
+        for (int i = 0; i < objList.length; i++) {
             newItem = null;
-            theObj = (HObject) iterator.next();
+            theObj = (HObject) objList[i].getData();
 
             if ((theObj instanceof Group) && ((Group) theObj).isRoot()) {
                 shell.getDisplay().beep();
@@ -1182,9 +1181,9 @@ public class DefaultTreeView implements TreeView {
             }
 
             // Add the node to the tree
-            //if (newItem != null) insertItem(newItem, pobj);
+            if (newItem != null) insertObject(newItem, pobj);
 
-        } // while (iterator.hasNext())
+        } // for (int i = 0; i < objList.length; i++)
 
         log.trace("pasteObject(...): finish");
     }
@@ -1944,7 +1943,6 @@ public class DefaultTreeView implements TreeView {
         Shell theShell = (Shell) viewer.getDataView(d);
 
         if (isDefaultDisplay) {
-
             if (theShell != null) {
                 theShell.setActive();
                 return null;

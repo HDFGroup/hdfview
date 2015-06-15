@@ -48,6 +48,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 
@@ -304,12 +306,12 @@ public class DefaultTableView extends Shell implements TableView {
             table = createTable((CompoundDS) dataset);
         }
         else { /* if (dataset instanceof ScalarDS) */
-            //this.setFrameIcon(ViewProperties.getDatasetIcon());
+            this.setImage(ViewProperties.getDatasetIcon());
             table = createTable((ScalarDS) dataset);
             log.trace("createTable((ScalarDS) dataset) dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
 
             if (dtype.getDatatypeClass() == Datatype.CLASS_REFERENCE) {
-                table.addMouseListener(this);
+                //table.addMouseListener(this);
 
                 if (dtype.getDatatypeSize() > 8) {
                     isReadOnly = true;
@@ -336,7 +338,6 @@ public class DefaultTableView extends Shell implements TableView {
             this.dispose();
             return;
         }
-        table.setName("data");
 
         log.trace("DefaultTableView create ColumnHeader");
         ColumnHeader columnHeaders = new ColumnHeader(table);
@@ -346,37 +347,38 @@ public class DefaultTableView extends Shell implements TableView {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.setGridColor(Color.gray);
 
-        // add the table to a scroller
-        ScrolledComposite scrollingTable = new ScrolledComposite(table);
-        scrollingTable.getVerticalScrollBar().setUnitIncrement(100);
-        scrollingTable.getHorizontalScrollBar().setUnitIncrement(100);
+        // Add the table to a scroller
+        ScrolledComposite scrollingTable = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
+        scrollingTable.setContent(table);
+        scrollingTable.getVerticalBar().setIncrement(100);
+        scrollingTable.getHorizontalBar().setIncrement(100);
 
-        // create row headers and add it to the scroller
+        // Create row headers and add it to the scroller
         log.trace("DefaultTableView create RowHeader");
         RowHeader rowHeaders = new RowHeader(table, dataset);
-        rowHeaders.setName("rowHeaders");
 
         JViewport viewp = new JViewport();
         viewp.add(rowHeaders);
         viewp.setPreferredSize(rowHeaders.getPreferredSize());
         scrollingTable.setRowHeader(viewp);
 
-        cellLabel = new JLabel("");
+        cellLabel = new Label();
         cellLabel.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
         Dimension dim = cellLabel.getPreferredSize();
         dim.width = 75;
         cellLabel.setPreferredSize(dim);
         cellLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        cellValueField = new JTextArea();
+        cellValueField = new Text(table, SWT.SINGLE);
         cellValueField.setLineWrap(true);
         cellValueField.setWrapStyleWord(true);
         cellValueField.setEditable(false);
         cellValueField.setBackground(new Color(255, 255, 240));
 
-        JScrollPane scrollingcellValue = new JScrollPane(cellValueField);
-        scrollingcellValue.getVerticalScrollBar().setUnitIncrement(50);
-        scrollingcellValue.getHorizontalScrollBar().setUnitIncrement(50);
+        ScrolledComposite scrollingcellValue = new ScrolledComposite(table, SWT.H_SCROLL | SWT.V_SCROLL);
+        scrollingcellValue.setContent(cellValueField);
+        scrollingcellValue.getVerticalBar().setIncrement(50);
+        scrollingcellValue.getHorizontalBar().setIncrement(50);
 
         JPanel valuePane = new JPanel();
         valuePane.setLayout(new BorderLayout());
@@ -398,7 +400,7 @@ public class DefaultTableView extends Shell implements TableView {
         sb.append("]");
         setTitle(sb.toString());
 
-        // setup subset information
+        // Setup subset information
         log.trace("DefaultTableView setup subset information");
         int rank = dataset.getRank();
         int[] selectedIndex = dataset.getSelectedIndex();
@@ -453,172 +455,238 @@ public class DefaultTableView extends Shell implements TableView {
    }
 
     private Menu createMenuBar() {
-        Menu menuBar = new Menu(shell);
+        Menu menuBar = new Menu(shell, SWT.BAR);
         Button button;
         boolean isEditable = !isReadOnly;
         boolean is3D = (dataset.getRank() > 2);
 
-        Menu menu = new Menu("Table", false);
-        menu.setText("&Table");
-        bar.setMenu(menu);
+        Menu menu = new Menu(table);
+        //menu.setText("&Table");
+        //bar.setMenu(menu);
 
-        MenuItem item = new MenuItem("Export Data to Text File");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as text");
-        menu.add(item);
+        MenuItem item = new MenuItem(menu, SWT.NONE);
+        item.setText("Export Data to Text File");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		try {
+                    saveAsText();
+                }
+                catch (Exception ex) {
+                    shell.getDisplay().beep();
+                    showError(ex.getMessage(), shell.getText());
+                }
+        	}
+        });
 
-        JMenu exportAsBinaryMenu = new JMenu("Export Data to Binary File");
-        if ((dataset instanceof ScalarDS)) {
-            menu.add(exportAsBinaryMenu);
-        }
-        item = new JMenuItem("Native Order");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as binary Native Order");
-        exportAsBinaryMenu.add(item);
-        item = new JMenuItem("Little Endian");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as binary Little Endian");
-        exportAsBinaryMenu.add(item);
-        item = new JMenuItem("Big Endian");
-        item.addActionListener(this);
-        item.setActionCommand("Save table as binary Big Endian");
-        exportAsBinaryMenu.add(item);
+        item = new MenuItem(menu, SWT.CASCADE);
+        item.setText("Export Data to Binary File");
+        item.setEnabled(dataset instanceof ScalarDS); // Disable export menu if this isn't a Scalar Dataset
+        
+        Menu exportAsBinaryMenu = new Menu(menu);
+        item.setMenu(exportAsBinaryMenu);
+        
+        //if (!(dataset instanceof ScalarDS)) {
+            //exportAsBinaryMenu.setVisible(false);
+        //}
+        
+        item = new MenuItem(exportAsBinaryMenu, SWT.NONE);
+        item.setText("Native Order");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		binaryOrder = 1;
+        		
+        		try {
+        			saveAsBinary();
+        		}
+        		catch (Exception ex) {
+        			shell.getDisplay().beep();
+        			showError(ex.getMessage(), shell.getText());
+        		}
+        	}
+        });
+        
+        item = new MenuItem(exportAsBinaryMenu, SWT.NONE);
+        item.setText("Little Endian");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		binaryOrder = 2;
+        		
+        		try {
+        			saveAsBinary();
+        		}
+        		catch (Exception ex) {
+        			shell.getDisplay().beep();
+        			showError(ex.getMessage(), shell.getText());
+        		}
+        	}
+        });
+        
+        item = new MenuItem(exportAsBinaryMenu, SWT.NONE);
+        item.setText("Big Endian");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		binaryOrder = 3;
+        		
+        		try {
+        			saveAsBinary();
+        		}
+        		catch (Exception ex) {
+        			shell.getDisplay().beep();
+        			showError(ex.getMessage(), shell.getText());
+        		}
+        	}
+        });
+        
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        menu.addSeparator();
-
-        item = new JMenuItem("Import Data from Text File");
-        item.addActionListener(this);
-        item.setActionCommand("Import data from file");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Import Data from Text File");
+        //item.setActionCommand("Import data from file");
         item.setEnabled(isEditable);
-        menu.add(item);
+        
+        item = new MenuItem(menu, SWT.CASCADE);
+        item.setText("Import Data from Binary File");
+        item.setEnabled(dataset instanceof ScalarDS); // Disable import menu if this isn't a Scalar Dataset
+        
+        Menu importFromBinaryMenu = new Menu(menu);
+        item.setMenu(importFromBinaryMenu);
+        
+        //item = checkFixedDataLength;
+        //item.setActionCommand("Fixed data length");
+        
+        //if (dataset instanceof ScalarDS) {
+        //    menu.add(item);
+        //}
+        
+        
+        //if ((dataset instanceof ScalarDS)) {
+        //    menu.add(importFromBinaryMenu);
+        //}
+        
+        item = new MenuItem(importFromBinaryMenu, SWT.NONE);
+        item.setText("Native Order");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		binaryOrder = 1;
+        		
+        		try {
+        			importBinaryData();
+        		}
+        		catch (Exception ex) {
+        			showError(ex.getMessage(), shell.getText());
+        		}
+        	}
+        });
+        
+        item = new MenuItem(importFromBinaryMenu, SWT.NONE);
+        item.setText("Little Endian");
+        
+        //item.setActionCommand("Order as Little Endian");
+        item = new MenuItem(importFromBinaryMenu, SWT.NONE);
+        item.setText("Big Endian");
+        //item.setActionCommand("Order as Big Endian");
 
-        item = checkFixedDataLength;
-        item.addActionListener(this);
-        item.setActionCommand("Fixed data length");
-        if (dataset instanceof ScalarDS) {
-            menu.add(item);
-        }
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        JMenu importFromBinaryMenu = new JMenu("Import Data from Binary File");
-        if ((dataset instanceof ScalarDS)) {
-            menu.add(importFromBinaryMenu);
-        }
-        item = new JMenuItem("Native Order");
-        item.addActionListener(this);
-        item.setActionCommand("Order as Native Order");
-        importFromBinaryMenu.add(item);
-        item = new JMenuItem("Little Endian");
-        item.addActionListener(this);
-        item.setActionCommand("Order as Little Endian");
-        importFromBinaryMenu.add(item);
-        item = new JMenuItem("Big Endian");
-        item.addActionListener(this);
-        item.setActionCommand("Order as Big Endian");
-        importFromBinaryMenu.add(item);
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Copy");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		copyData();
+        	}
+        });
+        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
 
-        menu.addSeparator();
-
-        item = new JMenuItem("Copy");
-        item.addActionListener(this);
-        item.setActionCommand("Copy data");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
-        menu.add(item);
-
-        item = new JMenuItem("Paste");
-        item.addActionListener(this);
-        item.setActionCommand("Paste data");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Paste");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		pasteData();
+        	}
+        });
+        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
         item.setEnabled(isEditable);
-        menu.add(item);
+        
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        menu.addSeparator();
-
-        item = new JMenuItem("Copy to New Dataset");
-        item.addActionListener(this);
-        item.setActionCommand("Write selection to dataset");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Copy to New Dataset");
+        //item.setActionCommand("Write selection to dataset");
         item.setEnabled(isEditable && (dataset instanceof ScalarDS));
-        menu.add(item);
 
-        item = new JMenuItem("Save Changes to File");
-        item.addActionListener(this);
-        item.setActionCommand("Save dataset");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Save Changes to File");
+        //item.setActionCommand("Save dataset");
+        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
         item.setEnabled(isEditable);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
-        menu.add(item);
+        
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        menu.addSeparator();
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Select All");
+        //item.setActionCommand("Select all data");
+        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
 
-        item = new JMenuItem("Select All");
-        item.addActionListener(this);
-        item.setActionCommand("Select all data");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
-        menu.add(item);
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        menu.addSeparator();
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Show Lineplot");
+        //item.setActionCommand("Show chart");
 
-        item = new JMenuItem("Show Lineplot");
-        item.addActionListener(this);
-        item.setActionCommand("Show chart");
-        menu.add(item);
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Show Statistics");
+        //item.setActionCommand("Show statistics");
 
-        item = new JMenuItem("Show Statistics");
-        item.addActionListener(this);
-        item.setActionCommand("Show statistics");
-        menu.add(item);
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        menu.addSeparator();
-
-        item = new JMenuItem("Math Conversion");
-        item.addActionListener(this);
-        item.setActionCommand("Math conversion");
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Math Conversion");
+        //item.setActionCommand("Math conversion");
         item.setEnabled(isEditable);
-        menu.add(item);
 
-        menu.addSeparator();
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        item = checkScientificNotation;
-        item.addActionListener(this);
-        item.setActionCommand("Show scientific notation");
-        if (dataset instanceof ScalarDS) {
-            menu.add(item);
-        }
+        //item = checkScientificNotation;
+        //item.setActionCommand("Show scientific notation");
+        //if (dataset instanceof ScalarDS) {
+        //    menu.add(item);
+        //}
 
-        item = checkCustomNotation;
-        item.addActionListener(this);
-        item.setActionCommand("Show custom notation");
-        if (dataset instanceof ScalarDS) {
-            menu.add(item);
-        }
+        //item = checkCustomNotation;
+        //item.setActionCommand("Show custom notation");
+        //if (dataset instanceof ScalarDS) {
+        //    menu.add(item);
+        //}
 
-        item = new JMenuItem("Create custom notation");
-        item.addActionListener(this);
-        item.setActionCommand("Create custom notation");
-        menu.add(item);
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Create custom notation");
+        //item.setActionCommand("Create custom notation");
 
         boolean isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
-        item = checkHex;
-        item.addActionListener(this);
-        item.setActionCommand("Show hexadecimal");
-        if ((dataset instanceof ScalarDS) && isInt) {
-            menu.add(item);
-        }
+        //item = checkHex;
+        //item.setActionCommand("Show hexadecimal");
+        //if ((dataset instanceof ScalarDS) && isInt) {
+        //    menu.add(item);
+        //}
 
-        item = checkBin;
-        item.addActionListener(this);
-        item.setActionCommand("Show binary");
-        if ((dataset instanceof ScalarDS) && isInt) {
-            menu.add(item);
-        }
+        //item = checkBin;
+        //item.setActionCommand("Show binary");
+        //if ((dataset instanceof ScalarDS) && isInt) {
+        //    menu.add(item);
+        //}
 
-        menu.addSeparator();
+        new MenuItem(menu, SWT.SEPARATOR);
 
-        item = new JMenuItem("Close");
-        item.addActionListener(this);
-        item.setActionCommand("Close");
-        menu.add(item);
+        item = new MenuItem(menu, SWT.NONE);
+        item.setText("Close");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		shell.dispose();
+        	}
+        });
 
-        bar.add(new JLabel("     "));
-
+        //new Label(menuBar, SWT.NONE).setText("     ");
+        
         // add icons to the menubar
 
         Insets margin = new Insets(0, 2, 0, 2);
@@ -700,36 +768,6 @@ public class DefaultTableView extends Shell implements TableView {
             String cmd = e.getActionCommand();
             log.trace("DefaultTableView actionPerformed: {}", cmd);
 
-            if (cmd.equals("Close")) {
-                dispose(); // terminate the application
-            }
-            else if (cmd.equals("Save table as text")) {
-                try {
-                    saveAsText();
-                }
-                catch (Exception ex) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog((JFrame) viewer, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
-                }
-            }
-            else if (cmd.startsWith("Save table as binary")) {
-                if (cmd.equals("Save table as binary Native Order")) binaryOrder = 1;
-                if (cmd.equals("Save table as binary Little Endian")) binaryOrder = 2;
-                if (cmd.equals("Save table as binary Big Endian")) binaryOrder = 3;
-                try {
-                    saveAsBinary();
-                }
-                catch (Exception ex) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog((JFrame) viewer, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
-                }
-            }
-            else if (cmd.equals("Copy data")) {
-                copyData();
-            }
-            else if (cmd.equals("Paste data")) {
-                pasteData();
-            }
             else if (cmd.equals("Import data from file")) {
                 String currentDir = dataset.getFileFormat().getParent();
                 JFileChooser fchooser = new JFileChooser(currentDir);
@@ -4526,10 +4564,7 @@ public class DefaultTableView extends Shell implements TableView {
     
     private void showError(String errorMsg, String title) {
     	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-    	if (title == null)
-    		error.setText(shell.getText());
-    	else
-    		error.setText(title);
+    	error.setText(title);
     	error.setMessage(errorMsg);
     	error.open();
     }

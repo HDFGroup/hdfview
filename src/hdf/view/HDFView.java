@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
 
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
@@ -80,7 +82,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 	private static final long     serialVersionUID = 2211017444445918998L;	
 	
 	private static Display display = new Display();
-	private Shell mainWindow;
+	private static Shell mainWindow;
 	
 	/* The directory where HDFView is installed */
 	private String					rootDir;
@@ -1979,8 +1981,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 				}
 			}
 			else if("-java.version".equalsIgnoreCase(args[i])) {
-				/* MessageDialog ; */
-				
+				/* Set icon to ViewProperties.getLargeHdfIcon() */
+				MessageBox info = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
+				info.setText(mainWindow.getText());
+				info.setMessage(JAVA_VER_INFO);
+				info.open();
 				System.exit(0);
 			}
 		}
