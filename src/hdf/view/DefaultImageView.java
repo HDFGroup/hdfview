@@ -14,39 +14,11 @@
 
 package hdf.view;
 
+import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.TreeItem;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBufferInt;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.ImageFilter;
-import java.awt.image.ImageProducer;
-import java.awt.image.PixelGrabber;
-import java.awt.image.RGBImageFilter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
@@ -63,34 +35,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.NumberFormatter;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import hdf.object.Datatype;
 import hdf.object.Group;
@@ -129,8 +73,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class DefaultImageView extends JInternalFrame implements ImageView,
-ActionListener {
+public class DefaultImageView extends Shell implements ImageView {
 	private static final long serialVersionUID = -6534336542813587242L;
 
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
@@ -188,7 +131,7 @@ ActionListener {
 	private String frameTitle;
 
 	/** TextField to show the image value. */
-	private JTextField valueField;
+	private Text valueField;
 
 	/** Flag to indicate if the image is a true color image */
 	private boolean isTrueColor;
@@ -227,9 +170,9 @@ ActionListener {
 
 	private List rotateRelatedItems;
 
-	private JScrollPane imageScroller;
+	private ScrolledComposite imageScroller;
 
-	private JTextField frameField;
+	private Text frameField;
 
 	private long curFrame = 0, maxFrame = 1;
 
@@ -332,8 +275,7 @@ ActionListener {
 			bitmask = (BitSet) map.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
 			bitmaskOP = (BITMASK_OP)map.get(ViewProperties.DATA_VIEW_KEY.BITMASKOP);
 
-			Boolean b = (Boolean) map
-			.get(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE);
+			Boolean b = (Boolean) map.get(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE);
 			if (b != null)
 				convertByteData = b.booleanValue();
 
@@ -393,14 +335,13 @@ ActionListener {
 		originalRange[1] = dataRange[1];
 
 		imageComponent = new ImageComponent(image);
-		JScrollPane scroller = new JScrollPane(imageComponent);
-		scroller.getVerticalScrollBar().setUnitIncrement(50);
-		scroller.getHorizontalScrollBar().setUnitIncrement(50);
-		scroller.setName("imagecontent");
+		ScrolledComposite scroller = new ScrolledComposite(imageComponent);
+		scroller.getVerticalBar().setIncrement(50);
+		scroller.getHorizontalBar().setIncrement(50);
 		imageScroller = scroller;
 		contentPane.add(scroller, BorderLayout.CENTER);
 
-		// add palette convas to show the palette
+		// add palette canvas to show the palette
 		if (imagePalette != null) {
 			paletteComponent = new PaletteComponent(imagePalette, dataRange);
 			contentPane.add(paletteComponent, BorderLayout.EAST);
@@ -503,81 +444,292 @@ ActionListener {
 			//        	imageComponent.getParent().setBackground(Color.black);
 	}
 
-	private JMenuBar createMenuBar() {
-		JMenuBar bar = new JMenuBar();
-		JButton button;
-		boolean isEditable = !dataset.getFileFormat().isReadOnly();
+	private Menu createMenuBar() {
+		Menu menuBar = new Menu(, SWT.BAR);
 
-		JMenu menu = new JMenu("Image", false);
-		menu.setMnemonic('I');
-		bar.add(menu);
+		MenuItem item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("Save Image As");
 
-		JMenu convertImageMenu = new JMenu("Save Image As");
-		menu.add(convertImageMenu);
+		Menu saveAsMenu = new Menu(item);
+		item.setMenu(saveAsMenu);
 
-		JMenuItem item = new JMenuItem(Tools.FILE_TYPE_JPEG);
-		item.addActionListener(this);
-		item.setActionCommand("Save image as jpeg");
-		convertImageMenu.add(item);
+		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item.setText("JPEG");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String filetype = Tools.FILE_TYPE_JPEG;
+				
+				try {
+					saveImageAs(filetype);
+				}
+				catch (Exception ex) {
+					Display.getCurrent().beep();
+					MessageBox error = new MessageBox(, SWT.ICON_ERROR | SWT.OK);
+					error.setMessage(ex.getMessage());
+					error.setText(.getText());
+					error.open();
+				}
+			}
+		});
 
 		/*
-		 * ImageIO does not support tiff by default item = new
-		 * JMenuItem(Tools.FILE_TYPE_TIFF); item.addActionListener(this);
-		 * item.setActionCommand("Save image as tiff");
-		 * convertImageMenu.add(item);
+		 * ImageIO does not support tiff by default
 		 */
+		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item.setText("TIFF");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String filetype = Tools.FILE_TYPE_TIFF;
+				
+				try {
+					saveImageAs(filetype);
+				}
+				catch (Exception ex) {
+					Display.getCurrent().beep();
+					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+					error.setMessage(ex.getMessage());
+					error.setText(.getText());
+					error.open();
+				}
+			}
+		});
+		
+		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item.setText("PNG");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String filetype = Tools.FILE_TYPE_PNG;
+				
+				try {
+					saveImageAs(filetype);
+				}
+				catch (Exception ex) {
+					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+					error.setMessage(ex.getMessage());
+					error.setText(.getText());
+					error.open();
+				}
+			}
+		});
+		
+		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item.setText("GIF");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String filetype = Tools.FILE_TYPE_GIF;
+				
+				try {
+					saveImageAs(filetype);
+				}
+				catch (Exception ex) {
+					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+					error.setMessage(ex.getMessage());
+					error.setText(.getText());
+					error.open();
+				}
+			}
+		});
+		
+		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item.setText("BMP");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String filetype = Tools.FILE_TYPE_BMP;
+				
+				try {
+					saveImageAs(filetype);
+				}
+				catch (Exception ex) {
+					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+					error.setMessage(ex.getMessage());
+					error.setTest(.getText());
+					error.open();
+				}
+			}
+		});
 
-		item = new JMenuItem(Tools.FILE_TYPE_PNG);
-		item.addActionListener(this);
-		item.setActionCommand("Save image as png");
-		convertImageMenu.add(item);
+		new MenuItem(menuBar, SWT.SEPARATOR);
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Write Selection to Image");
+		item.setEnabled(!dataset.getFileFormat().isReadOnly());
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
+					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+					error.setMessage("No data to write.\nUse Shift+Mouse_drag to select an image area.");
+					error.setText(.getText());
+					error.open();
+				}
+				
+				TreeView treeView = viewer.getTreeView();
+				//TreeNode node = treeView.findTreeNode(dataset);
+				//Group pGroup = (Group) ((DefaultMutableTreeNode) node
+				//		.getParent()).getUserObject();
+				HObject root = dataset.getFileFormat().getRootObject();
+				
+				if (root == null) return;
+				
+				Vector list = new Vector(dataset.getFileFormat().getNumberOfMembers() + 5);
+				DefaultMutableTreeNode theNode = null;
+				Enumeration local_enum = root.depthFirstEnumeration();
 
-		item = new JMenuItem(Tools.FILE_TYPE_GIF);
-		item.addActionListener(this);
-		item.setActionCommand("Save image as gif");
-		convertImageMenu.add(item);
+				while (local_enum.hasMoreElements()) {
+					theNode = (DefaultMutableTreeNode) local_enum.nextElement();
+					list.add(theNode.getUserObject());
+				}
 
-		item = new JMenuItem(Tools.FILE_TYPE_BMP);
-		item.addActionListener(this);
-		item.setActionCommand("Save image as bmp");
-		convertImageMenu.add(item);
+				/*
+				NewDatasetDialog dialog = new NewDatasetDialog((JFrame) viewer,
+						pGroup, list, this);
+				dialog.setVisible(true);
 
-		menu.addSeparator();
+				HObject obj = (HObject) dialog.getObject();
+				if (obj != null) {
+					Group pgroup = dialog.getParentGroup();
+					try {
+						treeView.addObject(obj, pgroup);
+					}
+					catch (Exception ex) {
+						log.debug("Write selection to image:", ex);
+					}
+				}
+				*/
 
-		item = new JMenuItem("Write Selection to Image");
-		item.addActionListener(this);
-		item.setActionCommand("Write selection to image");
-		item.setEnabled(isEditable);
+				list.setSize(0);
+			}
+		});
 		rotateRelatedItems.add(item);
-		menu.add(item);
+		
+		new MenuItem(menuBar, SWT.SEPARATOR);
 
-		menu.addSeparator();
-
-		item = new JMenuItem("Change Palette");
-		item.addActionListener(this);
-		item.setActionCommand("Edit palette");
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Change Palette");
 		item.setEnabled(!isTrueColor);
-		menu.add(item);
-
-		item = new JMenuItem("Import Palette");
-		item.addActionListener(this);
-		item.setActionCommand("Import palette");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				showColorTable();
+			}
+		});
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Import Palette");
 		item.setEnabled(!isTrueColor);
-		menu.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				JFileChooser fchooser = new JFileChooser(ViewProperties
+						.getWorkDir());
+				int returnVal = fchooser.showOpenDialog(this);
 
-		item = new JMenuItem("Export Palette");
-		item.addActionListener(this);
-		item.setActionCommand("Export palette");
+				if (returnVal != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
+
+				File choosedFile = fchooser.getSelectedFile();
+				if (choosedFile == null || choosedFile.isDirectory()) {
+					return;
+				}
+
+				Vector<String> palList = ViewProperties.getPaletteList();
+				String palPath = choosedFile.getAbsolutePath();
+				if(!palList.contains(palList))
+					palList.addElement(palPath);
+			}
+		});
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Export Palette");
 		item.setEnabled(!isTrueColor);
-		menu.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (imagePalette == null) return;
+				
+				String workDir = ViewProperties.getWorkDir() + File.separator;
+				JFileChooser fchooser = new JFileChooser(workDir);
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Color lookup table", "lut");
+				File pfile = Tools.checkNewFile(workDir, ".lut");
+				fchooser.setSelectedFile(pfile);
+				fchooser.setFileFilter(filter);
+				int returnVal = fchooser.showOpenDialog(this);
 
-		menu.addSeparator();
+				if (returnVal != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
 
-		item = new JMenuItem("Set Value Range");
+				File choosedFile = fchooser.getSelectedFile();
+				if (choosedFile == null || choosedFile.isDirectory()) {
+					return;
+				}
+
+				if (choosedFile.exists()) {
+					int newFileFlag = JOptionPane.showConfirmDialog(this,
+							"File exists. Do you want to replace it ?",
+									this.getTitle(),
+									JOptionPane.YES_NO_OPTION);
+					if (newFileFlag == JOptionPane.NO_OPTION) {
+						return;
+					}
+				}
+
+				PrintWriter out = null;
+
+				try {
+					out = new PrintWriter(new BufferedWriter(new FileWriter(choosedFile)));
+				} 
+				catch (Exception ex) { 
+					out = null; 
+				}
+
+				if (out == null)
+					return;
+
+				int cols = 3;
+				int rows = 256;
+				int rgb = 0;
+				for (int i=0; i<rows; i++) {
+					out.print(i);
+					for (int j=0; j<cols; j++) {
+						out.print(' ');
+						rgb = imagePalette[j][i];
+						if (rgb<0) rgb += 256;
+						out.print(rgb);
+					}
+					out.println();
+				}
+
+				out.flush();
+				out.close();
+			}
+		});
+		
+		new MenuItem(menuBar, SWT.SEPARATOR);
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Set Value Range");
 		item.setEnabled(!isTrueColor);
-		item.addActionListener(this);
-		item.setActionCommand("Set data range");
-		menu.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (originalRange == null || originalRange[0] == originalRange[1]) return;
+				
+				// Call only once
+				if (dataDist == null) {
+					dataDist = new int[256];
+					Tools.findDataDist(data, dataDist, originalRange);
+				}
+				
+				DataRangeDialog drd = new DataRangeDialog((JFrame) viewer, dataRange, originalRange,dataDist);
+				double[] drange = drd.getRange();
+
+				if ((drange == null)
+						|| (drange[0] == drange[1])
+						|| ((drange[0] == dataRange[0]) && (drange[1] == dataRange[1]))) {
+					return;
+				}
+
+				applyDataRange(drange);
+			}
+		});
+
 		// no need for byte data
 		// commented out for 2.6. May also need to apply range filter to byte
 		// data.
@@ -589,118 +741,233 @@ ActionListener {
 		// }
 		// } catch (Exception ex) {}
 
-		menu.addSeparator();
+		new MenuItem(menuBar, SWT.SEPARATOR);
 
-		item = new JMenuItem("Show Histogram");
-		item.addActionListener(this);
-		item.setActionCommand("Show chart");
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Show Histogram");
 		item.setEnabled(!isTrueColor);
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				showHistogram();
+			}
+		});
 		rotateRelatedItems.add(item);
-		menu.add(item);
 
-		menu.addSeparator();
+		new MenuItem(menuBar, SWT.SEPARATOR);
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Zoom In");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				zoomIn();
+			}
+		});
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Zoom Out");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				zoomOut();
+			}
+		});
 
-		item = new JMenuItem("Zoom In");
-		item.addActionListener(this);
-		item.setActionCommand("Zoom in");
-		menu.add(item);
+		new MenuItem(menuBar, SWT.SEPARATOR);
+		
+		item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("Flip Image");
+		
+		Menu flipMenu = new Menu(item);
+		item.setMenu(flipMenu);
 
-		item = new JMenuItem("Zoom Out");
-		item.addActionListener(this);
-		item.setActionCommand("Zoom out");
-		menu.add(item);
-
-		menu.addSeparator();
-
-		JMenu imageMenu = new JMenu("Flip");
-		menu.add(imageMenu);
-
-		item = new JMenuItem("Horizontal");
-		item.addActionListener(this);
-		item.setActionCommand("Flip horizontal");
-		imageMenu.add(item);
-
-		item = new JMenuItem("Vertical");
-		item.addActionListener(this);
-		item.setActionCommand("Flip vertical");
-		imageMenu.add(item);
-
-		imageMenu = new JMenu("Rotate Image");
-		menu.add(imageMenu);
-
+		item = new MenuItem(flipMenu, SWT.NONE);
+		item.setText("Horizontal");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				flip(FLIP_HORIZONTAL);
+			}
+		});
+		
+		item = new MenuItem(flipMenu, SWT.NONE);
+		item.setText("Vertical");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				flip(FLIP_VERTICAL);
+			}
+		});
+		
+		item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("Rotate Image");
+		
+		Menu rotateMenu = new Menu(item);
+		item.setMenu(rotateMenu);
+		
 		char t = 186;
-		item = new JMenuItem("90" + t + " CW");
-		item.addActionListener(this);
-		item.setActionCommand("Rotate clockwise");
-		imageMenu.add(item);
+		
+		item = new MenuItem(rotateMenu, SWT.NONE);
+		item.setText("90" + t + " CW");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				rotate(ROTATE_CW_90);
+				
+				int n = rotateRelatedItems.size();
+				for (int i = 0; i < n; i++) {
+					boolean itemState = (rotateCount == 0);
+					((Composite) rotateRelatedItems.get(i)).setEnabled(itemState);
+				}
+			}
+		});
+		
+		item = new MenuItem(rotateMenu, SWT.NONE);
+		item.setText("90" + t + " CCW");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				rotate(ROTATE_CCW_90);
+				
+				int n = rotateRelatedItems.size();
+				for (int i = 0; i < n; i++) {
+					boolean itemState = (rotateCount == 0);
+					((Composite) rotateRelatedItems.get(i)).setEnabled(itemState);
+				}
+			}
+		});
+		
+		new MenuItem(menuBar, SWT.SEPARATOR);
 
-		item = new JMenuItem("90" + t + " CCW");
-		item.addActionListener(this);
-		item.setActionCommand("Rotate counter clockwise");
-		imageMenu.add(item);
-
-		menu.addSeparator();
-
-		item = new JMenuItem("Brightness/Contrast");
-		item.addActionListener(this);
-		item.setActionCommand("Brightness");
-		menu.add(item);
-
-		JMenu contourMenu = new JMenu("Contour");
-		for (int i = 3; i < 10; i=i+2) {
-			item = new JMenuItem(String.valueOf(i));
-			item.addActionListener(this);
-			item.setActionCommand("Contour " + i);
-			contourMenu.add(item);
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Brightness/Contrast");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (contrastSlider == null)
+					contrastSlider = new ContrastSlider((JFrame) viewer, image.getSource());
+				
+				contrastSlider.setVisible(true);
+			}
+		});
+		
+		item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("Contour");
+		
+		Menu contourMenu = new Menu(item);
+		item.setMenu(contourMenu);
+		
+		for (int i = 3; i < 10; i += 2) {
+			item = new MenuItem(contourMenu, SWT.NONE);
+			item.setText(String.valueOf(i));
+			item.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					contour(i);
+				}
+			});
 		}
-		menu.add(contourMenu);
 
-		menu.addSeparator();
-
-		item = new JMenuItem("Show Animation");
-		item.addActionListener(this);
-		item.setActionCommand("Show animation");
+		new MenuItem(menuBar, SWT.SEPARATOR);
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Show Animation");
 		item.setEnabled(is3D);
-		menu.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				new Animation((JFrame) viewer, dataset);
+				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			}
+		});
 
-		JMenu animationMenu = new JMenu("Animation (frames/second)");
-		for (int i = 2; i < 12; i = i + 2) {
-			item = new JMenuItem(String.valueOf(i));
-			item.addActionListener(this);
-			item.setActionCommand("Animation speed " + i);
-			animationMenu.add(item);
+		item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("Animation Speed (frames/second)");
+		item.setEnabled(is3D);
+		
+		Menu animationSpeedMenu = new Menu(item);
+		item.setMenu(animationSpeedMenu);
+		
+		for (int i = 2; i < 12; i += 2) {
+			item = new MenuItem(animationSpeedMenu, SWT.NONE);
+			item.setText(String.valueOf(i));
+			item.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					animationSpeed = i;
+				}
+			});
 		}
-		animationMenu.setEnabled(is3D);
-		menu.add(animationMenu);
-		menu.addSeparator();
+		
+		new MenuItem(menuBar, SWT.SEPARATOR);
 
-		JCheckBoxMenuItem imageValueCheckBox = new JCheckBoxMenuItem(
-				"Show Value", false);
-		imageValueCheckBox.addActionListener(this);
-		imageValueCheckBox.setActionCommand("Show image value");
-		imageValueCheckBox.setSelected(ViewProperties.showImageValues());
+		item = new MenuItem(menuBar, SWT.CHECK);
+		item.setText("Show Value");
+		item.setSelection(ViewProperties.showImageValues());
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setValueVisible(e.getSource().getSelection());
+			}
+		});
 		rotateRelatedItems.add(imageValueCheckBox);
-		imageValueCheckBox.setName("showvaluebutton");
-		menu.add(imageValueCheckBox);
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Show Statistics");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					double[] minmax = new double[2];
+					double[] stat = new double[2];
 
-		item = new JMenuItem("Show Statistics");
-		item.addActionListener(this);
-		item.setActionCommand("Show statistics");
-		menu.add(item);
+					Object theData = null;
+					theData = getSelectedData();
 
-		menu.addSeparator();
+					if (theData == null) {
+						theData = data;
+					}
 
-		item = new JMenuItem("Select All");
-		item.addActionListener(this);
-		item.setActionCommand("Select all data");
-		menu.add(item);
+					Tools.findMinMax(theData, minmax, dataset.getFillValue());
+					if (Tools.computeStatistics(theData, stat, dataset.getFillValue()) > 0) {
+						String statistics = "Min                      = "
+						+ minmax[0] + "\nMax                      = "
+						+ minmax[1] + "\nMean                     = "
+						+ stat[0] + "\nStandard deviation = " + stat[1];
+						
+						MessageBox info = new MessageBox( , SWT.ICON_INFORMATION | SWT.OK);
+						info.setMessage(statistics);
+						info.setText("Statistics");
+						info.open();
+					}
+				}
+				catch (Exception ex) {
+					Display.getCurrent().beep();
+					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+					error.setMessage(ex.getMessage());
+					error.setText(.getText());
+					error.open();
+				}
+			}
+		});
 
-		menu.addSeparator();
+		new MenuItem(menuBar, SWT.SEPARATOR);
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Select All");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					selectAll();
+				}
+				catch (Exception ex) {
+					Display.getCurrent().beep();
+					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+					error.setMessage(ex.getMessage());
+					error.setText(.getText());
+					error.open();
+				}
+			}
+		});
 
-		item = new JMenuItem("Close");
-		item.addActionListener(this);
-		item.setActionCommand("Close");
-		menu.add(item);
+		new MenuItem(menuBar, SWT.SEPARATOR);
+		
+		item = new MenuItem(menuBar, SWT.NONE);
+		item.setText("Close");
+		item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				.dispose();
+			}
+		});
 
 		bar.add(new JLabel("       "));
 
@@ -821,7 +1088,7 @@ ActionListener {
 
 		}
 
-		return bar;
+		return menuBar;
 	}
 
 	// Implementing DataObserver.
@@ -1172,8 +1439,7 @@ ActionListener {
 
 		if (isTrueColor) {
 			toolkit.beep();
-			JOptionPane
-			.showMessageDialog(
+			JOptionPane.showMessageDialog(
 					this,
 					"Unsupported operation: unable to draw histogram for true color image.",
 					getTitle(), JOptionPane.ERROR_MESSAGE);
@@ -1445,224 +1711,6 @@ ActionListener {
 		try {
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-			Object source = e.getSource();
-			String cmd = e.getActionCommand();
-
-			if (cmd.equals("Close")) {
-				dispose(); // terminate the application
-				((Vector) rotateRelatedItems).setSize(0);
-			}
-			else if (cmd.startsWith("Save image as ")) {
-				String filetype = null;
-				if (cmd.equals("Save image as jpeg")) {
-					filetype = Tools.FILE_TYPE_JPEG;
-				}
-				else if (cmd.equals("Save image as tiff")) {
-					filetype = Tools.FILE_TYPE_TIFF;
-				}
-				else if (cmd.equals("Save image as png")) {
-					filetype = Tools.FILE_TYPE_PNG;
-				}
-				else if (cmd.equals("Save image as gif")) {
-					filetype = Tools.FILE_TYPE_GIF;
-				}
-				else if (cmd.equals("Save image as bmp")) {
-					filetype = Tools.FILE_TYPE_BMP;
-				}
-
-				try {
-					saveImageAs(filetype);
-				}
-				catch (Exception ex) {
-					toolkit.beep();
-					JOptionPane.showMessageDialog(this, ex, getTitle(),
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-			else if (cmd.equals("Write selection to image")) {
-				if ((getSelectedArea().width <= 0)
-						|| (getSelectedArea().height <= 0)) {
-					JOptionPane
-					.showMessageDialog(
-							this,
-							"No data to write.\nUse Shift+Mouse_drag to select an image area.",
-							"HDFView", JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
-
-				TreeView treeView = viewer.getTreeView();
-				//TreeNode node = treeView.findTreeNode(dataset);
-				//Group pGroup = (Group) ((DefaultMutableTreeNode) node
-				//		.getParent()).getUserObject();
-				HObject root = dataset.getFileFormat().getRootObject();
-
-				if (root == null) {
-					return;
-				}
-
-				Vector list = new Vector(dataset.getFileFormat()
-						.getNumberOfMembers() + 5);
-				DefaultMutableTreeNode theNode = null;
-				Enumeration local_enum = root.depthFirstEnumeration();
-
-				while (local_enum.hasMoreElements()) {
-					theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-					list.add(theNode.getUserObject());
-				}
-
-				/*
-				NewDatasetDialog dialog = new NewDatasetDialog((JFrame) viewer,
-						pGroup, list, this);
-				dialog.setVisible(true);
-
-				HObject obj = (HObject) dialog.getObject();
-				if (obj != null) {
-					Group pgroup = dialog.getParentGroup();
-					try {
-						treeView.addObject(obj, pgroup);
-					}
-					catch (Exception ex) {
-						log.debug("Write selection to image:", ex);
-					}
-				}
-				*/
-
-				list.setSize(0);
-			}
-			else if (cmd.equals("Zoom in")) {
-				zoomIn();
-			}
-			else if (cmd.equals("Zoom out")) {
-				zoomOut();
-			}
-			else if (cmd.equals("Edit palette")) {
-				showColorTable();
-			}
-			else if (cmd.equals("Import palette")) {
-				JFileChooser fchooser = new JFileChooser(ViewProperties
-						.getWorkDir());
-				int returnVal = fchooser.showOpenDialog(this);
-
-				if (returnVal != JFileChooser.APPROVE_OPTION) {
-					return;
-				}
-
-				File choosedFile = fchooser.getSelectedFile();
-				if (choosedFile == null || choosedFile.isDirectory()) {
-					return;
-				}
-
-				Vector<String> palList = ViewProperties.getPaletteList();
-				String palPath = choosedFile.getAbsolutePath();
-				if(!palList.contains(palList))
-					palList.addElement(palPath);
-			}
-			else if (cmd.equals("Export palette")) {
-				if (imagePalette == null)
-					return;
-
-				String wd =ViewProperties.getWorkDir()+File.separator;
-				JFileChooser fchooser = new JFileChooser(wd);
-				FileNameExtensionFilter filter = new FileNameExtensionFilter("Color lookup table", "lut");
-				File pfile = Tools.checkNewFile(wd, ".lut");
-				fchooser.setSelectedFile(pfile);
-				fchooser.setFileFilter(filter);
-				int returnVal = fchooser.showOpenDialog(this);
-
-				if (returnVal != JFileChooser.APPROVE_OPTION) {
-					return;
-				}
-
-				File choosedFile = fchooser.getSelectedFile();
-				if (choosedFile == null || choosedFile.isDirectory()) {
-					return;
-				}
-
-				if (choosedFile.exists())
-				{
-					int newFileFlag = JOptionPane.showConfirmDialog(this,
-							"File exists. Do you want to replace it ?",
-									this.getTitle(),
-									JOptionPane.YES_NO_OPTION);
-					if (newFileFlag == JOptionPane.NO_OPTION) {
-						return;
-					}
-				}
-
-				PrintWriter out = null;
-
-				try {
-					out = new PrintWriter(new BufferedWriter(new FileWriter(choosedFile)));
-				} 
-				catch (Exception ex) { 
-					out = null; 
-				}
-
-				if (out == null)
-					return;
-
-				int cols = 3;
-				int rows = 256;
-				int rgb = 0;
-				for (int i=0; i<rows; i++) {
-					out.print(i);
-					for (int j=0; j<cols; j++) {
-						out.print(' ');
-						rgb = imagePalette[j][i];
-						if (rgb<0) rgb += 256;
-						out.print(rgb);
-					}
-					out.println();
-				}
-
-				out.flush();
-				out.close();
-			}
-			else if (cmd.equals("Set data range")) {
-
-				if (originalRange==null || originalRange[0]== originalRange[1])
-					return;
-
-				// call only once
-				if (dataDist == null) {
-					dataDist = new int[256];
-					Tools.findDataDist(data, dataDist, originalRange);
-				}
-
-				DataRangeDialog drd = new DataRangeDialog((JFrame) viewer, dataRange, originalRange,dataDist);
-				double[] drange = drd.getRange();
-
-				if ((drange == null)
-						|| (drange[0] == drange[1])
-						|| ((drange[0] == dataRange[0]) && (drange[1] == dataRange[1]))) {
-					return;
-				}
-
-				applyDataRange(drange);
-			}
-			else if (cmd.equals("Flip horizontal")) {
-				flip(FLIP_HORIZONTAL);
-			}
-			else if (cmd.equals("Flip vertical")) {
-				flip(FLIP_VERTICAL);
-			}
-			else if (cmd.startsWith("Rotate")) {
-				if (cmd.equals("Rotate clockwise"))
-					rotate(ROTATE_CW_90);
-				else
-					rotate(ROTATE_CCW_90);
-
-				int n = rotateRelatedItems.size();
-				for (int i = 0; i < n; i++) {
-					boolean itemState = (rotateCount == 0);
-					((javax.swing.JComponent) rotateRelatedItems.get(i))
-					.setEnabled(itemState);
-				}
-			}
-			else if (cmd.equals("Show image value")) {
-				boolean b = ((JCheckBoxMenuItem) source).getState();
-				setValueVisible(b);
-			}
 			else if (cmd.startsWith("Go to frame")) {
 				int page = 0;
 				try {
@@ -1673,29 +1721,6 @@ ActionListener {
 				}
 
 				gotoPage (page);
-			}
-			else if (cmd.startsWith("Show animation")) {
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				new Animation((JFrame) viewer, dataset);
-				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-			else if (cmd.startsWith("Animation speed")) {
-				animationSpeed = Integer.parseInt((cmd
-						.substring(cmd.length() - 2)).trim());
-			}
-
-			else if (cmd.startsWith("Contour")) {
-				int level = Integer.parseInt(cmd.substring(cmd.length() - 1));
-				contour(level);
-			}
-			else if (cmd.startsWith("Brightness")) {
-				if (contrastSlider == null) {
-					//contrastSlider = new ContrastSlider((JFrame) viewer, image.getSource());
-				}
-				contrastSlider.setVisible(true);
-			}
-			else if (cmd.equals("Show chart")) {
-				showHistogram();
 			}
 			else if (cmd.equals("First page")) {
 				firstPage();
@@ -1709,49 +1734,10 @@ ActionListener {
 			else if (cmd.equals("Last page")) {
 				lastPage();
 			}
-			else if (cmd.equals("Show statistics")) {
-				try {
-					double[] minmax = new double[2];
-					double[] stat = new double[2];
-
-					Object theData = null;
-					theData = getSelectedData();
-
-					if (theData == null) {
-						theData = data;
-					}
-
-					Tools.findMinMax(theData, minmax, dataset.getFillValue());
-					if (Tools.computeStatistics(theData, stat, dataset.getFillValue()) > 0) {
-						String statistics = "Min                      = "
-						+ minmax[0] + "\nMax                      = "
-						+ minmax[1] + "\nMean                     = "
-						+ stat[0] + "\nStandard deviation = " + stat[1];
-						JOptionPane.showMessageDialog(this, statistics,
-								"Statistics", JOptionPane.INFORMATION_MESSAGE);
-					}
-				}
-				catch (Exception ex) {
-					toolkit.beep();
-					JOptionPane.showMessageDialog((JFrame) viewer, ex,
-							getTitle(), JOptionPane.ERROR_MESSAGE);
-				}
-			}
-			else if (cmd.equals("Select all data")) {
-				try {
-					selectAll();
-				}
-				catch (Exception ex) {
-					toolkit.beep();
-					JOptionPane.showMessageDialog((JFrame) viewer, ex,
-							getTitle(), JOptionPane.ERROR_MESSAGE);
-				}
-			}
 		}
 		finally {
 			setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
-
 	}
 
 	public void dispose() {
@@ -1963,11 +1949,12 @@ ActionListener {
 		long[] dims = dataset.getDims();
 
 		if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
-			toolkit.beep();
-			JOptionPane.showMessageDialog(this,
-					"Frame number must be between "+indexBase+" and "
-					+ (dims[selectedIndex[2]] - 1+indexBase), getTitle(),
-					JOptionPane.ERROR_MESSAGE);
+			Display.getCurrent().beep();
+			MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+			error.setMessage("Frame number must be between " + indexBase + 
+					         " and " + (dims[selectedIndex[2]] - 1+indexBase));
+			error.setText(.getText());
+			error.open();
 			return;
 		}
 
@@ -2097,9 +2084,11 @@ ActionListener {
 			zoomTo(zoomFactor);
 		}
 		catch (Throwable err) {
-			toolkit.beep();
-			JOptionPane.showMessageDialog(this, err.getMessage(), getTitle(),
-					JOptionPane.ERROR_MESSAGE);
+			Display.getCurrent().beeep();
+			MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
+			error.setMessage(err.getMessage());
+			error.setText(.getText());
+			error.open();
 			status = false;
 		}
 
@@ -2129,8 +2118,8 @@ ActionListener {
 		dataRange[1] = newRange[1];
 	}
 
-	/** PaletteComponent draws the palette on the side of the image. */
-	private class PaletteComponent extends JComponent {
+	/** PaletteCanvas draws the palette on the side of the image. */
+	private class PaletteCanvas extends Canvas {
 		private static final long serialVersionUID = -5194383032992628565L;
 		private Color[] colors = null;
 		private double[] pixelData = null;
@@ -2138,7 +2127,7 @@ ActionListener {
 		java.text.DecimalFormat format;
 		double[] dRange = null;
 
-		private PaletteComponent(byte[][] palette, double[] range) {
+		private PaletteCanvas(byte[][] palette, double[] range) {
 			paintSize = new Dimension(25, 2);
 			format = new java.text.DecimalFormat("0.00E0");
 			dRange = range;
@@ -2599,7 +2588,7 @@ ActionListener {
 	} // private class ImageComponent extends JComponent
 
 	/**
-	 * FlipFileter creates image filter to flip image horizontally or
+	 * FlipFilter creates image filter to flip image horizontally or
 	 * vertically.
 	 */
 	private class FlipFilter extends ImageFilter {

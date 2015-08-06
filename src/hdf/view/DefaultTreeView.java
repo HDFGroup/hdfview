@@ -36,7 +36,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -92,7 +91,7 @@ public class DefaultTreeView implements TreeView {
     /**
      * The super root of tree: all open files start at this root.
      */
-    private final TreeItem				  root;
+    //private final TreeItem				  root;
 
     /**
      * The tree which holds file structures.
@@ -177,7 +176,7 @@ public class DefaultTreeView implements TreeView {
         selectedItem = null;
         moveFlag = false;
         //currentSelectionsForMove = null;
-        root = null;
+        //root = null;
         
         // Initialize the tree and root item
         tree = new Tree(parent, SWT.MULTI | SWT.VIRTUAL);
@@ -476,7 +475,7 @@ public class DefaultTreeView implements TreeView {
         		}
         		catch (Exception ex) {
         			shell.getDisplay().beep();
-        			showError(ex.getMessage(), null);
+        			showError(ex.getMessage(), shell.getText());
         		}
         	}
         });
@@ -492,7 +491,7 @@ public class DefaultTreeView implements TreeView {
         		}
         		catch (Exception ex) {
         			shell.getDisplay().beep();
-        			showError(ex.getMessage(), null);
+        			showError(ex.getMessage(), shell.getText());
         		}
         	}
         });
@@ -1636,10 +1635,7 @@ public class DefaultTreeView implements TreeView {
     
     private void showError(String errorMsg, String title) {
     	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-    	if (title == null)
-    		error.setText(shell.getText());
-    	else
-    		error.setText(title);
+    	error.setText(title);
     	error.setMessage(errorMsg);
     	error.open();
     }
@@ -2410,13 +2406,13 @@ public class DefaultTreeView implements TreeView {
         private Button checkIndexType;
         private Button checkIndexOrder;
         private Button checkIndexNative;
-    
+        
         private boolean reloadFile;
         
         private FileFormat selectedFile;
         private int indexType;
         private int indexOrder;
-    
+        
         /**
          * constructs an UserOptionsDialog.
          * 

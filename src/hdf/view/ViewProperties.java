@@ -31,6 +31,7 @@ import java.util.jar.JarFile;
 import org.eclipse.swt.graphics.Image;
 
 import hdf.object.FileFormat;
+import hdf.HDFVersions;
 
 public class ViewProperties extends Properties {
     private static final long   serialVersionUID     = -6411465283887959066L;
@@ -38,7 +39,7 @@ public class ViewProperties extends Properties {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
     
     /** the version of the HDFViewer */
-    public static final String  VERSION              = "3.99";
+    public static final String  VERSION              = HDFVersions.HDFVIEW_VERSION;
 
     /** the local property file name */
     private static final String USER_PROPERTY_FILE   = ".hdfview" + VERSION;

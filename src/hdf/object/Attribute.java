@@ -22,12 +22,12 @@ import java.util.Map;
 
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data
- * object such as dataset, group or named datatype.
+ * object such as a dataset, group or named datatype.
  * <p>
  * Like a dataset, an attribute has a name, datatype and dataspace.
  * 
  * <p>
- * For more details on attibutes, see {@link <a
+ * For more details on attributes, see {@link <a
  * href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
  * <p>
  * 

@@ -26,8 +26,8 @@ import hdf.object.HObject;
 /**
  * 
  * <p>
- * TreeView defines APIs for open a file and display the file structure in tree
- * structure.
+ * TreeView defines APIs for opening a file and displaying the file structure in 
+ * a tree structure.
  * </p>
  * 
  * <p>
@@ -37,8 +37,8 @@ import hdf.object.HObject;
  * </p>
  * 
  * <p>
- * From the TreeView, you can open data content or metadata of selected object.
- * You can select object(s) to delete or add new object to the file.
+ * From the TreeView, you can open the data content or metadata of the selected 
+ * object. You can select object(s) to delete or add new objects to the file.
  * </p>
  * 
  * @author Peter X. Cao
@@ -68,8 +68,7 @@ public abstract interface TreeView {
      *         null.
      */
     public abstract FileFormat openFile(String filename, int accessID) throws Exception;
-    public abstract FileFormat reopenFile(FileFormat theFile)
-            throws Exception;
+    public abstract FileFormat reopenFile(FileFormat theFile) throws Exception;
 
     /**
      * close a file

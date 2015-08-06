@@ -34,7 +34,7 @@ public abstract interface ImageView extends DataView {
     /** @return true if the image is a truecolor image. */
     public abstract boolean isTrueColor();
 
-    /** @return true if the image interlace is plance interlace. */
+    /** @return true if the image interlace is plane interlace. */
     public abstract boolean isPlaneInterlace();
 
     /** Returns array of selected data */

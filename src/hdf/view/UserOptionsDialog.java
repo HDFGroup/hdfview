@@ -788,7 +788,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
             }
         }
         /*
-         * else if (cmd.equals("Add srb connsction")) { String srbaccount[] =
+         * else if (cmd.equals("Add srb connection")) { String srbaccount[] =
          * new String[7]; for (int i=0; i<7; i++) { srbaccount[i] =
          * srbFields[i].getText(); if (srbaccount[i] == null) { return; } }
          * DefaultListModel lm = (DefaultListModel)srbJList.getModel();

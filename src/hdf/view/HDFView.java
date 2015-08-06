@@ -27,11 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JOptionPane;
-
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -64,6 +59,8 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
+import hdf.HDFVersions;
+
 /**
  * HDFView is the main class of this HDF visual tool. It is used to layout the
  * graphical components of the hdfview. The major GUI components of the HDFView
@@ -73,7 +70,7 @@ import hdf.object.ScalarDS;
  * the HDF library. All the HDF library access is done through HDF objects.
  * Therefore, the HDFView package depends on the object package but not the
  * library package. The source code of the view package (hdf.view) should
- * be complied with the library package (hdf.hdflib and hdf.hdf5lib).
+ * be compiled with the library package (hdf.hdflib and hdf.hdf5lib).
  * 
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
@@ -131,9 +128,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 	
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 	
-	private static final String 	HDF4_VERSION = "HDF 4.2.10";
-	private static final String 	HDF5_VERSION = "HDF5 1.8.13";
-	private static final String 	HDFVIEW_VERSION = "HDFView 3.99";
+	private static final String 	HDF4_VERSION = HDFVersions.HDF4_VERSION;
+	private static final String 	HDF5_VERSION = HDFVersions.HDF5_VERSION;
+	private static final String 	HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
 	private static final String 	HDFVIEW_USERSGUIDE_URL = "http://www.hdfgroup.org/products/java/hdfview/UsersGuide/index.html";
 	private static final String 	JAVA_COMPILER = "jdk 1.7";
 	private static final String		JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
@@ -290,9 +287,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		// Make sure all GUI components are in place before
 		// opening any files
-		mainWindow.pack();
+		mainWindow.pack(); // Is this needed here?
 		
-		/*
 		int nfiles = flist.size();
 		File theFile = null;
 		for (int i = 0; i < nfiles; i++) {
@@ -320,8 +316,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 			
 			log.info("CurrentDir is {}", currentDir);
-		} */
-		
+		}
 		
 		if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null)
 			setEnabled(h4GUIs, false);
@@ -419,7 +414,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         //}
         
         // splitPane.setDividerLocation(d.height - 180);	
-		mainWindow.setLocation(0, 0);
+		mainWindow.setLocation(x, y);
 		mainWindow.setMinimumSize(winDim.x, winDim.y);
 		
 		log.info("Main Window created");
@@ -552,15 +547,14 @@ public class HDFView implements ViewManager, DropTargetListener {
 			public void widgetSelected(SelectionEvent e) {
 				closeAllWindows();
 				
-				//List<FileFormat> files = treeView.getCurrentFiles();
-				//while (!files.isEmpty()) {
-				//	try {
-				//		treeView.closeFile(files.get(0));
-				//	} catch (Exception ex) {
-				//		
-				//	}
-				//}
-				notYetImplemented();
+				List<FileFormat> files = treeView.getCurrentFiles();
+				while (!files.isEmpty()) {
+					try {
+						treeView.closeFile(files.get(0));
+					} catch (Exception ex) {
+						
+					}
+				}
 				
 				currentFile = null;
 				attributeArea.setText("");
@@ -573,45 +567,38 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_11.setText("&Save");
 		menuItem_11.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				/*
+				if (treeView.getCurrentFiles().size() <= 0) {
+					showError("No files currently open.", mainWindow.getText());
+					return;
+				}
+				
 				// Save what has been changed in memory into file
 				try {
 					FileFormat file = treeView.getSelectedFile();
-					//List<> views = getDataViews(); Was JInternalFrames, need different
+					List<Shell> views = getDataViews();
 					Object theView = null;
 					TableView tableView = null;
 					TextView textView = null;
 					FileFormat theFile = null;
 					
-					if (views != null) {
-						int n = views.size();
+					for (Iterator<Shell> i = views.iterator(); i.hasNext(); ) {
+						theView = i.next();
 						
-						for (int i = 0; i < n; i++) {
-							theView = views.get(i);
-							
-							if (theView instanceof TableView) {
-								tableView = (TableView) theView;
-								theFile = tableView.getDataObject().getFileFormat();
-								if (file.equals(theFile))
-									tableView.updateValueInFile();
-							}
-							else if (theView instanceof TextView) {
-								textView = (TextView) theView;
-								theFile = textView.getDataObject().getFileFormat();
-								if (file.equals(theFile))
-									textView.updateValueInFile();
-							}
+						if (theView instanceof TableView) {
+							tableView = (TableView) theView;
+							theFile = tableView.getDataObject().getFileFormat();
+							if (file.equals(theFile)) tableView.updateValueInFile();
+						}
+						else if (theView instanceof TextView) {
+							textView = (TextView) theView;
+							theFile = textView.getDataObject().getFileFormat();
+							if (file.equals(theFile)) textView.updateValueInFile();
 						}
 					}
 				} catch (Exception ex) {
 					display.beep();
-					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-					error.setText(mainWindow.getText());
-					error.setMessage(ex.getMessage());
-					error.open();
+					showError(ex.getMessage(), mainWindow.getText());
 				}
-				*/
-				notYetImplemented();
 			}
 		});
 		
@@ -619,18 +606,17 @@ public class HDFView implements ViewManager, DropTargetListener {
 		menuItem_12.setText("S&ave As");
 		menuItem_12.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				/*
+				if (treeView.getCurrentFiles().size() <= 0) {
+					showError("No files currently open.", mainWindow.getText());
+					return;
+				}
+				
 				try {
 					treeView.saveFile(treeView.getSelectedFile());
 				} catch (Exception ex) {
 					display.beep();
-					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-					error.setText(mainWindow.getText());
-					error.setMessage(ex.getMessage());
-					error.open();
+					showError(ex.getMessage(), mainWindow.getText());
 				}
-				*/
-				notYetImplemented();
 			}
 		});
 		
@@ -786,18 +772,15 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		/*
 		if ((helpViews != null) && (helpViews.size() > 0)) {
             int n = helpViews.size();
             for (int i = 0; i < n; i++) {
                 HelpView theView = (HelpView) helpViews.get(i);
-                item = new JMenuItem(theView.getLabel());
-                item.setActionCommand(theView.getActionCommand());
-                item.addActionListener(this);
-                menu.add(item);
+                MenuItem item = new MenuItem(menu_7, SWT.NONE);
+                item.setText(theView.getLabel());
+                //item.setActionCommand(theView.getActionCommand());
             }
-            menu.addSeparator();
-        }*/
+        }
 		
 		new MenuItem(menu_7, SWT.SEPARATOR);
 		
@@ -976,6 +959,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		url_bar.setItems(ViewProperties.getMRF().toArray(new String[0]));
 		url_bar.setText("/root/workspace/hdf-java/build/test/uitest/hdf5_test.h5");
 		url_bar.setVisibleItemCount(ViewProperties.MAX_RECENT_FILES);
+		url_bar.deselectAll();
 		url_bar.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if(e.keyCode == SWT.CR) {
@@ -998,7 +982,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 				}
 			}
 		});
-		url_bar.deselectAll();
 		
 		Button btnRecentFiles = new Button(url_toolbar, SWT.NONE);
 		btnRecentFiles.setText("Recent Files");
@@ -1024,10 +1007,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 	}
 	
 	private void createContentArea() {
-		//Composite content = new Composite(mainWindow, SWT.NONE);
-		//content.setLayoutData(BorderLayout.CENTER);
-		//content.setLayout(new FillLayout(SWT.HORIZONTAL));
-		
 		SashForm content = new SashForm(mainWindow, SWT.VERTICAL);
 		content.setSashWidth(10);
 		
@@ -1323,10 +1302,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     
     private void showError(String errorMsg, String title) {
     	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-    	if (title == null)
-    		error.setText(mainWindow.getText());
-    	else
-    		error.setText(title);
+    	error.setText(title);
     	error.setMessage(errorMsg);
     	error.open();
     }
@@ -1518,7 +1494,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	
     	shell.getDisplay().asyncExec(new Runnable() {
     		public void run() {
-    			shell.setActive();
+    			shell.forceActive();
     		}
     	});
     }
@@ -1654,7 +1630,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     		catch (Throwable ex2) {
     			display.beep();
     			url_bar.deselectAll();
-    			showError("Failed to open file " + currentFile + "\n" + ex2, null);
+    			showError("Failed to open file " + currentFile + "\n" + ex2, mainWindow.getText());
     			currentFile = null;
     		}
     	}
@@ -1699,7 +1675,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	} catch (Exception ex) {
     		url = null;
     		display.beep();
-    		showError(ex.getMessage(), null);
+    		showError(ex.getMessage(), mainWindow.getText());
     		return null;
     	}
     	
@@ -1712,7 +1688,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     	} catch (Exception ex) {
     		in = null;
     		display.beep();
-    		showError(ex.getMessage(), null);
+    		showError(ex.getMessage(), mainWindow.getText());
     		
     		try {
     			out.close();
@@ -1796,7 +1772,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     private void closeFile(FileFormat theFile) {
     	if (theFile == null) {
     		display.beep();
-    		showError("Select a file to close", null);
+    		showError("Select a file to close", mainWindow.getText());
     		return;
     	}
     	
@@ -1862,7 +1838,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
     
     private void notYetImplemented() {
-    	showError("Functionality not yet implemented.", null);
+    	showError("Functionality not yet implemented.", mainWindow.getText());
     }
     
     private class LibraryVersionDialog extends Dialog {

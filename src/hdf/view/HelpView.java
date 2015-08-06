@@ -26,7 +26,7 @@ public abstract interface HelpView {
     public abstract void show();
 
     /**
-     * Returns the HelpView's label, which is used to displayed in the HDFVIew
+     * Returns the HelpView's label, which is displayed in the HDFView
      * help menu.
      */
     public abstract String getLabel();

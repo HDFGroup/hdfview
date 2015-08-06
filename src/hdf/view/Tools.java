@@ -46,7 +46,7 @@ import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.BITMASK_OP;
 
 /**
- * The "Tools" class contains various of tools for HDF files such as jpeg to HDF
+ * The "Tools" class contains various tools for HDF files such as jpeg to HDF
  * converter.
  * 
  * @author Peter X. Cao
