@@ -531,8 +531,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setText("&Close");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//closeFile(treeView.getSelectedFile());
-				notYetImplemented();
+				closeFile(treeView.getSelectedFile());
 			}
 		});
 		
@@ -874,8 +873,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		tltmNewItem_1.setToolTipText("Close");
 		tltmNewItem_1.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//closeFile(treeView.getSelectedFile());
-				notYetImplemented();
+				closeFile(treeView.getSelectedFile());
 			}
 		});
 		
