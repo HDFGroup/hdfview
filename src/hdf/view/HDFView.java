@@ -422,23 +422,23 @@ public class HDFView implements ViewManager, DropTargetListener {
 		MenuItem menuItem = new MenuItem(menu, SWT.CASCADE);
 		menuItem.setText("&File");
 		
-		Menu menu_2 = new Menu(menuItem);
-		menuItem.setMenu(menu_2);
+		Menu fileMenu = new Menu(menuItem);
+		menuItem.setMenu(fileMenu);
 		
-		MenuItem menuItem_1 = new MenuItem(menu_2, SWT.NONE);
-		menuItem_1.setText("&Open \tCtrl-O");
-		menuItem_1.setAccelerator(SWT.MOD1 + 'O');
-		menuItem_1.addSelectionListener(new SelectionAdapter() {
+		MenuItem item = new MenuItem(fileMenu, SWT.PUSH);
+		item.setText("&Open \tCtrl-O");
+		item.setAccelerator(SWT.MOD1 + 'O');
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openLocalFile(null, FileFormat.WRITE);
 			}
 		});
 		
 		if(!ViewProperties.isReadOnly()) {
-			MenuItem menuItem_2 = new MenuItem(menu_2, SWT.NONE);
-			menuItem_2.setText("Open &Read-Only");
-			menuItem_2.setAccelerator(SWT.MOD1 + 'R');
-			menuItem_2.addSelectionListener(new SelectionAdapter() {
+			item = new MenuItem(fileMenu, SWT.PUSH);
+			item.setText("Open &Read-Only");
+			item.setAccelerator(SWT.MOD1 + 'R');
+			item.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					openLocalFile(null, FileFormat.READ);
 				}
@@ -459,18 +459,18 @@ public class HDFView implements ViewManager, DropTargetListener {
         // fileMenu.add(item);
         // }
 
-		new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(fileMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_4 = new MenuItem(menu_2, SWT.CASCADE);
-		menuItem_4.setText("New");
+		MenuItem fileNewMenu = new MenuItem(fileMenu, SWT.CASCADE);
+		fileNewMenu.setText("New");
 		
-		Menu menu_3 = new Menu(menuItem_4);
-		menuItem_4.setMenu(menu_3);
+		Menu newMenu = new Menu(fileNewMenu);
+		fileNewMenu.setMenu(newMenu);
 		
-		MenuItem menuItem_5 = new MenuItem(menu_3, SWT.NONE);
-		menuItem_5.setText("HDF&4");
-		h4GUIs.add(menuItem_5);
-		menuItem_5.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(newMenu, SWT.PUSH);
+		item.setText("HDF&4");
+		h4GUIs.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				NewFileDialog dialog = new NewFileDialog(mainWindow, currentDir, FileFormat.FILE_TYPE_HDF4, treeView.getCurrentFiles());
 				String filename = dialog.open();
@@ -496,10 +496,10 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		MenuItem menuItem_6 = new MenuItem(menu_3, SWT.NONE);
-		menuItem_6.setText("HDF&5");
-		h5GUIs.add(menuItem_6);
-		menuItem_6.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(newMenu, SWT.PUSH);
+		item.setText("HDF&5");
+		h5GUIs.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				NewFileDialog dialog = new NewFileDialog(mainWindow, currentDir, FileFormat.FILE_TYPE_HDF5, treeView.getCurrentFiles());
 				String filename = dialog.open();
@@ -525,20 +525,20 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(fileMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_8 = new MenuItem(menu_2, SWT.NONE);
-		menuItem_8.setText("&Close");
-		menuItem_8.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(fileMenu, SWT.PUSH);
+		item.setText("&Close");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				//closeFile(treeView.getSelectedFile());
 				notYetImplemented();
 			}
 		});
 		
-		MenuItem menuItem_9 = new MenuItem(menu_2, SWT.NONE);
-		menuItem_9.setText("Close &All");
-		menuItem_9.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(fileMenu, SWT.PUSH);
+		item.setText("Close &All");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				closeAllWindows();
 				
@@ -556,11 +556,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(fileMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_11 = new MenuItem(menu_2, SWT.NONE);
-		menuItem_11.setText("&Save");
-		menuItem_11.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(fileMenu, SWT.PUSH);
+		item.setText("&Save");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (treeView.getCurrentFiles().size() <= 0) {
 					showError("No files currently open.", mainWindow.getText());
@@ -597,9 +597,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		MenuItem menuItem_12 = new MenuItem(menu_2, SWT.NONE);
-		menuItem_12.setText("S&ave As");
-		menuItem_12.addSelectionListener(new SelectionAdapter() {
+	    item = new MenuItem(fileMenu, SWT.PUSH);
+		item.setText("S&ave As");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (treeView.getCurrentFiles().size() <= 0) {
 					showError("No files currently open.", mainWindow.getText());
@@ -615,46 +615,46 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(fileMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_14 = new MenuItem(menu_2, SWT.NONE);
-		menuItem_14.setText("E&xit \tCtrl-Q");
-		menuItem_14.setAccelerator(SWT.MOD1 + 'Q');
-		menuItem_14.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(fileMenu, SWT.PUSH);
+		item.setText("E&xit \tCtrl-Q");
+		item.setAccelerator(SWT.MOD1 + 'Q');
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				display.dispose();
 			}
 		});
 		
-		MenuItem menuItem_15 = new MenuItem(menu, SWT.CASCADE);
-		menuItem_15.setText("&Window");
+		menuItem = new MenuItem(menu, SWT.CASCADE);
+		menuItem.setText("&Window");
 		
-		Menu menu_4 = new Menu(menuItem_15);
-		menuItem_15.setMenu(menu_4);
+		Menu windowMenu = new Menu(menuItem);
+		menuItem.setMenu(windowMenu);
 		
-		MenuItem menuItem_16 = new MenuItem(menu_4, SWT.NONE);
-		menuItem_16.setText("&Cascade");
-		menuItem_16.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(windowMenu, SWT.PUSH);
+		item.setText("&Cascade");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				//cascadeWindows();
 				notYetImplemented();
 			}
 		});
 		
-		MenuItem menuItem_17 = new MenuItem(menu_4, SWT.NONE);
-		menuItem_17.setText("&Tile");
-		menuItem_17.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(windowMenu, SWT.PUSH);
+		item.setText("&Tile");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				//tileWindows();
 				notYetImplemented();
 			}
 		});
 		
-		new MenuItem(menu_4, SWT.SEPARATOR);
+		new MenuItem(windowMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_19 = new MenuItem(menu_4, SWT.NONE);
-		menuItem_19.setText("Close &Window");
-		menuItem_19.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(windowMenu, SWT.PUSH);
+		item.setText("Close &Window");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (mainWindow.getShells().length <= 0 || (display.getActiveShell().equals(mainWindow)))
 					return;
@@ -663,49 +663,49 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		MenuItem menuItem_20 = new MenuItem(menu_4, SWT.NONE);
-		menuItem_20.setText("Close &All");
-		menuItem_20.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(windowMenu, SWT.PUSH);
+		item.setText("Close &All");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				closeAllWindows();
 			}
 		});
 		
-		MenuItem menuItem_21 = new MenuItem(menu, SWT.CASCADE);
-		menuItem_21.setText("&Tools");
+		menuItem = new MenuItem(menu, SWT.CASCADE);
+		menuItem.setText("&Tools");
 		
-		Menu menu_5 = new Menu(menuItem_21);
-		menuItem_21.setMenu(menu_5);
+		Menu toolsMenu = new Menu(menuItem);
+		menuItem.setMenu(toolsMenu);
 		
-		MenuItem menuItem_22 = new MenuItem(menu_5, SWT.CASCADE);
-		menuItem_22.setText("Convert Image To");
+		MenuItem convertMenuItem = new MenuItem(toolsMenu, SWT.CASCADE);
+		convertMenuItem.setText("Convert Image To");
 		
-		Menu menu_6 = new Menu(menuItem_22);
-		menuItem_22.setMenu(menu_6);
+		Menu convertMenu = new Menu(convertMenuItem);
+		convertMenuItem.setMenu(convertMenu);
 		
-		MenuItem menuItem_23 = new MenuItem(menu_6, SWT.NONE);
-		menuItem_23.setText("HDF4");
-		menuItem_23.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(convertMenu, SWT.PUSH);
+		item.setText("HDF4");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF4);
 			}
 		});
-		h4GUIs.add(menuItem_23);
+		h4GUIs.add(item);
 		
-		MenuItem menuItem_24 = new MenuItem(menu_6, SWT.NONE);
-		menuItem_24.setText("HDF5");
-		menuItem_24.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(convertMenu, SWT.PUSH);
+		item.setText("HDF5");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF5);
 			}
 		});
-		h5GUIs.add(menuItem_24);
+		h5GUIs.add(item);
 		
-		new MenuItem(menu_5, SWT.SEPARATOR);
+		new MenuItem(toolsMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_26 = new MenuItem(menu_5, SWT.NONE);
-		menuItem_26.setText("User &Options");
-		menuItem_26.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(toolsMenu, SWT.PUSH);
+		item.setText("User &Options");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				/*
 				if (userOptionDialog == null)
@@ -733,35 +733,35 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		new MenuItem(menu_5, SWT.SEPARATOR);
+		new MenuItem(toolsMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_28 = new MenuItem(menu_5, SWT.NONE);
-		menuItem_28.setText("&Register File Format");
-		menuItem_28.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(toolsMenu, SWT.PUSH);
+		item.setText("&Register File Format");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				//registerFileFormat();
 				notYetImplemented();
 			}
 		});
 		
-		MenuItem menuItem_29 = new MenuItem(menu_5, SWT.NONE);
-		menuItem_29.setText("&Unregister File Format");
-		menuItem_29.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(toolsMenu, SWT.PUSH);
+		item.setText("&Unregister File Format");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				//unregisterFileFormat();
 				notYetImplemented();
 			}
 		});
 		
-		MenuItem menuItem_30 = new MenuItem(menu, SWT.CASCADE);
-		menuItem_30.setText("&Help");
+		menuItem = new MenuItem(menu, SWT.CASCADE);
+		menuItem.setText("&Help");
 		
-		Menu menu_7 = new Menu(menuItem_30);
-		menuItem_30.setMenu(menu_7);
+		Menu helpMenu = new Menu(menuItem);
+		menuItem.setMenu(helpMenu);
 		
-		MenuItem menuItem_31 = new MenuItem(menu_7, SWT.NONE);
-		menuItem_31.setText("&User's Guide");
-		menuItem_31.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(helpMenu, SWT.PUSH);
+		item.setText("&User's Guide");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				org.eclipse.swt.program.Program.launch(HDFVIEW_USERSGUIDE_URL);
 			}
@@ -771,37 +771,37 @@ public class HDFView implements ViewManager, DropTargetListener {
             int n = helpViews.size();
             for (int i = 0; i < n; i++) {
                 HelpView theView = (HelpView) helpViews.get(i);
-                MenuItem item = new MenuItem(menu_7, SWT.NONE);
+                item = new MenuItem(helpMenu, SWT.PUSH);
                 item.setText(theView.getLabel());
                 //item.setActionCommand(theView.getActionCommand());
             }
         }
 		
-		new MenuItem(menu_7, SWT.SEPARATOR);
+		new MenuItem(helpMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_33 = new MenuItem(menu_7, SWT.NONE);
-		menuItem_33.setText("HDF&4 Library Version");
-		h4GUIs.add(menuItem_33);
-		menuItem_22.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(helpMenu, SWT.PUSH);
+		item.setText("HDF&4 Library Version");
+		h4GUIs.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF4);
 				dialog.open();
 			}
 		});
 		
-		MenuItem menuItem_34 = new MenuItem(menu_7, SWT.NONE);
-		menuItem_34.setText("HDF&5 Library Version");
-		h5GUIs.add(menuItem_34);
-		menuItem_34.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(helpMenu, SWT.PUSH);
+		item.setText("HDF&5 Library Version");
+		h5GUIs.add(item);
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF5);
 				dialog.open();
 			}
 		});
 		
-		MenuItem menuItem_35 = new MenuItem(menu_7, SWT.NONE);
-		menuItem_35.setText("&Java Version");
-		menuItem_35.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(helpMenu, SWT.PUSH);
+		item.setText("&Java Version");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				MessageBox versionInfo = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
 				versionInfo.setText(mainWindow.getText());
@@ -811,11 +811,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		new MenuItem(menu_7, SWT.SEPARATOR);
+		new MenuItem(helpMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_37 = new MenuItem(menu_7, SWT.NONE);
-		menuItem_37.setText("Supported Fi&le Formats");
-		menuItem_37.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(helpMenu, SWT.PUSH);
+		item.setText("Supported Fi&le Formats");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Enumeration<?> formatKeys = FileFormat.getFileFormatKeys();
 				
@@ -832,11 +832,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		new MenuItem(menu_7, SWT.SEPARATOR);
+		new MenuItem(helpMenu, SWT.SEPARATOR);
 		
-		MenuItem menuItem_39 = new MenuItem(menu_7, SWT.NONE);
-		menuItem_39.setText("&About...");
-		menuItem_39.addSelectionListener(new SelectionAdapter() {
+		item = new MenuItem(helpMenu, SWT.PUSH);
+		item.setText("&About...");
+		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				MessageBox info = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
 				info.setText(mainWindow.getText());
