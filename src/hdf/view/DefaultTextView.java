@@ -325,7 +325,7 @@ public class DefaultTextView extends Shell implements TextView {
         	}
         });
 
-        item = new MenuItem(menu, SWT.SEPARATOR);
+        new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Save Changes");
@@ -335,7 +335,7 @@ public class DefaultTextView extends Shell implements TextView {
         	}
         });
         
-        item = new MenuItem(menu, SWT.SEPARATOR);
+        new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Close");

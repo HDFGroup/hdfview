@@ -78,7 +78,9 @@ import hdf.HDFVersions;
 public class HDFView implements ViewManager, DropTargetListener {
 	private static final long     serialVersionUID = 2211017444445918998L;	
 	
-	private static Display display = new Display();
+	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
+	
+	private static final Display display = new Display();
 	private static Shell mainWindow;
 	
 	/* The directory where HDFView is installed */
@@ -126,8 +128,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 	/* GUI component: the TreeView */
 	private TreeView				treeView;
 	
-	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
-	
 	private static final String 	HDF4_VERSION = HDFVersions.HDF4_VERSION;
 	private static final String 	HDF5_VERSION = HDFVersions.HDF5_VERSION;
 	private static final String 	HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
@@ -145,9 +145,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 	
 	/* String buffer holding the metadata information */
 	private StringBuffer			metadata;
-	
-	/* The list of most recent files */
-	// private Vector					recentFiles;
 	
 	/* GUI component: Container for the button toolbar and url toolbar */
 	private Composite 				toolbarContainer;
@@ -192,7 +189,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      * @param flist
      *            a list of files to open.
      */	
-	public HDFView(Display D, String root, List<File> flist, int width, int height, int x, int y) {		
+	public HDFView(String root, List<File> flist, int width, int height, int x, int y) {		
 		log.debug("Root is {}", root);
 		
 		rootDir = root;
@@ -215,7 +212,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 			log.debug("Failed to load View Properties from {}", rootDir);
 		}
 		
-		// recentFiles = ViewProperties.getMRF();
 		currentDir = ViewProperties.getWorkDir();
 		if (currentDir == null) currentDir = System.getProperty("user.home");
 		
@@ -287,7 +283,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		// Make sure all GUI components are in place before
 		// opening any files
-		mainWindow.pack(); // Is this needed here?
+		mainWindow.pack();
 		
 		int nfiles = flist.size();
 		File theFile = null;
@@ -328,8 +324,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		mainWindow.open();
 		
 		while(!mainWindow.isDisposed()) {
-			if(!D.readAndDispatch()){
-				D.sleep();
+			if(!display.readAndDispatch()){
+				display.sleep();
 			}
 		}
 		
@@ -377,7 +373,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		// Create a new display window
 		mainWindow = new Shell(display);
 		mainWindow.setImage(ViewProperties.getHdfIcon());
-		mainWindow.setText(HDFVIEW_VERSION);
+		mainWindow.setText("HDFView " + HDFVIEW_VERSION);
 		mainWindow.setLayout(new BorderLayout(0, 0));
 		
 		try {
@@ -788,7 +784,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h4GUIs.add(menuItem_33);
 		menuItem_22.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				hdfLibraryVersionInfo(HDF4_VERSION);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF4);
+				dialog.open();
 			}
 		});
 		
@@ -797,7 +794,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h5GUIs.add(menuItem_34);
 		menuItem_34.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				hdfLibraryVersionInfo(HDF5_VERSION);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF5);
+				dialog.open();
 			}
 		});
 		
@@ -925,7 +923,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		tltmNewItem_3.setToolTipText("HDF4 Library Version");
 		tltmNewItem_3.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				hdfLibraryVersionInfo(HDF4_VERSION);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF4);
+				dialog.open();
 			}
 		});
 		
@@ -938,7 +937,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		tltmNewItem_4.setToolTipText("HDF5 Library Version");
 		tltmNewItem_4.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				hdfLibraryVersionInfo(HDF5_VERSION);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF5);
+				dialog.open();
 			}
 		});
 		
@@ -1060,58 +1060,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		content.setWeights(new int[] {4, 1});
 		contentArea.setWeights(new int[] {1, 1});
-	}
-	
-	private void hdfLibraryVersionInfo(final String version) {
-		final Shell dialog = new Shell(mainWindow, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-		dialog.setText("HDFView");
-		dialog.setSize(mainWindow.getSize().x / 3, mainWindow.getSize().y / 3);
-		dialog.setLayout(new BorderLayout(0, 0));
-		// Add HDF Icon
-		
-		Composite canvasComposite = new Composite(dialog, SWT.NONE);
-		canvasComposite.setLayoutData(BorderLayout.NORTH);
-		canvasComposite.setLayout(new FillLayout());
-		
-		Composite buttonComposite = new Composite(dialog, SWT.NONE);
-		buttonComposite.setLayoutData(BorderLayout.SOUTH);
-		RowLayout buttonLayout = new RowLayout();
-		buttonLayout.center = true;
-		buttonLayout.justify = true;
-		buttonLayout.type = SWT.HORIZONTAL;
-		buttonComposite.setLayout(buttonLayout);
-		
-		Canvas canvas = new Canvas(canvasComposite, SWT.NO_REDRAW_RESIZE);
-		final Image hdfLarge = new Image(display, HDFView.class.getResourceAsStream("/icons/hdf_large.gif"));
-		canvas.addPaintListener(new PaintListener() {
-			public void paintControl(PaintEvent e) {
-				e.gc.drawImage(hdfLarge, 10, 20);
-				e.gc.drawText(version, 100, 40);
-			}
-		});
-		
-		Button okButton = new Button(buttonComposite, SWT.PUSH);
-		okButton.setText("OK");
-		okButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				dialog.dispose();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-		});
-		dialog.setDefaultButton(okButton);
-		
-		// Center the window relative to the main window
-		Point winCenter = new Point(mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
-				mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
-		
-		dialog.setBounds(winCenter.x - (dialog.getSize().x / 2), 
-				winCenter.y - (dialog.getSize().y / 2), 
-				dialog.getSize().x, dialog.getSize().y);
-		
-		dialog.open();
 	}
 	
 	private void registerFileFormat() {
@@ -1841,11 +1789,17 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
     
     private class LibraryVersionDialog extends Dialog {
+    	private String libType;
     	private String message;
     	
-    	public LibraryVersionDialog(Shell parent, String version) {
-    		super(parent, SWT.APPLICATION_MODAL);
-    		this.message = version;
+    	public LibraryVersionDialog(Shell parent, String libType) {
+    		super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+    		this.libType = libType;
+    		
+    		if(libType == FileFormat.FILE_TYPE_HDF4)
+    			setMessage("HDF4 " + HDF4_VERSION);
+    		else if (libType == FileFormat.FILE_TYPE_HDF5)
+    			setMessage("HDF5 " + HDF5_VERSION);
     	}
     	
     	public String getMessage() {
@@ -1857,13 +1811,23 @@ public class HDFView implements ViewManager, DropTargetListener {
     	}
     	
     	public void open() {
-    		Shell shell = new Shell(getParent(), getStyle());
-    		shell.setText(getText());
-    		createContents(shell);
-    		shell.pack();
-    		shell.open();
+    		Shell dialog = new Shell(getParent(), getStyle());
+    		dialog.setText("HDFView");
+    		createContents(dialog);
+    		dialog.pack();
+
+    		// Center the window relative to the main HDFView window
+    		Point winCenter = new Point(
+    				mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+    				mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+    		
+    		dialog.setSize(250, 200);
+    		dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+    		
+    		dialog.open();
+    		
     		Display display = getParent().getDisplay();
-    		while (!shell.isDisposed()) {
+    		while (!dialog.isDisposed()) {
     			if (!display.readAndDispatch()) {
     				display.sleep();
     			}
@@ -1871,7 +1835,38 @@ public class HDFView implements ViewManager, DropTargetListener {
     	}
     	
     	private void createContents(final Shell shell) {
+    		shell.setLayout(new BorderLayout(0,0));
     		
+    		// Draw HDF Icon and Version string
+    		Composite canvasComposite = new Composite(shell, SWT.NONE);
+    		canvasComposite.setLayoutData(BorderLayout.CENTER);
+    		canvasComposite.setLayout(new FillLayout());
+    		
+    		Canvas canvas = new Canvas(canvasComposite, SWT.NO_REDRAW_RESIZE);
+    		final Image hdfLarge = new Image(display, HDFView.class.getResourceAsStream("icons/hdf_large.gif"));
+    		canvas.addPaintListener(new PaintListener() {
+    			public void paintControl(PaintEvent e) {
+    				e.gc.drawImage(hdfLarge, 10, 20);
+    				e.gc.drawText(message, 100, 40);
+    			}
+    		});
+    		
+    		Composite buttonComposite = new Composite(shell, SWT.NONE);
+    		buttonComposite.setLayoutData(BorderLayout.SOUTH);
+    		RowLayout buttonLayout = new RowLayout();
+    		buttonLayout.center = true;
+    		buttonLayout.justify = true;
+    		buttonLayout.type = SWT.HORIZONTAL;
+    		buttonComposite.setLayout(buttonLayout);
+    		
+    		Button okButton = new Button(buttonComposite, SWT.PUSH);
+    		okButton.setText("OK");
+    		shell.setDefaultButton(okButton);
+    		okButton.addSelectionListener(new SelectionAdapter() {
+    			public void widgetSelected(SelectionEvent e) {
+    				shell.dispose();
+    			}
+    		});
     	}
     }
     
@@ -1982,7 +1977,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		display.syncExec(new Runnable() {
 			public void run() {
-				HDFView frame = new HDFView(display, the_rootDir, the_fList, the_W, the_H, the_X, the_Y);
+				HDFView frame = new HDFView(the_rootDir, the_fList, the_W, the_H, the_X, the_Y);
 			}
 		});
 	}
