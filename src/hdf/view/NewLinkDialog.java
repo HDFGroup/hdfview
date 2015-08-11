@@ -613,7 +613,7 @@ public class NewLinkDialog extends JDialog implements ActionListener,DocumentLis
         } 
 
         //getting the list of objects from the file:-
-        retriveObjects(fileFormatC);
+        retrieveObjects(fileFormatC);
 
         try {             
             fileFormatC.close();    
@@ -637,7 +637,7 @@ public class NewLinkDialog extends JDialog implements ActionListener,DocumentLis
     			if(!theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))){
     				targetObject.setEnabled(false);       
     			}
-    			retriveObjects(theFile);
+    			retrieveObjects(theFile);
     			break;
     		}
     	} // while(iterator.hasNext())
@@ -655,14 +655,14 @@ public class NewLinkDialog extends JDialog implements ActionListener,DocumentLis
                     targetFileButton.setEnabled(false);
                     targetObject.setEnabled(true);
                     targetObject.setEditable(false);                    
-                    retriveObjects(fileFormat);
+                    retrieveObjects(fileFormat);
                 }
                 else if (softLink.isSelected()) {
                     targetFile.setEnabled(false);
                     targetFileButton.setEnabled(false);
                     targetObject.setEnabled(true);
                     targetObject.setEditable(true);
-                    retriveObjects(fileFormat);
+                    retrieveObjects(fileFormat);
                 }
                 else if (externalLink.isSelected()) {
                     targetFile.setEnabled(true);
@@ -676,7 +676,8 @@ public class NewLinkDialog extends JDialog implements ActionListener,DocumentLis
     }
     
     //getting the list of objects from the file:-
-    private void retriveObjects(FileFormat file) {        
+    private void retrieveObjects(FileFormat file) {
+    	/*
         List<Object> objsFile =  breadthFirstUserObjects(file.getRootNode());
         List<HObject> groupListFile = new Vector<HObject>(objsFile.size());
         HObject obj = null;
@@ -706,8 +707,8 @@ public class NewLinkDialog extends JDialog implements ActionListener,DocumentLis
             targetObject.addItem(full_name);
         }
         targetObject.removeItemAt(idx_root);
-        objListFile.remove(idx_root);           
+        objListFile.remove(idx_root);
+        */
     }
-    
 }
 

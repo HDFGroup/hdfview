@@ -15,9 +15,19 @@
 package hdf.view;
 
 import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
+
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+
+import java.awt.image.ImageFilter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.ColorModel;
+import java.awt.Color;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -29,7 +39,6 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -77,6 +86,9 @@ public class DefaultImageView extends Shell implements ImageView {
 	private static final long serialVersionUID = -6534336542813587242L;
 
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
+	
+	private final Display display = Display.getCurrent();
+	private final Shell shell;
 
 	/** Horizontal direction to flip an image. */
 	public static final int FLIP_HORIZONTAL = 0;
@@ -159,12 +171,10 @@ public class DefaultImageView extends Shell implements ImageView {
 
 	private boolean isUnsignedConverted = false;
 
-	private final Toolkit toolkit;
-
 	private double[] dataRange;
 	private final double[] originalRange = {0,0};
 
-	private PaletteComponent paletteComponent;
+	//private PaletteComponent paletteComponent;
 
 	private int animationSpeed = 2;
 
@@ -176,7 +186,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 	private long curFrame = 0, maxFrame = 1;
 
-	private BufferedImage bufferedImage;
+	//private BufferedImage bufferedImage;
 
 	//    private AutoContrastSlider autoContrastSlider;
 
@@ -197,7 +207,7 @@ public class DefaultImageView extends Shell implements ImageView {
 	 */
 	private Object autoGainData;
 
-	private BitSet bitmask;
+	//private BitSet bitmask;
 	private boolean convertByteData = false;
 	private BITMASK_OP bitmaskOP = BITMASK_OP.EXTRACT;
 
@@ -231,30 +241,29 @@ public class DefaultImageView extends Shell implements ImageView {
 	 *            ViewProperties.DATA_VIEW_KEY.
 	 */
 	public DefaultImageView(ViewManager theView, HashMap map) {
-		super();
+		shell = new Shell(display);
 
-		setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+		//setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		//setFrameIcon(ViewProperties.getImageIcon());
 
 		viewer = theView;
 		zoomFactor = 1.0f;
 		imageByteData = null;
 		imagePalette = null;
-		paletteComponent = null;
+		//paletteComponent = null;
 		isTrueColor = false;
 		is3D = false;
 		isPlaneInterlace = false;
 		isUnsigned = false;
 		data = null;
 		NT = 0;
-		toolkit = Toolkit.getDefaultToolkit();
 		rotateRelatedItems = new Vector(10);
 		imageScroller = null;
 		gainBias = null;
 		gainBias_current = null;
 		autoGainData = null;
 		contrastSlider = null;
-		bitmask = null;
+		//bitmask = null;
 		invalidValueIndex = new ArrayList<Integer>();
 
 		String origStr = ViewProperties.getImageOrigin();
@@ -272,7 +281,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 		if (map != null) {
 			hobject = (HObject) map.get(ViewProperties.DATA_VIEW_KEY.OBJECT);
-			bitmask = (BitSet) map.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
+			//bitmask = (BitSet) map.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
 			bitmaskOP = (BITMASK_OP)map.get(ViewProperties.DATA_VIEW_KEY.BITMASKOP);
 
 			Boolean b = (Boolean) map.get(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE);
@@ -311,13 +320,13 @@ public class DefaultImageView extends Shell implements ImageView {
 				convertByteData = true;
 		}
 
-		JPanel contentPane = (JPanel) getContentPane();
-		contentPane.setName("imagecontentpane");
-		contentPane.setLayout(new BorderLayout());
+		//JPanel contentPane = (JPanel) getContentPane();
+		//contentPane.setName("imagecontentpane");
+		//contentPane.setLayout(new BorderLayout());
 
 		// add the text field to display pixel data
-		contentPane.add(valueField = new JTextField(), BorderLayout.SOUTH);
-		valueField.setName("valuefield");
+		//contentPane.add(valueField = new JTextField(), BorderLayout.SOUTH);
+		//valueField.setName("valuefield");
 		valueField.setEditable(false);
 		valueField.setVisible(ViewProperties.showImageValues());
 
@@ -334,18 +343,18 @@ public class DefaultImageView extends Shell implements ImageView {
 		originalRange[0] = dataRange[0];
 		originalRange[1] = dataRange[1];
 
-		imageComponent = new ImageComponent(image);
-		ScrolledComposite scroller = new ScrolledComposite(imageComponent);
-		scroller.getVerticalBar().setIncrement(50);
-		scroller.getHorizontalBar().setIncrement(50);
-		imageScroller = scroller;
-		contentPane.add(scroller, BorderLayout.CENTER);
+		//imageComponent = new ImageComponent(image);
+		//ScrolledComposite scroller = new ScrolledComposite(imageComponent);
+		//scroller.getVerticalBar().setIncrement(50);
+		//scroller.getHorizontalBar().setIncrement(50);
+		//imageScroller = scroller;
+		//contentPane.add(scroller, BorderLayout.CENTER);
 
 		// add palette canvas to show the palette
-		if (imagePalette != null) {
-			paletteComponent = new PaletteComponent(imagePalette, dataRange);
-			contentPane.add(paletteComponent, BorderLayout.EAST);
-		}
+		//if (imagePalette != null) {
+		//	paletteComponent = new PaletteComponent(imagePalette, dataRange);
+		//	contentPane.add(paletteComponent, BorderLayout.EAST);
+		//}
 
 		if (origin == 1)
 			flip(FLIP_VERTICAL);
@@ -366,11 +375,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		sb.append(dataset.getFileFormat().getParent());
 		sb.append("]");
 
-		setTitle(sb.toString());
-
-		frameTitle = sb.toString();
-		setTitle(frameTitle);
-		this.setName(frameTitle);
+		shell.setText(sb.toString());
 
 		// setup subset information
 		int rank = dataset.getRank();
@@ -412,40 +417,47 @@ public class DefaultImageView extends Shell implements ImageView {
 		}
 		sb.append(" ] ");
 
-		setJMenuBar(createMenuBar());
+		shell.setMenuBar(createMenuBar());
 		viewer.showStatus(sb.toString());
 
-		int titleJustification = TitledBorder.LEFT;
-		int titlePosition = TitledBorder.TOP;
-		String orgin = ViewProperties.getImageOrigin();
-		if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_UR))
-			titleJustification = TitledBorder.RIGHT;
-		else if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_LL))
-			titlePosition = TitledBorder.BOTTOM;
-		else if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_LR)) {
-			titleJustification = TitledBorder.RIGHT;
-			titlePosition = TitledBorder.BOTTOM;
-		}
+		//int titleJustification = TitledBorder.LEFT;
+		//int titlePosition = TitledBorder.TOP;
+		//String orgin = ViewProperties.getImageOrigin();
+		//if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_UR))
+			//titleJustification = TitledBorder.RIGHT;
+		//else if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_LL))
+			//titlePosition = TitledBorder.BOTTOM;
+		//else if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_LR)) {
+			//titleJustification = TitledBorder.RIGHT;
+			//titlePosition = TitledBorder.BOTTOM;
+		//}
 
 		String originTag = "(0,0)";
 		if (ViewProperties.isIndexBase1())
 			originTag = "(1,1)";
 
-		Border border = BorderFactory.createCompoundBorder(
-				BorderFactory.createRaisedBevelBorder(), BorderFactory
-				.createTitledBorder(BorderFactory
-						.createLineBorder(Color.lightGray, 1),
-						originTag,
-						titleJustification, titlePosition,
-						this.getFont(), Color.black));
-		contentPane.setBorder(border);
+		//Border border = BorderFactory.createCompoundBorder(
+		//		BorderFactory.createRaisedBevelBorder(), BorderFactory
+		//		.createTitledBorder(BorderFactory
+		//				.createLineBorder(Color.lightGray, 1),
+		//				originTag,
+		//				titleJustification, titlePosition,
+		//				this.getFont(), Color.black));
+		//contentPane.setBorder(border);
 
 		//        if (imageComponent.getParent() !=null)
-			//        	imageComponent.getParent().setBackground(Color.black);
+		//        	imageComponent.getParent().setBackground(Color.black);
+		
+		shell.open();
+		
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
 	}
 
 	private Menu createMenuBar() {
-		Menu menuBar = new Menu(, SWT.BAR);
+		Menu menuBar = new Menu(shell, SWT.BAR);
 
 		MenuItem item = new MenuItem(menuBar, SWT.CASCADE);
 		item.setText("Save Image As");
@@ -463,11 +475,8 @@ public class DefaultImageView extends Shell implements ImageView {
 					saveImageAs(filetype);
 				}
 				catch (Exception ex) {
-					Display.getCurrent().beep();
-					MessageBox error = new MessageBox(, SWT.ICON_ERROR | SWT.OK);
-					error.setMessage(ex.getMessage());
-					error.setText(.getText());
-					error.open();
+					shell.getDisplay().beep();
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -485,11 +494,8 @@ public class DefaultImageView extends Shell implements ImageView {
 					saveImageAs(filetype);
 				}
 				catch (Exception ex) {
-					Display.getCurrent().beep();
-					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-					error.setMessage(ex.getMessage());
-					error.setText(.getText());
-					error.open();
+					shell.getDisplay().beep();
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -504,10 +510,7 @@ public class DefaultImageView extends Shell implements ImageView {
 					saveImageAs(filetype);
 				}
 				catch (Exception ex) {
-					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-					error.setMessage(ex.getMessage());
-					error.setText(.getText());
-					error.open();
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -522,10 +525,7 @@ public class DefaultImageView extends Shell implements ImageView {
 					saveImageAs(filetype);
 				}
 				catch (Exception ex) {
-					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-					error.setMessage(ex.getMessage());
-					error.setText(.getText());
-					error.open();
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -540,10 +540,7 @@ public class DefaultImageView extends Shell implements ImageView {
 					saveImageAs(filetype);
 				}
 				catch (Exception ex) {
-					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-					error.setMessage(ex.getMessage());
-					error.setTest(.getText());
-					error.open();
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -555,11 +552,9 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setEnabled(!dataset.getFileFormat().isReadOnly());
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
-					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-					error.setMessage("No data to write.\nUse Shift+Mouse_drag to select an image area.");
-					error.setText(.getText());
-					error.open();
+					showError("No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
 				}
 				
 				TreeView treeView = viewer.getTreeView();
@@ -579,7 +574,6 @@ public class DefaultImageView extends Shell implements ImageView {
 					list.add(theNode.getUserObject());
 				}
 
-				/*
 				NewDatasetDialog dialog = new NewDatasetDialog((JFrame) viewer,
 						pGroup, list, this);
 				dialog.setVisible(true);
@@ -594,9 +588,9 @@ public class DefaultImageView extends Shell implements ImageView {
 						log.debug("Write selection to image:", ex);
 					}
 				}
-				*/
 
 				list.setSize(0);
+				*/
 			}
 		});
 		rotateRelatedItems.add(item);
@@ -617,6 +611,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				JFileChooser fchooser = new JFileChooser(ViewProperties
 						.getWorkDir());
 				int returnVal = fchooser.showOpenDialog(this);
@@ -634,6 +629,7 @@ public class DefaultImageView extends Shell implements ImageView {
 				String palPath = choosedFile.getAbsolutePath();
 				if(!palList.contains(palList))
 					palList.addElement(palPath);
+				*/
 			}
 		});
 		
@@ -642,6 +638,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				if (imagePalette == null) return;
 				
 				String workDir = ViewProperties.getWorkDir() + File.separator;
@@ -699,6 +696,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 				out.flush();
 				out.close();
+				*/
 			}
 		});
 		
@@ -709,6 +707,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				if (originalRange == null || originalRange[0] == originalRange[1]) return;
 				
 				// Call only once
@@ -727,6 +726,7 @@ public class DefaultImageView extends Shell implements ImageView {
 				}
 
 				applyDataRange(drange);
+				*/
 			}
 		});
 
@@ -837,10 +837,12 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setText("Brightness/Contrast");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				if (contrastSlider == null)
 					contrastSlider = new ContrastSlider((JFrame) viewer, image.getSource());
 				
 				contrastSlider.setVisible(true);
+				*/
 			}
 		});
 		
@@ -855,7 +857,7 @@ public class DefaultImageView extends Shell implements ImageView {
 			item.setText(String.valueOf(i));
 			item.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					contour(i);
+					//contour(i);
 				}
 			});
 		}
@@ -867,9 +869,11 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setEnabled(is3D);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				/*
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				new Animation((JFrame) viewer, dataset);
 				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				*/
 			}
 		});
 
@@ -885,7 +889,7 @@ public class DefaultImageView extends Shell implements ImageView {
 			item.setText(String.valueOf(i));
 			item.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					animationSpeed = i;
+					//animationSpeed = i;
 				}
 			});
 		}
@@ -897,10 +901,10 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setSelection(ViewProperties.showImageValues());
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				setValueVisible(e.getSource().getSelection());
+				setValueVisible(((MenuItem) e.getSource()).getSelection());
 			}
 		});
-		rotateRelatedItems.add(imageValueCheckBox);
+		rotateRelatedItems.add(item);
 		
 		item = new MenuItem(menuBar, SWT.NONE);
 		item.setText("Show Statistics");
@@ -924,18 +928,15 @@ public class DefaultImageView extends Shell implements ImageView {
 						+ minmax[1] + "\nMean                     = "
 						+ stat[0] + "\nStandard deviation = " + stat[1];
 						
-						MessageBox info = new MessageBox( , SWT.ICON_INFORMATION | SWT.OK);
+						MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
 						info.setMessage(statistics);
 						info.setText("Statistics");
 						info.open();
 					}
 				}
 				catch (Exception ex) {
-					Display.getCurrent().beep();
-					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-					error.setMessage(ex.getMessage());
-					error.setText(.getText());
-					error.open();
+					shell.getDisplay().beep();
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -950,11 +951,8 @@ public class DefaultImageView extends Shell implements ImageView {
 					selectAll();
 				}
 				catch (Exception ex) {
-					Display.getCurrent().beep();
-					MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-					error.setMessage(ex.getMessage());
-					error.setText(.getText());
-					error.open();
+					shell.getDisplay().beep();
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -965,15 +963,15 @@ public class DefaultImageView extends Shell implements ImageView {
 		item.setText("Close");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				.dispose();
+				display.dispose();
 			}
 		});
 
-		bar.add(new JLabel("       "));
+		//bar.add(new JLabel("       "));
 
 		// add icons to the menubar
 
-		Insets margin = new Insets(0, 2, 0, 2);
+		//Insets margin = new Insets(0, 2, 0, 2);
 
 		// chart button
 		//button = new JButton(ViewProperties.getChartIcon());
@@ -1028,7 +1026,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		//button.setName("zoomout");
 
 		if (is3D) {
-			bar.add(new JLabel("     "));
+			//bar.add(new JLabel("     "));
 
 			// first button
 			//button = new JButton(ViewProperties.getFirstIcon());
@@ -1048,18 +1046,18 @@ public class DefaultImageView extends Shell implements ImageView {
 			//button.setActionCommand("Previous page");
 			//button.setName("prevframebutton");
 
-			frameField = new JTextField(String.valueOf(curFrame));
-			frameField.setMaximumSize(new Dimension(50, 30));
-			bar.add(frameField);
-			frameField.setMargin(margin);
-			frameField.addActionListener(this);
-			frameField.setActionCommand("Go to frame");
-			frameField.setName("enterFrameField");
+			//frameField = new JTextField(String.valueOf(curFrame));
+			//frameField.setMaximumSize(new Dimension(50, 30));
+			//bar.add(frameField);
+			//frameField.setMargin(margin);
+			//frameField.addActionListener(this);
+			//frameField.setActionCommand("Go to frame");
+			//frameField.setName("enterFrameField");
 
-			JLabel tmpField = new JLabel(String.valueOf(maxFrame),
-					SwingConstants.CENTER);
-			tmpField.setMaximumSize(new Dimension(50, 30));
-			bar.add(tmpField);
+			//JLabel tmpField = new JLabel(String.valueOf(maxFrame),
+			//		SwingConstants.CENTER);
+			//tmpField.setMaximumSize(new Dimension(50, 30));
+			//bar.add(tmpField);
 
 			// next button
 			//button = new JButton(ViewProperties.getNextIcon());
@@ -1213,9 +1211,8 @@ public class DefaultImageView extends Shell implements ImageView {
 			}
 		}
 		catch (Throwable ex) {
-			toolkit.beep();
-			JOptionPane.showMessageDialog(this, ex, "ImageView:"+getTitle(),
-					JOptionPane.ERROR_MESSAGE);
+			shell.getDisplay().beep();
+			showError("ImageView: " + shell.getText(), shell.getText());
 			return null;
 		}
 
@@ -1234,7 +1231,7 @@ public class DefaultImageView extends Shell implements ImageView {
 	 * @throws OutOfMemoryError
 	 */
 	private void getIndexedImage() throws Exception, OutOfMemoryError {
-
+		/*
 		if (imagePalette==null)
 			imagePalette = dataset.getPalette();
 
@@ -1282,6 +1279,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		}
 
 		image = createIndexedImage(imageByteData, imagePalette, w, h);
+		*/
 	}
 
 	/**
@@ -1289,6 +1287,7 @@ public class DefaultImageView extends Shell implements ImageView {
 	 * @throws OutOfMemoryError
 	 */
 	private void getTrueColorImage() throws Exception, OutOfMemoryError {
+		/*
 		isPlaneInterlace = (dataset.getInterlace() == ScalarDS.INTERLACE_PLANE);
 
 		long[] selected = dataset.getSelectedDims();
@@ -1316,6 +1315,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 
 		image = createTrueColorImage(imageByteData, isPlaneInterlace, w, h);
+		*/
 	}
 
 	/**
@@ -1381,6 +1381,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 	// implementing ImageObserver
 	private void zoomTo(float zf) {
+		/*
 		if (zf > 8)
 			zf = 8;
 		else if (zf < 0.125)
@@ -1389,24 +1390,26 @@ public class DefaultImageView extends Shell implements ImageView {
 		if (zoomFactor == zf)
 			return; // no change in zooming
 
-			zoomFactor = zf;
+		zoomFactor = zf;
 
-			Dimension imageSize = new Dimension(
-					(int) (imageComponent.originalSize.width * zoomFactor),
-					(int) (imageComponent.originalSize.height * zoomFactor));
+		Dimension imageSize = new Dimension(
+				(int) (imageComponent.originalSize.width * zoomFactor),
+				(int) (imageComponent.originalSize.height * zoomFactor)
+				);
 
-			this.invalidate();
-			imageComponent.invalidate();
-			imageComponent.setImageSize(imageSize);
-			this.validate();
-			// updateUI();
+		this.invalidate();
+		imageComponent.invalidate();
+		imageComponent.setImageSize(imageSize);
+		this.validate();
+		updateUI();
 
-			if ((zoomFactor > 0.99) && (zoomFactor < 1.01)) {
-				setTitle(frameTitle);
-			}
-			else {
-				setTitle(frameTitle + " - " + 100 * zoomFactor + "%");
-			}
+		if ((zoomFactor > 0.99) && (zoomFactor < 1.01)) {
+			setTitle(frameTitle);
+		}
+		else {
+			setTitle(frameTitle + " - " + 100 * zoomFactor + "%");
+		}
+		*/
 	}
 
 	// implementing ImageObserver
@@ -1435,17 +1438,15 @@ public class DefaultImageView extends Shell implements ImageView {
 
 	// implementing ImageObserver
 	private void showHistogram() {
+		/*
 		Rectangle rec = imageComponent.selectedArea;
 
 		if (isTrueColor) {
-			toolkit.beep();
-			JOptionPane.showMessageDialog(
-					this,
-					"Unsupported operation: unable to draw histogram for true color image.",
-					getTitle(), JOptionPane.ERROR_MESSAGE);
+			shell.getDisplay().beep();
+			showError("Unsupported operation: unable to draw histogram for true color image.", shell.getText();
 			return;
 		}
-        /*
+		
 		if ((rec == null) || (rec.getWidth() <= 0) || (rec.getHeight() <= 0)) {
 			toolkit.beep();
 			JOptionPane
@@ -1455,7 +1456,6 @@ public class DefaultImageView extends Shell implements ImageView {
 					getTitle(), JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		*/
 
 		double chartData[][] = new double[1][256];
 		for (int i = 0; i < 256; i++) {
@@ -1478,7 +1478,7 @@ public class DefaultImageView extends Shell implements ImageView {
 			}
 		}
 
-		/* Use original data range */
+		// Use original data range
 		double[] xRange = originalRange;
 		if (xRange == null || xRange[0] == xRange[1]) {
 			xRange = new double[2];
@@ -1491,6 +1491,7 @@ public class DefaultImageView extends Shell implements ImageView {
 				+ dataset.getPath() + dataset.getName() + " - by pixel index",
 				Chart.HISTOGRAM, chartData, xRange, null);
 		cv.setVisible(true);
+		*/
 	}
 
 	/**
@@ -1499,15 +1500,16 @@ public class DefaultImageView extends Shell implements ImageView {
 	 * @throws Exception
 	 */
 	private void selectAll() throws Exception {
-		imageComponent.selectAll();
+		//imageComponent.selectAll();
 	}
 
 	// implementing ImageObserver
 	private void flip(int direction) {
+		/*
 		ImageFilter filter = new FlipFilter(direction);
 
 		if (applyImageFilter(filter)) {
-			// taggle flip flag
+			// toggle flip flag
 			if (direction == FLIP_HORIZONTAL) {
 				isHorizontalFlipped = !isHorizontalFlipped;
 			}
@@ -1515,10 +1517,12 @@ public class DefaultImageView extends Shell implements ImageView {
 				isVerticalFlipped = !isVerticalFlipped;
 			}
 		}
+		*/
 	}
 
 	// implementing ImageObserver
 	private void rotate(int direction) {
+		/*
 		if ( !(direction == ROTATE_CW_90 || direction == ROTATE_CCW_90))
 			return;
 
@@ -1537,11 +1541,12 @@ public class DefaultImageView extends Shell implements ImageView {
 				rotateCount = 0;
 			}
 		}
+		*/
 	}
 
 	// implementing ImageObserver
 	private void contour(int level) {
-		applyImageFilter(new ContourFilter(level));
+		//applyImageFilter(new ContourFilter(level));
 	}
 
 	/** Apply contrast/brightness to unsigned short integer */
@@ -1551,20 +1556,21 @@ public class DefaultImageView extends Shell implements ImageView {
 			int w = dataset.getWidth();
 			int h = dataset.getHeight();
 			image = createIndexedImage(imageByteData, imagePalette, w, h);
-			imageComponent.setImage(image);
+			//imageComponent.setImage(image);
 			zoomTo(zoomFactor);
 		}
 	}
 
 	// implementing ImageObserver
 	private void setValueVisible(boolean b) {
-		valueField.setVisible(b);
-		validate();
+		//valueField.setVisible(b);
+		//validate();
 		// updateUI(); //bug !!! on Windows. gives NullPointerException at
 		// javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener.mousePressed(BasicInternalFrameUI.java:693)
 	}
 
 	/** change alpha value for a given list of pixel locations */
+	/*
 	private void adjustAlpha(BufferedImage img, int alpha, List<Integer> idx)
 	{
 		if (img==null || idx.size()<=0)
@@ -1583,6 +1589,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		// final int[] pixels = ( (DataBufferInt) img.getRaster().getDataBuffer() ).getData();
 		// for (int i=0; i<pixels.length/2; i++) pixels[i] = (pixels[i] & 0x60ffffff);
 	}
+	*/
 
 
 	/**
@@ -1592,14 +1599,15 @@ public class DefaultImageView extends Shell implements ImageView {
 	 *            the plain image object.
 	 * @return buffered image for the given image.
 	 */
+	/*
 	private BufferedImage toBufferedImage(Image image) {
 		if (image == null) {
 			return null;
 		}
 
-		/*if (image instanceof BufferedImage) {
+		if (image instanceof BufferedImage) {
 			return (BufferedImage) image;
-		}*/
+		}
 
 		// !!!!!!!!!!!!!!!!!! NOTICE !!!!!!!!!!!!!!!!!!!!!
 		// the following way of creating a buffered image is using
@@ -1611,7 +1619,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		// It does not work well with JavaTM Advanced Imaging
 		// com.sun.media.jai.codec.*;
 		// if the screen setting is less than 32-bit color
-		/*int w = image.getWidth(null);
+		int w = image.getWidth(null);
 		int h = image.getHeight(null);
 		BufferedImage bimage = (BufferedImage) createImage(w, h);
 		Graphics g = bimage.createGraphics();
@@ -1619,9 +1627,8 @@ public class DefaultImageView extends Shell implements ImageView {
 
 		g.dispose();
 		return bimage;
-		*/
-		return null; // Remove once fixed
 	}
+    */
 
 	/**
 	 * Save the image to an image file.
@@ -1635,6 +1642,7 @@ public class DefaultImageView extends Shell implements ImageView {
 			return;
 		}
 
+		/*
 		final JFileChooser fchooser = new JFileChooser(dataset.getFile());
 		if (type.equals(Tools.FILE_TYPE_JPEG)) {
 			fchooser.setFileFilter(DefaultFileFilter.getFileFilterJPEG());
@@ -1705,13 +1713,15 @@ public class DefaultImageView extends Shell implements ImageView {
 		catch (Exception ex) {
 			log.debug("File {} size:", choosedFile.getName(), ex);
 		}
+		*/
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		/*
 		try {
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-			else if (cmd.startsWith("Go to frame")) {
+			if (cmd.startsWith("Go to frame")) {
 				int page = 0;
 				try {
 					page = Integer.parseInt(frameField.getText().trim())-indexBase;
@@ -1738,6 +1748,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		finally {
 			setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
+		*/
 	}
 
 	public void dispose() {
@@ -1777,6 +1788,7 @@ public class DefaultImageView extends Shell implements ImageView {
 	 * @return the selected data object.
 	 */
 	public Object getSelectedData() {
+		/*
 		Object selectedData = null;
 
 		int cols = imageComponent.originalSelectedArea.width;
@@ -1860,6 +1872,9 @@ public class DefaultImageView extends Shell implements ImageView {
 		}
 
 		return selectedData;
+		*/
+		
+		return null; // Remove when fixed
 	}
 
 	/**
@@ -1868,7 +1883,9 @@ public class DefaultImageView extends Shell implements ImageView {
 	 * @return the rectangle of the selected image area.
 	 */
 	public Rectangle getSelectedArea() {
-		return imageComponent.originalSelectedArea;
+		//return imageComponent.originalSelectedArea;
+		
+		return null; // Remove when fixed
 	}
 
 	/** @return true if the image is a truecolor image. */
@@ -1883,7 +1900,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 	public void setImage(Image img) {
 		image = img;
-		imageComponent.setImage(img);
+		//imageComponent.setImage(img);
 
 		setImageDirection();
 	}
@@ -1935,7 +1952,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 	public void setPalette(byte[][] pal) {
 		imagePalette = pal;
-		paletteComponent.updatePalette(pal);
+		//paletteComponent.updatePalette(pal);
 	}
 
 	private void gotoPage(long idx) {
@@ -1949,23 +1966,20 @@ public class DefaultImageView extends Shell implements ImageView {
 		long[] dims = dataset.getDims();
 
 		if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
-			Display.getCurrent().beep();
-			MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-			error.setMessage("Frame number must be between " + indexBase + 
-					         " and " + (dims[selectedIndex[2]] - 1+indexBase));
-			error.setText(.getText());
-			error.open();
+			shell.getDisplay().beep();
+			showError("Frame number must be between " + indexBase + 
+			         " and " + (dims[selectedIndex[2]] - 1+indexBase), shell.getText());
 			return;
 		}
 
-		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		//setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		start[selectedIndex[2]] = idx;
 		curFrame = idx+indexBase;
 		dataset.clearData();
 		image = null;
 		gainBias = null;
-		imageComponent.setImage(getImage());
+		//imageComponent.setImage(getImage());
 		frameField.setText(String.valueOf(curFrame));
 
 		isHorizontalFlipped = false;
@@ -1981,9 +1995,9 @@ public class DefaultImageView extends Shell implements ImageView {
 			rotate(ROTATE_CW_90);
 		}
 
-		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		//setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
-		updateUI();
+		//updateUI();
 	}
 
 	/**
@@ -2045,7 +2059,7 @@ public class DefaultImageView extends Shell implements ImageView {
 	private Image createTrueColorImage(byte[] imageData, boolean planeInterlace,
 			int w, int h) 
 	{
-
+		/*
 		if (bufferedImage == null)
 			bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
@@ -2070,10 +2084,13 @@ public class DefaultImageView extends Shell implements ImageView {
 		} 
 
 		adjustAlpha(bufferedImage, 0, invalidValueIndex);        
-		//return bufferedImage;
+		return bufferedImage;
+		*/
+		
 		return null; // Remove when fixed
 	}
 
+	/*
 	private boolean applyImageFilter(ImageFilter filter) {
 		boolean status = true;
 		//ImageProducer imageProducer = image.getSource();
@@ -2084,16 +2101,14 @@ public class DefaultImageView extends Shell implements ImageView {
 			zoomTo(zoomFactor);
 		}
 		catch (Throwable err) {
-			Display.getCurrent().beeep();
-			MessageBox error = new MessageBox( , SWT.ICON_ERROR | SWT.OK);
-			error.setMessage(err.getMessage());
-			error.setText(.getText());
-			error.open();
+			shell.getDisplay().beep();
+			showError(err.getMessage(), shell.getText());
 			status = false;
 		}
 
 		return status;
 	}
+	*/
 
 	private void applyDataRange(double[] newRange) {
 		if (doAutoGainContrast && gainBias!= null) {
@@ -2111,7 +2126,7 @@ public class DefaultImageView extends Shell implements ImageView {
 			image = createIndexedImage(imageByteData, imagePalette, w, h);
 			setImage(image);
 			zoomTo(zoomFactor);
-			paletteComponent.updateRange(newRange);
+			//paletteComponent.updateRange(newRange);
 		}
 
 		dataRange[0] = newRange[0];
@@ -2119,6 +2134,7 @@ public class DefaultImageView extends Shell implements ImageView {
 	}
 
 	/** PaletteCanvas draws the palette on the side of the image. */
+	/*
 	private class PaletteCanvas extends Canvas {
 		private static final long serialVersionUID = -5194383032992628565L;
 		private Color[] colors = null;
@@ -2211,24 +2227,34 @@ public class DefaultImageView extends Shell implements ImageView {
 					paintSize.height * 255);
 		}
 	}
+	*/
+	
+	private void showError(String errorMsg, String title) {
+    	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+    	error.setText(title);
+    	error.setMessage(errorMsg);
+    	error.open();
+    }
 
 	/** ImageComponent draws the image. */
-	private class ImageComponent extends JComponent implements MouseListener,
-	MouseMotionListener, MouseWheelListener {
+	private class ImageComponent 
+	//extends JComponent
+	//implements MouseListener, MouseMotionListener, MouseWheelListener 
+	{
+		/*
 		private static final long serialVersionUID = -2690648149547151532L;
 		private Dimension originalSize, imageSize;
 		private Image image;
 		private Point startPosition, currentPosition; // mouse clicked position
 		private Rectangle selectedArea, originalSelectedArea;
 		private StringBuffer strBuff; // to hold display value
-		private int yMousePosition = 0; /*
-		 * the vertical position of the current
-		 * mouse
-		 */
+		private int yMousePosition = 0; // the vertical position of the current mouse
 		private Dimension scrollDim = null;
 		private JScrollBar hbar = null;
 		private JScrollBar vbar = null;
+        */
 
+		/*
 		private ImageComponent(Image img) {
 			image = img;
 			//imageSize = new Dimension(image.getWidth(this), image
@@ -2243,7 +2269,9 @@ public class DefaultImageView extends Shell implements ImageView {
 			addMouseMotionListener(this);
 			addMouseWheelListener(this);
 		}
+		*/
 
+		/*
 		public void paint(Graphics g) {
 			if (g instanceof Graphics2D && (zoomFactor<0.99)) {
 				Graphics2D g2 = (Graphics2D) g;
@@ -2263,6 +2291,7 @@ public class DefaultImageView extends Shell implements ImageView {
 						selectedArea.height);
 			}
 		}
+		*/
 
 		/**
 		 * Create an image using multiple step bilinear, see details at
@@ -2273,6 +2302,7 @@ public class DefaultImageView extends Shell implements ImageView {
 		 * @param targetHeight the desired height of the scaled instance,
 		 * @return a scaled version of the original 
 		 */
+		/*
 		private Image multiBiliner(Image img, int targetWidth, int targetHeight, boolean highquality)
 		{
 			Image ret = img;
@@ -2318,6 +2348,8 @@ public class DefaultImageView extends Shell implements ImageView {
 
 			return ret;
 		}
+		*/
+		/*
 		public void mousePressed(MouseEvent e) {
 			startPosition = e.getPoint();
 			//selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
@@ -2332,7 +2364,9 @@ public class DefaultImageView extends Shell implements ImageView {
 				setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			}
 		}
+		*/
 
+		/*
 		public void mouseClicked(MouseEvent e) {
 			startPosition = e.getPoint();
 			//selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
@@ -2347,7 +2381,9 @@ public class DefaultImageView extends Shell implements ImageView {
 
 			repaint();
 		}
+		*/
 
+		/*
 		public void mouseDragged(MouseEvent e) {
 			// don't update too often.
 			try {
@@ -2585,6 +2621,7 @@ public class DefaultImageView extends Shell implements ImageView {
 
 			repaint();
 		}
+		*/
 	} // private class ImageComponent extends JComponent
 
 	/**
@@ -2725,6 +2762,7 @@ public class DefaultImageView extends Shell implements ImageView {
 	 * [0, 255] New_Value *= 255 //Clamp [0, 255] If(New_Value > 255) New_Value
 	 * = 255 If(New_Value < 0) New_Value = 0
 	 */
+	/*
 	private class BrightnessFilter extends RGBImageFilter {
 		// brightness level = [-200, 200]
 		int brightLevel = 0;
@@ -2858,6 +2896,7 @@ public class DefaultImageView extends Shell implements ImageView {
 			return rgb;
 		}
 	}
+	*/
 
 	/**
 	 * Makes an image filter for contour.
@@ -3224,7 +3263,10 @@ public class DefaultImageView extends Shell implements ImageView {
 	/**
 	 * Makes animation for 3D images.
 	 */
-	private class Animation extends JDialog implements ActionListener, Runnable {
+	private class Animation
+	//extends JDialog implements ActionListener, Runnable 
+	{
+		/*
 		private static final long serialVersionUID = 6717628496771098250L;
 
 		private final int MAX_ANIMATION_IMAGE_SIZE = 300;
@@ -3239,7 +3281,9 @@ public class DefaultImageView extends Shell implements ImageView {
 		private Graphics offScrGC; // Offscreen graphics context
 		private JFrame owner;
 		private int x0 = 0, y0 = 0; // offset of the image drawing
+		*/
 
+		/*
 		public Animation(JFrame theOwner, ScalarDS dataset) {
 			super(theOwner, "Animation", true);
 			owner = theOwner;
@@ -3361,7 +3405,9 @@ public class DefaultImageView extends Shell implements ImageView {
 			pack();
 			setVisible(true);
 		}
+		*/
 
+		/*
 		public void actionPerformed(ActionEvent e) {
 			Object source = e.getSource();
 			String cmd = e.getActionCommand();
@@ -3370,40 +3416,50 @@ public class DefaultImageView extends Shell implements ImageView {
 				dispose(); // terminate the animation
 			}
 		}
+		*/
 
+		/*
 		public void dispose() {
 			engine = null;
 			frames = null;
 			super.dispose();
 		}
+		*/
 
 		/**
 		 * No need to clear anything; just paint.
 		 */
+		/*
 		public void update(Graphics g) {
 			paint(g);
 		}
+		*/
 
 		/**
 		 * Paint the current frame
 		 */
+		/*
 		public void paint(Graphics g) {
 			canvas.paint(g);
 		}
+		*/
 
 		/**
 		 * Start the applet by forking an animation thread.
 		 */
+		/*
 		private void start() {
 			engine = new Thread(this);
 			engine.start();
 		}
+		*/
 
 		/**
 		 * Run the animation. This method is called by class Thread.
 		 * 
 		 * @see java.lang.Thread
 		 */
+		/*
 		public void run() {
 			Thread me = Thread.currentThread();
 
@@ -3424,10 +3480,13 @@ public class DefaultImageView extends Shell implements ImageView {
 				}
 			}
 		} // public void run() {
+		*/
 	} // private class Animation extends JDialog
 
-	private class DataRangeDialog extends JDialog implements ActionListener,
-	ChangeListener, PropertyChangeListener {
+	private class DataRangeDialog
+	//extends JDialog implements ActionListener, ChangeListener, PropertyChangeListener 
+	{
+		/*
 		final int NTICKS = 10;
 		double tickRatio = 1;
 		final int W = 500, H = 400;
@@ -3437,7 +3496,9 @@ public class DefaultImageView extends Shell implements ImageView {
 		final double[] minmax_dist = {0,0};
 		JSlider minSlider, maxSlider;
 		JFormattedTextField minField, maxField;
+		*/
 
+		/*
 		public DataRangeDialog(JFrame theOwner, double[] minmaxCurrent, 
 				double[] minmaxOriginal, final int[] dataDist) 
 		{
@@ -3598,7 +3659,9 @@ public class DefaultImageView extends Shell implements ImageView {
 			pack();
 			setVisible(true);
 		}
+		*/
 
+		/*
 		public void actionPerformed(ActionEvent e) {
 			String cmd = e.getActionCommand();
 
@@ -3628,8 +3691,10 @@ public class DefaultImageView extends Shell implements ImageView {
 				this.dispose();
 			}
 		}
+		*/
 
 		/** Listen to the slider. */
+		/*
 		public void stateChanged(ChangeEvent e) {
 			Object source = e.getSource();
 
@@ -3660,11 +3725,13 @@ public class DefaultImageView extends Shell implements ImageView {
 				maxField.setValue(new Double(value*tickRatio+min_org));
 			}
 		}
+		*/
 
 		/**
 		 * Listen to the text field. This method detects when the value of the
 		 * text field changes.
 		 */
+		/*
 		public void propertyChange(PropertyChangeEvent e) {
 			Object source = e.getSource();
 			if ("value".equals(e.getPropertyName())) {
@@ -3692,21 +3759,29 @@ public class DefaultImageView extends Shell implements ImageView {
 				}
 			}
 		}
+		*/
 
+		/*
 		public double[] getRange() {
 			return minmax_current;
 		}
+		*/
 	} // private class DataRangeDialog extends JDialog implements ActionListener
 
-	private class ContrastSlider extends JDialog implements
-	ActionListener, ChangeListener, PropertyChangeListener {
+	private class ContrastSlider 
+	//extends JDialog 
+	//implements ActionListener, ChangeListener, PropertyChangeListener 
+	{
+		/*
 		private static final long serialVersionUID = -3002524363351111565L;
 		JSlider brightSlider, contrastSlider;
 		JFormattedTextField brightField, contrastField;
 		ImageProducer imageProducer;
 		double[] autoGainBias = {0, 0};
 		int bLevel=0, cLevel=0;
+		*/
 
+		/*
 		public ContrastSlider(JFrame theOwner, ImageProducer producer) 
 		{
 			super(theOwner, "Brightness/Contrast", true);
@@ -3804,7 +3879,9 @@ public class DefaultImageView extends Shell implements ImageView {
 			setLocation(l);
 			pack();
 		}
+		*/
 
+		/*
 		public void actionPerformed(ActionEvent e) {
 			String cmd = e.getActionCommand();
 
@@ -3826,8 +3903,10 @@ public class DefaultImageView extends Shell implements ImageView {
 				setVisible(false);
 			}
 		}
+		*/
 
 		/** Listen to the slider. */
+		/*
 		public void stateChanged(ChangeEvent e) {
 			Object source = e.getSource();
 
@@ -3844,11 +3923,13 @@ public class DefaultImageView extends Shell implements ImageView {
 				contrastField.setValue(new Integer(value));
 			}
 		}
+		*/
 
 		/**
 		 * Listen to the text field. This method detects when the value of the
 		 * text field changes.
 		 */
+		/*
 		public void propertyChange(PropertyChangeEvent e) {
 			Object source = e.getSource();
 			if ("value".equals(e.getPropertyName())) {
@@ -3874,7 +3955,9 @@ public class DefaultImageView extends Shell implements ImageView {
 				}
 			}
 		}
+		*/
 
+		/*
 		private void applyBrightContrast(int blevel, int clevel) {
 			// do not separate autogain and simple contrast process
 			//            ImageFilter filter = new BrightnessFilter(blevel, clevel);
@@ -3895,7 +3978,6 @@ public class DefaultImageView extends Shell implements ImageView {
 				zoomTo(zoomFactor);           
 			}
 		}
-
+		*/
 	} // private class ContrastSlider extends JDialog implements ActionListener
-
 }

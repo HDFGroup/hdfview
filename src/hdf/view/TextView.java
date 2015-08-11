@@ -23,7 +23,7 @@ package hdf.view;
  */
 public abstract interface TextView extends DataView {
     /** return array of the text in this textview */
-    public abstract String[] getText();
+    public abstract String[] getContents();
 
     /** Write the change of a dataset into file. */
     public abstract void updateValueInFile();

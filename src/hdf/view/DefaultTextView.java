@@ -36,7 +36,13 @@ import javax.print.SimpleDoc;
 import javax.print.StreamPrintServiceFactory;
 
 import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 
 import hdf.object.Dataset;
 import hdf.object.FileFormat;
@@ -58,6 +64,10 @@ public class DefaultTextView extends Shell implements TextView {
      * The main HDFView.
      */
     private final ViewManager viewer;
+    
+    private final Display display = Display.getCurrent();
+    
+    private final Shell shell;
 
     /**
      * The Scalar Dataset.
@@ -110,11 +120,13 @@ public class DefaultTextView extends Shell implements TextView {
      *            ViewProperties.DATA_VIEW_KEY.
      */
     public DefaultTextView(ViewManager theView, HashMap map) {
-        viewer = theView;
+        shell = new Shell(display);
+    	
+    	viewer = theView;
         text = null;
         table = null;
         dataset = null;
-        textEditor = new TextAreaEditor(this);
+        //textEditor = new TextAreaEditor(this);
         
         if (ViewProperties.isIndexBase1())
             indexBase = 1;
@@ -142,12 +154,8 @@ public class DefaultTextView extends Shell implements TextView {
         try {
             text = (String[]) dataset.getData();
         } 
-        catch (Exception ex) { 
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex,
-                    "TextView:"+getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+        catch (Exception ex) {
+        	showError(ex.getMessage(), "TextView" + shell.getText());
             text = null; 
         }
 
@@ -159,11 +167,10 @@ public class DefaultTextView extends Shell implements TextView {
         }
         
         String fname = new java.io.File(dataset.getFile()).getName();
-        this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        this.setTitle("TextView  -  " + dataset.getName() + "  -  "
+        //this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        shell.setText("TextView  -  " + dataset.getName() + "  -  "
                 + dataset.getPath() + "  -  " + fname);
         //this.setFrameIcon(ViewProperties.getTextIcon());
-        this.setName("textdata");
         
         int rank = dataset.getRank();
         long start[] = dataset.getStartDims();
@@ -181,63 +188,64 @@ public class DefaultTextView extends Shell implements TextView {
 
         table = createTable(colName);
         
-        JTableHeader colHeader = table.getTableHeader();
-        colHeader.setReorderingAllowed(false);
+        //JTableHeader colHeader = table.getTableHeader();
+        //colHeader.setReorderingAllowed(false);
         //colHeader.setBackground(Color.black);
         
-        rowHeaders = new RowHeader(table, dataset);
+        //rowHeaders = new RowHeader(table, dataset);
 
         // add the table to a scroller
-        JScrollPane scrollingTable = new JScrollPane(table);
-        scrollingTable.getVerticalScrollBar().setUnitIncrement(100);
-        scrollingTable.getHorizontalScrollBar().setUnitIncrement(100);
+        ScrolledComposite scrollingTable = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
+        scrollingTable.setContent(table);
+        scrollingTable.getVerticalBar().setIncrement(100);
+        scrollingTable.getHorizontalBar().setIncrement(100);
 
-        JViewport viewp = new JViewport();
-        viewp.add(rowHeaders);
-        viewp.setPreferredSize(rowHeaders.getPreferredSize());
-        scrollingTable.setRowHeader(viewp);
+        //JViewport viewp = new JViewport();
+        //viewp.add(rowHeaders);
+        //viewp.setPreferredSize(rowHeaders.getPreferredSize());
+        //scrollingTable.setRowHeader(viewp);
 
-        TableColumnModel cmodel = table.getColumnModel();
+        //TableColumnModel cmodel = table.getColumnModel();
         TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
 
-        cmodel.getColumn(0).setCellRenderer(textAreaRenderer);
-        cmodel.getColumn(0).setCellEditor(textEditor);
+        //cmodel.getColumn(0).setCellRenderer(textAreaRenderer);
+        //cmodel.getColumn(0).setCellEditor(textEditor);
 
-        ((JPanel) getContentPane()).add(scrollingTable);
+        shell.setMenuBar(createMenuBar());
+        
+        shell.addDisposeListener(new DisposeListener() {
+        	public void widgetDisposed(DisposeEvent e) {
+        		if (isTextChanged && !isReadOnly) {
+                	MessageBox confirm = new MessageBox(shell, SWT.YES | SWT.NO);
+                	confirm.setMessage("\""
+                            + dataset.getName() + "\" has changed.\n"
+                            + "Do you want to save the changes?");
+                	confirm.setText(shell.getText());
 
-        setJMenuBar(createMenuBar());
-    }
+                    if (confirm.open() == SWT.YES) {
+                        updateValueInFile();
+                    }
+                }
 
-    public void actionPerformed(ActionEvent e) {
-        Object source = e.getSource();
-        String cmd = e.getActionCommand();
-
-        if (cmd.equals("Close")) {
-            dispose(); // terminate the application
-        }
-        else if (cmd.equals("Save to text file")) {
-            try {
-                saveAsText();
-            }
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog((JFrame) viewer, ex, getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        else if (cmd.equals("Save changes")) {
-            updateValueInFile();
-        }
-        else if (cmd.equals("Print")) {
-            print();
-        }
+                //viewer.removeDataView();
+        	}
+        });
+        
+        shell.open();
+        
+        while (!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
     }
 
     /**
-     * Creates a JTable to hold a compound dataset.
+     * Creates a Table to hold a compound dataset.
      */
-    private JTable createTable(final String colName) {
-        JTable theTable = null;
+    private Table createTable(final String colName) {
+        Table theTable = null;
         
+        /*
         AbstractTableModel tm =  new AbstractTableModel()
         {
             public int getColumnCount() {
@@ -257,8 +265,10 @@ public class DefaultTextView extends Shell implements TextView {
                 return text[row];
             }
         };
+        */
         
-        theTable = new JTable(tm) {
+        /*
+        theTable = new Table(tm) {
             private static final long serialVersionUID = -6571266777012522255L;
 
             @Override
@@ -281,54 +291,65 @@ public class DefaultTextView extends Shell implements TextView {
                 } // if (source instanceof CellEditor)
             }
         };
-        theTable.setName("TextView");
+        */
+        //theTable.setName("TextView");
 
         return theTable;
     }
 
-    public void keyPressed(KeyEvent e) {
-    }
-
-    public void keyReleased(KeyEvent e) {
-    }
-
+    /*
     public void keyTyped(KeyEvent e) {
         isTextChanged = true;
     }
+    */
 
-    private JMenuBar createMenuBar() {
-        JMenuBar bar = new JMenuBar();
-        JMenu menu = new JMenu("Text", false);
-        menu.setMnemonic('T');
-        bar.add(menu);
+    private Menu createMenuBar() {
+        Menu menuBar = new Menu(shell, SWT.BAR);
+        
+        MenuItem textMenu = new MenuItem(menuBar, SWT.CASCADE);
+        textMenu.setText("&Text");
+        
+        Menu menu = new Menu(shell, SWT.DROP_DOWN);
+        textMenu.setMenu(menu);
 
-        JMenuItem item = new JMenuItem("Save To Text File");
-        // item.setMnemonic(KeyEvent.VK_T);
-        item.addActionListener(this);
-        item.setActionCommand("Save to text file");
-        menu.add(item);
+        MenuItem item = new MenuItem(menu, SWT.PUSH);
+        item.setText("Save To &Text File");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		try {
+        			saveAsText();
+        		}
+        		catch (Exception ex) {
+        			showError(ex.getMessage(), shell.getText());
+        		}
+        	}
+        });
 
-        menu.addSeparator();
+        item = new MenuItem(menu, SWT.SEPARATOR);
 
-        item = new JMenuItem("Save Changes");
-        item.addActionListener(this);
-        item.setActionCommand("Save changes");
-        menu.add(item);
+        item = new MenuItem(menu, SWT.PUSH);
+        item.setText("Save Changes");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		updateValueInFile();
+        	}
+        });
+        
+        item = new MenuItem(menu, SWT.SEPARATOR);
 
-        menu.addSeparator();
+        item = new MenuItem(menu, SWT.PUSH);
+        item.setText("Close");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		shell.dispose();
+        	}
+        });
 
-        menu.addSeparator();
-
-        item = new JMenuItem("Close");
-        item.addActionListener(this);
-        item.setActionCommand("Close");
-        menu.add(item);
-
-        return bar;
+        return menuBar;
     }
 
     /**
-     * update dataset value in file. The change will go to file.
+     * Update dataset value in file. The change will go to file.
      */
     public void updateValueInFile() {
         if (isReadOnly) {
@@ -343,27 +364,27 @@ public class DefaultTextView extends Shell implements TextView {
             return;
         }
 
-        int row = table.getEditingRow();
-        if (row >= 0) {
+        //int row = table.getEditingRow();
+        //if (row >= 0) {
             // make sure to update the current row
-            String cellValue = (String) textEditor.getCellEditorValue();
-            text[row] = cellValue;
-        }
+        //    String cellValue = (String) textEditor.getCellEditorValue();
+        //    text[row] = cellValue;
+        //}
 
         try {
             dataset.write();
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex, getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+        	showError(ex.getMessage(), shell.getText());
             return;
         }
+        
         isTextChanged = false;
-
     }
 
     /** Save data as text. */
     private void saveAsText() throws Exception {
+    	/*
         final JFileChooser fchooser = new JFileChooser(dataset.getFile());
         fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
         fchooser.changeToParentDirectory();
@@ -393,10 +414,8 @@ public class DefaultTextView extends Shell implements TextView {
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(fname)) {
-                    JOptionPane.showMessageDialog(this,
-                            "Unable to save data to file \"" + fname
-                                    + "\". \nThe file is being used.",
-                            getTitle(), JOptionPane.ERROR_MESSAGE);
+                	showError("Unable to save data to file \"" + fname
+                            + "\". \nThe file is being used.", shell.getText());
                     return;
                 }
             }
@@ -435,24 +454,7 @@ public class DefaultTextView extends Shell implements TextView {
         catch (Exception ex) {
         	log.debug("raf file size:", ex);
         }
-    }
-
-    @Override
-    public void dispose() {
-        if (isTextChanged && !isReadOnly) {
-            int op = JOptionPane.showConfirmDialog(this, "\""
-                    + dataset.getName() + "\" has changed.\n"
-                    + "Do you want to save the changes?", getTitle(),
-                    JOptionPane.YES_NO_OPTION);
-
-            if (op == JOptionPane.YES_OPTION) {
-                updateValueInFile();
-            }
-        }
-
-        viewer.removeDataView(this);
-
-        super.dispose();
+        */
     }
 
     // Implementing DataView.
@@ -461,7 +463,7 @@ public class DefaultTextView extends Shell implements TextView {
     }
 
     // Implementing TextView.
-    public String[] getText() {
+    public String[] getContents() {
         return text;
     }
 
@@ -505,21 +507,30 @@ public class DefaultTextView extends Shell implements TextView {
             System.out.println(ex);
         }
     }
+    
+    private void showError(String errorMsg, String title) {
+    	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+    	error.setText(title);
+    	error.setMessage(errorMsg);
+    	error.open();
+    }
 
-    private class TextAreaRenderer extends JTextArea implements
-            TableCellRenderer {
+    private class TextAreaRenderer
+    //extends JTextArea implements TableCellRenderer 
+    {
         private static final long serialVersionUID = -5869975162678521978L;
 
-        private final DefaultTableCellRenderer adaptee = new DefaultTableCellRenderer();
+        //private final DefaultTableCellRenderer adaptee = new DefaultTableCellRenderer();
 
         /** map from table to map of rows to map of column heights */
         private final Map cellSizes = new HashMap();
 
         public TextAreaRenderer() {
-            setLineWrap(true);
-            setWrapStyleWord(true);
+            //setLineWrap(true);
+            //setWrapStyleWord(true);
         }
 
+        /*
         public Component getTableCellRendererComponent(
                 //
                 JTable table, Object obj, boolean isSelected, boolean hasFocus,
@@ -546,7 +557,9 @@ public class DefaultTextView extends Shell implements TextView {
             }
             return this;
         }
+        */
 
+        /*
         private void addSize(JTable table, int row, int column, int height) {
             Map rows = (Map) cellSizes.get(table);
             if (rows == null) {
@@ -558,12 +571,14 @@ public class DefaultTextView extends Shell implements TextView {
             }
             rowheights.put(new Integer(column), new Integer(height));
         }
+        */
 
         /**
          * Look through all columns and get the renderer. If it is also a
          * TextAreaRenderer, we look at the maximum height in its hash table for
          * this row.
          */
+        /*
         private int findTotalMaximumRowSize(JTable table, int row) {
             int maximum_height = 0;
             Enumeration columns = table.getColumnModel().getColumns();
@@ -578,7 +593,9 @@ public class DefaultTextView extends Shell implements TextView {
             }
             return maximum_height;
         }
+        */
 
+        /*
         private int findMaximumRowSize(JTable table, int row) {
             Map rows = (Map) cellSizes.get(table);
             if (rows == null) {
@@ -596,9 +613,13 @@ public class DefaultTextView extends Shell implements TextView {
             }
             return maximum_height;
         }
+        */
     }
 
-    private class TextAreaEditor extends DefaultCellEditor {
+    private class TextAreaEditor
+    //extends DefaultCellEditor 
+    {
+    	/*
         private static final long serialVersionUID = 1721646779892184957L;
 
         public TextAreaEditor(KeyListener keyListener) {
@@ -626,16 +647,24 @@ public class DefaultTextView extends Shell implements TextView {
                 }
             };
         }
+        */
     }
 
     /** RowHeader defines the row header component of the Spreadsheet. */
-    private class RowHeader extends JTable {
-        private static final long serialVersionUID = 2572539746584274419L;
+    private class RowHeader extends Table {
+		private static final long serialVersionUID = 2572539746584274419L;
         private int currentRowIndex = -1;
         private int lastRowIndex = -1;
-        private JTable parentTable;
-
-        public RowHeader(JTable pTable, Dataset dset) {
+        private Table parentTable;
+        
+        // Only here for compile reasons
+        public RowHeader(Composite parent, int style) {
+			super(parent, style);
+			// TODO Auto-generated constructor stub
+		}
+        
+        /*
+        public RowHeader(Table pTable, Dataset dset) {
             // Create a JTable with the same number of rows as
             // the parent table and one column.
             super(pTable.getRowCount(), 1);
@@ -661,15 +690,15 @@ public class DefaultTextView extends Shell implements TextView {
             // Use the cell renderer in the column.
             col.setCellRenderer(new RowHeaderRenderer());
         }
+        */
 
         /** Overridden to return false since the headers are not editable. */
-        @Override
         public boolean isCellEditable(int row, int col) {
             return false;
         }
 
         /** This is called when the selection changes in the row headers. */
-        @Override
+        /*
         public void valueChanged(ListSelectionEvent e) {
             if (parentTable == null) {
                 return;
@@ -685,7 +714,9 @@ public class DefaultTextView extends Shell implements TextView {
             parentTable.setColumnSelectionInterval(0, parentTable
                     .getColumnCount() - 1);
         }
+        */
 
+        /*
         @Override
         protected void processMouseMotionEvent(MouseEvent e) {
             if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
@@ -713,7 +744,9 @@ public class DefaultTextView extends Shell implements TextView {
                         .getColumnCount() - 1);
             }
         }
+        */
 
+        /*
         @Override
         protected void processMouseEvent(MouseEvent e) {
             int mouseID = e.getID();
@@ -758,25 +791,28 @@ public class DefaultTextView extends Shell implements TextView {
                 currentRowIndex = rowAtPoint(e.getPoint());
             }
         }
+        */
     } // private class RowHeader extends JTable
 
     /**
      * RowHeaderRenderer is a custom cell renderer that displays cells as
      * buttons.
      */
-    private class RowHeaderRenderer extends JLabel implements TableCellRenderer {
+    private class RowHeaderRenderer extends Label
+    //implements TableCellRenderer
+    {
         private static final long serialVersionUID = 3081275694689434654L;
 
         public RowHeaderRenderer() {
-            super();
-            setHorizontalAlignment(SwingConstants.CENTER);
+            super(shell, SWT.CENTER);
 
-            setOpaque(true);
-            setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-            setBackground(Color.lightGray);
+            //setOpaque(true);
+            //setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+            setBackground(display.getSystemColor(SWT.COLOR_GRAY));
         }
 
         /** Configures the button for the current cell, and returns it. */
+        /*
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
@@ -788,7 +824,7 @@ public class DefaultTextView extends Shell implements TextView {
 
             return this;
         }
+        */
     } // private class RowHeaderRenderer extends JLabel implements
       // TableCellRenderer
-
 }

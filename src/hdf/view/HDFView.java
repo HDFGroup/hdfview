@@ -373,8 +373,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      * ||========================================||
      * </pre>
      */
-	private void createMainWindow(int width, int height, int x, int y) {
-		
+	private void createMainWindow(int width, int height, int x, int y) {		
 		// Create a new display window
 		mainWindow = new Shell(display);
 		mainWindow.setImage(ViewProperties.getHdfIcon());

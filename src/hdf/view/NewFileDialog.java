@@ -86,15 +86,15 @@ public class NewFileDialog extends FileDialog
         if (fileType == FileFormat.FILE_TYPE_HDF4) {
             isH4 = true;
             setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
-            setFileFilter(DefaultFileFilter.getFileFilterHDF4());
+            //setFileFilter(DefaultFileFilter.getFileFilterHDF4());
         }
         else if (fileType == FileFormat.FILE_TYPE_HDF5) {
             isH5 = true;
             setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
-            setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+            //setFileFilter(DefaultFileFilter.getFileFilterHDF5());
         }
 
-        this.setAcceptAllFileFilterUsed(false);
+        //this.setAcceptAllFileFilterUsed(false);
         
         String filename = open();
         if (filename != null) {

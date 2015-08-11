@@ -277,11 +277,12 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
 
     /** add an attribute to a data object. */
     public Attribute addAttribute(HObject obj) {
+    	/*
         if (obj == null) {
             return null;
         }
-
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) obj.getFileFormat().getRootNode();
+        
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) obj.getFileFormat().getRootObject();
         NewAttributeDialog dialog = new NewAttributeDialog(this, obj, node.breadthFirstEnumeration());
         dialog.setVisible(true);
 
@@ -311,6 +312,9 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
 
         return attr;
+        */
+    	
+    	return null; // Remove when fixed
     }
 
     /** delete an attribute from a data object. */
@@ -367,6 +371,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
      * Creates a panel used to display general information of HDF object.
      */
     private JPanel createGeneralPropertyPanel() {
+    	/*
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
@@ -402,7 +407,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
             lp.add(new JLabel("Path: "));
             lp.add(new JLabel("Type: "));
 
-            /* bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC */
+            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
             if (isH4) {
                 lp.add(new JLabel("Tag, Ref:        "));
             }
@@ -538,7 +543,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
             rp.add(libverbound);
         }
 
-        /* bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC */
+        // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
         String oidStr = null;
         long[] OID = hObject.getOID();
         if (OID != null) {
@@ -579,6 +584,9 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         }
 
         return panel;
+        */
+    	
+    	return null; // Remove when fixed
     }
 
     /**
