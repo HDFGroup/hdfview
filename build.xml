@@ -90,10 +90,10 @@
       includes="fits.jar netcdf.jar"
       excludes="*sources.jar"/>
   </path>
-	<path id="swt-classpath">
-	  <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar"/>
-		<fileset file="${lib.dir}/ext/swt/swing2swt.jar"/>
-	</path>
+  <path id="swt-classpath">
+	<fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar"/>
+	<fileset file="${lib.dir}/ext/swt/swing2swt.jar"/>
+  </path>
   <path id="jni-classpath">
     <fileset dir="${hdf.lib.dir}" includes="jarhdf*.jar slf4j-api*.jar"/>
   </path>
