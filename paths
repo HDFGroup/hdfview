@@ -1,27 +1,27 @@
-A
+D
 dir
-/branches/hdfview-3/src/hdf/object/nc2
+/branches/view-prototype/lib
 
 
 
 
-A
+D
 dir
-/branches/hdfview-3/src/hdf/object/fits
+/branches/view-prototype/bin
 
 
 
 
-A
+D
 dir
-/branches/hdfview-3/src/hdf/object/h4
+/branches/view-prototype/hdf
 
 
 
 
-A
+D
 dir
-/branches/hdfview-3/src/hdf/object/h5
+/branches/view-prototype/.settings
 
 
 
