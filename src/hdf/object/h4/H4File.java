@@ -21,10 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
@@ -57,9 +53,9 @@ public class H4File extends FileFormat {
     private int flag;
 
     /**
-     * The root node of the tree structure of this file.
+     * The root object of this file.
      */
-    private DefaultMutableTreeNode rootNode;
+    private HObject rootObject;
 
     /**
      * The list of unique (tag, ref) pairs. It is used to avoid duplicate
@@ -302,7 +298,7 @@ public class H4File extends FileFormat {
         sdid = HDFLibrary.SDstart(fullFileName, flag);
 
         // load the file hierarchy
-        rootNode = loadTree();
+        rootObject = loadTree();
 
         log.trace("hdf.H4File - open: end");
         
@@ -313,19 +309,19 @@ public class H4File extends FileFormat {
     @Override
     public void close() throws HDFException {
         // clean unused objects
-        if (rootNode != null) {
-            DefaultMutableTreeNode theNode = null;
+        if (rootObject != null) {
+            //DefaultMutableTreeNode theNode = null;
             HObject theObj = null;
-            Enumeration local_enum = (rootNode).breadthFirstEnumeration();
-            while (local_enum.hasMoreElements()) {
-                theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-                theObj = (HObject) theNode.getUserObject();
-                if (theObj instanceof Dataset) {
-                    ((Dataset) theObj).clearData();
-                }
-                theObj = null;
-                theNode = null;
-            }
+            //Enumeration local_enum = (rootNode).breadthFirstEnumeration();
+            //while (local_enum.hasMoreElements()) {
+            //    theNode = (DefaultMutableTreeNode) local_enum.nextElement();
+            //    theObj = (HObject) theNode.getUserObject();
+            //    if (theObj instanceof Dataset) {
+            //        ((Dataset) theObj).clearData();
+            //    }
+            //    theObj = null;
+            //    theNode = null;
+            //}
         }
 
         try {
@@ -355,8 +351,8 @@ public class H4File extends FileFormat {
 
     // Implementing FileFormat
     @Override
-    public TreeNode getRootNode() {
-        return rootNode;
+    public HObject getRootObject() {
+        return rootObject;
     }
 
     @Override
@@ -426,13 +422,12 @@ public class H4File extends FileFormat {
      *            the object to copy.
      * @param dstGroup
      *            the destination group.
-     * @return the new node containing the new object.
+     * @return the destination group, if the copy was successful, or
+     * 		   null otherwise.
      */
     @Override
-    public TreeNode copy(HObject srcObj, Group dstGroup, String dstName)
+    public H4Group copy(HObject srcObj, Group dstGroup, String dstName)
             throws Exception {
-        TreeNode newNode = null;
-
         log.trace("copy(): start");
         if ((srcObj == null) || (dstGroup == null)) {
             return null;
@@ -445,26 +440,23 @@ public class H4File extends FileFormat {
 
         if (srcObj instanceof H4SDS) {
             log.trace("copy(): srcObj instanceof H4SDS");
-            newNode = new DefaultMutableTreeNode(((H4SDS) srcObj).copy(
-                    dstGroup, dstName, null, null));
-        } 
+            ((H4SDS) srcObj).copy(dstGroup, dstName, null, null);
+        }
         else if (srcObj instanceof H4GRImage) {
             log.trace("copy(): srcObj instanceof H4GRImage");
-            newNode = new DefaultMutableTreeNode(((H4GRImage) srcObj).copy(
-                    dstGroup, dstName, null, null));
-        } 
+            ((H4GRImage) srcObj).copy(dstGroup, dstName, null, null);
+        }
         else if (srcObj instanceof H4Vdata) {
             log.trace("copy(): srcObj instanceof H4Vdata");
-            newNode = new DefaultMutableTreeNode(((H4Vdata) srcObj).copy(
-                    dstGroup, null, null, null));
-        } 
+            ((H4Vdata) srcObj).copy(dstGroup, dstName, null, null);
+        }
         else if (srcObj instanceof H4Group) {
             log.trace("copy(): srcObj instanceof H4Group");
-            newNode = copyGroup((H4Group) srcObj, (H4Group) dstGroup);
+            copyGroup((H4Group) srcObj, (H4Group) dstGroup);
         }
 
         log.trace("copy(): finish");
-        return newNode;
+        return (H4Group) dstGroup;
     }
 
     /**
@@ -543,7 +535,7 @@ public class H4File extends FileFormat {
         log.trace("writeAttribute(): finish");
     }
 
-    private TreeNode copyGroup(H4Group srcGroup, H4Group pgroup)
+    private void copyGroup(H4Group srcGroup, H4Group pgroup)
             throws Exception {
         H4Group group = null;
         int srcgid, dstgid;
@@ -552,7 +544,7 @@ public class H4File extends FileFormat {
         log.trace("copyGroup(): start");
         dstgid = HDFLibrary.Vattach(fid, -1, "w");
         if (dstgid < 0) {
-            return null;
+            return;
         }
 
         gname = srcGroup.getName();
@@ -602,14 +594,14 @@ public class H4File extends FileFormat {
         long[] oid = { tag, ref };
         group = new H4Group(this, gname, path, pgroup, oid);
 
-        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(group) {
-            private static final long serialVersionUID = -8601910527549035409L;
+        //DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(group) {
+        //    private static final long serialVersionUID = -8601910527549035409L;
 
-            @Override
-            public boolean isLeaf() {
-                return false;
-            }
-        };
+        //    @Override
+        //    public boolean isLeaf() {
+        //        return false;
+        //    }
+        //};
         pgroup.addToMemberList(group);
 
         // copy members of the source group to the new group
@@ -619,7 +611,8 @@ public class H4File extends FileFormat {
             while (iterator.hasNext()) {
                 HObject mObj = (HObject) iterator.next();
                 try {
-                    newNode.add((MutableTreeNode) copy(mObj, group));
+                	// Change this to be taken care of inside treeview instead of here
+                    //newNode.add((MutableTreeNode) copy(mObj, group));
                 } 
                 catch (Exception ex) {
                     log.debug("newNode.ad failure: ", ex);
@@ -636,18 +629,17 @@ public class H4File extends FileFormat {
         }
 
         log.trace("copyGroup(): finish");
-        return newNode;
     }
 
     /**
-     * Retrieves and returns the file structure from disk.
+     * Retrieves the file structure from disk and returns the root object.
      * <p>
      * First gets the top level objects or objects that do not belong to any
      * groups. If a top level object is a group, call the depth_first() to
      * retrieve the sub-tree of that group, recursively.
      * 
      */
-    private DefaultMutableTreeNode loadTree() {
+    private HObject loadTree() {
         if (fid < 0) {
             return null;
         }
@@ -655,23 +647,22 @@ public class H4File extends FileFormat {
         long[] oid = { 0, 0 };
         int n = 0, ref = -1;
         int[] argv = null;
-        MutableTreeNode node = null;
+        //MutableTreeNode node = null;
 
         log.trace("loadTree(): start");
-        H4Group rootGroup = new H4Group(this, "/", null, // root node does not
-                // have a parent
-                // path
-                null, // root node does not have a parent node
-                oid);
+        H4Group rootGroup = new H4Group(this, "/",
+        								null, // root node does not have a parent path
+        								null, // root node does not have a parent node
+        								oid);
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
-            private static final long serialVersionUID = 3507473044690724650L;
+        //DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
+        //    private static final long serialVersionUID = 3507473044690724650L;
 
-            @Override
-            public boolean isLeaf() {
-                return false;
-            }
-        };
+        //    @Override
+        //    public boolean isLeaf() {
+        //        return false;
+        //    }
+        //};
 
         // get top level VGroup
         int[] tmpN = new int[1];
@@ -703,19 +694,19 @@ public class H4File extends FileFormat {
                     HObject.separator, rootGroup, false);
 
             if (g != null) {
-                node = new DefaultMutableTreeNode(g) {
-                    private static final long serialVersionUID = 8927502967802143369L;
+                //node = new DefaultMutableTreeNode(g) {
+                //    private static final long serialVersionUID = 8927502967802143369L;
 
-                    @Override
-                    public boolean isLeaf() {
-                        return false;
-                    }
-                };
-                root.add(node);
+                //    @Override
+                //    public boolean isLeaf() {
+                //        return false;
+                //    }
+                //};
+                //root.add(node);
                 rootGroup.addToMemberList(g);
 
                 // recursively get the sub-tree
-                depth_first(node, null);
+                //depth_first(node, null);
             }
         } // for (int i=0; i<n; i++)
 
@@ -737,8 +728,8 @@ public class H4File extends FileFormat {
                 H4GRImage gr = getGRImage(HDFConstants.DFTAG_RIG, i,
                         HObject.separator, false);
                 if (gr != null) {
-                    node = new DefaultMutableTreeNode(gr);
-                    root.add(node);
+                    //node = new DefaultMutableTreeNode(gr);
+                    //root.add(node);
                     rootGroup.addToMemberList(gr);
                 }
             } // for (int i=0; i<n; i++)
@@ -759,8 +750,8 @@ public class H4File extends FileFormat {
                 H4SDS sds = getSDS(HDFConstants.DFTAG_NDG, i,
                         HObject.separator, false);
                 if (sds != null) {
-                    node = new DefaultMutableTreeNode(sds);
-                    root.add(node);
+                    //node = new DefaultMutableTreeNode(sds);
+                    //root.add(node);
                     rootGroup.addToMemberList(sds);
                 }
             } // for (int i=0; i<n; i++)
@@ -784,8 +775,8 @@ public class H4File extends FileFormat {
                     HObject.separator, false);
 
             if (vdata != null) {
-                node = new DefaultMutableTreeNode(vdata);
-                root.add(node);
+                //node = new DefaultMutableTreeNode(vdata);
+                //root.add(node);
                 rootGroup.addToMemberList(vdata);
             }
         } // for (int i=0; i<n; i++)
@@ -823,7 +814,7 @@ public class H4File extends FileFormat {
         }
 
         log.trace("loadTree(): finish");
-        return root;
+        return rootGroup;
     }
 
     /**
@@ -835,6 +826,7 @@ public class H4File extends FileFormat {
      * @param parentNode
      *            the parent node.
      */
+    /*
     private void depth_first(MutableTreeNode parentNode, H4Group pgroup) {
         if ((pgroup == null) && (parentNode == null)) {
             return;
@@ -972,6 +964,7 @@ public class H4File extends FileFormat {
         } // for (int i=0; i<nelms; i++)
 
     } // private depth_first()
+    */
 
     /**
      * Retrieve an GR image for the given GR image identifier and index.
@@ -1849,7 +1842,7 @@ public class H4File extends FileFormat {
         if (ref > 0) {
             long oid[] = { HDFConstants.DFTAG_VG, ref };
             H4Group g = new H4Group(this, objName[0], path, null, oid);
-            depth_first(null, g);
+            //depth_first(null, g);
             return g;
         }
 

@@ -50,9 +50,9 @@ public class FitsFile extends FileFormat
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsFile.class);
 
     /**
-     * The root node of the file hierearchy.
+     * The root object of the file hierarchy.
      */
-    private MutableTreeNode rootNode;
+    private HObject rootObject;
 
     /** the fits file */
     private Fits fitsFile;
@@ -191,13 +191,13 @@ public class FitsFile extends FileFormat
     public int open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
-            rootNode = loadTree();
+            rootObject = loadTree();
         }
 
         return 0;
     }
 
-    private MutableTreeNode loadTree() {
+    private HObject loadTree() {
 
         long[] oid = {0};
         FitsGroup rootGroup = new FitsGroup(
@@ -207,15 +207,15 @@ public class FitsFile extends FileFormat
             null, // root node does not have a parent node
             oid);
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
-            private static final long serialVersionUID = 5556789624491863365L;
+        //DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
+        //    private static final long serialVersionUID = 5556789624491863365L;
 
-            @Override
-            public boolean isLeaf() { return false; }
-        };
+        //    @Override
+        //    public boolean isLeaf() { return false; }
+        //};
 
         if (fitsFile == null) {
-            return root;
+        //    return root;
         }
 
         BasicHDU[] hdus = null;
@@ -228,7 +228,7 @@ public class FitsFile extends FileFormat
         }
 
         if (hdus == null) {
-            return root;
+            //return root;
         }
 
         int n = hdus.length;
@@ -262,12 +262,13 @@ public class FitsFile extends FileFormat
                 oid[0] = hdu.hashCode();
                 FitsDataset d =  new FitsDataset(this, hdu, hduName, oid);
                 DefaultMutableTreeNode node = new DefaultMutableTreeNode(d);
-                root.add( node );
+                //root.add( node );
                 rootGroup.addToMemberList(d);
             }
         }
 
-        return root;
+        //return root;
+        return null; // Remove when fixed
     }
 
     // Implementing FileFormat
@@ -285,8 +286,8 @@ public class FitsFile extends FileFormat
 
     // Implementing FileFormat
     @Override
-    public TreeNode getRootNode() {
-        return rootNode;
+    public HObject getRootObject() {
+        return rootObject;
     }
 
     public Fits getFitsFile() {
@@ -356,16 +357,16 @@ public class FitsFile extends FileFormat
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
-    // implementign FileFormat
+    // implementing FileFormat
     @Override
     public void delete(HObject obj) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
-    // implementign FileFormat
+    // implementing FileFormat
     @Override
-    public TreeNode copy(HObject srcObj, Group dstGroup, String dstName) throws Exception {
+    public HObject copy(HObject srcObj, Group dstGroup, String dstName) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }
@@ -376,13 +377,13 @@ public class FitsFile extends FileFormat
      * @return the treeNode containing the new copy of the dataset.
      */
 
-    private TreeNode copyDataset(Dataset srcDataset, FitsGroup pgroup)
+    private void copyDataset(Dataset srcDataset, FitsGroup pgroup)
          throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
-    private TreeNode copyGroup(FitsGroup srcGroup, FitsGroup pgroup)
+    private void copyGroup(FitsGroup srcGroup, FitsGroup pgroup)
          throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");

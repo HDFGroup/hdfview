@@ -178,7 +178,7 @@ public class DefaultTreeView implements TreeView {
         //currentSelectionsForMove = null;
         //root = null;
         
-        // Initialize the tree and root item
+        // Initialize the tree
         tree = new Tree(parent, SWT.MULTI | SWT.VIRTUAL);
         tree.setSize(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
@@ -266,11 +266,27 @@ public class DefaultTreeView implements TreeView {
         		//if (selPath == null) return;
         		
         		if (!theItem.equals(selectedItem)) {
+        			FileFormat theFile = null;
+        			
         			//selectedTreePath = selPath;
         			selectedItem = theItem;
-        			selectedObject = (HObject) selectedItem.getData();
         			
-        			FileFormat theFile = selectedObject.getFileFormat();
+        			try {
+        				selectedObject = (HObject) selectedItem.getData();
+        			}
+        			catch(NullPointerException ex) {
+        				System.err.println("TreeItem " + selectedItem.getText() + " had no associated data.");
+        				return;
+        			}
+        			
+        			try {
+        			    theFile = selectedObject.getFileFormat();
+        			}
+        			catch(NullPointerException ex) {
+        				System.err.println("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+        				return;
+        			}
+        			
         			if ((theFile != null) && !theFile.equals(selectedFile)) {
         				// A different file is selected, handle only one file at a time
         				selectedFile = theFile;
@@ -1772,7 +1788,7 @@ public class DefaultTreeView implements TreeView {
         } 
         else  {
             fileRoot = new TreeItem(tree, SWT.NONE, 0);
-            fileRoot.setData(fileFormat.getRootObject());
+            fileRoot.setData((HObject) fileFormat.getRootObject());
             
             if(fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)))
             	fileRoot.setImage(ViewProperties.getH4Icon());

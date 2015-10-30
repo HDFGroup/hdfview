@@ -14,7 +14,7 @@
 
 package hdf.view;
 
-import org.eclipse.swt.widgets.Table;
+import org.eclipse.nebula.widgets.nattable.NatTable;
 
 /**
  * 
@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Table;
  */
 public abstract interface TableView extends DataView {
     /** Returns the table */
-    public abstract Table getTable();
+    public abstract NatTable getTable();
 
     /** Returns array of selected data */
     public abstract Object getSelectedData();

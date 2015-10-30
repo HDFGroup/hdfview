@@ -53,6 +53,8 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.swt.SWT;
 
 import hdf.object.CompoundDS;
@@ -108,7 +110,7 @@ public class DefaultTableView extends Shell implements TableView {
     /**
      * The table used to hold the table data.
      */
-    private Table                         	table;
+    private NatTable                         	table;
 
     /** Label to indicate the current cell location. */
     private Label                         	cellLabel;
@@ -1143,7 +1145,7 @@ public class DefaultTableView extends Shell implements TableView {
     }
 
     // Implementing TableObserver.
-    public Table getTable() {
+    public NatTable getTable() {
         return table;
     }
 
@@ -1531,10 +1533,10 @@ public class DefaultTableView extends Shell implements TableView {
     }
 
     /**
-     * Creates a JTable to hold a scalar dataset.
+     * Creates a NatTable to hold a scalar dataset.
      */
-    private Table createTable (ScalarDS d) {
-        Table theTable = null;
+    private NatTable createTable (ScalarDS d) {
+        NatTable theTable = null;
         int rows = 0;
         int cols = 0;
 
@@ -1807,6 +1809,9 @@ public class DefaultTableView extends Shell implements TableView {
         };
         */
 
+        //GridLayer grid = new GridLayer();
+        //theTable = new NatTable(shell, grid);
+        
         /*
         theTable = new JTable(tm) {
             private static final long serialVersionUID = -145476220959400488L;
@@ -2184,9 +2189,9 @@ public class DefaultTableView extends Shell implements TableView {
     }
 
     /**
-     * Creates a Table to hold a compound dataset.
+     * Creates a NatTable to hold a compound dataset.
      */
-    private Table createTable (CompoundDS d) {
+    private NatTable createTable (CompoundDS d) {
         Table theTable = null;
         log.trace("createTable: CompoundDS start");
 
@@ -3462,7 +3467,7 @@ public class DefaultTableView extends Shell implements TableView {
      * Selects all rows, columns, and cells in the table.
      */
     private void selectAll ( ) throws Exception {
-        table.selectAll();
+        //table.
     }
 
     /**

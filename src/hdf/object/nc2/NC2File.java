@@ -58,9 +58,9 @@ public class NC2File extends FileFormat {
     private int flag;
 
     /**
-     * The root node of the file hierearchy.
+     * The root object of the file hierarchy.
      */
-    private MutableTreeNode rootNode;
+    private HObject rootObject;
 
     /** the netcdf file */
     private NetcdfFile ncFile;
@@ -184,13 +184,13 @@ public class NC2File extends FileFormat {
     public int open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
-            rootNode = loadTree();
+            rootObject = loadTree();
         }
 
         return 0;
     }
 
-    private MutableTreeNode loadTree() {
+    private HObject loadTree() {
 
         long[] oid = { 0 };
         NC2Group rootGroup = new NC2Group(
@@ -200,21 +200,21 @@ public class NC2File extends FileFormat {
                 null, // root node does not have a parent node
                 oid);
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
+        //DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
 
-            /**
-             * 
-             */
-            private static final long serialVersionUID = -9190644912409119072L;
+        //    /**
+        //     * 
+        //     */
+        //    private static final long serialVersionUID = -9190644912409119072L;
 
-            @Override
-            public boolean isLeaf() {
-                return false;
-            }
-        };
+        //    @Override
+        //    public boolean isLeaf() {
+        //        return false;
+        //    }
+        //};
 
         if (ncFile == null) {
-            return root;
+            //return root;
         }
 
         Iterator it = ncFile.getVariables().iterator();
@@ -226,11 +226,12 @@ public class NC2File extends FileFormat {
             oid[0] = ncDataset.hashCode();
             d = new NC2Dataset(this, ncDataset, oid);
             node = new DefaultMutableTreeNode(d);
-            root.add(node);
+            //root.add(node);
             rootGroup.addToMemberList(d);
         }
 
-        return root;
+        //return root;
+        return null; // Remove when fixed
     }
 
     // Implementing FileFormat
@@ -243,8 +244,8 @@ public class NC2File extends FileFormat {
 
     // Implementing FileFormat
     @Override
-    public TreeNode getRootNode() {
-        return rootNode;
+    public HObject getRootObject() {
+        return rootObject;
     }
 
     public NetcdfFile getNetcdfFile() {
@@ -299,7 +300,7 @@ public class NC2File extends FileFormat {
 
     // implementing FileFormat
     @Override
-    public TreeNode copy(HObject srcObj, Group dstGroup, String dstName)
+    public HObject copy(HObject srcObj, Group dstGroup, String dstName)
             throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
@@ -315,13 +316,13 @@ public class NC2File extends FileFormat {
      * @return the treeNode containing the new copy of the dataset.
      */
 
-    private TreeNode copyDataset(Dataset srcDataset, NC2Group pgroup)
+    private void copyDataset(Dataset srcDataset, NC2Group pgroup)
             throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
-    private TreeNode copyGroup(NC2Group srcGroup, NC2Group pgroup)
+    private void copyGroup(NC2Group srcGroup, NC2Group pgroup)
             throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");

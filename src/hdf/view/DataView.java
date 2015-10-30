@@ -17,7 +17,7 @@ package hdf.view;
 import hdf.object.HObject;
 
 /**
- * The data view interface for displaying data object
+ * The data view interface for displaying data objects
  * 
  * @author Peter X. Cao
  * @version 2.4 9/6/2007

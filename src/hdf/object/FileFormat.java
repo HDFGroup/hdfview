@@ -419,7 +419,7 @@ public abstract class FileFormat extends File {
 
         int i = 0;
         FileFormat[] fileformats = new FileFormat[n];
-        Enumeration local_enum = ((Hashtable) FileList).elements();
+        Enumeration<?> local_enum = ((Hashtable) FileList).elements();
         while (local_enum.hasMoreElements()) {
             fileformats[i++] = (FileFormat) local_enum.nextElement();
         }
@@ -553,7 +553,7 @@ public abstract class FileFormat extends File {
 
         FileFormat fileFormat = null;
         FileFormat knownFormat = null;
-        Enumeration elms = ((Hashtable) FileList).elements();
+        Enumeration<?> elms = ((Hashtable) FileList).elements();
 
         while (elms.hasMoreElements()) {
             knownFormat = (FileFormat) elms.nextElement();

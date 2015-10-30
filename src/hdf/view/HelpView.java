@@ -22,7 +22,7 @@ package hdf.view;
  * @version 2.4 9/6/2007
  */
 public abstract interface HelpView {
-    /** Display help informaion */
+    /** Display help information */
     public abstract void show();
 
     /**
