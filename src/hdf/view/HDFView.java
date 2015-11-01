@@ -90,7 +90,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 	private String					currentDir;
 	
 	/* The current working file */
-	private String					currentFile;
+	private String					currentFile = null;
 	
 	/* The view properties */
 	private ViewProperties			props;
@@ -117,10 +117,10 @@ public class HDFView implements ViewManager, DropTargetListener {
 	private static List<?>			helpViews;
 	
 	/* The list of GUI components related to HDF4 */
-	private final List<MenuItem> 	h4GUIs;
+	private final List<MenuItem> 	h4GUIs = new Vector<MenuItem>();
 	
 	/* The list of GUI components related to HDF5 */
-	private final List<MenuItem> 	h5GUIs;
+	private final List<MenuItem> 	h5GUIs = new Vector<MenuItem>();
 	
 	/* The list of GUI components related to editing */
 	//private final List<?>			editGUIs;
@@ -171,7 +171,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 	//private final Menu				fileMenu;
 	
 	/* The offset when a new dataview is added into the main window. */
-	private int						frameOffset;
+	private int						frameOffset = 0;
 	
 	private UserOptionsDialog		userOptionDialog;
 	
@@ -193,13 +193,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 		log.debug("Root is {}", root);
 		
 		rootDir = root;
-		currentFile = null;
-		frameOffset = 0;
 		//userOptionsDialog = null;
 		//ctrSrbFileDialog = null;
 		
-		h4GUIs = new Vector<MenuItem>();
-		h5GUIs = new Vector<MenuItem>();
 		//editGUIs = new Vector<Object>();
 		
 		ViewProperties.loadIcons();
@@ -1067,66 +1063,61 @@ public class HDFView implements ViewManager, DropTargetListener {
             + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
             + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
             + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
-		//String str = (String) JOptionPane.showInputDialog(this, msg, "Register a file format",
-        //    JOptionPane.PLAIN_MESSAGE, ViewProperties.getLargeHdfIcon(), null, null);
-    	//if ((str == null) || (str.length() < 1)) {
-        //	return;
-    	//}
+		
+		// Add custom HDFLarge icon to dialog
+		String str = (new InputDialog(mainWindow, SWT.ICON_INFORMATION, 
+		        "Register a file format", msg)).open();
 
-    	//int idx1 = str.indexOf(':');
-    	//int idx2 = str.lastIndexOf(':');
+		if ((str == null) || (str.length() < 1)) return;
 
-    	//if ((idx1 < 0) || (idx2 <= idx1)) {
-    	//	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-    	//	error.setText("Register File Format");
-    	//	error.setMessage("Failed to register " + str
-        //       	+ "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION");
-    	//	error.open();
-        //	return;
-    	//}
+    	int idx1 = str.indexOf(':');
+    	int idx2 = str.lastIndexOf(':');
 
-    	//String key = str.substring(0, idx1);
-    	//String className = str.substring(idx1 + 1, idx2);
-    	//String extension = str.substring(idx2 + 1);
+    	if ((idx1 < 0) || (idx2 <= idx1)) {
+    	    showError("Failed to register " + str
+                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION",
+                    "Register File Format");
+        	return;
+    	}
 
-    	// check is the file format has been registered or the key is taken.
+    	String key = str.substring(0, idx1);
+    	String className = str.substring(idx1 + 1, idx2);
+    	String extension = str.substring(idx2 + 1);
+
+    	// Check if the file format has been registered or the key is taken.
     	String theKey = null;
     	String theClassName = null;
     	Enumeration<?> local_enum = FileFormat.getFileFormatKeys();
     	while (local_enum.hasMoreElements()) {
         	theKey = (String) local_enum.nextElement();
-        	//if (theKey.endsWith(key)) {
-        	//	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-        	//	error.setText("Register File Format");
-        	//	error.setMessage("Invalid key: " + key + " is taken.");
-        	//	error.open();
-            //	return;
-        	//}
+        	if (theKey.endsWith(key)) {
+        	    showError("Invalid key: " + key + " is taken.", "Register File Format");
+            	return;
+        	}
 
         	theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
-        	//if (theClassName.endsWith(className)) {
-        	//	MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-        	//	error.setText("Register File Format");
-        	//	error.setMessage("The file format has already been registered: " + className);
-        	//	error.open();
-            //	return;
-        	//}
+        	if (theClassName.endsWith(className)) {
+        	    showError("The file format has already been registered: " + className,
+        	            "Register File Format");
+            	return;
+        	}
     	}
 
-    	// enables use of JHDF5 in JNLP (Web Start) applications, the system
+    	// Enables use of JHDF5 in JNLP (Web Start) applications, the system
     	// class loader with reflection first.
     	Class<?> theClass = null;
     	try {
-        	//theClass = Class.forName(className);
+        	theClass = Class.forName(className);
     	}
     	catch (Exception ex) {
         	try {
-            	//theClass = ViewProperties.loadExtClass().loadClass(className);
+            	theClass = ViewProperties.loadExtClass().loadClass(className);
         	}
         	catch (Exception ex2) {
             	theClass = null;
         	}
     	}
+    	
     	if (theClass == null) {
     		return;
     	}
@@ -1134,43 +1125,38 @@ public class HDFView implements ViewManager, DropTargetListener {
     	try {
         	Object theObject = theClass.newInstance();
         	if (theObject instanceof FileFormat) {
-        		//FileFormat.addFileFormat(key, (FileFormat) theObject);
+        		FileFormat.addFileFormat(key, (FileFormat) theObject);
         	}
     	}
     	catch (Throwable ex) {
-        	//JOptionPane.showMessageDialog(this, "Failed to register " + str + "\n\n" + ex, "Register File Format",
-        	//	JOptionPane.ERROR_MESSAGE);
+    	    showError("Failed to register " + str + "\n\n" + ex, "Register File Format");
         	return;
     	}
 
-    	//if ((extension != null) && (extension.length() > 0)) {
-        //	extension = extension.trim();
-        //	String ext = ViewProperties.getFileExtension();
-        //	ext += ", " + extension;
-        //	ViewProperties.setFileExtension(ext);
-    	//}
+    	if ((extension != null) && (extension.length() > 0)) {
+        	extension = extension.trim();
+        	String ext = ViewProperties.getFileExtension();
+        	ext += ", " + extension;
+        	ViewProperties.setFileExtension(ext);
+    	}
 	}
 	
 	private void unregisterFileFormat() {
-		/*
 		Enumeration<Object> keys = FileFormat.getFileFormatKeys();
 		ArrayList<Object> keyList = new ArrayList<Object>();
 		
 		while (keys.hasMoreElements())
 			keyList.add((Object) keys.nextElement());
 		
-		// Subclass SWT Dialog and create new Dialog for file format input
-		String theKey = (String) JOptionPane.showInputDialog(this, "Unregister a file format",
-                "Unregister a file format", JOptionPane.WARNING_MESSAGE, ViewProperties.getLargeHdfIcon(),
-                keyList.toArray(), null);
+		// Add custom HDFLarge icon to dialog
+		String theKey = (new InputDialog(mainWindow, "Unregister a file format", 
+		        "Unregister a file format:\n\n" + keyList.toArray())).open();
 		
-		if (theKey == null)
-			return;
+		if (theKey == null) return;
 		
 		FileFormat.removeFileFormat(theKey);
-		*/
 	}
-	
+
     /**
      * Returns a list of all open DataViews
      */

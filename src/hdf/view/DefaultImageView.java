@@ -211,8 +211,8 @@ public class DefaultImageView extends Shell implements ImageView {
 	private boolean convertByteData = false;
 	private BITMASK_OP bitmaskOP = BITMASK_OP.EXTRACT;
 
-	/* image origin: 0-UL, 1-LL, 2-UR, 3-LR */
-	private int origin = 0;
+	private enum Origin { UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT }
+	private Origin imageOrigin = null;
 
 	private List<Integer> invalidValueIndex;
 
@@ -268,11 +268,11 @@ public class DefaultImageView extends Shell implements ImageView {
 
 		String origStr = ViewProperties.getImageOrigin();
 		if (ViewProperties.ORIGIN_LL.equalsIgnoreCase(origStr))
-			origin = 1;
+			imageOrigin = Origin.LOWER_LEFT;
 		else if (ViewProperties.ORIGIN_UR.equalsIgnoreCase(origStr))
-			origin = 2;
+			imageOrigin = Origin.UPPER_RIGHT;
 		else if (ViewProperties.ORIGIN_LR.equalsIgnoreCase(origStr))
-			origin = 3;
+			imageOrigin = Origin.LOWER_RIGHT;
 
 		if (ViewProperties.isIndexBase1())
 			indexBase = 1;
@@ -356,11 +356,11 @@ public class DefaultImageView extends Shell implements ImageView {
 		//	contentPane.add(paletteComponent, BorderLayout.EAST);
 		//}
 
-		if (origin == 1)
+		if (imageOrigin == Origin.LOWER_LEFT)
 			flip(FLIP_VERTICAL);
-		else if (origin == 2)
+		else if (imageOrigin == Origin.UPPER_RIGHT)
 			flip(FLIP_HORIZONTAL);
-		if (origin == 3) {
+		if (imageOrigin == Origin.LOWER_RIGHT) {
 			rotate(ROTATE_CW_90);
 			rotate(ROTATE_CW_90);
 		}
@@ -1933,11 +1933,11 @@ public class DefaultImageView extends Shell implements ImageView {
 
 		} 
 		else {
-			if (origin == 1)
+			if (imageOrigin == Origin.LOWER_LEFT)
 				flip(FLIP_VERTICAL);
-			else if (origin == 2)
+			else if (imageOrigin == Origin.UPPER_RIGHT)
 				flip(FLIP_HORIZONTAL);
-			if (origin == 3) {
+			if (imageOrigin == Origin.LOWER_RIGHT) {
 				rotate(ROTATE_CW_90);
 				rotate(ROTATE_CW_90);
 			}
@@ -1986,11 +1986,11 @@ public class DefaultImageView extends Shell implements ImageView {
 		isVerticalFlipped = false;
 		rotateCount = 0;        
 
-		if (origin == 1)
+		if (imageOrigin == Origin.LOWER_LEFT)
 			flip(FLIP_VERTICAL);
-		else if (origin == 2)
+		else if (imageOrigin == Origin.UPPER_RIGHT)
 			flip(FLIP_HORIZONTAL);
-		if (origin == 3) {
+		if (imageOrigin == Origin.LOWER_RIGHT) {
 			rotate(ROTATE_CW_90);
 			rotate(ROTATE_CW_90);
 		}

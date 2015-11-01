@@ -83,7 +83,7 @@ public class DefaultTextView extends Shell implements TextView {
     private Table table;
 
     // Text areas to hold the text.
-    // private JTextArea[] textAreas;
+    private Text[] textAreas;
 
     private boolean isReadOnly = false;
 
