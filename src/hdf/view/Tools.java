@@ -941,8 +941,9 @@ public final class Tools {
      * @return a new instance of the given class.
      */
     public static Object newInstance(Class<?> cls, Object[] initargs) throws Exception {
+        log.trace("newInstance(Class = {}): start", cls);
+        
         Object instance = null;
-        log.trace("newInstance: start");
 
         if (cls == null) {
             return null;
@@ -979,7 +980,7 @@ public final class Tools {
                 }
             } // for (int i=0; i<m; i++) {
         }
-        log.trace("newInstance: finish");
+        log.trace("newInstance(Class = {}): finish", cls);
 
         return instance;
     }

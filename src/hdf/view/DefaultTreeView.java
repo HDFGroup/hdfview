@@ -22,12 +22,18 @@ import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Vector;
+
+import javax.swing.tree.TreePath;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
@@ -55,7 +61,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
-import hdf.view.DefaultTreeViewOld.ChangeIndexingDialog;
+import hdf.object.h5.H5ScalarDS;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
 
 /**
@@ -81,7 +87,7 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
 public class DefaultTreeView implements TreeView {
     private static final long             serialVersionUID    = 4092566164712521186L;
     
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeViewOld.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
     
     private Shell                         shell;
 
@@ -103,6 +109,8 @@ public class DefaultTreeView implements TreeView {
     
     /** The list of current selected objects for copying */
     private TreeItem[]                    objectsToCopy = null;
+    
+    private TreeItem[]                    currentSelectionsForMove = null;
 
     /** The currently selected object */
     private HObject                       selectedObject;
@@ -212,7 +220,8 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = true;
                 
                 try {
-                    showDataContent(selectedObject);
+                    if(!(selectedObject instanceof Group))
+                        showDataContent(selectedObject);
                 }
                 catch (Exception ex) {
                 }
@@ -449,13 +458,13 @@ public class DefaultTreeView implements TreeView {
         changeIndexItem.setText("Change file indexing");
         changeIndexItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                ChangeIndexingDialog dialog = new ChangeIndexingDialog(shell, SWT.NONE, selectedFile);
-                dialog.open();
-                if (dialog.isreloadFile()) {
-                    selectedFile.setIndexType(dialog.getIndexType());
-                    selectedFile.setIndexOrder(dialog.getIndexOrder());
-                    ((HDFView) viewer).reloadFile();
-                }
+                //ChangeIndexingDialog dialog = new ChangeIndexingDialog(shell, SWT.NONE, selectedFile);
+                //dialog.open();
+                //if (dialog.isreloadFile()) {
+                //    selectedFile.setIndexType(dialog.getIndexType());
+                //    selectedFile.setIndexOrder(dialog.getIndexOrder());
+                //    ((HDFView) viewer).reloadFile();
+                //}
             }
         });
         
@@ -536,7 +545,7 @@ public class DefaultTreeView implements TreeView {
         setLibVerBoundsItem.setText("Set Lib version bounds");
         setLibVerBoundsItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                setLibVersionBounds();
+                //setLibVersionBounds();
             }
         });
         
@@ -611,14 +620,11 @@ public class DefaultTreeView implements TreeView {
                 binaryOrder = 99;
                 
                 try {
-                    saveAsFile();
+                    saveDataAsFile();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText("Export Dataset");
-                    error.setMessage(ex.getMessage());
-                    error.open();
+                    showError(ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -630,14 +636,11 @@ public class DefaultTreeView implements TreeView {
                 binaryOrder = 1;
                 
                 try {
-                    saveAsFile();
+                    saveDataAsFile();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText("Export Dataset");
-                    error.setMessage(ex.getMessage());
-                    error.open();
+                    showError(ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -649,14 +652,11 @@ public class DefaultTreeView implements TreeView {
                 binaryOrder = 2;
                 
                 try {
-                    saveAsFile();
+                    saveDataAsFile();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText("Export Dataset");
-                    error.setMessage(ex.getMessage());
-                    error.open();
+                    showError(ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -668,14 +668,11 @@ public class DefaultTreeView implements TreeView {
                 binaryOrder = 3;
                 
                 try {
-                    saveAsFile();
+                    saveDataAsFile();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText("Export Dataset");
-                    error.setMessage(ex.getMessage());
-                    error.open();
+                    showError(ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -842,38 +839,19 @@ public class DefaultTreeView implements TreeView {
     }
     
     /**
-     * Adds a new data object to the file.
+     * Adds a new data object to the Tree.
      * 
      * @param newObject
      *            the new object to add.
      * @param parentGroup
-     *            the parent group to add the object to.
-     * @throws Exception
+     *            the parent group to add the object to. If
+     *            null, adds the object to the end of the tree.
+     * @return the newly created TreeItem
      */
-    public void addObject(HObject newObject, Group parentGroup) throws Exception {
-        if (newObject == null) return;
+    public TreeItem addObject(HObject newObject, Group parentGroup) {
+        if (newObject == null) return null;
 
-        TreeItem pitem = findTreeItem(parentGroup);
-        TreeItem newItem = this.insertObject(newObject, pitem);
-        
-        // When a TreeItem is disposed, it should be removed from its parent
-        // items member list
-        newItem.addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent e) {
-                TreeItem thisItem = (TreeItem) e.getSource();
-                TreeItem parentItem = thisItem.getParentItem();
-                
-                if (parentItem != null) {
-                    Group parentGroup = (Group) parentItem.getData();
-                    parentGroup.removeFromMemberList((HObject) thisItem.getData());
-                }
-                
-                if (thisItem.equals(selectedItem)) {
-                    selectedItem = null;
-                    selectedFile = null;
-                }
-            }
-        });
+        return this.insertObject(newObject, findTreeItem(parentGroup));
     }
 
     /**
@@ -884,13 +862,110 @@ public class DefaultTreeView implements TreeView {
      *            the object to insert.
      * @param pobj
      *            the parent TreeItem to insert the new object under.
+     *            If null, inserts the object at the end of the Tree.
      * @return the newly created TreeItem
      */
     private TreeItem insertObject(HObject obj, TreeItem pobj) {
-        if ((obj == null) || (pobj == null)) return null;
+        if ((obj == null)) return null;
 
-        TreeItem item = new TreeItem(pobj, SWT.NONE, pobj.getItemCount());
+        TreeItem item;
+        
+        if(pobj != null) {
+            item = new TreeItem(pobj, SWT.NONE, pobj.getItemCount());
+            item.setText(obj.getName());
+        } else {
+            // Parent object was null, insert at end of tree as root object
+            item = new TreeItem(tree, SWT.NONE, tree.getItemCount());
+            item.setText(obj.getFileFormat().getName());
+        }
+        
         item.setData(obj);
+        
+        boolean hasAttribute = obj.hasAttribute();
+        
+        if(obj instanceof Dataset) {
+            if (obj instanceof ScalarDS) {
+                ScalarDS sd = (ScalarDS) obj;
+                
+                if (sd.isImage()) {
+                    if (hasAttribute) {
+                        item.setImage(ViewProperties.getImageIconA());
+                    }
+                    else {
+                        item.setImage(ViewProperties.getImageIcon());
+                    }
+                }
+                else if (sd.isText()) {
+                    if (hasAttribute) {
+                        item.setImage(ViewProperties.getTextIconA());
+                    }
+                    else {
+                        item.setImage(ViewProperties.getTextIcon());
+                    }
+                }
+                else {
+                    if (hasAttribute) {
+                        item.setImage(ViewProperties.getDatasetIconA());
+                    }
+                    else {
+                        item.setImage(ViewProperties.getDatasetIcon());
+                    }
+                }
+            }
+            else if (obj instanceof CompoundDS) {
+                if (hasAttribute) {
+                    item.setImage(ViewProperties.getTableIconA());
+                }
+                else {
+                    item.setImage(ViewProperties.getTableIcon());
+                }
+            }
+        }
+        else if(obj instanceof Group) {
+            if(((Group) obj).isRoot()) {
+                FileFormat theFile = obj.getFileFormat();
+                
+                if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)))
+                    item.setImage(ViewProperties.getH4Icon());
+                else
+                    item.setImage(ViewProperties.getH5Icon());
+            } else {
+                if(hasAttribute) {
+                    item.setImage(ViewProperties.getFoldercloseIconA());
+                } else {
+                    item.setImage(ViewProperties.getFoldercloseIcon());
+                }
+            }
+        }
+        else if(obj instanceof Datatype) {
+            if(hasAttribute) {
+                item.setImage(ViewProperties.getDatatypeIconA());
+            } else {
+                item.setImage(ViewProperties.getDatatypeIcon());
+            }
+        }
+        else {
+            item.setImage(ViewProperties.getQuestionIcon());
+        }
+        
+        // When a TreeItem is disposed, it should be removed from its parent
+        // items member list
+        item.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                TreeItem thisItem = (TreeItem) e.getSource();
+                TreeItem parentItem = thisItem.getParentItem();
+                
+                if (parentItem != null) {
+                    ((Group) parentItem.getData()).removeFromMemberList((HObject) thisItem.getData());
+                }
+                
+                if (thisItem.equals(selectedItem)) {
+                    selectedItem = null;
+                    selectedObject = null;
+                    selectedFile = null;
+                }
+            }
+        });
         
         return item;
     }
@@ -899,7 +974,7 @@ public class DefaultTreeView implements TreeView {
     private void moveObject() {
         objectsToCopy = tree.getSelection();
         moveFlag = true;
-        //currentSelectionsForMove = tree.getSelectionPaths();
+        currentSelectionsForMove = tree.getSelection();
     }
     
     /** Copy selected objects */
@@ -914,23 +989,22 @@ public class DefaultTreeView implements TreeView {
         
         if (moveFlag == true) {
             HObject theObj = null;
-            //for (int i = 0; i < currentSelectionsForMove.length; i++) {
-            //    TreeItem currentItem = (TreeItem) (currentSelectionsForMove[i]
-            //            .getLastPathComponent());
-            //    theObj = (HObject) currentItem.getData();
+            for (int i = 0; i < currentSelectionsForMove.length; i++) {
+                TreeItem currentItem = currentSelectionsForMove[i];
+                theObj = (HObject) currentItem.getData();
 
-            //    if (isObjectOpen(theObj)) {
-            //        shell.getDisplay().beep();
-            //        showError("Cannot move the selected object: " + theObj
-            //                + "\nThe dataset or dataset in the group is in use."
-            //                + "\n\nPlease close the dataset(s) and try again.\n");
-            //        
-            //        moveFlag = false;
-            //        currentSelectionsForMove = null;
-            //       objectsToCopy = null;
-            //        return;
-            //    }
-            //}
+                if (isObjectOpen(theObj)) {
+                    shell.getDisplay().beep();
+                    showError("Cannot move the selected object: " + theObj
+                            + "\nThe dataset or dataset in the group is in use."
+                            + "\n\nPlease close the dataset(s) and try again.\n", "Move Objects");
+                    
+                    moveFlag = false;
+                    currentSelectionsForMove = null;
+                    objectsToCopy = null;
+                    return;
+                }
+            }
         }
 
         TreeItem pitem = selectedItem;
@@ -968,7 +1042,7 @@ public class DefaultTreeView implements TreeView {
                 shell.getDisplay().beep();
                 showError("Cannot move the selected object to different file", null);
                 moveFlag = false;
-                //currentSelectionsForMove = null;
+                currentSelectionsForMove = null;
                 objectsToCopy = null;
                 return;
             }
@@ -1016,7 +1090,7 @@ public class DefaultTreeView implements TreeView {
         if (moveFlag == true) {
             removeSelectedObjects();
             moveFlag = false;
-            //currentSelectionsForMove = null;
+            currentSelectionsForMove = null;
             objectsToCopy = null;
         }
         
@@ -1066,7 +1140,7 @@ public class DefaultTreeView implements TreeView {
 
             // Add the node to the tree
             if (newItem != null) insertObject(newItem, pobj);
-
+            
         } // for (int i = 0; i < objList.length; i++)
 
         log.trace("pasteObject(...): finish");
@@ -1119,61 +1193,93 @@ public class DefaultTreeView implements TreeView {
             showError("Unsupported operation: cannot delete HDF4 object.", null);
             return;
         }
+        
+        TreeItem[] currentSelections = tree.getSelection();
 
-        //TreePath[] currentSelections = tree.getSelectionPaths();
-
-        //if (moveFlag == true) {
-        //    currentSelections = currentSelectionsForMove;
-        //}
-        //if ((currentSelections == null) || (currentSelections.length <= 0)) {
-        //    return;
-        //}
+        if (moveFlag == true) {
+            currentSelections = currentSelectionsForMove;
+        }
+        if ((currentSelections == null) || (currentSelections.length <= 0)) {
+            return;
+        }
         if (moveFlag != true) {
             MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
             confirm.setText("Remove object");
             confirm.setMessage("Do you want to remove all the selected object(s) ?");
             if (confirm.open() == SWT.NO) return;
         }
+        
         HObject theObj = null;
-        //for (int i = 0; i < currentSelections.length; i++) {
-        //    TreeItem currentItem = (TreeItem) (currentSelections[i].getLastPathComponent());
-        //    theObj = (HObject) currentItem.getData();
+        for (int i = 0; i < currentSelections.length; i++) {
+            TreeItem currentItem = currentSelections[i];
+            theObj = (HObject) currentItem.getData();
 
-              // Cannot delete root
-        //    if (theObj instanceof Group) {
-        //        Group g = (Group) theObj;
-        //        if (g.isRoot()) {
-        //            shell.getDisplay().beep();
-        //            showError("Unsupported operation: cannot delete the file root.");
-        //            return;
-        //       }
-        //    }
+            // Cannot delete a root object
+            if (theObj instanceof Group && ((Group) theObj).isRoot()) {
+                    shell.getDisplay().beep();
+                    showError("Unsupported operation: cannot delete the file root.", "Delete Objects");
+                    return;
+            }
 
-        //    if (moveFlag != true) {
-        //        if (isObjectOpen(theObj)) {
-        //            shell.getDisplay().beep();
-        //            showError("Cannot delete the selected object: " + theObj
-        //                    + "\nThe dataset or dataset in the group is in use."
-        //                    + "\n\nPlease close the dataset(s) and try again.\n");
-        //            continue;
-        //        }
-        //    }
+            if (moveFlag != true) {
+                if (isObjectOpen(theObj)) {
+                    shell.getDisplay().beep();
+                    showError("Cannot delete the selected object: " + theObj
+                            + "\nThe dataset or dataset in the group is in use."
+                            + "\n\nPlease close the dataset(s) and try again.\n", "Delete Objects");
+                    continue;
+                }
+            }
 
-        //    try {
-        //        theFile.delete(theObj);
-        //    }
-        //    catch (Exception ex) {
-        //        shell.getDisplay().beep();
-        //        showError(ex.getMessage());
-        //        continue;
-        //    }
-
-        //    if (theObj.equals(selectedObject)) {
-        //        selectedObject = null;
-        //    }
-
-        //    removeItem(currentItem);
-        //} // for (int i=0; i< currentSelections.length; i++) {
+            try {
+                theFile.delete(theObj);
+            }
+            catch (Exception ex) {
+                shell.getDisplay().beep();
+                showError(ex.getMessage(), "Delete Objects");
+                continue;
+            }
+            
+            currentItem.dispose();
+        } // for (int i=0; i < currentSelections.length; i++) {
+    }
+    
+    /**
+     * Populates the TreeView with TreeItems corresponding to
+     * the user objects in the specified file by. Creates TreeItems
+     * in a depth-first manner.
+     *
+     * @return the root TreeItem created in the Tree of the 
+     * specified file.
+     */
+    private TreeItem populateTree(FileFormat theFile) {
+        if (theFile.getFID() < 0 || theFile.getRootObject() == null) {
+            log.trace("Error occured when populating Tree with members of file {}", theFile.getFilePath());
+            return null;
+        }
+        
+        recursivePopulate(theFile.getRootObject(), null);
+        
+        return findTreeItem(theFile.getRootObject());
+    }
+    
+    /**
+     * Helper method for populate tree to recursively discover all 
+     * items under the specified group of a file.
+     */
+    private void recursivePopulate(HObject obj, Group parentGroup) {
+        if(obj == null) return;
+        
+        if(obj instanceof Group) {
+            addObject(obj, parentGroup);
+            
+            Iterator<HObject> it = ((Group) obj).getMemberList().iterator();
+            while(it.hasNext()) {
+                recursivePopulate(it.next(), (Group) obj);
+            }
+        } else {
+            addObject(obj, parentGroup);
+        }
     }
     
     /**
@@ -1224,6 +1330,395 @@ public class DefaultTreeView implements TreeView {
         }
 
         return isOpen;
+    }
+    
+    /**
+     * Returns the number of items in the tree, since tree.getItemCount()
+     * only returns the number of top-level objects.
+     */
+    private int getAllItemCount() {
+        // Consider different way of doing this
+        return getAllItemsBreadthFirst().size();
+    }
+    
+    /**
+     * Returns a list that lists all TreeItems in the 
+     * current Tree in a breadth-first manner.
+     * @return
+     */
+    private ArrayList<TreeItem> getAllItemsBreadthFirst() {
+        ArrayList<TreeItem> allItems = new ArrayList<TreeItem>();
+        Queue<TreeItem> currentChildren = new LinkedList<TreeItem>();
+        TreeItem currentItem = null;
+        
+        // Add all root items in the Tree to a Queue
+        currentChildren.addAll(Arrays.asList(tree.getItems()));
+        
+        // For every item in the queue, remove it from the head of the queue,
+        // add it to the list of all items, then add all of its possible children
+        // TreeItems to the end of the queue. This produces a breadth-first
+        // ordering of the Tree's TreeItems.
+        while(!currentChildren.isEmpty()) {
+            currentItem = currentChildren.remove();
+            allItems.add(currentItem);
+            
+            if(currentItem.getItemCount() <= 0) continue;
+            
+            currentChildren.addAll(Arrays.asList(currentItem.getItems()));
+        }
+        
+        return allItems;
+    }
+    
+    /**
+     * Returns a list that lists all TreeItems in the 
+     * current Tree that are children of the specified
+     * TreeItem in a breadth-first manner.
+     * @return
+     */
+    private ArrayList<TreeItem> getItemsBreadthFirst(TreeItem item) {
+        ArrayList<TreeItem> allItems = new ArrayList<TreeItem>();
+        Queue<TreeItem> currentChildren = new LinkedList<TreeItem>();
+        TreeItem currentItem = item;
+        
+        // Add all root items in the Tree to a Queue
+        currentChildren.addAll(Arrays.asList(currentItem.getItems()));
+        
+        // For every item in the queue, remove it from the head of the queue,
+        // add it to the list of all items, then add all of its possible children
+        // TreeItems to the end of the queue. This produces a breadth-first
+        // ordering of the Tree's TreeItems.
+        while(!currentChildren.isEmpty()) {
+            currentItem = currentChildren.remove();
+            allItems.add(currentItem);
+            
+            if(currentItem.getItemCount() <= 0) continue;
+            
+            currentChildren.addAll(Arrays.asList(currentItem.getItems()));
+        }
+        
+        return allItems;
+    }
+    
+    /**
+     * Returns a list of all user objects that traverses the subtree rooted at
+     * this item in breadth-first order..
+     * 
+     * @param item
+     *            the item to start with.
+     */
+    private final List<Object> breadthFirstUserObjects(TreeItem item) {
+        if (item == null) return null;
+
+        Vector<Object> list = new Vector<Object>();
+        Iterator<TreeItem> it = getItemsBreadthFirst(item).iterator();
+        TreeItem theItem = null;
+        
+        while (it.hasNext()) {
+            theItem = it.next();
+            list.add(theItem.getData());
+        }
+
+        return list;
+    }
+    
+    /**
+     * Save the current file into a new HDF4 file. Since HDF4 does not
+     * support packing, the source file is copied into the new file with
+     * the exact same content.
+     */
+    private final void saveAsHDF4(FileFormat srcFile) {
+        if (srcFile == null) {
+            shell.getDisplay().beep();
+            showError("Select a file to save.", null);
+            return;
+        }
+
+        Shell owner = (viewer == null) ? new Shell(Display.getCurrent()) : (Shell) viewer;
+        String currentDir = srcFile.getParent();
+        
+        NewFileDialog dialog = new NewFileDialog(owner, currentDir, FileFormat.FILE_TYPE_HDF4, getCurrentFiles());
+        String filename = dialog.open();
+        if (!dialog.isFileCreated()) return;
+
+        // Since cannot pack hdf4, simply copy the whole physical file
+        int length = 0;
+        int bsize = 512;
+        byte[] buffer;
+        BufferedInputStream bi = null;
+        BufferedOutputStream bo = null;
+
+        try {
+            bi = new BufferedInputStream(new FileInputStream(srcFile.getFilePath()));
+        }
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            showError(ex.getMessage() + "\n" + filename, null);
+            return;
+        }
+
+        try {
+            bo = new BufferedOutputStream(new FileOutputStream(filename));
+        }
+        catch (Exception ex) {
+            try {
+                bi.close();
+            }
+            catch (Exception ex2) {
+                log.debug("Output file force input close:", ex2);
+            }
+            
+            shell.getDisplay().beep();
+            showError(ex.getMessage(), null);
+            return;
+        }
+
+        buffer = new byte[bsize];
+        try {
+            length = bi.read(buffer, 0, bsize);
+        }
+        catch (Exception ex) {
+            length = 0;
+        }
+        while (length > 0) {
+            try {
+                bo.write(buffer, 0, length);
+                length = bi.read(buffer, 0, bsize);
+            }
+            catch (Exception ex) {
+                length = 0;
+            }
+        }
+
+        try {
+            bo.flush();
+        }
+        catch (Exception ex) {
+            log.debug("Output file:", ex);
+        }
+        try {
+            bi.close();
+        }
+        catch (Exception ex) {
+            log.debug("Input file:", ex);
+        }
+        try {
+            bo.close();
+        }
+        catch (Exception ex) {
+            log.debug("Output file:", ex);
+        }
+
+        try {
+            openFile(filename, FileFormat.WRITE);
+        }
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            showError(ex.getMessage() + "\n" + filename, null);
+        }
+    }
+    
+    /**
+     * Copy the current file into a new HDF5 file. The new file does not include the
+     * inaccessible objects. Values of reference dataset are not updated in the
+     * new file.
+     */
+    private void saveAsHDF5(FileFormat srcFile) {
+        if (srcFile == null) {
+            shell.getDisplay().beep();
+            showError("Select a file to save.", null);
+            return;
+        }
+
+        HObject root = srcFile.getRootObject();
+        if (root == null) {
+            shell.getDisplay().beep();
+            showError("The file is empty.", null);
+            return;
+        }
+
+        Shell owner = (viewer == null) ? new Shell(Display.getCurrent()) : (Shell) viewer;
+        NewFileDialog dialog = new NewFileDialog(owner, srcFile.getParent(), FileFormat.FILE_TYPE_HDF5,
+                getCurrentFiles());
+        String filename = dialog.open();
+        
+        if (!dialog.isFileCreated()) return;
+
+        int n = getAllItemCount(); // Consider TreeView.getAllItemCount() method
+        Vector<Object> objList = new Vector<Object>(n);
+        TreeItem item = null;
+        for (int i = 0; i < n; i++) {
+            item = tree.getItem(i);
+            objList.add(item.getData());
+        }
+
+        FileFormat newFile = null;
+        try {
+            newFile = openFile(filename, FileFormat.WRITE);
+        }
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            showError(ex.getMessage() + "\n" + filename, null);
+            return;
+        }
+
+        if (newFile == null) return;
+
+        HObject pitem = newFile.getRootObject();
+
+        pasteObject((TreeItem[]) objList.toArray(), findTreeItem(pitem), newFile);
+        objList.setSize(0);
+
+        Group srcGroup = (Group) root;
+        Group dstGroup = (Group) newFile.getRootObject();
+        Object[] parameter = new Object[2];
+        Class<?> classHOjbect = null;
+        Class<?>[] parameterClass = new Class[2];
+        Method method = null;
+
+        // Copy attributes of the root group
+        try {
+            parameter[0] = srcGroup;
+            parameter[1] = dstGroup;
+            classHOjbect = Class.forName("hdf.object.HObject");
+            parameterClass[0] = parameterClass[1] = classHOjbect;
+            method = newFile.getClass().getMethod("copyAttributes", parameterClass);
+            method.invoke(newFile, parameter);
+        }
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            showError(ex.getMessage(), null);
+        }
+
+        // Update reference datasets
+        parameter[0] = srcGroup.getFileFormat();
+        parameter[1] = newFile;
+        parameterClass[0] = parameterClass[1] = parameter[0].getClass();
+        try {
+            method = newFile.getClass().getMethod("updateReferenceDataset", parameterClass);
+            method.invoke(newFile, parameter);
+        }
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            showError(ex.getMessage(), null);
+        }
+    }
+    
+    /** Save data as file. */
+    private void saveDataAsFile() throws Exception {
+        if (!(selectedObject instanceof Dataset) || (selectedObject == null) || (selectedItem == null)) return;
+        
+        Dataset dataset = (Dataset) selectedObject;
+        FileDialog fChooser = new FileDialog(shell);
+        //fChooser.setFilterPath(dataset.getFile().);
+        
+        //final JFileChooser fchooser = new JFileChooser(dataset.getFile());
+        //fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
+        // fchooser.changeToParentDirectory();
+        File chosenFile = null;
+        
+        if(binaryOrder == 99) {
+            fChooser.setText("Save Dataset Data To Text File --- " + dataset.getName());
+            chosenFile = new File(dataset.getName() + ".txt");
+        }
+        else {
+            fChooser.setText("Save Current Data To Binary File --- " + dataset.getName());
+            chosenFile = new File(dataset.getName() + ".bin");
+        }
+
+        //fchooser.setSelectedFile(choosedFile);
+        //int returnVal = fchooser.showSaveDialog(this);
+
+        if (fChooser.open() == null) return;
+
+        //choosedFile = fchooser.getSelectedFile();
+        if (chosenFile == null) return;
+        
+        String fname = chosenFile.getAbsolutePath();
+
+        // Check if the file is in use
+        List<?> fileList = viewer.getTreeView().getCurrentFiles();
+        if (fileList != null) {
+            FileFormat theFile = null;
+            Iterator<?> iterator = fileList.iterator();
+            while (iterator.hasNext()) {
+                theFile = (FileFormat) iterator.next();
+                if (theFile.getFilePath().equals(fname)) {
+                    shell.getDisplay().beep();
+                    showError("Unable to save data to file \"" + fname + "\". \nThe file is being used.", "Export Dataset");
+                    return;
+                }
+            }
+        }
+
+        if (chosenFile.exists()) {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText("Export Dataset");
+            confirm.setMessage("File exists. Do you want to replace it?");
+            if (confirm.open() == SWT.NO) return;
+        }
+
+        boolean isH4 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
+
+        if (isH4) {
+            shell.getDisplay().beep();
+            showError("Cannot export HDF4 object.", null);
+            return;
+        }
+
+        try {
+            selectedObject.getFileFormat().exportDataset(fname, dataset.getFile(), dataset.getFullName(), binaryOrder);
+        }
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            showError(ex.getMessage(), null);
+        }
+
+        viewer.showStatus("Data saved to: " + fname);
+    }
+    
+    private void setLibVersionBounds() {
+        Object[] lowValues = { "Earliest", "Latest" };
+        Object[] highValues = { "Latest" };
+        //JComboBox lowComboBox = new JComboBox(lowValues);
+        //lowComboBox.setName("earliestversion");
+        //JComboBox highComboBox = new JComboBox(highValues);
+        //highComboBox.setName("latestversion");
+
+        //Object[] msg = { "Earliest Version:", lowComboBox, "Latest Version:", highComboBox };
+        Object[] options = { "Ok", "Cancel" };
+        //JOptionPane op = new JOptionPane(msg, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
+
+        //op.setName("libselect");
+        //JDialog dialog = op.createDialog(this, "Set the library version bounds: ");
+        //dialog.setVisible(true);
+
+        String result = null;
+        try {
+           // result = (String) op.getValue();
+        }
+        catch (Exception err) {
+            // err.printStackTrace();
+        }
+
+        if ((result != null) && (result.equals("Ok"))) {
+            int low = -1;
+            int high = 1;
+            //if ((lowComboBox.getSelectedItem()).equals("Earliest"))
+            //    low = 0;
+            //else
+            //    low = 1;
+            try {
+                selectedObject.getFileFormat().setLibBounds(low, high);
+            }
+            catch (Throwable err) {
+                shell.getDisplay().beep();
+                showError("Error when setting lib version bounds", null);
+                return;
+            }
+        }
+        else
+            return;
     }
     
     /** enable/disable GUI components */
@@ -1361,22 +1856,14 @@ public class DefaultTreeView implements TreeView {
             throw new java.io.IOException("Failed to open file - " + filename);
         } 
         else  {
-            fileRoot = new TreeItem(tree, SWT.NONE, 0);
-            fileRoot.setData((HObject) fileFormat.getRootObject());
-            
-            if(fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)))
-                fileRoot.setImage(ViewProperties.getH4Icon());
-            else
-                fileRoot.setImage(ViewProperties.getH5Icon());
-            
-            String fname = fileFormat.getFilePath();
-            fileRoot.setText(fname.substring(fname.lastIndexOf('/') + 1, fname.length()));
+            fileRoot = populateTree(fileFormat);
             
             if (fileRoot != null) {
-                //int currentRowCount = tree.getRowCount();
-                //if (currentRowCount > 0) {
-                //    tree.expandRow(tree.getRowCount() - 1);
-                //}
+                /* Expand top level items of root object */
+                int currentRowCount = tree.getItemCount();
+                if (currentRowCount > 0) {
+                    tree.getItem(currentRowCount - 1).setExpanded(true);
+                }
 
                 fileList.add(fileFormat);
             }
@@ -1484,10 +1971,10 @@ public class DefaultTreeView implements TreeView {
         }
 
         if (isH5) {
-            saveAsHDF5(file);
+            //saveAsHDF5(file);
         }
         else if (isH4) {
-            saveAsHDF4(file);
+            //saveAsHDF4(file);
         }
     }
     
@@ -1499,15 +1986,16 @@ public class DefaultTreeView implements TreeView {
 
         TreeItem theItem = null;
         HObject theObj = null;
+        Iterator<TreeItem> it = this.getAllItemsBreadthFirst().iterator();
         
-        Enumeration<?> local_enum = this.getAllItemsBreadthFirst();
-        while (local_enum.hasMoreElements()) {
-            theItem = (TreeItem) local_enum.nextElement();
+        while(it.hasNext()) {
+            theItem = (TreeItem) it.next();
             theObj = (HObject) theItem.getData();
+            
             if (theObj == null) {
                 continue;
             }
-            else if (theObj.equals(obj)) {
+            else if(theObj.equalsOID(obj.getOID())) {
                 return theItem;
             }
         }
@@ -1547,8 +2035,231 @@ public class DefaultTreeView implements TreeView {
     public List<FileFormat> getCurrentFiles() {
         return fileList;
     }
-
     
+    /**
+     * Display the content of a data object.
+     * 
+     * @param dataObject
+     *            the data object
+     * @return the DataView that displays the data content
+     * @throws Exception
+     */
+    public DataView showDataContent(HObject dataObject) throws Exception {
+        log.trace("showDataContent({}): start", dataObject.getName());
 
+        if ((dataObject == null) || !(dataObject instanceof Dataset)) {
+            return null; // can only display dataset
+        }
 
+        Dataset d = (Dataset) dataObject;
+
+        if (d.getRank() <= 0) d.init();
+        
+        boolean isText = ((d instanceof ScalarDS) && ((ScalarDS) d).isText());
+        boolean isImage = ((d instanceof ScalarDS) && ((ScalarDS) d).isImage());
+        boolean isDisplayTypeChar = false;
+        boolean isTransposed = false;
+        boolean isIndexBase1 = ViewProperties.isIndexBase1();
+        BitSet bitmask = null;
+        String dataViewName = null;
+        
+        log.trace("showDataContent: inited");
+
+        Shell theShell = (Shell) viewer.getDataView(d);
+
+        if (isDefaultDisplay) {
+            if (theShell != null) {
+                theShell.setActive();
+                return null;
+            }
+
+            if (isText) {
+                dataViewName = (String) HDFView.getListOfTextView().get(0);
+            }
+            else if (isImage) {
+                dataViewName = (String) HDFView.getListOfImageView().get(0);
+            }
+            else {
+                dataViewName = (String) HDFView.getListOfTableView().get(0);
+            }
+        }
+        else {
+            DataOptionDialog dialog = new DataOptionDialog(viewer, d);
+
+            dialog.setVisible(true);
+            if (dialog.isCancelled()) {
+                return null;
+            }
+
+            isImage = dialog.isImageDisplay();
+            isDisplayTypeChar = dialog.isDisplayTypeChar();
+            dataViewName = dialog.getDataViewName();
+            isTransposed = dialog.isTransposed();
+            bitmask = dialog.getBitmask();
+            isIndexBase1 = dialog.isIndexBase1();
+            isApplyBitmaskOnly = dialog.isApplyBitmaskOnly();
+        }
+        
+        log.trace("showDataContent: {}", dataViewName);
+
+        // Enables use of JHDF5 in JNLP (Web Start) applications, the system
+        // class loader with reflection first.
+        Class<?> theClass = null;
+        try {
+            theClass = Class.forName(dataViewName);
+        }
+        catch (Exception ex) {
+            try {
+                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
+            }
+            catch (Exception ex2) {
+                theClass = null;
+            }
+        }
+
+        // Use default dataview
+        if (theClass == null) {
+            log.trace("showDataContent: Using default dataview");
+            if (isText)
+                dataViewName = "hdf.view.DefaultTextView";
+            else if (isImage)
+                dataViewName = "hdf.view.DefaultImageView";
+            else
+                dataViewName = "hdf.view.DefaultTableView";
+            try {
+                theClass = Class.forName(dataViewName);
+            }
+            catch (Exception ex) {
+                log.debug("Class.forName {} failure: ", dataViewName, ex);
+            }
+        }
+        
+        Object theView = null;
+        Object[] initargs = { viewer };
+        HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<DATA_VIEW_KEY, Serializable>(8);
+        map.put(ViewProperties.DATA_VIEW_KEY.INDEXBASE1, new Boolean(isIndexBase1));
+        if (bitmask != null) {
+            map.put(ViewProperties.DATA_VIEW_KEY.BITMASK, bitmask);
+            if (isApplyBitmaskOnly) map.put(ViewProperties.DATA_VIEW_KEY.BITMASKOP, ViewProperties.BITMASK_OP.AND);
+
+            // Create a copy of the dataset
+            ScalarDS d_copy = null;
+            Constructor<? extends Dataset> constructor = null;
+            Object[] paramObj = null;
+            try {
+                Class<?>[] paramClass = { FileFormat.class, String.class, String.class, long[].class };
+                constructor = d.getClass().getConstructor(paramClass);
+
+                paramObj = new Object[] { d.getFileFormat(), d.getName(), d.getPath(), d.getOID() };
+            }
+            catch (Exception ex) {
+                constructor = null;
+            }
+
+            try {
+                d_copy = (ScalarDS) constructor.newInstance(paramObj);
+            }
+            catch (Exception ex) {
+                d_copy = null;
+            }
+            if (d_copy != null) {
+                try {
+                    d_copy.init();
+                    log.trace("showDataContent: d_copy inited");
+                    int rank = d.getRank();
+                    System.arraycopy(d.getDims(), 0, d_copy.getDims(), 0, rank);
+                    System.arraycopy(d.getStartDims(), 0, d_copy.getStartDims(), 0, rank);
+                    System.arraycopy(d.getSelectedDims(), 0, d_copy.getSelectedDims(), 0, rank);
+                    System.arraycopy(d.getStride(), 0, d_copy.getStride(), 0, rank);
+                    System.arraycopy(d.getSelectedIndex(), 0, d_copy.getSelectedIndex(), 0, 3);
+                }
+                catch (Throwable ex) {
+                    ex.printStackTrace();
+                }
+
+                map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, d_copy);
+            }
+        }
+        if (dataViewName.startsWith("hdf.view.DefaultTableView")) {
+            map.put(ViewProperties.DATA_VIEW_KEY.CHAR, new Boolean(isDisplayTypeChar));
+            map.put(ViewProperties.DATA_VIEW_KEY.TRANSPOSED, new Boolean(isTransposed));
+            Object[] tmpargs = { viewer, map };
+            initargs = tmpargs;
+        }
+        else if (dataViewName.startsWith("hdf.view.DefaultImageView")) {
+            map.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, new Boolean((bitmask != null)));
+            Object[] tmpargs = { viewer, map };
+            initargs = tmpargs;
+        }
+
+        //Cursor cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
+        //shell.setCursor(cursor);
+        //cursor.dispose();
+        
+        try {
+            theView = Tools.newInstance(theClass, initargs);
+            log.trace("showDataContent: Tools.newInstance");
+
+            viewer.addDataView((DataView) theView);
+        }
+        finally {
+            //cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_ARROW);
+            //shell.setCursor(cursor);
+            //cursor.dispose();
+        }
+
+        log.trace("showDataContent({}): finish", dataObject.getName());
+        return (DataView) theView;
+    }
+    
+    /**
+     * Displays the meta data of a data object.
+     * 
+     * @param dataObject
+     *            the data object
+     * @return the MetaDataView that displays the MetaData of the data object
+     * @throws Exception
+     */
+    public MetaDataView showMetaData(HObject dataObject) throws Exception {
+        if (dataObject == null) {
+            return null;
+        }
+
+        List<?> metaDataViewList = HDFView.getListOfMetaDataView();
+        if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
+            return null;
+        }
+
+        int n = metaDataViewList.size();
+        String className = (String) metaDataViewList.get(0);
+
+        if (!isDefaultDisplay && (n > 1)) {
+            //className = (new InputDialog(shell, "HDFView", "Select MetaDataView")).open();
+            
+            //className = (String) JOptionPane.showInputDialog(this, "Select MetaDataView", "HDFView",
+            //        JOptionPane.INFORMATION_MESSAGE, null, metaDataViewList.toArray(), className);
+        }
+
+        // Enables use of JHDF5 in JNLP (Web Start) applications, the system
+        // class loader with reflection first.
+        Class<?> theClass = null;
+        try {
+            theClass = Class.forName(className);
+        }
+        catch (Exception ex) {
+            theClass = ViewProperties.loadExtClass().loadClass(className);
+        }
+
+        Object[] initargs = { viewer };
+        MetaDataView dataView = (MetaDataView) Tools.newInstance(theClass, initargs);
+
+        return dataView;
+    }
+    
+    private class ChangeIndexingDialog extends Dialog {
+        private ChangeIndexingDialog(Shell parent, int style, FileFormat viewSelectedFile) {
+            super(parent, style);
+            
+        }
+    }
 }

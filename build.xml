@@ -175,7 +175,7 @@
     <!-- Generate Versions file -->
     <javac srcdir="${build.dir}" destdir="${classes.dir}" includes="HDFVersions.java" includeantruntime="false" />
 
-    <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" />
 
     <copy todir="${classes.dir}">
       <fileset dir="${src.dir}" excludes=" **/*.in **/*.java examples/** test/**" />

@@ -99,7 +99,7 @@ public class H5File extends FileFormat {
     private int indexOrder = HDF5Constants.H5_ITER_INC;
 
     /**
-     * The root node of the file hierarchy.
+     * The root object of the file hierarchy.
      */
     private HObject rootObject;
 
@@ -1102,12 +1102,12 @@ public class H5File extends FileFormat {
             log.debug("H5Fclose failure: ", ex);
         }
 
-        // Set fid to -1 but don't reset rootNode
+        // Set fid to -1 but don't reset rootObject
         fid = -1;
     }
 
     /**
-     * Returns the root node of the open HDF5 File.
+     * Returns the root object of the open HDF5 File.
      *
      * @see hdf.object.FileFormat#getRootObject()
      */
@@ -1986,42 +1986,21 @@ public class H5File extends FileFormat {
 
         if ((fid >= 0) && loadFullHierarchy) {
             // load the hierarchy of the file
-            rootObject = loadTree();
+            loadIntoMemory();
         }
 
         log.trace("open: finish");
         return fid;
     }
-
+    
     /**
-     * Reads the file structure into memory and returns the root object.
-     *
-     * @return the root object of the file structure.
+     * Loads the file structure into memory.
      */
-    private HObject loadTree() {
-        if (fid < 0) {
-            return null;
-        }
-
-        //DefaultMutableTreeNode root = null;
-
-        long[] rootOID = { 0 };
-        H5Group rootGroup = new H5Group(this, "/", null, // root node does not
-                // have a parent path
-                null); // root node does not have a parent node
-
-        //root = new DefaultMutableTreeNode(rootGroup) {
-        //    private static final long serialVersionUID = 991382067363411723L;
-
-        //    @Override
-        //    public boolean isLeaf() {
-        //        return false;
-        //    }
-        //};
-
-        //depth_first(root, 0); // reload all
-
-        return rootGroup;
+    private void loadIntoMemory() {
+        if (fid < 0) return;
+        
+        rootObject = new H5Group(this, "/", null, null);
+        depth_first(rootObject, 0);
     }
 
     /**
@@ -2041,7 +2020,8 @@ public class H5File extends FileFormat {
         String fullPath = null;
         String ppath = null;
         int gid = -1;
-        log.trace("depth_first: start");
+        
+        log.trace("depth_first({}): start", parentObject);
 
         H5Group pgroup = (H5Group) parentObject;
         ppath = pgroup.getPath();
@@ -2096,7 +2076,7 @@ public class H5File extends FileFormat {
         for (int i = 0; i < nelems; i++) {
             obj_name = objNames[i];
             obj_type = objTypes[i];
-            log.trace("depth_first: obj_name={}, obj_type={}", obj_name, obj_type);
+            log.trace("depth_first({}): obj_name={}, obj_type={}", parentObject, obj_name, obj_type);
             long oid[] = { objRefs[i], fNos[i] };
 
             if (obj_name == null) {
@@ -2116,7 +2096,9 @@ public class H5File extends FileFormat {
 
             // create a new group
             if (obj_type == HDF5Constants.H5O_TYPE_GROUP) {
-                H5Group g = new H5Group(this, obj_name, fullPath, pgroup, oid); // deprecated!
+                H5Group g = new H5Group(this, obj_name, fullPath, pgroup, oid);
+                //H5Group g = new H5Group(this, obj_name, fullPath, pgroup);
+                
                 //node = new DefaultMutableTreeNode(g) {
                 //    private static final long serialVersionUID = 5139629211215794015L;
 
@@ -2150,7 +2132,7 @@ public class H5File extends FileFormat {
                 // recursively go through the next group
                 // stops if it has loop.
                 if (!hasLoop) {
-                    //nTotal = depth_first(node, nTotal);
+                    nTotal = depth_first(g, nTotal);
                 }
             }
             else if (skipLoad) {
@@ -2236,7 +2218,7 @@ public class H5File extends FileFormat {
 
         pgroup.close(gid);
 
-        log.trace("depth_first: finish");
+        log.trace("depth_first({}): finish", parentObject);
         return nTotal;
     } // private depth_first()
 

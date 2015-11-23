@@ -156,7 +156,7 @@ public class DefaultTableView extends Shell implements TableView {
     // Popup Menu for region references
     private Menu                            popupMenu = null;
     
-    private final Button                    checkFixedDataLength = ;
+    private final Button                    checkFixedDataLength;
     private final Button                    checkCustomNotation;
     private final Button                    checkScientificNotation;
     private final Button                    checkHex;
@@ -412,7 +412,7 @@ public class DefaultTableView extends Shell implements TableView {
         int rank = dataset.getRank();
         
         
-        
+        return null; // Remove when implemented
     }
     
     /**
@@ -423,6 +423,7 @@ public class DefaultTableView extends Shell implements TableView {
      */
     private NatTable createTable(CompoundDS dataset) {
         
+        return null; // Remove when implemented
     }
     
     /**
@@ -445,7 +446,7 @@ public class DefaultTableView extends Shell implements TableView {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    saveAsText();
+                    //saveAsText();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -472,7 +473,7 @@ public class DefaultTableView extends Shell implements TableView {
                 binaryOrder = 1;
 
                 try {
-                    saveAsBinary();
+                    //saveAsBinary();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -488,7 +489,7 @@ public class DefaultTableView extends Shell implements TableView {
                 binaryOrder = 2;
 
                 try {
-                    saveAsBinary();
+                    //saveAsBinary();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -504,7 +505,7 @@ public class DefaultTableView extends Shell implements TableView {
                 binaryOrder = 3;
 
                 try {
-                    saveAsBinary();
+                    //saveAsBinary();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -598,7 +599,7 @@ public class DefaultTableView extends Shell implements TableView {
                 binaryOrder = 1;
 
                 try {
-                    importBinaryData();
+                    //importBinaryData();
                 }
                 catch (Exception ex) {
                     showError(ex.getMessage(), shell.getText());
@@ -613,7 +614,7 @@ public class DefaultTableView extends Shell implements TableView {
                 binaryOrder = 2;
 
                 try {
-                    importBinaryData();
+                    //importBinaryData();
                 }
                 catch (Exception ex) {
                     showError(ex.getMessage(), shell.getText());
@@ -628,7 +629,7 @@ public class DefaultTableView extends Shell implements TableView {
                 binaryOrder = 3;
 
                 try {
-                    importBinaryData();
+                    //importBinaryData();
                 }
                 catch (Exception ex) {
                     showError(ex.getMessage(), shell.getText());
@@ -747,7 +748,7 @@ public class DefaultTableView extends Shell implements TableView {
         item.setText("Show Lineplot");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                showLineplot();
+                //showLineplot();
             }
         });
 
@@ -802,7 +803,7 @@ public class DefaultTableView extends Shell implements TableView {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    mathConversion();
+                    //mathConversion();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -940,7 +941,7 @@ public class DefaultTableView extends Shell implements TableView {
                         sds.clearData();
                     }
 
-                    dataValue = null;
+                    //dataValue = null;
                     table = null;
                 }
 
@@ -1257,15 +1258,15 @@ public class DefaultTableView extends Shell implements TableView {
         //setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         try {
-            dataValue = dataset.getData();
+            //dataValue = dataset.getData();
             if (dataset instanceof ScalarDS) {
                 ((ScalarDS) dataset).convertFromUnsignedC();
-                dataValue = dataset.getData();
+                //dataValue = dataset.getData();
             }
         }
         catch (Exception ex) {
             //setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            dataValue = null;
+            //dataValue = null;
             showError(ex.getMessage(), shell.getText());
             return;
         }
@@ -1316,16 +1317,16 @@ public class DefaultTableView extends Shell implements TableView {
     private void updateValueInMemory(String cellValue, int row, int col) throws Exception {
         log.trace("DefaultTableView: updateValueInMemory()");
         
-        if (currentEditingCellValue != null) {
+        //if (currentEditingCellValue != null) {
             // Data values are the same, no need to change the data
-            if (currentEditingCellValue.toString().equals(cellValue)) return;
-        }
+        //    if (currentEditingCellValue.toString().equals(cellValue)) return;
+        //}
 
         if (dataset instanceof ScalarDS) {
-            updateScalarData(cellValue, row, col);
+            //updateScalarData(cellValue, row, col);
         }
         else if (dataset instanceof CompoundDS) {
-            updateCompoundData(cellValue, row, col);
+            //updateCompoundData(cellValue, row, col);
         }
     }
     

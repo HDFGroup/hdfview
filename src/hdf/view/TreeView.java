@@ -122,15 +122,17 @@ public abstract interface TreeView {
             throws Exception;
 
     /**
-     * Adds a new data object to the file.
+     * Adds a new data object to the Tree.
      * 
      * @param newObject
      *            the new object to add.
      * @param parentGroup
-     *            the parent group the object is to add to.
+     *            the parent group the object is to be
+     *            added to. If null, the object is
+     *            added to the end of the Tree
      * @throws Exception
      */
-    public abstract void addObject(HObject newObject, Group parentGroup)
+    public abstract TreeItem addObject(HObject newObject, Group parentGroup)
             throws Exception;
 
     /**
@@ -141,7 +143,7 @@ public abstract interface TreeView {
     public abstract Tree getTree();
 
     /**
-     * Returns the list of current open files..
+     * Returns the list of currently open files.
      */
     public abstract List<FileFormat> getCurrentFiles();
 
