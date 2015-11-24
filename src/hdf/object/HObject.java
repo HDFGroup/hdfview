@@ -442,7 +442,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
         int n = Math.min(n1, n2);
         boolean isMatched = (theID[0] == oid[0]);
-
+        
         for (int i = 1; isMatched && (i < n); i++) {
             isMatched = (theID[i] == oid[i]);
         }
@@ -474,6 +474,21 @@ public abstract class HObject implements Serializable, DataFormat {
         }
 
         return oid.clone();
+    }
+    
+    /**
+     * Returns whether this HObject is equal to the specified HObject
+     * by comparing their OIDs.
+     */
+    public boolean equals(HObject obj) {
+        // Since HDF4 object getOID() returns the pair (0, 0) for every object,
+        // a special case must be made
+        if(this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) &&
+           obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+            
+        }
+        
+        return this.equalsOID(obj.getOID());
     }
 
     /**

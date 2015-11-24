@@ -35,8 +35,6 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.eclipse.swt.widgets.TreeItem;
-
 import javax.imageio.ImageIO;
 
 import hdf.object.Datatype;

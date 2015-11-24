@@ -734,8 +734,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setText("&Register File Format");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//registerFileFormat();
-				notYetImplemented();
+				registerFileFormat();
 			}
 		});
 		
@@ -743,8 +742,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setText("&Unregister File Format");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//unregisterFileFormat();
-				notYetImplemented();
+				unregisterFileFormat();
 			}
 		});
 		
@@ -1142,7 +1140,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 	}
 	
 	private void unregisterFileFormat() {
-		Enumeration<Object> keys = FileFormat.getFileFormatKeys();
+		Enumeration<?> keys = FileFormat.getFileFormatKeys();
 		ArrayList<Object> keyList = new ArrayList<Object>();
 		
 		while (keys.hasMoreElements())
@@ -1531,7 +1529,10 @@ public class HDFView implements ViewManager, DropTargetListener {
     		FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN);
     		//fChooser.setFilterExtensions();
     	
-    		File chosenFile = new File(fChooser.open());
+    		filename = fChooser.open();
+    		if(filename == null) return;
+    		
+    		File chosenFile = new File(filename);
     		if (chosenFile == null) return;
     	
     		if (chosenFile.isDirectory()) {
@@ -1552,11 +1553,11 @@ public class HDFView implements ViewManager, DropTargetListener {
     	}
     	
     	try {
-    		treeView.openFile(currentFile, accessMode + FileFormat.READ);
+    		treeView.openFile(currentFile, accessMode + FileFormat.OPEN_NEW);
     	}
     	catch (Throwable ex) {
     		try {
-    			treeView.openFile(currentFile, FileFormat.OPEN_NEW);
+    			treeView.openFile(currentFile, FileFormat.READ);
     		}
     		catch (Throwable ex2) {
     			display.beep();

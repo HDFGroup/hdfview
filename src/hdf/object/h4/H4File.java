@@ -16,9 +16,10 @@ package hdf.object.h4;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Vector;
 
 import hdf.hdflib.HDFConstants;
@@ -298,7 +299,7 @@ public class H4File extends FileFormat {
         sdid = HDFLibrary.SDstart(fullFileName, flag);
 
         // load the file hierarchy
-        rootObject = loadTree();
+        loadIntoMemory();
 
         log.trace("hdf.H4File - open: end");
         
@@ -310,18 +311,18 @@ public class H4File extends FileFormat {
     public void close() throws HDFException {
         // clean unused objects
         if (rootObject != null) {
-            //DefaultMutableTreeNode theNode = null;
             HObject theObj = null;
-            //Enumeration local_enum = (rootNode).breadthFirstEnumeration();
-            //while (local_enum.hasMoreElements()) {
-            //    theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-            //    theObj = (HObject) theNode.getUserObject();
-            //    if (theObj instanceof Dataset) {
-            //        ((Dataset) theObj).clearData();
-            //    }
-            //    theObj = null;
-            //    theNode = null;
-            //}
+            Iterator<HObject> it = getMembersBreadthFirst(rootObject).iterator();
+            while (it.hasNext()) {
+                theObj = it.next();
+                
+                if (theObj instanceof Dataset) {
+                    ((Dataset) theObj).clearData();
+                }
+                else if (theObj instanceof Group) {
+                    ((Group) theObj).clear();
+                }
+            }
         }
 
         try {
@@ -594,25 +595,16 @@ public class H4File extends FileFormat {
         long[] oid = { tag, ref };
         group = new H4Group(this, gname, path, pgroup, oid);
 
-        //DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(group) {
-        //    private static final long serialVersionUID = -8601910527549035409L;
-
-        //    @Override
-        //    public boolean isLeaf() {
-        //        return false;
-        //    }
-        //};
         pgroup.addToMemberList(group);
 
         // copy members of the source group to the new group
-        List members = srcGroup.getMemberList();
+        List<HObject> members = srcGroup.getMemberList();
         if ((members != null) && (members.size() > 0)) {
-            Iterator iterator = members.iterator();
+            Iterator<HObject> iterator = members.iterator();
             while (iterator.hasNext()) {
                 HObject mObj = (HObject) iterator.next();
                 try {
-                	// Change this to be taken care of inside treeview instead of here
-                    //newNode.add((MutableTreeNode) copy(mObj, group));
+                	copy(mObj, group, mObj.getName());
                 } 
                 catch (Exception ex) {
                     log.debug("newNode.ad failure: ", ex);
@@ -639,30 +631,18 @@ public class H4File extends FileFormat {
      * retrieve the sub-tree of that group, recursively.
      * 
      */
-    private HObject loadTree() {
-        if (fid < 0) {
-            return null;
-        }
+    private void loadIntoMemory() {
+        if (fid < 0) return;
 
         long[] oid = { 0, 0 };
         int n = 0, ref = -1;
         int[] argv = null;
-        //MutableTreeNode node = null;
 
-        log.trace("loadTree(): start");
-        H4Group rootGroup = new H4Group(this, "/",
-        								null, // root node does not have a parent path
-        								null, // root node does not have a parent node
+        log.trace("loadIntoMemory(): start");
+        rootObject = new H4Group(this, "/",
+        								null, // root object does not have a parent path
+        								null, // root object does not have a parent object
         								oid);
-
-        //DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
-        //    private static final long serialVersionUID = 3507473044690724650L;
-
-        //    @Override
-        //    public boolean isLeaf() {
-        //        return false;
-        //    }
-        //};
 
         // get top level VGroup
         int[] tmpN = new int[1];
@@ -691,22 +671,13 @@ public class H4File extends FileFormat {
         for (int i = i0; i < i1; i++) {
             ref = refs[i];
             H4Group g = getVGroup(HDFConstants.DFTAG_VG, ref,
-                    HObject.separator, rootGroup, false);
+                    HObject.separator, (H4Group) rootObject, false);
 
             if (g != null) {
-                //node = new DefaultMutableTreeNode(g) {
-                //    private static final long serialVersionUID = 8927502967802143369L;
-
-                //    @Override
-                //    public boolean isLeaf() {
-                //        return false;
-                //    }
-                //};
-                //root.add(node);
-                rootGroup.addToMemberList(g);
+                ((H4Group) rootObject).addToMemberList(g);
 
                 // recursively get the sub-tree
-                //depth_first(node, null);
+                depth_first(g);
             }
         } // for (int i=0; i<n; i++)
 
@@ -728,9 +699,7 @@ public class H4File extends FileFormat {
                 H4GRImage gr = getGRImage(HDFConstants.DFTAG_RIG, i,
                         HObject.separator, false);
                 if (gr != null) {
-                    //node = new DefaultMutableTreeNode(gr);
-                    //root.add(node);
-                    rootGroup.addToMemberList(gr);
+                    ((H4Group) rootObject).addToMemberList(gr);
                 }
             } // for (int i=0; i<n; i++)
         } // if ( grid!=HDFConstants.FAIL && HDFLibrary.GRfileinfo(grid,argv) )
@@ -750,9 +719,7 @@ public class H4File extends FileFormat {
                 H4SDS sds = getSDS(HDFConstants.DFTAG_NDG, i,
                         HObject.separator, false);
                 if (sds != null) {
-                    //node = new DefaultMutableTreeNode(sds);
-                    //root.add(node);
-                    rootGroup.addToMemberList(sds);
+                    ((H4Group) rootObject).addToMemberList(sds);
                 }
             } // for (int i=0; i<n; i++)
         } // if (sdid != HDFConstants.FAIL && HDFLibrary.SDfileinfo(sdid, argv))
@@ -775,17 +742,15 @@ public class H4File extends FileFormat {
                     HObject.separator, false);
 
             if (vdata != null) {
-                //node = new DefaultMutableTreeNode(vdata);
-                //root.add(node);
-                rootGroup.addToMemberList(vdata);
+                ((H4Group) rootObject).addToMemberList(vdata);
             }
         } // for (int i=0; i<n; i++)
 
-        if (rootGroup != null) {
+        if (rootObject != null) {
             // retrieve file annotation, GR and SDS globle attributes
             List attributeList = null;
             try {
-                attributeList = rootGroup.getMetadata();
+                attributeList = ((H4Group) rootObject).getMetadata();
             } 
             catch (HDFException ex) {
                 log.debug("rootGroup.getMetadata failure: ", ex);
@@ -813,39 +778,30 @@ public class H4File extends FileFormat {
             }
         }
 
-        log.trace("loadTree(): finish");
-        return rootGroup;
+        log.trace("loadIntoMemory(): finish");
     }
 
     /**
      * Retrieves the tree structure of the file by depth-first order. The
-     * current implementation only retrieves group and dataset. It does not
-     * include named datatype and soft links.
+     * current implementation only retrieves groups and datasets. It does not
+     * include named datatypes and soft links.
      * <p>
      * 
-     * @param parentNode
-     *            the parent node.
+     * @param parentObject
+     *            the parent object.
      */
-    /*
-    private void depth_first(MutableTreeNode parentNode, H4Group pgroup) {
-        if ((pgroup == null) && (parentNode == null)) {
-            return;
-        }
+    private void depth_first(HObject parentObj) {
+        if (parentObj == null) return;
 
-        // System.out.println("H4File.depth_first() pnode = "+parentNode);
+        log.trace("H4File.depth_first(pobj = "+parentObj+")");
         int nelems = 0, ref = -1, tag = -1, index = -1;
         int[] tags = null;
         int[] refs = null;
-        MutableTreeNode node = null;
-        DefaultMutableTreeNode pnode = null;
+        
+        H4Group parentGroup = (H4Group) parentObj;
 
-        if (parentNode != null) {
-            pnode = (DefaultMutableTreeNode) parentNode;
-            pgroup = (H4Group) (pnode.getUserObject());
-        }
-
-        String fullPath = pgroup.getPath() + pgroup.getName() + HObject.separator;
-        int gid = pgroup.open();
+        String fullPath = parentGroup.getPath() + parentGroup.getName() + HObject.separator;
+        int gid = parentGroup.open();
         if (gid == HDFConstants.FAIL) {
             return;
         }
@@ -860,7 +816,7 @@ public class H4File extends FileFormat {
             nelems = 0;
         } 
         finally {
-            pgroup.close(gid);
+            parentGroup.close(gid);
         }
 
         int i0 = Math.max(0, getStartMembers());
@@ -889,11 +845,7 @@ public class H4File extends FileFormat {
                 }
                 if (index != HDFConstants.FAIL) {
                     H4GRImage gr = getGRImage(tag, index, fullPath, true);
-                    pgroup.addToMemberList(gr);
-                    if ((gr != null) && (pnode != null)) {
-                        node = new DefaultMutableTreeNode(gr);
-                        pnode.add(node);
-                    }
+                    parentGroup.addToMemberList(gr);
                 }
                 break;
             case HDFConstants.DFTAG_SD:
@@ -907,53 +859,32 @@ public class H4File extends FileFormat {
                 }
                 if (index != HDFConstants.FAIL) {
                     H4SDS sds = getSDS(tag, index, fullPath, true);
-                    pgroup.addToMemberList(sds);
-                    if ((sds != null) && (pnode != null)) {
-                        node = new DefaultMutableTreeNode(sds);
-                        pnode.add(node);
-                    }
+                    parentGroup.addToMemberList(sds);
                 }
                 break;
             case HDFConstants.DFTAG_VH:
             case HDFConstants.DFTAG_VS:
                 H4Vdata vdata = getVdata(tag, ref, fullPath, true);
-                pgroup.addToMemberList(vdata);
-                if ((vdata != null) && (pnode != null)) {
-                    node = new DefaultMutableTreeNode(vdata);
-                    pnode.add(node);
-                }
+                parentGroup.addToMemberList(vdata);
                 break;
             case HDFConstants.DFTAG_VG:
-                H4Group vgroup = getVGroup(tag, ref, fullPath, pgroup, true);
-                pgroup.addToMemberList(vgroup);
-                if ((vgroup != null) && (pnode != null)) {
-                    node = new DefaultMutableTreeNode(vgroup) {
-                        private static final long serialVersionUID = -8774836537322039221L;
-
-                        @Override
-                        public boolean isLeaf() {
-                            return false;
-                        }
-                    };
-
-                    pnode.add(node);
-
+                H4Group vgroup = getVGroup(tag, ref, fullPath, parentGroup, true);
+                parentGroup.addToMemberList(vgroup);
+                if ((vgroup != null) && (parentGroup != null)) {
                     // check for loops
                     boolean looped = false;
-                    DefaultMutableTreeNode theNode = pnode;
-                    while ((theNode != null) && !looped) {
-                        H4Group theGroup = (H4Group) theNode.getUserObject();
+                    H4Group theGroup = (H4Group) parentGroup;
+                    while ((theGroup != null) && !looped) {
                         long[] oid = { tag, ref };
                         if (theGroup.equalsOID(oid)) {
                             looped = true;
                         } 
                         else {
-                            theNode = (DefaultMutableTreeNode) theNode
-                                    .getParent();
+                            theGroup = (H4Group) theGroup.getParent();
                         }
                     }
                     if (!looped) {
-                        depth_first(node, null);
+                        depth_first(vgroup);
                     }
                 }
                 break;
@@ -964,7 +895,32 @@ public class H4File extends FileFormat {
         } // for (int i=0; i<nelms; i++)
 
     } // private depth_first()
-    */
+    
+    /**
+     * Returns a list of all the members of this H4File in a
+     * breadth-first ordering that are rooted at the specified
+     * object.
+     */
+    private static List<HObject> getMembersBreadthFirst(HObject obj) {
+        List<HObject> allMembers = new Vector<HObject>();
+        Queue<HObject> queue = new LinkedList<HObject>();
+        HObject currentObject = obj;
+        
+        queue.add(currentObject);
+        
+        while(!queue.isEmpty()) {
+            currentObject = queue.remove();
+            allMembers.add(currentObject);
+            
+            if(currentObject instanceof Group) {
+                queue.addAll(((Group) currentObject).getMemberList());
+            } else {
+                continue;
+            }
+        }
+        
+        return allMembers;
+    }
 
     /**
      * Retrieve an GR image for the given GR image identifier and index.
@@ -1842,7 +1798,7 @@ public class H4File extends FileFormat {
         if (ref > 0) {
             long oid[] = { HDFConstants.DFTAG_VG, ref };
             H4Group g = new H4Group(this, objName[0], path, null, oid);
-            //depth_first(null, g);
+            depth_first(g);
             return g;
         }
 
