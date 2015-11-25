@@ -563,7 +563,7 @@ public class DefaultTreeView implements TreeView {
         item.setImage(ViewProperties.getFoldercloseIcon());
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                addObject(OBJECT_TYPE.GROUP);
+                addNewObject(OBJECT_TYPE.GROUP);
             }
         });
         
@@ -572,7 +572,7 @@ public class DefaultTreeView implements TreeView {
         addDatasetMenuItem.setImage(ViewProperties.getDatasetIcon());
         addDatasetMenuItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                addObject(OBJECT_TYPE.DATASET);
+                addNewObject(OBJECT_TYPE.DATASET);
             }
         });
         
@@ -581,7 +581,7 @@ public class DefaultTreeView implements TreeView {
         item.setImage(ViewProperties.getImageIcon());
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                addObject(OBJECT_TYPE.IMAGE);
+                addNewObject(OBJECT_TYPE.IMAGE);
             }
         });
         
@@ -590,7 +590,7 @@ public class DefaultTreeView implements TreeView {
         addTableMenuItem.setImage(ViewProperties.getTableIcon());
         addTableMenuItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                addObject(OBJECT_TYPE.TABLE);
+                addNewObject(OBJECT_TYPE.TABLE);
             }
         });
         
@@ -599,7 +599,7 @@ public class DefaultTreeView implements TreeView {
         addDatatypeMenuItem.setImage(ViewProperties.getDatatypeIcon());
         addDatatypeMenuItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                addObject(OBJECT_TYPE.DATATYPE);
+                addNewObject(OBJECT_TYPE.DATATYPE);
             }
         });
         
@@ -608,7 +608,7 @@ public class DefaultTreeView implements TreeView {
         addLinkMenuItem.setImage(ViewProperties.getLinkIcon());
         addLinkMenuItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                addObject(OBJECT_TYPE.LINK);
+                addNewObject(OBJECT_TYPE.LINK);
             }
         });
         
@@ -780,15 +780,15 @@ public class DefaultTreeView implements TreeView {
      * @param type
      *          The type (GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK) of object to add.
      */
-    private void addObject(OBJECT_TYPE type) {
+    private void addNewObject(OBJECT_TYPE type) {
         if ((selectedObject == null) || (selectedItem == null)) return;
         
-        Group pGroup = null;
+        TreeItem parentItem = null;
         if(selectedObject instanceof Group) {
-            pGroup = (Group) selectedObject;
+            parentItem = selectedItem;
         }
         else {
-            pGroup = (Group) (selectedItem.getParentItem()).getData();
+            parentItem = selectedItem.getParentItem();
         }
         
         HObject obj = null;
@@ -836,7 +836,7 @@ public class DefaultTreeView implements TreeView {
         if (obj == null) return;
         
         try {
-            this.addObject(obj, pGroup);
+            this.insertObject(obj, parentItem);
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
@@ -846,19 +846,20 @@ public class DefaultTreeView implements TreeView {
     }
     
     /**
-     * Adds a new data object to the Tree.
+     * Adds an already created HObject to the tree under the
+     * TreeItem containing the specified parent group.
      * 
-     * @param newObject
-     *            the new object to add.
+     * @param obj
+     *            the object to add.
      * @param parentGroup
-     *            the parent group to add the object to. If
-     *            null, adds the object to the end of the tree.
-     * @return the newly created TreeItem
+     *            the parent group to add the object to.
      */
-    public TreeItem addObject(HObject newObject, Group parentGroup) {
-        if (newObject == null) return null;
-
-        return this.insertObject(newObject, findTreeItem(parentGroup));
+    public TreeItem addObject(HObject obj, Group parentGroup) {
+        if ((obj == null) || (parentGroup == null)) {
+            return null;
+        }
+        
+        return insertObject(obj, findTreeItem(parentGroup));
     }
 
     /**
@@ -954,25 +955,6 @@ public class DefaultTreeView implements TreeView {
         else {
             item.setImage(ViewProperties.getQuestionIcon());
         }
-        
-        // When a TreeItem is disposed, it should be removed from its parent
-        // items member list
-        item.addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent e) {
-                TreeItem thisItem = (TreeItem) e.getSource();
-                TreeItem parentItem = thisItem.getParentItem();
-                
-                if (parentItem != null) {
-                    ((Group) parentItem.getData()).removeFromMemberList((HObject) thisItem.getData());
-                }
-                
-                if (thisItem.equals(selectedItem)) {
-                    selectedItem = null;
-                    selectedObject = null;
-                    selectedFile = null;
-                }
-            }
-        });
         
         return item;
     }
@@ -1247,6 +1229,17 @@ public class DefaultTreeView implements TreeView {
                 continue;
             }
             
+            // When a TreeItem is disposed, it should be removed from its parent
+            // items member list to prevent a bug when copying and deleting
+            // groups/datasets
+            ((Group) currentItem.getParentItem().getData()).removeFromMemberList(theObj);
+            
+            if (currentItem.equals(selectedItem)) {
+                selectedItem = null;
+                selectedObject = null;
+                selectedFile = null;
+            }
+            
             currentItem.dispose();
         } // for (int i=0; i < currentSelections.length; i++) {
     }
@@ -1261,11 +1254,20 @@ public class DefaultTreeView implements TreeView {
      */
     private TreeItem populateTree(FileFormat theFile) {
         if (theFile.getFID() < 0 || theFile.getRootObject() == null) {
-            log.trace("Error occured when populating Tree with members of file {}", theFile.getFilePath());
+            log.trace("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
             return null;
         }
         
-        recursivePopulate(theFile.getRootObject(), null);
+        try {
+            recursivePopulate(theFile.getRootObject(), null);
+        } catch (Exception ex) {
+            log.trace("Error occured when populating Tree with members of file {}", theFile.getFilePath());
+            TreeItem rootItem = findTreeItem(theFile.getRootObject());
+            if(rootItem != null) rootItem.dispose();
+            shell.getDisplay().beep();
+            showError("Error opening file " + theFile.getName(), "Open File");
+            return null;
+        }
         
         return findTreeItem(theFile.getRootObject());
     }
@@ -1274,18 +1276,18 @@ public class DefaultTreeView implements TreeView {
      * Helper method for populate tree to recursively discover all 
      * items under the specified group of a file.
      */
-    private void recursivePopulate(HObject obj, Group parentGroup) {
+    private void recursivePopulate(HObject obj, TreeItem parentItem) {
         if(obj == null) return;
         
         if(obj instanceof Group) {
-            addObject(obj, parentGroup);
+            TreeItem newParent = insertObject(obj, parentItem);
             
             Iterator<HObject> it = ((Group) obj).getMemberList().iterator();
             while(it.hasNext()) {
-                recursivePopulate(it.next(), (Group) obj);
+                recursivePopulate(it.next(), newParent);
             }
         } else {
-            addObject(obj, parentGroup);
+            insertObject(obj, parentItem);
         }
     }
     
@@ -2020,9 +2022,31 @@ public class DefaultTreeView implements TreeView {
     public TreeItem findTreeItem(HObject obj) {
         if (obj == null || (obj.getFileFormat().getRootObject() == null)) return null;
         
+        // Locate the item's file root to save on search time in large files
+        TreeItem[] fileRoots = tree.getItems();
+        TreeItem rootItem = null;
+        HObject rootObject = null;
+        for(int i = 0; i < fileRoots.length; i++) {
+            rootItem = fileRoots[i];
+            rootObject = (HObject) rootItem.getData();
+            
+            if(rootObject.getFileFormat().equals(obj.getFileFormat())) {
+                // If the object being looked for is a file root, return
+                // this found TreeItem
+                if(obj instanceof Group && ((Group) obj).isRoot()) {
+                    return rootItem;
+                }
+            
+                // Else the file root for the object being looked for has
+                // been found, continue the search through only this TreeItem's
+                // members
+                break;
+            }
+        }
+        
         TreeItem theItem = null;
         HObject theObj = null;
-        Iterator<TreeItem> it = this.getAllItemsBreadthFirst().iterator();
+        Iterator<TreeItem> it = getItemsBreadthFirst(rootItem).iterator();
         
         while(it.hasNext()) {
             theItem = (TreeItem) it.next();

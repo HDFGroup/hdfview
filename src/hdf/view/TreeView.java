@@ -122,18 +122,15 @@ public abstract interface TreeView {
             throws Exception;
 
     /**
-     * Adds a new data object to the Tree.
+     * Adds an already created HObject to the tree under the
+     * TreeItem containing the specified parent group.
      * 
-     * @param newObject
-     *            the new object to add.
+     * @param obj
+     *            the object to add.
      * @param parentGroup
-     *            the parent group the object is to be
-     *            added to. If null, the object is
-     *            added to the end of the Tree
-     * @throws Exception
+     *            the parent group to add the object to.
      */
-    public abstract TreeItem addObject(HObject newObject, Group parentGroup)
-            throws Exception;
+    public abstract TreeItem addObject(HObject newObject, Group parentGroup);
 
     /**
      * Returns the Tree which holds the file structure.

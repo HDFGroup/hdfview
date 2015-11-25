@@ -617,7 +617,18 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setAccelerator(SWT.MOD1 + 'Q');
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				display.dispose();
+                closeAllWindows();
+                
+                List<FileFormat> files = treeView.getCurrentFiles();
+                while (!files.isEmpty()) {
+                    try {
+                        treeView.closeFile(files.get(0));
+                    } catch (Exception ex) {
+                        
+                    }
+                }
+			    
+			    display.dispose();
 			}
 		});
 		

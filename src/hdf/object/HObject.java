@@ -41,19 +41,19 @@ import java.io.Serializable;
  * All HDF4 and HDF5 data objects are inherited from HObject. At the top level
  * of the hierarchy, both HDF4 and HDF5 have the same super-classes, such as
  * Group and Dataset. At the bottom level of the hierarchy, HDF4 and HDF5
- * objects have their own implementation, such as H5Group, H5ScalarDs,
+ * objects have their own implementation, such as H5Group, H5ScalarDS,
  * H5CompoundDS, and H5Datatype.
  * <p>
  * <b>Warning: HDF4 and HDF5 may have multiple links to the same object. Data
  * objects in this model do not deal with multiple links. Users may create
- * duplicate copies of the same data object with different pathes. Applications
+ * duplicate copies of the same data object with different paths. Applications
  * should check the OID of the data object to avoid duplicate copies of the same
  * object.</b>
  * <p>
- * HDF4 objects are uniquely identified by the OID of the (ref_id, tag_id) pair.
- * The ref_id is the object reference count. tag_id is a pre-defined number to
- * identify the type of object. For example, DFTAG_RI is for raster image,
- * DFTAG_SD is for scientific dataset, and DFTAG_VG is for Vgroup.
+ * HDF4 objects are uniquely identified by the OID of the (tag_id, obj_id) pair.
+ * The tag_id is a pre-defined number to identify the type of object. For example,
+ * DFTAG_RI is for raster image, DFTAG_SD is for scientific dataset, and DFTAG_VG
+ * is for Vgroup. The obj_id is a unique ID number generated at creation time.
  * <p>
  * HDF5 objects are uniquely identified by the OID or object reference. The OID
  * is usually obtained by H5Rcreate(). The following example shows how to
@@ -117,9 +117,10 @@ public abstract class HObject implements Serializable, DataFormat {
     /**
      * Array of long integer storing unique identifier for the object.
      * <p>
-     * HDF4 objects are uniquely identified by a (ref_id, tag_id) pair. i.e.
-     * oid[0]=tag, oid[1]=ref.<br>
-     * HDF5 objects are uniquely identified by an object reference.
+     * HDF4 objects are uniquely identified by a (tag_id, obj_id) pair. i.e.
+     * oid[0] = tag, oid[1] = obj_id.<br>
+     * HDF5 objects are uniquely identified by an object reference. i.e.
+     * oid[0] = obj_id.
      */
     protected long[]           oid;
 
@@ -139,7 +140,7 @@ public abstract class HObject implements Serializable, DataFormat {
     public HObject() {
         this(null, null, null, null);
     }
-
+    
     /**
      * Constructs an instance of a data object with specific name and path.
      * <p>
@@ -158,8 +159,17 @@ public abstract class HObject implements Serializable, DataFormat {
     }
 
     /**
-     * @deprecated Not for public use in the future.<br>
-     *             Using {@link #HObject(FileFormat, String, String)}
+     * Constructs an instance of a data object with specific name and path.
+     * <p>
+     * For example, in H5ScalarDS(h5file, "dset", "/arrays"), "dset" is the name
+     * of the dataset, "/arrays" is the group path of the dataset.
+     * 
+     * @param theFile
+     *            the file that contains the data object.
+     * @param theName
+     *            the name of the data object, e.g. "dset".
+     * @param thePath
+     *            the group path of the data object, e.g. "/arrays".
      */
     @Deprecated
     public HObject(FileFormat theFile, String theName, String thePath, long[] oid) {
@@ -190,7 +200,7 @@ public abstract class HObject implements Serializable, DataFormat {
                     thePath = thePath.substring(0, thePath.length() - 1);
                 }
 
-                // seperate the name and the path
+                // separate the name and the path
                 theName = thePath.substring(thePath.lastIndexOf(separator) + 1);
                 thePath = thePath.substring(0, thePath.lastIndexOf(separator));
             }
@@ -481,13 +491,6 @@ public abstract class HObject implements Serializable, DataFormat {
      * by comparing their OIDs.
      */
     public boolean equals(HObject obj) {
-        // Since HDF4 object getOID() returns the pair (0, 0) for every object,
-        // a special case must be made
-        if(this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) &&
-           obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
-            
-        }
-        
         return this.equalsOID(obj.getOID());
     }
 
@@ -513,5 +516,20 @@ public abstract class HObject implements Serializable, DataFormat {
 
         return super.toString();
     }
-
+    
+    /**
+     * Generates a unique object identifier for this HObject.
+     */
+    private long[] generateOID() {
+        long[] oid;
+        
+        if(fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+            // HDF4 HObjects are uniquely identified by a (tag_id, obj_id) pair
+            oid = new long[2];
+        } else {
+            oid = new long[1];
+        }
+        
+        return oid;
+    }
 }
