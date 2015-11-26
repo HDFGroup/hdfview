@@ -257,4 +257,13 @@ public abstract class Group extends HObject {
     public int getNumberOfMembersInFile() {
         return nMembersInFile;
     }
+    
+    /**
+     * Get the HObject at the specified index in this Group's member list.
+     * @param idx The index of the HObject to get.
+     * @return The HObject at the specified index.
+     */
+    public HObject getMember(int idx) {
+        return memberList.get(idx);
+    }
 }

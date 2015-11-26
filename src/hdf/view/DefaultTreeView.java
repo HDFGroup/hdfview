@@ -36,11 +36,11 @@ import java.util.Vector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
 
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -50,6 +50,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -117,7 +118,7 @@ public class DefaultTreeView implements TreeView {
     /** Maintains a list of TreeItems in the tree in breadth-first order
      * to prevent many calls of getAllItemsBreadthFirst.
      */
-    private ArrayList<TreeItem>           breadthFirstItems = null;
+    //private ArrayList<TreeItem>           breadthFirstItems = null;
     
     /** A list of currently open files */
     private final List<FileFormat>        fileList = new Vector<FileFormat>();
@@ -140,7 +141,26 @@ public class DefaultTreeView implements TreeView {
     private MenuItem                      addLinkMenuItem;
     private MenuItem                      setLibVerBoundsItem;
     private MenuItem                      changeIndexItem;
-
+    
+    /** Keep Image instances to prevent many calls to ViewProperties.getTypeIcon() */
+    private Image h4Icon = ViewProperties.getH4Icon();
+    private Image h5Icon = ViewProperties.getH5Icon();
+    private Image imageIcon = ViewProperties.getImageIcon();
+    private Image imageIconA = ViewProperties.getImageIconA();
+    private Image textIcon = ViewProperties.getTextIcon();
+    private Image textIconA = ViewProperties.getTextIconA();
+    private Image datasetIcon = ViewProperties.getDatasetIcon();
+    private Image datasetIconA = ViewProperties.getDatasetIconA();
+    private Image tableIcon = ViewProperties.getTableIcon();
+    private Image tableIconA = ViewProperties.getTableIconA();
+    private Image datatypeIcon = ViewProperties.getDatatypeIcon();
+    private Image datatypeIconA = ViewProperties.getDatatypeIconA();
+    private Image folderCloseIcon = ViewProperties.getFoldercloseIcon();
+    private Image folderCloseIconA = ViewProperties.getFoldercloseIconA();
+    private Image folderOpenIcon = ViewProperties.getFolderopenIcon();
+    private Image folderOpenIconA = ViewProperties.getFolderopenIconA();
+    private Image questionIcon = ViewProperties.getQuestionIcon();
+    
     /** Flag to indicate if the dataset is displayed as default */
     private boolean                       isDefaultDisplay = true;
 
@@ -176,8 +196,8 @@ public class DefaultTreeView implements TreeView {
         //tree.setCellRenderer(new HTreeCellRenderer());
         //tree.setRootVisible(false);
         //tree.setShowsRootHandles(true);
-        //int rowheight = 23 + (int) ((tree.getFont().getSize() - 12) * 0.5);
-        //tree.setRowHeight(rowheight); 
+        //int rowheight = 23 + (int) ((tree.getFont().getFontData()[0].getHeight() - 12) * 0.5);
+        //tree.setItemHeight(rowheight); 
         
         // Handle tree key events
         tree.addKeyListener(new KeyAdapter() {
@@ -187,25 +207,22 @@ public class DefaultTreeView implements TreeView {
                 if (key == SWT.ARROW_LEFT || key == SWT.ARROW_RIGHT || key == SWT.ARROW_DOWN || key == SWT.ARROW_UP ||
                     key == SWT.KEYPAD_4 || key == SWT.KEYPAD_6 || key == SWT.KEYPAD_2 || key == SWT.KEYPAD_8) {
                     
-                    //TreePath selPath = ((JTree) e.getComponent()).getSelectionPath();
-                    //if (selPath == null) return;
+                    TreeItem[] selectedItems = tree.getSelection();
+                    TreeItem theItem = selectedItems[0];
                     
-                    //TreeItem theItem = (TreeItem) selPath.getLastPathComponent();
+                    if(theItem.equals(selectedItem)) return;
+                    
+                    selectedItem = theItem;
+                    selectedObject = ((HObject) (selectedItem.getData()));
+                    FileFormat theFile = selectedObject.getFileFormat();
+                    if ((theFile != null) && !theFile.equals(selectedFile)) {
+                        // A different file is selected, handle only one file at a time
+                        selectedFile = theFile;
+                        tree.deselectAll();
+                        //tree.setSelectionPath(selPath);
+                    }
 
-                    //if (!theItem.equals(selectedItem)) {
-                    //    selectedTreePath = selPath;
-                    //    selectedItem = theItem;
-                    //    selectedObject = ((HObject) (selectedItem.getData()));
-                    //    FileFormat theFile = selectedObject.getFileFormat();
-                    //    if ((theFile != null) && !theFile.equals(selectedFile)) {
-                            // A different file is selected, handle only one file at a time
-                    //        selectedFile = theFile;
-                    //      tree.clearSelection();
-                    //        tree.setSelectionPath(selPath);
-                    //    }
-
-                    //    ((HDFView) viewer).showMetaData(selectedObject);
-                    //}
+                    ((HDFView) viewer).showMetaData(selectedObject);
                 }
             }
         });
@@ -229,9 +246,9 @@ public class DefaultTreeView implements TreeView {
                 }
             }
             
-            // When a mouse press is detected, attempt to set the selected item
+            // When a mouse release is detected, attempt to set the selected item
             // and object to the TreeItem under the pointer
-            public void mouseDown(MouseEvent e) {
+            public void mouseUp(MouseEvent e) {
                 // Make sure user clicked on a TreeItem
                 TreeItem theItem = tree.getItem(new Point(e.x, e.y));
                 
@@ -243,51 +260,97 @@ public class DefaultTreeView implements TreeView {
                     return;
                 }
                 
-                //TreePath selPath = tree.getPathForLocation(e.x, e.y);
-                //if (selPath == null) return;
+                if(theItem.equals(selectedItem)) return;
                 
-                if (!theItem.equals(selectedItem)) {
-                    FileFormat theFile = null;
+                FileFormat theFile = null;
                     
-                    //selectedTreePath = selPath;
-                    selectedItem = theItem;
+                selectedItem = theItem;
+                
+                try {
+                    selectedObject = (HObject) selectedItem.getData();
+                }
+                catch(NullPointerException ex) {
+                    System.err.println("TreeItem " + selectedItem.getText() + " had no associated data.");
+                    return;
+                }
                     
-                    try {
-                        selectedObject = (HObject) selectedItem.getData();
-                    }
-                    catch(NullPointerException ex) {
-                        System.err.println("TreeItem " + selectedItem.getText() + " had no associated data.");
-                        return;
-                    }
+                try {
+                    theFile = selectedObject.getFileFormat();
+                }
+                catch(NullPointerException ex) {
+                    System.err.println("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    return;
+                }
                     
-                    try {
-                        theFile = selectedObject.getFileFormat();
-                    }
-                    catch(NullPointerException ex) {
-                        System.err.println("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
-                        return;
-                    }
-                    
-                    if ((theFile != null) && !theFile.equals(selectedFile)) {
-                        // A different file is selected, handle only one file at a time
-                        selectedFile = theFile;
-                        //tree.deselectAll();
-                        //tree.setSelection(selPath);
-                    }
-                    
-                    //viewer.mouseEventFired(e);
+                if ((theFile != null) && !theFile.equals(selectedFile)) {
+                    // A different file is selected, handle only one file at a time
+                    selectedFile = theFile;
+                    //tree.deselectAll();
+                    //tree.setSelection(selPath);
                 }
             }
         });
         
         // Show context menu only if user has selected a data object
-        tree.addListener(SWT.MenuDetect, new Listener() {
-            public void handleEvent(Event e) {
+        tree.addMenuDetectListener(new MenuDetectListener() {
+            public void menuDetected(MenuDetectEvent e) {
                 if (selectedItem == null | selectedObject == null | selectedFile == null) return;
                 
                 Point pt = new Point(e.x, e.y);
                 popupMenu.setLocation(pt);
                 popupMenu.setVisible(true);
+            }
+        });
+        
+        tree.addListener(SWT.Expand, new Listener() {
+            public void handleEvent(Event event) {
+                // Prevent graphical issues from happening by stopping
+                // tree from redrawing until all the items are created
+                tree.setRedraw(false);
+                
+                TreeItem item = (TreeItem) event.item;
+                Group obj = (Group) item.getData();
+                
+                if(obj.isRoot()) return;
+                
+                item.setImage(obj.hasAttribute() ? folderOpenIconA : folderOpenIcon);
+                
+                // Process any remaining SetData events and then allow
+                // the tree to redraw once all are finished
+                while(!tree.getDisplay().readAndDispatch());
+                
+                tree.setRedraw(true);
+            }
+        });
+        
+        tree.addListener(SWT.Collapse, new Listener() {
+            public void handleEvent(Event event) {
+                TreeItem item = (TreeItem) event.item;
+                Group obj = (Group) item.getData();
+                
+                if(obj.isRoot()) return;
+                
+                item.setImage(obj.hasAttribute() ? folderCloseIconA : folderCloseIcon);
+            }
+        });
+        
+        // When groups are expanded, populate TreeItems corresponding to file objects
+        // on demand.
+        tree.addListener(SWT.SetData, new Listener() {
+            public void handleEvent(Event event) {
+                TreeItem item = (TreeItem) event.item;
+                TreeItem parentItem = item.getParentItem();
+                
+                int position = parentItem.indexOf(item);
+                HObject obj = ((Group) parentItem.getData()).getMember(position);
+                
+                item.setData(obj);
+                item.setText(obj.getName());
+                item.setImage(getObjectTypeImage(obj));
+                        
+                if(obj instanceof Group) {
+                    item.setItemCount(((Group) obj).getNumberOfMembersInFile());
+                }
             }
         });
     }
@@ -888,73 +951,7 @@ public class DefaultTreeView implements TreeView {
         }
         
         item.setData(obj);
-        
-        boolean hasAttribute = obj.hasAttribute();
-        
-        if(obj instanceof Dataset) {
-            if (obj instanceof ScalarDS) {
-                ScalarDS sd = (ScalarDS) obj;
-                
-                if (sd.isImage()) {
-                    if (hasAttribute) {
-                        item.setImage(ViewProperties.getImageIconA());
-                    }
-                    else {
-                        item.setImage(ViewProperties.getImageIcon());
-                    }
-                }
-                else if (sd.isText()) {
-                    if (hasAttribute) {
-                        item.setImage(ViewProperties.getTextIconA());
-                    }
-                    else {
-                        item.setImage(ViewProperties.getTextIcon());
-                    }
-                }
-                else {
-                    if (hasAttribute) {
-                        item.setImage(ViewProperties.getDatasetIconA());
-                    }
-                    else {
-                        item.setImage(ViewProperties.getDatasetIcon());
-                    }
-                }
-            }
-            else if (obj instanceof CompoundDS) {
-                if (hasAttribute) {
-                    item.setImage(ViewProperties.getTableIconA());
-                }
-                else {
-                    item.setImage(ViewProperties.getTableIcon());
-                }
-            }
-        }
-        else if(obj instanceof Group) {
-            if(((Group) obj).isRoot()) {
-                FileFormat theFile = obj.getFileFormat();
-                
-                if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)))
-                    item.setImage(ViewProperties.getH4Icon());
-                else
-                    item.setImage(ViewProperties.getH5Icon());
-            } else {
-                if(hasAttribute) {
-                    item.setImage(ViewProperties.getFoldercloseIconA());
-                } else {
-                    item.setImage(ViewProperties.getFoldercloseIcon());
-                }
-            }
-        }
-        else if(obj instanceof Datatype) {
-            if(hasAttribute) {
-                item.setImage(ViewProperties.getDatatypeIconA());
-            } else {
-                item.setImage(ViewProperties.getDatatypeIcon());
-            }
-        }
-        else {
-            item.setImage(ViewProperties.getQuestionIcon());
-        }
+        item.setImage(getObjectTypeImage(obj));
         
         return item;
     }
@@ -1246,11 +1243,12 @@ public class DefaultTreeView implements TreeView {
     
     /**
      * Populates the TreeView with TreeItems corresponding to
-     * the user objects in the specified file by. Creates TreeItems
-     * in a depth-first manner.
+     * the top-level user objects in the specified file. The rest
+     * of the user objects in the file are populated as TreeItems
+     * on demand when the user expands groups.
      *
-     * @return the root TreeItem created in the Tree of the 
-     * specified file.
+     * @return the root TreeItem created in the Tree corresponding
+     * to the file object.
      */
     private TreeItem populateTree(FileFormat theFile) {
         if (theFile.getFID() < 0 || theFile.getRootObject() == null) {
@@ -1258,37 +1256,33 @@ public class DefaultTreeView implements TreeView {
             return null;
         }
         
+        TreeItem rootItem = null;
+        
         try {
-            recursivePopulate(theFile.getRootObject(), null);
-        } catch (Exception ex) {
+            rootItem = insertObject(theFile.getRootObject(), null);
+            
+            Iterator<HObject> it = ((Group) rootItem.getData()).getMemberList().iterator();
+            while(it.hasNext()) {
+                TreeItem newItem = null;
+                HObject obj = it.next();
+                
+                newItem = insertObject(obj, rootItem);
+                
+                // Tell SWT how many members this group has so they can
+                // be populated when the group is expanded
+                if(obj instanceof Group)
+                    newItem.setItemCount(((Group) obj).getNumberOfMembersInFile());
+            }
+        }
+        catch (Exception ex) {
             log.trace("Error occured when populating Tree with members of file {}", theFile.getFilePath());
-            TreeItem rootItem = findTreeItem(theFile.getRootObject());
             if(rootItem != null) rootItem.dispose();
             shell.getDisplay().beep();
             showError("Error opening file " + theFile.getName(), "Open File");
             return null;
         }
         
-        return findTreeItem(theFile.getRootObject());
-    }
-    
-    /**
-     * Helper method for populate tree to recursively discover all 
-     * items under the specified group of a file.
-     */
-    private void recursivePopulate(HObject obj, TreeItem parentItem) {
-        if(obj == null) return;
-        
-        if(obj instanceof Group) {
-            TreeItem newParent = insertObject(obj, parentItem);
-            
-            Iterator<HObject> it = ((Group) obj).getMemberList().iterator();
-            while(it.hasNext()) {
-                recursivePopulate(it.next(), newParent);
-            }
-        } else {
-            insertObject(obj, parentItem);
-        }
+        return rootItem;
     }
     
     /**
@@ -1299,17 +1293,89 @@ public class DefaultTreeView implements TreeView {
      *            Collapse the TreeItem and its children if false.
      */
     private void recursiveExpand(TreeItem item, boolean expand) {
-        if(item == null) return;
+        if(item == null || !(item.getData() instanceof Group)) return;
         
-        if(item.getData() instanceof Group) {
-            TreeItem[] toExpand = item.getItems();
+        TreeItem[] toExpand = item.getItems();
             
-            item.setExpanded(expand);
+        item.setExpanded(expand);
             
-            for(int i = 0; i < toExpand.length; i++)
-                recursiveExpand(toExpand[i], expand);
+        for(int i = 0; i < toExpand.length; i++)
+            recursiveExpand(toExpand[i], expand);
+    }
+    
+    /**
+     * Gets the Image to set on the TreeItem for the specified HObject,
+     * based on the type of HObject it is.
+     * @param obj
+     * @return
+     */
+    private Image getObjectTypeImage(HObject obj) {
+        boolean hasAttribute = obj.hasAttribute();
+        
+        if(obj instanceof Dataset) {
+            if (obj instanceof ScalarDS) {
+                ScalarDS sd = (ScalarDS) obj;
+                
+                if (sd.isImage()) {
+                    if (hasAttribute) {
+                        return imageIconA;
+                    }
+                    else {
+                        return imageIcon;
+                    }
+                }
+                else if (sd.isText()) {
+                    if (hasAttribute) {
+                        return textIconA;
+                    }
+                    else {
+                        return textIcon;
+                    }
+                }
+                else {
+                    if (hasAttribute) {
+                        return datasetIconA;
+                    }
+                    else {
+                        return datasetIcon;
+                    }
+                }
+            }
+            else if (obj instanceof CompoundDS) {
+                if (hasAttribute) {
+                    return tableIconA;
+                }
+                else {
+                    return tableIcon;
+                }
+            }
         }
-    }            
+        else if(obj instanceof Group) {
+            if(((Group) obj).isRoot()) {
+                FileFormat theFile = obj.getFileFormat();
+                
+                if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)))
+                    return h4Icon;
+                else
+                    return h5Icon;
+            } else {
+                if(hasAttribute) {
+                    return folderCloseIconA;
+                } else {
+                    return folderCloseIcon;
+                }
+            }
+        }
+        else if(obj instanceof Datatype) {
+            if(hasAttribute) {
+                return datatypeIconA;
+            } else {
+                return datatypeIcon;
+            }
+        }
+        
+        return questionIcon;
+    }
     
     /**
      * Checks if a file is already open.
@@ -1898,11 +1964,13 @@ public class DefaultTreeView implements TreeView {
                 
                 // If this is the first file opened, initialize the breadth-first
                 // list of TreeItems
-                if(breadthFirstItems == null)
-                    breadthFirstItems = getItemsBreadthFirst(fileRoot);
+                //if(breadthFirstItems == null)
+                //    breadthFirstItems = getItemsBreadthFirst(fileRoot);
 
                 fileList.add(fileFormat);
             }
+            
+            tree.setItemCount(fileList.size());
         }
 
         return fileFormat;
@@ -1956,7 +2024,7 @@ public class DefaultTreeView implements TreeView {
             }
         }
         
-        if(fileList.size() <= 0) breadthFirstItems = null;
+        //if(fileList.size() <= 0) breadthFirstItems = null;
     }
 
     /**
