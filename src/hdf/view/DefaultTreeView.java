@@ -18,6 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -95,11 +96,6 @@ public class DefaultTreeView implements TreeView {
      * The tree which holds file structures.
      */
     private final Tree                    tree;
-
-    /**
-     * The super root of the tree: all open files start at this root.
-     */
-    private final TreeItem                root = null;
 
     /** The currently selected tree item */
     private TreeItem                      selectedItem = null;
@@ -191,14 +187,6 @@ public class DefaultTreeView implements TreeView {
         // Create the context menu for the Tree
         popupMenu = createPopupMenu();
         
-        //treeModel = new DefaultTreeModel(root);
-        //tree.setLargeModel(true);
-        //tree.setCellRenderer(new HTreeCellRenderer());
-        //tree.setRootVisible(false);
-        //tree.setShowsRootHandles(true);
-        //int rowheight = 23 + (int) ((tree.getFont().getFontData()[0].getHeight() - 12) * 0.5);
-        //tree.setItemHeight(rowheight); 
-        
         // Handle tree key events
         tree.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
@@ -219,10 +207,48 @@ public class DefaultTreeView implements TreeView {
                         // A different file is selected, handle only one file at a time
                         selectedFile = theFile;
                         tree.deselectAll();
-                        //tree.setSelectionPath(selPath);
                     }
 
                     ((HDFView) viewer).showMetaData(selectedObject);
+                }
+            }
+        });
+        
+        /**
+         * If user presses Enter on a TreeItem, expand/collapse the item if it
+         * is a group, or try to show the data content if it is a data object.
+         */
+        tree.addListener(SWT.Traverse, new Listener() {
+            public void handleEvent(Event event) {
+                if(!(event.detail == SWT.TRAVERSE_RETURN)) return;
+                
+                TreeItem item = selectedItem;
+                if(item == null) return;
+                
+                HObject obj = (HObject) item.getData();
+                if(obj == null) return;
+                
+                if(obj instanceof Group) {
+                    boolean isExpanded = item.getExpanded();
+                    
+                    item.setExpanded(!isExpanded);
+                    
+                    Event expand = new Event();
+                    expand.item = item;
+                    
+                    if(isExpanded) {
+                        tree.notifyListeners(SWT.Collapse, expand);
+                    } else {
+                        tree.notifyListeners(SWT.Expand, expand);
+                    }
+                } else {
+                    try {
+                        showDataContent(obj);
+                    } catch (Throwable err) {
+                        shell.getDisplay().beep();
+                        showError(err.getMessage(), null);
+                        return;
+                    }
                 }
             }
         });
@@ -294,30 +320,34 @@ public class DefaultTreeView implements TreeView {
         // Show context menu only if user has selected a data object
         tree.addMenuDetectListener(new MenuDetectListener() {
             public void menuDetected(MenuDetectEvent e) {
-                if (selectedItem == null | selectedObject == null | selectedFile == null) return;
+                Display display = Display.getDefault();
                 
-                Point pt = new Point(e.x, e.y);
-                popupMenu.setLocation(pt);
+                Point pt = display.map(null, tree, new Point(e.x, e.y));
+                TreeItem item = tree.getItem(pt);
+                if(item == null) return;
+                
+                popupMenu.setLocation(display.getCursorLocation());
                 popupMenu.setVisible(true);
             }
         });
         
         tree.addListener(SWT.Expand, new Listener() {
             public void handleEvent(Event event) {
-                // Prevent graphical issues from happening by stopping
-                // tree from redrawing until all the items are created
-                tree.setRedraw(false);
-                
                 TreeItem item = (TreeItem) event.item;
                 Group obj = (Group) item.getData();
                 
                 if(obj.isRoot()) return;
                 
-                item.setImage(obj.hasAttribute() ? folderOpenIconA : folderOpenIcon);
+                // Prevent graphical issues from happening by stopping
+                // tree from redrawing until all the items are created
+                tree.setRedraw(false);
+                
+                if(item.getItemCount() > 0)
+                    item.setImage(obj.hasAttribute() ? folderOpenIconA : folderOpenIcon);
                 
                 // Process any remaining SetData events and then allow
                 // the tree to redraw once all are finished
-                while(!tree.getDisplay().readAndDispatch());
+                while(tree.getDisplay().readAndDispatch());
                 
                 tree.setRedraw(true);
             }
@@ -338,19 +368,23 @@ public class DefaultTreeView implements TreeView {
         // on demand.
         tree.addListener(SWT.SetData, new Listener() {
             public void handleEvent(Event event) {
-                TreeItem item = (TreeItem) event.item;
-                TreeItem parentItem = item.getParentItem();
-                
-                int position = parentItem.indexOf(item);
-                HObject obj = ((Group) parentItem.getData()).getMember(position);
-                
-                item.setData(obj);
-                item.setText(obj.getName());
-                item.setImage(getObjectTypeImage(obj));
+                Display.getDefault().syncExec(new Runnable() {
+                    public void run() {
+                        TreeItem item = (TreeItem) event.item;
+                        TreeItem parentItem = item.getParentItem();
                         
-                if(obj instanceof Group) {
-                    item.setItemCount(((Group) obj).getNumberOfMembersInFile());
-                }
+                        int position = parentItem.indexOf(item);
+                        HObject obj = ((Group) parentItem.getData()).getMember(position);
+                        
+                        item.setData(obj);
+                        item.setText(obj.getName());
+                        item.setImage(getObjectTypeImage(obj));
+                                
+                        if(obj instanceof Group) {
+                            item.setItemCount(((Group) obj).getNumberOfMembersInFile());
+                        }
+                    }
+                });
             }
         });
     }
@@ -525,13 +559,13 @@ public class DefaultTreeView implements TreeView {
         changeIndexItem.setText("Change file indexing");
         changeIndexItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                //ChangeIndexingDialog dialog = new ChangeIndexingDialog(shell, SWT.NONE, selectedFile);
-                //dialog.open();
-                //if (dialog.isreloadFile()) {
-                //    selectedFile.setIndexType(dialog.getIndexType());
-                //    selectedFile.setIndexOrder(dialog.getIndexOrder());
-                //    ((HDFView) viewer).reloadFile();
-                //}
+                ChangeIndexingDialog dialog = new ChangeIndexingDialog(shell, SWT.NONE, selectedFile);
+                dialog.open();
+                if (dialog.isreloadFile()) {
+                    selectedFile.setIndexType(dialog.getIndexType());
+                    selectedFile.setIndexOrder(dialog.getIndexOrder());
+                    ((HDFView) viewer).reloadFile();
+                }
             }
         });
         
@@ -549,7 +583,7 @@ public class DefaultTreeView implements TreeView {
                 
                 if (findStr != null && findStr.length() > 0) currentSearchPhrase = findStr;
                 
-                //find(currentSearchPhrase, selectedTreePath, tree);
+                find(currentSearchPhrase, selectedItem);
             }
         });
 
@@ -789,30 +823,31 @@ public class DefaultTreeView implements TreeView {
                 // Adding table is only supported by HDF5
                 if ((selectedFile != null) && selectedFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
                     addDatasetMenuItem.setText("Dataset");
-                    //addTableMenuItem.setVisible(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
-                    //addDatatypeMenuItem.setVisible(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
-                    //addLinkMenuItem.setVisible(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
+                    addTableMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
+                    addDatatypeMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
+                    addLinkMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
+                    
                     boolean state = false;
                     if ((selectedObject instanceof Group)) {
                         state = (((Group) selectedObject).isRoot());
                         //separator.setVisible(isWritable && state);
-                        //setLibVerBoundsItem.setVisible(isWritable && state); 
-                        // added only if it is HDF5format, iswritable & isroot
+                        setLibVerBoundsItem.setEnabled(isWritable && state);
                     }
                     else {
                         // separator.setVisible(false);
-                        //setLibVerBoundsItem.setVisible(false);
+                        setLibVerBoundsItem.setEnabled(false);
                     }
-                    //changeIndexItem.setVisible(state);
+                    
+                    changeIndexItem.setEnabled(state);
                 }
                 else {
-                    addDatasetMenuItem.setText("SDS");
-                    //addTableMenuItem.setVisible(false);
-                    //addDatatypeMenuItem.setVisible(false);
-                    //addLinkMenuItem.setVisible(false);
+                    //addDatasetMenuItem.setText("SDS");
+                    addTableMenuItem.setEnabled(false);
+                    addDatatypeMenuItem.setEnabled(false);
+                    addLinkMenuItem.setEnabled(false);
                     //separator.setVisible(false);
-                    //setLibVerBoundsItem.setVisible(false);
-                    //changeIndexItem.setVisible(false);
+                    setLibVerBoundsItem.setEnabled(false);
+                    changeIndexItem.setEnabled(false);
                 }
             
                 // Export table is only supported by HDF5
@@ -820,14 +855,14 @@ public class DefaultTreeView implements TreeView {
                     if ((selectedObject instanceof Dataset)) {
                         Dataset dataset = (Dataset) selectedObject;
                         if ((dataset instanceof ScalarDS))
-                            exportDatasetMenu.setVisible(true);
+                            exportDatasetMenuItem.setEnabled(true);
                     }
                     else {
-                        exportDatasetMenu.setVisible(false);
+                        exportDatasetMenuItem.setEnabled(false);
                     }
                 }
                 else {
-                    exportDatasetMenu.setVisible(false);
+                    exportDatasetMenuItem.setEnabled(false);
                 }
             }
         });
@@ -1296,11 +1331,23 @@ public class DefaultTreeView implements TreeView {
         if(item == null || !(item.getData() instanceof Group)) return;
         
         TreeItem[] toExpand = item.getItems();
-            
+        
         item.setExpanded(expand);
-            
-        for(int i = 0; i < toExpand.length; i++)
+        
+        // Make sure the TreeItem's icon gets set appropriately by
+        // notifying its Expand or Collapse listener
+        Event event = new Event();
+        event.item = item;
+        tree.notifyListeners(expand ? SWT.Expand : SWT.Collapse, event);
+        
+        // All SetData events for this group must be processed before any
+        // child groups can be expanded, otherwise their data will be
+        // null
+        while(tree.getDisplay().readAndDispatch());
+        
+        for(int i = 0; i < toExpand.length; i++) {
             recursiveExpand(toExpand[i], expand);
+        }
     }
     
     /**
@@ -1520,6 +1567,72 @@ public class DefaultTreeView implements TreeView {
     }
     
     /**
+     * Find first object that is matched by name under the specified
+     * TreeItem.
+     * 
+     * @param objName
+     *            -- the object name.
+     * @return the object if found, otherwise, returns null.
+     */
+    private final HObject find(String objName, TreeItem parentItem) {
+        if (objName == null || objName.length() <= 0 || parentItem == null) return null;
+        
+        HObject retObj = null;
+        boolean isFound = false, isPrefix = false, isSuffix = false, isContain = false;
+
+        if (objName.equals("*")) return null;
+
+        if (objName.startsWith("*")) {
+            isSuffix = true;
+            objName = objName.substring(1, objName.length());
+        }
+
+        if (objName.endsWith("*")) {
+            isPrefix = true;
+            objName = objName.substring(0, objName.length() - 1);
+        }
+
+        if (isPrefix && isSuffix) {
+            isContain = true;
+            isPrefix = isSuffix = false;
+        }
+
+        if (objName == null || objName.length() <= 0) return null;
+
+        HObject obj = null;
+        String theName = null;
+        TreeItem theItem = null;
+        Iterator<TreeItem> it = getItemsBreadthFirst(parentItem).iterator();
+        while (it.hasNext()) {
+            theItem = it.next();
+            obj = (HObject) theItem.getData();
+            if (obj != null && (theName = obj.getName()) != null) {
+                if (isPrefix)
+                    isFound = theName.startsWith(objName);
+                else if (isSuffix)
+                    isFound = theName.endsWith(objName);
+                else if (isContain)
+                    isFound = theName.contains(objName);
+                else
+                    isFound = theName.equals(objName);
+
+                if (isFound) {
+                    retObj = obj;
+                    break;
+                }
+            }
+        }
+
+        if (retObj != null) {
+            tree.deselectAll();
+            tree.setSelection(theItem);
+            tree.showItem(theItem);
+        }
+
+        return retObj;
+    }
+    
+    /**
      * Save the current file into a new HDF4 file. Since HDF4 does not
      * support packing, the source file is copied into the new file with
      * the exact same content.
@@ -1641,7 +1754,7 @@ public class DefaultTreeView implements TreeView {
         
         if (!dialog.isFileCreated()) return;
 
-        int n = getAllItemCount(); // Consider TreeView.getAllItemCount() method
+        int n = getAllItemCount();
         Vector<Object> objList = new Vector<Object>(n);
         TreeItem item = null;
         for (int i = 0; i < n; i++) {
@@ -1705,33 +1818,27 @@ public class DefaultTreeView implements TreeView {
     private void saveDataAsFile() throws Exception {
         if (!(selectedObject instanceof Dataset) || (selectedObject == null) || (selectedItem == null)) return;
         
-        Dataset dataset = (Dataset) selectedObject;
-        FileDialog fChooser = new FileDialog(shell);
-        //fChooser.setFilterPath(dataset.getFile().);
-        
-        //final JFileChooser fchooser = new JFileChooser(dataset.getFile());
-        //fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
-        // fchooser.changeToParentDirectory();
         File chosenFile = null;
+        String filename = null;
+        Dataset dataset = (Dataset) selectedObject;
+        FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+        fChooser.setFilterExtensions(new String[] {"*.txt", "*.bin"});
+        fChooser.setFilterNames(new String[] {"Text File", "Binary File"});
+        fChooser.setFilterPath(dataset.getFile().substring(0, dataset.getFile().lastIndexOf(File.separator)));
         
         if(binaryOrder == 99) {
             fChooser.setText("Save Dataset Data To Text File --- " + dataset.getName());
-            chosenFile = new File(dataset.getName() + ".txt");
+            fChooser.setFileName(dataset.getName() + ".txt");
+            fChooser.setFilterIndex(0);
         }
         else {
             fChooser.setText("Save Current Data To Binary File --- " + dataset.getName());
-            chosenFile = new File(dataset.getName() + ".bin");
+            fChooser.setFileName(dataset.getName() + ".bin");
+            fChooser.setFilterIndex(1);
         }
-
-        //fchooser.setSelectedFile(choosedFile);
-        //int returnVal = fchooser.showSaveDialog(this);
-
-        if (fChooser.open() == null) return;
-
-        //choosedFile = fchooser.getSelectedFile();
-        if (chosenFile == null) return;
         
-        String fname = chosenFile.getAbsolutePath();
+        filename = fChooser.open();
+        if(filename == null) return;
 
         // Check if the file is in use
         List<?> fileList = viewer.getTreeView().getCurrentFiles();
@@ -1740,13 +1847,15 @@ public class DefaultTreeView implements TreeView {
             Iterator<?> iterator = fileList.iterator();
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
-                if (theFile.getFilePath().equals(fname)) {
+                if (theFile.getFilePath().equals(filename)) {
                     shell.getDisplay().beep();
-                    showError("Unable to save data to file \"" + fname + "\". \nThe file is being used.", "Export Dataset");
+                    showError("Unable to save data to file \"" + filename + "\". \nThe file is being used.", "Export Dataset");
                     return;
                 }
             }
         }
+        
+        chosenFile = new File(filename);
 
         if (chosenFile.exists()) {
             MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
@@ -1764,14 +1873,14 @@ public class DefaultTreeView implements TreeView {
         }
 
         try {
-            selectedObject.getFileFormat().exportDataset(fname, dataset.getFile(), dataset.getFullName(), binaryOrder);
+            selectedObject.getFileFormat().exportDataset(filename, dataset.getFile(), dataset.getFullName(), binaryOrder);
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
             showError(ex.getMessage(), null);
         }
 
-        viewer.showStatus("Data saved to: " + fname);
+        viewer.showStatus("Data saved to: " + filename);
     }
     
     private void setLibVersionBounds() {
@@ -1869,7 +1978,7 @@ public class DefaultTreeView implements TreeView {
 
         File tmpFile = new File(filename);
         if (!tmpFile.exists()) {
-            throw new UnsupportedOperationException("File does not exist.");
+            throw new FileNotFoundException("File does not exist.");
         }
 
         if (!tmpFile.canWrite()) {
@@ -1923,7 +2032,7 @@ public class DefaultTreeView implements TreeView {
         
         if (fileFormat == null) throw new java.io.IOException("Unsupported fileformat - " + filename);
 
-        //shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_ARROW));
+        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
         
         try {
             fileFormat.setMaxMembers(ViewProperties.getMaxMembers());
@@ -1944,9 +2053,7 @@ public class DefaultTreeView implements TreeView {
             fileFormat = null;
         }
         finally {
-            //cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_ARROW);
-            //shell.setCursor(cursor);
-            //cursor.dispose();
+            shell.setCursor(null);
         }
 
         if (fileFormat == null) {
@@ -2321,20 +2428,19 @@ public class DefaultTreeView implements TreeView {
             initargs = tmpargs;
         }
 
-        //Cursor cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
-        //shell.setCursor(cursor);
-        //cursor.dispose();
+        Cursor cursor = new Cursor(Display.getDefault(), SWT.CURSOR_WAIT);
         
         try {
+            shell.setCursor(cursor);
+            
             theView = Tools.newInstance(theClass, initargs);
             log.trace("showDataContent: Tools.newInstance");
 
             viewer.addDataView((DataView) theView);
         }
         finally {
-            //cursor = new Cursor(Display.getCurrent(), SWT.CURSOR_ARROW);
-            //shell.setCursor(cursor);
-            //cursor.dispose();
+            cursor.dispose();
+            shell.setCursor(null);
         }
 
         log.trace("showDataContent({}): finish", dataObject.getName());
@@ -2385,10 +2491,159 @@ public class DefaultTreeView implements TreeView {
         return dataView;
     }
     
+    /**
+     * ChangeIndexingDialog displays file index options.
+     */
     private class ChangeIndexingDialog extends Dialog {
+        private static final long serialVersionUID = 1048114401768228742L;
+        
+        Object result;
+        
+        private Button checkIndexType;
+        private Button checkIndexOrder;
+        private Button checkIndexNative;
+        
+        private boolean reloadFile;
+        
+        private FileFormat selectedFile;
+        private int indexType;
+        private int indexOrder;
+        
         private ChangeIndexingDialog(Shell parent, int style, FileFormat viewSelectedFile) {
             super(parent, style);
             
+            selectedFile = viewSelectedFile;
+            indexType = selectedFile.getIndexType(null);
+            indexOrder = selectedFile.getIndexOrder(null);
+            reloadFile = false;
+        }
+        
+        //public void actionPerformed(ActionEvent e) {
+        //    String cmd = e.getActionCommand();
+    
+        //    if (cmd.equals("Reload File")) {
+        //        setIndexOptions();
+        //        setVisible(false);
+        //    }
+        //    else if (cmd.equals("Cancel")) {
+        //        reloadFile = false;
+        //        setVisible(false);
+        //    }
+        //}
+        
+        private void setIndexOptions() {
+            if (checkIndexType.getSelection())
+                selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_NAME"));
+            else
+                selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
+            indexType = selectedFile.getIndexType(null);
+            
+            if (checkIndexOrder.getSelection())
+                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_INC"));
+            else if (checkIndexNative.getSelection())
+                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_NATIVE"));
+            else
+                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_DEC"));
+            indexOrder = selectedFile.getIndexOrder(null);
+            
+            reloadFile = true;
+        }
+    
+        public int getIndexType() {
+            return indexType;
+        }
+    
+        public int getIndexOrder() {
+            return indexOrder;
+        }
+    
+        public boolean isreloadFile() {
+            return reloadFile;
+        }
+        
+        public void open() {
+            Shell parent = getParent();
+            final Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+            shell.setText("Indexing options");
+            
+            // Creation code
+            /*
+            Shell contentPane = getParent();
+            contentPane.setLayout(new BorderLayout(8, 8));
+            contentPane.setBorder(BorderFactory.createEmptyBorder(15, 5, 5, 5));
+    
+            JPanel indexP = new JPanel();
+            TitledBorder tborder = new TitledBorder("Index Options");
+            tborder.setTitleColor(Color.darkGray);
+            indexP.setBorder(tborder);
+            indexP.setLayout(new GridLayout(2, 1, 10, 10));
+            indexP.setBorder(new SoftBevelBorder(BevelBorder.LOWERED));
+            contentPane.add(indexP);
+    
+            JPanel pType = new JPanel();
+            tborder = new TitledBorder("Indexing Type");
+            tborder.setTitleColor(Color.darkGray);
+            pType.setBorder(tborder);
+            pType.setLayout(new GridLayout(1, 2, 8, 8));
+            //checkIndexType = new JRadioButton("By Name", (indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
+            //checkIndexType.setName("Index by Name");
+            //pType.add(checkIndexType);
+            //JRadioButton checkIndexCreateOrder = new JRadioButton("By Creation Order", (indexType) == selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
+            //checkIndexCreateOrder.setName("Index by Creation Order");
+            //pType.add(checkIndexCreateOrder);
+            ButtonGroup bTypegrp = new ButtonGroup();
+            //bTypegrp.add(checkIndexType);
+            //bTypegrp.add(checkIndexCreateOrder);
+            indexP.add(pType);
+    
+            JPanel pOrder = new JPanel();
+            tborder = new TitledBorder("Indexing Order");
+            tborder.setTitleColor(Color.darkGray);
+            pOrder.setBorder(tborder);
+            pOrder.setLayout(new GridLayout(1, 3, 8, 8));
+            //checkIndexOrder = new JRadioButton("Increments", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
+            //checkIndexOrder.setName("Index Increments");
+            //pOrder.add(checkIndexOrder);
+            //JRadioButton checkIndexDecrement = new JRadioButton("Decrements", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_DEC"));
+            //checkIndexDecrement.setName("Index Decrements");
+            //pOrder.add(checkIndexDecrement);
+            //checkIndexNative = new JRadioButton("Native", (indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
+            //checkIndexNative.setName("Index Native");
+            //pOrder.add(checkIndexNative);
+            ButtonGroup bOrdergrp = new ButtonGroup();
+            //bOrdergrp.add(checkIndexOrder);
+            //bOrdergrp.add(checkIndexDecrement);
+            //bOrdergrp.add(checkIndexNative);
+            indexP.add(pOrder);
+    
+            JPanel buttonP = new JPanel();
+            //JButton b = new JButton("Reload File");
+            //b.setName("Reload File");
+            //b.setActionCommand("Reload File");
+            //b.addActionListener(this);
+            //buttonP.add(b);
+            //b = new JButton("Cancel");
+            //b.setName("Cancel");
+            //b.setActionCommand("Cancel");
+            //b.addActionListener(this);
+            //buttonP.add(b);
+    
+            contentPane.add("Center", indexP);
+            contentPane.add("South", buttonP);
+            */
+            
+            shell.pack();
+            
+            Rectangle parentBounds = parent.getBounds();
+            Point shellSize = shell.getSize();
+            shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+            
+            shell.open();
+            Display display = parent.getDisplay();
+            while (!shell.isDisposed()) {
+                if (!display.readAndDispatch()) display.sleep();
+            }
         }
     }
 }

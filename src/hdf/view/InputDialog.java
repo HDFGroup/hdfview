@@ -15,6 +15,8 @@
 package hdf.view;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -132,6 +134,12 @@ public class InputDialog extends Dialog {
         });
         
         shell.pack();
+        
+        Rectangle parentBounds = parent.getBounds();
+        Point shellSize = shell.getSize();
+        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+        
         shell.open();
         
         Display display = parent.getDisplay();

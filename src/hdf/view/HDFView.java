@@ -1531,51 +1531,63 @@ public class HDFView implements ViewManager, DropTargetListener {
     	int accessMode = fileAccessID;
     	if (ViewProperties.isReadOnly()) accessMode = FileFormat.READ;
     	
+    	String[] selectedFilenames = null;
+    	File[] chosenFiles = null;
+    	
     	if (filename != null) {
     		File file = new File(filename);
-    		if (file == null) return;
+    		if(!file.exists()) {
+    		    showError("File " + filename + " does not exist.", "Open File");
+    		    return;
+    		}
     		
     		currentFile = filename;
     	} else {
-    		FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN);
-    		//fChooser.setFilterExtensions();
-    	
-    		filename = fChooser.open();
-    		if(filename == null) return;
+    		FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
+    		fChooser.setFilterExtensions(new String[] {"*.*", "*.h4;*.h5;*.hdf;*.hdf4;*.hdf5;*.he2;*.he5"});
+    		fChooser.setFilterNames(new String[] {"All Files", "HDF File"});
+    		fChooser.setFilterIndex(0);
+    		fChooser.setFilterPath(null);
+    		fChooser.open();
     		
-    		File chosenFile = new File(filename);
-    		if (chosenFile == null) return;
-    	
-    		if (chosenFile.isDirectory()) {
-    			currentDir = chosenFile.getPath();
-    		} else {
-    			currentDir = chosenFile.getParent();
+    		selectedFilenames = fChooser.getFileNames();
+    		if(selectedFilenames.length <= 0) return;
+    		
+    		chosenFiles = new File[selectedFilenames.length];
+    		for(int i = 0; i < chosenFiles.length; i++) {
+    		    chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
+    		    
+    		    if (chosenFiles[i].isDirectory()) {
+                    currentDir = chosenFiles[i].getPath();
+                } else {
+                    currentDir = chosenFiles[i].getParent();
+                }
+    		    
+    		    try {
+    		        url_bar.remove(chosenFiles[i].getAbsolutePath());
+    	            url_bar.add(chosenFiles[i].getAbsolutePath(), 0);
+    	            url_bar.select(0);
+    		    }
+    		    catch (Exception ex) {
+    		    }
+    		    
+    		    try {
+    		        treeView.openFile(chosenFiles[i].getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
+    		    }
+    		    catch (Throwable ex) {
+    		        try {
+    	                treeView.openFile(chosenFiles[i].getAbsolutePath(), FileFormat.READ);
+    	            }
+    	            catch (Throwable ex2) {
+    	                display.beep();
+    	                url_bar.deselectAll();
+    	                showError("Failed to open file " + selectedFilenames[i] + "\n" + ex2, mainWindow.getText());
+    	                currentFile = null;
+    	            }
+    		    }
     		}
     		
-    		currentFile = chosenFile.getAbsolutePath();
-    	}
-    		
-    	try {
-    		url_bar.remove(currentFile);
-    		url_bar.add(currentFile, 0);
-    		url_bar.select(0);
-    	}
-    	catch (Exception ex) {
-    	}
-    	
-    	try {
-    		treeView.openFile(currentFile, accessMode + FileFormat.OPEN_NEW);
-    	}
-    	catch (Throwable ex) {
-    		try {
-    			treeView.openFile(currentFile, FileFormat.READ);
-    		}
-    		catch (Throwable ex2) {
-    			display.beep();
-    			url_bar.deselectAll();
-    			showError("Failed to open file " + currentFile + "\n" + ex2, mainWindow.getText());
-    			currentFile = null;
-    		}
+    		currentFile = chosenFiles[0].getAbsolutePath();
     	}
     }
     
