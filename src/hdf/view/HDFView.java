@@ -1985,7 +1985,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		display.syncExec(new Runnable() {
 			public void run() {
-				HDFView frame = new HDFView(the_rootDir, the_fList, the_W, the_H, the_X, the_Y);
+				new HDFView(the_rootDir, the_fList, the_W, the_H, the_X, the_Y);
 			}
 		});
 	}

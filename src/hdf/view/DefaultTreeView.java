@@ -132,6 +132,7 @@ public class DefaultTreeView implements TreeView {
 
     private MenuItem                      separator;
     private MenuItem                      addDatasetMenuItem;
+    private MenuItem                      exportDatasetMenuItem;
     private MenuItem                      addTableMenuItem;
     private MenuItem                      addDatatypeMenuItem;
     private MenuItem                      addLinkMenuItem;
@@ -314,6 +315,8 @@ public class DefaultTreeView implements TreeView {
                     //tree.deselectAll();
                     //tree.setSelection(selPath);
                 }
+                
+                ((HDFView) viewer).showMetaData(selectedObject);
             }
         });
         
@@ -368,23 +371,19 @@ public class DefaultTreeView implements TreeView {
         // on demand.
         tree.addListener(SWT.SetData, new Listener() {
             public void handleEvent(Event event) {
-                Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
-                        TreeItem item = (TreeItem) event.item;
-                        TreeItem parentItem = item.getParentItem();
-                        
-                        int position = parentItem.indexOf(item);
-                        HObject obj = ((Group) parentItem.getData()).getMember(position);
-                        
-                        item.setData(obj);
-                        item.setText(obj.getName());
-                        item.setImage(getObjectTypeImage(obj));
-                                
-                        if(obj instanceof Group) {
-                            item.setItemCount(((Group) obj).getNumberOfMembersInFile());
-                        }
-                    }
-                });
+                TreeItem item = (TreeItem) event.item;
+                TreeItem parentItem = item.getParentItem();
+                
+                int position = parentItem.indexOf(item);
+                HObject obj = ((Group) parentItem.getData()).getMember(position);
+                
+                item.setData(obj);
+                item.setText(obj.getName());
+                item.setImage(getObjectTypeImage(obj));
+                
+                if(obj instanceof Group) {
+                    item.setItemCount(((Group) obj).getMemberList().size());
+                }
             }
         });
     }
@@ -470,7 +469,7 @@ public class DefaultTreeView implements TreeView {
         });
         editGUIs.add(item);
 
-        MenuItem exportDatasetMenuItem = new MenuItem(menu, SWT.CASCADE);
+        exportDatasetMenuItem = new MenuItem(menu, SWT.CASCADE);
         exportDatasetMenuItem.setText("Export Dataset");
         
         new MenuItem(menu, SWT.SEPARATOR);
@@ -1306,7 +1305,7 @@ public class DefaultTreeView implements TreeView {
                 // Tell SWT how many members this group has so they can
                 // be populated when the group is expanded
                 if(obj instanceof Group)
-                    newItem.setItemCount(((Group) obj).getNumberOfMembersInFile());
+                    newItem.setItemCount(((Group) obj).getMemberList().size());
             }
         }
         catch (Exception ex) {
@@ -1328,7 +1327,9 @@ public class DefaultTreeView implements TreeView {
      *            Collapse the TreeItem and its children if false.
      */
     private void recursiveExpand(TreeItem item, boolean expand) {
-        if(item == null || !(item.getData() instanceof Group)) return;
+    	if(item == null || !(item.getData() instanceof Group)) {
+    		return;
+    	}
         
         TreeItem[] toExpand = item.getItems();
         

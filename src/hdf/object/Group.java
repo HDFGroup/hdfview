@@ -264,6 +264,8 @@ public abstract class Group extends HObject {
      * @return The HObject at the specified index.
      */
     public HObject getMember(int idx) {
-        return memberList.get(idx);
+    	if(memberList.size() <= 0 || idx >= memberList.size()) return null;
+    	
+    	return memberList.get(idx);
     }
 }
