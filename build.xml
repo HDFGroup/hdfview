@@ -90,8 +90,7 @@
   </path>
   <path id="swt-classpath">
     <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
-    <fileset file="${lib.dir}/ext/swt/swing2swt.jar" />
-  	<fileset file="${lib.dir}/ext/swt/org.eclipse.nebula.widgets.nattable.core_1.3.0.201503261201.jar"/>
+    <fileset dir="${lib.dir}/ext/swt" includes="*.jar"/>
   </path>
   <path id="jni-classpath">
     <fileset dir="${hdf.lib.dir}" includes="jarhdf*.jar slf4j-api*.jar" />

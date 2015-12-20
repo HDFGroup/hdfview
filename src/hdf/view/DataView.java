@@ -37,8 +37,4 @@ public abstract interface DataView {
 
     /** Returns the data object displayed in this data viewer */
     public abstract HObject getDataObject();
-
-    /** Disposes this data viewer */
-    public abstract void dispose();
-
 }

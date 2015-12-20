@@ -941,11 +941,11 @@ public final class Tools {
     public static Object newInstance(Class<?> cls, Object[] initargs) throws Exception {
         log.trace("newInstance(Class = {}): start", cls);
         
-        Object instance = null;
-
         if (cls == null) {
             return null;
         }
+        
+        Object instance = null;
 
         if ((initargs == null) || (initargs.length == 0)) {
             instance = cls.newInstance();
@@ -972,7 +972,12 @@ public final class Tools {
                     }
 
                     if (isConstructorMatched) {
-                        instance = constructor.newInstance(initargs);
+                    	try {
+                            instance = constructor.newInstance(initargs);
+                    	} catch (Exception ex) {
+                    		log.debug("Error creating instance of {}: {}", cls, ex.getMessage());
+                    		ex.printStackTrace();
+                    	}
                         break;
                     }
                 }

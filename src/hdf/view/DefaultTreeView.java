@@ -404,7 +404,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
-                    showError(err.getMessage(), null);
+                    showError(err.getMessage(), shell.getText());
                     return;
                 }
             }
@@ -421,7 +421,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
-                    showError(err.getMessage(), null);
+                    showError(err.getMessage(), shell.getText());
                     return;
                 }
             }
@@ -482,7 +482,7 @@ public class DefaultTreeView implements TreeView {
                 
                 if ((selectedObject instanceof Group) && ((Group) selectedObject).isRoot()) {
                     shell.getDisplay().beep();
-                    showError("Cannot save the root group.\nUse \"Save As\" from file menu to save the whole file", null);
+                    showError("Cannot save the root group.\nUse \"Save As\" from file menu to save the whole file", shell.getText());
                     return;
                 }
                 
@@ -502,7 +502,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage() + "\n" + filename, null);
+                    showError(ex.getMessage() + "\n" + filename, shell.getText());
                 }
                 
                 List<TreeItem> objList = new Vector<TreeItem>(2);
@@ -626,7 +626,7 @@ public class DefaultTreeView implements TreeView {
                     closeFile(getSelectedFile());
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), null);
+                    showError(ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -2372,7 +2372,7 @@ public class DefaultTreeView implements TreeView {
         }
         
         Object theView = null;
-        Object[] initargs = { viewer };
+        Object[] initargs = { shell, viewer };
         HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<DATA_VIEW_KEY, Serializable>(8);
         map.put(ViewProperties.DATA_VIEW_KEY.INDEXBASE1, new Boolean(isIndexBase1));
         if (bitmask != null) {
@@ -2420,12 +2420,12 @@ public class DefaultTreeView implements TreeView {
         if (dataViewName.startsWith("hdf.view.DefaultTableView")) {
             map.put(ViewProperties.DATA_VIEW_KEY.CHAR, new Boolean(isDisplayTypeChar));
             map.put(ViewProperties.DATA_VIEW_KEY.TRANSPOSED, new Boolean(isTransposed));
-            Object[] tmpargs = { viewer, map };
+            Object[] tmpargs = { shell, viewer, map };
             initargs = tmpargs;
         }
         else if (dataViewName.startsWith("hdf.view.DefaultImageView")) {
             map.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, new Boolean((bitmask != null)));
-            Object[] tmpargs = { viewer, map };
+            Object[] tmpargs = { shell, viewer, map };
             initargs = tmpargs;
         }
 

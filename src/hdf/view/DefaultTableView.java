@@ -50,12 +50,26 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
+import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
+import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
+import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
+import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
+import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
+import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 
 import hdf.object.CompoundDS;
@@ -75,7 +89,7 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class DefaultTableView extends Shell implements TableView {
+public class DefaultTableView implements TableView {
     private static final long serialVersionUID      = -7452459299532863847L;
 
     private final static org.slf4j.Logger log       = org.slf4j.LoggerFactory.getLogger(DefaultTableView.class);
@@ -90,6 +104,13 @@ public class DefaultTableView extends Shell implements TableView {
     
     // The Dataset (Scalar or Compound) to be displayed in the Table
     private Dataset dataset;
+    
+    /**
+     * The value of the dataset.
+     */
+    private Object                        	dataValue;
+    
+    private Object           				fillValue               = null;
 
     private enum ViewType { TABLE, IMAGE, TEXT };
     private	ViewType viewType = ViewType.TABLE;
@@ -156,13 +177,20 @@ public class DefaultTableView extends Shell implements TableView {
     // Popup Menu for region references
     private Menu                            popupMenu = null;
     
-    private final Button                    checkFixedDataLength;
-    private final Button                    checkCustomNotation;
-    private final Button                    checkScientificNotation;
-    private final Button                    checkHex;
-    private final Button                    checkBin;
+    private MenuItem                        checkFixedDataLength = null;
+    private MenuItem                        checkCustomNotation = null;
+    private MenuItem                        checkScientificNotation = null;
+    private MenuItem                        checkHex = null;
+    private MenuItem                        checkBin = null;
+    
+    // Text field to display the value of the current cell.
+    private Text                          	cellValueField;
+    
+    // Label to indicate the current cell location.
+    private Label                         	cellLabel;
 
-
+    // The value of the current cell value in editing.
+    private Object           				currentEditingCellValue = null;
 
     /**
      * Constructs a TableView.
@@ -171,8 +199,8 @@ public class DefaultTableView extends Shell implements TableView {
      * @param theView
      * 			the main HDFView.
      */
-    public DefaultTableView(ViewManager theView) {
-        this(theView, null);
+    public DefaultTableView(Shell parent, ViewManager theView) {
+        this(parent, theView, null);
     }
 
     /**
@@ -188,24 +216,14 @@ public class DefaultTableView extends Shell implements TableView {
      *          data as character, applying bitmask, and etc. Predefined keys are listed at
      *          ViewProperties.DATA_VIEW_KEY.
      */
-    public DefaultTableView(ViewManager theView, HashMap map) {
+    public DefaultTableView(Shell parent, ViewManager theView, HashMap map) {
         log.trace("DefaultTableView start");
 
-        shell = new Shell(display);
+        shell = new Shell(parent, SWT.FLAT);
+        shell.setLayout(new FillLayout());
         
         viewer = theView;
         HObject hObject = null;
-        
-        checkFixedDataLength = new Button(shell, SWT.CHECK);
-        checkFixedDataLength.setText("Fixed Data Length");
-        checkCustomNotation = new Button(shell, SWT.CHECK);
-        checkCustomNotation.setText("Show Custom Notation");
-        checkScientificNotation = new Button(shell, SWT.CHECK);
-        checkScientificNotation.setText("Show Scientific Notation");
-        checkHex = new Button(shell, SWT.CHECK);
-        checkHex.setText("Show Hexadecimal");
-        checkBin = new Button(shell, SWT.CHECK);
-        checkBin.setText("Show Binary");
         
         if (ViewProperties.isIndexBase1()) indexBase = 1;
         log.trace("Index base is {}", indexBase);
@@ -279,20 +297,36 @@ public class DefaultTableView extends Shell implements TableView {
         //TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.lightGray, 1), indexBase + "-based",
         //        TitledBorder.RIGHT, TitledBorder.TOP, this.getFont(), Color.black);
         //((JPanel) getContentPane()).setBorder(border);
-
+        
+        SashForm content = new SashForm(shell, SWT.VERTICAL);
+        content.setSashWidth(10);
+        
+        Composite cellValueComposite = new Composite(content, SWT.NONE);
+        cellValueComposite.setLayout(new RowLayout());
+        
+        cellLabel = new Label(cellValueComposite, SWT.BORDER);
+        cellLabel.setSize(75, cellLabel.getSize().y);
+        cellLabel.setAlignment(SWT.RIGHT);
+        
+        cellValueField = new Text(cellValueComposite, SWT.SINGLE | SWT.BORDER | SWT.WRAP);
+        //cellValueField.setWrapStyleWord(true);
+        cellValueField.setEditable(false);
+        cellValueField.setBackground(new Color(display, 255, 255, 240));
+        cellValueField.setEnabled(false);
+        
         // Create the NatTable
         if (dataset instanceof CompoundDS) {
             log.trace("createTable((CompoundDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
             
             isDataTransposed = false; // Disable transpose for compound dataset
             //shell.setImage(ViewProperties.getTableIcon());
-            table = createTable((CompoundDS) dataset);
+            table = createTable(content, (CompoundDS) dataset);
         }
         else { /* if (dataset instanceof ScalarDS) */
             log.trace("createTable((ScalarDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
             
             //shell.setImage(ViewProperties.getDatasetIcon());
-            table = createTable((ScalarDS) dataset);
+            table = createTable(content, (ScalarDS) dataset);
 
             if (dtype.getDatatypeClass() == Datatype.CLASS_REFERENCE) {
                 //table.addMouseListener(this);
@@ -315,20 +349,14 @@ public class DefaultTableView extends Shell implements TableView {
             }
             log.trace("createTable((ScalarDS) dataset): isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
         }
+        content.setWeights(new int[] {1, 19});
 
         if (table == null) {
             viewer.showStatus("Creating table failed - " + dataset.getName());
             dataset = null;
-            this.dispose();
+            shell.dispose();
             return;
         }
-
-        // Add the table to a scroller
-        //ScrolledComposite scrollingTable = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
-        //scrollingTable.setContent(table);
-        //scrollingTable.getVerticalBar().setIncrement(100);
-        //scrollingTable.getHorizontalBar().setIncrement(100);
-        
         
         StringBuffer sb = new StringBuffer(hObject.getName());
         sb.append("  at  ");
@@ -402,17 +430,166 @@ public class DefaultTableView extends Shell implements TableView {
      *          The Scalar dataset for the NatTable to display
      * @return The newly created NatTable
      */
-    private NatTable createTable(ScalarDS dataset) {
-        NatTable theTable = null;
-        int rows = 0;
+    private NatTable createTable(Composite parent, ScalarDS dataset) {
+    	int rows = 0;
         int cols = 0;
-        
+    	
         log.trace("createTable(ScalarDS): start");
         
         int rank = dataset.getRank();
+        if (rank <= 0) {
+            try {
+                dataset.init();
+                log.trace("createTable: dataset inited");
+            }
+            catch (Exception ex) {
+            	showError(ex.getMessage(), "createTable:" + shell.getText());
+            	dataValue = null;
+                return null;
+            }
+
+            rank = dataset.getRank();
+        }
+        long[] dims = dataset.getSelectedDims();
         
+        if (rank > 1) {
+            rows = dataset.getHeight();
+            cols = dataset.getWidth();
+        } else {
+        	rows = (int) dims[0];
+            cols = 1;
+        }
         
-        return null; // Remove when implemented
+        log.trace("createTable: rows={} : cols={}", rows, cols);
+        
+        dataValue = null;
+        try {
+            dataValue = dataset.getData();
+            if (dataValue == null) {
+            	showError("No data read", "ScalarDS createTable:" + shell.getText());
+                return null;
+            }
+
+            log.trace("createTable: dataValue={}", dataValue);
+            
+            if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
+                isReadOnly = true;
+                String opName = "Bits ";
+
+                if (bitmaskOP == ViewProperties.BITMASK_OP.AND) opName = "Bitwise AND ";
+
+                //JPanel contentpane = (JPanel) getContentPane();
+                //Border border = contentpane.getBorder();
+                
+               // String btitle = ((TitledBorder) border).getTitle();
+               //btitle += ", " + opName + bitmask;
+               //((TitledBorder) border).setTitle(btitle);
+            }
+
+            dataset.convertFromUnsignedC();
+            dataValue = dataset.getData();
+
+            if (Array.getLength(dataValue) <= rows) cols = 1;
+        }
+        catch (Throwable ex) {
+        	showError(ex.getMessage(), "ScalarDS createTable:" + shell.getText());
+            dataValue = null;
+        }
+        
+        if (dataValue == null) {
+            return null;
+        }
+
+        fillValue = dataset.getFillValue();
+        log.trace("createTable: fillValue={}", fillValue);
+        
+        String cName = dataValue.getClass().getName();
+        int cIndex = cName.lastIndexOf("[");
+        if (cIndex >= 0) {
+            NT = cName.charAt(cIndex + 1);
+        }
+        log.trace("createTable: cName={} NT={}", cName, NT);
+        
+        // convert numerical data into char
+        // only possible cases are byte[] and short[] (converted from unsigned
+        // byte)
+        if (isDisplayTypeChar && ((NT == 'B') || (NT == 'S'))) {
+            int n = Array.getLength(dataValue);
+            char[] charData = new char[n];
+            for (int i = 0; i < n; i++) {
+                if (NT == 'B') {
+                    charData[i] = (char) Array.getByte(dataValue, i);
+                }
+                else if (NT == 'S') {
+                    charData[i] = (char) Array.getShort(dataValue, i);
+                }
+            }
+
+            dataValue = charData;
+        }
+        else if ((NT == 'B') && dataset.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
+            Datatype baseType = dataset.getDatatype().getBasetype();
+            if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
+                dataValue = Dataset.byteToString((byte[]) dataValue, baseType.getDatatypeSize());
+            }
+        }
+        
+        final String columnNames[] = new String[cols];
+        final int rowCount = rows;
+        final int colCount = cols;
+        final long[] startArray = dataset.getStartDims();
+        final long[] strideArray = dataset.getStride();
+        int[] selectedIndex = dataset.getSelectedIndex();
+        final int rowStart = (int) startArray[selectedIndex[0]];
+        final int rowStride = (int) strideArray[selectedIndex[0]];
+        int start = 0;
+        int stride = 1;
+
+        if (rank > 1) {
+            start = (int) startArray[selectedIndex[1]];
+            stride = (int) strideArray[selectedIndex[1]];
+
+            for (int i = 0; i < cols; i++) {
+                columnNames[i] = String.valueOf(start + indexBase + i * stride);
+            }
+        }
+        else {
+            columnNames[0] = "  ";
+        }
+        
+        // Create body layer
+        IDataProvider bodyDataProvider = new ScalarDSDataProvider();
+        final DataLayer dataLayer = new DataLayer(bodyDataProvider);
+        final SelectionLayer selectionLayer = new SelectionLayer(dataLayer);
+        ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
+        dataLayer.setDefaultColumnWidth(80);
+        
+        // Create the Column Header layer
+        IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnNames);
+        ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
+                columnHeaderDataProvider), viewportLayer, selectionLayer);
+        
+        // Create the Row Header layer
+        IDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(
+                bodyDataProvider);
+        ILayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
+                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer);
+
+        // Create the Corner layer
+        ILayer cornerLayer = new CornerLayer(new DataLayer(
+                new DefaultCornerDataProvider(columnHeaderDataProvider,
+                        rowHeaderDataProvider)), rowHeaderLayer,
+                columnHeaderLayer);
+        
+        // Create the Grid layer
+        GridLayer gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
+                rowHeaderLayer, cornerLayer);
+        
+        final NatTable natTable = new NatTable(parent, gridLayer);
+        
+        log.trace("createTable(ScalarDS): finish");
+        
+        return natTable;
     }
     
     /**
@@ -421,7 +598,7 @@ public class DefaultTableView extends Shell implements TableView {
      *          The Compound dataset for the NatTable to display
      * @return The newly created NatTable
      */
-    private NatTable createTable(CompoundDS dataset) {
+    private NatTable createTable(Composite parent, CompoundDS dataset) {
         
         return null; // Remove when implemented
     }
@@ -515,7 +692,7 @@ public class DefaultTableView extends Shell implements TableView {
         });
 
         new MenuItem(menu, SWT.SEPARATOR);
-
+        
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Import Data from Text File");
         item.setEnabled(isEditable);
@@ -548,45 +725,6 @@ public class DefaultTableView extends Shell implements TableView {
 
         Menu importFromBinaryMenu = new Menu(menu);
         item.setMenu(importFromBinaryMenu);
-
-        //item = checkFixedDataLength;
-        //if (dataset instanceof ScalarDS) {
-        //    menu.add(item);
-        //}
-        //item.addSelectionListener(new SelectionAdapter() {
-        //  public void widgetSelected(SelectionEvent e) {
-        //      if (!checkFixedDataLength.isSelected()) {
-        //            fixedDataLength = -1;
-        //            this.updateUI();
-        //            return;
-        //        }
-        //
-        //        String str = JOptionPane
-        //                .showInputDialog(
-        //                        this,
-        //                        "Enter fixed data length when importing text data\n\n"
-        //                                + "For example, for a text string of \"12345678\"\n\t\tenter 2, the data will be 12, 34, 56, 78\n\t\tenter 4, the data will be 1234, 5678\n",
-        //                        "");
-        //
-        //        if ((str == null) || (str.length() < 1)) {
-        //            checkFixedDataLength.setSelected(false);
-        //            return;
-        //        }
-        //
-        //        try {
-        //            fixedDataLength = Integer.parseInt(str);
-        //        }
-        //        catch (Exception ex) {
-        //            fixedDataLength = -1;
-        //        }
-        //
-        //        if (fixedDataLength < 1) {
-        //            checkFixedDataLength.setSelected(false);
-        //            return;
-        //        }
-        //  }
-        //});
-
 
         //if ((dataset instanceof ScalarDS)) {
         //    menu.add(importFromBinaryMenu);
@@ -636,6 +774,43 @@ public class DefaultTableView extends Shell implements TableView {
                 }
             }
         });
+        
+        if(dataset instanceof ScalarDS) {
+        	checkFixedDataLength = new MenuItem(menu, SWT.CHECK);
+            checkFixedDataLength.setText("Fixed Data Length");
+            checkFixedDataLength.addSelectionListener(new SelectionAdapter() {
+            	public void widgetSelected(SelectionEvent e) {
+            		if (!checkFixedDataLength.getSelection()) {
+            	        fixedDataLength = -1;
+            	        //this.updateUI();
+            	        return;
+            	    }
+            	    
+            	    String str = new InputDialog(shell, "", 
+            	    		"Enter fixed data length when importing text data\n\n"
+                            + "For example, for a text string of \"12345678\"\n\t\tenter 2,"
+                            + "the data will be 12, 34, 56, 78\n\t\tenter 4, the data will be"
+                            + "1234, 5678\n").open();
+            	    
+            	    if ((str == null) || (str.length() < 1)) {
+            	        checkFixedDataLength.setSelection(false);
+            	        return;
+            	    }
+            	    
+            	    try {
+            	        fixedDataLength = Integer.parseInt(str);
+            	    }
+            	    catch (Exception ex) {
+            	        fixedDataLength = -1;
+            	    }
+            	    
+            	    if (fixedDataLength < 1) {
+            	        checkFixedDataLength.setSelection(false);
+            	        return;
+            	    }
+            	}
+            });
+        }
 
         new MenuItem(menu, SWT.SEPARATOR);
 
@@ -813,46 +988,44 @@ public class DefaultTableView extends Shell implements TableView {
         });
 
         new MenuItem(menu, SWT.SEPARATOR);
-
-        //item = checkScientificNotation;
-        //if (dataset instanceof ScalarDS) {
-        //    menu.add(item);
-        //}
-        //item.addSelectionListener(new SelectionAdapter() {
-        //  public void widgetSelected(SelectionEvent e) {
-        //      if (checkScientificNotation.isSelected()) {
-        //            checkCustomNotation.setSelected(false);
-        //            numberFormat = scientificFormat;
-        //            checkHex.setSelected(false);
-        //            checkBin.setSelected(false);
-        //            showAsHex = false;
-        //            showAsBin = false;
-        //        }
-        //        else
-        //            numberFormat = normalFormat;
-        //        this.updateUI();
-        //  }
-        //});
-
-        //item = checkCustomNotation;
-        //if (dataset instanceof ScalarDS) {
-        //    menu.add(item);
-        //}
-        //item.addSelectionListener(new SelectionAdapter() {
-        //  public void widgetSelected(SelectionEvent e) {
-        //      if (checkCustomNotation.isSelected()) {
-        //            numberFormat = customFormat;
-        //            checkScientificNotation.setSelected(false);
-        //            checkHex.setSelected(false);
-        //            checkBin.setSelected(false);
-        //            showAsHex = false;
-        //            showAsBin = false;
-        //        }
-        //        else
-        //            numberFormat = normalFormat;
-        //        this.updateUI();
-        //  }
-        //});
+        
+        if(dataset instanceof ScalarDS) {
+        	checkScientificNotation = new MenuItem(menu, SWT.CHECK);
+            checkScientificNotation.setText("Show Scientific Notation");
+            checkScientificNotation.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    if (checkScientificNotation.getSelection()) {
+                        checkCustomNotation.setSelection(false);
+                        numberFormat = scientificFormat;
+                        checkHex.setSelection(false);
+                        checkBin.setSelection(false);
+                        showAsHex = false;
+                        showAsBin = false;
+                    }
+                    else
+                        numberFormat = normalFormat;
+                    //this.updateUI();  //redraw menu
+                }
+            });
+            
+            checkCustomNotation = new MenuItem(menu, SWT.CHECK);
+            checkCustomNotation.setText("Show Custom Notation");
+            checkCustomNotation.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    if (checkCustomNotation.getSelection()) {
+                        numberFormat = customFormat;
+                        checkScientificNotation.setSelection(false);
+                        checkHex.setSelection(false);
+                        checkBin.setSelection(false);
+                        showAsHex = false;
+                        showAsBin = false;
+                    }
+                    else
+                        numberFormat = normalFormat;
+                    //this.updateUI(); // redraw menu
+                }
+            });
+        }
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Create custom notation");
@@ -878,43 +1051,42 @@ public class DefaultTableView extends Shell implements TableView {
         });
 
         boolean isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
+        
+        if ((dataset instanceof ScalarDS) && isInt) {
+            checkHex = new MenuItem(menu, SWT.CHECK);
+            checkHex.setText("Show Hexadecimal");
+            checkHex.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    showAsHex = checkHex.getSelection();
+                    if (showAsHex) {
+                        checkScientificNotation.setSelection(false);
+                        checkCustomNotation.setSelection(false);
+                        checkBin.setSelection(false);
+                        showAsBin = false;
+                        numberFormat = normalFormat;
+                    }
+                    //this.updateUI();
+                }
+            });
+            
+            checkBin = new MenuItem(menu, SWT.CHECK);
+            checkBin.setText("Show Binary");
+            checkBin.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    showAsBin = checkBin.getSelection();
+                    if (showAsBin) {
+                        checkScientificNotation.setSelection(false);
+                        checkCustomNotation.setSelection(false);
+                        checkHex.setSelection(false);
+                        showAsHex = false;
+                        numberFormat = normalFormat;
+                    }
+                    //this.updateUI();
+                }
+            });
 
-        //item = checkHex;
-        //if ((dataset instanceof ScalarDS) && isInt) {
-        //    menu.add(item);
-        //}
-        //item.addSelectionListener(new SelectionAdapter() {
-        //  public void widgetSelected(SelectionEvent e) {
-        //      showAsHex = checkHex.isSelected();
-        //        if (showAsHex) {
-        //            checkScientificNotation.setSelected(false);
-        //            checkCustomNotation.setSelected(false);
-        //            checkBin.setSelected(false);
-        //            showAsBin = false;
-        //            numberFormat = normalFormat;
-        //        }
-        //        this.updateUI();
-        //  }
-        //});
-
-        //item = checkBin;
-        //if ((dataset instanceof ScalarDS) && isInt) {
-        //    menu.add(item);
-        //}
-        //item.addSelectionListener(new SelectionAdapter() {
-        //  public void widgetSelected(SelectionEvent e) {
-        //      showAsBin = checkBin.isSelected();
-        //        if (showAsBin) {
-        //            checkScientificNotation.setSelected(false);
-        //            checkCustomNotation.setSelected(false);
-        //            checkHex.setSelected(false);
-        //            showAsHex = false;
-        //            numberFormat = normalFormat;
-        //        }
-        //        this.updateUI();
-        //  }
-        //});
-
+        }
+        
         new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.PUSH);
@@ -941,7 +1113,7 @@ public class DefaultTableView extends Shell implements TableView {
                         sds.clearData();
                     }
 
-                    //dataValue = null;
+                    dataValue = null;
                     table = null;
                 }
 
@@ -1258,15 +1430,15 @@ public class DefaultTableView extends Shell implements TableView {
         //setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         try {
-            //dataValue = dataset.getData();
+            dataValue = dataset.getData();
             if (dataset instanceof ScalarDS) {
                 ((ScalarDS) dataset).convertFromUnsignedC();
-                //dataValue = dataset.getData();
+                dataValue = dataset.getData();
             }
         }
         catch (Exception ex) {
             //setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            //dataValue = null;
+            dataValue = null;
             showError(ex.getMessage(), shell.getText());
             return;
         }
@@ -1275,7 +1447,7 @@ public class DefaultTableView extends Shell implements TableView {
 
         frameField.setText(String.valueOf(curFrame));
         
-        //updateUI();
+        table.refresh();
     }
 
 
@@ -1642,4 +1814,161 @@ public class DefaultTableView extends Shell implements TableView {
         error.setMessage(errorMsg);
         error.open();
     }
+    
+    private class ScalarDSDataProvider implements IDataProvider {
+    	private static final long  serialVersionUID = 254175303655079056L;
+    	private final StringBuffer stringBuffer     = new StringBuffer();
+        private final Datatype     dtype            = dataset.getDatatype();
+        private final Datatype     btype            = dtype.getBasetype();
+        private final int          typeSize         = dtype.getDatatypeSize();
+        private final boolean      isArray          = (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY);
+        private final boolean      isStr            = (NT == 'L');
+        private final boolean      isInt            = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
+        private final boolean      isUINT64         = (dtype.isUnsigned() && (NT == 'J'));
+        private Object             theValue;
+
+        boolean                    isNaturalOrder   = (dataset.getRank() == 1 || (dataset.getSelectedIndex()[0] < dataset
+                                                            .getSelectedIndex()[1]));
+        
+        private int                rowCount         = dataset.getHeight();
+        private int                colCount         = dataset.getWidth();
+    	
+    	public ScalarDSDataProvider() {
+    		
+    	}
+    	
+    	@Override
+        public Object getDataValue(int columnIndex, int rowIndex) {
+    		if (startEditing[0]) return "";
+            log.trace("ScalarDS:ScalarDSDataProvider:getValueAt({},{}) start", columnIndex, rowIndex);
+            log.trace("ScalarDS:ScalarDSDataProvider:getValueAt isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray, showAsHex, showAsBin);
+
+            if (isArray) {
+                // ARRAY dataset
+                int arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
+                log.trace("ScalarDS:ScalarDSDataProvider:getValueAt ARRAY dataset size={} isDisplayTypeChar={} isUINT64={}",
+                        arraySize, isDisplayTypeChar, isUINT64);
+
+                stringBuffer.setLength(0); // clear the old string
+                int i0 = (rowIndex * colCount + columnIndex) * arraySize;
+                int i1 = i0 + arraySize;
+
+                if (isDisplayTypeChar) {
+                    for (int i = i0; i < i1; i++) {
+                        stringBuffer.append(Array.getChar(dataValue, i));
+                        if (stringBuffer.length() > 0 && i < (i1 - 1)) stringBuffer.append(", ");
+                    }
+                }
+                else {
+                    if (isUINT64) {
+                        for (int i = i0; i < i1; i++) {
+                            Long l = (Long) Array.get(dataValue, i);
+                            if (l < 0) {
+                                l = (l << 1) >>> 1;
+                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                                BigInteger big2 = new BigInteger(l.toString());
+                                BigInteger big = big1.add(big2);
+                                stringBuffer.append(big.toString());
+                            }
+                            else
+                                stringBuffer.append(Array.get(dataValue, i));
+                            if (stringBuffer.length() > 0 && i < (i1 - 1)) stringBuffer.append(", ");
+                        }
+                    }
+                    else {
+                        for (int i = i0; i < i1; i++) {
+                            stringBuffer.append(Array.get(dataValue, i));
+                            if (stringBuffer.length() > 0 && i < (i1 - 1)) stringBuffer.append(", ");
+                        }
+                    }
+                }
+                theValue = stringBuffer;
+            }
+            else {
+                int index = columnIndex * rowCount + rowIndex;
+
+                if (dataset.getRank() > 1) {
+                    log.trace("ScalarDS:ScalarDSDataProvider:getValueAt rank={} isDataTransposed={} isNaturalOrder={}", dataset.getRank(), isDataTransposed, isNaturalOrder);
+                    if ((isDataTransposed && isNaturalOrder) || (!isDataTransposed && !isNaturalOrder))
+                        index = columnIndex * rowCount + rowIndex;
+                    else
+                        index = rowIndex * colCount + columnIndex;
+                }
+                log.trace("ScalarDS:ScalarDSDataProvider:getValueAt index={} isStr={} isUINT64={}", index, isStr, isUINT64);
+
+                if (isStr) {
+                    theValue = Array.get(dataValue, index);
+                    return theValue;
+                }
+
+                if (isUINT64) {
+                    theValue = Array.get(dataValue, index);
+                    Long l = (Long) theValue;
+                    if (l < 0) {
+                        l = (l << 1) >>> 1;
+                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                        BigInteger big2 = new BigInteger(l.toString());
+                        BigInteger big = big1.add(big2);
+                        theValue = big.toString();
+                    }
+                }
+                else if (showAsHex && isInt) {
+                    // show in Hexadecimal
+                    char[] hexArray = "0123456789ABCDEF".toCharArray();
+                    theValue = Array.get(dataValue, index * typeSize);
+                    log.trace("ScalarDS:ScalarDSDataProvider:getValueAt() theValue[{}]={}", index, theValue.toString());
+                    // show in Hexadecimal
+                    char[] hexChars = new char[2];
+                    stringBuffer.setLength(0); // clear the old string
+                    for (int x = 0; x < typeSize; x++) {
+                        if (x > 0)
+                            theValue = Array.get(dataValue, index * typeSize + x);
+                        int v = (int)((Byte)theValue) & 0xFF;
+                        hexChars[0] = hexArray[v >>> 4];
+                        hexChars[1] = hexArray[v & 0x0F];
+                        if (x > 0) stringBuffer.append(":");
+                        stringBuffer.append(hexChars);
+                        log.trace("ScalarDS:ScalarDSDataProvider:getValueAt() hexChars[{}]={}", x, hexChars);
+                    }
+                    theValue = stringBuffer;
+                }
+                else if (showAsBin && isInt) {
+                    theValue = Array.get(dataValue, index);
+                    theValue = Tools.toBinaryString(Long.valueOf(theValue.toString()), typeSize);
+                    // theValue =
+                    // Long.toBinaryString(Long.valueOf(theValue.toString()));
+                }
+                else if (numberFormat != null) {
+                    // show in scientific format
+                    theValue = Array.get(dataValue, index);
+                    theValue = numberFormat.format(theValue);
+                }
+                else {
+                    theValue = Array.get(dataValue, index);
+                }
+            }
+
+            log.trace("ScalarDS:ScalarDSDataProvider:getValueAt finish");
+            return theValue;
+        }
+
+        @Override
+        public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
+        	
+        }
+
+        @Override
+        public int getColumnCount() {
+            return dataset.getWidth();
+        }
+
+        @Override
+        public int getRowCount() {
+            return dataset.getHeight();
+        }
+    }
+    
+    //private class CompoundDSDataProvider implements IDataProvider {
+    	
+    //}
 }

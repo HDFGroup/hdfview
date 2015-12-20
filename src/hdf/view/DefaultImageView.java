@@ -21,6 +21,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 
 import java.awt.image.ImageFilter;
@@ -82,7 +84,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class DefaultImageView extends Shell implements ImageView {
+public class DefaultImageView implements ImageView {
 	private static final long serialVersionUID = -6534336542813587242L;
 
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
@@ -447,6 +449,28 @@ public class DefaultImageView extends Shell implements ImageView {
 
 		//        if (imageComponent.getParent() !=null)
 		//        	imageComponent.getParent().setBackground(Color.black);
+		
+		shell.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				// reload the data when it is displayed next time
+				// because the display type (table or image) may be
+				// different.
+				if (!dataset.isImage()) {
+					dataset.clearData();
+				}
+
+				data = null;
+				image = null;
+				imageByteData = null;
+				imageComponent = null;
+				autoGainData = null;
+				((Vector) rotateRelatedItems).setSize(0);
+				System.runFinalization();
+				System.gc();
+
+				//viewer.removeDataView(this);
+			}
+		});
 		
 		shell.open();
 		
@@ -1749,28 +1773,6 @@ public class DefaultImageView extends Shell implements ImageView {
 			setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
 		*/
-	}
-
-	public void dispose() {
-		// reload the data when it is displayed next time
-		// because the display type (table or image) may be
-		// different.
-		if (!dataset.isImage()) {
-			dataset.clearData();
-		}
-
-		data = null;
-		image = null;
-		imageByteData = null;
-		imageComponent = null;
-		autoGainData = null;
-		((Vector) rotateRelatedItems).setSize(0);
-		System.runFinalization();
-		System.gc();
-
-		viewer.removeDataView(this);
-
-		super.dispose();
 	}
 
 	// Implementing DataView.

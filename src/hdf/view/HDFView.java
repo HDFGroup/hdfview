@@ -43,6 +43,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -371,6 +373,20 @@ public class HDFView implements ViewManager, DropTargetListener {
 		mainWindow.setImage(ViewProperties.getHdfIcon());
 		mainWindow.setText("HDFView " + HDFVIEW_VERSION);
 		mainWindow.setLayout(new BorderLayout(0, 0));
+		mainWindow.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				closeAllWindows();
+				
+				List<FileFormat> files = treeView.getCurrentFiles();
+                while (!files.isEmpty()) {
+                    try {
+                        treeView.closeFile(files.get(0));
+                    } catch (Exception ex) {
+                        
+                    }
+                }
+			}
+		});
 		
 		try {
 			mainWindow.setImage(ViewProperties.getHdfIcon());
@@ -617,8 +633,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setAccelerator(SWT.MOD1 + 'Q');
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-                closeAllWindows();
-                
                 List<FileFormat> files = treeView.getCurrentFiles();
                 while (!files.isEmpty()) {
                     try {
@@ -1505,6 +1519,10 @@ public class HDFView implements ViewManager, DropTargetListener {
      */
     private void closeAllWindows() {
     	Shell[] sList = mainWindow.getShells();
+    	
+    	for(int i = 0; i < sList.length; i++) {
+    		System.out.println("Shell: " + sList[i].getText());
+    	}
     	
     	// Return if main window (shell) is the only open shell
     	if (sList.length < 1) return;
