@@ -55,7 +55,7 @@ import hdf.object.ScalarDS;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class DefaultTextView extends Shell implements TextView {
+public class DefaultTextView implements TextView {
     private static final long serialVersionUID = 3892752752951438428L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTextView.class);

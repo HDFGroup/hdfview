@@ -32,7 +32,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.swt.dnd.*;
 
@@ -42,8 +41,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.CTabFolder;
@@ -262,7 +259,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
         
         // Initialize all GUI components
-		createMainWindow(width, height, x, y);
+		mainWindow = createMainWindow();
 		
 		try {
 			Font font = null;
@@ -302,11 +299,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 					
 					try {
 						url_bar.remove(currentFile);
-						url_bar.add(currentFile, 0);
-						url_bar.select(0);
 					} catch (Exception ex) {
-						log.info("Failed to update urlBar with {}", currentFile);
 					}
+					
+					url_bar.add(currentFile, 0);
+					url_bar.select(0);
 				} catch (Exception ex) {
 					showStatus(ex.toString());
 				}
@@ -322,6 +319,30 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) == null)
 			setEnabled(h5GUIs, false);
+		
+		// Set size of main window
+		// float inset = 0.17f; // for UG only.
+		float inset = 0.04f;
+		Point winDim = new Point(width, height);
+		
+		// If given height and width are too small, adjust accordingly
+		if (height <= 300) {
+			winDim.y = (int) ((1 - 2 * inset) * mainWindow.getSize().y);
+		}
+		
+		if (width <= 300) {
+			winDim.x = (int) (0.9 * (double) mainWindow.getSize().y);
+		}
+		
+		// TEST
+        //if (treeView.getClass().getName().startsWith("ext.erdc")) {
+        //    topSplitPane.setDividerLocation(500);
+        //    winDim.x = (int) (0.9 * mainWindow.getSize().x);
+        //    winDim.y = (int) (winDim.x * 0.618);
+        //}
+        
+        mainWindow.setLocation(x, y);
+		mainWindow.setMinimumSize(winDim.x, winDim.y);
 		
 		// Display the window
 		mainWindow.open();
@@ -372,13 +393,13 @@ public class HDFView implements ViewManager, DropTargetListener {
      * ||========================================||
      * </pre>
      */
-	private void createMainWindow(int width, int height, int x, int y) {		
+	private Shell createMainWindow() {		
 		// Create a new display window
-		mainWindow = new Shell(display);
-		mainWindow.setImage(ViewProperties.getHdfIcon());
-		mainWindow.setText("HDFView " + HDFVIEW_VERSION);
-		mainWindow.setLayout(new BorderLayout(0, 0));
-		mainWindow.addDisposeListener(new DisposeListener() {
+		final Shell shell = new Shell(display);
+		shell.setImage(ViewProperties.getHdfIcon());
+		shell.setText("HDFView " + HDFVIEW_VERSION);
+		shell.setLayout(new BorderLayout(0, 0));
+		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				closeAllWindows();
 				
@@ -393,41 +414,18 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		createMenuBar();
-		createToolbar();
-		createContentArea();
-		
-		// Set size of main window
-		// float inset = 0.17f; // for UG only.
-		float inset = 0.04f;
-		Point winDim = new Point(width, height);
-		
-		// If given height and width are too small, adjust accordingly
-		if (height <= 300) {
-			winDim.y = (int) ((1 - 2 * inset) * mainWindow.getSize().y);
-		}
-		
-		if (width <= 300) {
-			winDim.x = (int) (0.9 * (double) mainWindow.getSize().y);
-		}
-		
-		// TEST
-        //if (treeView.getClass().getName().startsWith("ext.erdc")) {
-        //    topSplitPane.setDividerLocation(500);
-        //    winDim.x = (int) (0.9 * mainWindow.getSize().x);
-        //    winDim.y = (int) (winDim.x * 0.618);
-        //}
-        
-        // splitPane.setDividerLocation(d.height - 180);	
-		mainWindow.setLocation(x, y);
-		mainWindow.setMinimumSize(winDim.x, winDim.y);
+		createMenuBar(shell);
+		createToolbar(shell);
+		createContentArea(shell);
 		
 		log.info("Main Window created");
+		
+		return shell;
 	}
 	
-	private void createMenuBar() {
-		Menu menu = new Menu(mainWindow, SWT.BAR);
-		mainWindow.setMenuBar(menu);
+	private void createMenuBar(final Shell shell) {
+		Menu menu = new Menu(shell, SWT.BAR);
+		shell.setMenuBar(menu);
 		
 		MenuItem menuItem = new MenuItem(menu, SWT.CASCADE);
 		menuItem.setText("&File");
@@ -482,7 +480,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h4GUIs.add(item);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				NewFileDialog dialog = new NewFileDialog(mainWindow, currentDir, FileFormat.FILE_TYPE_HDF4, treeView.getCurrentFiles());
+				NewFileDialog dialog = new NewFileDialog(shell, currentDir, FileFormat.FILE_TYPE_HDF4, treeView.getCurrentFiles());
 				String filename = dialog.open();
 				
 				if(!dialog.isFileCreated() || filename == null)
@@ -494,11 +492,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 					
 					try {
 						url_bar.remove(filename);
-						url_bar.add(filename, 0);
-						url_bar.select(0);
 					} catch (Exception ex) {
-						
 					}
+					
+					url_bar.add(filename, 0);
+					url_bar.select(0);
 				} catch (Exception ex) {
 					display.beep();
 					showError(ex.getMessage() + "\n" + filename, null);
@@ -511,7 +509,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h5GUIs.add(item);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				NewFileDialog dialog = new NewFileDialog(mainWindow, currentDir, FileFormat.FILE_TYPE_HDF5, treeView.getCurrentFiles());
+				NewFileDialog dialog = new NewFileDialog(shell, currentDir, FileFormat.FILE_TYPE_HDF5, treeView.getCurrentFiles());
 				String filename = dialog.open();
 				
 				if(!dialog.isFileCreated() || filename == null)
@@ -523,11 +521,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 					
 					try {
 						url_bar.remove(filename);
-						url_bar.add(filename, 0);
-						url_bar.select(0);
 					} catch (Exception ex) {
-						
 					}
+					
+					url_bar.add(filename, 0);
+					url_bar.select(0);
 				} catch (Exception ex) {
 					display.beep();
 					showError(ex.getMessage() + "\n" + filename, null);
@@ -562,6 +560,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 				
 				currentFile = null;
 				attributeArea.setText("");
+				url_bar.setText("");
 			}
 		});
 		
@@ -572,7 +571,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (treeView.getCurrentFiles().size() <= 0) {
-					showError("No files currently open.", mainWindow.getText());
+					showError("No files currently open.", shell.getText());
 					return;
 				}
 				
@@ -601,7 +600,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 					}
 				} catch (Exception ex) {
 					display.beep();
-					showError(ex.getMessage(), mainWindow.getText());
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -611,7 +610,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (treeView.getCurrentFiles().size() <= 0) {
-					showError("No files currently open.", mainWindow.getText());
+					showError("No files currently open.", shell.getText());
 					return;
 				}
 				
@@ -619,7 +618,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 					treeView.saveFile(treeView.getSelectedFile());
 				} catch (Exception ex) {
 					display.beep();
-					showError(ex.getMessage(), mainWindow.getText());
+					showError(ex.getMessage(), shell.getText());
 				}
 			}
 		});
@@ -674,7 +673,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setText("Close &Window");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (mainWindow.getShells().length <= 0 || (display.getActiveShell().equals(mainWindow)))
+				if (shell.getShells().length <= 0 || (display.getActiveShell().equals(shell)))
 					return;
 				
 				display.getActiveShell().dispose();
@@ -800,7 +799,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h4GUIs.add(item);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF4);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4);
 				dialog.open();
 			}
 		});
@@ -810,7 +809,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		h5GUIs.add(item);
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF5);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5);
 				dialog.open();
 			}
 		});
@@ -819,8 +818,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setText("&Java Version");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				MessageBox versionInfo = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
-				versionInfo.setText(mainWindow.getText());
+				MessageBox versionInfo = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+				versionInfo.setText(shell.getText());
 				versionInfo.setMessage(JAVA_VER_INFO);
 				// Add custom HDF Icon
 				versionInfo.open();
@@ -841,8 +840,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 				}
 				formats += "\n";
 				
-				MessageBox message = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
-				message.setText(mainWindow.getText());
+				MessageBox message = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+				message.setText(shell.getText());
 				message.setMessage(formats);
 				message.open();
 			}
@@ -854,8 +853,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setText("&About...");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				MessageBox info = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
-				info.setText(mainWindow.getText());
+				MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+				info.setText(shell.getText());
 				info.setMessage(aboutHDFView);
 				// Add HDF Icon
 				info.open();
@@ -865,8 +864,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		log.info("Menubar created");
 	}
 
-	private void createToolbar() {
-		toolBar = new ToolBar(mainWindow, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER_DOT);
+	private void createToolbar(final Shell shell) {
+		toolBar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER_DOT);
 		toolBar.setFont(Display.getCurrent().getSystemFont());
 		toolBar.setLayoutData(BorderLayout.NORTH);
 		
@@ -919,8 +918,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 				try {
 					org.eclipse.swt.program.Program.launch(ugPath);
 				} catch (Exception ex) {
-					MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-					error.setText(mainWindow.getText());
+					MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+					error.setText(shell.getText());
 					error.setMessage(ex.getMessage());
 					// Add HDF Icon
 					error.open();
@@ -935,7 +934,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		hdf4Item.setToolTipText("HDF4 Library Version");
 		hdf4Item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF4);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4);
 				dialog.open();
 			}
 		});
@@ -951,7 +950,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 		hdf5Item.setToolTipText("HDF5 Library Version");
 		hdf5Item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF5);
+				LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5);
 				dialog.open();
 			}
 		});
@@ -962,14 +961,14 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		// Make the toolbar as wide as the window and as
 		// tall as the buttons
-		toolBar.setSize(mainWindow.getClientArea().width, openItem.getBounds().height);
+		toolBar.setSize(shell.getClientArea().width, openItem.getBounds().height);
 		toolBar.setLocation(0, 0);
 		
 		log.info("Toolbar created");
 	}
 
-	private void createContentArea() {
-		SashForm content = new SashForm(mainWindow, SWT.VERTICAL);
+	private void createContentArea(final Shell shell) {
+		SashForm content = new SashForm(shell, SWT.VERTICAL);
 		content.setSashWidth(10);
 		
 		// Add Url Toolbar, Data content area and Status Area to main window
@@ -979,7 +978,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 	    Composite statusArea = new Composite(content, SWT.NONE);
 	    statusArea.setLayout(new FillLayout(SWT.HORIZONTAL));
 	    
-	    Composite urlToolbarContainer = new Composite(container, SWT.BORDER);
+	    Composite urlToolbarContainer = new Composite(container, SWT.NONE);
 	    urlToolbarContainer.setLayout(new FormLayout());
 	    FormData formData = new FormData();
 	    formData.top = new FormAttachment(0, 0);
@@ -998,28 +997,32 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		url_bar = new Combo(urlToolbarContainer, SWT.NONE);
 		url_bar.setItems(ViewProperties.getMRF().toArray(new String[0]));
-		url_bar.setText("/root/workspace/hdf-java/build/test/uitest/hdf5_test.h5");
 		url_bar.setVisibleItemCount(ViewProperties.MAX_RECENT_FILES);
 		url_bar.deselectAll();
 		url_bar.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if(e.keyCode == SWT.CR) {
 					String filename = url_bar.getText();
-					if (filename == null || filename.length() < 1 || filename.equals(currentFile))
+					if (filename == null || filename.length() < 1 || filename.equals(currentFile)) {
 						return;
+					}
 					
 					if(!(filename.startsWith("http://") || filename.startsWith("ftp://"))) {
-						File tmpFile = new File(filename);
-						if(!tmpFile.exists())
-							return;
-						
-						if(tmpFile.isDirectory()) {
-							currentDir = filename;
-							openLocalFile(null, FileFormat.WRITE);
-						}
+					    openLocalFile(filename, FileFormat.WRITE);
 					} else {
 						openRemoteFile(filename);
 					}
+				}
+			}
+		});
+		url_bar.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String filename = url_bar.getText();
+				
+				if(!(filename.startsWith("http://") || filename.startsWith("ftp://"))) {
+			        openLocalFile(filename, FileFormat.WRITE);
+				} else {
+					openRemoteFile(filename);
 				}
 			}
 		});
@@ -1029,7 +1032,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		btnClearText.setText("Clear Text");
 		btnClearText.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				url_bar.clearSelection();
+				url_bar.setText("");
+				url_bar.deselectAll();
 			}
 		});
 		
@@ -1600,7 +1604,27 @@ public class HDFView implements ViewManager, DropTargetListener {
     		    return;
     		}
     		
-    		currentFile = filename;
+			if(file.isDirectory()) {
+				currentDir = filename;
+				openLocalFile(null, FileFormat.WRITE); // needs to be edited
+			} else {
+    		    currentFile = filename;
+			}
+    		
+    		try {
+		        treeView.openFile(filename, accessMode);
+		    }
+		    catch (Throwable ex) {
+		        try {
+	                treeView.openFile(filename, FileFormat.READ);
+	            }
+	            catch (Throwable ex2) {
+	                display.beep();
+	                url_bar.deselectAll();
+	                showError("Failed to open file " + filename + "\n" + ex2, mainWindow.getText());
+	                currentFile = null;
+	            }
+		    }
     	} else {
     		FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
     		fChooser.setFilterExtensions(new String[] {"*.*", "*.h4;*.h5;*.hdf;*.hdf4;*.hdf5;*.he2;*.he5"});
@@ -1624,11 +1648,12 @@ public class HDFView implements ViewManager, DropTargetListener {
     		    
     		    try {
     		        url_bar.remove(chosenFiles[i].getAbsolutePath());
-    	            url_bar.add(chosenFiles[i].getAbsolutePath(), 0);
-    	            url_bar.select(0);
     		    }
     		    catch (Exception ex) {
     		    }
+    		    
+    		    url_bar.add(chosenFiles[i].getAbsolutePath(), 0);
+	            url_bar.select(0);
     		    
     		    try {
     		        treeView.openFile(chosenFiles[i].getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
@@ -1713,7 +1738,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     		return null;
     	}
     	
-    	//setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
+    	mainWindow.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
     	byte[] buff = new byte[512]; // set default buffer size to 512
     	try {
     		int n = 0;
@@ -1737,7 +1762,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     		log.debug("Remote file: ", ex);
     	}
     	
-    	//setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
+    	mainWindow.setCursor(null);
     	
     	return localFile;
     }
@@ -1806,11 +1831,11 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
     	
-    	//String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
-    	//if (theFile.getFilePath().equals(fName)) {
-    	//	currentFile = null;
-    	//	url_bar.clearSelection();
-    	//}
+    	String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
+    	if (theFile.getFilePath().equals(fName)) {
+    		currentFile = null;
+    		url_bar.setText("");
+    	}
     	
     	try {
     		treeView.closeFile(theFile);
@@ -1832,7 +1857,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     		File theFile = new File(filename);
     		
     		if (!theFile.exists()) return;
-    			
+    	    
     		currentDir = theFile.getParentFile().getAbsolutePath();
     		currentFile = theFile.getAbsolutePath();
     		
@@ -1841,10 +1866,11 @@ public class HDFView implements ViewManager, DropTargetListener {
     			
     			try {
     				url_bar.remove(filename);
-    				url_bar.add(filename, 0);
-    				url_bar.select(0);
     			} catch (Exception ex) {
     			}
+    			
+    			url_bar.add(filename, 0);
+				url_bar.select(0);
     		} catch (Exception ex) {
     			showStatus(ex.toString());
     		}
@@ -1954,7 +1980,10 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		File tmpFile = null;
 		int j = args.length;
-		int W = 0, H = 0, X = 0, Y = 0;
+		int W = display.getClientArea().width / 2,
+			H = display.getClientArea().height,
+			X = 0,
+			Y = 0;
 		
 		for(int i = 0; i < args.length; i++) {
 			if ("-root".equalsIgnoreCase(args[i])) {

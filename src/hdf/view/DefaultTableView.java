@@ -14,8 +14,6 @@
 
 package hdf.view;
 
-import java.awt.event.MouseEvent;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -54,10 +52,10 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
@@ -78,7 +76,6 @@ import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
-import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties;
@@ -185,6 +182,9 @@ public class DefaultTableView implements TableView {
     private MenuItem                        checkHex = null;
     private MenuItem                        checkBin = null;
     
+    // Labeled Group to display the index base
+    private Group                           group;
+    
     // Text field to display the value of the current cell.
     private Text                          	cellValueField;
     
@@ -222,7 +222,7 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView start");
 
         shell = new Shell(parent, SWT.TITLE | SWT.MAX | SWT.CLOSE);
-        shell.setLayout(new RowLayout());
+        shell.setLayout(new FillLayout());
         
         viewer = theView;
         HObject hObject = null;
@@ -294,14 +294,8 @@ public class DefaultTableView implements TableView {
 
         log.trace("dataset isDisplayTypeChar={} isConvertEnum={}", isDisplayTypeChar, ViewProperties.isConvertEnum());
         dataset.setEnumConverted(ViewProperties.isConvertEnum());
-
-        // Create border around Table with Index base indicator
-        //TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.lightGray, 1), indexBase + "-based",
-        //        TitledBorder.RIGHT, TitledBorder.TOP, this.getFont(), Color.black);
-        //((JPanel) getContentPane()).setBorder(border);
         
-        org.eclipse.swt.widgets.Group group = 
-        		new org.eclipse.swt.widgets.Group(shell, SWT.SHADOW_ETCHED_OUT);
+        group = new Group(shell, SWT.SHADOW_ETCHED_OUT);
         group.setFont(Display.getCurrent().getSystemFont());
         group.setText(indexBase + "-based");
         group.setLayout(new FillLayout());
@@ -309,23 +303,32 @@ public class DefaultTableView implements TableView {
         SashForm content = new SashForm(group, SWT.VERTICAL);
         content.setSashWidth(10);
         
-        Composite cellValueComposite = new Composite(content, SWT.NONE);
-        RowLayout layout = new RowLayout();
-        layout.justify = true;
-        layout.marginHeight = 2;
-        layout.marginWidth = 2;
-        layout.type = SWT.HORIZONTAL;
-        cellValueComposite.setLayout(new RowLayout());
+        Composite cellValueComposite = new Composite(content, SWT.BORDER);
+        cellValueComposite.setLayout(new FormLayout());
         
-        cellLabel = new Label(cellValueComposite, SWT.BORDER);
-        cellLabel.setSize(75, cellLabel.getSize().y);
+        cellLabel = new Label(cellValueComposite, SWT.NONE);
         cellLabel.setAlignment(SWT.CENTER);
+        FormData formData = new FormData();
+        formData.left = new FormAttachment(0, 0);
+        formData.right = new FormAttachment(cellValueField, 2);
+        formData.top = new FormAttachment(0, 0);
+        formData.bottom = new FormAttachment(100, 0);
+        cellLabel.setLayoutData(formData);
         
         cellValueField = new Text(cellValueComposite, SWT.SINGLE | SWT.BORDER | SWT.WRAP);
         //cellValueField.setWrapStyleWord(true);
         cellValueField.setEditable(false);
         cellValueField.setBackground(new Color(display, 255, 255, 240));
         cellValueField.setEnabled(false);
+        formData = new FormData();
+        formData.top = new FormAttachment(0, 0);
+        formData.right = new FormAttachment(100, 0);
+        formData.bottom = new FormAttachment(100, 0);
+        formData.left = new FormAttachment(10, 0);
+        cellValueField.setLayoutData(formData);
+        
+        Composite tableComposite = new Composite(content, SWT.BORDER);
+        tableComposite.setLayout(new FillLayout());
         
         // Create the NatTable
         if (dataset instanceof CompoundDS) {
@@ -333,13 +336,13 @@ public class DefaultTableView implements TableView {
             
             isDataTransposed = false; // Disable transpose for compound dataset
             shell.setImage(ViewProperties.getTableIcon());
-            table = createTable(content, (CompoundDS) dataset);
+            table = createTable(tableComposite, (CompoundDS) dataset);
         }
         else { /* if (dataset instanceof ScalarDS) */
             log.trace("createTable((ScalarDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
             
             shell.setImage(ViewProperties.getDatasetIcon());
-            table = createTable(content, (ScalarDS) dataset);
+            table = createTable(tableComposite, (ScalarDS) dataset);
 
             if (dtype.getDatatypeClass() == Datatype.CLASS_REFERENCE) {
                 //table.addMouseListener(this);
@@ -362,7 +365,7 @@ public class DefaultTableView implements TableView {
             }
             log.trace("createTable((ScalarDS) dataset): isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
         }
-        content.setWeights(new int[] {1, 19});
+        content.setWeights(new int[] {1, 18});
 
         if (table == null) {
             viewer.showStatus("Creating table failed - " + dataset.getName());
@@ -429,14 +432,14 @@ public class DefaultTableView implements TableView {
         
         log.trace("DefaultTableView: finish");
         
+        group.pack();
+        
+        shell.pack();
+        
         Composite dataClientArea = ((HDFView) viewer).getDataArea();
         shell.setSize(dataClientArea.getClientArea().width, dataClientArea.getClientArea().height);
         shell.setLocation(dataClientArea.getBounds().x, dataClientArea.getBounds().y);
         
-        group.pack();
-        group.setLayoutData(new RowData(shell.getSize().x, shell.getSize().y));
-        
-        shell.pack();
         shell.open();
         
         while (!shell.isDisposed()) {
@@ -499,12 +502,9 @@ public class DefaultTableView implements TableView {
 
                 if (bitmaskOP == ViewProperties.BITMASK_OP.AND) opName = "Bitwise AND ";
 
-                //JPanel contentpane = (JPanel) getContentPane();
-                //Border border = contentpane.getBorder();
-                
-               // String btitle = ((TitledBorder) border).getTitle();
-               //btitle += ", " + opName + bitmask;
-               //((TitledBorder) border).setTitle(btitle);
+                String title = group.getText();
+                title += ", " + opName + bitmask;
+                group.setText(title);
             }
 
             dataset.convertFromUnsignedC();
@@ -556,13 +556,9 @@ public class DefaultTableView implements TableView {
         }
         
         final String columnNames[] = new String[cols];
-        final int rowCount = rows;
-        final int colCount = cols;
         final long[] startArray = dataset.getStartDims();
         final long[] strideArray = dataset.getStride();
         int[] selectedIndex = dataset.getSelectedIndex();
-        final int rowStart = (int) startArray[selectedIndex[0]];
-        final int rowStride = (int) strideArray[selectedIndex[0]];
         int start = 0;
         int stride = 1;
 
@@ -629,7 +625,6 @@ public class DefaultTableView implements TableView {
      */
     private Menu createMenuBar() {
         Menu menuBar = new Menu(shell, SWT.BAR);
-        Button button;
         boolean isEditable = !isReadOnly;
         boolean is3D = (dataset.getRank() > 2);
 
@@ -653,64 +648,62 @@ public class DefaultTableView implements TableView {
             }
         });
 
-        item = new MenuItem(menu, SWT.CASCADE);
-        item.setText("Export Data to Binary File");
-        item.setEnabled(dataset instanceof ScalarDS); // Disable export menu if this isn't a Scalar Dataset
+        if(dataset instanceof ScalarDS) {
+        	MenuItem exportAsBinaryMenuItem = new MenuItem(menu, SWT.CASCADE);
+            exportAsBinaryMenuItem.setText("Export Data to Binary File");
+            
+            Menu exportAsBinaryMenu = new Menu(menu);
+            
+            item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
+            item.setText("Native Order");
+            item.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    binaryOrder = 1;
 
-        Menu exportAsBinaryMenu = new Menu(menu);
-        item.setMenu(exportAsBinaryMenu);
-
-        //if (!(dataset instanceof ScalarDS)) {
-        //exportAsBinaryMenu.setVisible(false);
-        //}
-
-        item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
-        item.setText("Native Order");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                binaryOrder = 1;
-
-                try {
-                    //saveAsBinary();
+                    try {
+                        //saveAsBinary();
+                    }
+                    catch (Exception ex) {
+                        shell.getDisplay().beep();
+                        showError(ex.getMessage(), shell.getText());
+                    }
                 }
-                catch (Exception ex) {
-                    shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
-                }
-            }
-        });
+            });
 
-        item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
-        item.setText("Little Endian");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                binaryOrder = 2;
+            item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
+            item.setText("Little Endian");
+            item.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    binaryOrder = 2;
 
-                try {
-                    //saveAsBinary();
+                    try {
+                        //saveAsBinary();
+                    }
+                    catch (Exception ex) {
+                        shell.getDisplay().beep();
+                        showError(ex.getMessage(), shell.getText());
+                    }
                 }
-                catch (Exception ex) {
-                    shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
-                }
-            }
-        });
+            });
 
-        item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
-        item.setText("Big Endian");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                binaryOrder = 3;
+            item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
+            item.setText("Big Endian");
+            item.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    binaryOrder = 3;
 
-                try {
-                    //saveAsBinary();
+                    try {
+                        //saveAsBinary();
+                    }
+                    catch (Exception ex) {
+                        shell.getDisplay().beep();
+                        showError(ex.getMessage(), shell.getText());
+                    }
                 }
-                catch (Exception ex) {
-                    shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
-                }
-            }
-        });
+            });
+            
+            exportAsBinaryMenuItem.setMenu(exportAsBinaryMenu);
+        }
 
         new MenuItem(menu, SWT.SEPARATOR);
         
@@ -740,63 +733,7 @@ public class DefaultTableView implements TableView {
             }
         });
 
-        item = new MenuItem(menu, SWT.CASCADE);
-        item.setText("Import Data from Binary File");
-        item.setEnabled(dataset instanceof ScalarDS); // Disable import menu if this isn't a Scalar Dataset
-
-        Menu importFromBinaryMenu = new Menu(menu);
-        item.setMenu(importFromBinaryMenu);
-
-        //if ((dataset instanceof ScalarDS)) {
-        //    menu.add(importFromBinaryMenu);
-        //}
-
-        item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
-        item.setText("Native Order");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                binaryOrder = 1;
-
-                try {
-                    //importBinaryData();
-                }
-                catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
-                }
-            }
-        });
-
-        item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
-        item.setText("Little Endian");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                binaryOrder = 2;
-
-                try {
-                    //importBinaryData();
-                }
-                catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
-                }
-            }
-        });
-
-        item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
-        item.setText("Big Endian");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                binaryOrder = 3;
-
-                try {
-                    //importBinaryData();
-                }
-                catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
-                }
-            }
-        });
-        
-        if(dataset instanceof ScalarDS) {
+        if ((dataset instanceof ScalarDS)) {
         	checkFixedDataLength = new MenuItem(menu, SWT.CHECK);
             checkFixedDataLength.setText("Fixed Data Length");
             checkFixedDataLength.addSelectionListener(new SelectionAdapter() {
@@ -831,6 +768,58 @@ public class DefaultTableView implements TableView {
             	    }
             	}
             });
+        	
+        	MenuItem importAsBinaryMenuItem = new MenuItem(menu, SWT.CASCADE);
+        	importAsBinaryMenuItem.setText("Import Data from Binary File");
+            
+            Menu importFromBinaryMenu = new Menu(menu);
+            
+            item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
+            item.setText("Native Order");
+            item.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    binaryOrder = 1;
+
+                    try {
+                        //importBinaryData();
+                    }
+                    catch (Exception ex) {
+                        showError(ex.getMessage(), shell.getText());
+                    }
+                }
+            });
+
+            item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
+            item.setText("Little Endian");
+            item.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    binaryOrder = 2;
+
+                    try {
+                        //importBinaryData();
+                    }
+                    catch (Exception ex) {
+                        showError(ex.getMessage(), shell.getText());
+                    }
+                }
+            });
+
+            item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
+            item.setText("Big Endian");
+            item.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    binaryOrder = 3;
+
+                    try {
+                        //importBinaryData();
+                    }
+                    catch (Exception ex) {
+                        showError(ex.getMessage(), shell.getText());
+                    }
+                }
+            });
+            
+            importAsBinaryMenuItem.setMenu(importFromBinaryMenu);
         }
 
         new MenuItem(menu, SWT.SEPARATOR);
@@ -1016,15 +1005,17 @@ public class DefaultTableView implements TableView {
             checkScientificNotation.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     if (checkScientificNotation.getSelection()) {
-                        checkCustomNotation.setSelection(false);
+                    	if(checkCustomNotation != null)
+                        	checkCustomNotation.setSelection(false);
+                    	if(checkHex != null) checkHex.setSelection(false);
+                        if(checkBin != null) checkBin.setSelection(false);
+                    	
                         numberFormat = scientificFormat;
-                        checkHex.setSelection(false);
-                        checkBin.setSelection(false);
                         showAsHex = false;
                         showAsBin = false;
-                    }
-                    else
+                    } else {
                         numberFormat = normalFormat;
+                    }
                     //this.updateUI();  //redraw menu
                 }
             });
@@ -1034,15 +1025,17 @@ public class DefaultTableView implements TableView {
             checkCustomNotation.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     if (checkCustomNotation.getSelection()) {
+                    	if(checkScientificNotation != null)
+                        	checkScientificNotation.setSelection(false);
+                    	if(checkHex != null) checkHex.setSelection(false);
+                        if(checkBin != null) checkBin.setSelection(false);
+                    	
                         numberFormat = customFormat;
-                        checkScientificNotation.setSelection(false);
-                        checkHex.setSelection(false);
-                        checkBin.setSelection(false);
                         showAsHex = false;
                         showAsBin = false;
-                    }
-                    else
+                    } else {
                         numberFormat = normalFormat;
+                    }
                     //this.updateUI(); // redraw menu
                 }
             });
@@ -1067,7 +1060,7 @@ public class DefaultTableView implements TableView {
                     return;
                 }
 
-                //customFormat.applyPattern(str);
+                customFormat.applyPattern(str);
             }
         });
 
@@ -1080,9 +1073,12 @@ public class DefaultTableView implements TableView {
                 public void widgetSelected(SelectionEvent e) {
                     showAsHex = checkHex.getSelection();
                     if (showAsHex) {
-                        checkScientificNotation.setSelection(false);
-                        checkCustomNotation.setSelection(false);
-                        checkBin.setSelection(false);
+                        if(checkScientificNotation != null)
+                        	checkScientificNotation.setSelection(false);
+                        if(checkCustomNotation != null)
+                        	checkCustomNotation.setSelection(false);
+                        if(checkBin != null) checkBin.setSelection(false);
+                        
                         showAsBin = false;
                         numberFormat = normalFormat;
                     }
@@ -1096,16 +1092,18 @@ public class DefaultTableView implements TableView {
                 public void widgetSelected(SelectionEvent e) {
                     showAsBin = checkBin.getSelection();
                     if (showAsBin) {
-                        checkScientificNotation.setSelection(false);
-                        checkCustomNotation.setSelection(false);
-                        checkHex.setSelection(false);
+                        if(checkScientificNotation != null)
+                        	checkScientificNotation.setSelection(false);
+                        if(checkCustomNotation != null)
+                        	checkCustomNotation.setSelection(false);
+                        if(checkHex != null) checkHex.setSelection(false);
+                        
                         showAsHex = false;
                         numberFormat = normalFormat;
                     }
                     //this.updateUI();
                 }
             });
-
         }
         
         new MenuItem(menu, SWT.SEPARATOR);
@@ -1448,8 +1446,8 @@ public class DefaultTableView implements TableView {
         curFrame = idx + indexBase;
         dataset.clearData();
 
-        //setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
+        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
+        
         try {
             dataValue = dataset.getData();
             if (dataset instanceof ScalarDS) {
@@ -1458,13 +1456,13 @@ public class DefaultTableView implements TableView {
             }
         }
         catch (Exception ex) {
-            //setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            dataValue = null;
+        	shell.setCursor(null);
+        	dataValue = null;
             showError(ex.getMessage(), shell.getText());
             return;
         }
 
-        //setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        shell.setCursor(null);
 
         frameField.setText(String.valueOf(curFrame));
         
@@ -1638,6 +1636,49 @@ public class DefaultTableView implements TableView {
 
         table.updateUI();
         */
+    }
+    
+    /**
+     * Remove values of NaN, INF from the array.
+     * 
+     * @param data
+     *            the data array
+     * @param xData
+     *            the x-axis data points
+     * @param yRange
+     *            the range of data values
+     * @return number of data points in the plot data if successful; otherwise, returns false.
+     */
+    private int removeInvalidPlotData (double[][] data, double[] xData, double[] yRange) {
+        int idx = 0;
+        boolean hasInvalid = false;
+
+        if (data == null || yRange == null) return -1;
+
+        yRange[0] = Double.POSITIVE_INFINITY;
+        yRange[1] = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < data[0].length; i++) {
+            hasInvalid = false;
+
+            for (int j = 0; j < data.length; j++) {
+                hasInvalid = Tools.isNaNINF(data[j][i]);
+                if (xData != null) hasInvalid = hasInvalid || Tools.isNaNINF(xData[i]);
+
+                if (hasInvalid)
+                    break;
+                else {
+                    data[j][idx] = data[j][i];
+                    if (xData != null) xData[idx] = xData[i];
+                    yRange[0] = Math.min(yRange[0], data[j][idx]);
+                    yRange[1] = Math.max(yRange[1], data[j][idx]);
+                }
+            }
+
+            if (!hasInvalid) idx++;
+        }
+
+        return idx;
     }
     
     /**
@@ -1835,6 +1876,225 @@ public class DefaultTableView implements TableView {
         error.setMessage(errorMsg);
         error.open();
     }
+    
+    
+    /**
+     * Display data pointed by object references. Data of each object is shown in a separate
+     * spreadsheet.
+     * 
+     * @param ref
+     *            the array of strings that contain the object reference information.
+     * 
+     */
+    private void showObjRefData (long ref) {
+        long[] oid = { ref };
+        log.trace("DefaultTableView showObjRefData: ref={}", ref);
+
+        HObject obj = FileFormat.findObject(dataset.getFileFormat(), oid);
+        if (obj == null || !(obj instanceof ScalarDS)) return;
+
+        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dset_copy = null;
+
+        // create an instance of the dataset constructor
+        Constructor<? extends ScalarDS> constructor = null;
+        Object[] paramObj = null;
+        Object data = null;
+
+        try {
+            Class[] paramClass = { FileFormat.class, String.class, String.class };
+            constructor = dset.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+            dset_copy = (ScalarDS) constructor.newInstance(paramObj);
+            data = dset_copy.getData();
+        }
+        catch (Exception ex) {
+        	showError(ex.getMessage(), "Object Reference:" + shell.getText());
+            data = null;
+        }
+
+        if (data == null) return;
+
+        Shell dataView = null;
+        HashMap map = new HashMap(1);
+        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
+        switch (viewType) {
+            case TEXT:
+                dataView = null;//new DefaultTextView(viewer, map);
+                break;
+            case IMAGE:
+                dataView = null;//new DefaultImageView(viewer, map);
+                break;
+            default:
+                dataView = null;//new DefaultTableViewOld(viewer, map);
+                break;
+        }
+
+        if (dataView != null) {
+            viewer.addDataView((DataView) dataView);
+        }
+    }
+
+    /**
+     * Display data pointed by region references. Data of each region is shown in a separate
+     * spreadsheet. The reg. ref. information is stored in strings of the format below:
+     * <p />
+     * <ul>
+     * <li>For point selections: "file_id:obj_id { <point1> <point2> ...) }", where <point1> is in
+     * the form of (location_of_dim0, location_of_dim1, ...). For example, 0:800 { (0,1) (2,11)
+     * (1,0) (2,4) }</li>
+     * <li>For rectangle selections:
+     * "file_id:obj_id { <corner coordinates1> <corner coordinates2> ... }", where <corner
+     * coordinates1> is in the form of (start_corner)-(oposite_corner). For example, 0:800 {
+     * (0,0)-(0,2) (0,11)-(0,13) (2,0)-(2,2) (2,11)-(2,13) }</li>
+     * </ul>
+     * 
+     * @param reg
+     *            the array of strings that contain the reg. ref information.
+     * 
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void showRegRefData (String reg) {
+        boolean isPointSelection = false;
+
+        if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) return;
+        log.trace("DefaultTableView showRegRefData: reg={}", reg);
+
+        isPointSelection = (reg.indexOf('-') <= 0);
+
+        // find the object location
+        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf(' '));
+        log.trace("DefaultTableView showRegRefData: isPointSelection={} oidStr={}", isPointSelection, oidStr);
+
+        // decode the region selection
+        String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
+        if (regStr == null || regStr.length() <= 0) return; // no selection
+
+        reg.substring(reg.indexOf('}') + 1);
+
+        StringTokenizer st = new StringTokenizer(regStr);
+        int nSelections = st.countTokens();
+        if (nSelections <= 0) return; // no selection
+        log.trace("DefaultTableView showRegRefData: nSelections={}", nSelections);
+
+        HObject obj = FileFormat.findObject(dataset.getFileFormat(), oidStr);
+        if (obj == null || !(obj instanceof ScalarDS)) return;
+
+        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dset_copy = null;
+
+        // create an instance of the dataset constructor
+        Constructor<? extends ScalarDS> constructor = null;
+        Object[] paramObj = null;
+        try {
+            Class[] paramClass = { FileFormat.class, String.class, String.class };
+            constructor = dset.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+        }
+        catch (Exception ex) {
+            constructor = null;
+        }
+
+        // load each selection into a separate dataset and display it in
+        // a separate spreadsheet
+        StringBuffer titleSB = new StringBuffer();
+        log.trace("DefaultTableView showRegRefData: titleSB created");
+
+        while (st.hasMoreTokens()) {
+            log.trace("DefaultTableView showRegRefData: st.hasMoreTokens() begin");
+            try {
+                dset_copy = (ScalarDS) constructor.newInstance(paramObj);
+            }
+            catch (Exception ex) {
+                continue;
+            }
+
+            if (dset_copy == null) continue;
+
+            try {
+                dset_copy.init();
+            }
+            catch (Exception ex) {
+                continue;
+            }
+
+            dset_copy.getRank();
+            long start[] = dset_copy.getStartDims();
+            long count[] = dset_copy.getSelectedDims();
+
+            // set the selected dimension sizes based on the region selection
+            // info.
+            int idx = 0;
+            String sizeStr = null;
+            String token = st.nextToken();
+
+            titleSB.setLength(0);
+            titleSB.append(token);
+            titleSB.append(" at ");
+            log.trace("DefaultTableView showRegRefData: titleSB={}", titleSB);
+
+            token = token.replace('(', ' ');
+            token = token.replace(')', ' ');
+            if (isPointSelection) {
+                // point selection
+                StringTokenizer tmp = new StringTokenizer(token, ",");
+                while (tmp.hasMoreTokens()) {
+                    count[idx] = 1;
+                    sizeStr = tmp.nextToken().trim();
+                    start[idx] = Long.valueOf(sizeStr);
+                    idx++;
+                }
+            }
+            else {
+                // rectangle selection
+                String startStr = token.substring(0, token.indexOf('-'));
+                String endStr = token.substring(token.indexOf('-') + 1);
+                StringTokenizer tmp = new StringTokenizer(startStr, ",");
+                while (tmp.hasMoreTokens()) {
+                    sizeStr = tmp.nextToken().trim();
+                    start[idx] = Long.valueOf(sizeStr);
+                    idx++;
+                }
+
+                idx = 0;
+                tmp = new StringTokenizer(endStr, ",");
+                while (tmp.hasMoreTokens()) {
+                    sizeStr = tmp.nextToken().trim();
+                    count[idx] = Long.valueOf(sizeStr) - start[idx] + 1;
+                    idx++;
+                }
+            }
+            log.trace("DefaultTableView showRegRefData: selection inited");
+
+            try {
+                dset_copy.getData();
+            }
+            catch (Exception ex) {
+            	showError(ex.getMessage(), "Region Reference:" + shell.getText());
+            }
+
+            Shell dataView = null;
+            HashMap map = new HashMap(1);
+            map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
+            switch (viewType) {
+                case TEXT:
+                    dataView = null;//new DefaultTextView(viewer, map);
+                    break;
+                case IMAGE:
+                    dataView = null;//new DefaultImageView(viewer, map);
+                    break;
+                default:
+                    dataView = null;//new DefaultTableViewOld(viewer, map);
+                    break;
+            }
+
+            if (dataView != null) {
+                viewer.addDataView((DataView) dataView);
+                dataView.setText(dataView.getText() + "; " + titleSB.toString());
+            }
+            log.trace("DefaultTableView showRegRefData: st.hasMoreTokens() end");
+        } // while (st.hasMoreTokens())
+    } // private void showRegRefData(String reg)
     
     private class ScalarDSDataProvider implements IDataProvider {
     	private static final long  serialVersionUID = 254175303655079056L;

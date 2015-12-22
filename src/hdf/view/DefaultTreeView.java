@@ -316,6 +316,8 @@ public class DefaultTreeView implements TreeView {
                     //tree.setSelection(selPath);
                 }
                 
+                // Add way to set url_bar text to this current file
+                
                 ((HDFView) viewer).showMetaData(selectedObject);
             }
         });
