@@ -54,7 +54,9 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.nebula.widgets.nattable.NatTable;
@@ -219,8 +221,8 @@ public class DefaultTableView implements TableView {
     public DefaultTableView(Shell parent, ViewManager theView, HashMap map) {
         log.trace("DefaultTableView start");
 
-        shell = new Shell(parent, SWT.FLAT);
-        shell.setLayout(new FillLayout());
+        shell = new Shell(parent, SWT.TITLE | SWT.MAX | SWT.CLOSE);
+        shell.setLayout(new RowLayout());
         
         viewer = theView;
         HObject hObject = null;
@@ -298,15 +300,26 @@ public class DefaultTableView implements TableView {
         //        TitledBorder.RIGHT, TitledBorder.TOP, this.getFont(), Color.black);
         //((JPanel) getContentPane()).setBorder(border);
         
-        SashForm content = new SashForm(shell, SWT.VERTICAL);
+        org.eclipse.swt.widgets.Group group = 
+        		new org.eclipse.swt.widgets.Group(shell, SWT.SHADOW_ETCHED_OUT);
+        group.setFont(Display.getCurrent().getSystemFont());
+        group.setText(indexBase + "-based");
+        group.setLayout(new FillLayout());
+        
+        SashForm content = new SashForm(group, SWT.VERTICAL);
         content.setSashWidth(10);
         
         Composite cellValueComposite = new Composite(content, SWT.NONE);
+        RowLayout layout = new RowLayout();
+        layout.justify = true;
+        layout.marginHeight = 2;
+        layout.marginWidth = 2;
+        layout.type = SWT.HORIZONTAL;
         cellValueComposite.setLayout(new RowLayout());
         
         cellLabel = new Label(cellValueComposite, SWT.BORDER);
         cellLabel.setSize(75, cellLabel.getSize().y);
-        cellLabel.setAlignment(SWT.RIGHT);
+        cellLabel.setAlignment(SWT.CENTER);
         
         cellValueField = new Text(cellValueComposite, SWT.SINGLE | SWT.BORDER | SWT.WRAP);
         //cellValueField.setWrapStyleWord(true);
@@ -319,13 +332,13 @@ public class DefaultTableView implements TableView {
             log.trace("createTable((CompoundDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
             
             isDataTransposed = false; // Disable transpose for compound dataset
-            //shell.setImage(ViewProperties.getTableIcon());
+            shell.setImage(ViewProperties.getTableIcon());
             table = createTable(content, (CompoundDS) dataset);
         }
         else { /* if (dataset instanceof ScalarDS) */
             log.trace("createTable((ScalarDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
             
-            //shell.setImage(ViewProperties.getDatasetIcon());
+            shell.setImage(ViewProperties.getDatasetIcon());
             table = createTable(content, (ScalarDS) dataset);
 
             if (dtype.getDatatypeClass() == Datatype.CLASS_REFERENCE) {
@@ -416,6 +429,14 @@ public class DefaultTableView implements TableView {
         
         log.trace("DefaultTableView: finish");
         
+        Composite dataClientArea = ((HDFView) viewer).getDataArea();
+        shell.setSize(dataClientArea.getClientArea().width, dataClientArea.getClientArea().height);
+        shell.setLocation(dataClientArea.getBounds().x, dataClientArea.getBounds().y);
+        
+        group.pack();
+        group.setLayoutData(new RowData(shell.getSize().x, shell.getSize().y));
+        
+        shell.pack();
         shell.open();
         
         while (!shell.isDisposed()) {

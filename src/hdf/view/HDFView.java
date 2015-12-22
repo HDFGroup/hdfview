@@ -39,6 +39,11 @@ import org.eclipse.swt.dnd.*;
 import swing2swt.layout.BorderLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.CTabFolder;
@@ -148,8 +153,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 	/* String buffer holding the metadata information */
 	private StringBuffer			metadata;
 	
-	/* GUI component: Container for the button toolbar and url toolbar */
-	private Composite 				toolbarContainer;
+	/* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
+	private ToolBar 				toolBar;
 	
 	/* GUI component: Area to hold file structure tree and data content pane */
 	private Composite				contentArea;
@@ -388,15 +393,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		try {
-			mainWindow.setImage(ViewProperties.getHdfIcon());
-		} catch (Exception ex) {
-			log.debug("Failed to set window icon");
-		}
-		
 		createMenuBar();
-		createToolBar();
-		createUrlToolbar();
+		createToolbar();
 		createContentArea();
 		
 		// Set size of main window
@@ -866,43 +864,38 @@ public class HDFView implements ViewManager, DropTargetListener {
 		
 		log.info("Menubar created");
 	}
-	
-	private void createToolBar() {
-		toolbarContainer = new Composite(mainWindow, SWT.NONE);
-		toolbarContainer.setFont(Display.getCurrent().getSystemFont());
-		toolbarContainer.setLayoutData(BorderLayout.NORTH);
-		toolbarContainer.setLayout(new FillLayout(SWT.VERTICAL));
+
+	private void createToolbar() {
+		toolBar = new ToolBar(mainWindow, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER_DOT);
+		toolBar.setFont(Display.getCurrent().getSystemFont());
+		toolBar.setLayoutData(BorderLayout.NORTH);
 		
-		Composite toolbarItemContainer = new Composite(toolbarContainer, SWT.NONE);
-		toolbarItemContainer.setLayout(new FillLayout(SWT.HORIZONTAL));
-		
-		ToolBar toolBar = new ToolBar(toolbarItemContainer, SWT.FLAT | SWT.RIGHT);
-		
-		ToolItem tltmNewItem = new ToolItem(toolBar, SWT.NONE);
-		tltmNewItem.setToolTipText("Open");
-		tltmNewItem.setImage(ViewProperties.getFileopenIcon());
-		tltmNewItem.addSelectionListener(new SelectionAdapter() {
+		ToolItem openItem = new ToolItem(toolBar, SWT.PUSH);
+		openItem.setToolTipText("Open");
+		openItem.setImage(ViewProperties.getFileopenIcon());
+		openItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openLocalFile(null, FileFormat.WRITE);
 			}
 		});
 		
-		ToolItem tltmNewItem_1 = new ToolItem(toolBar, SWT.NONE);
-		tltmNewItem_1.setImage(ViewProperties.getFilecloseIcon());
-		tltmNewItem_1.setToolTipText("Close");
-		tltmNewItem_1.addSelectionListener(new SelectionAdapter() {
+		new ToolItem(toolBar, SWT.SEPARATOR).setWidth(4);
+		
+		ToolItem closeItem = new ToolItem(toolBar, SWT.PUSH);
+		closeItem.setImage(ViewProperties.getFilecloseIcon());
+		closeItem.setToolTipText("Close");
+		closeItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				closeFile(treeView.getSelectedFile());
 			}
 		});
 		
-		ToolItem toolItem = new ToolItem(toolBar, SWT.SEPARATOR);
-		toolItem.setWidth(20);
+		new ToolItem(toolBar, SWT.SEPARATOR).setWidth(20);
 		
-		ToolItem tltmNewItem_2 = new ToolItem(toolBar, SWT.NONE);
-		tltmNewItem_2.setImage(ViewProperties.getHelpIcon());
-		tltmNewItem_2.setToolTipText("Help");
-		tltmNewItem_2.addSelectionListener(new SelectionAdapter() {
+		ToolItem helpItem = new ToolItem(toolBar, SWT.PUSH);
+		helpItem.setImage(ViewProperties.getHelpIcon());
+		helpItem.setToolTipText("Help");
+		helpItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String ugPath = ViewProperties.getUsersGuide();
@@ -935,10 +928,12 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		ToolItem tltmNewItem_3 = new ToolItem(toolBar, SWT.NONE);
-		tltmNewItem_3.setImage(ViewProperties.getH4Icon());
-		tltmNewItem_3.setToolTipText("HDF4 Library Version");
-		tltmNewItem_3.addSelectionListener(new SelectionAdapter() {
+		new ToolItem(toolBar, SWT.SEPARATOR).setWidth(4);
+		
+		ToolItem hdf4Item = new ToolItem(toolBar, SWT.PUSH);
+		hdf4Item.setImage(ViewProperties.getH4Icon());
+		hdf4Item.setToolTipText("HDF4 Library Version");
+		hdf4Item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF4);
 				dialog.open();
@@ -946,13 +941,15 @@ public class HDFView implements ViewManager, DropTargetListener {
 		});
 		
 		if(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null) {
-			tltmNewItem_3.setEnabled(false);
+			hdf4Item.setEnabled(false);
 		}
 		
-		ToolItem tltmNewItem_4 = new ToolItem(toolBar, SWT.NONE);
-		tltmNewItem_4.setImage(ViewProperties.getH5Icon());
-		tltmNewItem_4.setToolTipText("HDF5 Library Version");
-		tltmNewItem_4.addSelectionListener(new SelectionAdapter() {
+		new ToolItem(toolBar, SWT.SEPARATOR).setWidth(4);
+		
+		ToolItem hdf5Item = new ToolItem(toolBar, SWT.PUSH);
+		hdf5Item.setImage(ViewProperties.getH5Icon());
+		hdf5Item.setToolTipText("HDF5 Library Version");
+		hdf5Item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				LibraryVersionDialog dialog = new LibraryVersionDialog(mainWindow, FileFormat.FILE_TYPE_HDF5);
 				dialog.open();
@@ -960,18 +957,46 @@ public class HDFView implements ViewManager, DropTargetListener {
 		});
 		
 		if(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) == null) {
-			tltmNewItem_4.setEnabled(false);
+			hdf5Item.setEnabled(false);
 		}
+		
+		// Make the toolbar as wide as the window and as
+		// tall as the buttons
+		toolBar.setSize(mainWindow.getClientArea().width, openItem.getBounds().height);
+		toolBar.setLocation(0, 0);
 		
 		log.info("Toolbar created");
 	}
-	
-	private void createUrlToolbar() {
-		Composite url_toolbar = new Composite(toolbarContainer, SWT.NONE);
-		url_toolbar.setLayout(new BorderLayout(0, 0));
+
+	private void createContentArea() {
+		SashForm content = new SashForm(mainWindow, SWT.VERTICAL);
+		content.setSashWidth(10);
 		
-		url_bar = new Combo(url_toolbar, SWT.NONE);
-		url_bar.setLayoutData(BorderLayout.CENTER);
+		// Add Url Toolbar, Data content area and Status Area to main window
+		Composite container = new Composite(content, SWT.NONE);
+		container.setLayout(new FormLayout());
+		
+	    Composite statusArea = new Composite(content, SWT.NONE);
+	    statusArea.setLayout(new FillLayout(SWT.HORIZONTAL));
+	    
+	    Composite urlToolbarContainer = new Composite(container, SWT.BORDER);
+	    urlToolbarContainer.setLayout(new FormLayout());
+	    FormData formData = new FormData();
+	    formData.top = new FormAttachment(0, 0);
+	    formData.left = new FormAttachment(0, 0);
+	    formData.right = new FormAttachment(100, 0);
+	    urlToolbarContainer.setLayoutData(formData);
+		
+		Button btnRecentFiles = new Button(urlToolbarContainer, SWT.NONE);
+		btnRecentFiles.setText("Recent Files");
+		btnRecentFiles.setToolTipText("List of recent files");
+		btnRecentFiles.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				url_bar.setListVisible(true);
+			}
+		});
+		
+		url_bar = new Combo(urlToolbarContainer, SWT.NONE);
 		url_bar.setItems(ViewProperties.getMRF().toArray(new String[0]));
 		url_bar.setText("/root/workspace/hdf-java/build/test/uitest/hdf5_test.h5");
 		url_bar.setVisibleItemCount(ViewProperties.MAX_RECENT_FILES);
@@ -999,19 +1024,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		Button btnRecentFiles = new Button(url_toolbar, SWT.NONE);
-		btnRecentFiles.setText("Recent Files");
-		btnRecentFiles.setToolTipText("List of recent files");
-		btnRecentFiles.setLayoutData(BorderLayout.WEST);
-		btnRecentFiles.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				url_bar.setListVisible(true);
-			}
-		});
-		
-		Button btnClearText = new Button(url_toolbar, SWT.NONE);
+		Button btnClearText = new Button(urlToolbarContainer, SWT.NONE);
 		btnClearText.setToolTipText("Clear current selection");
-		btnClearText.setLayoutData(BorderLayout.EAST);
 		btnClearText.setText("Clear Text");
 		btnClearText.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -1019,27 +1033,48 @@ public class HDFView implements ViewManager, DropTargetListener {
 			}
 		});
 		
-		log.info("URL Toolbar created");
-	}
-	
-	private void createContentArea() {
-		SashForm content = new SashForm(mainWindow, SWT.VERTICAL);
-		content.setSashWidth(10);
+		// Set layout for Recent Files button
+		formData = new FormData();
+		formData.top = new FormAttachment(0, 0);
+		formData.left = new FormAttachment(0, 0);
+		formData.bottom = new FormAttachment(100, 0);
+		formData.right = new FormAttachment(url_bar, 0);
+		btnRecentFiles.setLayoutData(formData);
 		
-		// Add Data content area and Status Area to main window
-		SashForm contentArea = new SashForm(content, SWT.HORIZONTAL);
+		// Set layout for URL toolbar
+		formData = new FormData();
+		formData.top = new FormAttachment(0, 1);
+		formData.left = new FormAttachment(10, 0);
+		formData.bottom = new FormAttachment(100, 0);
+		formData.right = new FormAttachment(92, 0);
+		url_bar.setLayoutData(formData);
+		
+		// Set layout for Clear Text button
+		formData = new FormData();
+		formData.top = new FormAttachment(0, 0);
+		formData.left = new FormAttachment(url_bar, 0);
+		formData.bottom = new FormAttachment(100, 0);
+		formData.right = new FormAttachment(100, 0);
+		btnClearText.setLayoutData(formData);
+		
+		log.info("URL Toolbar created");
+		
+		SashForm contentArea = new SashForm(container, SWT.HORIZONTAL);
 	    contentArea.setSashWidth(10);
-	    
-	    Composite statusArea = new Composite(content, SWT.NONE);
-	    statusArea.setLayout(new FillLayout(SWT.HORIZONTAL));
+	    formData = new FormData();
+	    formData.left = new FormAttachment(0, 0);
+	    formData.right = new FormAttachment(100, 0);
+	    formData.top = new FormAttachment(urlToolbarContainer, 0);
+	    formData.bottom = new FormAttachment(100, 0);
+	    contentArea.setLayoutData(formData);
 	    
 	    // Add TreeView and DataView to content area pane
-		ScrolledComposite treeArea = new ScrolledComposite(contentArea, SWT.H_SCROLL | SWT.V_SCROLL);
+		ScrolledComposite treeArea = new ScrolledComposite(contentArea, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		treeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		treeArea.setExpandHorizontal(true);
 		treeArea.setExpandVertical(true);
 		
-		dataArea = new Composite(contentArea, SWT.NONE);
+		dataArea = new Composite(contentArea, SWT.BORDER);
 		dataArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		
 		// Could not load user's treeview, use default treeview.
@@ -1075,8 +1110,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 		// Set Log Info to show first in status area
 		tabFolder.setSelection(0);
 		
-		content.setWeights(new int[] {4, 1});
-		contentArea.setWeights(new int[] {1, 1});
+		content.setWeights(new int[] {9, 1});
+		contentArea.setWeights(new int[] {1, 3});
 	}
 	
 	private void registerFileFormat() {
@@ -1413,6 +1448,12 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
     
     public void dropAccept(DropTargetEvent evt) {
+    }
+    
+    // Get the data area which HDFView uses to display
+    // DataViews in
+    public Composite getDataArea() {
+    	return dataArea;
     }
 
     /**
