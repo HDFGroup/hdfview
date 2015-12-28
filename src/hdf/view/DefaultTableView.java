@@ -49,6 +49,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -58,7 +59,23 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
+import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
+import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
+import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
+import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
+import org.eclipse.nebula.widgets.nattable.config.EditableRule;
+import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
+import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.validate.IDataValidator;
+import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
+import org.eclipse.nebula.widgets.nattable.edit.action.CellEditDragMode;
+import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
+import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditBindings;
+import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
+import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
+import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
@@ -68,7 +85,13 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
+import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
+import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.BodyCellEditorMouseEventMatcher;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 
@@ -221,7 +244,8 @@ public class DefaultTableView implements TableView {
     public DefaultTableView(Shell parent, ViewManager theView, HashMap map) {
         log.trace("DefaultTableView start");
 
-        shell = new Shell(parent, SWT.TITLE | SWT.MAX | SWT.CLOSE);
+        shell = new Shell(parent, SWT.SHELL_TRIM);
+        //shell = new Shell(display, SWT.SHELL_TRIM);
         shell.setLayout(new FillLayout());
         
         viewer = theView;
@@ -575,7 +599,166 @@ public class DefaultTableView implements TableView {
         }
         
         // Create body layer
-        IDataProvider bodyDataProvider = new ScalarDSDataProvider();
+        final IDataProvider bodyDataProvider = new ScalarDSDataProvider();
+        final DataLayer dataLayer = new DataLayer(bodyDataProvider);
+        final SelectionLayer selectionLayer = new SelectionLayer(dataLayer);
+        ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
+        dataLayer.setDefaultColumnWidth(80);
+        
+        // Create the Column Header layer
+        IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnNames);
+        ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
+                columnHeaderDataProvider), viewportLayer, selectionLayer);
+        
+        // Create the Row Header layer
+        IDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(
+                bodyDataProvider);
+        ILayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
+                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer);
+
+        // Create the Corner layer
+        ILayer cornerLayer = new CornerLayer(new DataLayer(
+                new DefaultCornerDataProvider(columnHeaderDataProvider,
+                        rowHeaderDataProvider)), rowHeaderLayer,
+                columnHeaderLayer);
+        
+        // Create the Grid layer
+        GridLayer gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
+                rowHeaderLayer, cornerLayer, false);
+        gridLayer.addConfiguration(new DefaultEditConfiguration());
+        
+        // Change cell editing to be on double click rather than single click
+        gridLayer.addConfiguration(new AbstractUiBindingConfiguration() {
+        	@Override
+        	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+        		uiBindingRegistry.registerFirstDoubleClickBinding(
+        		    new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
+        		//uiBindingRegistry.registerFirstMouseDragMode(mouseEventMatcher, new CellEditDragMode());
+        	}
+        });
+        
+        final NatTable natTable = new NatTable(parent, gridLayer, false);
+        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+        /*natTable.addConfiguration(new AbstractRegistryConfiguration() {
+        	@Override
+            public void configureRegistry(IConfigRegistry configRegistry) {
+                EditableGridExample.registerConfigLabelsOnColumns(columnLabelAccumulator);
+
+                registerISINValidator(configRegistry);
+                registerAskPriceValidator(configRegistry, dataProvider);
+                registerBidPriceValidator(configRegistry);
+
+                registerSecurityDescriptionCellStyle(configRegistry);
+                registerPricingCellStyle(configRegistry);
+
+                registerPriceFormatter(configRegistry);
+                registerDateFormatter(configRegistry);
+                registerLotSizeFormatter(configRegistry);
+
+                registerEditableRules(configRegistry, dataProvider);
+            }
+
+        });*/
+        
+        // Register cell editing rules with table
+        natTable.addConfiguration(new AbstractRegistryConfiguration() {
+            @Override
+            public void configureRegistry(IConfigRegistry configRegistry) {
+                configRegistry.registerConfigAttribute(
+                		EditConfigAttributes.CELL_EDITABLE_RULE,
+                		getEditRule(bodyDataProvider),
+                		DisplayMode.EDIT);
+            }
+
+            @Override
+            public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+            	//uiBindingRegistry.registerDoubleClickBinding(mouseEventMatcher, action);
+            }
+        });
+        
+        natTable.configure();
+        
+        log.trace("createTable(ScalarDS): finish");
+        
+        return natTable;
+    }
+    
+    /**
+     * Creates a NatTable for a Compound dataset
+     * @param dataset
+     *          The Compound dataset for the NatTable to display
+     * @return The newly created NatTable
+     */
+    private NatTable createTable(Composite parent, CompoundDS dataset) {
+    	log.trace("createTable: CompoundDS start");
+
+        if (dataset.getRank() <= 0) dataset.init();
+
+        long[] startArray = dataset.getStartDims();
+        long[] strideArray = dataset.getStride();
+        int[] selectedIndex = dataset.getSelectedIndex();
+        final int rowStart = (int) startArray[selectedIndex[0]];
+        final int rowStride = (int) strideArray[selectedIndex[0]];
+
+        // use lazy convert for large number of strings
+        if (dataset.getHeight() > 10000) {
+            dataset.setConvertByteToString(false);
+        }
+
+        dataValue = null;
+        try {
+            dataValue = dataset.getData();
+        }
+        catch (Throwable ex) {
+            shell.getDisplay().beep();
+            showError(ex.getMessage(), "TableView " + shell.getText());
+            dataValue = null;
+        }
+
+        if ((dataValue == null) || !(dataValue instanceof List)) {
+            return null;
+        }
+
+        final int rows = dataset.getHeight();
+        int cols = dataset.getSelectedMemberCount();
+        String[] columnNames = new String[cols];
+
+        int idx = 0;
+        String[] columnNamesAll = dataset.getMemberNames();
+        for (int i = 0; i < columnNamesAll.length; i++) {
+            if (dataset.isMemberSelected(i)) {
+                columnNames[idx] = columnNamesAll[i];
+                columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
+                idx++;
+            }
+        }
+
+        String[] subColumnNames = columnNames;
+        int columns = dataset.getWidth();
+        if (columns > 1) {
+            // multi-dimension compound dataset
+            subColumnNames = new String[columns * columnNames.length];
+            int halfIdx = columnNames.length / 2;
+            for (int i = 0; i < columns; i++) {
+                for (int j = 0; j < columnNames.length; j++) {
+                    // display column index only once, in the middle of the
+                    // compound fields
+                    if (j == halfIdx) {
+                        // subColumnNames[i * columnNames.length + j] = (i + 1)
+                        // + "\n " + columnNames[j];
+                        subColumnNames[i * columnNames.length + j] = (i + indexBase) + "\n " + columnNames[j];
+                    }
+                    else {
+                        subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
+                    }
+                }
+            }
+        }
+
+        final String[] allColumnNames = subColumnNames;
+        
+        // Create body layer
+        IDataProvider bodyDataProvider = new CompoundDSDataProvider();
         final DataLayer dataLayer = new DataLayer(bodyDataProvider);
         final SelectionLayer selectionLayer = new SelectionLayer(dataLayer);
         ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
@@ -604,20 +787,9 @@ public class DefaultTableView implements TableView {
         
         final NatTable natTable = new NatTable(parent, gridLayer);
         
-        log.trace("createTable(ScalarDS): finish");
+        log.trace("createTable(CompoundDS): finish");
         
         return natTable;
-    }
-    
-    /**
-     * Creates a NatTable for a Compound dataset
-     * @param dataset
-     *          The Compound dataset for the NatTable to display
-     * @return The newly created NatTable
-     */
-    private NatTable createTable(Composite parent, CompoundDS dataset) {
-        
-        return null; // Remove when implemented
     }
     
     /**
@@ -1466,7 +1638,7 @@ public class DefaultTableView implements TableView {
 
         frameField.setText(String.valueOf(curFrame));
         
-        table.refresh();
+        table.doCommand(new StructuralRefreshCommand());
     }
 
 
@@ -1508,16 +1680,16 @@ public class DefaultTableView implements TableView {
     private void updateValueInMemory(String cellValue, int row, int col) throws Exception {
         log.trace("DefaultTableView: updateValueInMemory()");
         
-        //if (currentEditingCellValue != null) {
+        if (currentEditingCellValue != null) {
             // Data values are the same, no need to change the data
-        //    if (currentEditingCellValue.toString().equals(cellValue)) return;
-        //}
+            if (currentEditingCellValue.toString().equals(cellValue)) return;
+        }
 
         if (dataset instanceof ScalarDS) {
-            //updateScalarData(cellValue, row, col);
+            updateScalarData(cellValue, row, col);
         }
         else if (dataset instanceof CompoundDS) {
-            //updateCompoundData(cellValue, row, col);
+            updateCompoundData(cellValue, row, col);
         }
     }
     
@@ -2096,6 +2268,263 @@ public class DefaultTableView implements TableView {
         } // while (st.hasMoreTokens())
     } // private void showRegRefData(String reg)
     
+    /**
+     * Update cell value in memory. It does not change the dataset value in file.
+     * 
+     * @param cellValue
+     *            the string value of input.
+     * @param row
+     *            the row of the editing cell.
+     * @param col
+     *            the column of the editing cell.
+     */
+    private void updateScalarData (String cellValue, int row, int col) throws Exception {
+    	if (!(dataset instanceof ScalarDS) || (cellValue == null) || ((cellValue = cellValue.trim()) == null)
+    			|| showAsBin || showAsHex) {
+            return;
+        }
+
+        int i = 0;
+        if (isDataTransposed) {
+            i = col * (table.getPreferredRowCount() - 1) + row;
+        }
+        else {
+            i = row * (table.getPreferredColumnCount() - 1) + col;
+        }
+        
+        System.out.println("Updating index " + i + " with value " + cellValue);
+        log.trace("DefaultTableView: updateScalarData {} NT={}", cellValue, NT);
+        
+        ScalarDS sds = (ScalarDS) dataset;
+        boolean isUnsigned = sds.isUnsigned();
+        String cname = dataset.getOriginalClass().getName();
+        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        log.trace("updateScalarData: isUnsigned={} cname={} dname={}", isUnsigned, cname, dname);
+
+        // check data range for unsigned datatype converted sizes!
+        if (isUnsigned) {
+            long lvalue = -1;
+            long maxValue = Long.MAX_VALUE;
+            if (dname == 'B') {
+                maxValue = 255;
+                lvalue = Long.parseLong(cellValue);
+
+                if (lvalue < 0) {
+                    throw new NumberFormatException("Negative value for unsigned integer: " + lvalue);
+                }
+
+                if (lvalue > maxValue) {
+                    throw new NumberFormatException("Data value is out of range: " + lvalue);
+                }
+            }
+            else if (dname == 'S') {
+                maxValue = 65535;
+                lvalue = Long.parseLong(cellValue);
+
+                if (lvalue < 0) {
+                    throw new NumberFormatException("Negative value for unsigned integer: " + lvalue);
+                }
+
+                if (lvalue > maxValue) {
+                    throw new NumberFormatException("Data value is out of range: " + lvalue);
+                }
+            }
+            else if (dname == 'I') {
+                maxValue = 4294967295L;
+                lvalue = Long.parseLong(cellValue);
+
+                if (lvalue < 0) {
+                    throw new NumberFormatException("Negative value for unsigned integer: " + lvalue);
+                }
+
+                if (lvalue > maxValue) {
+                    throw new NumberFormatException("Data value is out of range: " + lvalue);
+                }
+            }
+            else if (dname == 'J') {
+                BigInteger Jmax = new BigInteger("18446744073709551615");
+                BigInteger big = new BigInteger(cellValue);
+                if (big.compareTo(Jmax) > 0) {
+                    throw new NumberFormatException("Negative value for unsigned integer: " + cellValue);
+                }
+                if (big.compareTo(BigInteger.ZERO) < 0) {
+                    throw new NumberFormatException("Data value is out of range: " + cellValue);
+                }
+            }
+        }
+
+        switch (NT) {
+            case 'B':
+                byte bvalue = 0;
+                bvalue = Byte.parseByte(cellValue);
+                Array.setByte(dataValue, i, bvalue);
+                break;
+            case 'S':
+                short svalue = 0;
+                svalue = Short.parseShort(cellValue);
+                Array.setShort(dataValue, i, svalue);
+                break;
+            case 'I':
+                int ivalue = 0;
+                ivalue = Integer.parseInt(cellValue);
+                Array.setInt(dataValue, i, ivalue);
+                break;
+            case 'J':
+                long lvalue = 0;
+                if (dname == 'J') {
+                    BigInteger big = new BigInteger(cellValue);
+                    lvalue = big.longValue();
+                }
+                else
+                    lvalue = Long.parseLong(cellValue);
+                Array.setLong(dataValue, i, lvalue);
+                break;
+            case 'F':
+                float fvalue = 0;
+                fvalue = Float.parseFloat(cellValue);
+                Array.setFloat(dataValue, i, fvalue);
+                break;
+            case 'D':
+                double dvalue = 0;
+                dvalue = Double.parseDouble(cellValue);
+                Array.setDouble(dataValue, i, dvalue);
+                break;
+            default:
+                Array.set(dataValue, i, cellValue);
+                break;
+        }
+
+        isValueChanged = true;
+    }
+    
+    private void updateCompoundData (String cellValue, int row, int col) throws Exception {
+    	if (!(dataset instanceof CompoundDS) || (cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
+            return;
+        }
+        log.trace("DefaultTableView: updateCompoundData");
+
+        CompoundDS compDS = (CompoundDS) dataset;
+        List<?> cdata = (List<?>) compDS.getData();
+        int orders[] = compDS.getSelectedMemberOrders();
+        Datatype types[] = compDS.getSelectedMemberTypes();
+        int nFields = cdata.size();
+        int nSubColumns = (table.getPreferredColumnCount() - 1) / nFields;
+        //table.getRowCount();
+        int column = col;
+        int offset = 0;
+        int morder = 1;
+
+        if (nSubColumns > 1) { // multi-dimension compound dataset
+            int colIdx = col / nFields;
+            column = col - colIdx * nFields;
+            // //BUG 573: offset = row * orders[column] + colIdx * nRows *
+            // orders[column];
+            offset = row * orders[column] * nSubColumns + colIdx * orders[column];
+        }
+        else {
+            offset = row * orders[column];
+        }
+        morder = orders[column];
+
+        Object mdata = cdata.get(column);
+
+        // strings
+        if (Array.get(mdata, 0) instanceof String) {
+            Array.set(mdata, offset, cellValue);
+            isValueChanged = true;
+            return;
+        }
+        else if (types[column].getDatatypeClass() == Datatype.CLASS_STRING) {
+            // it is string but not converted, still byte array
+            int strlen = types[column].getDatatypeSize();
+            offset *= strlen;
+            byte[] bytes = cellValue.getBytes();
+            byte[] bData = (byte[]) mdata;
+            int n = Math.min(strlen, bytes.length);
+            System.arraycopy(bytes, 0, bData, offset, n);
+            offset += n;
+            n = strlen - bytes.length;
+            // space padding
+            for (int i = 0; i < n; i++) {
+                bData[offset + i] = ' ';
+            }
+            isValueChanged = true;
+            return;
+        }
+
+        // Numeric data
+        char mNT = ' ';
+        String cName = mdata.getClass().getName();
+        int cIndex = cName.lastIndexOf("[");
+        if (cIndex >= 0) {
+            mNT = cName.charAt(cIndex + 1);
+        }
+
+        StringTokenizer st = new StringTokenizer(cellValue, ",");
+        if (st.countTokens() < morder) {
+            shell.getDisplay().beep();
+            showError("Number of data points < " + morder + ".", shell.getText());
+            return;
+        }
+
+        String token = "";
+        isValueChanged = true;
+        switch (mNT) {
+            case 'B':
+                byte bvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    bvalue = Byte.parseByte(token);
+                    Array.setByte(mdata, offset + i, bvalue);
+                }
+                break;
+            case 'S':
+                short svalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    svalue = Short.parseShort(token);
+                    Array.setShort(mdata, offset + i, svalue);
+                }
+                break;
+            case 'I':
+                int ivalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    ivalue = Integer.parseInt(token);
+                    Array.setInt(mdata, offset + i, ivalue);
+                }
+                break;
+            case 'J':
+                long lvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    BigInteger big = new BigInteger(token);
+                    lvalue = big.longValue();
+                    // lvalue = Long.parseLong(token);
+                    Array.setLong(mdata, offset + i, lvalue);
+                }
+                break;
+            case 'F':
+                float fvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    fvalue = Float.parseFloat(token);
+                    Array.setFloat(mdata, offset + i, fvalue);
+                }
+                break;
+            case 'D':
+                double dvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    dvalue = Double.parseDouble(token);
+                    Array.setDouble(mdata, offset + i, dvalue);
+                }
+                break;
+            default:
+                isValueChanged = false;
+        }
+    }
+    
     private class ScalarDSDataProvider implements IDataProvider {
     	private static final long  serialVersionUID = 254175303655079056L;
     	private final StringBuffer stringBuffer     = new StringBuffer();
@@ -2120,7 +2549,7 @@ public class DefaultTableView implements TableView {
     	
     	@Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-    		if (startEditing[0]) return "";
+    	    if (startEditing[0]) return "";
             log.trace("ScalarDS:ScalarDSDataProvider:getValueAt({},{}) start", columnIndex, rowIndex);
             log.trace("ScalarDS:ScalarDSDataProvider:getValueAt isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray, showAsHex, showAsBin);
 
@@ -2235,21 +2664,199 @@ public class DefaultTableView implements TableView {
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-        	
+        	try {
+                updateValueInMemory((String) newValue, rowIndex, columnIndex);
+            }
+            catch (Exception ex) {
+                display.beep();
+                showError(ex.getMessage(), shell.getText());
+            }
         }
 
         @Override
         public int getColumnCount() {
-            return dataset.getWidth();
+            return colCount;
         }
 
         @Override
         public int getRowCount() {
-            return dataset.getHeight();
+            return rowCount;
         }
     }
     
-    //private class CompoundDSDataProvider implements IDataProvider {
-    	
-    //}
+    private class CompoundDSDataProvider implements IDataProvider {
+    	private static final long serialVersionUID = -2176296469630678304L;
+        CompoundDS                compound         = (CompoundDS) dataset;
+        int                       orders[]         = compound.getSelectedMemberOrders();
+        Datatype                  types[]          = compound.getSelectedMemberTypes();
+        StringBuffer              stringBuffer     = new StringBuffer();
+        int                       nFields          = ((List<?>) dataValue).size();
+        int                       nSubColumns      = (nFields > 0) ? getColumnCount() / nFields : 0;
+        int                       nRows            = compound.getHeight();
+        int                       nCols            = compound.getSelectedMemberCount();
+        
+        public CompoundDSDataProvider() {
+        	
+        }
+        
+		@Override
+		public Object getDataValue(int col, int row) {
+			if (startEditing[0]) return "";
+
+            int fieldIdx = col;
+            int rowIdx = row;
+            char CNT = ' ';
+            boolean CshowAsHex = false;
+            boolean CshowAsBin = false;
+            log.trace("CompoundDS:CompoundDSDataProvider:getValueAt({},{}) start", row, col);
+
+            if (nSubColumns > 1) { // multi-dimension compound dataset
+                int colIdx = col / nFields;
+                fieldIdx = col - colIdx * nFields;
+                // BUG 573: rowIdx = row * orders[fieldIdx] + colIdx * nRows
+                // * orders[fieldIdx];
+                rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
+                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
+            }
+            else {
+                rowIdx = row * orders[fieldIdx];
+                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
+            }
+            log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() rowIdx={}", rowIdx);
+
+            Object colValue = ((List<?>) dataValue).get(fieldIdx);
+            if (colValue == null) {
+                return "Null";
+            }
+
+            stringBuffer.setLength(0); // clear the old string
+            boolean isString = (types[fieldIdx].getDatatypeClass() == Datatype.CLASS_STRING);
+            if (isString && (colValue instanceof byte[])) {
+                // strings
+                int strlen = types[fieldIdx].getDatatypeSize();
+                String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
+                int idx = str.indexOf('\0');
+                if (idx > 0) {
+                    str = str.substring(0, idx);
+                }
+                stringBuffer.append(str.trim());
+            }
+            else {
+                // numerical values
+                Datatype dtype = types[fieldIdx];
+                if (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY) dtype = types[fieldIdx].getBasetype();
+
+                String cName = colValue.getClass().getName();
+                int cIndex = cName.lastIndexOf("[");
+                if (cIndex >= 0) {
+                    CNT = cName.charAt(cIndex + 1);
+                }
+                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt(): cName={} CNT={}", cName, CNT);
+
+                boolean isUINT64 = false;
+                boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
+                int typeSize = dtype.getDatatypeSize();
+                
+                if ((dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) || (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE)) {
+                    CshowAsHex = true;
+                    log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() class={} (BITFIELD or OPAQUE)", dtype.getDatatypeClass());
+                }
+                if (dtype.isUnsigned()) {
+                    if (cIndex >= 0) {
+                        isUINT64 = (cName.charAt(cIndex + 1) == 'J');
+                    }
+                }
+                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() isUINT64={} isInt={} CshowAsHex={} typeSize={}", isUINT64, isInt, CshowAsHex, typeSize);
+
+                for (int i = 0; i < orders[fieldIdx]; i++) {
+                    if (isUINT64) {
+                        Object theValue = Array.get(colValue, rowIdx + i);
+                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        Long l = (Long) theValue;
+                        if (l < 0) {
+                            l = (l << 1) >>> 1;
+                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                            BigInteger big2 = new BigInteger(l.toString());
+                            BigInteger big = big1.add(big2);
+                            theValue = big.toString();
+                        }
+                        if (i > 0) stringBuffer.append(", ");
+                        stringBuffer.append(theValue);
+                    }
+                    else if (CshowAsHex && isInt) {
+                        char[] hexArray = "0123456789ABCDEF".toCharArray();
+                        Object theValue = Array.get(colValue, rowIdx * typeSize + typeSize * i);
+                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        // show in Hexadecimal
+                        char[] hexChars = new char[2];
+                        if (i > 0) stringBuffer.append(", ");
+                        for (int x = 0; x < typeSize; x++) {
+                            if (x > 0)
+                                theValue = Array.get(colValue, rowIdx * typeSize + typeSize * i + x);
+                            int v = (int)((Byte)theValue) & 0xFF;
+                            hexChars[0] = hexArray[v >>> 4];
+                            hexChars[1] = hexArray[v & 0x0F];
+                            if (x > 0) stringBuffer.append(":");
+                            stringBuffer.append(hexChars);
+                            log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() hexChars[{}]={}", x, hexChars);
+                        }
+                    }
+                    else if (showAsBin && isInt) {
+                        Object theValue = Array.get(colValue, rowIdx + typeSize * i);
+                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        theValue = Tools.toBinaryString(Long.valueOf(theValue.toString()), typeSize);
+                        if (i > 0) stringBuffer.append(", ");
+                        stringBuffer.append(theValue);
+                    }
+                    else if (numberFormat != null) {
+                        // show in scientific format
+                        Object theValue = Array.get(colValue, rowIdx + i);
+                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        theValue = numberFormat.format(theValue);
+                        if (i > 0) stringBuffer.append(", ");
+                        stringBuffer.append(theValue);
+                    }
+                    else {
+                        Object theValue = Array.get(colValue, rowIdx + i);
+                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        if (i > 0) stringBuffer.append(", ");
+                        stringBuffer.append(theValue);
+                    }
+                }
+            } // end of else {
+
+            return stringBuffer;
+		}
+
+		@Override
+		public void setDataValue(int arg0, int arg1, Object arg2) {
+			
+		}
+
+		@Override
+		public int getColumnCount() {
+			return nCols;
+		}
+
+		@Override
+		public int getRowCount() {
+			return nRows;
+		}
+    }
+    
+    // Allow a cell to be edited under specific conditions
+    private IEditableRule getEditRule(final IDataProvider dataProvider) {
+        return new EditableRule() {
+            @Override
+            public boolean isEditable(int columnIndex, int rowIndex) {
+            	if (isReadOnly || isDisplayTypeChar || showAsBin || showAsHex
+            			|| dataset.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
+                    return false;
+                }
+                else {
+                	return true;
+                }
+            }
+        };
+    }
 }
