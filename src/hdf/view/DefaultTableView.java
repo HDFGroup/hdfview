@@ -51,6 +51,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -252,6 +254,34 @@ public class DefaultTableView implements TableView {
         shell = new Shell(parent, SWT.SHELL_TRIM);
         //shell = new Shell(display, SWT.SHELL_TRIM);
         shell.setLayout(new FillLayout());
+        
+        shell.addDisposeListener(new DisposeListener() {
+        	public void widgetDisposed(DisposeEvent e) {
+        		if (isValueChanged && !isReadOnly) {
+                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                    confirm.setText(shell.getText());
+                    confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
+                    if (confirm.open() == SWT.YES) {
+                        updateValueInFile();
+                    }
+                    else dataset.clearData(); // reload data
+        		}
+                
+                if (dataset instanceof ScalarDS) {
+                    ScalarDS sds = (ScalarDS) dataset;
+                    // reload the data when it is displayed next time
+                    // because the display type (table or image) may be
+                    // different.
+
+                    if (sds.isImage()) {
+                        sds.clearData();
+                    }
+
+                    dataValue = null;
+                    table = null;
+                }
+        	}
+        });
         
         viewer = theView;
         HObject hObject = null;
@@ -897,7 +927,7 @@ public class DefaultTableView implements TableView {
                 fchooser.setFilterPath(currentDir);
                 //fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
                 fchooser.setFilterExtensions(new String[] {"*.txt", "*.*"});
-        		fchooser.setFilterNames(new String[] {"Text Documents", "All Files"});
+        		fchooser.setFilterNames(new String[] {"Text Documents (*.txt)", "All Files (*.*)"});
         		fchooser.setFilterIndex(0);
                 
                 if (fchooser.open() == null) return;
@@ -1294,30 +1324,6 @@ public class DefaultTableView implements TableView {
         item.setText("Close");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                if (isValueChanged && !isReadOnly) {
-                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                    confirm.setText(shell.getText());
-                    confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
-                    if (confirm.open() == SWT.YES) {
-                        updateValueInFile();
-                    }
-                    else dataset.clearData(); // reload data
-                }
-
-                if (dataset instanceof ScalarDS) {
-                    ScalarDS sds = (ScalarDS) dataset;
-                    // reload the data when it is displayed next time
-                    // because the display type (table or image) may be
-                    // different.
-
-                    if (sds.isImage()) {
-                        sds.clearData();
-                    }
-
-                    dataValue = null;
-                    table = null;
-                }
-
                 //viewer.removeDataView(this);
 
                 shell.dispose();
@@ -2691,7 +2697,7 @@ public class DefaultTableView implements TableView {
         fchooser.setFilterPath(currentDir);
         //fchooser.setFileFilter(DefaultFileFilter.getFileFilterBinary());
         fchooser.setFilterExtensions(new String[] {"*.bin", "*.*"});
-		fchooser.setFilterNames(new String[] {"Binary Files", "All Files"});
+		fchooser.setFilterNames(new String[] {"Binary Files (*.bin)", "All Files (*.*)"});
 		fchooser.setFilterIndex(0);
         
         if (fchooser.open() == null) return;
