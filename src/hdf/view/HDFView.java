@@ -1640,6 +1640,11 @@ public class HDFView implements ViewManager, DropTargetListener {
     		for(int i = 0; i < chosenFiles.length; i++) {
     		    chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
     		    
+    		    if(!chosenFiles[i].exists()) {
+        		    showError("File " + chosenFiles[i].getName() + " does not exist.", "Open File");
+        		    continue;
+        		}
+    		    
     		    if (chosenFiles[i].isDirectory()) {
                     currentDir = chosenFiles[i].getPath();
                 } else {
