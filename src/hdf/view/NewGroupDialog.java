@@ -14,36 +14,31 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import hdf.object.DataFormat;
 import hdf.object.FileFormat;
@@ -56,54 +51,43 @@ import hdf.object.HObject;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class NewGroupDialog extends JDialog implements ActionListener, ItemListener, KeyListener {
-    private static final long serialVersionUID = 7340860373483987075L;
+public class NewGroupDialog extends Dialog {
+	private static final long serialVersionUID = 7340860373483987075L;
+	
+	private Shell shell;
 
-    private JTextField nameField;
-
-    private JTextField compactField;
-
-    private JTextField indexedField;
-
-    @SuppressWarnings("rawtypes")
-    private JComboBox parentChoice;
-
-    private JCheckBox useCreationOrder;
-
-    private JCheckBox setLinkStorage;
-
-    @SuppressWarnings("rawtypes")
-    private JComboBox orderFlags;
-
-    /** a list of current groups */
+	private Text nameField;
+	private Text compactField;
+	private Text indexedField;
+	
+	private Combo parentChoice;
+	private Combo orderFlags;
+	
+    private Button useCreationOrder;
+    private Button setLinkStorage;
+    private Button creationOrderHelpButton;
+    private Button storageTypeHelpButton;
+    private Button okButton;
+    private Button cancelButton;
+    private Button moreButton;
+    
+    private Composite moreOptionsComposite;
+    private Composite creationOrderComposite;
+    private Composite storageTypeComposite;
+    
     private List<Group> groupList;
+    private List<?> objList;
 
     private HObject newObject;
+    private Group parentGroup;
 
     private FileFormat fileFormat;
-
-    private final Toolkit toolkit;
-
+    
     private int creationOrder;
-
-    private JPanel useCreationOrderJPanel;
-
-    private JPanel setLinkStorageJPanel;
-
-    private JButton moreButton;
-
-    private JPanel labelPanel;
-
-    private JPanel textPanel;
-
-    private JPanel contentPane;
-
-    private JButton creationOrderHelpButton;
-
-    private JButton storageTypeHelpButton;
-
+    
     private boolean isH5;
-
+    private boolean moreOptionsEnabled;
+    
     /**
      * Constructs NewGroupDialog with specified list of possible parent groups.
      * 
@@ -114,275 +98,187 @@ public class NewGroupDialog extends JDialog implements ActionListener, ItemListe
      * @param objs
      *            the list of all objects.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public NewGroupDialog(Frame owner, Group pGroup, List<?> objs) {
-        super(owner, "New Group...", true);
-
-        newObject = null;
-
-        fileFormat = pGroup.getFileFormat();
+    public NewGroupDialog(Shell parent, Group pGroup, List<?> objs) {
+    	super(parent, SWT.APPLICATION_MODAL);
+    	
+    	newObject = null;
+    	parentGroup = pGroup;
+    	objList = objs;
+    	
+    	moreOptionsEnabled = false;
+    	
+    	fileFormat = pGroup.getFileFormat();
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        toolkit = Toolkit.getDefaultToolkit();
-
-        parentChoice = new JComboBox();
-        groupList = new Vector<Group>();
+    }
+    
+    public void open() {
+    	Shell parent = getParent();
+    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+    			SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell.setText("New Group...");
+    	GridLayout layout = new GridLayout(2, false);
+    	layout.marginWidth = 5;
+    	layout.marginHeight = 5;
+    	shell.setLayout(layout);
+    	
+    	CLabel groupNameLabel = new CLabel(shell, SWT.LEFT);
+    	groupNameLabel.setText("Group name:");
+    	
+    	nameField = new Text(shell, SWT.SINGLE | SWT.BORDER);
+    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
+    	CLabel parentGroupLabel = new CLabel(shell, SWT.LEFT);
+    	parentGroupLabel.setText("Parent group:");
+    	parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    	
+    	parentChoice = new Combo(shell, SWT.DROP_DOWN | SWT.BORDER);
+    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	parentChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
+    		}
+    	});
+    	
+    	groupList = new Vector<Group>();
         Object obj = null;
-        Iterator<?> iterator = objs.iterator();
+        Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
             obj = iterator.next();
             if (obj instanceof Group) {
                 groupList.add((Group) obj);
                 Group g = (Group) obj;
                 if (g.isRoot()) {
-                    parentChoice.addItem(HObject.separator);
+                    parentChoice.add(HObject.separator);
                 }
                 else {
-                    parentChoice.addItem(g.getPath() + g.getName() + HObject.separator);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.separator);
                 }
             }
         }
-
-        if (pGroup.isRoot()) {
-            parentChoice.setSelectedItem(HObject.separator);
+        
+        if (parentGroup.isRoot()) {
+        	parentChoice.select(parentChoice.indexOf(HObject.separator));
         }
         else {
-            parentChoice.setSelectedItem(pGroup.getPath() + pGroup.getName() + HObject.separator);
+        	parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + 
+        			parentGroup.getName() + HObject.separator));
         }
+        
+        // Only add "More" button if file is H5 type
+        if(isH5) {
+        	moreOptionsComposite = new Composite(shell, SWT.NONE);
+        	moreOptionsComposite.setLayout(new GridLayout(2, false));
+        	moreOptionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        	
+        	moreButton = new Button(moreOptionsComposite, SWT.PUSH);
+        	moreButton.setText("More");
+        	moreButton.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			moreOptionsEnabled = !moreOptionsEnabled;
+        			
+        			if(moreOptionsEnabled) {
+        				addMoreOptions();
+        			} else {
+        				removeMoreOptions();
+        			}
+        		}
+        	});
+        	moreButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
+        	
+        	new Composite(moreOptionsComposite, SWT.NONE);
+        }
+        
+        Composite buttonComposite = new Composite(shell, SWT.NONE);
+        RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
+        rowLayout.fill = true;
+        rowLayout.justify = true;
+        buttonComposite.setLayout(rowLayout);
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        buttonComposite.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        
+        okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("Ok");
+        okButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		newObject = create();
+                if (newObject != null) {
+                    shell.dispose();
+                }
+        	}
+        });
+        //okButton.setMnemonic(KeyEvent.VK_O);
+        okButton.setLayoutData(new RowData(70, SWT.DEFAULT));
+        
+        cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setText("Cancel");
+        cancelButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		newObject = null;
+                shell.dispose();
+        	}
+        });
+        //cancelButton.setMnemonic(KeyEvent.VK_C);
+        cancelButton.setLayoutData(new RowData(70, SWT.DEFAULT));
 
-        orderFlags = new JComboBox();
-        orderFlags.addItem("Tracked");
-        orderFlags.addItem("Tracked+Indexed");
-
-        contentPane = (JPanel) getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(15, 5, 5, 5));
+        shell.pack();
+        
         int w = 400 + (ViewProperties.getFontSize() - 12) * 15;
         int h = 150 + (ViewProperties.getFontSize() - 12) * 10;
-        contentPane.setPreferredSize(new Dimension(w, h));
-
-        JButton okButton = new JButton("   Ok   ");
-        okButton.setName("OK");
-        okButton.setActionCommand("Ok");
-        okButton.setMnemonic(KeyEvent.VK_O);
-        okButton.addActionListener(this);
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setName("Cancel");
-        cancelButton.setMnemonic(KeyEvent.VK_C);
-        cancelButton.setActionCommand("Cancel");
-        cancelButton.addActionListener(this);
-
-        moreButton = new JButton("More");
-        moreButton.setName("More");
-        moreButton.addActionListener(this);
-
-        // set OK and CANCEL buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-
-        // set NAME and PARENT GROUP panel
-        JPanel namePanel = new JPanel();
-        namePanel.setLayout(new BorderLayout(5, 5));
-
-        labelPanel = new JPanel();
-        textPanel = new JPanel();
-
-        if (!isH5) {
-            labelPanel.setLayout(new GridLayout(2, 1));
-            labelPanel.add(new JLabel("Group name: "));
-            labelPanel.add(new JLabel("Parent group: "));
-            textPanel.setLayout(new GridLayout(2, 1));
-            textPanel.add(nameField = new JTextField());
-            textPanel.add(parentChoice);
-        }
-        else {
-            labelPanel.setLayout(new GridLayout(3, 1));
-            labelPanel.add(new JLabel("Group name: "));
-            labelPanel.add(new JLabel("Parent group: "));
-            labelPanel.add(moreButton); // if h5 format then add more button
-            textPanel.setLayout(new GridLayout(3, 1));
-            textPanel.add(nameField = new JTextField());
-            textPanel.add(parentChoice);
-            textPanel.add(new JLabel("")); // for more button
-        }
-        nameField.setName("groupname");
-        parentChoice.setName("groupparent");
-
-        //creationOrderHelpButton = new JButton(ViewProperties.getHelpIcon());
-        creationOrderHelpButton.setToolTipText("Help on Creation Order");
-        creationOrderHelpButton.setMargin(new Insets(0, 0, 0, 0));
-        creationOrderHelpButton.addActionListener(this);
-        creationOrderHelpButton.setActionCommand("Help on Creation Order");
-
-        //storageTypeHelpButton = new JButton(ViewProperties.getHelpIcon());
-        storageTypeHelpButton.setToolTipText("Help on set Link Storage");
-        storageTypeHelpButton.setMargin(new Insets(0, 0, 0, 0));
-        storageTypeHelpButton.addActionListener(this);
-        storageTypeHelpButton.setActionCommand("Help on set Link Storage");
-
-        namePanel.add(labelPanel, BorderLayout.WEST);
-
-        useCreationOrderJPanel = new JPanel();
-        useCreationOrderJPanel.setLayout(new GridLayout(1, 2));
-        useCreationOrderJPanel.setBorder(new TitledBorder(""));
-        useCreationOrderJPanel.add(useCreationOrder = new JCheckBox("Use Creation Order"));
-        useCreationOrder.addItemListener(this);
-        JPanel orderFlagsJPanel = new JPanel();
-        orderFlagsJPanel.setLayout(new GridLayout(1, 2));
-        orderFlagsJPanel.add(new JLabel("Order Flags: "));
-        orderFlagsJPanel.add(orderFlags);
-        orderFlags.setEnabled(false);
-        useCreationOrderJPanel.add(orderFlagsJPanel);
-
-        setLinkStorageJPanel = new JPanel();
-        setLinkStorageJPanel.setLayout(new GridLayout(1, 2));
-        setLinkStorageJPanel.setBorder(new TitledBorder(""));
-        setLinkStorageJPanel.add(setLinkStorage = new JCheckBox("Set Link Storage"));
-        setLinkStorage.addItemListener(this);
-        JPanel storageTypeJPanel = new JPanel();
-        storageTypeJPanel.setLayout(new GridLayout(2, 2));
-        storageTypeJPanel.add(new JLabel("Min Indexed: "));
-        storageTypeJPanel.add(new JLabel("Max Compact: "));
-        indexedField = new JTextField();
-        indexedField.addKeyListener(this);
-        storageTypeJPanel.add(indexedField);
-        indexedField.setDocument(new JTextFieldLimit(5));
-        indexedField.setText("6");
-        indexedField.setEnabled(false);
-        compactField = new JTextField();
-        storageTypeJPanel.add(compactField);
-        compactField.addKeyListener(this);
-        compactField.setDocument(new JTextFieldLimit(5));
-        compactField.setText("8");
-        compactField.setEnabled(false);
-        setLinkStorageJPanel.add(storageTypeJPanel);
-
-        namePanel.add(textPanel, BorderLayout.CENTER);
-        contentPane.add(namePanel, BorderLayout.CENTER);
-
-        // locate the H5Property dialog
-        Point l = owner.getLocation();
-        l.x += 250;
-        l.y += 80;
-        setLocation(l);
-        validate();
-        pack();
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-
-        if (cmd.equals("More")) {
-            moreButton.setText("Less");
-            int w = 500 + (ViewProperties.getFontSize() - 12) * 15;
-            int h = 280 + (ViewProperties.getFontSize() - 12) * 10;
-            contentPane.setPreferredSize(new Dimension(w, h));
-            labelPanel.setLayout(new GridLayout(5, 1));
-            labelPanel.add(creationOrderHelpButton);
-            labelPanel.add(storageTypeHelpButton);
-            textPanel.setLayout(new GridLayout(5, 1));
-            textPanel.add(useCreationOrderJPanel);
-            textPanel.add(setLinkStorageJPanel);
-            validate();
-            pack();
-        }
-
-        if (cmd.equals("Less")) {
-            moreButton.setText("More");
-            int w = 400 + (ViewProperties.getFontSize() - 12) * 15;
-            int h = 150 + (ViewProperties.getFontSize() - 12) * 10;
-            contentPane.setPreferredSize(new Dimension(w, h));
-            labelPanel.setLayout(new GridLayout(3, 1));
-            labelPanel.remove(creationOrderHelpButton);
-            labelPanel.remove(storageTypeHelpButton);
-            textPanel.setLayout(new GridLayout(3, 1));
-            textPanel.remove(useCreationOrderJPanel);
-            textPanel.remove(setLinkStorageJPanel);
-            useCreationOrder.setSelected(false);
-            setLinkStorage.setSelected(false);
-            validate();
-            pack();
-        }
-
-        if (cmd.equals("Help on Creation Order")) {
-            final String msg = "Use Creation Order allows the user to set the creation order \n"
-                    + "of links in a group, so that tracking, indexing, and iterating over links\n"
-                    + "in groups can be possible. \n\n"
-                    + "If the order flag Tracked is selected, links in a group can now \n"
-                    + "be explicitly tracked by the order that they were created. \n\n"
-                    + "If the order flag Tracked+Indexed is selected, links in a group can \n"
-                    + "now be explicitly tracked and indexed in the order that they were created. \n\n"
-                    + "The default order in which links in a group are listed is alphanumeric-by-name. \n\n\n";
-            JOptionPane.showMessageDialog(this, msg);
-        }
-
-        if (cmd.equals("Help on set Link Storage")) {
-            final String msg = "Set Link Storage allows the users to explicitly set the storage  \n"
-                    + "type of a group to be Compact or Indexed. \n\n"
-                    + "Compact Storage: For groups with only a few links, compact link storage\n"
-                    + "allows groups containing only a few links to take up much less space \n" + "in the file. \n\n"
-                    + "Indexed Storage: For groups with large number of links, indexed link storage  \n"
-                    + "provides a faster and more scalable method for storing and working with  \n"
-                    + "large groups containing many links. \n\n"
-                    + "The threshold for switching between the compact and indexed storage   \n"
-                    + "formats is either set to default values or can be set by the user. \n\n"
-                    + "<html><b>Max Compact</b></html> \n"
-                    + "Max Compact is the maximum number of links to store in the group in a  \n"
-                    + "compact format, before converting the group to the Indexed format. Groups \n"
-                    + "that are in compact format and in which the number of links rises above \n"
-                    + " this threshold are automatically converted to indexed format. \n\n"
-                    + "<html><b>Min Indexed</b></html> \n"
-                    + "Min Indexed is the minimum number of links to store in the Indexed format.   \n"
-                    + "Groups which are in indexed format and in which the number of links falls    \n"
-                    + "below this threshold are automatically converted to compact format. \n\n\n";
-            JOptionPane.showMessageDialog(this, msg);
-        }
-
-        if (cmd.equals("Ok")) {
-            newObject = create();
-            if (newObject != null) {
-                dispose();
-            }
-        }
-        if (cmd.equals("Cancel")) {
-            newObject = null;
-            dispose();
+        shell.setMinimumSize(w, h);
+        
+        Rectangle parentBounds = parent.getBounds();
+        Point shellSize = shell.getSize();
+        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+        
+        shell.open();
+        
+        Display display = parent.getDisplay();
+        while(!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
         }
     }
-
+    
     private HObject create() {
-        String name = null;
+    	String name = null;
         Group pgroup = null;
         int gcpl = 0;
 
         name = nameField.getText();
         if (name == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Group name is not specified.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Group name is not specified.");
+            error.open();
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Group name cannot contain path.", getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Group name cannot contain path.");
+            error.open();
             return null;
         }
-
-        pgroup = groupList.get(parentChoice.getSelectedIndex());
+        
+        pgroup = groupList.get(parentChoice.getSelectionIndex());
 
         if (pgroup == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Parent group is null.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Parent group is null.");
+            error.open();
             return null;
         }
 
         Group obj = null;
-
-        if (orderFlags.isEnabled()) {
-            String order = (String) orderFlags.getSelectedItem();
+        
+        if (orderFlags != null && orderFlags.isEnabled()) {
+            String order = (String) orderFlags.getItem(orderFlags.getSelectionIndex());
             if (order.equals("Tracked"))
                 creationOrder = Group.CRT_ORDER_TRACKED;
             else if (order.equals("Tracked+Indexed"))
@@ -391,21 +287,25 @@ public class NewGroupDialog extends JDialog implements ActionListener, ItemListe
         else
             creationOrder = 0;
 
-        if ((orderFlags.isEnabled()) || (setLinkStorage.isSelected())) {
+        if ((orderFlags != null) && ((orderFlags.isEnabled()) || (setLinkStorage.getSelection()))) {
             int maxCompact = Integer.parseInt(compactField.getText());
             int minDense = Integer.parseInt(indexedField.getText());
 
             if ((maxCompact <= 0) || (maxCompact > 65536) || (minDense > 65536)) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Max Compact and Min Indexed should be > 0 and < 65536.",
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Max Compact and Min Indexed should be > 0 and < 65536.");
+                error.open();
                 return null;
             }
 
             if (maxCompact < minDense) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Min Indexed should be <= Max Compact", getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Min Indexed should be <= Max Compact");
+                error.open();
                 return null;
             }
 
@@ -413,7 +313,7 @@ public class NewGroupDialog extends JDialog implements ActionListener, ItemListe
                 gcpl = fileFormat.createGcpl(creationOrder, maxCompact, minDense);
             }
             catch (Exception ex) {
-                ex.printStackTrace();
+            	ex.printStackTrace();
             }
         }
 
@@ -424,87 +324,204 @@ public class NewGroupDialog extends JDialog implements ActionListener, ItemListe
                 obj = fileFormat.createGroup(name, pgroup);
         }
         catch (Exception ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ERROR);
+            error.setText(shell.getText());
+            error.setMessage(ex.getMessage());
+            error.open();
             return null;
         }
 
         return obj;
     }
+    
+    private void addMoreOptions() {
+    	moreButton.setText("Less");
+        
+        creationOrderHelpButton = new Button(moreOptionsComposite, SWT.PUSH);
+        creationOrderHelpButton.setImage(ViewProperties.getHelpIcon());
+        creationOrderHelpButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+        creationOrderHelpButton.setToolTipText("Help on Creation Order");
+        creationOrderHelpButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		final String msg = "Use Creation Order allows the user to set the creation order \n"
+                        + "of links in a group, so that tracking, indexing, and iterating over links\n"
+                        + "in groups can be possible. \n\n"
+                        + "If the order flag Tracked is selected, links in a group can now \n"
+                        + "be explicitly tracked by the order that they were created. \n\n"
+                        + "If the order flag Tracked+Indexed is selected, links in a group can \n"
+                        + "now be explicitly tracked and indexed in the order that they were created. \n\n"
+                        + "The default order in which links in a group are listed is alphanumeric-by-name. \n\n\n";
+                
+        		MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+        		info.setText(shell.getText());
+        		info.setMessage(msg);
+        		info.open();
+        	}
+        });
+        
+        creationOrderComposite = new Composite(moreOptionsComposite, SWT.BORDER);
+        creationOrderComposite.setLayout(new GridLayout(3, true));
+        creationOrderComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        useCreationOrder = new Button(creationOrderComposite, SWT.CHECK);
+        useCreationOrder.setText("Use Creation Order");
+        useCreationOrder.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		boolean isOrder = useCreationOrder.getSelection();
 
+                if (isOrder)
+                    orderFlags.setEnabled(true);
+                else
+                    orderFlags.setEnabled(false);
+        	}
+        });
+        
+        Label label = new Label(creationOrderComposite, SWT.RIGHT);
+        label.setText("Order Flags: ");
+        label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+        
+        orderFlags = new Combo(creationOrderComposite, SWT.DROP_DOWN);
+        orderFlags.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        orderFlags.add("Tracked");
+        orderFlags.add("Tracked+Indexed");
+        orderFlags.select(orderFlags.indexOf("Tracked"));
+        orderFlags.setEnabled(false);
+        
+        
+        storageTypeHelpButton = new Button(moreOptionsComposite, SWT.PUSH);
+        storageTypeHelpButton.setImage(ViewProperties.getHelpIcon());
+        storageTypeHelpButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+        storageTypeHelpButton.setToolTipText("Help on set Link Storage");
+        storageTypeHelpButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		final String msg = "Set Link Storage allows the users to explicitly set the storage  \n"
+                        + "type of a group to be Compact or Indexed. \n\n"
+                        + "Compact Storage: For groups with only a few links, compact link storage\n"
+                        + "allows groups containing only a few links to take up much less space \n" + "in the file. \n\n"
+                        + "Indexed Storage: For groups with large number of links, indexed link storage  \n"
+                        + "provides a faster and more scalable method for storing and working with  \n"
+                        + "large groups containing many links. \n\n"
+                        + "The threshold for switching between the compact and indexed storage   \n"
+                        + "formats is either set to default values or can be set by the user. \n\n"
+                        + "<html><b>Max Compact</b></html> \n"
+                        + "Max Compact is the maximum number of links to store in the group in a  \n"
+                        + "compact format, before converting the group to the Indexed format. Groups \n"
+                        + "that are in compact format and in which the number of links rises above \n"
+                        + " this threshold are automatically converted to indexed format. \n\n"
+                        + "<html><b>Min Indexed</b></html> \n"
+                        + "Min Indexed is the minimum number of links to store in the Indexed format.   \n"
+                        + "Groups which are in indexed format and in which the number of links falls    \n"
+                        + "below this threshold are automatically converted to compact format. \n\n\n";
+                
+        		MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+        		info.setText(shell.getText());
+        		info.setMessage(msg);
+        		info.open();
+        	}
+        });
+        
+        storageTypeComposite = new Composite(moreOptionsComposite, SWT.BORDER);
+        storageTypeComposite.setLayout(new GridLayout(2, true));
+        storageTypeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        setLinkStorage = new Button(storageTypeComposite, SWT.CHECK);
+        setLinkStorage.setText("Set Link Storage");
+        setLinkStorage.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+                if (setLinkStorage.getSelection()) {
+                    compactField.setEnabled(true);
+                    indexedField.setEnabled(true);
+                }
+                else {
+                    compactField.setText("8");
+                    compactField.setEnabled(false);
+                    indexedField.setText("6");
+                    indexedField.setEnabled(false);
+                }
+        	}
+        });
+        
+        Composite indexedComposite = new Composite(storageTypeComposite, SWT.NONE);
+        indexedComposite.setLayout(new GridLayout(2, true));
+        indexedComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        Label minLabel = new Label(indexedComposite, SWT.LEFT);
+        minLabel.setText("Min Indexed: ");
+        
+        Label maxLabel = new Label(indexedComposite, SWT.LEFT);
+        maxLabel.setText("Max Compact: ");
+        
+        indexedField = new Text(indexedComposite, SWT.SINGLE | SWT.BORDER);
+        indexedField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        indexedField.setText("6");
+        indexedField.setTextLimit(5);
+        indexedField.setEnabled(false);
+        indexedField.addVerifyListener(new VerifyListener() {
+        	public void verifyText(VerifyEvent e) {
+        		String input = e.text;
+        		
+        		char[] chars = new char[input.length()];
+        	    input.getChars(0, chars.length, chars, 0);
+        	    for (int i = 0; i < chars.length; i++) {
+        	       if (!('0' <= chars[i] && chars[i] <= '9')) {
+        	          e.doit = false;
+        	          return;
+        	       }
+        	    }
+        	}
+        });
+        
+        compactField = new Text(indexedComposite, SWT.SINGLE | SWT.BORDER);
+        compactField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        compactField.setText("8");
+        compactField.setTextLimit(5);
+        compactField.setEnabled(false);
+        compactField.addVerifyListener(new VerifyListener() {
+        	public void verifyText(VerifyEvent e) {
+        		String input = e.text;
+        		
+        		char[] chars = new char[input.length()];
+        	    input.getChars(0, chars.length, chars, 0);
+        	    for (int i = 0; i < chars.length; i++) {
+        	       if (!('0' <= chars[i] && chars[i] <= '9')) {
+        	          e.doit = false;
+        	          return;
+        	       }
+        	    }
+        	}
+        });
+        
+        shell.pack();
+
+        int w = 500 + (ViewProperties.getFontSize() - 12) * 15;
+        int h = 280 + (ViewProperties.getFontSize() - 12) * 10;
+        shell.setMinimumSize(w, h);
+    }
+    
+    private void removeMoreOptions() {
+    	moreButton.setText("More");
+    	
+    	creationOrderHelpButton.dispose();
+    	storageTypeHelpButton.dispose();
+    	
+    	creationOrderComposite.dispose();
+    	storageTypeComposite.dispose();
+    	
+    	shell.pack();
+    	
+    	int w = 400 + (ViewProperties.getFontSize() - 12) * 15;
+        int h = 150 + (ViewProperties.getFontSize() - 12) * 10;
+    	shell.setMinimumSize(w, h);
+    }
+    
     /** Returns the new group created. */
     public DataFormat getObject() {
-        return newObject;
+    	return newObject;
     }
-
+    
     /** Returns the parent group of the new group. */
     public Group getParentGroup() {
-        return groupList.get(parentChoice.getSelectedIndex());
+        return parentGroup;
     }
-
-    public void itemStateChanged(ItemEvent e) {
-        Object source = e.getSource();
-
-        if (source.equals(useCreationOrder)) {
-            boolean isOrder = useCreationOrder.isSelected();
-
-            if (isOrder)
-                orderFlags.setEnabled(true);
-            else
-                orderFlags.setEnabled(false);
-        }
-
-        if (source.equals(setLinkStorage)) {
-            boolean setStorage = setLinkStorage.isSelected();
-
-            if (setStorage) {
-                compactField.setEnabled(true);
-                indexedField.setEnabled(true);
-            }
-            else {
-                compactField.setText("8");
-                compactField.setEnabled(false);
-                indexedField.setText("6");
-                indexedField.setEnabled(false);
-            }
-        }
-    }
-
-    // Setting the length of the text fields.
-    class JTextFieldLimit extends PlainDocument {
-        private static final long serialVersionUID = -5131438789797052658L;
-        private int limit;
-
-        JTextFieldLimit(int limit) {
-            super();
-            this.limit = limit;
-        }
-
-        JTextFieldLimit(int limit, boolean upper) {
-            super();
-            this.limit = limit;
-        }
-
-        public void insertString(int offset, String str, AttributeSet attr) throws BadLocationException {
-            if (str == null)
-                return;
-
-            if ((getLength() + str.length()) <= limit) {
-                super.insertString(offset, str, attr);
-            }
-        }
-    }
-
-    public void keyPressed(java.awt.event.KeyEvent arg0) {
-    }
-
-    public void keyReleased(java.awt.event.KeyEvent arg0) {
-    }
-
-    public void keyTyped(java.awt.event.KeyEvent arg0) {
-        char c = arg0.getKeyChar();
-        if (!Character.isDigit(c))
-            arg0.consume(); // prevent event propagation
-    }
-
 }
