@@ -14,17 +14,6 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Iterator;
@@ -32,25 +21,23 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLFrameHyperlinkEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
@@ -64,40 +51,41 @@ import hdf.object.ScalarDS;
  * NewDatasetDialog shows a message dialog requesting user input for creating a
  * new HDF4/5 dataset.
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 1/3/2016
  */
-public class NewDatasetDialog extends JDialog implements ActionListener, ItemListener, HyperlinkListener {
-    private static final long serialVersionUID = 5381164938654184532L;
+public class NewDatasetDialog extends Dialog {	
+	private static final long serialVersionUID = 5381164938654184532L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
+	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 
-    private JTextField        nameField, currentSizeField, maxSizeField, chunkSizeField, stringLengthField,
-    fillValueField;
+	private Shell             shell;
+	
+    private Text              nameField, currentSizeField, maxSizeField, chunkSizeField,
+                              stringLengthField, fillValueField;
 
-    @SuppressWarnings("rawtypes")
-    private JComboBox         parentChoice, classChoice, sizeChoice, endianChoice, rankChoice, compressionLevel;
+    private Combo             parentChoice, classChoice, sizeChoice, endianChoice,
+                              rankChoice, compressionLevel;
 
-    private JCheckBox         checkUnsigned, checkCompression, checkFillValue;
+    private Button            checkUnsigned, checkCompression, checkFillValue;
 
-    private JRadioButton      checkContinguous, checkChunked;
-
-    private JDialog           helpDialog;
+    private Button            checkContiguous, checkChunked;
 
     private boolean           isH5;
 
-    /** a list of current groups */
-    private List<Object>      groupList;
+    /** A list of current groups */
+    private List<Group>       groupList;
+    
+    private List<?>           objList;
 
     private HObject           newObject;
+    private Group             parentGroup;
 
     private FileFormat        fileFormat;
 
-    private final Toolkit     toolkit;
-
     private final DataView    dataView;
 
-    /**
+	/**
      * Constructs NewDatasetDialog with specified list of possible parent
      * groups.
      * 
@@ -108,281 +96,20 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
      * @param objs
      *            the list of all objects.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public NewDatasetDialog(JFrame owner, Group pGroup, List<?> objs) {
-        super(owner, "New Dataset...", true);
-
-        helpDialog = null;
+	public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
+		super(parent, SWT.APPLICATION_MODAL);
+		
+        parentGroup = pGroup;
         newObject = null;
         dataView = null;
+        
+        objList = objs;
 
         fileFormat = pGroup.getFileFormat();
-        toolkit = Toolkit.getDefaultToolkit();
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-
-        parentChoice = new JComboBox();
-        groupList = new Vector<Object>();
-        Object obj = null;
-        Iterator<?> iterator = objs.iterator();
-        while (iterator.hasNext()) {
-            obj = iterator.next();
-            if (obj instanceof Group) {
-                Group g = (Group) obj;
-                groupList.add(obj);
-                if (g.isRoot()) {
-                    parentChoice.addItem(HObject.separator);
-                }
-                else {
-                    parentChoice.addItem(g.getPath() + g.getName() + HObject.separator);
-                }
-            }
-        }
-
-        if (pGroup.isRoot()) {
-            parentChoice.setSelectedItem(HObject.separator);
-        }
-        else {
-            parentChoice.setSelectedItem(pGroup.getPath() + pGroup.getName() + HObject.separator);
-        }
-
-        JPanel contentPane = (JPanel) getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(15, 5, 5, 5));
-        int w = 600 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 350 + (ViewProperties.getFontSize() - 12) * 10;
-        contentPane.setPreferredSize(new Dimension(w, h));
-
-        JButton okButton = new JButton("   Ok   ");
-        okButton.setName("OK");
-        okButton.setActionCommand("Ok");
-        okButton.setMnemonic(KeyEvent.VK_O);
-        okButton.addActionListener(this);
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setName("Cancel");
-        cancelButton.setMnemonic(KeyEvent.VK_C);
-        cancelButton.setActionCommand("Cancel");
-        cancelButton.addActionListener(this);
-
-        JButton helplButton = new JButton("Help");
-        helplButton.setName("Help");
-        helplButton.setMnemonic(KeyEvent.VK_H);
-        helplButton.setActionCommand("Show help");
-        helplButton.addActionListener(this);
-
-        // set OK and CANCEL buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
-        buttonPanel.add(helplButton);
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-
-        // set NAME and PARENT GROUP panel
-        JPanel namePanel = new JPanel();
-        namePanel.setLayout(new BorderLayout(5, 5));
-        JPanel tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-        tmpP.add(new JLabel("Dataset name: "));
-        tmpP.add(new JLabel("Parent group: "));
-        namePanel.add(tmpP, BorderLayout.WEST);
-        tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-        tmpP.add(nameField = new JTextField());
-        nameField.setName("datasetname");
-        tmpP.add(parentChoice);
-        namePanel.add(tmpP, BorderLayout.CENTER);
-        contentPane.add(namePanel, BorderLayout.NORTH);
-
-        // set DATATYPE
-        JPanel typePanel = new JPanel();
-        typePanel.setLayout(new GridLayout(2, 4, 15, 3));
-        TitledBorder border = new TitledBorder("Datatype");
-        border.setTitleColor(Color.gray);
-        typePanel.setBorder(border);
-
-        stringLengthField = new JTextField("String length");
-        stringLengthField.setName("datasetstringlen");
-        stringLengthField.setEnabled(false);
-
-        endianChoice = new JComboBox();
-        endianChoice.setName("datasetendian");
-        classChoice = new JComboBox();
-        classChoice.setName("datasetclass");
-        sizeChoice = new JComboBox();
-        sizeChoice.setName("datasetsize");
-        endianChoice.setEnabled(isH5);
-
-        classChoice.addItem("INTEGER");
-        classChoice.addItem("FLOAT");
-        classChoice.addItem("CHAR");
-
-        if (isH5) {
-            classChoice.addItem("STRING");
-            classChoice.addItem("REFERENCE");
-            classChoice.addItem("ENUM");
-            classChoice.addItem("VLEN_INTEGER");
-            classChoice.addItem("VLEN_FLOAT");
-            classChoice.addItem("VLEN_STRING");
-            sizeChoice.addItem("NATIVE");
-            endianChoice.addItem("NATIVE");
-            endianChoice.addItem("LITTLE ENDIAN");
-            endianChoice.addItem("BIG ENDIAN");
-        }
-        else {
-            sizeChoice.addItem("DEFAULT");
-            endianChoice.addItem("DEFAULT");
-        }
-        sizeChoice.addItem("8");
-        sizeChoice.addItem("16");
-        sizeChoice.addItem("32");
-        sizeChoice.addItem("64");
-
-        typePanel.add(new JLabel("Datatype class"));
-        typePanel.add(new JLabel("Size (bits)"));
-        typePanel.add(new JLabel("Byte ordering"));
-        checkUnsigned = new JCheckBox("Unsigned");
-        checkUnsigned.setName("datasetchkunsigned");
-        typePanel.add(checkUnsigned);
-
-        typePanel.add(classChoice);
-        typePanel.add(sizeChoice);
-        typePanel.add(endianChoice);
-        typePanel.add(stringLengthField);
-
-        // set DATATSPACE
-        JPanel spacePanel = new JPanel();
-        spacePanel.setLayout(new GridLayout(2, 3, 15, 3));
-        border = new TitledBorder("Dataspace");
-        border.setTitleColor(Color.gray);
-        spacePanel.setBorder(border);
-
-        rankChoice = new JComboBox();
-        rankChoice.setName("datasetrank");
-        for (int i = 1; i < 33; i++) {
-            rankChoice.addItem(String.valueOf(i));
-        }
-        rankChoice.setSelectedIndex(1);
-
-        currentSizeField = new JTextField("1 x 1");
-        currentSizeField.setName("currentsize");
-        maxSizeField = new JTextField("");
-        spacePanel.add(new JLabel("No. of dimensions"));
-        spacePanel.add(new JLabel("Current size"));
-        spacePanel.add(new JLabel(""));
-        spacePanel.add(rankChoice);
-        spacePanel.add(currentSizeField);
-        JButton jb = new JButton("Set Max Size");
-        jb.setActionCommand("Set max size");
-        jb.addActionListener(this);
-        spacePanel.add(jb);
-        // spacePanel.add(maxSizeField);
-
-        // set storage layout and data compression
-        JPanel layoutPanel = new JPanel();
-        layoutPanel.setLayout(new BorderLayout());
-        border = new TitledBorder("Storage Properties");
-        border.setTitleColor(Color.gray);
-        layoutPanel.setBorder(border);
-
-        checkContinguous = new JRadioButton("Contiguous");
-        checkContinguous.setName("datasetcontinguous");
-        checkContinguous.setSelected(true);
-        checkChunked = new JRadioButton("Chunked (size) ");
-        checkChunked.setName("datasetchunk");
-        ButtonGroup bgroup = new ButtonGroup();
-        bgroup.add(checkChunked);
-        bgroup.add(checkContinguous);
-        chunkSizeField = new JTextField("1 x 1");
-        chunkSizeField.setName("datasetchunksize");
-        chunkSizeField.setEnabled(false);
-        checkCompression = new JCheckBox("gzip (level) ");
-        checkCompression.setName("datasetgzip");
-
-        compressionLevel = new JComboBox();
-        compressionLevel.setName("datasetlevel");
-        for (int i = 0; i < 10; i++) {
-            compressionLevel.addItem(String.valueOf(i));
-        }
-        compressionLevel.setSelectedIndex(6);
-        compressionLevel.setEnabled(false);
-
-        tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-        tmpP.add(new JLabel("Storage layout:  "));
-        tmpP.add(new JLabel("Compression:  "));
-        layoutPanel.add(tmpP, BorderLayout.WEST);
-
-        tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-
-        // storage layout
-        JPanel tmpP0 = new JPanel();
-        tmpP0.setLayout(new GridLayout(1, 3, 0, 5));
-        tmpP0.add(checkContinguous);
-        JPanel tmpP00 = new JPanel();
-        tmpP00.setLayout(new BorderLayout());
-        tmpP00.add(checkChunked, BorderLayout.WEST);
-        tmpP00.add(chunkSizeField, BorderLayout.CENTER);
-        tmpP0.add(tmpP00);
-        tmpP0.add(new JLabel(""));
-        tmpP.add(tmpP0);
-
-        tmpP0 = new JPanel();
-        tmpP0.setLayout(new GridLayout(1, 2, 30, 5));
-
-        // compression
-        tmpP00 = new JPanel();
-        tmpP00.setLayout(new BorderLayout());
-        tmpP00.add(checkCompression, BorderLayout.WEST);
-        tmpP00.add(compressionLevel, BorderLayout.CENTER);
-        tmpP0.add(tmpP00);
-
-        // fill values
-        checkFillValue = new JCheckBox("Fill Value ");
-        checkFillValue.setName("datasetchkfill");
-        fillValueField = new JTextField("0");
-        fillValueField.setName("datasetfillval");
-        fillValueField.setEnabled(false);
-        checkFillValue.setSelected(false);
-        tmpP00 = new JPanel();
-        tmpP00.setLayout(new BorderLayout());
-        tmpP00.add(checkFillValue, BorderLayout.WEST);
-        tmpP00.add(fillValueField, BorderLayout.CENTER);
-
-        if (isH5)
-            tmpP0.add(tmpP00);
-        else
-            tmpP0.add(new JLabel(""));
-
-        tmpP.add(tmpP0);
-
-        layoutPanel.add(tmpP, BorderLayout.CENTER);
-
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new GridLayout(3, 1, 5, 10));
-        infoPanel.add(typePanel);
-        infoPanel.add(spacePanel);
-        infoPanel.add(layoutPanel);
-        contentPane.add(infoPanel, BorderLayout.CENTER);
-
-        classChoice.addItemListener(this);
-        sizeChoice.addItemListener(this);
-        rankChoice.addItemListener(this);
-        checkCompression.addItemListener(this);
-        checkFillValue.addItemListener(this);
-        checkContinguous.addItemListener(this);
-        checkChunked.addItemListener(this);
-
-        // locate the H5Property dialog
-        Point l = owner.getLocation();
-        l.x += 250;
-        l.y += 80;
-        setLocation(l);
-        validate();
-        pack();
-    }
-
-    /**
+	}
+	
+	/**
      * Constructs NewDatasetDialog with specified list of possible parent
      * groups.
      * 
@@ -393,307 +120,520 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
      * @param objs
      *            the list of all objects.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public NewDatasetDialog(JFrame owner, Group pGroup, List<?> objs, DataView observer) {
-        super(owner, "New Dataset...", true);
-
-        helpDialog = null;
+	public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
+        super(parent, SWT.APPLICATION_MODAL);
+        
+        parentGroup = pGroup;
         newObject = null;
         dataView = observer;
+        
+        objList = objs;
 
         fileFormat = pGroup.getFileFormat();
-        toolkit = Toolkit.getDefaultToolkit();
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-
-        parentChoice = new JComboBox();
-        groupList = new Vector<Object>();
+	}
+	
+	public void open() {
+		Shell parent = getParent();
+    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell.setText("New Dataset...");
+    	shell.setImage(ViewProperties.getHdfIcon());
+    	shell.setLayout(new GridLayout(1, true));
+    	
+    	
+    	// Create Dataset name / Parent Group region
+    	Composite fieldComposite = new Composite(shell, SWT.NONE);
+    	fieldComposite.setLayout(new GridLayout(2, false));
+    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	Label datasetNameLabel = new Label(fieldComposite, SWT.LEFT);
+    	datasetNameLabel.setText("Dataset name: ");
+    	//datasetNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, ));
+    	
+    	Text datasetNameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+    	datasetNameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
+    	parentGroupLabel.setText("Parent group: ");
+    	
+    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
+    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	parentChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
+    		}
+    	});
+    	
+        groupList = new Vector<Group>();
         Object obj = null;
-        Iterator<?> iterator = objs.iterator();
+        Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
             obj = iterator.next();
             if (obj instanceof Group) {
                 Group g = (Group) obj;
-                groupList.add(obj);
+                groupList.add(g);
                 if (g.isRoot()) {
-                    parentChoice.addItem(HObject.separator);
+                    parentChoice.add(HObject.separator);
                 }
                 else {
-                    parentChoice.addItem(g.getPath() + g.getName() + HObject.separator);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.separator);
                 }
             }
         }
-
-        if (pGroup.isRoot()) {
-            parentChoice.setSelectedItem(HObject.separator);
+        
+        if (parentGroup.isRoot()) {
+        	parentChoice.select(parentChoice.indexOf(HObject.separator));
         }
         else {
-            parentChoice.setSelectedItem(pGroup.getPath() + pGroup.getName() + HObject.separator);
+        	parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
-
-        JPanel contentPane = (JPanel) getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(15, 5, 5, 5));
-        int w = 400 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 120 + (ViewProperties.getFontSize() - 12) * 10;
-        contentPane.setPreferredSize(new Dimension(w, h));
-
-        JButton okButton = new JButton("   Ok   ");
-        okButton.setActionCommand("Ok");
-        okButton.setMnemonic(KeyEvent.VK_O);
-        okButton.addActionListener(this);
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setMnemonic(KeyEvent.VK_C);
-        cancelButton.setActionCommand("Cancel");
-        cancelButton.addActionListener(this);
-
-        // set OK and CANCEL buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-
-        // set NAME and PARENT GROUP panel
-        JPanel namePanel = new JPanel();
-        namePanel.setLayout(new BorderLayout(5, 5));
-        JPanel tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-        tmpP.add(new JLabel("Dataset name: "));
-        tmpP.add(new JLabel("Parent group: "));
-        namePanel.add(tmpP, BorderLayout.WEST);
-        tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-        tmpP.add(nameField = new JTextField(((HObject) observer.getDataObject()).getName() + "~copy", 40));
-        tmpP.add(parentChoice);
-        namePanel.add(tmpP, BorderLayout.CENTER);
-        contentPane.add(namePanel, BorderLayout.CENTER);
-
-        // locate the H5Property dialog
-        Point l = owner.getLocation();
-        l.x += 250;
-        l.y += 80;
-        setLocation(l);
-        pack();
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-
-        if (cmd.equals("Ok")) {
-            if (dataView instanceof TableView) {
-                newObject = createFromTable();
-            }
-            else if (dataView instanceof ImageView) {
-                newObject = createFromImage();
-            }
-            else if (dataView == null) {
-                newObject = createFromScratch();
-            }
-
-            if (newObject != null) {
-                dispose();
-            }
-        }
-        if (cmd.equals("Cancel")) {
-            newObject = null;
-            dispose();
-            ((Vector<Object>) groupList).setSize(0);
-        }
-        else if (cmd.equals("Show help")) {
-            if (helpDialog == null) {
-                createHelpDialog();
-            }
-            helpDialog.setVisible(true);
-        }
-        else if (cmd.equals("Hide help")) {
-            if (helpDialog != null) {
-                helpDialog.setVisible(false);
-            }
-        }
-        else if (cmd.equals("Set max size")) {
-            String strMax = maxSizeField.getText();
-            if (strMax == null || strMax.length() < 1) strMax = currentSizeField.getText();
-
-            String msg = JOptionPane.showInputDialog(this, "Enter max dimension sizes. \n"
-                    + "Use \"unlimited\" for unlimited dimension size.\n\n" + "For example,\n" + "    200 x 100\n"
-                    + "    100 x unlimited\n\n", strMax);
-
-            if (msg == null || msg.length() < 1)
-                maxSizeField.setText(currentSizeField.getText());
-            else
-                maxSizeField.setText(msg);
-
-            checkMaxSize();
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public void itemStateChanged(ItemEvent e) {
-        Object source = e.getSource();
-
-        if (source.equals(classChoice)) {
-            int idx = classChoice.getSelectedIndex();
-            sizeChoice.setSelectedIndex(0);
-            endianChoice.setSelectedIndex(0);
-            stringLengthField.setEnabled(false);
-
-            if ((idx == 0) || (idx == 6)) { // INTEGER
-                sizeChoice.setEnabled(true);
-                endianChoice.setEnabled(isH5);
-                checkUnsigned.setEnabled(true);
-
-                if (sizeChoice.getItemCount() == 3) {
-                    sizeChoice.removeItem("32");
-                    sizeChoice.removeItem("64");
-                    sizeChoice.addItem("8");
-                    sizeChoice.addItem("16");
-                    sizeChoice.addItem("32");
-                    sizeChoice.addItem("64");
-                }
-            }
-            else if ((idx == 1) || (idx == 7)) { // FLOAT
-                sizeChoice.setEnabled(true);
-                endianChoice.setEnabled(isH5);
-                checkUnsigned.setEnabled(false);
-
-                if (sizeChoice.getItemCount() == 5) {
-                    sizeChoice.removeItem("16");
-                    sizeChoice.removeItem("8");
-                }
-            }
-            else if (idx == 2) { // CHAR
-                sizeChoice.setEnabled(false);
-                endianChoice.setEnabled(isH5);
-                checkUnsigned.setEnabled(true);
-            }
-            else if (idx == 3) { // STRING
-                sizeChoice.setEnabled(false);
-                endianChoice.setEnabled(false);
-                checkUnsigned.setEnabled(false);
-                stringLengthField.setEnabled(true);
-                stringLengthField.setText("String length");
-            }
-            else if (idx == 4) { // REFERENCE
-                sizeChoice.setEnabled(false);
-                endianChoice.setEnabled(false);
-                checkUnsigned.setEnabled(false);
+        
+    	
+        // Create Datatype region
+    	org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	datatypeGroup.setText("Datatype");
+    	datatypeGroup.setLayout(new GridLayout(4, true));
+    	datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	Label label = new Label(datatypeGroup, SWT.LEFT);
+    	label.setText("Datatype Class");
+    	
+    	label = new Label(datatypeGroup, SWT.LEFT);
+    	label.setText("Size (bits)");
+    	
+    	label = new Label(datatypeGroup, SWT.LEFT);
+    	label.setText("Byte Ordering");
+    	
+    	checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
+    	checkUnsigned.setText("Unsigned");
+    	/*checkUnsigned.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			
+    		}
+    	});*/
+    	
+    	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	classChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			int idx = classChoice.getSelectionIndex();
+                sizeChoice.select(0);
+                endianChoice.select(0);
                 stringLengthField.setEnabled(false);
-            }
-            else if (idx == 5) { // ENUM
-                sizeChoice.setEnabled(true);
-                checkUnsigned.setEnabled(true);
-                stringLengthField.setEnabled(true);
-                stringLengthField.setText("R=0,G=1,B=2,...");
-            }
-            else if (idx == 8) {
-                sizeChoice.setEnabled(false);
-                endianChoice.setEnabled(false);
-                checkUnsigned.setEnabled(false);
-                stringLengthField.setEnabled(false);
-            }
-        }
-        else if (source.equals(sizeChoice)) {
-            if (classChoice.getSelectedIndex() == 0) {
-                checkUnsigned.setEnabled(true);
-            }
-        }
-        else if (source.equals(rankChoice)) {
-            int rank = rankChoice.getSelectedIndex() + 1;
-            String currentSizeStr = "1";
-            String maxSizeStr = "0";
 
-            for (int i = 1; i < rank; i++) {
-                currentSizeStr += " x 1";
-                maxSizeStr += " x 0";
-            }
+                if ((idx == 0) || (idx == 6)) { // INTEGER
+                    sizeChoice.setEnabled(true);
+                    endianChoice.setEnabled(isH5);
+                    checkUnsigned.setEnabled(true);
 
-            currentSizeField.setText(currentSizeStr);
-            maxSizeField.setText(maxSizeStr);
-
-            String currentStr = currentSizeField.getText();
-            int idx = currentStr.lastIndexOf("x");
-            String chunkStr = "1";
-
-            if (rank <= 1) {
-                chunkStr = currentStr;
-            }
-            else {
-                for (int i = 1; i < rank - 1; i++) {
-                    chunkStr += " x 1";
-                }
-                if (idx > 0) {
-                    chunkStr += " x " + currentStr.substring(idx + 1);
-                }
-            }
-
-            chunkSizeField.setText(chunkStr);
-        }
-        else if (source.equals(checkContinguous)) {
-            chunkSizeField.setEnabled(false);
-        }
-        else if (source.equals(checkChunked)) {
-            chunkSizeField.setEnabled(true);
-            String chunkStr = "";
-            StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
-            int rank = rankChoice.getSelectedIndex() + 1;
-            while (st.hasMoreTokens()) {
-                long l = Math.max(1, Long.valueOf(st.nextToken().trim()) / (2 * rank));
-                chunkStr += String.valueOf(l) + "x";
-            }
-            chunkStr = chunkStr.substring(0, chunkStr.lastIndexOf('x'));
-            chunkSizeField.setText(chunkStr);
-        }
-        else if (source.equals(checkCompression)) {
-            boolean isCompressed = checkCompression.isSelected();
-
-            if (isCompressed && isH5) {
-                if (!checkChunked.isSelected()) {
-                    String currentStr = currentSizeField.getText();
-                    int idx = currentStr.lastIndexOf("x");
-                    String chunkStr = "1";
-
-                    int rank = rankChoice.getSelectedIndex() + 1;
-                    if (rank <= 1) {
-                        chunkStr = currentStr;
+                    if (sizeChoice.getItemCount() == 3) {
+                        sizeChoice.remove("32");
+                        sizeChoice.remove("64");
+                        sizeChoice.add("8");
+                        sizeChoice.add("16");
+                        sizeChoice.add("32");
+                        sizeChoice.add("64");
                     }
-                    else {
-                        for (int i = 1; i < rank - 1; i++) {
-                            chunkStr += " x 1";
-                        }
-                        if (idx > 0) {
-                            chunkStr += " x " + currentStr.substring(idx + 1);
-                        }
-                    }
-
-                    chunkSizeField.setText(chunkStr);
                 }
-                compressionLevel.setEnabled(true);
-                checkContinguous.setEnabled(false);
-                checkChunked.setSelected(true);
-                chunkSizeField.setEnabled(true);
-            }
-            else {
-                compressionLevel.setEnabled(isCompressed);
-                checkContinguous.setEnabled(true);
-            }
-        }
-        else if (source.equals(checkFillValue)) {
-            fillValueField.setEnabled(checkFillValue.isSelected());
-        }
-    }
+                else if ((idx == 1) || (idx == 7)) { // FLOAT
+                    sizeChoice.setEnabled(true);
+                    endianChoice.setEnabled(isH5);
+                    checkUnsigned.setEnabled(false);
 
-    /** check is the max size is valid */
-    private void checkMaxSize() {
-        boolean isChunkNeeded = false;
+                    if (sizeChoice.getItemCount() == 5) {
+                        sizeChoice.remove("16");
+                        sizeChoice.remove("8");
+                    }
+                }
+                else if (idx == 2) { // CHAR
+                    sizeChoice.setEnabled(false);
+                    endianChoice.setEnabled(isH5);
+                    checkUnsigned.setEnabled(true);
+                }
+                else if (idx == 3) { // STRING
+                    sizeChoice.setEnabled(false);
+                    endianChoice.setEnabled(false);
+                    checkUnsigned.setEnabled(false);
+                    stringLengthField.setEnabled(true);
+                    stringLengthField.setText("String length");
+                }
+                else if (idx == 4) { // REFERENCE
+                    sizeChoice.setEnabled(false);
+                    endianChoice.setEnabled(false);
+                    checkUnsigned.setEnabled(false);
+                    stringLengthField.setEnabled(false);
+                }
+                else if (idx == 5) { // ENUM
+                    sizeChoice.setEnabled(true);
+                    checkUnsigned.setEnabled(true);
+                    stringLengthField.setEnabled(true);
+                    stringLengthField.setText("R=0,G=1,B=2,...");
+                }
+                else if (idx == 8) {
+                    sizeChoice.setEnabled(false);
+                    endianChoice.setEnabled(false);
+                    checkUnsigned.setEnabled(false);
+                    stringLengthField.setEnabled(false);
+                }
+    		}
+    	});
+    	
+    	classChoice.add("INTEGER");
+        classChoice.add("FLOAT");
+        classChoice.add("CHAR");
+        
+        if(isH5) {
+        	classChoice.add("STRING");
+            classChoice.add("REFERENCE");
+            classChoice.add("ENUM");
+            classChoice.add("VLEN_INTEGER");
+            classChoice.add("VLEN_FLOAT");
+            classChoice.add("VLEN_STRING");
+        }
+
+    	sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	sizeChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			if (classChoice.getSelectionIndex() == 0) {
+                    checkUnsigned.setEnabled(true);
+                }
+    		}
+    	});
+    	
+    	if(isH5) {
+    		sizeChoice.add("NATIVE");
+    	} else {
+    		sizeChoice.add("DEFAULT");
+    	}
+    	
+        sizeChoice.add("8");
+        sizeChoice.add("16");
+        sizeChoice.add("32");
+        sizeChoice.add("64");
+    	
+    	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	endianChoice.setEnabled(isH5);
+    	endianChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			
+    		}
+    	});
+    	
+    	if(isH5) {
+    		endianChoice.add("NATIVE");
+            endianChoice.add("LITTLE ENDIAN");
+            endianChoice.add("BIG ENDIAN");
+    	} else {
+    		endianChoice.add("DEFAULT");
+    	}
+    	
+    	stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
+    	stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	stringLengthField.setText("String Length");
+    	stringLengthField.setEnabled(false);
+    	
+    	classChoice.select(0);
+    	sizeChoice.select(0);
+    	endianChoice.select(0);
+    	
+    	
+    	// Create Dataspace region
+    	org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	dataspaceGroup.setText("Dataspace");
+    	dataspaceGroup.setLayout(new GridLayout(3, true));
+    	dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	label = new Label(dataspaceGroup, SWT.LEFT);
+    	label.setText("No. of dimensions");
+    	
+    	label = new Label(dataspaceGroup, SWT.LEFT);
+    	label.setText("Current size");
+    	
+    	// Dummy label
+    	label = new Label(dataspaceGroup, SWT.LEFT);
+    	label.setText("");
+    	
+    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN);
+    	rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	rankChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			int rank = rankChoice.getSelectionIndex() + 1;
+                String currentSizeStr = "1";
+                String maxSizeStr = "0";
+
+                for (int i = 1; i < rank; i++) {
+                    currentSizeStr += " x 1";
+                    maxSizeStr += " x 0";
+                }
+
+                currentSizeField.setText(currentSizeStr);
+                maxSizeField.setText(maxSizeStr);
+
+                String currentStr = currentSizeField.getText();
+                int idx = currentStr.lastIndexOf("x");
+                String chunkStr = "1";
+
+                if (rank <= 1) {
+                    chunkStr = currentStr;
+                }
+                else {
+                    for (int i = 1; i < rank - 1; i++) {
+                        chunkStr += " x 1";
+                    }
+                    if (idx > 0) {
+                        chunkStr += " x " + currentStr.substring(idx + 1);
+                    }
+                }
+
+                chunkSizeField.setText(chunkStr);
+    		}
+    	});
+    	
+    	for (int i = 1; i < 33; i++) {
+            rankChoice.add(String.valueOf(i));
+        }
+        rankChoice.select(1);
+
+        currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
+        currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        currentSizeField.setText("1 x 1");
+        
+        Button setMaxSizeButton = new Button(dataspaceGroup, SWT.PUSH);
+        setMaxSizeButton.setText("Set Max Size");
+        setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		String strMax = maxSizeField.getText();
+                if (strMax == null || strMax.length() < 1) strMax = currentSizeField.getText();
+
+                String msg = new InputDialog(shell, "Set Max Size", "Enter max dimension sizes. \n"
+                        + "Use \"unlimited\" for unlimited dimension size.\n\n" + "For example,\n" + "    200 x 100\n"
+                        + "    100 x unlimited\n\n", strMax).open();
+
+                if (msg == null || msg.length() < 1)
+                    maxSizeField.setText(currentSizeField.getText());
+                else
+                    maxSizeField.setText(msg);
+
+                checkMaxSize();
+        	}
+        });
+        
+    	
+        // Create Storage Properties region
+    	org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	storagePropertiesGroup.setText("Storage Properties");
+    	storagePropertiesGroup.setLayout(new GridLayout(5, true));
+    	storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	label = new Label(storagePropertiesGroup, SWT.LEFT);
+    	label.setText("Storage layout: ");
+    	
+    	checkContiguous = new Button(storagePropertiesGroup, SWT.RADIO);
+    	checkContiguous.setText("Contiguous");
+    	checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+    	checkContiguous.setSelection(true);
+    	checkContiguous.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			chunkSizeField.setEnabled(false);
+    		}
+    	});
+    	
+    	// Dummy label
+    	label = new Label(storagePropertiesGroup, SWT.LEFT);
+    	label.setText("");
+    	label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	checkChunked = new Button(storagePropertiesGroup, SWT.RADIO);
+    	checkChunked.setText("Chunked (size) ");
+    	checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+    	checkChunked.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			chunkSizeField.setEnabled(true);
+                String chunkStr = "";
+                StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
+                int rank = rankChoice.getSelectionIndex() + 1;
+                while (st.hasMoreTokens()) {
+                    long l = Math.max(1, Long.valueOf(st.nextToken().trim()) / (2 * rank));
+                    chunkStr += String.valueOf(l) + "x";
+                }
+                chunkStr = chunkStr.substring(0, chunkStr.lastIndexOf('x'));
+                chunkSizeField.setText(chunkStr);
+    		}
+    	});
+    	
+    	chunkSizeField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
+    	chunkSizeField.setText("1 x 1");
+    	chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	chunkSizeField.setEnabled(false);
+    	
+    	label = new Label(storagePropertiesGroup, SWT.LEFT);
+    	label.setText("Compression: ");
+    	
+    	checkCompression = new Button(storagePropertiesGroup, SWT.CHECK);
+    	checkCompression.setText("gzip (level) ");
+    	checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+    	checkCompression.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			boolean isCompressed = checkCompression.getSelection();
+
+                if (isCompressed && isH5) {
+                    if (!checkChunked.getSelection()) {
+                        String currentStr = currentSizeField.getText();
+                        int idx = currentStr.lastIndexOf("x");
+                        String chunkStr = "1";
+
+                        int rank = rankChoice.getSelectionIndex() + 1;
+                        if (rank <= 1) {
+                            chunkStr = currentStr;
+                        }
+                        else {
+                            for (int i = 1; i < rank - 1; i++) {
+                                chunkStr += " x 1";
+                            }
+                            if (idx > 0) {
+                                chunkStr += " x " + currentStr.substring(idx + 1);
+                            }
+                        }
+
+                        chunkSizeField.setText(chunkStr);
+                    }
+                    compressionLevel.setEnabled(true);
+                    checkContiguous.setEnabled(false);
+                    checkContiguous.setSelection(false);
+                    checkChunked.setSelection(true);
+                    chunkSizeField.setEnabled(true);
+                }
+                else {
+                    compressionLevel.setEnabled(isCompressed);
+                    checkContiguous.setEnabled(true);
+                }
+    		}
+    	});
+    	
+    	compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN);
+    	compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	for (int i = 0; i < 10; i++) {
+            compressionLevel.add(String.valueOf(i));
+        }
+        compressionLevel.select(6);
+        compressionLevel.setEnabled(false);
+
+        if(isH5) {
+            checkFillValue = new Button(storagePropertiesGroup, SWT.CHECK);
+            checkFillValue.setText("Fill Value");
+            checkFillValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+            checkFillValue.setSelection(false);
+            checkFillValue.addSelectionListener(new SelectionAdapter() {
+        	    public void widgetSelected(SelectionEvent e) {
+        	    	fillValueField.setEnabled(checkFillValue.getSelection());
+        	    }
+            });
+            
+            fillValueField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
+            fillValueField.setText("0");
+            fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            fillValueField.setEnabled(false);
+        } else {
+        	// Add two dummy labels
+        	label = new Label(storagePropertiesGroup, SWT.LEFT);
+        	label.setText("");
+        	label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        	
+        	label = new Label(storagePropertiesGroup, SWT.LEFT);
+        	label.setText("");
+        	label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        }
+    	
+    	
+    	// Create Ok/Cancel/Help button region
+    	Composite buttonComposite = new Composite(shell, SWT.NONE);
+    	buttonComposite.setLayout(new GridLayout(3, false));
+    	buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	Button okButton = new Button(buttonComposite, SWT.PUSH);
+    	okButton.setText("   &Ok   ");
+    	GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+    	gridData.widthHint = 70;
+    	okButton.setLayoutData(gridData);
+    	okButton.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			if (dataView instanceof TableView) {
+                    newObject = createFromTable();
+                }
+                else if (dataView instanceof ImageView) {
+                    newObject = createFromImage();
+                }
+                else if (dataView == null) {
+                    newObject = createFromScratch();
+                }
+
+                if (newObject != null) {
+                    shell.dispose();
+                }
+    		}
+    	});
+        
+        Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setText("&Cancel");
+        gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
+        gridData.widthHint = 70;
+        cancelButton.setLayoutData(gridData);
+        cancelButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		newObject = null;
+                shell.dispose();
+                ((Vector<Group>) groupList).setSize(0);
+        	}
+        });
+        
+        Button helpButton = new Button(buttonComposite, SWT.PUSH);
+        helpButton.setText("&Help");
+        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        helpButton.setLayoutData(gridData);
+        helpButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		new HelpDialog(shell).open();
+        	}
+        });
+    	
+        shell.pack();
+        
+        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        
+        Rectangle parentBounds = parent.getBounds();
+        Point shellSize = shell.getSize();
+        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+        
+        shell.open();
+        
+        Display display = parent.getDisplay();
+        while(!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
+	}
+	
+	/** Check if the max size is valid */
+	private void checkMaxSize() {
+		boolean isChunkNeeded = false;
         String dimStr = currentSizeField.getText();
         String maxStr = maxSizeField.getText();
         StringTokenizer stMax = new StringTokenizer(maxStr, "x");
         StringTokenizer stDim = new StringTokenizer(dimStr, "x");
 
         if (stMax.countTokens() != stDim.countTokens()) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Wrong number of values in the max dimension size " + maxStr,
-                    getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Wrong number of values in the max dimension size " + maxStr);
+            error.open();
             maxSizeField.setText(null);
             return;
         }
@@ -714,9 +654,11 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
                     max = Long.parseLong(token);
                 }
                 catch (NumberFormatException ex) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Invalid max dimension size: " + maxStr, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                    error.setText(shell.getText());
+                    error.setMessage("Invalid max dimension size: " + maxStr);
+                    error.open();
                     maxSizeField.setText(null);
                     return;
                 }
@@ -727,16 +669,20 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
                 dim = Long.parseLong(token);
             }
             catch (NumberFormatException ex) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Invalid dimension size: " + dimStr, getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Invalid dimension size: " + dimStr);
+                error.open();
                 return;
             }
 
             if (max != -1 && max < dim) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Invalid max dimension size: " + maxStr, getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Invalid max dimension size: " + maxStr);
+                error.open();
                 maxSizeField.setText(null);
                 return;
             }
@@ -748,122 +694,32 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         } // for (int i = 0; i < rank; i++)
 
         if (isH5) {
-            if (isChunkNeeded && !checkChunked.isSelected()) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Chunking is required for the max dimensions of " + maxStr,
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
-                checkChunked.setSelected(true);
+            if (isChunkNeeded && !checkChunked.getSelection()) {
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Chunking is required for the max dimensions of " + maxStr);
+                error.open();
+                checkChunked.setSelection(true);
             }
         }
         else {
             for (int i = 1; i < rank; i++) {
                 if (maxdims[i] <= 0) {
                     maxSizeField.setText(currentSizeField.getText());
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Only dim[0] can be unlimited." + maxStr, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                    error.setText(shell.getText());
+                    error.setMessage("Only dim[0] can be unlimited." + maxStr);
+                    error.open();
                     return;
                 }
             }
         }
-    }
-
-    /** Creates a dialog to show the help information. */
-    private void createHelpDialog() {
-        helpDialog = new JDialog(this, "Create New Dataset");
-
-        JPanel contentPane = (JPanel) helpDialog.getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(15, 5, 5, 5));
-        int w = 500 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 400 + (ViewProperties.getFontSize() - 12) * 10;
-        contentPane.setPreferredSize(new Dimension(w, h));
-
-        JButton b = new JButton("  Ok  ");
-        b.addActionListener(this);
-        b.setActionCommand("Hide help");
-        JPanel tmpP = new JPanel();
-        tmpP.add(b);
-        contentPane.add(tmpP, BorderLayout.SOUTH);
-
-        JEditorPane infoPane = new JEditorPane();
-        infoPane.setEditable(false);
-        JScrollPane editorScrollPane = new JScrollPane(infoPane);
-        contentPane.add(editorScrollPane, BorderLayout.CENTER);
-
-        try {
-            URL url = null, url2 = null, url3 = null;
-            String rootPath = ViewProperties.getViewRoot();
-
-            try {
-                url = new URL("file:" + rootPath + "/lib/jhdfview.jar");
-            }
-            catch (java.net.MalformedURLException mfu) {
-            	log.debug("help information:", mfu);
-            }
-
-            try {
-                url2 = new URL("file:" + rootPath + "/");
-            }
-            catch (java.net.MalformedURLException mfu) {
-            	log.debug("help information:", mfu);
-            }
-
-            try {
-                url3 = new URL("file:" + rootPath + "/src/");
-            }
-            catch (java.net.MalformedURLException mfu) {
-            	log.debug("help information:", mfu);
-            }
-
-            URL uu[] = { url, url2, url3 };
-            URLClassLoader cl = new URLClassLoader(uu);
-            URL u = cl.findResource("ncsa/hdf/view/NewDatasetHelp.html");
-
-            infoPane.setPage(u);
-            infoPane.addHyperlinkListener(this);
-        }
-        catch (Exception e) {
-            infoPane.setContentType("text/html");
-            StringBuffer buff = new StringBuffer();
-            buff.append("<html>");
-            buff.append("<body>");
-            buff.append("ERROR: cannot load help information.");
-            buff.append("</body>");
-            buff.append("</html>");
-            infoPane.setText(buff.toString());
-        }
-
-        Point l = helpDialog.getOwner().getLocation();
-        l.x += 50;
-        l.y += 80;
-        helpDialog.setLocation(l);
-        helpDialog.validate();
-        helpDialog.pack();
-    }
-
-    public void hyperlinkUpdate(HyperlinkEvent e) {
-        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-            JEditorPane pane = (JEditorPane) e.getSource();
-
-            if (e instanceof HTMLFrameHyperlinkEvent) {
-                HTMLFrameHyperlinkEvent evt = (HTMLFrameHyperlinkEvent) e;
-                HTMLDocument doc = (HTMLDocument) pane.getDocument();
-                doc.processHTMLFrameHyperlinkEvent(evt);
-            }
-            else {
-                try {
-                    pane.setPage(e.getURL());
-                }
-                catch (Throwable t) {
-                    log.debug("JEditorPane hyperlink:", t);
-                }
-            }
-        }
-    }
-
-    private HObject createFromScratch() {
-        String name = null;
+	}
+	
+	private HObject createFromScratch() {
+		String name = null;
         Group pgroup = null;
         boolean isVLen = false;
         int rank = -1, gzip = -1, tclass = -1, tsize = -1, torder = -1, tsign = -1;
@@ -871,32 +727,39 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
 
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
-            toolkit.beep();
-            JOptionPane
-            .showMessageDialog(this, "Dataset name is not specified.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Dataset name is not specified.");
+            error.open();
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Dataset name cannot contain path.", getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Dataset name cannot contain path.");
+            error.open();
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectedIndex());
+        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
 
         if (pgroup == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Parent group is null.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Parent group is null.");
+            error.open();
             return null;
         }
 
         // set datatype class
-        int idx = classChoice.getSelectedIndex();
+        int idx = classChoice.getSelectionIndex();
         if (idx == 0) {
             tclass = Datatype.CLASS_INTEGER;
-            if (checkUnsigned.isSelected()) {
+            if (checkUnsigned.getSelection()) {
                 tsign = Datatype.SIGN_NONE;
             }
         }
@@ -905,7 +768,7 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         }
         else if (idx == 2) {
             tclass = Datatype.CLASS_CHAR;
-            if (checkUnsigned.isSelected()) {
+            if (checkUnsigned.getSelection()) {
                 tsign = Datatype.SIGN_NONE;
             }
         }
@@ -921,7 +784,7 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         else if (idx == 6) {
             isVLen = true;
             tclass = Datatype.CLASS_INTEGER;
-            if (checkUnsigned.isSelected()) {
+            if (checkUnsigned.getSelection()) {
                 tsign = Datatype.SIGN_NONE;
             }
         }
@@ -935,7 +798,7 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         }
 
         // set datatype size/order
-        idx = sizeChoice.getSelectedIndex();
+        idx = sizeChoice.getSelectionIndex();
         if (tclass == Datatype.CLASS_STRING) {
             if (isVLen) {
                 tsize = -1;
@@ -950,9 +813,11 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
                 }
     
                 if (stringLength <= 0) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Invalid string length: " + stringLengthField.getText(),
-                            getTitle(), JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                    error.setText(shell.getText());
+                    error.setMessage("Invalid string length: " + stringLengthField.getText());
+                    error.open();
                     return null;
                 }
                 tsize = stringLength;
@@ -961,9 +826,11 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         else if (tclass == Datatype.CLASS_ENUM) {
             String enumStr = stringLengthField.getText();
             if ((enumStr == null) || (enumStr.length() < 1) || enumStr.endsWith("...")) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Invalid member values: " + stringLengthField.getText(),
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Invalid member values: " + stringLengthField.getText());
+                error.open();
                 return null;
             }
         }
@@ -981,14 +848,16 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         }
 
         if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "HDF4 does not support 64-bit integer.", getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("HDF4 does not support 64-bit integer.");
+            error.open();
             return null;
         }
 
         // set order
-        idx = endianChoice.getSelectedIndex();
+        idx = endianChoice.getSelectionIndex();
         if (idx == 0) {
             torder = Datatype.NATIVE;
         }
@@ -999,12 +868,14 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
             torder = Datatype.ORDER_BE;
         }
 
-        rank = rankChoice.getSelectedIndex() + 1;
+        rank = rankChoice.getSelectionIndex() + 1;
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Number of values in the current dimension size is less than " + rank,
-                    getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Number of values in the current dimension size is less than " + rank);
+            error.open();
             return null;
         }
 
@@ -1017,16 +888,20 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
                 l = Long.parseLong(token);
             }
             catch (NumberFormatException ex) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Invalid dimension size: " + currentSizeField.getText(),
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Invalid dimension size: " + currentSizeField.getText());
+                error.open();
                 return null;
             }
 
             if (l <= 0) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Dimension size must be greater than zero.", getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Dimension size must be greater than zero.");
+                error.open();
                 return null;
             }
 
@@ -1037,9 +912,11 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         if (maxFieldStr != null && maxFieldStr.length() > 1) {
             st = new StringTokenizer(maxFieldStr, "x");
             if (st.countTokens() < rank) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Number of values in the max dimension size is less than " + rank,
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Number of values in the max dimension size is less than " + rank);
+                error.open();
                 return null;
             }
 
@@ -1056,17 +933,21 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
                         l = Long.parseLong(token);
                     }
                     catch (NumberFormatException ex) {
-                        toolkit.beep();
-                        JOptionPane.showMessageDialog(this, "Invalid max dimension size: " + maxSizeField.getText(),
-                                getTitle(), JOptionPane.ERROR_MESSAGE);
+                        shell.getDisplay().beep();
+                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                        error.setText(shell.getText());
+                        error.setMessage("Invalid max dimension size: " + maxSizeField.getText());
+                        error.open();
                         return null;
                     }
                 }
 
                 if (l < -1) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Dimension size cannot be less than -1.", getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                    error.setText(shell.getText());
+                    error.setMessage("Dimension size cannot be less than -1.");
+                    error.open();
                     return null;
                 }
                 else if (l == 0) {
@@ -1078,12 +959,14 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         }
 
         chunks = null;
-        if (checkChunked.isSelected()) {
+        if (checkChunked.getSelection()) {
             st = new StringTokenizer(chunkSizeField.getText(), "x");
             if (st.countTokens() < rank) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Number of values in the chunk size is less than " + rank,
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setText(shell.getText());
+                error.setMessage("Number of values in the chunk size is less than " + rank);
+                error.open();
                 return null;
             }
 
@@ -1095,16 +978,20 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
                     l = Long.parseLong(token);
                 }
                 catch (NumberFormatException ex) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Invalid chunk dimension size: " + chunkSizeField.getText(),
-                            getTitle(), JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                    error.setText(shell.getText());
+                    error.setMessage("Invalid chunk dimension size: " + chunkSizeField.getText());
+                    error.open();
                     return null;
                 }
 
                 if (l < 1) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Chunk size cannot be less than 1.", getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                    error.setText(shell.getText());
+                    error.setMessage("Chunk size cannot be less than 1.");
+                    error.open();
                     return null;
                 }
 
@@ -1118,30 +1005,30 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
             }
 
             if (tchunksize >= tdimsize) {
-                toolkit.beep();
-                int status = JOptionPane.showConfirmDialog(this, "Chunk size is equal/greater than the current size. "
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?", getTitle(),
-                        JOptionPane.YES_NO_OPTION);
-                if (status == JOptionPane.NO_OPTION) {
-                    return null;
+                shell.getDisplay().beep();
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText(shell.getText());
+                confirm.setMessage("Chunk size is equal/greater than the current size. "
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
+                if(confirm.open() == SWT.NO) {
+                	return null;
                 }
             }
 
             if (tchunksize == 1) {
-                toolkit.beep();
-                int status = JOptionPane.showConfirmDialog(this,
-                        "Chunk size is one, which may cause large memory overhead for large dataset."
-                                + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?",
-                                getTitle(), JOptionPane.YES_NO_OPTION);
-                if (status == JOptionPane.NO_OPTION) {
-                    return null;
+                shell.getDisplay().beep();
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText(shell.getText());
+                confirm.setMessage("Chunk size is one, which may cause large memory overhead for large dataset."
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
+                if(confirm.open() == SWT.NO) {
+                	return null;
                 }
             }
-
         } // if (checkChunked.isSelected())
 
-        if (checkCompression.isSelected()) {
-            gzip = compressionLevel.getSelectedIndex();
+        if (checkCompression.getSelection()) {
+            gzip = compressionLevel.getSelectionIndex();
         }
         else {
             gzip = 0;
@@ -1164,39 +1051,49 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
             obj = fileFormat.createScalarDS(name, pgroup, datatype, dims, maxdims, chunks, gzip, fillValue, null);
         }
         catch (Exception ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage(ex.getMessage());
+            error.open();
             return null;
         }
 
         return obj;
-    }
-
-    private HObject createFromTable() {
-        HObject obj = null;
+	}
+	
+	private HObject createFromTable() {
+		HObject obj = null;
 
         String name = null;
         Group pgroup = null;
 
         name = nameField.getText();
-        if (name == null) {
-            toolkit.beep();
-            JOptionPane
-            .showMessageDialog(this, "Dataset name is not specified.", getTitle(), JOptionPane.ERROR_MESSAGE);
+        if (name == null || name.length() == 0) {
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Dataset name is not specified.");
+            error.open();
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Dataset name cannot contain path.", getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Dataset name cannot contain path.");
+            error.open();
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectedIndex());
+        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Parent group is null.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Parent group is null.");
+            error.open();
             return null;
         }
 
@@ -1228,32 +1125,39 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         */
 
         return obj;
-    }
-
-    private HObject createFromImage() {
-        HObject obj = null;
+	}
+	
+	private HObject createFromImage() {
+		HObject obj = null;
         String name = null;
         Group pgroup = null;
 
         name = nameField.getText();
-        if (name == null) {
-            toolkit.beep();
-            JOptionPane
-            .showMessageDialog(this, "Dataset name is not specified.", getTitle(), JOptionPane.ERROR_MESSAGE);
+        if (name == null || name.length() == 0) {
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Dataset name is not specified.");
+            error.open();
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Dataset name cannot contain path.", getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Dataset name cannot contain path.");
+            error.open();
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectedIndex());
+        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Parent group is null.", getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage("Parent group is null.");
+            error.open();
             return null;
         }
 
@@ -1266,7 +1170,7 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
         }
 
         // in version 2.4, unsigned image data is converted to signed data
-        // to write data, the data needs to converted back to unsigned.
+        // to write data, the data needs to be converted back to unsigned.
         if (dataset.isUnsigned()) {
             theData = Dataset.convertToUnsignedC(theData, null);
         }
@@ -1305,13 +1209,126 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
             obj = dataset.copy(pgroup, name, dims, theData);
         }
         catch (Exception ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            error.setText(shell.getText());
+            error.setMessage(ex.getMessage());
+            error.open();
             return null;
         }
 
         return obj;
-    }
+	}
+	
+	private class HelpDialog extends Dialog {
+		private Shell helpShell;
+		
+		public HelpDialog(Shell parent) {
+			super(parent, SWT.APPLICATION_MODAL);
+		}
+		
+		public void open() {
+			Shell parent = getParent();
+			helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+	    			SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+	    	helpShell.setText("Create New Dataset");
+	    	helpShell.setImage(ViewProperties.getHdfIcon());
+	    	helpShell.setLayout(new GridLayout(1, true));
+	    	
+	    	// Try to create a Browser on platforms that support it
+	    	Browser browser;
+	    	try {
+	    	    browser = new Browser(helpShell, SWT.NONE);
+	    	    browser.setBounds(0, 0, 500, 500);
+	    	    browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+	    	    //TODO: Fix URLClassLoader URLs to load local html file from .jar
+		    	try {
+		            URL url = null, url2 = null, url3 = null;
+		            String rootPath = ViewProperties.getViewRoot();
+
+		            try {
+		                url = new URL("file://" + rootPath + "/HDFView.jar");
+		            }
+		            catch (java.net.MalformedURLException mfu) {
+		            	log.debug("help information:", mfu);
+		            }
+
+		            try {
+		                url2 = new URL("file://" + rootPath + "/");
+		            }
+		            catch (java.net.MalformedURLException mfu) {
+		            	log.debug("help information:", mfu);
+		            }
+
+		            try {
+		                url3 = new URL("file://" + rootPath + "/src/");
+		            }
+		            catch (java.net.MalformedURLException mfu) {
+		            	log.debug("help information:", mfu);
+		            }
+		            
+		            URL uu[] = { url, url2, url3 };
+		            URLClassLoader cl = new URLClassLoader(uu);
+		            URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
+		            
+		            System.out.println(cl.getURLs()[0]);
+		            System.out.println(cl.getURLs()[1]);
+		            System.out.println(cl.getURLs()[2]);
+		            
+		            browser.setUrl(u.toString());
+		            
+		            cl.close();
+		        }
+		        catch (Exception e) {
+		        	StringBuffer buff = new StringBuffer();
+		            buff.append("<html>");
+		            buff.append("<body>");
+		            buff.append("ERROR: cannot load help information.");
+		            buff.append("</body>");
+		            buff.append("</html>");
+		            browser.setText(buff.toString(), true);
+		        }
+		    	
+		    	Button okButton = new Button(helpShell, SWT.PUSH);
+		    	okButton.setText("   Ok   ");
+		    	okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+		    	okButton.addSelectionListener(new SelectionAdapter() {
+		    		public void widgetSelected(SelectionEvent e) {
+		    			helpShell.dispose();
+		    		}
+		    	});
+		    	
+		    	helpShell.pack();
+		    	
+		    	helpShell.setSize(helpShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		        
+		        Rectangle parentBounds = parent.getBounds();
+		        Point shellSize = helpShell.getSize();
+		        helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+		                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+		    	
+		    	helpShell.open();
+		    	
+		    	Display display = parent.getDisplay();
+		        while(!helpShell.isDisposed()) {
+		            if (!display.readAndDispatch())
+		                display.sleep();
+		        }
+	    	} catch (Exception ex) {
+	    		// Try opening help link in external browser if platform
+	    		// doesn't support SWT browser
+	    		browser = null;
+	    		MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+	    		error.setMessage("Platform doesn't support Browser. Opening external link in web browser...");
+	    		error.setText("Browser support");
+	    		error.open();
+	    		helpShell.dispose();
+	    		
+	    		//TODO: Add support for launching in external browser
+	    	}
+		}
+	}
 
     /** Returns the new dataset created. */
     public DataFormat getObject() {
@@ -1320,7 +1337,6 @@ public class NewDatasetDialog extends JDialog implements ActionListener, ItemLis
 
     /** Returns the parent group of the new dataset. */
     public Group getParentGroup() {
-        return (Group) groupList.get(parentChoice.getSelectedIndex());
+        return parentGroup;
     }
-
 }

@@ -907,10 +907,10 @@ public class DefaultTreeView implements TreeView {
                 parentItem = findTreeItem(groupDialog.getParentGroup());
                 break;
             case DATASET:
-                //NewDatasetDialog datasetDialog = new NewDatasetDialog((JFrame) viewer, pGroup, breadthFirstUserObjects(selectedObject.getFileFormat().getRootObject()));
-                //datasetDialog.setVisible(true);
-                //obj = (HObject) datasetDialog.getObject();
-                //pGroup = datasetDialog.getParentGroup();
+                NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                datasetDialog.open();
+                obj = (HObject) datasetDialog.getObject();
+                parentItem = findTreeItem(datasetDialog.getParentGroup());
                 break;
             case IMAGE:
                 //NewImageDialog imageDialog = new NewImageDialog((JFrame) viewer, pGroup, breadthFirstUserObjects(selectedObject.getFileFormat().getRootObject()));
