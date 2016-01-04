@@ -45,8 +45,8 @@ import hdf.object.HObject;
 /**
  * NewGroupDialog shows a message dialog requesting user input for creating a new HDF4/5 group.
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 12/30/2015
  */
 public class NewGroupDialog extends Dialog {
 	private static final long serialVersionUID = 7340860373483987075L;
@@ -88,10 +88,10 @@ public class NewGroupDialog extends Dialog {
     private boolean moreOptionsEnabled;
     
     /**
-     * Constructs NewGroupDialog with specified list of possible parent groups.
+     * Constructs a NewGroupDialog with specified list of possible parent groups.
      * 
-     * @param owner
-     *            the owner of the input
+     * @param parent
+     *            the parent shell of the dialog
      * @param pGroup
      *            the parent group which the new group is added to.
      * @param objs

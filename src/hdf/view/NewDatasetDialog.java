@@ -52,7 +52,7 @@ import hdf.object.ScalarDS;
  * new HDF4/5 dataset.
  * 
  * @author Jordan T. Henderson
- * @version 2.4 1/3/2016
+ * @version 2.4 12/31/2015
  */
 public class NewDatasetDialog extends Dialog {	
 	private static final long serialVersionUID = 5381164938654184532L;
@@ -86,11 +86,11 @@ public class NewDatasetDialog extends Dialog {
     private final DataView    dataView;
 
 	/**
-     * Constructs NewDatasetDialog with specified list of possible parent
+     * Constructs a NewDatasetDialog with specified list of possible parent
      * groups.
      * 
-     * @param owner
-     *            the owner of the input
+     * @param parent
+     *            the parent shell of the dialog
      * @param pGroup
      *            the parent group which the new group is added to.
      * @param objs
@@ -110,11 +110,11 @@ public class NewDatasetDialog extends Dialog {
 	}
 	
 	/**
-     * Constructs NewDatasetDialog with specified list of possible parent
+     * Constructs a NewDatasetDialog with specified list of possible parent
      * groups.
      * 
-     * @param owner
-     *            the owner of the input
+     * @param parent
+     *            the parent shell of the dialog
      * @param pGroup
      *            the parent group which the new group is added to.
      * @param objs
@@ -207,11 +207,6 @@ public class NewDatasetDialog extends Dialog {
     	
     	checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
     	checkUnsigned.setText("Unsigned");
-    	/*checkUnsigned.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			
-    		}
-    	});*/
     	
     	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
     	classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -316,11 +311,6 @@ public class NewDatasetDialog extends Dialog {
     	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
     	endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	endianChoice.setEnabled(isH5);
-    	endianChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			
-    		}
-    	});
     	
     	if(isH5) {
     		endianChoice.add("NATIVE");

@@ -1,11 +1,5 @@
 public class NewDatasetDialogOld extends JDialog implements ActionListener, ItemListener, HyperlinkListener {
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public NewDatasetDialogOld(JFrame owner, Group pGroup, List<?> objs) {
-        int w = 600 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 350 + (ViewProperties.getFontSize() - 12) * 10;
-    }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public NewDatasetDialogOld(JFrame owner, Group pGroup, List<?> objs, DataView observer) {
         parentChoice = new JComboBox();
         groupList = new Vector<Object>();
