@@ -16,7 +16,9 @@ package hdf.view;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -160,12 +162,12 @@ public class NewLinkDialog extends Dialog {
                         + "Soft Link creates a new soft link to an object in an HDF5 file. \n" 
                         + "Soft links are only for use only if the target object is in the current file. \n"
                         + "Unlike hard links, a soft link in an HDF5 file is allowed to dangle, \n" 
-                        + "meaning that the target object need not exist at the time that the link is created."
+                        + "meaning that the target object need not exist at the time that the link is created.\n"
                         + "The HDF5 library does not keep a count of soft links.  \n\n"
                         + "External Link: \n"
                         + "External Link creates a new soft link to an external object, which is an \n" 
-                        + "object in a different HDF5 file from the location of the link. External links are"
-                        + "allowed to dangle like soft links. \n\n"
+                        + "object in a different HDF5 file from the location of the link. \n"
+                        + "External links are allowed to dangle like soft links. \n\n"
                         + "Soft links and external links are also known as symbolic links as they use " 
                         + "a name to point to an object; hard links employ an object's address in the file.  \n\n\n";
                 
@@ -187,7 +189,7 @@ public class NewLinkDialog extends Dialog {
         	public void widgetSelected(SelectionEvent e) {
         		targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
-                targetObject.setEnabled(true);
+                //targetObject.setEnabled(true);
                 targetObject.addKeyListener(new KeyListener() {
                 	public void keyPressed(KeyEvent e) {
                 		e.doit = false;
@@ -198,7 +200,10 @@ public class NewLinkDialog extends Dialog {
                 	}
                 });
                 
+                targetObject.removeAll();
                 retrieveObjects(fileFormat);
+                
+                targetObject.select(0);
         	}
         });
         
@@ -209,10 +214,13 @@ public class NewLinkDialog extends Dialog {
         	public void widgetSelected(SelectionEvent e) {
         		targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
-                targetObject.setEnabled(true);
+                //targetObject.setEnabled(true);
                 //targetObject.setEditable(true);
                 
+                targetObject.removeAll();
                 retrieveObjects(fileFormat);
+                
+                targetObject.select(0);
         	}
         });
         
@@ -223,7 +231,7 @@ public class NewLinkDialog extends Dialog {
         	public void widgetSelected(SelectionEvent e) {
         		targetFile.setEnabled(true);
                 targetFileButton.setEnabled(true);
-                targetObject.setEnabled(true);
+                //targetObject.setEnabled(true);
                 //targetObject.setEditable(true);
                 targetObject.removeAll();
         	}
@@ -258,6 +266,9 @@ public class NewLinkDialog extends Dialog {
                 }
                 
                 targetFile.setText(filename);
+                getTargetFileObjs();
+                
+                if(targetObject.getItemCount() > 0) targetObject.select(0);
         	}
         });
         
@@ -266,6 +277,7 @@ public class NewLinkDialog extends Dialog {
         
         targetObject = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
         targetObject.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        //targetObject.setEditable(false);
         
         groupList = new Vector<Group>(objList.size());
         Object obj = null;
@@ -341,6 +353,7 @@ public class NewLinkDialog extends Dialog {
         });
         
         hardLink.setSelection(true);
+        targetObject.select(0);
     	
         shell.pack();
         
@@ -495,7 +508,6 @@ public class NewLinkDialog extends Dialog {
             }
             FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
             try {
-                //h5format.close();
                 TargetFileFormat = h5format.createInstance(TargetFileName, fileAccessID);
                 TargetFileFormat.open(); //open the file
             } 
@@ -533,14 +545,6 @@ public class NewLinkDialog extends Dialog {
                 }
                 tFileObj = TargetFileName + FileFormat.FILE_OBJ_SEP + tObj;
             }
-            // should allow to link to the root of an external file            
-            //            if ((targetObj instanceof Group) && ((Group) targetObj).isRoot()) {
-            //                toolkit.beep();
-            //                JOptionPane.showMessageDialog(this,
-            //                        "Cannot make a link to the root group.", getTitle(),
-            //                        JOptionPane.ERROR_MESSAGE);
-            //                return null;
-            //            }
 
             try {
                 if(targetObj !=null)
@@ -565,7 +569,7 @@ public class NewLinkDialog extends Dialog {
     private String openTargetFile() {
     	FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
     	fchooser.setFilterPath(currentDir);
-    	fchooser.setFilterExtensions(new String[] {"*.*, *.h5;*.hdf4;*.hdf;*.h4;*.he5;*.he2;*.hdf5"});
+    	fchooser.setFilterExtensions(new String[] {"*.*", "*.h5;*.hdf4;*.hdf;*.h4;*.he5;*.he2;*.hdf5"});
     	fchooser.setFilterNames(new String[] {"All Files", "HDF & more"});
     	fchooser.setFilterIndex(1);
     	//fchooser.setFileFilter(DefaultFileFilter.getFileFilter());
@@ -584,6 +588,18 @@ public class NewLinkDialog extends Dialog {
     	else {
     		currentDir = choosedFile.getParent();
     	}
+    	
+        //Check if the target File is not the current file.
+        String currentFileName = fileFormat.getAbsolutePath();
+        if(currentFileName.equals(choosedFile.getAbsolutePath())) {
+        	//targetObject.setEnabled(false);
+        	
+        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+        	error.setText(shell.getText());
+        	error.setMessage("Please select a file other than the current file for external links.");
+        	error.open();
+        	return null;
+        }
 
     	return choosedFile.getAbsolutePath();
     }
@@ -610,14 +626,44 @@ public class NewLinkDialog extends Dialog {
     	return isOpen;
     }
     
+    private List<HObject> getAllUserObjectsBreadthFirst(FileFormat file) {
+    	if(file == null) return null;
+    	
+    	Vector<HObject> breadthFirstObjects = new Vector<HObject>();
+    	Queue<HObject> currentChildren = new LinkedList<HObject>();
+    	HObject currentObject = file.getRootObject();
+    	
+    	breadthFirstObjects.add(file.getRootObject()); // Add the root object to the list first
+        
+    	// Add all root object children to a Queue
+        currentChildren.addAll(((Group) currentObject).getMemberList());
+        
+        // For every item in the queue, remove it from the head of the queue,
+        // add it to the list of all items, then add all of its possible children
+        // TreeItems to the end of the queue. This produces a breadth-first
+        // ordering of the Tree's TreeItems.
+        while(!currentChildren.isEmpty()) {
+            currentObject = currentChildren.remove();
+            breadthFirstObjects.add(currentObject);
+            
+            if(currentObject instanceof Group) {
+            	if(((Group) currentObject).getNumberOfMembersInFile() <= 0) continue;
+                
+                currentChildren.addAll(((Group) currentObject).getMemberList());
+            }
+        }
+        
+        return breadthFirstObjects;
+    }
+    
     // Retrieves the list of objects from the file
     private void retrieveObjects(FileFormat file) {
         HObject obj = null;
-        Iterator<?> iterator = objList.iterator();
+        Iterator<HObject> iterator = getAllUserObjectsBreadthFirst(file).iterator();
         String full_name = null;
-        targetObject.removeAll();
+        
         while (iterator.hasNext()) {
-            obj = (HObject) iterator.next();
+            obj = iterator.next();
 
             if (obj instanceof Group) {
                 Group g = (Group) obj;
@@ -633,6 +679,58 @@ public class NewLinkDialog extends Dialog {
             }
             
             targetObject.add(full_name);
+        }
+        
+        // Remove the root group "/" from the target objects
+        targetObject.remove(0);
+    }
+    
+    // Retrieves objects from Target File.
+    private void getTargetFileObjs(){
+        FileFormat fileFormatC = null;
+        int fileAccessID = FileFormat.FILE_CREATE_OPEN;
+        String filename = null;
+        filename = targetFile.getText();
+
+        if (filename == null || filename.length()<1) {
+            return;
+        }
+
+        //Check if the target File is open in treeView
+        if (isFileOpen(filename)) {
+            return;
+        }
+
+        File choosedFile = new File(filename);
+
+        if (!choosedFile.exists()) {
+            targetObject.setEnabled(false);
+            return;
+        }
+        
+        FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
+        try {
+            fileFormatC = h5format.createInstance(filename, fileAccessID);
+            fileFormatC.open(); //open the file
+        } 
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+            error.setText(shell.getText());
+            error.setMessage("Invalid File Format");
+            error.open();
+            targetFile.setText("");
+            return;
+        } 
+
+        // get the list of objects from the file
+        retrieveObjects(fileFormatC);
+
+        try {             
+            fileFormatC.close();    
+        } 
+        catch (Exception ex) {
+        	log.debug("FileFormat close:", ex);
         }
     }
 

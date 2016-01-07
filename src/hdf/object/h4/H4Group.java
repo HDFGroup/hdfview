@@ -89,7 +89,7 @@ public class H4Group extends Group
         if (nAttributes < 0) {
             int vgid = open();
             try {  
-                nAttributes =HDFLibrary.Vnattrs(vgid);
+                nAttributes = HDFLibrary.Vnattrs(vgid);
                 nMembersInFile = HDFLibrary.Vntagrefs(vgid);
             } 
             catch (Exception ex) {

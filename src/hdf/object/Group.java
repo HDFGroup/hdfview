@@ -14,7 +14,6 @@
 
 package hdf.object;
 
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
