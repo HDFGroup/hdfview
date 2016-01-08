@@ -919,10 +919,10 @@ public class DefaultTreeView implements TreeView {
                 parentItem = findTreeItem(imageDialog.getParentGroup());
                 break;
             case TABLE:
-                //NewTableDataDialog tableDialog = new NewTableDataDialog((JFrame) viewer, pGroup, breadthFirstUserObjects(selectedObject.getFileFormat().getRootObject()));
-                //tableDialog.setVisible(true);
-                //obj = (HObject) tableDialog.getObject();
-                //pGroup = tableDialog.getParentGroup();
+                NewTableDataDialog tableDialog = new NewTableDataDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                tableDialog.open();
+                obj = (HObject) tableDialog.getObject();
+                parentItem = findTreeItem(tableDialog.getParentGroup());
                 break;
             case DATATYPE:
                 NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));

@@ -14,41 +14,31 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
@@ -60,16 +50,18 @@ import hdf.object.HObject;
 
 /**
  * NewTableDataDialog shows a message dialog requesting user input for creating
- * a new HDF4/5 dataset.
+ * a new HDF4/5 compound dataset.
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 1/7/2015
  */
-public class NewTableDataDialog extends JDialog implements ActionListener, ItemListener {
-    private static final long     serialVersionUID = -6786877503226330821L;
+public class NewTableDataDialog extends Dialog {
+	private static final long     serialVersionUID = -6786877503226330821L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewTableDataDialog.class);
 
+	private Shell shell;
+    
     private static final String[] DATATYPE_NAMES   = { 
         "byte (8-bit)", // 0
         "short (16-bit)", // 1
@@ -87,602 +79,459 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
 
     private FileFormat            fileformat;
 
-    @SuppressWarnings("rawtypes")
-    private JComboBox             parentChoice, nFieldBox, templateChoice;
+    private Combo                 parentChoice, nFieldBox, templateChoice;
 
-    /** a list of current groups */
-    private Vector<Object>        groupList, compoundDSList;
+    /** A list of current groups */
+    private Vector<Group>         groupList;
+    private Vector<Object>        compoundDSList;
 
     private HObject               newObject;
-
-    private final Toolkit         toolkit;
+    private Group                 parentGroup;
+    
+    private List<?>               objList;
 
     private int                   numberOfMembers;
 
-    private JTable                table;
+    private Table                 table;
 
-    private DefaultTableModel     tableModel;
-
-    private RowEditorModel        rowEditorModel;
-
-    private DefaultCellEditor     cellEditor;
-
-    private JTextField            nameField, currentSizeField, maxSizeField, chunkSizeField;
-    @SuppressWarnings("rawtypes")
-    private JComboBox             compressionLevel, rankChoice, memberTypeChoice;
-    private JCheckBox             checkCompression;
-    private JRadioButton          checkContinguous, checkChunked;
-
+    private Text                  nameField, currentSizeField, maxSizeField, chunkSizeField;
+    
+    private Combo                 compressionLevel, rankChoice, memberTypeChoice;
+    private Button                checkCompression;
+    private Button                checkContiguous, checkChunked;
+	
     /**
-     * Constructs NewTableDataDialog with specified list of possible parent
+     * Constructs a NewTableDataDialog with specified list of possible parent
      * groups.
      * 
-     * @param owner
-     *            the owner of the input
+     * @param parent
+     *            the parent shell of the dialog
      * @param pGroup
      *            the parent group which the new group is added to.
      * @param objs
      *            the list of all objects.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public NewTableDataDialog(JFrame owner, Group pGroup, List<?> objs) {
-        super(owner, "New Compound Dataset...", true);
-
-        newObject = null;
+	public NewTableDataDialog(Shell parent, Group pGroup, List<?> objs) {
+		super(parent, SWT.APPLICATION_MODAL);
+		
+		newObject = null;
         numberOfMembers = 2;
-        fileformat = pGroup.getFileFormat();
-
-        memberTypeChoice = new JComboBox(DATATYPE_NAMES);
-        cellEditor = new DefaultCellEditor(memberTypeChoice);
-        rowEditorModel = new RowEditorModel(numberOfMembers, cellEditor);
-        String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
-        tableModel = new DefaultTableModel(colNames, numberOfMembers);
-        table = new JTable(tableModel) {
-            private static final long serialVersionUID = 7141605060652738476L;
-            RowEditorModel            rm               = rowEditorModel;
-
-            @Override
-            public TableCellEditor getCellEditor(int row, int col) {
-                TableCellEditor cellEditor = rm.getEditor(row);
-
-                if ((cellEditor == null) || !(col == 1)) {
-                    cellEditor = super.getCellEditor(row, col);
-                }
-
-                return cellEditor;
-            }
-        };
-        table.setName("CompoundDataset");
-        table.setRowSelectionAllowed(false);
-        table.setColumnSelectionAllowed(false);
-
-        // set cell height for large fonts
-        int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
-        table.setRowHeight(cellRowHeight);
-
-        toolkit = Toolkit.getDefaultToolkit();
-
-        parentChoice = new JComboBox();
-        String[] memberSizes = new String[100];
-        for (int i = 0; i < 100; i++) {
-            memberSizes[i] = String.valueOf(i + 1);
-        }
-
-        nFieldBox = new JComboBox(memberSizes);
-        nFieldBox.setName("numbermembers");
-        nFieldBox.setEditable(true);
-        nFieldBox.addActionListener(this);
-        nFieldBox.setActionCommand("Change number of members");
-        nFieldBox.setSelectedItem(String.valueOf(numberOfMembers));
-
-        groupList = new Vector<Object>(objs.size());
-        Object obj = null;
-        Iterator<?> iterator = objs.iterator();
-
+        parentGroup = pGroup;
+        objList = objs;
+        
+        groupList = new Vector<Group>(objs.size());
         compoundDSList = new Vector<Object>(objs.size());
+        
+        fileformat = pGroup.getFileFormat();
+	}
+	
+	public void open() {
+		Shell parent = getParent();
+    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell.setText("New Compound Dataset...");
+    	shell.setImage(ViewProperties.getHdfIcon());
+    	shell.setLayout(new GridLayout(1, false));
+    	
+    	
+    	// Create Name/Parent Group/Import field region
+    	Composite fieldComposite = new Composite(shell, SWT.NONE);
+    	GridLayout layout = new GridLayout(2, false);
+    	layout.verticalSpacing = 0;
+    	fieldComposite.setLayout(layout);
+    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	new Label(fieldComposite, SWT.LEFT).setText("Dataset name: ");
+    	
+    	nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	new Label(fieldComposite, SWT.LEFT).setText("Parent group: ");
+    	
+    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN);
+    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	parentChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
+    		}
+    	});
+    	
+    	Object obj = null;
+        Iterator<?> iterator = objList.iterator();
 
         while (iterator.hasNext()) {
             obj = iterator.next();
             if (obj instanceof Group) {
                 Group g = (Group) obj;
-                groupList.add(obj);
+                groupList.add(g);
                 if (g.isRoot()) {
-                    parentChoice.addItem(HObject.separator);
+                    parentChoice.add(HObject.separator);
                 }
                 else {
-                    parentChoice.addItem(g.getPath() + g.getName() + HObject.separator);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.separator);
                 }
             }
             else if (obj instanceof CompoundDS) {
                 compoundDSList.add(obj);
             }
         }
-
-        templateChoice = new JComboBox(compoundDSList);
-        templateChoice.setName("templateChoice");
-        templateChoice.setSelectedIndex(-1);
-        templateChoice.addItemListener(this);
-
-        if (pGroup.isRoot()) {
-            parentChoice.setSelectedItem(HObject.separator);
+        
+    	if (parentGroup.isRoot()) {
+            parentChoice.select(parentChoice.indexOf(HObject.separator));
         }
         else {
-            parentChoice.setSelectedItem(pGroup.getPath() + pGroup.getName() + HObject.separator);
+            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
+    	
+    	new Label(fieldComposite, SWT.LEFT).setText("Import template: ");
+    	
+    	templateChoice = new Combo(fieldComposite, SWT.DROP_DOWN);
+    	templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	templateChoice.setItems(compoundDSList.toArray(new String[0]));
+    	templateChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			
+    		}
+    	});
+    	
+    	
+    	// Create Dataspace region
+    	org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	dataspaceGroup.setLayout(new GridLayout(3, true));
+    	dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	dataspaceGroup.setText("Dataspace");
+    	
+    	new Label(dataspaceGroup, SWT.LEFT).setText("No. of dimensions");
+    	
+    	new Label(dataspaceGroup, SWT.LEFT).setText("Current size");
+    	
+    	new Label(dataspaceGroup, SWT.LEFT).setText("Max size (-1 for unlimited)");
+    	
+    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN);
+    	rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	rankChoice.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			int rank = (int) rankChoice.getSelectionIndex() + 1;
+                String currentSizeStr = "1";
+                String maxSizeStr = "0";
 
-        JPanel contentPane = (JPanel) getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(15, 5, 5, 5));
-        int w = 700 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 500 + (ViewProperties.getFontSize() - 12) * 10;
-        contentPane.setPreferredSize(new Dimension(w, h));
-
-        JButton okButton = new JButton("   Ok   ");
-        okButton.setName("OK");
-        okButton.setActionCommand("Ok");
-        okButton.setMnemonic(KeyEvent.VK_O);
-        okButton.addActionListener(this);
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setName("Cancel");
-        cancelButton.setMnemonic(KeyEvent.VK_C);
-        cancelButton.setActionCommand("Cancel");
-        cancelButton.addActionListener(this);
-
-        // set NAME and PARENT GROUP panel
-        JPanel namePanel = new JPanel();
-        namePanel.setLayout(new BorderLayout(5, 5));
-        JPanel tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(3, 1));
-        tmpP.add(new JLabel("   Dataset name: "));
-        tmpP.add(new JLabel("   Parent group: "));
-        tmpP.add(new JLabel("Import template: "));
-        namePanel.add(tmpP, BorderLayout.WEST);
-        tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(3, 1));
-        tmpP.add(nameField = new JTextField());
-        nameField.setName("datasetname");
-        tmpP.add(parentChoice);
-        tmpP.add(templateChoice);
-        namePanel.add(tmpP, BorderLayout.CENTER);
-
-        // set DATATSPACE
-        JPanel spacePanel = new JPanel();
-        spacePanel.setLayout(new GridLayout(2, 3, 15, 3));
-        TitledBorder border = new TitledBorder("Dataspace");
-        border.setTitleColor(Color.blue);
-        spacePanel.setBorder(border);
-
-        rankChoice = new JComboBox();
-        for (int i = 1; i < 33; i++) {
-            rankChoice.addItem(String.valueOf(i));
-        }
-        rankChoice.setSelectedIndex(0);
-
-        currentSizeField = new JTextField("1");
-        maxSizeField = new JTextField("0");
-        spacePanel.add(new JLabel("No. of dimensions"));
-        spacePanel.add(new JLabel("Current size"));
-        spacePanel.add(new JLabel("Max size (-1 for unlimited)"));
-        spacePanel.add(rankChoice);
-        spacePanel.add(currentSizeField);
-        spacePanel.add(maxSizeField);
-
-        // set storage layout and data compression
-        JPanel layoutPanel = new JPanel();
-        layoutPanel.setLayout(new BorderLayout());
-        border = new TitledBorder("Data Layout and Compression");
-        border.setTitleColor(Color.BLUE);
-        layoutPanel.setBorder(border);
-
-        checkContinguous = new JRadioButton("Contiguous");
-        checkContinguous.setSelected(true);
-        checkChunked = new JRadioButton("Chunked");
-        ButtonGroup bgroup = new ButtonGroup();
-        bgroup.add(checkChunked);
-        bgroup.add(checkContinguous);
-        chunkSizeField = new JTextField("1");
-        chunkSizeField.setEnabled(false);
-        checkCompression = new JCheckBox("gzip");
-
-        compressionLevel = new JComboBox();
-        for (int i = 0; i < 10; i++) {
-            compressionLevel.addItem(String.valueOf(i));
-        }
-        compressionLevel.setSelectedIndex(6);
-        compressionLevel.setEnabled(false);
-
-        tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-        tmpP.add(new JLabel("Storage layout:  "));
-        tmpP.add(new JLabel("Compression:  "));
-        layoutPanel.add(tmpP, BorderLayout.WEST);
-
-        tmpP = new JPanel();
-        tmpP.setLayout(new GridLayout(2, 1));
-
-        JPanel tmpP0 = new JPanel();
-        tmpP0.setLayout(new GridLayout(1, 2));
-        tmpP0.add(checkContinguous);
-
-        JPanel tmpP00 = new JPanel();
-        tmpP00.setLayout(new GridLayout(1, 3));
-        tmpP00.add(checkChunked);
-        tmpP00.add(new JLabel("          Size: "));
-        tmpP00.add(chunkSizeField);
-        tmpP0.add(tmpP00);
-
-        tmpP.add(tmpP0);
-
-        tmpP0 = new JPanel();
-        tmpP0.setLayout(new GridLayout(1, 7));
-        tmpP0.add(checkCompression);
-        tmpP0.add(new JLabel("      Level: "));
-        tmpP0.add(compressionLevel);
-        tmpP0.add(new JLabel(""));
-        tmpP0.add(new JLabel(""));
-        tmpP0.add(new JLabel(""));
-        tmpP0.add(new JLabel(""));
-        tmpP.add(tmpP0);
-
-        layoutPanel.add(tmpP, BorderLayout.CENTER);
-
-        // add name, space and layout panels
-        tmpP = new JPanel();
-        tmpP.setLayout(new BorderLayout(5, 5));
-        tmpP.add(namePanel, BorderLayout.NORTH);
-        tmpP.add(spacePanel, BorderLayout.CENTER);
-        tmpP.add(layoutPanel, BorderLayout.SOUTH);
-
-        contentPane.add(tmpP, BorderLayout.NORTH);
-
-        // add field table
-        tmpP = new JPanel();
-        tmpP.setLayout(new BorderLayout(5, 5));
-        tmpP0 = new JPanel();
-        tmpP0.setLayout(new BorderLayout(5, 5));
-        tmpP0.add(new JLabel(" Number of Members:"), BorderLayout.WEST);
-        tmpP0.add(nFieldBox, BorderLayout.CENTER);
-        tmpP.add(tmpP0, BorderLayout.NORTH);
-        JScrollPane scroller = new JScrollPane(table);
-        border = new TitledBorder("Compound Datatype Properties");
-        border.setTitleColor(Color.BLUE);
-        tmpP.setBorder(border);
-        tmpP.add(scroller, BorderLayout.CENTER);
-        contentPane.add(tmpP, BorderLayout.CENTER);
-
-        // set OK and CANCEL buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-
-        rankChoice.addItemListener(this);
-        checkCompression.addItemListener(this);
-        checkContinguous.addItemListener(this);
-        checkChunked.addItemListener(this);
-        memberTypeChoice.addItemListener(this);
-
-        // locate the H5Property dialog
-        Point l = owner.getLocation();
-        l.x += 250;
-        l.y += 120;
-        setLocation(l);
-        validate();
-        pack();
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-
-        if (cmd.equals("Ok")) {
-            try {
-                newObject = createCompoundDS();
-            }
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
-            }
-
-            if (newObject != null) {
-                dispose();
-            }
-        }
-        else if (cmd.equals("Cancel")) {
-            newObject = null;
-            dispose();
-            (groupList).setSize(0);
-        }
-        else if (cmd.equals("Change number of members")) {
-            int n = 0;
-
-            try {
-                n = Integer.valueOf((String) nFieldBox.getSelectedItem()).intValue();
-            }
-            catch (Exception ex) {
-            	log.debug("Change number of members:", ex);
-            }
-
-            if (n == numberOfMembers) {
-                return;
-            }
-
-            tableModel.setRowCount(n);
-            for (int i = numberOfMembers; i < n; i++) {
-                rowEditorModel.addEditorForRow(i, cellEditor);
-            }
-            numberOfMembers = n;
-        }
-    }
-
-    public void itemStateChanged(ItemEvent e) {
-        Object source = e.getSource();
-
-        if (source.equals(rankChoice)) {
-            int rank = (int)rankChoice.getSelectedIndex() + 1;
-            String currentSizeStr = "1";
-            String maxSizeStr = "0";
-
-            for (int i = 1; i < rank; i++) {
-                currentSizeStr += " x 1";
-                maxSizeStr += " x 0";
-            }
-
-            currentSizeField.setText(currentSizeStr);
-            maxSizeField.setText(maxSizeStr);
-
-            String currentStr = currentSizeField.getText();
-            int idx = currentStr.lastIndexOf("x");
-            String chunkStr = "1";
-
-            if (rank <= 1) {
-                chunkStr = currentStr;
-            }
-            else {
-                for (int i = 1; i < rank - 1; i++) {
-                    chunkStr += " x 1";
-                }
-                if (idx > 0) {
-                    chunkStr += " x " + currentStr.substring(idx + 1);
-                }
-            }
-
-            chunkSizeField.setText(chunkStr);
-        }
-        else if (source.equals(checkContinguous)) {
-            chunkSizeField.setEnabled(false);
-        }
-        else if (source.equals(checkChunked)) {
-            chunkSizeField.setEnabled(true);
-            String currentStr = currentSizeField.getText();
-            int idx = currentStr.lastIndexOf("x");
-            String chunkStr = "1";
-
-            int rank = (int)rankChoice.getSelectedIndex() + 1;
-            if (rank <= 1) {
-                chunkStr = currentStr;
-            }
-            else {
-                for (int i = 1; i < rank - 1; i++) {
-                    chunkStr += " x 1";
-                }
-                if (idx > 0) {
-                    chunkStr += " x " + currentStr.substring(idx + 1);
-                }
-            }
-
-            chunkSizeField.setText(chunkStr);
-        }
-        else if (source.equals(checkCompression)) {
-            boolean isCompressed = checkCompression.isSelected();
-
-            if (isCompressed) {
-                if (!checkChunked.isSelected()) {
-                    String currentStr = currentSizeField.getText();
-                    int idx = currentStr.lastIndexOf("x");
-                    String chunkStr = "1";
-
-                    int rank = (int)rankChoice.getSelectedIndex() + 1;
-                    if (rank <= 1) {
-                        chunkStr = currentStr;
-                    }
-                    else {
-                        for (int i = 1; i < rank - 1; i++) {
-                            chunkStr += " x 1";
-                        }
-                        if (idx > 0) {
-                            chunkStr += " x " + currentStr.substring(idx + 1);
-                        }
-                    }
-
-                    chunkSizeField.setText(chunkStr);
-                }
-                compressionLevel.setEnabled(true);
-                checkContinguous.setEnabled(false);
-                checkChunked.setSelected(true);
-                chunkSizeField.setEnabled(true);
-            }
-            else {
-                compressionLevel.setEnabled(false);
-                checkContinguous.setEnabled(true);
-            }
-        }
-        else if (source.equals(memberTypeChoice)) {
-            String item = (String) memberTypeChoice.getSelectedItem();
-            if ((item == null) || !item.equals("enum")) {
-                return;
-            }
-
-            int row = table.getSelectedRow();
-            table.setValueAt("mb1=0,mb=1,...", row, 2);
-        }
-        else if (source.equals(templateChoice)) {
-            Object obj = templateChoice.getSelectedItem();
-            if (!(obj instanceof CompoundDS)) {
-                return;
-            }
-
-            CompoundDS dset = (CompoundDS) obj;
-            int rank = dset.getRank();
-            if (rank < 1) {
-                dset.init();
-            }
-
-            rank = dset.getRank();
-            rankChoice.setSelectedIndex(rank - 1);
-            long[] dims = dset.getDims();
-            String[] mNames = dset.getMemberNames();
-            int[] mOrders = dset.getMemberOrders();
-            Datatype[] mTypes = dset.getMemberTypes();
-
-            String sizeStr = String.valueOf(dims[0]);
-            for (int i = 1; i < rank; i++) {
-                sizeStr += "x" + dims[i];
-            }
-            currentSizeField.setText(sizeStr);
-
-            try {
-                dset.getMetadata();
-            } // get chunking and compression info
-            catch (Exception ex) {
-            	log.debug("get chunking and compression info:", ex);
-            }
-            long[] chunks = dset.getChunkSize();
-            if (chunks != null) {
-                checkChunked.setSelected(true);
-                sizeStr = String.valueOf(chunks[0]);
                 for (int i = 1; i < rank; i++) {
-                    sizeStr += "x" + chunks[i];
-                }
-                chunkSizeField.setText(sizeStr);
-            }
-
-            String compression = dset.getCompression();
-            if (compression != null) {
-                int clevel = -1;
-                int comp_pos = Dataset.compression_gzip_txt.length();
-                int idx = compression.indexOf(Dataset.compression_gzip_txt);
-                if (idx >= 0) {
-                    try {
-                        clevel = Integer.parseInt(compression.substring(idx + comp_pos, idx + comp_pos +1));
-                    }
-                    catch (NumberFormatException ex) {
-                        clevel = -1;
-                    }
-                }
-                if (clevel > 0) {
-                    checkCompression.setSelected(true);
-                    compressionLevel.setSelectedIndex(clevel);
-                }
-            }
-
-            numberOfMembers = dset.getMemberCount();
-            nFieldBox.setSelectedIndex(numberOfMembers - 1);
-            tableModel.setRowCount(numberOfMembers);
-            for (int i = 0; i < numberOfMembers; i++) {
-                rowEditorModel.addEditorForRow(i, cellEditor);
-
-                tableModel.setValueAt(mNames[i], i, 0);
-
-                int typeIdx = -1;
-                int tclass = mTypes[i].getDatatypeClass();
-                int tsize = mTypes[i].getDatatypeSize();
-                int tsigned = mTypes[i].getDatatypeSign();
-                if (tclass == Datatype.CLASS_ARRAY) {
-                    tclass = mTypes[i].getBasetype().getDatatypeClass();
-                    tsize = mTypes[i].getBasetype().getDatatypeSize();
-                    tsigned = mTypes[i].getBasetype().getDatatypeSign();
-                }
-                if (tclass == Datatype.CLASS_CHAR) {
-                    if (tsigned == Datatype.SIGN_NONE) {
-                        if (tsize == 1) {
-                            typeIdx = 3;
-                        }
-                    }
-                    else {
-                        if (tsize == 1) {
-                            typeIdx = 0;
-                        }
-                    }
-                }
-                if (tclass == Datatype.CLASS_INTEGER) {
-                    if (tsigned == Datatype.SIGN_NONE) {
-                        if (tsize == 1) {
-                            typeIdx = 3;
-                        }
-                        else if (tsize == 2) {
-                            typeIdx = 4;
-                        }
-                        else if (tsize == 4) {
-                            typeIdx = 5;
-                        }
-                        else {
-                            typeIdx = 11;
-                        }
-                    }
-                    else {
-                        if (tsize == 1) {
-                            typeIdx = 0;
-                        }
-                        else if (tsize == 2) {
-                            typeIdx = 1;
-                        }
-                        else if (tsize == 4) {
-                            typeIdx = 2;
-                        }
-                        else {
-                            typeIdx = 6;
-                        }
-                    }
-                }
-                else if (tclass == Datatype.CLASS_FLOAT) {
-                    if (tsize == 4) {
-                        typeIdx = 7;
-                    }
-                    else {
-                        typeIdx = 8;
-                    }
-                }
-                else if (tclass == Datatype.CLASS_STRING) {
-                    typeIdx = 9;
-                }
-                else if (tclass == Datatype.CLASS_ENUM) {
-                    typeIdx = 10;
-                }
-                if (typeIdx < 0) {
-                    continue;
+                    currentSizeStr += " x 1";
+                    maxSizeStr += " x 0";
                 }
 
-                memberTypeChoice.setSelectedIndex(typeIdx);
-                tableModel.setValueAt(memberTypeChoice.getSelectedItem(), i, 1);
+                currentSizeField.setText(currentSizeStr);
+                maxSizeField.setText(maxSizeStr);
 
-                if (tclass == Datatype.CLASS_STRING) {
-                    tableModel.setValueAt(String.valueOf(tsize), i, 2);
-                }
-                else if (tclass == Datatype.CLASS_ENUM) {
-                    tableModel.setValueAt(mTypes[i].getEnumMembers(), i, 2);
+                String currentStr = currentSizeField.getText();
+                int idx = currentStr.lastIndexOf("x");
+                String chunkStr = "1";
+
+                if (rank <= 1) {
+                    chunkStr = currentStr;
                 }
                 else {
-                    tableModel.setValueAt(String.valueOf(mOrders[i]), i, 2);
+                    for (int i = 1; i < rank - 1; i++) {
+                        chunkStr += " x 1";
+                    }
+                    if (idx > 0) {
+                        chunkStr += " x " + currentStr.substring(idx + 1);
+                    }
                 }
 
-            } // for (int i=0; i<numberOfMembers; i++)
-        } // else if (source.equals(templateChoice))
-    }
+                chunkSizeField.setText(chunkStr);
+    		}
+    	});
+    	
+    	for (int i = 1; i < 33; i++) {
+            rankChoice.add(String.valueOf(i));
+        }
+    	
+    	currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
+    	currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	currentSizeField.setText("1");
+    	
+    	maxSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
+    	maxSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	maxSizeField.setText("0");
+    	
+    	
+    	// Create Data Layout/Compression region
+    	org.eclipse.swt.widgets.Group layoutGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	layoutGroup.setLayout(new GridLayout(7, false));
+    	layoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	layoutGroup.setText("Data Layout and Compression");
+    	
+    	new Label(layoutGroup, SWT.LEFT).setText("Storage layout: ");
+    	
+    	checkContiguous = new Button(layoutGroup, SWT.RADIO);
+    	checkContiguous.setText("Contiguous");
+    	checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	checkContiguous.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			chunkSizeField.setEnabled(false);
+    		}
+    	});
+    	
+    	// Dummy labels
+    	new Label(layoutGroup, SWT.LEFT).setText("");
+    	new Label(layoutGroup, SWT.LEFT).setText("");
+    	
+    	checkChunked = new Button(layoutGroup, SWT.RADIO);
+    	checkChunked.setText("Chunked");
+    	checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	checkChunked.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			chunkSizeField.setEnabled(true);
+                
+    			String currentStr = currentSizeField.getText();
+                int idx = currentStr.lastIndexOf("x");
+                String chunkStr = "1";
 
-    private HObject createCompoundDS() throws Exception {
+                int rank = (int)rankChoice.getSelectionIndex() + 1;
+                if (rank <= 1) {
+                    chunkStr = currentStr;
+                }
+                else {
+                    for (int i = 1; i < rank - 1; i++) {
+                        chunkStr += " x 1";
+                    }
+                    if (idx > 0) {
+                        chunkStr += " x " + currentStr.substring(idx + 1);
+                    }
+                }
+
+                chunkSizeField.setText(chunkStr);
+    		}
+    	});
+    	
+    	new Label(layoutGroup, SWT.LEFT).setText("Size: ");
+    	
+    	chunkSizeField = new Text(layoutGroup, SWT.SINGLE | SWT.BORDER);
+    	chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	chunkSizeField.setText("1");
+    	chunkSizeField.setEnabled(false);
+    	
+    	new Label(layoutGroup, SWT.LEFT).setText("Compression: ");
+    	
+    	checkCompression = new Button(layoutGroup, SWT.CHECK);
+    	checkCompression.setText("gzip");
+    	checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	checkCompression.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			boolean isCompressed = checkCompression.getSelection();
+
+                if (isCompressed) {
+                    if (!checkChunked.getSelection()) {
+                        String currentStr = currentSizeField.getText();
+                        int idx = currentStr.lastIndexOf("x");
+                        String chunkStr = "1";
+
+                        int rank = (int) rankChoice.getSelectionIndex() + 1;
+                        if (rank <= 1) {
+                            chunkStr = currentStr;
+                        }
+                        else {
+                            for (int i = 1; i < rank - 1; i++) {
+                                chunkStr += " x 1";
+                            }
+                            if (idx > 0) {
+                                chunkStr += " x " + currentStr.substring(idx + 1);
+                            }
+                        }
+
+                        chunkSizeField.setText(chunkStr);
+                    }
+                    
+                    compressionLevel.setEnabled(true);
+                    checkContiguous.setEnabled(false);
+                    checkContiguous.setSelection(false);
+                    checkChunked.setSelection(true);
+                    chunkSizeField.setEnabled(true);
+                }
+                else {
+                    compressionLevel.setEnabled(false);
+                    checkContiguous.setEnabled(true);
+                }
+    		}
+    	});
+    	
+    	new Label(layoutGroup, SWT.LEFT).setText("Level: ");
+    	
+    	compressionLevel = new Combo(layoutGroup, SWT.DROP_DOWN);
+    	compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	compressionLevel.setEnabled(false);
+    	
+    	for (int i = 0; i < 10; i++) {
+            compressionLevel.add(String.valueOf(i));
+        }
+    	
+    	new Label(layoutGroup, SWT.LEFT).setText("");
+    	new Label(layoutGroup, SWT.LEFT).setText("");
+    	new Label(layoutGroup, SWT.LEFT).setText("");
+    	
+    	
+    	// Create Properties region
+    	org.eclipse.swt.widgets.Group propertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	propertiesGroup.setLayout(new GridLayout(2, false));
+    	propertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	propertiesGroup.setText("Compound Datatype Properties");
+    	
+    	new Label(propertiesGroup, SWT.LEFT).setText("Number of Members:");
+    	
+    	nFieldBox = new Combo(propertiesGroup, SWT.DROP_DOWN);
+    	nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	//nFieldBox.setEditable(true);
+    	nFieldBox.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			int n = 0;
+
+                try {
+                    n = Integer.valueOf((String) nFieldBox.getItem(nFieldBox.getSelectionIndex())).intValue();
+                }
+                catch (Exception ex) {
+                	log.debug("Change number of members:", ex);
+                }
+
+                if (n == numberOfMembers) {
+                    return;
+                }
+                
+                if(n > numberOfMembers) {
+                	for(int i = 0; i < n - numberOfMembers; i++) {
+                		addMemberTableItem(table);
+                	}
+                } else {
+                	for(int i = numberOfMembers - 1; i >= n; i--) {
+                		TableItem item = table.getItem(i);
+                		TableEditor editor = (TableEditor) item.getData("NameEditor");
+                		editor.getEditor().dispose();
+                		editor.dispose();
+                		
+                		editor = (TableEditor) item.getData("DatatypeEditor");
+                		editor.getEditor().dispose();
+                		editor.dispose();
+                		
+                		editor = (TableEditor) item.getData("ArraySizeEditor");
+                		editor.getEditor().dispose();
+                		editor.dispose();
+                		
+                		table.remove(table.indexOf(item));
+                	}
+                }
+                
+                table.setItemCount(n);
+                numberOfMembers = n;
+    		}
+    	});
+    	
+    	for (int i = 1; i <= 100; i++) {
+            nFieldBox.add(String.valueOf(i));
+        }
+    	
+    	table = new Table(propertiesGroup, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+    	table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+    	table.setLinesVisible(false);
+    	table.setHeaderVisible(true);
+    	
+    	String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
+    	
+    	TableColumn column = new TableColumn(table, SWT.NONE);
+    	column.setText(colNames[0]);
+    	
+    	column = new TableColumn(table, SWT.NONE);
+    	column.setText(colNames[1]);
+    	
+    	column = new TableColumn(table, SWT.NONE);
+    	column.setText(colNames[2]);
+    	
+    	addMemberTableItem(table);
+    	addMemberTableItem(table);
+    	
+    	for(int i = 0; i < table.getColumnCount(); i++) {
+    		table.getColumn(i).pack();
+    	}
+    	
+    	// Create Ok/Cancel button region
+    	Composite buttonComposite = new Composite(shell, SWT.NONE);
+        buttonComposite.setLayout(new GridLayout(2, true));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        
+        Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("   &Ok   ");
+        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        okButton.setLayoutData(gridData);
+        okButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		try {
+                    newObject = createCompoundDS();
+                }
+                catch (Exception ex) {
+                	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                	error.setText(shell.getText());
+                	error.setMessage(ex.getMessage());
+                	error.open();
+                }
+
+                if (newObject != null) {
+                    shell.dispose();
+                }
+        	}
+        });
+        
+        Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setText("&Cancel");
+        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        cancelButton.setLayoutData(gridData);
+        cancelButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		newObject = null;
+                shell.dispose();
+                (groupList).setSize(0);
+        	}
+        });
+        
+        templateChoice.deselectAll();
+        rankChoice.select(0);
+        checkContiguous.setSelection(true);
+        compressionLevel.select(6);
+        nFieldBox.select(nFieldBox.indexOf(String.valueOf(numberOfMembers)));
+    	
+        shell.pack();
+        
+        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        shell.setSize(computedSize.x + 250 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y + 100);
+        
+        Rectangle parentBounds = parent.getBounds();
+        Point shellSize = shell.getSize();
+        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+        
+        shell.open();
+        
+        Display display = parent.getDisplay();
+        while(!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
+	}
+	
+	private HObject createCompoundDS() throws Exception {
         HObject obj = null;
         long dims[], maxdims[], chunks[];
         int rank;
 
         // stop editing the last selected cell
-        int row = table.getSelectedRow();
-        int col = table.getSelectedColumn();
-        if ((row >= 0) && (col > -0)) {
-            TableCellEditor ed = table.getCellEditor(row, col);
-            if (ed != null) {
-                ed.stopCellEditing();
-            }
-        }
+        //int row = table.getSelectedRow();
+        //int col = table.getSelectedColumn();
+        //if ((row >= 0) && (col > -0)) {
+        //    TableCellEditor ed = table.getCellEditor(row, col);
+        //    if (ed != null) {
+        //        ed.stopCellEditing();
+        //    }
+        //}
 
         maxdims = chunks = null;
         String dname = nameField.getText();
@@ -690,12 +539,12 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
             throw new IllegalArgumentException("Dataset name is empty");
         }
 
-        Group pgroup = (Group) groupList.get(parentChoice.getSelectedIndex());
+        Group pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             throw new IllegalArgumentException("Invalid parent group");
         }
 
-        int n = table.getRowCount();
+        int n = table.getItemCount();
         if (n <= 0) {
             return null;
         }
@@ -705,14 +554,14 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
         int[] mOrders = new int[n];
 
         for (int i = 0; i < n; i++) {
-            String name = (String) table.getValueAt(i, 0);
+            String name = (String) table.getItem(i).getText(0);
             if ((name == null) || (name.length() <= 0)) {
                 throw new IllegalArgumentException("Member name is empty");
             }
             mNames[i] = name;
 
             int order = 1;
-            String orderStr = (String) table.getValueAt(i, 2);
+            String orderStr = (String) table.getItem(i).getText(2);
             if (orderStr != null) {
                 try {
                     order = Integer.parseInt(orderStr);
@@ -723,7 +572,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
             }
             mOrders[i] = order;
 
-            String typeName = (String) table.getValueAt(i, 1);
+            String typeName = (String) table.getItem(i).getText(1);
             Datatype type = null;
             if (DATATYPE_NAMES[0].equals(typeName)) {
                 type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
@@ -758,9 +607,11 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
             else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
                 type = fileformat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
                 if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Invalid member values: " + orderStr, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                    error.setText(shell.getText());
+                    error.setMessage("Invalid member values: " + orderStr);
+                    error.open();
                     return null;
                 }
                 else {
@@ -776,12 +627,14 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
             mDatatypes[i] = type;
         } // for (int i=0; i<n; i++)
 
-        rank = (int)rankChoice.getSelectedIndex() + 1;
+        rank = (int)rankChoice.getSelectionIndex() + 1;
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Number of values in the current dimension size is less than " + rank,
-                    getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+            error.setText(shell.getText());
+            error.setMessage("Number of values in the current dimension size is less than " + rank);
+            error.open();
             return null;
         }
 
@@ -794,16 +647,20 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
                 l = Long.parseLong(token);
             }
             catch (NumberFormatException ex) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Invalid dimension size: " + currentSizeField.getText(),
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                error.setText(shell.getText());
+                error.setMessage("Invalid dimension size: " + currentSizeField.getText());
+                error.open();
                 return null;
             }
 
             if (l <= 0) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Dimension size must be greater than zero.", getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                error.setText(shell.getText());
+                error.setMessage("Dimension size must be greater than zero.");
+                error.open();
                 return null;
             }
 
@@ -812,9 +669,11 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
 
         st = new StringTokenizer(maxSizeField.getText(), "x");
         if (st.countTokens() < rank) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, "Number of values in the max dimension size is less than " + rank,
-                    getTitle(), JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+            error.setText(shell.getText());
+            error.setMessage("Number of values in the max dimension size is less than " + rank);
+            error.open();
             return null;
         }
 
@@ -826,16 +685,20 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
                 l = Long.parseLong(token);
             }
             catch (NumberFormatException ex) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Invalid max dimension size: " + maxSizeField.getText(),
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                error.setText(shell.getText());
+                error.setMessage("Invalid max dimension size: " + maxSizeField.getText());
+                error.open();
                 return null;
             }
 
             if (l < -1) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Dimension size cannot be less than -1.", getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                error.setText(shell.getText());
+                error.setMessage("Dimension size cannot be less than -1.");
+                error.open();
                 return null;
             }
             else if (l == 0) {
@@ -846,12 +709,14 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
         }
 
         chunks = null;
-        if (checkChunked.isSelected()) {
+        if (checkChunked.getSelection()) {
             st = new StringTokenizer(chunkSizeField.getText(), "x");
             if (st.countTokens() < rank) {
-                toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Number of values in the chunk size is less than " + rank,
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                shell.getDisplay().beep();
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                error.setText(shell.getText());
+                error.setMessage("Number of values in the chunk size is less than " + rank);
+                error.open();
                 return null;
             }
 
@@ -864,16 +729,20 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
                     l = Long.parseLong(token);
                 }
                 catch (NumberFormatException ex) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Invalid chunk dimension size: " + chunkSizeField.getText(),
-                            getTitle(), JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                    error.setText(shell.getText());
+                    error.setMessage("Invalid chunk dimension size: " + chunkSizeField.getText());
+                    error.open();
                     return null;
                 }
 
                 if (l < 1) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this, "Chunk size cannot be less than 1.", getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                    error.setText(shell.getText());
+                    error.setMessage("Chunk size cannot be less than 1.");
+                    error.open();
                     return null;
                 }
 
@@ -887,34 +756,35 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
             }
 
             if (tchunksize >= tdimsize) {
-                toolkit.beep();
-                int status = JOptionPane.showConfirmDialog(this, "Chunk size is equal/greater than the current size. "
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?", getTitle(),
-                        JOptionPane.YES_NO_OPTION);
-                if (status == JOptionPane.NO_OPTION) {
-                    return null;
+                shell.getDisplay().beep();
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+                confirm.setText(shell.getText());
+                confirm.setMessage("Chunk size is equal/greater than the current size. "
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
+                if(confirm.open() == SWT.NO) {
+                	return null;
                 }
             }
 
             if (tchunksize == 1) {
-                toolkit.beep();
-                int status = JOptionPane.showConfirmDialog(this,
-                        "Chunk size is one, which may cause large memory overhead for large dataset."
-                                + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?",
-                                getTitle(), JOptionPane.YES_NO_OPTION);
-                if (status == JOptionPane.NO_OPTION) {
-                    return null;
+                shell.getDisplay().beep();
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+                confirm.setText(shell.getText());
+                confirm.setMessage("Chunk size is one, which may cause large memory overhead for large dataset."
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
+                if(confirm.open() == SWT.NO) {
+                	return null;
                 }
             }
 
-        } // if (checkChunked.isSelected())
+        } // if (checkChunked.getSelection())
 
         int gzip = 0;
-        if (checkCompression.isSelected()) {
-            gzip = compressionLevel.getSelectedIndex();
+        if (checkCompression.getSelection()) {
+            gzip = compressionLevel.getSelectionIndex();
         }
 
-        if (checkChunked.isSelected()) {
+        if (checkChunked.getSelection()) {
             obj = fileformat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes, mOrders,
                     null);
         }
@@ -925,6 +795,40 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
 
         return obj;
     }
+	
+	private TableItem addMemberTableItem(Table table) {
+		TableItem item = new TableItem(table, SWT.NONE);
+		
+		TableEditor editor = new TableEditor(table);
+		Text text = new Text(table, SWT.SINGLE | SWT.BORDER);
+		editor.grabHorizontal = true;
+		editor.grabVertical = true;
+		editor.horizontalAlignment = SWT.LEFT;
+		editor.verticalAlignment = SWT.TOP;
+		editor.setEditor(text, item, 0);
+		item.setData("NameEditor", editor);
+		
+		Combo combo = new Combo(table, SWT.DROP_DOWN);
+		combo.setItems(DATATYPE_NAMES);
+		editor = new TableEditor(table);
+		editor.grabHorizontal = true;
+		editor.grabVertical = true;
+		editor.horizontalAlignment = SWT.LEFT;
+		editor.verticalAlignment = SWT.TOP;
+		editor.setEditor(combo, item, 1);
+		item.setData("DatatypeEditor", editor);
+		
+		text = new Text(table, SWT.SINGLE | SWT.BORDER);
+		editor = new TableEditor(table);
+		editor.grabHorizontal = true;
+		editor.grabVertical = true;
+		editor.horizontalAlignment = SWT.LEFT;
+		editor.verticalAlignment = SWT.TOP;
+		editor.setEditor(text, item, 2);
+		item.setData("ArraySizeEditor", editor);
+		
+		return item;
+	}
 
     /** Returns the new dataset created. */
     public DataFormat getObject() {
@@ -933,34 +837,6 @@ public class NewTableDataDialog extends JDialog implements ActionListener, ItemL
 
     /** Returns the parent group of the new dataset. */
     public Group getParentGroup() {
-        return (Group) groupList.get(parentChoice.getSelectedIndex());
-    }
-
-    private class RowEditorModel {
-        private Hashtable<Integer, TableCellEditor> data;
-
-        public RowEditorModel() {
-            data = new Hashtable<Integer, TableCellEditor>();
-        }
-
-        // all rows has the same cell editor
-        public RowEditorModel(int rows, TableCellEditor ed) {
-            data = new Hashtable<Integer, TableCellEditor>();
-            for (int i = 0; i < rows; i++) {
-                data.put(new Integer(i), ed);
-            }
-        }
-
-        public void addEditorForRow(int row, TableCellEditor e) {
-            data.put(new Integer(row), e);
-        }
-
-        public void removeEditorForRow(int row) {
-            data.remove(new Integer(row));
-        }
-
-        public TableCellEditor getEditor(int row) {
-            return (TableCellEditor) data.get(new Integer(row));
-        }
+        return parentGroup;
     }
 }

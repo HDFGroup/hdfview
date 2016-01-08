@@ -1262,10 +1262,6 @@ public class NewDatasetDialog extends Dialog {
 		            URLClassLoader cl = new URLClassLoader(uu);
 		            URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
 		            
-		            System.out.println(cl.getURLs()[0]);
-		            System.out.println(cl.getURLs()[1]);
-		            System.out.println(cl.getURLs()[2]);
-		            
 		            browser.setUrl(u.toString());
 		            
 		            cl.close();
