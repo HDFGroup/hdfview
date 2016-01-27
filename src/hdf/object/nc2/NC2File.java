@@ -34,14 +34,14 @@ import ucar.nc2.Variable;
  * This class provides file level APIs. File access APIs include retrieving the
  * file hierarchy, opening and closing file, and writing file content to disk.
  * <p>
- * 
+ *
  * @version 2.4 9/4/2007
  * @author Peter X. Cao
  */
 public class NC2File extends FileFormat {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 6941235662108358451L;
 
@@ -95,7 +95,7 @@ public class NC2File extends FileFormat {
     /**
      * Checks if the given file format is a NetCDF file.
      * <p>
-     * 
+     *
      * @param fileformat
      *            the fileformat to be checked.
      * @return true if the given file is an NetCDF file; otherwise returns
@@ -109,7 +109,7 @@ public class NC2File extends FileFormat {
     /**
      * Checks if a given file is a NetCDF file.
      * <p>
-     * 
+     *
      * @param filename
      *            the file to be checked.
      * @return true if the given file is an NetCDF file; otherwise returns
@@ -170,7 +170,7 @@ public class NC2File extends FileFormat {
      * Creates an NC2File instance with specified file name and READ access.
      * <p>
      * Regardless of specified access, the NC2File implementation uses READ.
-     * 
+     *
      * @see hdf.object.FileFormat#createInstance(java.lang.String, int)
      */
     @Override
@@ -181,7 +181,7 @@ public class NC2File extends FileFormat {
 
     // Implementing FileFormat
     @Override
-    public int open() throws Exception {
+    public long open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
             rootObject = loadTree();
@@ -194,8 +194,8 @@ public class NC2File extends FileFormat {
 
         long[] oid = { 0 };
         NC2Group rootGroup = new NC2Group(
-        		this, 
-        		"/",
+                this,
+                "/",
                 null, // root node does not have a parent path
                 null, // root node does not have a parent node
                 oid);
@@ -308,7 +308,7 @@ public class NC2File extends FileFormat {
 
     /**
      * copy a dataset into another group.
-     * 
+     *
      * @param srcDataset
      *            the dataset to be copied.
      * @param pgroup
@@ -347,9 +347,9 @@ public class NC2File extends FileFormat {
     /**
      * Creates a new attribute and attached to the object if attribute does not
      * exist. Otherwise, just update the value of the attribute.
-     * 
+     *
      * <p>
-     * 
+     *
      * @param obj
      *            the object which the attribute is to be attached to.
      * @param attr
@@ -392,11 +392,11 @@ public class NC2File extends FileFormat {
 
         return ver;
     }
-    
+
     // implementing FileFormat
     @Override
     public HObject get(String path) throws Exception
     {
         throw new UnsupportedOperationException("get() is not supported");
-    }    
+    }
 }

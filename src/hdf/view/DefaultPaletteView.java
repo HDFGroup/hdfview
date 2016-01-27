@@ -368,8 +368,8 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
                 palette[1], // g - the array of green color components
                 palette[2]); // b - the array of blue color components
 
-        int w = dataset.getWidth();
-        int h = dataset.getHeight();
+        int w = (int)dataset.getWidth();
+        int h = (int)dataset.getHeight();
         MemoryImageSource memoryImageSource = null;
 
         try {

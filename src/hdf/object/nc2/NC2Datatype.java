@@ -23,7 +23,7 @@ import ucar.ma2.DataType;
  * Datatype encapsulates information of a datatype. Information includes the
  * class, size, endian of a datatype.
  * <p>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -46,7 +46,7 @@ public class NC2Datatype extends Datatype {
      * NC2Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
      * </OL>
      * <p>
-     * 
+     *
      * @param tclass
      *            the class of the datatype.
      * @param tsize
@@ -62,7 +62,7 @@ public class NC2Datatype extends Datatype {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute() {
@@ -72,7 +72,7 @@ public class NC2Datatype extends Datatype {
     /**
      * Create a Datatype with a given Netcdf native datatype.
      * <p>
-     * 
+     *
      * @param theType
      *            the netcdf native datatype.
      */
@@ -87,7 +87,7 @@ public class NC2Datatype extends Datatype {
      * double, or String to store data retrieved from an Netcdf file based on
      * the given Netcdf datatype and dimension sizes.
      * <p>
-     * 
+     *
      * @param dtype
      *            the netdcdf datatype.
      * @param size
@@ -130,12 +130,12 @@ public class NC2Datatype extends Datatype {
     /**
      * Translate Netcdf datatype identifier into NC2Datatype.
      * <p>
-     * 
+     *
      * @param nativeID
      *            the netcdf native datatype.
      */
     @Override
-    public void fromNative(int tid) {
+    public void fromNative(long tid) {
         if (nativeType == null) {
             return;
         }
@@ -190,7 +190,7 @@ public class NC2Datatype extends Datatype {
 
     // implementing Datatype
     @Override
-    public int toNative() {
+    public long toNative() {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = DataType.BYTE;
@@ -222,11 +222,11 @@ public class NC2Datatype extends Datatype {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(int id) {
+    public void close(long id) {
         ;
     }
 

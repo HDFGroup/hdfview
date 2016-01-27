@@ -21,7 +21,7 @@ import java.io.Serializable;
  * class has HObject as a superclass. All objects (Groups and Datasets)
  * implement the methods of this class. The following is the inherited structure
  * of HDF Objects.
- * 
+ *
  * <pre>
  *                                 HObject
  *          __________________________|________________________________
@@ -35,9 +35,9 @@ import java.io.Serializable;
  *      ____|____       _____|______        _____|_____          _____|_____
  *      |       |       |          |        |         |          |         |
  *   H5Group H4Group H5ScalarDS H4SclarDS H5CompDS H4CompDS H5Datatype H4Datatype
- * 
+ *
  * </pre>
- * 
+ *
  * All HDF4 and HDF5 data objects are inherited from HObject. At the top level
  * of the hierarchy, both HDF4 and HDF5 have the same super-classes, such as
  * Group and Dataset. At the bottom level of the hierarchy, HDF4 and HDF5
@@ -58,7 +58,7 @@ import java.io.Serializable;
  * HDF5 objects are uniquely identified by the OID or object reference. The OID
  * is usually obtained by H5Rcreate(). The following example shows how to
  * retrieve an object ID from a file.
- * 
+ *
  * <pre>
  * // retrieve the object ID
  * try {
@@ -69,7 +69,7 @@ import java.io.Serializable;
  * catch (Exception ex) {
  * }
  * </pre>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
@@ -140,13 +140,13 @@ public abstract class HObject implements Serializable, DataFormat {
     public HObject() {
         this(null, null, null, null);
     }
-    
+
     /**
      * Constructs an instance of a data object with specific name and path.
      * <p>
      * For example, in H5ScalarDS(h5file, "dset", "/arrays"), "dset" is the name
      * of the dataset, "/arrays" is the group path of the dataset.
-     * 
+     *
      * @param theFile
      *            the file that contains the data object.
      * @param theName
@@ -163,7 +163,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * <p>
      * For example, in H5ScalarDS(h5file, "dset", "/arrays"), "dset" is the name
      * of the dataset, "/arrays" is the group path of the dataset.
-     * 
+     *
      * @param theFile
      *            the file that contains the data object.
      * @param theName
@@ -263,7 +263,7 @@ public abstract class HObject implements Serializable, DataFormat {
     /**
      * Print out debug information
      * <p>
-     * 
+     *
      * @param msg
      *            the debug message to print
      */
@@ -277,7 +277,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * The file name is necessary because the file of this data object is
      * uniquely identified when multiple files are opened by an application at
      * the same time.
-     * 
+     *
      * @return The full path (path + name) of the file.
      */
     public final String getFile() {
@@ -286,7 +286,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * Returns the name of the object. For example, "Raster Image #2".
-     * 
+     *
      * @return The name of the object.
      */
     public final String getName() {
@@ -295,7 +295,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * Returns the name of the target object that is linked to.
-     * 
+     *
      * @return The name of the object that is linked to.
      */
     public final String getLinkTargetObjName() {
@@ -312,7 +312,7 @@ public abstract class HObject implements Serializable, DataFormat {
     /**
      * Returns the full name (group path + object name) of the object. For
      * example, "/Images/Raster Image #2"
-     * 
+     *
      * @return The full name (group path + object name) of the object.
      */
     public final String getFullName() {
@@ -321,7 +321,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * Returns the group path of the object. For example, "/Images".
-     * 
+     *
      * @return The group path of the object.
      */
     public final String getPath() {
@@ -332,7 +332,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * Sets the name of the object.
      * <p>
      * setName (String newName) changes the name of the object in the file.
-     * 
+     *
      * @param newName
      *            The new name of the object.
      */
@@ -366,7 +366,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * group conatining the object is changed by setName(). The path of the
      * object in memory under this group should be updated to the new path to
      * the group. Unlike setName(), setPath() does not change anything in file.
-     * 
+     *
      * @param newPath
      *            The new path of the object.
      */
@@ -380,20 +380,20 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * Opens an existing object such as dataset or group for access.
-     * 
+     *
      * The return value is an object identifier obtained by implementing classes
      * such as H5.H5Dopen(). This function is needed to allow other objects to
      * be able to access the object. For instance, H5File class uses the open()
-     * function to obtain object identifier for copyAttributes(int src_id, int
+     * function to obtain object identifier for copyAttributes(long src_id, long
      * dst_id) and other purposes. The open() function should be used in pair
-     * with close(int) function.
-     * 
+     * with close(long) function.
+     *
      * @see hdf.object.HObject#close(int)
-     * 
+     *
      * @return the object identifier if successful; otherwise returns a negative
      *         value.
      */
-    public abstract int open();
+    public abstract long open();
 
     /**
      * Closes access to the object.
@@ -403,18 +403,18 @@ public abstract class HObject implements Serializable, DataFormat {
      * <p>
      * For example, H5Group.close() calls the hdf.hdf5lib.H5.H5Gclose()
      * method and closes the group resource specified by the group id.
-     * 
+     *
      * @param id
      *            The object identifier.
      */
-    public abstract void close(int id);
+    public abstract void close(long id);
 
     /**
      * Returns the file identifier of of the file containing the object.
-     * 
+     *
      * @return the file identifier of of the file containing the object.
      */
-    public final int getFID() {
+    public final long getFID() {
         if (fileFormat != null) {
             return fileFormat.getFID();
         }
@@ -434,7 +434,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * The HObject.equalsOID(long[] theID) can be used to check if two data
      * objects with different names are pointed to the same object within the
      * same file.
-     * 
+     *
      * @return true if the ID of the object equals the given OID; otherwise,
      *         returns false.
      */
@@ -452,7 +452,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
         int n = Math.min(n1, n2);
         boolean isMatched = (theID[0] == oid[0]);
-        
+
         for (int i = 1; isMatched && (i < n); i++) {
             isMatched = (theID[i] == oid[i]);
         }
@@ -462,7 +462,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * Returns the file that contains the object.
-     * 
+     *
      * @return The file that contains the object.
      */
     public final FileFormat getFileFormat() {
@@ -475,7 +475,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * The object OID cannot be modified once it is created. getIOD() clones the
      * object OID to ensure the object OID cannot be modified outside of this
      * class.
-     * 
+     *
      * @return the cloned copy of the object OID.
      */
     public final long[] getOID() {
@@ -485,7 +485,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
         return oid.clone();
     }
-    
+
     /**
      * Returns whether this HObject is equal to the specified HObject
      * by comparing their OIDs.
@@ -503,7 +503,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * <p>
      * For example, toString() returns "Raster Image #2" instead of
      * "hdf.object.h4.H4SDS".
-     * 
+     *
      * @return The name of the object.
      */
     @Override
@@ -516,20 +516,20 @@ public abstract class HObject implements Serializable, DataFormat {
 
         return super.toString();
     }
-    
+
     /**
      * Generates a unique object identifier for this HObject.
      */
     private long[] generateOID() {
         long[] oid;
-        
+
         if(fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             // HDF4 HObjects are uniquely identified by a (tag_id, obj_id) pair
             oid = new long[2];
         } else {
             oid = new long[1];
         }
-        
+
         return oid;
     }
 }

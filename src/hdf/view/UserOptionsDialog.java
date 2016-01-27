@@ -50,13 +50,15 @@ import javax.swing.border.TitledBorder;
 
 /**
  * UserOptionsDialog displays components for choosing user options.
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class UserOptionsDialog extends JDialog implements ActionListener, ItemListener 
+public class UserOptionsDialog extends JDialog implements ActionListener, ItemListener
 {
     private static final long     serialVersionUID = -8521813136101442590L;
+
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
 
     /**
      * The main HDFView.
@@ -74,7 +76,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
     private JCheckBox             checkCurrentUserDir, checkAutoContrast, checkConvertEnum, checkShowValues, checkShowRegRefValues;
     private JButton               currentDirButton;
     private JRadioButton          checkReadOnly, checkIndexType, checkIndexOrder, checkIndexNative, checkLibVersion,
-    							  checkReadAll;
+                                  checkReadAll;
 
     private int                   fontSize;
 
@@ -114,7 +116,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
 
     /**
      * constructs an UserOptionsDialog.
-     * 
+     *
      * @param view
      *            The HDFView.
      */
@@ -132,6 +134,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
         if (workDir == null) {
             workDir = rootDir;
         }
+        log.trace("UserOptionsDialog: workDir={}", workDir);
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
         textViews = ViewProperties.getTextViewList();
@@ -196,6 +199,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
             if (workDir == null) {
                 workDir = rootDir;
             }
+            log.trace("UserOptionsDialog:setVisible workDir={}", workDir);
         }
         super.setVisible(b);
     }
@@ -298,7 +302,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
         tborder = new TitledBorder("Default File Access Mode");
         tborder.setTitleColor(Color.darkGray);
         p01.setBorder(tborder);
-        
+
         JPanel p02 = new JPanel();
         p02.setLayout(new GridLayout(1, 2, 8, 8));
         p02.add(checkLibVersion = new JRadioButton("Earliest", ViewProperties.isEarlyLib()));
@@ -419,12 +423,12 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
 
         p0 = new JPanel();
         p0.setLayout(new GridLayout(1, 3, 8, 8));
-        
+
         int nMax = ViewProperties.getMaxMembers();
         checkReadAll = new JRadioButton("Open All", (nMax<=0) || (nMax==Integer.MAX_VALUE));
         checkReadAll.addItemListener(this);
         p0.add(checkReadAll);
-        
+
         p00 = new JPanel();
         p00.setLayout(new BorderLayout());
         p00.add(new JLabel("Start Member: "), BorderLayout.WEST);
@@ -438,9 +442,9 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
         p00.add(maxMemberField = new JTextField(String.valueOf(ViewProperties.getMaxMembers())), BorderLayout.CENTER);
         p0.add(p00);
 
-      	startMemberField.setEnabled(!checkReadAll.isSelected());
-       	maxMemberField.setEnabled(!checkReadAll.isSelected());
-        
+          startMemberField.setEnabled(!checkReadAll.isSelected());
+           maxMemberField.setEnabled(!checkReadAll.isSelected());
+
         tborder = new TitledBorder("Objects to Open");
         tborder.setTitleColor(Color.darkGray);
         p0.setBorder(tborder);
@@ -567,22 +571,22 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
      * p.setLayout(new BorderLayout(5,5)); TitledBorder tborder = new
      * TitledBorder("SRB Connections"); tborder.setTitleColor(Color.darkGray);
      * p.setBorder(tborder);
-     * 
+     *
      * DefaultListModel listModel = new DefaultListModel(); srbJList = new
      * JList(listModel);
      * srbJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
      * srbJList.addListSelectionListener(this);
-     * 
+     *
      * srbFields = new JTextField[7];
-     * 
+     *
      * if (srbVector!= null) { int n=srbVector.size();
-     * 
+     *
      * String srbaccount[] = null; for (int i=0; i<n; i++) { srbaccount =
      * (String[])srbVector.get(i); if (srbaccount != null) {
      * listModel.addElement(srbaccount[0]); } } }
-     * 
+     *
      * JPanel cp = new JPanel(); cp.setLayout(new BorderLayout(5,5));
-     * 
+     *
      * JPanel cpc = new JPanel(); cpc.setLayout(new GridLayout(7,1,5,5));
      * cpc.add(srbFields[0] = new JTextField()); cpc.add(srbFields[1] = new
      * JTextField()); cpc.add(srbFields[2] = new JTextField());
@@ -590,7 +594,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
      * JTextField()); cpc.add(srbFields[5] = new JTextField());
      * cpc.add(srbFields[6] = new JTextField()); cp.add(cpc,
      * BorderLayout.CENTER);
-     * 
+     *
      * JPanel cpl = new JPanel(); cpl.setLayout(new GridLayout(7,1,5,5));
      * cpl.add(new JLabel("Host Machine: ", SwingConstants.RIGHT)); cpl.add(new
      * JLabel("Port Number: ", SwingConstants.RIGHT)); cpl.add(new
@@ -600,7 +604,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
      * JLabel("Domain Name/Zone: ", SwingConstants.RIGHT)); cpl.add(new
      * JLabel(" Default Storage Resource: ", SwingConstants.RIGHT)); cp.add(cpl,
      * BorderLayout.WEST);
-     * 
+     *
      * JPanel lp = new JPanel(); lp.setLayout(new BorderLayout(5,5)); JPanel lpb
      * = new JPanel(); JButton add = new JButton("Save");
      * add.addActionListener(this); add.setActionCommand("Add srb connsction");
@@ -612,16 +616,16 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
      * (ViewProperties.getFontSize()-12)*10; int h = 200 +
      * (ViewProperties.getFontSize()-12)*15; listScroller.setPreferredSize(new
      * Dimension(w, h)); lp.add(listScroller, BorderLayout.CENTER);
-     * 
+     *
      * JPanel sp = new JPanel(); sp.setLayout(new GridLayout(3,1,5,15));
      * sp.add(new JLabel(" "));
-     * 
+     *
      * p.add(cp, BorderLayout.CENTER); p.add(lp, BorderLayout.WEST); p.add(sp,
      * BorderLayout.SOUTH);
-     * 
+     *
      * if ((srbVector !=null) && (srbVector.size()>0)) {
      * srbJList.setSelectedIndex(0); }
-     * 
+     *
      * return p; }
      */
 
@@ -792,7 +796,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
          * new String[7]; for (int i=0; i<7; i++) { srbaccount[i] =
          * srbFields[i].getText(); if (srbaccount[i] == null) { return; } }
          * DefaultListModel lm = (DefaultListModel)srbJList.getModel();
-         * 
+         *
          * if (lm.contains(srbaccount[0])) { int n =
          * srbJList.getSelectedIndex(); if ( n<0 ) return; String
          * srbaccountOld[] = (String[])srbVector.get(n); for (int i=0; i<7; i++)
@@ -801,13 +805,13 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
          * srbJList.setSelectedValue(srbaccount[0], true); } } else if
          * (cmd.equals("Delete srb connsction")) { int n =
          * srbJList.getSelectedIndex(); if (n<0) { return; }
-         * 
+         *
          * int resp = JOptionPane.showConfirmDialog(this,
          * "Are you sure you want to delete the following SRB connection?\n"+
          * "            \""+srbJList.getSelectedValue()+"\"",
          * "Delete SRB Connection", JOptionPane.YES_NO_OPTION); if (resp ==
          * JOptionPane.NO_OPTION) { return; }
-         * 
+         *
          * DefaultListModel lm = (DefaultListModel)srbJList.getModel();
          * lm.removeElementAt(n); srbVector.remove(n); for (int i=0; i<7; i++) {
          * srbFields[i].setText(""); } }
@@ -847,14 +851,14 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
     /*
      * public void valueChanged(ListSelectionEvent e) { Object src =
      * e.getSource();
-     * 
+     *
      * if (!src.equals(srbJList)) { return; }
-     * 
+     *
      * int n = srbJList.getSelectedIndex(); if ( n<0 ) { return; }
-     * 
+     *
      * String srbaccount[] = (String[])srbVector.get(n); if (srbaccount == null)
      * { return; }
-     * 
+     *
      * n = Math.min(7, srbaccount.length); for (int i=0; i<n; i++) {
      * srbFields[i].setText(srbaccount[i]); } }
      */
@@ -873,6 +877,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
             workPath = "user.home";
         }
 
+        log.trace("UserOptionsDialog:setUserOptions workPath={}", workPath);
         if ((workPath != null) && (workPath.length() > 0)) {
             workPath = workPath.trim();
             isWorkDirChanged = !workPath.equals(ViewProperties.getWorkDir());
@@ -889,11 +894,11 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
             ViewProperties.setReadOnly(true);
         else
             ViewProperties.setReadOnly(false);
-        
+
         if (checkLibVersion.isSelected())
             ViewProperties.setEarlyLib(true);
         else
-            ViewProperties.setEarlyLib(false);        
+            ViewProperties.setEarlyLib(false);
 
         // set font size
         int fsize = 12;
@@ -934,8 +939,8 @@ public class UserOptionsDialog extends JDialog implements ActionListener, ItemLi
             ViewProperties.setIndexOrder("H5_ITER_DEC");
 
         if (checkReadAll.isSelected()) {
-        	ViewProperties.setStartMembers(0);
-        	ViewProperties.setMaxMembers(-1);
+            ViewProperties.setStartMembers(0);
+            ViewProperties.setMaxMembers(-1);
         } else {
             try {
                 int maxsize = Integer.parseInt(maxMemberField.getText());

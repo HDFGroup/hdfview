@@ -27,16 +27,16 @@ import hdf.object.HObject;
  * an object in a file that does not exist. The type of the object is unknown.
  * Once the object being linked to is created, and the type is known, then
  * H5link object will change its type.
- * 
+ *
  * <p>
- * 
+ *
  * @version 2.7.2 7/6/2010
  * @author Nidhi Gupta
  */
 
 public class H5Link extends HObject {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -8137277460521594367L;
 
@@ -45,7 +45,7 @@ public class H5Link extends HObject {
     /**
      * Constructs an HDF5 link with specific name, path, and parent.
      * <p>
-     * 
+     *
      * @param theFile
      *            the file which containing the link.
      * @param name
@@ -54,7 +54,7 @@ public class H5Link extends HObject {
      *            the full path of this link, e.g. "/groups/".
      */
     public H5Link(FileFormat theFile, String name, String path) {
-       this (theFile, name, path, null);  
+       this (theFile, name, path, null);
     }
 
     public H5Link(FileFormat theFile, String theName, String thePath,
@@ -63,13 +63,13 @@ public class H5Link extends HObject {
 
         obj_info = new H5O_info_t(-1L, -1L, -1, 0, -1L, 0L, 0L, 0L, 0L, null,null,null);
     }
-    
+
     @Override
-    public void close(int id) {        
+    public void close(long id) {
     }
 
     @Override
-    public int open() {
+    public long open() {
         return 0;
     }
 
@@ -77,7 +77,7 @@ public class H5Link extends HObject {
 
         try{
             this.linkTargetObjName= H5File.getLinkTargetName(this);
-        }catch(Exception ex){        
+        }catch(Exception ex){
         }
 
         return null;
@@ -87,7 +87,7 @@ public class H5Link extends HObject {
         return false;
     }
 
-    public void removeMetadata(Object info) throws Exception {        
+    public void removeMetadata(Object info) throws Exception {
     }
 
     public void writeMetadata(Object info) throws Exception {
@@ -102,12 +102,12 @@ public class H5Link extends HObject {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.HObject#setName(java.lang.String)
      */
     @Override
     public void setName(String newName) throws Exception {
         H5File.renameObject(this, newName);
         super.setName(newName);
-    }    
+    }
 }

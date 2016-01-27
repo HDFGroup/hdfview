@@ -44,22 +44,22 @@ import hdf.object.HObject;
 
 /**
  * NewGroupDialog shows a message dialog requesting user input for creating a new HDF4/5 group.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 12/30/2015
  */
 public class NewGroupDialog extends Dialog {
-	private static final long serialVersionUID = 7340860373483987075L;
-	
-	private Shell shell;
+    private static final long serialVersionUID = 7340860373483987075L;
 
-	private Text nameField;
-	private Text compactField;
-	private Text indexedField;
-	
-	private Combo parentChoice;
-	private Combo orderFlags;
-	
+    private Shell shell;
+
+    private Text nameField;
+    private Text compactField;
+    private Text indexedField;
+
+    private Combo parentChoice;
+    private Combo orderFlags;
+
     private Button useCreationOrder;
     private Button setLinkStorage;
     private Button creationOrderHelpButton;
@@ -67,13 +67,13 @@ public class NewGroupDialog extends Dialog {
     private Button okButton;
     private Button cancelButton;
     private Button moreButton;
-    
+
     private Composite moreOptionsComposite;
     private Composite creationOrderComposite;
     private Composite storageTypeComposite;
     private Composite dummyComposite;
     private Composite buttonComposite;
-    
+
     private List<Group> groupList;
     private List<?> objList;
 
@@ -81,15 +81,15 @@ public class NewGroupDialog extends Dialog {
     private Group parentGroup;
 
     private FileFormat fileFormat;
-    
+
     private int creationOrder;
-    
+
     private boolean isH5;
     private boolean moreOptionsEnabled;
-    
+
     /**
      * Constructs a NewGroupDialog with specified list of possible parent groups.
-     * 
+     *
      * @param parent
      *            the parent shell of the dialog
      * @param pGroup
@@ -98,51 +98,51 @@ public class NewGroupDialog extends Dialog {
      *            the list of all objects.
      */
     public NewGroupDialog(Shell parent, Group pGroup, List<?> objs) {
-    	super(parent, SWT.APPLICATION_MODAL);
-    	
-    	newObject = null;
-    	parentGroup = pGroup;
-    	objList = objs;
-    	
-    	moreOptionsEnabled = false;
-    	
-    	fileFormat = pGroup.getFileFormat();
+        super(parent, SWT.APPLICATION_MODAL);
+
+        newObject = null;
+        parentGroup = pGroup;
+        objList = objs;
+
+        moreOptionsEnabled = false;
+
+        fileFormat = pGroup.getFileFormat();
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
-    
+
     public void open() {
-    	Shell parent = getParent();
-    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
-    	shell.setText("New Group...");
-    	shell.setImage(ViewProperties.getHdfIcon());
-    	GridLayout layout = new GridLayout(1, false);
-    	layout.verticalSpacing = 0;
-    	shell.setLayout(layout);
-    	
-    	Composite fieldComposite = new Composite(shell, SWT.NONE);
-    	fieldComposite.setLayout(new GridLayout(2, false));
-    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	Label groupNameLabel = new Label(fieldComposite, SWT.LEFT);
-    	groupNameLabel.setText("Group name:");
-    	
-    	nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
-    	parentGroupLabel.setText("Parent group:");
-    	parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-    	
-    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
-    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	parentChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
-    		}
-    	});
-    	
-    	groupList = new Vector<Group>();
+        Shell parent = getParent();
+        shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+                SWT.BORDER | SWT.APPLICATION_MODAL);
+        shell.setText("New Group...");
+        shell.setImage(ViewProperties.getHdfIcon());
+        GridLayout layout = new GridLayout(1, false);
+        layout.verticalSpacing = 0;
+        shell.setLayout(layout);
+
+        Composite fieldComposite = new Composite(shell, SWT.NONE);
+        fieldComposite.setLayout(new GridLayout(2, false));
+        fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Label groupNameLabel = new Label(fieldComposite, SWT.LEFT);
+        groupNameLabel.setText("Group name:");
+
+        nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
+        parentGroupLabel.setText("Parent group:");
+        parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+        parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
+        parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        parentChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+            }
+        });
+
+        groupList = new Vector<Group>();
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
@@ -158,94 +158,94 @@ public class NewGroupDialog extends Dialog {
                 }
             }
         }
-        
+
         if (parentGroup.isRoot()) {
-        	parentChoice.select(parentChoice.indexOf(HObject.separator));
+            parentChoice.select(parentChoice.indexOf(HObject.separator));
         }
         else {
-        	parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + 
-        			parentGroup.getName() + HObject.separator));
+            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() +
+                    parentGroup.getName() + HObject.separator));
         }
-        
+
         // Only add "More" button if file is H5 type
         if(isH5) {
-        	moreOptionsComposite = new Composite(shell, SWT.NONE);
-        	moreOptionsComposite.setLayout(new GridLayout(2, false));
-        	moreOptionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-            
-        	moreButton = new Button(moreOptionsComposite, SWT.PUSH);
-        	moreButton.setText("   More   ");
-        	moreButton.addSelectionListener(new SelectionAdapter() {
-        		public void widgetSelected(SelectionEvent e) {
-        			moreOptionsEnabled = !moreOptionsEnabled;
-        			
-        			if(moreOptionsEnabled) {
-        				addMoreOptions();
-        			} else {
-        				removeMoreOptions();
-        			}
-        		}
-        	});
-        	moreButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-        	
-        	dummyComposite = new Composite(moreOptionsComposite, SWT.NONE);
-        	dummyComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            moreOptionsComposite = new Composite(shell, SWT.NONE);
+            moreOptionsComposite.setLayout(new GridLayout(2, false));
+            moreOptionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+            moreButton = new Button(moreOptionsComposite, SWT.PUSH);
+            moreButton.setText("   More   ");
+            moreButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    moreOptionsEnabled = !moreOptionsEnabled;
+
+                    if(moreOptionsEnabled) {
+                        addMoreOptions();
+                    } else {
+                        removeMoreOptions();
+                    }
+                }
+            });
+            moreButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+
+            dummyComposite = new Composite(moreOptionsComposite, SWT.NONE);
+            dummyComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         }
-        
+
         buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        
+
         okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
         okButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		newObject = create();
+            public void widgetSelected(SelectionEvent e) {
+                newObject = create();
                 if (newObject != null) {
                     shell.dispose();
                 }
-        	}
+            }
         });
         GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
         gridData.widthHint = 70;
         okButton.setLayoutData(gridData);
-        
+
         cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setText("&Cancel");
         cancelButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		newObject = null;
+            public void widgetSelected(SelectionEvent e) {
+                newObject = null;
                 shell.dispose();
-        	}
+            }
         });
-        
+
         gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
         gridData.widthHint = 70;
         cancelButton.setLayoutData(gridData);
-        
+
         shell.pack();
-        
+
         Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
         shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
-        
+
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         shell.open();
-        
+
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
     }
-    
+
     private HObject create() {
-    	String name = null;
+        String name = null;
         Group pgroup = null;
-        int gcpl = 0;
+        long gcpl = 0;
 
         name = nameField.getText();
         if (name == null || name.length() == 0) {
@@ -265,7 +265,7 @@ public class NewGroupDialog extends Dialog {
             error.open();
             return null;
         }
-        
+
         pgroup = groupList.get(parentChoice.getSelectionIndex());
 
         if (pgroup == null) {
@@ -278,7 +278,7 @@ public class NewGroupDialog extends Dialog {
         }
 
         Group obj = null;
-        
+
         if (orderFlags != null && orderFlags.isEnabled()) {
             String order = (String) orderFlags.getItem(orderFlags.getSelectionIndex());
             if (order.equals("Tracked"))
@@ -315,7 +315,7 @@ public class NewGroupDialog extends Dialog {
                 gcpl = fileFormat.createGcpl(creationOrder, maxCompact, minDense);
             }
             catch (Exception ex) {
-            	ex.printStackTrace();
+                ex.printStackTrace();
             }
         }
 
@@ -336,17 +336,17 @@ public class NewGroupDialog extends Dialog {
 
         return obj;
     }
-    
+
     private void addMoreOptions() {
-    	moreButton.setText("   Less   ");
-        
+        moreButton.setText("   Less   ");
+
         creationOrderHelpButton = new Button(moreOptionsComposite, SWT.PUSH);
         creationOrderHelpButton.setImage(ViewProperties.getHelpIcon());
         creationOrderHelpButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
         creationOrderHelpButton.setToolTipText("Help on Creation Order");
         creationOrderHelpButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		final String msg = "Use Creation Order allows the user to set the creation order \n"
+            public void widgetSelected(SelectionEvent e) {
+                final String msg = "Use Creation Order allows the user to set the creation order \n"
                         + "of links in a group, so that tracking, indexing, and iterating over links\n"
                         + "in groups can be possible. \n\n"
                         + "If the order flag Tracked is selected, links in a group can now \n"
@@ -354,50 +354,50 @@ public class NewGroupDialog extends Dialog {
                         + "If the order flag Tracked+Indexed is selected, links in a group can \n"
                         + "now be explicitly tracked and indexed in the order that they were created. \n\n"
                         + "The default order in which links in a group are listed is alphanumeric-by-name. \n\n\n";
-                
-        		MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
-        		info.setText(shell.getText());
-        		info.setMessage(msg);
-        		info.open();
-        	}
+
+                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                info.setText(shell.getText());
+                info.setMessage(msg);
+                info.open();
+            }
         });
-        
+
         creationOrderComposite = new Composite(moreOptionsComposite, SWT.BORDER);
         creationOrderComposite.setLayout(new GridLayout(3, true));
         creationOrderComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         useCreationOrder = new Button(creationOrderComposite, SWT.CHECK);
         useCreationOrder.setText("Use Creation Order");
         useCreationOrder.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		boolean isOrder = useCreationOrder.getSelection();
+            public void widgetSelected(SelectionEvent e) {
+                boolean isOrder = useCreationOrder.getSelection();
 
                 if (isOrder)
                     orderFlags.setEnabled(true);
                 else
                     orderFlags.setEnabled(false);
-        	}
+            }
         });
-        
+
         Label label = new Label(creationOrderComposite, SWT.RIGHT);
         label.setText("Order Flags: ");
         label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-        
+
         orderFlags = new Combo(creationOrderComposite, SWT.DROP_DOWN);
         orderFlags.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         orderFlags.add("Tracked");
         orderFlags.add("Tracked+Indexed");
         orderFlags.select(orderFlags.indexOf("Tracked"));
         orderFlags.setEnabled(false);
-        
-        
+
+
         storageTypeHelpButton = new Button(moreOptionsComposite, SWT.PUSH);
         storageTypeHelpButton.setImage(ViewProperties.getHelpIcon());
         storageTypeHelpButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
         storageTypeHelpButton.setToolTipText("Help on set Link Storage");
         storageTypeHelpButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		final String msg = "Set Link Storage allows the users to explicitly set the storage  \n"
+            public void widgetSelected(SelectionEvent e) {
+                final String msg = "Set Link Storage allows the users to explicitly set the storage  \n"
                         + "type of a group to be Compact or Indexed. \n\n"
                         + "Compact Storage: For groups with only a few links, compact link storage\n"
                         + "allows groups containing only a few links to take up much less space \n" + "in the file. \n\n"
@@ -415,22 +415,22 @@ public class NewGroupDialog extends Dialog {
                         + "Min Indexed is the minimum number of links to store in the Indexed format.   \n"
                         + "Groups which are in indexed format and in which the number of links falls    \n"
                         + "below this threshold are automatically converted to compact format. \n\n\n";
-                
-        		MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
-        		info.setText(shell.getText());
-        		info.setMessage(msg);
-        		info.open();
-        	}
+
+                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                info.setText(shell.getText());
+                info.setMessage(msg);
+                info.open();
+            }
         });
-        
+
         storageTypeComposite = new Composite(moreOptionsComposite, SWT.BORDER);
         storageTypeComposite.setLayout(new GridLayout(2, true));
         storageTypeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         setLinkStorage = new Button(storageTypeComposite, SWT.CHECK);
         setLinkStorage.setText("Set Link Storage");
         setLinkStorage.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 if (setLinkStorage.getSelection()) {
                     compactField.setEnabled(true);
                     indexedField.setEnabled(true);
@@ -441,96 +441,96 @@ public class NewGroupDialog extends Dialog {
                     indexedField.setText("6");
                     indexedField.setEnabled(false);
                 }
-        	}
+            }
         });
-        
+
         Composite indexedComposite = new Composite(storageTypeComposite, SWT.NONE);
         indexedComposite.setLayout(new GridLayout(2, true));
         indexedComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         Label minLabel = new Label(indexedComposite, SWT.LEFT);
         minLabel.setText("Min Indexed: ");
-        
+
         Label maxLabel = new Label(indexedComposite, SWT.LEFT);
         maxLabel.setText("Max Compact: ");
-        
+
         indexedField = new Text(indexedComposite, SWT.SINGLE | SWT.BORDER);
         indexedField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         indexedField.setText("6");
         indexedField.setTextLimit(5);
         indexedField.setEnabled(false);
         indexedField.addVerifyListener(new VerifyListener() {
-        	public void verifyText(VerifyEvent e) {
-        		String input = e.text;
-        		
-        		char[] chars = new char[input.length()];
-        	    input.getChars(0, chars.length, chars, 0);
-        	    for (int i = 0; i < chars.length; i++) {
-        	       if (!('0' <= chars[i] && chars[i] <= '9')) {
-        	          e.doit = false;
-        	          return;
-        	       }
-        	    }
-        	}
+            public void verifyText(VerifyEvent e) {
+                String input = e.text;
+
+                char[] chars = new char[input.length()];
+                input.getChars(0, chars.length, chars, 0);
+                for (int i = 0; i < chars.length; i++) {
+                if (!('0' <= chars[i] && chars[i] <= '9')) {
+                    e.doit = false;
+                    return;
+                }
+                }
+            }
         });
-        
+
         compactField = new Text(indexedComposite, SWT.SINGLE | SWT.BORDER);
         compactField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         compactField.setText("8");
         compactField.setTextLimit(5);
         compactField.setEnabled(false);
         compactField.addVerifyListener(new VerifyListener() {
-        	public void verifyText(VerifyEvent e) {
-        		String input = e.text;
-        		
-        		char[] chars = new char[input.length()];
-        	    input.getChars(0, chars.length, chars, 0);
-        	    for (int i = 0; i < chars.length; i++) {
-        	       if (!('0' <= chars[i] && chars[i] <= '9')) {
-        	          e.doit = false;
-        	          return;
-        	       }
-        	    }
-        	}
+            public void verifyText(VerifyEvent e) {
+                String input = e.text;
+
+                char[] chars = new char[input.length()];
+                input.getChars(0, chars.length, chars, 0);
+                for (int i = 0; i < chars.length; i++) {
+                if (!('0' <= chars[i] && chars[i] <= '9')) {
+                    e.doit = false;
+                    return;
+                }
+                }
+            }
         });
-        
+
         shell.pack();
 
         Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
         shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
-        
+
         Rectangle parentBounds = shell.getParent().getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
     }
-    
+
     private void removeMoreOptions() {
-    	moreButton.setText("   More   ");
-    	
-    	creationOrderHelpButton.dispose();
-    	storageTypeHelpButton.dispose();
-    	
-    	creationOrderComposite.dispose();
-    	storageTypeComposite.dispose();
-    	
-    	shell.layout(true, true);
-    	shell.pack();
-    	
-    	Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-    	shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
-    	
-    	Rectangle parentBounds = shell.getParent().getBounds();
+        moreButton.setText("   More   ");
+
+        creationOrderHelpButton.dispose();
+        storageTypeHelpButton.dispose();
+
+        creationOrderComposite.dispose();
+        storageTypeComposite.dispose();
+
+        shell.layout(true, true);
+        shell.pack();
+
+        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+
+        Rectangle parentBounds = shell.getParent().getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
     }
-    
+
     /** Returns the new group created. */
     public DataFormat getObject() {
-    	return newObject;
+        return newObject;
     }
-    
+
     /** Returns the parent group of the new group. */
     public Group getParentGroup() {
         return parentGroup;

@@ -38,7 +38,7 @@ import hdf.object.HObject;
  * may contain sub-directories or files.
  * <p>
  * For more information on HDF5 Groups,
- * 
+ *
  * @see <a href="http://hdfgroup.org/HDF5/doc/UG/">HDF5 User's Guide</a>
  *      <p>
  * @version 1.1 9/4/2007
@@ -46,7 +46,7 @@ import hdf.object.HObject;
  */
 public class H5Group extends Group {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -951164512330444150L;
 
@@ -65,7 +65,7 @@ public class H5Group extends Group {
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
      * <p>
-     * 
+     *
      * @param theFile
      *            the file which containing the group.
      * @param name
@@ -105,14 +105,14 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute() {
         obj_info.num_attrs = nAttributes;
 
         if (obj_info.num_attrs < 0) {
-            int gid = open();
+            long gid = open();
             if (gid > 0) {
                 try {
                     obj_info = H5.H5Oget_info(gid);
@@ -130,13 +130,13 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.Group#getNumberOfMembersInFile()
      */
     @Override
     public int getNumberOfMembersInFile() {
         if (nMembersInFile < 0) {
-            int gid = open();
+            long gid = open();
             if (gid > 0) {
                 try {
                     H5G_info_t group_info = null;
@@ -154,7 +154,7 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.Group#clear()
      */
     @Override
@@ -168,7 +168,7 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#getMetadata()
      */
     public List getMetadata() throws HDF5Exception {
@@ -177,31 +177,31 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#getMetadata(int...)
      */
     public List getMetadata(int... attrPropList) throws HDF5Exception {
         if (attributeList == null) {
-            int gid = open();
+            long gid = open();
             if(gid >= 0) {
-            	int indxType = fileFormat.getIndexType(null);
-            	int order = fileFormat.getIndexOrder(null);
+                int indxType = fileFormat.getIndexType(null);
+                int order = fileFormat.getIndexOrder(null);
 
-            	if (attrPropList.length > 0) {
-            		indxType = attrPropList[0];
-            		if (attrPropList.length > 1) {
-            			order = attrPropList[1];
-            		}
-            	}
-            	try {
-            		attributeList = H5File.getAttribute(gid, indxType, order);
-            	}
-            	finally {
-            		close(gid);
-            	}
+                if (attrPropList.length > 0) {
+                    indxType = attrPropList[0];
+                    if (attrPropList.length > 1) {
+                        order = attrPropList[1];
+                    }
+                }
+                try {
+                    attributeList = H5File.getAttribute(gid, indxType, order);
+                }
+                finally {
+                    close(gid);
+                }
             }
             else {
-            	log.debug("failed to open group");
+                log.debug("failed to open group");
             }
         }
 
@@ -209,7 +209,7 @@ public class H5Group extends Group {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
         }
         catch (Exception ex) {
-        	log.debug("getLinkTargetName:", ex);
+            log.debug("getLinkTargetName:", ex);
         }
 
         return attributeList;
@@ -217,7 +217,7 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
     public void writeMetadata(Object info) throws Exception {
@@ -246,37 +246,37 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
     public void removeMetadata(Object info) throws HDF5Exception {
         // only attribute metadata is supported.
-    	if (!(info instanceof Attribute)) {
-    		return;
-    	}
+        if (!(info instanceof Attribute)) {
+            return;
+        }
 
-    	Attribute attr = (Attribute) info;
+        Attribute attr = (Attribute) info;
         log.trace("removeMetadata: {}", attr.getName());
-    	int gid = open();
-    	if(gid >= 0) {
-    	    try {
-    	        H5.H5Adelete(gid, attr.getName());
-    	        List attrList = getMetadata();
-    	        attrList.remove(attr);
-    	        nAttributes = attributeList.size();
-    	    }
-    	    finally {
-    	        close(gid);
-    	    }
-    	}
-    	else {
-    	    log.debug("failed to open group");
-    	}
+        long gid = open();
+        if(gid >= 0) {
+            try {
+                H5.H5Adelete(gid, attr.getName());
+                List attrList = getMetadata();
+                attrList.remove(attr);
+                nAttributes = attributeList.size();
+            }
+            finally {
+                close(gid);
+            }
+        }
+        else {
+            log.debug("failed to open group");
+        }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
     public void updateMetadata(Object info) throws HDF5Exception {
@@ -291,12 +291,12 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.HObject#open()
      */
     @Override
-    public int open() {
-        int gid = -1;
+    public long open() {
+        long gid = -1;
 
         try {
             if (isRoot()) {
@@ -316,16 +316,16 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(int gid) {
+    public void close(long gid) {
         try {
             H5.H5Gclose(gid);
         }
         catch (HDF5Exception ex) {
-        	log.debug("H5Gclose:", ex);
+            log.debug("H5Gclose:", ex);
         }
     }
 
@@ -337,10 +337,10 @@ public class H5Group extends Group {
      * identifiers, lcpl, gcpl, gapl. It allows the user to create a group with
      * group creation properties. It will close the group creation properties
      * specified in gplist.
-     * 
+     *
      * @see hdf.hdf5lib.H5#H5Gcreate(int, String, int, int, int) for the
      *      order of property list identifiers.
-     * 
+     *
      * @param name
      *            The name of a new group.
      * @param pgroup
@@ -354,15 +354,15 @@ public class H5Group extends Group {
      *            list for group creation <li>gapl : Property list for group
      *            access
      *            </ul>
-     * 
+     *
      * @return The new group if successful; otherwise returns null.
      */
-    public static H5Group create(String name, Group pgroup, int... gplist) throws Exception {
+    public static H5Group create(String name, Group pgroup, long... gplist) throws Exception {
         H5Group group = null;
         String fullPath = null;
-        int lcpl = HDF5Constants.H5P_DEFAULT;
-        int gcpl = HDF5Constants.H5P_DEFAULT;
-        int gapl = HDF5Constants.H5P_DEFAULT;
+        long lcpl = HDF5Constants.H5P_DEFAULT;
+        long gcpl = HDF5Constants.H5P_DEFAULT;
+        long gapl = HDF5Constants.H5P_DEFAULT;
 
         if (gplist.length > 0) {
             lcpl = gplist[0];
@@ -399,12 +399,12 @@ public class H5Group extends Group {
         fullPath = path + name;
 
         // create a new group and add it to the parent node
-        int gid = H5.H5Gcreate(file.open(), fullPath, lcpl, gcpl, gapl);
+        long gid = H5.H5Gcreate(file.open(), fullPath, lcpl, gcpl, gapl);
         try {
             H5.H5Gclose(gid);
         }
         catch (Exception ex) {
-        	log.debug("H5Gcreate {} H5Gclose:", fullPath, ex);
+            log.debug("H5Gcreate {} H5Gclose:", fullPath, ex);
         }
 
         byte[] ref_buf = H5.H5Rcreate(file.open(), fullPath, HDF5Constants.H5R_OBJECT, -1);
@@ -422,7 +422,7 @@ public class H5Group extends Group {
                 H5.H5Pclose(gcpl);
             }
             catch (final Exception ex) {
-            	log.debug("create prop H5Pclose:", ex);
+                log.debug("create prop H5Pclose:", ex);
             }
         }
 
@@ -431,7 +431,7 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.HObject#setName(java.lang.String)
      */
     @Override
@@ -442,7 +442,7 @@ public class H5Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.HObject#setPath(java.lang.String)
      */
     @Override

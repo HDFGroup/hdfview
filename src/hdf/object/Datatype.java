@@ -36,13 +36,13 @@ import java.util.List;
  * these functions so that the conversion will be done correctly.
  * The values of the CLASS member are not identical to HDF5 values for a datatype class
  * <p>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public abstract class Datatype extends HObject {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -581324710549963177L;
 
@@ -52,7 +52,7 @@ public abstract class Datatype extends HObject {
      * The default definition for datatype size, order, and sign.
      */
     public static final int NATIVE = -1;
-    
+
     /**
      * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
      * User's Guide</a>}
@@ -209,13 +209,13 @@ public abstract class Datatype extends HObject {
     /*
      * The dimension of the ARRAY element. For ARRAY datatype only
      */
-    protected long[] dims; 
-    
+    protected long[] dims;
+
 
     /**
      * Constructs a named datatype with a given file, name and path.
      * <p>
-     * 
+     *
      * @param theFile
      *            the HDF file.
      * @param name
@@ -251,7 +251,7 @@ public abstract class Datatype extends HObject {
      * <LI>to create 64-bit double<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
      * </OL>
-     * 
+     *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
      *            etc.
@@ -284,7 +284,7 @@ public abstract class Datatype extends HObject {
      * <LI>to create 64-bit double<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
      * </OL>
-     * 
+     *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
      *            etc.
@@ -316,21 +316,21 @@ public abstract class Datatype extends HObject {
      * <p>
      * For example, if the datatype identifier is a 32-bit unsigned integer
      * created from HDF5,
-     * 
+     *
      * <pre>
      * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
      * Datatype dtype = new Datatype(tid);
      * </pre>
-     * 
+     *
      * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4,
      * NATIVE, SIGN_NONE);
      * <p>
-     * 
+     *
      * @see #fromNative(int nativeID)
-     * @param type
+     * @param tid
      *            the native datatype identifier.
      */
-    public Datatype(int type) {
+    public Datatype(long tid) {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE);
     }
 
@@ -350,7 +350,7 @@ public abstract class Datatype extends HObject {
      * <li>CLASS_VLEN
      * <li>CLASS_ARRAY
      * </ul>
-     * 
+     *
      * @return the class of the datatype.
      */
     public int getDatatypeClass() {
@@ -360,7 +360,7 @@ public abstract class Datatype extends HObject {
     /**
      * Returns the size of the datatype in bytes. For example, for a 32-bit
      * integer, the size is 4 (bytes).
-     * 
+     *
      * @return the size of the datatype.
      */
     public int getDatatypeSize() {
@@ -375,7 +375,7 @@ public abstract class Datatype extends HObject {
      * <li>ORDER_VAX
      * <li>ORDER_NONE
      * </ul>
-     * 
+     *
      * @return the byte order of the datatype.
      */
     public int getDatatypeOrder() {
@@ -384,7 +384,7 @@ public abstract class Datatype extends HObject {
 
     /**
      * Returns the sign (SIGN_NONE, SIGN_2 or NSGN) of an integer datatype.
-     * 
+     *
      * @return the sign of the datatype.
      */
     public int getDatatypeSign() {
@@ -396,7 +396,7 @@ public abstract class Datatype extends HObject {
      * <p>
      * For example, a dataset set of ARRAY of integer, The datatype of the
      * dataset is ARRAY. The datatype of the base type is integer.
-     * 
+     *
      * @return the the datatype of array element for ARRAY datatype.
      */
     public Datatype getBasetype() {
@@ -415,7 +415,7 @@ public abstract class Datatype extends HObject {
      * <dt>setEnumMembers("lowTemp=10, highTemp")</dt>
      * <dd>sets enum member lowTemp to 10 and highTemp to 11.</dd>
      * </dl>
-     * 
+     *
      * @param enumStr
      *            the (name, value) pairs of enum members
      */
@@ -435,7 +435,7 @@ public abstract class Datatype extends HObject {
      * <dt>setEnumMembers("lowTemp=10, highTemp")</dt>
      * <dd>sets enum member lowTemp to 10 and highTemp to 11.</dd>
      * </dl>
-     * 
+     *
      * @return enumStr the (name, value) pairs of enum members
      */
     public final String getEnumMembers() {
@@ -444,28 +444,28 @@ public abstract class Datatype extends HObject {
 
     /**
      * Converts the datatype object to a native datatype.
-     * 
+     *
      * Subclasses must implement it so that this datatype will be converted
      * accordingly. Use close() to close the native identifier; otherwise, the
      * datatype will be left open.
      * <p>
      * For example, a HDF5 datatype created from<br>
-     * 
+     *
      * <pre>
      * H5Dataype dtype = new H5Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
      * int tid = dtype.toNative();
      * </pre>
-     * 
+     *
      * There "tid" will be the HDF5 datatype id of a 32-bit unsigned integer,
      * which is equivalent to
-     * 
+     *
      * <pre>
      * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
      * </pre>
-     * 
+     *
      * @return the identifier of the native datatype.
      */
-    public abstract int toNative();
+    public abstract long toNative();
 
     /**
      * Set datatype characteristics (class, size, byte order and sign) from a
@@ -476,24 +476,24 @@ public abstract class Datatype extends HObject {
      * <p>
      * For example, if the type identifier is a 32-bit unsigned integer created
      * from HDF5,
-     * 
+     *
      * <pre>
      * H5Datatype dtype = new H5Datatype();
      * dtype.fromNative(HDF5Constants.H5T_NATIVE_UNINT32);
      * </pre>
-     * 
+     *
      * Where dtype is equivalent to <br>
      * new H5Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
      * <p>
-     * 
+     *
      * @param nativeID
      *            the datatype identifier.
      */
-    public abstract void fromNative(int nativeID);
+    public abstract void fromNative(long nativeID);
 
     /**
      * Returns a short text description of this datatype.
-     * 
+     *
      * @return a short text description of this datatype
      */
     public String getDatatypeDescription() {
@@ -545,7 +545,7 @@ public abstract class Datatype extends HObject {
 
     /**
      * Checks if this datatype is an unsigned integer.
-     * 
+     *
      * @return true if the datatype is an unsigned integer; otherwise, returns
      *         false.
      */
@@ -555,12 +555,12 @@ public abstract class Datatype extends HObject {
      * Opens access to this named datatype. Sub-clases must replace this default
      * implementation. For example, in H5Datatype, open() function
      * H5.H5Topen(loc_id, name) to get the datatype identifier.
-     * 
+     *
      * @return the datatype identifier if successful; otherwise returns negative
      *         value.
      */
     @Override
-    public int open() {
+    public long open() {
         return -1;
     }
 
@@ -568,16 +568,16 @@ public abstract class Datatype extends HObject {
      * Closes a datatype identifier.
      * <p>
      * Sub-clases must replace this default implementation.
-     * 
+     *
      * @param id
      *            the datatype identifier to close.
      */
     @Override
-    public abstract void close(int id);
+    public abstract void close(long id);
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#getMetadata()
      */
     public List getMetadata() throws Exception {
@@ -586,7 +586,7 @@ public abstract class Datatype extends HObject {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
     public void writeMetadata(Object info) throws Exception {
@@ -595,7 +595,7 @@ public abstract class Datatype extends HObject {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
     public void removeMetadata(Object info) throws Exception {
@@ -604,7 +604,7 @@ public abstract class Datatype extends HObject {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
     public void updateMetadata(Object info) throws Exception {

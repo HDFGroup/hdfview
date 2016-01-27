@@ -28,11 +28,11 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 
 /**
- * This class defines HDF5 data type characteristics and APIs for a data type.
+ * This class defines HDF5 datatype characteristics and APIs for a data type.
  * <p>
- * This class provides several methods to convert an HDF5 dataype identifier to a dataype object, and vice versa. A
- * dataype object is described by four basic fields: datatype class, size, byte order, and sign, while an HDF5 dataype
- * is presented by a datetype identifier.
+ * This class provides several methods to convert an HDF5 datatype identifier to a datatype object, and vice versa. A
+ * datatype object is described by four basic fields: datatype class, size, byte order, and sign, while an HDF5 datatype
+ * is presented by a datatype identifier.
  * <p>
  *
  * @version 1.1 9/4/2007
@@ -174,15 +174,15 @@ public class H5Datatype extends Datatype {
      * <p>
      *
      * @see #fromNative(int nativeID)
-     * @param nativeID
+     * @param tid
      *            the native datatype identifier.
      */
-    public H5Datatype(int nativeID) {
-        super(nativeID);
+    public H5Datatype(long tid) {
+        super(tid);
 
-        description = getDatatypeDescription(nativeID);
+        description = getDatatypeDescription(tid);
         log.trace("H5Datatype(int nativeID) description={}", description);
-        fromNative(nativeID);
+        fromNative(tid);
     }
 
     /*
@@ -194,7 +194,7 @@ public class H5Datatype extends Datatype {
         obj_info.num_attrs = nAttributes;
 
         if (obj_info.num_attrs < 0) {
-            int tid = -1;
+            long tid = -1;
             try {
                 tid = H5.H5Topen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
@@ -240,7 +240,7 @@ public class H5Datatype extends Datatype {
      *             If there is an error at the HDF5 library level.
      *
      */
-    public static final String[] convertEnumValueToName(int tid, Object inValues, String[] outNames)
+    public static final String[] convertEnumValueToName(long tid, Object inValues, String[] outNames)
             throws HDF5Exception {
         int inSize = 0;
         log.trace("convertEnumValueToName start");
@@ -284,11 +284,17 @@ public class H5Datatype extends Datatype {
         // Look for matches
         for (int i = 0; i < inSize; i++) {
             val = Array.getInt(inValues, i);
+            boolean notfound = true;
             for (int j = 0; j < nMembers; j++) {
                 if (val == values[j]) {
                     outNames[i] = names[j];
+                    notfound = false;
                     break;
                 }
+            }
+            if(notfound) {
+                outNames[i] = "**ENUM ERR "+String.valueOf(val)+"**";
+                log.trace("convertEnumValueToName default name");
             }
         }
 
@@ -314,7 +320,7 @@ public class H5Datatype extends Datatype {
      *             If there is an error at the HDF5 library level.
      *
      */
-    public static final int[] convertEnumNameToValue(int tid, String[] in, int[] out) throws HDF5Exception {
+    public static final int[] convertEnumNameToValue(long tid, String[] in, int[] out) throws HDF5Exception {
         int size = 0;
         log.trace("convertEnumNameToValue start");
 
@@ -371,7 +377,7 @@ public class H5Datatype extends Datatype {
      * @see hdf.object.Datatype#fromNative(int)
      */
     @Override
-    public void fromNative(int tid) {
+    public void fromNative(long tid) {
         int tclass = -1, tsize = -1, torder = -1;
         boolean isChar = false, isUchar = false;
         log.trace("fromNative start");
@@ -404,7 +410,7 @@ public class H5Datatype extends Datatype {
             }
 
             if (tclass == HDF5Constants.H5T_ARRAY) {
-                int tmptid = -1;
+                long tmptid = -1;
                 datatypeClass = CLASS_ARRAY;
                 try {
                     int ndims = H5.H5Tget_array_ndims(tid);
@@ -501,7 +507,7 @@ public class H5Datatype extends Datatype {
                 }
             }
             else if (tclass == HDF5Constants.H5T_VLEN) {
-                int tmptid = -1;
+                long tmptid = -1;
                 datatypeClass = CLASS_VLEN;
                 try {
                     tmptid = H5.H5Tget_super(tid);
@@ -548,9 +554,9 @@ public class H5Datatype extends Datatype {
      * @return the memory datatype identifier if successful, and negative otherwise.
      */
     @Deprecated
-    public static int toNative(int tid) {
+    public static long toNative(long tid) {
         // data type information
-        int native_type = -1;
+        long native_type = -1;
 
         try {
             native_type = H5.H5Tget_native_type(tid);
@@ -576,8 +582,9 @@ public class H5Datatype extends Datatype {
      * @see hdf.object.Datatype#toNative()
      */
     @Override
-    public int toNative() {
-        int tid = -1, tmptid = -1;
+    public long toNative() {
+        long tid = -1;
+        long tmptid = -1;
 
         if (isNamed) {
             try {
@@ -747,7 +754,7 @@ public class H5Datatype extends Datatype {
 
         // set up enum members
         if (datatypeClass == CLASS_ENUM) {
-            int ptid = tid;
+            long ptid = tid;
             try {
                 tid = H5.H5Tenum_create(ptid);
                 datatypeSize = H5.H5Tget_size(tid);
@@ -890,7 +897,7 @@ public class H5Datatype extends Datatype {
      *            the total number of data points of the array.
      * @return the array object if successful; otherwise, return null.
      */
-    public static Object allocateArray(int tid, int size) throws OutOfMemoryError {
+    public static Object allocateArray(long tid, int size) throws OutOfMemoryError {
         Object data = null;
         boolean isVL = false;
         boolean is_variable_str = false;
@@ -958,7 +965,7 @@ public class H5Datatype extends Datatype {
         }
         else if (tclass == HDF5Constants.H5T_ENUM) {
             log.trace("allocateArray class.H5T_ENUM={}", tclass);
-            int superTid = -1;
+            long superTid = -1;
             try {
                 superTid = H5.H5Tget_super(tid);
                 data = allocateArray(superTid, size);
@@ -990,7 +997,7 @@ public class H5Datatype extends Datatype {
         }
         else if (tclass == HDF5Constants.H5T_ARRAY) {
             // use the base datatype to define the array
-            int superTid = -1;
+            long superTid = -1;
             try {
                 int mn = H5.H5Tget_array_ndims(tid);
                 long[] marray = new long[mn];
@@ -1061,7 +1068,7 @@ public class H5Datatype extends Datatype {
     @Override
     public String getDatatypeDescription() {
         if (description == null) {
-            int tid = toNative();
+            long tid = toNative();
             if (tid >= 0) {
                 description = getDatatypeDescription(tid);
                 close(tid);
@@ -1081,7 +1088,7 @@ public class H5Datatype extends Datatype {
      *            the HDF5 datatype identifier
      * @return a string describing the data type.
      */
-    public static final String getDatatypeDescription(int tid) {
+    public static final String getDatatypeDescription(long tid) {
         String description = "Unknown";
 
         // data type information
@@ -1219,7 +1226,7 @@ public class H5Datatype extends Datatype {
         else if (tclass == HDF5Constants.H5T_ARRAY) {
             description = "Array of ";
             // use the base datatype to define the array
-            int tmptid = -1;
+            long tmptid = -1;
             try {
                 tmptid = H5.H5Tget_super(tid);
                 description += getDatatypeDescription(tmptid);
@@ -1254,7 +1261,7 @@ public class H5Datatype extends Datatype {
             try {
                 description += "{";
                 int n = H5.H5Tget_nmembers(tid);
-                int mtid = -1;
+                long mtid = -1;
 
                 for (int i = 0; i < n; i++) {
                     mtid = H5.H5Tget_member_type(tid, i);
@@ -1274,7 +1281,7 @@ public class H5Datatype extends Datatype {
             }
         }
         else if (tclass == HDF5Constants.H5T_VLEN) {
-            int tmptid = -1;
+            long tmptid = -1;
             try {
                 tmptid = H5.H5Tget_super(tid);
                 description = "Variable-length of " + getDatatypeDescription(tmptid);
@@ -1309,7 +1316,7 @@ public class H5Datatype extends Datatype {
     @Override
     public boolean isUnsigned() {
         boolean unsigned = false;
-        int tid = toNative();
+        long tid = toNative();
 
         unsigned = isUnsigned(tid);
         try {
@@ -1325,21 +1332,21 @@ public class H5Datatype extends Datatype {
      * Checks if a datatype specified by the identifier is an unsigned integer.
      * <p>
      *
-     * @param datatype
+     * @param tid
      *            the datatype ID to be checked.
      *
      * @return true is the datatype is an unsigned integer; otherwise returns false.
      */
-    public static final boolean isUnsigned(int datatype) {
+    public static final boolean isUnsigned(long tid) {
         boolean unsigned = false;
 
-        if (datatype >= 0) {
+        if (tid >= 0) {
             try {
-                int tclass = H5.H5Tget_class(datatype);
+                int tclass = H5.H5Tget_class(tid);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
                         && tclass != HDF5Constants.H5T_OPAQUE) {
-                    int tsign = H5.H5Tget_sign(datatype);
+                    int tsign = H5.H5Tget_sign(tid);
                     if (tsign == HDF5Constants.H5T_SGN_NONE) {
                         unsigned = true;
                     }
@@ -1352,7 +1359,7 @@ public class H5Datatype extends Datatype {
                 }
             }
             catch (Exception ex) {
-                log.debug("{} Datatype {} failure", getDatatypeDescription(datatype), datatype, ex);
+                log.debug("{} Datatype {} failure", getDatatypeDescription(tid), tid, ex);
                 unsigned = false;
             }
         }
@@ -1373,8 +1380,8 @@ public class H5Datatype extends Datatype {
      * @see hdf.hdf5lib.H5#H5Topen(int, String)
      */
     @Override
-    public int open() {
-        int tid = -1;
+    public long open() {
+        long tid = -1;
 
         try {
             tid = H5.H5Topen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
@@ -1395,7 +1402,7 @@ public class H5Datatype extends Datatype {
      *            the datatype ID to close
      */
     @Override
-    public void close(int tid) {
+    public void close(long tid) {
         try {
             H5.H5Tclose(tid);
         }
@@ -1422,7 +1429,7 @@ public class H5Datatype extends Datatype {
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         // load attributes first
         if (attributeList == null) {
-            int tid = open();
+            long tid = open();
             int indxType = fileFormat.getIndexType(null);
             int order = fileFormat.getIndexOrder(null);
 
@@ -1501,7 +1508,7 @@ public class H5Datatype extends Datatype {
         }
 
         Attribute attr = (Attribute) info;
-        int tid = open();
+        long tid = open();
         try {
             H5.H5Adelete(tid, attr.getName());
             List<Attribute> attrList = getMetadata();

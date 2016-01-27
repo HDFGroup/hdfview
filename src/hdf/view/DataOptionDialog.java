@@ -68,14 +68,14 @@ import hdf.object.ScalarDS;
 /**
  * DataOptionDialog is an dialog window used to select display options. Display options include
  * selection of subset, display type (image, text, or spreadsheet).
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public class DataOptionDialog extends JDialog implements ActionListener, ItemListener
 {
     /**
-     * 
+     *
      */
     private static final long      serialVersionUID      = -1078411885690696784L;
 
@@ -207,10 +207,10 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         stride = dataset.getStride();
         fieldList = null;
 
-        int h = 1, w = 1;
-        h = (int) dims[selectedIndex[0]];
+        long h = 1, w = 1;
+        h = dims[(int)selectedIndex[0]];
         if (rank > 1) {
-            w = (int) dims[selectedIndex[1]];
+            w = dims[(int)selectedIndex[1]];
         }
 
         transposeChoice = new JComboBox();
@@ -490,15 +490,15 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
 
                 tmpP = new JPanel();
                 if (bitmaskButtons.length <= 16) {
-                	tmpP.setLayout(new GridLayout(1, bitmaskButtons.length));
+                    tmpP.setLayout(new GridLayout(1, bitmaskButtons.length));
                     for (int i = bitmaskButtons.length; i > 0; i--)
                         tmpP.add(bitmaskButtons[i - 1]);
                 } else {
-                	tmpP.setLayout(new GridLayout(tsize/2, 16));
+                    tmpP.setLayout(new GridLayout(tsize/2, 16));
                     for (int i = bitmaskButtons.length; i > 0; i--)
                         tmpP.add(bitmaskButtons[i - 1]);
                 }
-                
+
                 sheetP2.setLayout(new BorderLayout(10, 10));
                 if (tsize <= 8) sheetP2.add(tmpP, BorderLayout.CENTER);
                 sheetP2.add(new JLabel(), BorderLayout.NORTH);
@@ -587,7 +587,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             endFields[i].setEnabled(false);
             strideFields[i].setEnabled(false);
             maxLabels[i].setEnabled(false);
-            
+
             // Provide fields with names for access
             startFields[i].setName("startField"+i);
             endFields[i].setName("endField"+i);
@@ -865,8 +865,8 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
                         transposeChoice.setEnabled(true);
 
                     long dims[] = dataset.getDims();
-                    int w = (int) dims[wIdx];
-                    int h = (int) dims[hIdx];
+                    long w = dims[wIdx];
+                    long h = dims[hIdx];
                     navigator.setDimensionSize(w, h);
                     navigator.updateUI();
                 }
@@ -947,14 +947,14 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         boolean isImage = false;
 
         if (dataset instanceof ScalarDS) {
-        	if(!((ScalarDS) dataset).isText()) {
-        		ScalarDS sd = (ScalarDS) dataset;
-        		isImage = sd.isImageDisplay();
-        		isTrueColorImage = sd.isTrueColor();
-            	// compound datasets don't have data range or fill values
-            	// (JAVA-1825)
-            	dataRangeField.setEnabled(isImage);
-            	fillValueField.setEnabled(isImage);
+            if(!((ScalarDS) dataset).isText()) {
+                ScalarDS sd = (ScalarDS) dataset;
+                isImage = sd.isImageDisplay();
+                isTrueColorImage = sd.isTrueColor();
+                // compound datasets don't have data range or fill values
+                // (JAVA-1825)
+                dataRangeField.setEnabled(isImage);
+                fillValueField.setEnabled(isImage);
             }
         }
         else if (dataset instanceof CompoundDS) {
@@ -1062,7 +1062,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         performJComboBoxEvent = true;
     }
 
-    private void setPalette ( ) {
+    private void setPalette() {
         if (!(dataset instanceof ScalarDS)) {
             return;
         }
@@ -1100,7 +1100,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         ((ScalarDS) dataset).setPalette(pal);
     }
 
-    private boolean setSelection ( ) {
+    private boolean setSelection() {
         long[] n0 = { 0, 0, 0 }; // start
         long[] n1 = { 0, 0, 0 }; // end
         long[] n2 = { 1, 1, 1 }; // stride
@@ -1168,30 +1168,30 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         }
         else {
             ScalarDS ds = (ScalarDS) dataset;
-            
+
             if(!ds.isText()) {
-            	StringTokenizer st = new StringTokenizer(dataRangeField.getText(), ",");
-            	if (st.countTokens() == 2) {
-            		double min = 0, max = 0;
-            		try {
-            			min = Double.valueOf(st.nextToken());
-            			max = Double.valueOf(st.nextToken());
-            		}
-            		catch (Throwable ex) {
-            		}
-            		if (max > min)
-            			ds.setImageDataRange(min, max);
-            	}
-            	st = new StringTokenizer(fillValueField.getText(), ",");
-            	while (st.hasMoreTokens()) {
-            		double x = 0;
-            		try {
-            			x = Double.valueOf(st.nextToken());
-            			ds.addFilteredImageValue(x);
-            		}
-            		catch (Throwable ex) {
-            		}
-            	}
+                StringTokenizer st = new StringTokenizer(dataRangeField.getText(), ",");
+                if (st.countTokens() == 2) {
+                    double min = 0, max = 0;
+                    try {
+                        min = Double.valueOf(st.nextToken());
+                        max = Double.valueOf(st.nextToken());
+                    }
+                    catch (Throwable ex) {
+                    }
+                    if (max > min)
+                        ds.setImageDataRange(min, max);
+                }
+                st = new StringTokenizer(fillValueField.getText(), ",");
+                while (st.hasMoreTokens()) {
+                    double x = 0;
+                    try {
+                        x = Double.valueOf(st.nextToken());
+                        ds.addFilteredImageValue(x);
+                    }
+                    catch (Throwable ex) {
+                    }
+                }
             }
         }
 
@@ -1206,7 +1206,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             selectedIndex[i] = sIndex[i];
             start[selectedIndex[i]] = n0[i];
             if (i < 2) {
-                selected[selectedIndex[i]] = (int) ((n1[i] - n0[i]) / n2[i]) + 1;
+                selected[selectedIndex[i]] = (long) ((n1[i] - n0[i]) / n2[i]) + 1;
                 stride[selectedIndex[i]] = n2[i];
             }
         }
@@ -1228,7 +1228,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         return retVal;
     }
 
-    private boolean setBitmask ( )
+    private boolean setBitmask()
     {
         boolean isAll = false, isNothing = false;
 
@@ -1268,7 +1268,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             MouseMotionListener {
         private static final long serialVersionUID = -4458114008420664965L;
         private final int         NAVIGATOR_SIZE   = 150;
-        private int               dimX, dimY, x, y;
+        private long              dimX, dimY, x, y;
         private double            r;
         private Point             startPosition;                           // mouse
                                                                             // clicked
@@ -1276,18 +1276,18 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         private Rectangle         selectedArea;
         private Image             previewImage     = null;
 
-        private PreviewNavigator(int w, int h) {
+        private PreviewNavigator(long w, long h) {
             dimX = w;
             dimY = h;
             if (dimX > dimY) {
                 x = NAVIGATOR_SIZE;
                 r = dimX / (double) x;
-                y = (int) (dimY / r);
+                y = (long) (dimY / r);
             }
             else {
                 y = NAVIGATOR_SIZE;
                 r = dimY / (double) y;
-                x = (int) (dimX / r);
+                x = (long) (dimX / r);
             }
 
             selectedArea = new Rectangle();
@@ -1303,7 +1303,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             addMouseMotionListener(this);
         }
 
-        private Image createPreviewImage ( ) throws Exception {
+        private Image createPreviewImage() throws Exception {
             if ((rank <= 1) || !(dataset instanceof ScalarDS)) {
                 return null;
             }
@@ -1355,17 +1355,15 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             }
 
             // update the ration of preview image size to the real dataset
-            y = (int) selected[selectedIndex[0]];
-            x = (int) selected[selectedIndex[1]];
-            r = Math.min((double) dims[selectedIndex[0]]
-                    / (double) selected[selectedIndex[0]],
-                    (double) dims[selectedIndex[1]]
-                            / (double) selected[selectedIndex[1]]);
+            y = selected[selectedIndex[0]];
+            x = selected[selectedIndex[1]];
+            r = Math.min((double) dims[selectedIndex[0]] / (double) selected[selectedIndex[0]],
+                         (double) dims[selectedIndex[1]] / (double) selected[selectedIndex[1]]);
 
             try {
                 Object data = sd.read();
-                int h = sd.getHeight();
-                int w = sd.getWidth();
+                long h = sd.getHeight();
+                long w = sd.getWidth();
 
                 byte[] bData = Tools.getBytes(data, sd.getImageDataRange(), w, h, false, sd.getFilteredImageValues(), null);
 
@@ -1385,9 +1383,9 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
                         // transpose data
                         int n = bData.length;
                         byte[] bData2 = new byte[n];
-                        for (int i = 0; i < h; i++) {
-                            for (int j = 0; j < w; j++) {
-                                bData[i * w + j] = bData2[j * h + i];
+                        for (long i = 0; i < h; i++) {
+                            for (long j = 0; j < w; j++) {
+                                bData[(int)(i * w + j)] = bData2[(int)(j * h + i)];
                             }
                         }
                     }
@@ -1396,9 +1394,9 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
                         // > selectedIndex[0]
                         int n = bData.length;
                         byte[] bData2 = new byte[n];
-                        for (int i = 0; i < h; i++) {
-                            for (int j = 0; j < w; j++) {
-                                bData[i * w + j] = bData2[j * h + i];
+                        for (long i = 0; i < h; i++) {
+                            for (long j = 0; j < w; j++) {
+                                bData[(int)(i * w + j)] = bData2[(int)(j * h + i)];
                             }
                         }
                     }
@@ -1424,7 +1422,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
                 g.drawImage(previewImage, 0, 0, this);
             }
             else {
-                g.fillRect(0, 0, x, y);
+                g.fillRect(0, 0, (int)x, (int)y);
             }
 
             int w = selectedArea.width;
@@ -1455,8 +1453,8 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
 
             int x0 = Math.max(0, Math.min(p0.x, p1.x));
             int y0 = Math.max(0, Math.min(p0.y, p1.y));
-            int x1 = Math.min(x, Math.max(p0.x, p1.x));
-            int y1 = Math.min(y, Math.max(p0.y, p1.y));
+            int x1 = Math.min((int)x, Math.max(p0.x, p1.x));
+            int y1 = Math.min((int)y, Math.max(p0.y, p1.y));
 
             int w = x1 - x0;
             int h = y1 - y0;
@@ -1471,17 +1469,17 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             repaint();
         }
 
-        private void updateSelection (int x0, int y0, int w, int h) {
-            int i0 = 0, i1 = 0;
+        private void updateSelection (long x0, long y0, long w, long h) {
+            long i0 = 0, i1 = 0;
             String selStr;
 
-            i0 = (int) (y0 * r);
+            i0 = (long)(y0 * r);
             if (i0 > dims[currentIndex[0]]) {
-                i0 = (int) dims[currentIndex[0]];
+                i0 = dims[currentIndex[0]];
             }
             startFields[0].setText(String.valueOf(i0));
 
-            i1 = (int) ((y0 + h) * r);
+            i1 = (long)((y0 + h) * r);
 
             if (i1 < i0) {
                 i1 = i0;
@@ -1491,19 +1489,19 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
             selStr = String.valueOf((int) (h * r));
 
             if (rank > 1) {
-                i0 = (int) (x0 * r);
+                i0 = (long)(x0 * r);
                 if (i0 > dims[currentIndex[1]]) {
-                    i0 = (int) dims[currentIndex[1]];
+                    i0 = dims[currentIndex[1]];
                 }
                 startFields[1].setText(String.valueOf(i0));
 
-                i1 = (int) ((x0 + w) * r);
+                i1 = (long)((x0 + w) * r);
                 if (i1 < i0) {
                     i1 = i0;
                 }
                 endFields[1].setText(String.valueOf(i1));
 
-                selStr += " x " + ((int) (w * r));
+                selStr += " x " + ((long)(w * r));
             }
 
             selLabel.setText(selStr);
@@ -1525,18 +1523,18 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
         public void mouseMoved (MouseEvent e) {
         }
 
-        private void setDimensionSize (int w, int h) {
+        private void setDimensionSize (long w, long h) {
             dimX = w;
             dimY = h;
             if (dimX > dimY) {
                 x = NAVIGATOR_SIZE;
                 r = dimX / (double) x;
-                y = (int) (dimY / r);
+                y = (long) (dimY / r);
             }
             else {
                 y = NAVIGATOR_SIZE;
                 r = dimY / (double) y;
-                x = (int) (dimX / r);
+                x = (long) (dimX / r);
             }
             setPreferredSize(new Dimension(NAVIGATOR_SIZE, NAVIGATOR_SIZE));
             selectedArea.setSize(0, 0);
@@ -1551,7 +1549,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
     } // private class SubsetNavigator extends JComponent
 
     /**
-     * 
+     *
      * @return true if display the data as characters; otherwise, display as numbers.
      */
     public boolean isDisplayTypeChar ( ) {
@@ -1596,7 +1594,7 @@ public class DataOptionDialog extends JDialog implements ActionListener, ItemLis
     }
 
     /**
-     * 
+     *
      * @return true if transpose the data in 2D table; otherwise, do not transpose the data.
      */
     public boolean isTransposed ( ) {

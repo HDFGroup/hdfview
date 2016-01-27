@@ -17,6 +17,8 @@
     </filterchain>
   </loadfile>
 
+  <property name="hdf4.version"           value="N/A"/>
+<!--
   <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings">
     <filterchain>
       <tokenfilter>
@@ -29,6 +31,7 @@
       </tokenfilter>
     </filterchain>
   </loadfile>
+ -->
 
   <loadfile property="hdf5.version" srcFile="${hdf.lib.dir}/libhdf5.settings">
     <filterchain>
@@ -86,14 +89,14 @@
   <property name="jre.version" value="${ant.java.version}" />
 
   <path id="obj-classpath">
-    <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
+    <fileset dir="${lib.dir}" includes="netcdf.jar" excludes="*sources.jar" />
   </path>
   <path id="swt-classpath">
     <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
     <fileset dir="${lib.dir}/ext/swt" includes="*.jar"/>
   </path>
   <path id="jni-classpath">
-    <fileset dir="${hdf.lib.dir}" includes="jarhdf*.jar slf4j-api*.jar" />
+    <fileset dir="${hdf.lib.dir}" includes="jarhdf5*.jar slf4j-api*.jar" />
   </path>
   <path id="log-classpath">
     <fileset dir="${lib.dir}/extra" includes="slf4j-simple*.jar" excludes="*sources.jar" />
@@ -172,9 +175,16 @@
     <replace file="${build.dir}/HDFVersions.java" token="@HDFJAVA_VERSION@" value='"${hdfjava.version}"' />
 
     <!-- Generate Versions file -->
-    <javac srcdir="${build.dir}" destdir="${classes.dir}" includes="HDFVersions.java" includeantruntime="false" />
+    <javac srcdir="${build.dir}" destdir="${classes.dir}" 
+    includes="HDFVersions.java" 
+    includeantruntime="false" 
+    />
 
-    <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" 
+    classpathref="project-classpath" 
+    excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java hdf/object/fits/** hdf/object/h4/**" 
+    includeantruntime="false" 
+    />
 
     <copy todir="${classes.dir}">
       <fileset dir="${src.dir}" excludes=" **/*.in **/*.java examples/** test/**" />
