@@ -1853,9 +1853,9 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
     
     private void convertFile(String typeFrom, String typeTo) {
-    	FileConversionDialog dialog = new FileConversionDialog(null, typeFrom, typeTo, currentDir,
-    			treeView.getCurrentFiles()); // null should be changed to something useful
-    	dialog.setVisible(true);
+    	ImageConversionDialog dialog = new ImageConversionDialog(mainWindow, typeFrom, typeTo,
+    			currentDir, treeView.getCurrentFiles());
+    	dialog.open();
     	
     	if (dialog.isFileConverted()) {
     		String filename = dialog.getConvertedFile();

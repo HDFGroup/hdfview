@@ -2331,9 +2331,9 @@ public class DefaultTreeView implements TreeView {
             }
         }
         else {
-            DataOptionDialog dialog = new DataOptionDialog(viewer, d);
+            DataOptionDialog dialog = new DataOptionDialog(shell, d);
+            dialog.open();
 
-            dialog.setVisible(true);
             if (dialog.isCancelled()) {
                 return null;
             }

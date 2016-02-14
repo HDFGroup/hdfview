@@ -14,55 +14,45 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.lang.reflect.Array;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * MathConversionDialog shows a message dialog requesting user input for math
  * conversion.
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 1/28/2016
  */
-public class MathConversionDialog extends JDialog implements ActionListener,
-        ListSelectionListener {
-    private static final long serialVersionUID = 5136554941147830371L;
+public class MathConversionDialog extends Dialog {
+	private Shell shell;
+	
+	private Text aField, bField;
 
-    private JTextField aField, bField;
+    private Text infoArea;
 
-    private JTextArea infoArea;
-
-    private JList functionList;
+    private List functionList;
 
     private Object dataValue;
 
     private char NT;
-
-    private final Toolkit toolkit;
-
+    
     private String[] functionDescription;
 
     private boolean isConverted;
@@ -75,26 +65,18 @@ public class MathConversionDialog extends JDialog implements ActionListener,
      * @param data
      *            the data array to convert.
      */
-    public MathConversionDialog(JFrame owner, Object data) {
-        super(owner, "Convert Data...", true);
-
-        toolkit = Toolkit.getDefaultToolkit();
-        isConverted = false;
+    public MathConversionDialog(Shell parent, Object data) {
+    	super(parent, SWT.APPLICATION_MODAL);
+    	
+    	isConverted = false;
         dataValue = data;
         NT = ' ';
-
+        
         String cName = data.getClass().getName();
         int cIndex = cName.lastIndexOf("[");
         if (cIndex >= 0) {
             NT = cName.charAt(cIndex + 1);
         }
-
-        String[] functionNames = { "[a, b]", "abs (x)", "a + b * x",
-                "pow (x, a)", "exp (x)", "ln (x)", "log (a, x)", "sin (x)",
-                "cos (x)", "tan (x)" };
-        functionList = new JList(functionNames);
-        functionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        functionList.addListSelectionListener(this);
 
         String[] tmpStrs = {
                 "The filter by lower and upper bounds. x=a if x<a; x=b if x>b."
@@ -118,86 +100,128 @@ public class MathConversionDialog extends JDialog implements ActionListener,
                         + "\ne.g.\n tan(0.785398)=1\n tan(1.047198)=1.732051" };
 
         functionDescription = tmpStrs;
-
-        JPanel contentPane = (JPanel) getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
-        int w = 500 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 300 + (ViewProperties.getFontSize() - 12) * 10;
-        contentPane.setPreferredSize(new Dimension(w, h));
-
-        JButton okButton = new JButton("   Ok   ");
-        okButton.setActionCommand("Ok");
-        okButton.setMnemonic(KeyEvent.VK_O);
-        okButton.addActionListener(this);
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setMnemonic(KeyEvent.VK_C);
-        cancelButton.setActionCommand("Cancel");
-        cancelButton.addActionListener(this);
-
-        // set OK and CANCEL buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-
-        // set name, parent, width and height panel
-        JPanel centerP = new JPanel();
-        centerP.setLayout(new BorderLayout(10, 10));
-        JScrollPane scroller = new JScrollPane(functionList);
-        centerP.add(scroller, BorderLayout.CENTER);
-
-        JPanel tmpP = new JPanel();
-        tmpP.setLayout(new BorderLayout(5, 5));
-
-        JPanel tmpP0 = new JPanel();
-        tmpP0.setLayout(new GridLayout(4, 1, 5, 5));
-        tmpP0.add(new JLabel("a = "));
-        tmpP0.add(new JLabel("b = "));
-        tmpP0.add(new JLabel("                     "));
-        tmpP0.add(new JLabel("                     "));
-        tmpP.add(tmpP0, BorderLayout.WEST);
-
-        tmpP0 = new JPanel();
-        tmpP0.setLayout(new GridLayout(4, 1, 5, 5));
-        tmpP0.add(aField = new JTextField("0"));
-        tmpP0.add(bField = new JTextField("1"));
-        tmpP0.add(new JLabel("                     "));
-        tmpP0.add(new JLabel("                     "));
-        tmpP.add(tmpP0, BorderLayout.CENTER);
-
-        centerP.add(tmpP, BorderLayout.EAST);
-        
-        tmpP0 = new JPanel();
-        tmpP0.setLayout(new BorderLayout());
-        tmpP0.add(infoArea = new JTextArea(4, 80), BorderLayout.CENTER);
-        infoArea.setEditable(false);
-        infoArea.setLineWrap(true);
-        infoArea.setBackground(java.awt.Color.lightGray);
-        infoArea.setWrapStyleWord(true);
-
-        centerP.setBorder(new TitledBorder(
-                "Converting Data With A Mathematic Function"));
-        centerP.add(tmpP0, BorderLayout.SOUTH);
-        aField.setEnabled(false);
-        bField.setEnabled(false);
-
-        contentPane.add(centerP, BorderLayout.CENTER);
-
-        // locate the H5Property dialog
-        Point l = owner.getLocation();
-        l.x += 250;
-        l.y += 80;
-        setLocation(l);
-        validate();
-        pack();
     }
+    
+    public void open() {
+    	Shell parent = getParent();
+    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell.setText("Convert Data...");
+    	shell.setImage(ViewProperties.getHdfIcon());
+    	shell.setLayout(new GridLayout(1, true));
+    	
+    	// Create content region
+    	org.eclipse.swt.widgets.Group contentGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	contentGroup.setText("Converting Data With A Mathematic Function");
+    	contentGroup.setLayout(new GridLayout(2, false));
+    	contentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
+    	String[] functionNames = { "[a, b]", "abs (x)", "a + b * x",
+                "pow (x, a)", "exp (x)", "ln (x)", "log (a, x)", "sin (x)",
+                "cos (x)", "tan (x)" };
+        
+        functionList = new List(contentGroup, SWT.SINGLE | SWT.BORDER);
+        functionList.setItems(functionNames);
+        functionList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        functionList.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		int index = functionList.getSelectionIndex();
+                infoArea.setText(functionDescription[index]);
 
+                if ((index == 0) || (index == 2)) {
+                    aField.setEnabled(true);
+                    bField.setEnabled(true);
+                }
+                else if ((index == 3) || (index == 6)) {
+                    aField.setEnabled(true);
+                    bField.setEnabled(false);
+                }
+                else {
+                    aField.setEnabled(false);
+                    bField.setEnabled(false);
+                }
+        	}
+        });
+    	
+    	Composite fieldComposite = new Composite(contentGroup, SWT.NONE);
+    	fieldComposite.setLayout(new GridLayout(2, true));
+    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	new Label(fieldComposite, SWT.NONE).setText("a = ");
+    	
+    	aField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+    	aField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	aField.setText("0");
+    	aField.setEnabled(false);
+    	
+    	new Label(fieldComposite, SWT.NONE).setText("b = ");
+    	
+    	bField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+    	bField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	bField.setText("1");
+    	bField.setEnabled(false);
+    	
+    	infoArea = new Text(contentGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP);
+    	infoArea.setEditable(false);
+    	infoArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+    	infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+    	
+    	// Create Ok/Cancel button region
+    	Composite buttonComposite = new Composite(shell, SWT.NONE);
+        buttonComposite.setLayout(new GridLayout(2, true));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+        
+        Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("   &Ok   ");
+        okButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		isConverted = convertData();
+                
+        		shell.dispose();
+        	}
+        });
+        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        okButton.setLayoutData(gridData);
+        
+        Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setText("&Cancel");
+        cancelButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		isConverted = false;
+        		
+                shell.dispose();
+        	}
+        });
+        
+        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        cancelButton.setLayoutData(gridData);
+    	
+        shell.pack();
+        
+        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        shell.setSize(computedSize.x + 200 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y + 100);
+        
+        Rectangle parentBounds = parent.getBounds();
+        Point shellSize = shell.getSize();
+        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+        
+        shell.open();
+        
+        Display display = parent.getDisplay();
+        while(!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
+    }
+    
     private boolean convertData() {
         double a = 0, b = 1;
 
-        int index = functionList.getSelectedIndex();
+        int index = functionList.getSelectionIndex();
+        
         try {
             if ((index == 0) || (index == 2)) {
                 a = Double.parseDouble(aField.getText().trim());
@@ -209,18 +233,21 @@ public class MathConversionDialog extends JDialog implements ActionListener,
             else if (index == 6) {
                 a = Integer.parseInt(aField.getText().trim());
                 if (a <= 0) {
-                    toolkit.beep();
-                    JOptionPane.showMessageDialog(this,
-                            "a must be an integer greater than zero.",
-                            getTitle(), JOptionPane.ERROR_MESSAGE);
+                    shell.getDisplay().beep();
+                    MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                    error.setText(shell.getText());
+                    error.setMessage("a must be an integer greater than zero.");
+                    error.open();
                     return false;
                 }
             }
         }
         catch (Exception ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex.getMessage(), getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+            error.setText(shell.getText());
+            error.setMessage(ex.getMessage());
+            error.open();
             return false;
         }
 
@@ -228,198 +255,160 @@ public class MathConversionDialog extends JDialog implements ActionListener,
         double value = 0, x = 0;
 
         switch (NT) {
-        case 'B':
-            byte[] bdata = (byte[]) dataValue;
-            for (int i = 0; i < n; i++) {
-                x = bdata[i];
-                value = y(index, x, a, b);
-                if ((value > Byte.MAX_VALUE) || (value < Byte.MIN_VALUE)) {
-                    JOptionPane.showMessageDialog(this, "Invalid byte value: "
-                            + (long) value, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+            case 'B':
+                byte[] bdata = (byte[]) dataValue;
+                for (int i = 0; i < n; i++) {
+                    x = bdata[i];
+                    value = y(index, x, a, b);
+                    if ((value > Byte.MAX_VALUE) || (value < Byte.MIN_VALUE)) {
+                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        error.setText(shell.getText());
+                        error.setMessage("Invalid byte value: " + (long) value);
+                        error.open();
+                        return false;
+                    }
 
-                bdata[i] = (byte) value;
-            } // for (int i=0; i<n; i++)
-            break;
-        case 'S':
-            short[] sdata = (short[]) dataValue;
-            for (int i = 0; i < n; i++) {
-                x = sdata[i];
-                value = y(index, x, a, b);
-                if ((value > Short.MAX_VALUE) || (value < Short.MIN_VALUE)) {
-                    JOptionPane.showMessageDialog(this, "Invalid short value: "
-                            + (long) value, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+                    bdata[i] = (byte) value;
+                } // for (int i=0; i<n; i++)
+                break;
+            case 'S':
+                short[] sdata = (short[]) dataValue;
+                for (int i = 0; i < n; i++) {
+                    x = sdata[i];
+                    value = y(index, x, a, b);
+                    if ((value > Short.MAX_VALUE) || (value < Short.MIN_VALUE)) {
+                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        error.setText(shell.getText());
+                        error.setMessage("Invalid short value: " + (long) value);
+                        error.open();
+                        return false;
+                    }
 
-                sdata[i] = (short) value;
-            } // for (int i=0; i<n; i++)
-            break;
-        case 'I':
-            int[] idata = (int[]) dataValue;
-            for (int i = 0; i < n; i++) {
-                x = idata[i];
-                value = y(index, x, a, b);
-                if ((value > Integer.MAX_VALUE) || (value < Integer.MIN_VALUE)) {
-                    JOptionPane.showMessageDialog(this, "Invalid int value: "
-                            + (long) value, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+                    sdata[i] = (short) value;
+                } // for (int i=0; i<n; i++)
+                break;
+            case 'I':
+                int[] idata = (int[]) dataValue;
+                for (int i = 0; i < n; i++) {
+                    x = idata[i];
+                    value = y(index, x, a, b);
+                    if ((value > Integer.MAX_VALUE) || (value < Integer.MIN_VALUE)) {
+                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        error.setText(shell.getText());
+                        error.setMessage("Invalid int value: " + (long) value);
+                        error.open();
+                        return false;
+                    }
 
-                idata[i] = (int) value;
-            } // for (int i=0; i<n; i++)
-            break;
-        case 'J':
-            long[] ldata = (long[]) dataValue;
-            for (int i = 0; i < n; i++) {
-                x = ldata[i];
-                value = y(index, x, a, b);
-                if ((value > Long.MAX_VALUE) || (value < Long.MIN_VALUE)) {
-                    JOptionPane.showMessageDialog(this, "Invalid long value: "
-                            + (long) value, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+                    idata[i] = (int) value;
+                } // for (int i=0; i<n; i++)
+                break;
+            case 'J':
+                long[] ldata = (long[]) dataValue;
+                for (int i = 0; i < n; i++) {
+                    x = ldata[i];
+                    value = y(index, x, a, b);
+                    if ((value > Long.MAX_VALUE) || (value < Long.MIN_VALUE)) {
+                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        error.setText(shell.getText());
+                        error.setMessage("Invalid long value: " + (long) value);
+                        error.open();
+                        return false;
+                    }
 
-                ldata[i] = (long) value;
-            } // for (int i=0; i<n; i++)
-            break;
-        case 'F':
-            float[] fdata = (float[]) dataValue;
-            for (int i = 0; i < n; i++) {
-                x = fdata[i];
-                value = y(index, x, a, b);
-                if ((value > Float.MAX_VALUE) || (value < -Float.MAX_VALUE)
+                    ldata[i] = (long) value;
+                } // for (int i=0; i<n; i++)
+                break;
+            case 'F':
+                float[] fdata = (float[]) dataValue;
+                for (int i = 0; i < n; i++) {
+                    x = fdata[i];
+                    value = y(index, x, a, b);
+                    if ((value > Float.MAX_VALUE) || (value < -Float.MAX_VALUE)
                         || (value == Float.NaN)) {
-                    JOptionPane.showMessageDialog(this, "Invalid float value: "
-                            + value, getTitle(), JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        error.setText(shell.getText());
+                        error.setMessage("Invalid float value: " + value);
+                        error.open();
+                        return false;
+                    }
 
-                fdata[i] = (float) value;
-            } // for (int i=0; i<n; i++)
-            break;
-        case 'D':
-            double[] ddata = (double[]) dataValue;
-            for (int i = 0; i < n; i++) {
-                x = ddata[i];
-                value = y(index, x, a, b);
-                if ((value > Double.MAX_VALUE) || (value < -Double.MAX_VALUE)
+                    fdata[i] = (float) value;
+                } // for (int i=0; i<n; i++)
+                break;
+            case 'D':
+                double[] ddata = (double[]) dataValue;
+                for (int i = 0; i < n; i++) {
+                    x = ddata[i];
+                    value = y(index, x, a, b);
+                    if ((value > Double.MAX_VALUE) || (value < -Double.MAX_VALUE)
                         || (value == Double.NaN)) {
-                    JOptionPane.showMessageDialog(this,
-                            "Invalid double value: " + value, getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        error.setText(shell.getText());
+                        error.setMessage("Invalid double value: " + value);
+                        error.open();
+                        return false;
+                    }
 
-                ddata[i] = value;
-            } // for (int i=0; i<n; i++)
-            break;
-        default:
-            break;
+                    ddata[i] = value;
+                } // for (int i=0; i<n; i++)
+                break;
+            default:
+                break;
         }
 
         return true;
     }
-
-    public void actionPerformed(ActionEvent e) {
-        Object source = e.getSource();
-        String cmd = e.getActionCommand();
-
-        if (cmd.equals("Ok")) {
-            isConverted = convertData();
-            // if (isConverted)
-            dispose();
-        }
-        if (cmd.equals("Cancel")) {
-            isConverted = false;
-            dispose();
-        }
-    }
-
-    public void valueChanged(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) {
-            return;
-        }
-
-        if (!e.getSource().equals(functionList)) {
-            return;
-        }
-
-        if (functionList.isSelectionEmpty()) {
-            return;
-        }
-
-        int index = functionList.getSelectedIndex();
-        infoArea.setText(functionDescription[index]);
-
-        if ((index == 0) || (index == 2)) {
-            aField.setEnabled(true);
-            bField.setEnabled(true);
-        }
-        else if ((index == 3) || (index == 6)) {
-            aField.setEnabled(true);
-            bField.setEnabled(false);
-        }
-        else {
-            aField.setEnabled(false);
-            bField.setEnabled(false);
-        }
-    }
-
+    
     private double y(int index, double x, double a, double b) {
         double y = x;
+        
         switch (index) {
-        case 0:
-            if (x < a) {
-                y = a;
-            }
-            else if (x > b) {
-                y = b;
-            }
-            break;
-        case 1:
-            y = Math.abs(x);
-            break;
-        case 2:
-            y = (a + b * x);
-            break;
-        case 3:
-            y = Math.pow(x, a);
-            break;
-        case 4:
-            y = Math.exp(x);
-            break;
-        case 5:
-            y = Math.log(x);
-            break;
-        case 6:
-            y = (Math.log(x) / Math.log(a));
-            break;
-        case 7:
-            y = Math.sin(x);
-            break;
-        case 8:
-            y = Math.cos(x);
-            break;
-        case 9:
-            y = Math.tan(x);
-            break;
-        default:
-            y = x;
-            break;
+            case 0:
+                if (x < a) {
+                    y = a;
+                }
+                else if (x > b) {
+                    y = b;
+                }
+                break;
+            case 1:
+                y = Math.abs(x);
+                break;
+            case 2:
+                y = (a + b * x);
+                break;
+            case 3:
+                y = Math.pow(x, a);
+                break;
+            case 4:
+                y = Math.exp(x);
+                break;
+            case 5:
+                y = Math.log(x);
+                break;
+            case 6:
+                y = (Math.log(x) / Math.log(a));
+                break;
+            case 7:
+                y = Math.sin(x);
+                break;
+            case 8:
+                y = Math.cos(x);
+                break;
+            case 9:
+                y = Math.tan(x);
+                break;
+            default:
+                y = x;
+                break;
         }
 
         return y;
     }
-
+    
     /** Returns true if the data is successfully converted. */
     public boolean isConverted() {
         return isConverted;
     }
-
 }

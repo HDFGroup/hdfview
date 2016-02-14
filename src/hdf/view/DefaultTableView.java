@@ -47,8 +47,11 @@ import java.util.BitSet;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
@@ -71,6 +74,7 @@ import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfigurat
 import org.eclipse.nebula.widgets.nattable.config.EditableRule;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
+import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.validate.IDataValidator;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
@@ -676,26 +680,6 @@ public class DefaultTableView implements TableView {
         
         final NatTable natTable = new NatTable(parent, gridLayer, false);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
-        /*natTable.addConfiguration(new AbstractRegistryConfiguration() {
-        	@Override
-            public void configureRegistry(IConfigRegistry configRegistry) {
-                EditableGridExample.registerConfigLabelsOnColumns(columnLabelAccumulator);
-
-                registerISINValidator(configRegistry);
-                registerAskPriceValidator(configRegistry, dataProvider);
-                registerBidPriceValidator(configRegistry);
-
-                registerSecurityDescriptionCellStyle(configRegistry);
-                registerPricingCellStyle(configRegistry);
-
-                registerPriceFormatter(configRegistry);
-                registerDateFormatter(configRegistry);
-                registerLotSizeFormatter(configRegistry);
-
-                registerEditableRules(configRegistry, dataProvider);
-            }
-
-        });*/
         
         // Register cell editing rules with table
         natTable.addConfiguration(new AbstractRegistryConfiguration() {
@@ -1200,7 +1184,7 @@ public class DefaultTableView implements TableView {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    //mathConversion();
+                    mathConversion();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -1878,11 +1862,20 @@ public class DefaultTableView implements TableView {
      * Returns the selected data values of the ScalarDS
      */
     private Object getSelectedScalarData() {
-        /*
     	Object selectedData = null;
 
-        int[] selectedRows = table.getSelectedRows();
-        int[] selectedCols = table.getSelectedColumns();
+    	// Since NatTable returns the selected row positions as a Set<Range>, convert this to
+    	// an Integer[]
+    	Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+    	Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+    	Iterator<Range> i1 = rowPositions.iterator();
+    	while(i1.hasNext()) {
+    		selectedRowPos.addAll(i1.next().getMembers());
+    	}
+    	
+        Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
+        int[] selectedCols = selectionLayer.getSelectedColumnPositions();
+        
         if (selectedRows == null || selectedRows.length <= 0 || selectedCols == null || selectedCols.length <= 0) {
             return null;
         }
@@ -1891,7 +1884,7 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView getSelectedScalarData: {}", size);
 
         // the whole table is selected
-        if ((table.getColumnCount() == selectedCols.length) && (table.getRowCount() == selectedRows.length)) {
+        if ((table.getPreferredColumnCount() - 1 == selectedCols.length) && (table.getPreferredRowCount() == selectedRows.length)) {
             return dataValue;
         }
 
@@ -1933,9 +1926,7 @@ public class DefaultTableView implements TableView {
         }
         log.trace("DefaultTableView getSelectedScalarData: selectedData is type {}", NT);
 
-        table.getSelectedRow();
-        table.getSelectedColumn();
-        int w = table.getColumnCount();
+        int w = table.getPreferredColumnCount() - 1;
         log.trace("DefaultTableView getSelectedScalarData: getColumnCount={}", w);
         int idx_src = 0;
         int idx_dst = 0;
@@ -1958,9 +1949,6 @@ public class DefaultTableView implements TableView {
         // }
 
         return selectedData;
-        */
-        
-        return null; // Remove when fixed
     }
     
     /**
@@ -2030,6 +2018,68 @@ public class DefaultTableView implements TableView {
         return null; // Remove when fixed
     }
     
+    /**
+     * Convert selected data based on predefined math functions.
+     */
+    private void mathConversion() throws Exception {
+        if (isReadOnly) {
+            return;
+        }
+        
+        int cols = selectionLayer.getSelectedColumnPositions().length;
+        if ((dataset instanceof CompoundDS) && (cols > 1)) {
+            shell.getDisplay().beep();
+            showError("Please select one column at a time for math conversion"
+            		+ "for compound dataset.", shell.getText());
+            return;
+        }
+
+        Object theData = getSelectedData();
+        if (theData == null) {
+            shell.getDisplay().beep();
+            showError("No data is selected.", shell.getText());
+            return;
+        }
+
+        MathConversionDialog dialog = new MathConversionDialog(shell, theData);
+        dialog.open();
+
+        if (dialog.isConverted()) {
+            if (dataset instanceof CompoundDS) {
+                Object colData = null;
+                try {
+                    //colData = ((List<?>) dataset.getData()).get(table.getSelectedColumn());
+                }
+                catch (Exception ex) {
+                    log.debug("colData:", ex);
+                }
+
+                if (colData != null) {
+                    int size = Array.getLength(theData);
+                    System.arraycopy(theData, 0, colData, 0, size);
+                }
+            }
+            else {
+                int rows = selectionLayer.getSelectedRowCount();
+                //int r0 = table.getSelectedRow();
+                //int c0 = table.getSelectedColumn();
+                int w = table.getPreferredColumnCount() - 1;
+                int idx_src = 0;
+                int idx_dst = 0;
+                //for (int i = 0; i < rows; i++) {
+                //    idx_dst = (r0 + i) * w + c0;
+                //    System.arraycopy(theData, idx_src, dataValue, idx_dst, cols);
+                //    idx_src += cols;
+                //}
+            }
+
+            theData = null;
+            System.gc();
+            //table.updateUI();
+            isValueChanged = true;
+        }
+    }
+    
     // Implementing DataView
     @Override
     public HObject getDataObject() {
@@ -2056,7 +2106,6 @@ public class DefaultTableView implements TableView {
         error.setMessage(errorMsg);
         error.open();
     }
-    
     
     /**
      * Display data pointed by object references. Data of each object is shown in a separate
