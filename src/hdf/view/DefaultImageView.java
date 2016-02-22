@@ -225,8 +225,8 @@ public class DefaultImageView implements ImageView {
 	 * @param theView
 	 *            the main HDFView.
 	 */
-	public DefaultImageView(ViewManager theView) {
-		this(theView, null);
+	public DefaultImageView(Shell parent, ViewManager theView) {
+		this(parent, theView, null);
 	}
 
 	/**
@@ -242,7 +242,7 @@ public class DefaultImageView implements ImageView {
 	 *            applying bitmask, and etc. Predefined keys are listed at
 	 *            ViewProperties.DATA_VIEW_KEY.
 	 */
-	public DefaultImageView(ViewManager theView, HashMap map) {
+	public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
 		shell = new Shell(display);
 
 		//setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);

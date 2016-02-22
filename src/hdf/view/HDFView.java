@@ -724,11 +724,10 @@ public class HDFView implements ViewManager, DropTargetListener {
 		item.setText("User &Options");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				/*
 				if (userOptionDialog == null)
-					// userOptionDialog = new UserOptionsDialog(display, rootDir);
+					userOptionDialog = new UserOptionsDialog(shell, rootDir);
 				
-				userOptionDialog.setVisible(true);
+				userOptionDialog.open();
 				
 				if (userOptionDialog.isWorkDirChanged())
 					currentDir = ViewProperties.getWorkDir();
@@ -745,8 +744,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 					if (font != null)
 						updateFontSize(font);
 				}
-				*/
-				notYetImplemented();
 			}
 		});
 		

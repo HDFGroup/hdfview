@@ -2144,18 +2144,18 @@ public class DefaultTableView implements TableView {
 
         if (data == null) return;
 
-        Shell dataView = null;
+        DataView dataView = null;
         HashMap map = new HashMap(1);
         map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
         switch (viewType) {
             case TEXT:
-                dataView = null;//new DefaultTextView(viewer, map);
+                dataView = new DefaultTextView(shell, viewer, map);
                 break;
             case IMAGE:
-                dataView = null;//new DefaultImageView(viewer, map);
+                dataView = new DefaultImageView(shell, viewer, map);
                 break;
             default:
-                dataView = null;//new DefaultTableViewOld(viewer, map);
+                dataView = new DefaultTableView(shell, viewer, map);
                 break;
         }
 
@@ -3340,7 +3340,6 @@ public class DefaultTableView implements TableView {
     }
     
     private class ScalarDSDataProvider implements IDataProvider {
-    	private static final long  serialVersionUID = 254175303655079056L;
     	private final StringBuffer stringBuffer     = new StringBuffer();
         private final Datatype     dtype            = dataset.getDatatype();
         private final Datatype     btype            = dtype.getBasetype();
@@ -3499,7 +3498,6 @@ public class DefaultTableView implements TableView {
     }
     
     private class CompoundDSDataProvider implements IDataProvider {
-    	private static final long serialVersionUID = -2176296469630678304L;
         CompoundDS                compound         = (CompoundDS) dataset;
         int                       orders[]         = compound.getSelectedMemberOrders();
         Datatype                  types[]          = compound.getSelectedMemberTypes();

@@ -94,16 +94,9 @@ public class DefaultTextView implements TextView {
     private RowHeader rowHeaders = null;
     
     private int indexBase = 0;
-
-    /**
-     * Constructs an TextView.
-     * <p>
-     * 
-     * @param theView
-     *            the main HDFView.
-     */
-    public DefaultTextView(ViewManager theView) {
-        this(theView, null);
+    
+    public DefaultTextView(Shell parent, ViewManager theView) {
+    	this(parent, theView, null);
     }
 
     /**
@@ -119,7 +112,7 @@ public class DefaultTextView implements TextView {
      *            applying bitmask, and etc. Predefined keys are listed at
      *            ViewProperties.DATA_VIEW_KEY.
      */
-    public DefaultTextView(ViewManager theView, HashMap map) {
+    public DefaultTextView(Shell parent, ViewManager theView, HashMap map) {
         shell = new Shell(display);
     	
     	viewer = theView;
@@ -167,10 +160,9 @@ public class DefaultTextView implements TextView {
         }
         
         String fname = new java.io.File(dataset.getFile()).getName();
-        //this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         shell.setText("TextView  -  " + dataset.getName() + "  -  "
                 + dataset.getPath() + "  -  " + fname);
-        //this.setFrameIcon(ViewProperties.getTextIcon());
+        shell.setImage(ViewProperties.getTextIcon());
         
         int rank = dataset.getRank();
         long start[] = dataset.getStartDims();
@@ -237,6 +229,10 @@ public class DefaultTextView implements TextView {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
+    }
+    
+    public void open() {
+    	
     }
 
     /**

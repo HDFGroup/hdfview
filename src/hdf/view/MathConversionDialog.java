@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Text;
  * MathConversionDialog shows a message dialog requesting user input for math
  * conversion.
  * 
- * @author Jordan T. Henderson
+ * @author Jordan T. Henderson 
  * @version 2.4 1/28/2016
  */
 public class MathConversionDialog extends Dialog {
