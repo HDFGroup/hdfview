@@ -18,11 +18,6 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.util.Vector;
 
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -167,7 +162,7 @@ public class UserOptionsDialog extends Dialog {
 		okButton.setText("   &Ok   ");
 		okButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//setUserOptions();
+				setUserOptions();
 				shell.dispose();
 			}
 		});
@@ -593,15 +588,15 @@ public class UserOptionsDialog extends Dialog {
 		checkConvertEnum = new Button(dataGroup, SWT.CHECK);
 		checkConvertEnum.setText("Convert Enum");
 		checkConvertEnum.setSelection(ViewProperties.isConvertEnum());
-		checkConvertEnum.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		checkConvertEnum.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
 		
 		checkShowRegRefValues = new Button(dataGroup, SWT.CHECK);
 		checkShowRegRefValues.setText("Show RegRef Values");
 		checkShowRegRefValues.setSelection(ViewProperties.showRegRefValues());
 		checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		// Add dummy label somewhere
-		
+		// Add dummy label
+		new Label(dataGroup, SWT.RIGHT).setText("");
 		
 		new Label(dataGroup, SWT.RIGHT).setText("Index Base: ");
 		
@@ -615,7 +610,9 @@ public class UserOptionsDialog extends Dialog {
         else
             indexBaseChoice.select(0);
         
-        new Label(dataGroup, SWT.RIGHT).setText("Data Delimeter: ");
+        Label delimLabel = new Label(dataGroup, SWT.RIGHT);
+        delimLabel.setText("Data Delimiter: ");
+        delimLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
         
         String[] delimiterChoices = { ViewProperties.DELIMITER_TAB, ViewProperties.DELIMITER_COMMA,
                 ViewProperties.DELIMITER_SPACE, ViewProperties.DELIMITER_COLON, ViewProperties.DELIMITER_SEMI_COLON };

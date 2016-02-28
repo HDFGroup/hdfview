@@ -14,43 +14,41 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.swing.BorderFactory;
-import javax.swing.CellEditor;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
@@ -62,229 +60,141 @@ import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
 /**
- * DefaultMetadataView is an dialog window used to show data properties. Data
+ * DefaultMetadataView is a dialog window used to show data properties. Data
  * properties include attributes and general information such as object type,
  * data type and data space.
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 2/21/2016
  */
-public class DefaultMetaDataView extends JDialog implements ActionListener, MetaDataView {
-    private static final long serialVersionUID = 7891048909810508761L;
+public class DefaultMetaDataView implements MetaDataView {
+	private Display display = Display.getCurrent();
+	private Shell shell;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
+	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
 
-    /**
-     * The main HDFView.
-     */
-    private ViewManager       viewer;
+	/** The HDF data object */
+	private HObject hObject;
 
-    /** The HDF data object */
-    private HObject           hObject;
+	private Text attrContentArea;
+	private Table attrTable; // table to hold a list of attributes
+	private Label attrNumberLabel;
+	private int numAttributes;
+	private boolean isH5, isH4;
+	private byte[] userBlock;
+	private Text userBlockArea;
+	private Button jamButton;
 
-    private JTabbedPane       tabbedPane       = null;
-    private JTextArea         attrContentArea;
-    private JTable            attrTable;  // table to hold a list of attributes
-    private DefaultTableModel attrTableModel;
-    private JLabel            attrNumberLabel;
-    private int               numAttributes;
-    private boolean           isH5, isH4;
-    private byte[]            userBlock;
-    private JTextArea         userBlockArea;
-    private JButton           jamButton;
+	private Text linkField = null;
 
-    private JTextField        linkField        = null;
+	private FileFormat fileFormat;
+	private String LinkTObjName;
 
-    private FileFormat        fileFormat;
-    private String            LinkTObjName;
+	private int[] libver;
 
-    private int[]             libver;
+	public DefaultMetaDataView(Shell parent, HObject theObj) {
+		log.trace("DefaultMetaDataView: start");
 
-    /**
-     * Constructs a DefaultMetadataView with the given HDFView.
-     */
-    public DefaultMetaDataView(ViewManager theView) {
-        super((JFrame) theView, false);
-        setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+		shell = new Shell(parent, SWT.SHELL_TRIM);
+		shell.setImage(ViewProperties.getHdfIcon());
+		shell.setLayout(new GridLayout(1, true));
 
-        setName("DefaultMetaDataView");
-        viewer = theView;
-        hObject = viewer.getTreeView().getCurrentObject();
-        fileFormat = hObject.getFileFormat();
-        numAttributes = 0;
-        userBlock = null;
-        userBlockArea = null;
-        libver = new int[2];
+		hObject = theObj;
+		fileFormat = hObject.getFileFormat();
+		numAttributes = 0;
+		userBlock = null;
+		userBlockArea = null;
+		libver = new int[2];
 
-        if (hObject == null) {
-            dispose();
-        }
-        else if (hObject.getPath() == null) {
-            setTitle("Properties - " + hObject.getName());
-        }
-        else {
-            setTitle("Properties - " + hObject.getPath() + hObject.getName());
-        }
+		isH5 = hObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+		isH4 = hObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
 
-        isH5 = hObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        isH4 = hObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
-
-        tabbedPane = new JTabbedPane();
-        // get the metadata information before add GUI components */
+		if (hObject == null) {
+			shell.dispose();
+		} else if (hObject.getPath() == null) {
+			shell.setText("Properties - " + hObject.getName());
+		} else {
+			shell.setText("Properties - " + hObject.getPath() + hObject.getName());
+		}
+		
+		// Get the metadata information before adding GUI components */
         try {
-            log.trace("DefaultMetaDataView: start");
             hObject.getMetadata();
         }
         catch (Exception ex) {
-        	log.debug("get the metadata information before add GUI components:", ex);
+        	log.debug("Error retrieving metadata of object " + hObject.getName() + ":", ex);
         }
-        tabbedPane.addTab("General", createGeneralPropertyPanel());
-        tabbedPane.addTab("Attributes", createAttributePanel());
-
-        boolean isRoot = ((hObject instanceof Group) && ((Group) hObject).isRoot());
-        if (isH5 && isRoot) {
-            // add panel to display user block
-            tabbedPane.addTab("User Block", createUserBlockPanel());
-        }
-        tabbedPane.setSelectedIndex(0);
-
+        
         if (isH5) {
             if (hObject.getLinkTargetObjName() != null) {
                 LinkTObjName = hObject.getLinkTargetObjName();
             }
         }
-        JPanel bPanel = new JPanel();
-        bPanel.setName("MetaDataClose");
-        JButton b = new JButton("  Close  ");
-        b.setName("Close");
-        b.setMnemonic(KeyEvent.VK_C);
-        b.setActionCommand("Close");
-        b.addActionListener(this);
-        bPanel.add(b);
 
-        // Add the tabbed pane to this panel.
-        JPanel contentPane = (JPanel) getContentPane();
-        contentPane.setName("MetaDataContent");
-        contentPane.setLayout(new BorderLayout());
-        contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        contentPane.setPreferredSize(new Dimension(620, 400));
+		// Create main content
+		TabFolder folder = new TabFolder(shell, SWT.TOP);
+		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		folder.setSelection(0);
 
-        contentPane.add("Center", tabbedPane);
-        contentPane.add("South", bPanel);
+		TabItem generalItem = new TabItem(folder, SWT.NONE);
+		generalItem.setText("General");
+		generalItem.setControl(createGeneralComposite(folder));
 
-        // locate the H5Property dialog
-        Point l = getParent().getLocation();
-        l.x += 250;
-        l.y += 80;
-        setLocation(l);
-        pack();
-        setVisible(true);
-    }
-
-    @SuppressWarnings("rawtypes")
-    public void actionPerformed(ActionEvent e) {
-        Object source = e.getSource();
-        String cmd = e.getActionCommand();
-
-        if (cmd.equals("Close")) {
-            if (isH5 && linkField != null) checkLinkTargetChanged();
-
-            dispose();
-        }
-        else if (cmd.equals("Add attribute")) {
-            addAttribute(hObject);
-        }
-        else if (cmd.equals("Delete attribute")) {
-            deleteAttribute(hObject);
-        }
-        else if (cmd.equals("Jam user block")) {
-            writeUserBlock();
-        }
-        else if (cmd.equals("Display user block as")) {
-            int type = 0;
-            String typeName = (String) ((JComboBox) source).getSelectedItem();
-            jamButton.setEnabled(false);
-            userBlockArea.setEditable(false);
-
-            if (typeName.equalsIgnoreCase("Text")) {
-                type = 0;
-                jamButton.setEnabled(true);
-                userBlockArea.setEditable(true);
-            }
-            else if (typeName.equalsIgnoreCase("Binary")) {
-                type = 2;
-            }
-            else if (typeName.equalsIgnoreCase("Octal")) {
-                type = 8;
-            }
-            else if (typeName.equalsIgnoreCase("Hexadecimal")) {
-                type = 16;
-            }
-            else if (typeName.equalsIgnoreCase("Decimal")) {
-                type = 10;
-            }
-
-            showUserBlockAs(type);
-        }
-    }
-
-    private final void checkLinkTargetChanged() {
-        Group pgroup = null;
-        try {
-            pgroup = (Group) hObject.getFileFormat().get(hObject.getPath());
-        }
-        catch (Exception ex) {
-        	log.debug("parent group:", ex);
-        }
-        if (pgroup == null) {
-            JOptionPane.showMessageDialog(this, "Parent group is null.", getTitle(), JOptionPane.ERROR_MESSAGE);
-            return;
+		TabItem attributeItem = new TabItem(folder, SWT.NONE);
+		attributeItem.setText("Attributes");
+		attributeItem.setControl(createAttributesComposite(folder));
+		
+		boolean isRoot = ((hObject instanceof Group) && ((Group) hObject).isRoot());
+        if (isH5 && isRoot) {
+            // Add panel to display user block
+            TabItem userBlock = new TabItem(folder, SWT.NONE);
+            userBlock.setText("User Block");
+            userBlock.setControl(createUserBlockComposite(folder));
         }
 
-        String target_name = linkField.getText();
-        if (target_name != null) target_name = target_name.trim();
+		// Create Close button region
+		Button closeButton = new Button(shell, SWT.PUSH);
+		closeButton.setText("   &Close   ");
+		closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+		closeButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (isH5 && linkField != null) checkLinkTargetChanged();
+				
+				shell.dispose();
+			}
+		});
 
-        int linkType = Group.LINK_TYPE_SOFT;
-        if (LinkTObjName.contains(FileFormat.FILE_OBJ_SEP))
-            linkType = Group.LINK_TYPE_EXTERNAL;
-        else if (target_name.equals("/")) // do not allow to link to the root
-            return;
 
-        // no change
-        if (target_name.equals(hObject.getLinkTargetObjName())) return;
+		log.trace("DefaultMetaDataView: finish");
 
-        // invalid name
-        if (target_name == null || target_name.length() < 1) return;
+		shell.pack();
 
-        try {
-            fileFormat.createLink(pgroup, hObject.getName(), target_name, linkType);
-            hObject.setLinkTargetObjName(target_name);
-        }
-        catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
-        }
-    }
+		Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		shell.setMinimumSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
 
-    /** returns the data object displayed in this data viewer */
-    public HObject getDataObject() {
-        return hObject;
-    }
+		Rectangle parentBounds = parent.getBounds();
+		Point shellSize = shell.getSize();
+		shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+				(parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
-    /** Disposes of this dataobserver. */
-    public void dispose() {
-        super.dispose();
-    }
+		shell.open();
 
-    /** add an attribute to a data object. */
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
+	}
+
+	/** Add an attribute to a data object. */
     public Attribute addAttribute(HObject obj) {
     	/*
         if (obj == null) {
             return null;
         }
         
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) obj.getFileFormat().getRootObject();
+        HObject node = obj.getFileFormat().getRootObject();
         NewAttributeDialog dialog = new NewAttributeDialog(this, obj, node.breadthFirstEnumeration());
-        dialog.setVisible(true);
+        dialog.open();
 
         Attribute attr = dialog.getAttribute();
         if (attr == null) {
@@ -314,27 +224,29 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         return attr;
         */
     	
-    	return null; // Remove when fixed
+    	return null;
     }
 
-    /** delete an attribute from a data object. */
+	/** Delete an attribute from a data object. */
     public Attribute deleteAttribute(HObject obj) {
         if (obj == null) {
             return null;
         }
-
-        int idx = attrTable.getSelectedRow();
+        
+        int idx = attrTable.getSelectionIndex();
         if (idx < 0) {
-            JOptionPane.showMessageDialog(getOwner(), "No attribute is selected.", getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
-            return null;
+        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+        	error.setText(shell.getText());
+        	error.setMessage("No attribute is selected.");
+        	error.open();
+        	return null;
         }
-
-        int option = JOptionPane.showConfirmDialog(this, "Do you want to delete the selected attribute?", getTitle(),
-                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
-        if (option == JOptionPane.NO_OPTION) {
-            return null;
+        
+        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+        confirm.setText(shell.getText());
+        confirm.setMessage("Do you want to delete the selected attribute?");
+        if(confirm.open() == SWT.NO) {
+        	return null;
         }
 
         List<?> attrList = null;
@@ -356,10 +268,10 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         catch (Exception ex) {
         	log.debug("delete an attribute from a data object:", ex);
         }
-
-        attrTableModel.removeRow(idx);
+        
+        attrTable.remove(idx);
         numAttributes--;
-        attrTableModel.fireTableRowsDeleted(idx, idx);
+        //attrTableModel.fireTableRowsDeleted(idx, idx);
 
         attrContentArea.setText("");
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
@@ -367,741 +279,301 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         return attr;
     }
 
-    /**
-     * Creates a panel used to display general information of HDF object.
-     */
-    private JPanel createGeneralPropertyPanel() {
-    	/*
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        boolean isRoot = ((hObject instanceof Group) && ((Group) hObject).isRoot());
-        FileFormat theFile = hObject.getFileFormat();
-
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BorderLayout());
-
-        JPanel lp = new JPanel();
-        lp.setLayout(new GridLayout(5, 1));
-
-        if (isRoot) {
-            lp.add(new JLabel("File Name: "));
-            lp.add(new JLabel("File Path: "));
-            lp.add(new JLabel("File Type: "));
-            if (isH5) {
-                try {
-                    libver = hObject.getFileFormat().getLibBounds();
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1))
-                    lp.add(new JLabel("Library version: "));
-            }
+	/** Returns the data object displayed in this data viewer */
+	public HObject getDataObject() {
+        return hObject;
+	}
+	
+	private final void checkLinkTargetChanged() {
+        Group pgroup = null;
+        try {
+            pgroup = (Group) hObject.getFileFormat().get(hObject.getPath());
         }
-        else {
-            lp.add(new JLabel("Name: "));
-            if (isH5) {
-                if (hObject.getLinkTargetObjName() != null) lp.add(new JLabel("Link To Target: "));
-            }
-            lp.add(new JLabel("Path: "));
-            lp.add(new JLabel("Type: "));
-
-            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
-            if (isH4) {
-                lp.add(new JLabel("Tag, Ref:        "));
-            }
-            else {
-                lp.add(new JLabel("Object Ref:       "));
-            }
+        catch (Exception ex) {
+        	log.debug("parent group:", ex);
+        }
+        if (pgroup == null) {
+        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+        	error.setText(shell.getText());
+        	error.setMessage("Parent group is null.");
+        	error.open();
+        	return;
         }
 
-        JPanel rp = new JPanel();
-        rp.setLayout(new GridLayout(5, 1));
+        String target_name = linkField.getText();
+        if (target_name != null) target_name = target_name.trim();
 
-        JLabel nameField = new JLabel(hObject.getName());
-        nameField.setName("namefield");
-        rp.add(nameField);
+        int linkType = Group.LINK_TYPE_SOFT;
+        if (LinkTObjName.contains(FileFormat.FILE_OBJ_SEP))
+            linkType = Group.LINK_TYPE_EXTERNAL;
+        else if (target_name.equals("/")) // do not allow to link to the root
+            return;
 
-        JPanel targetObjPanel = new JPanel();
-        JButton ChangeTargetObjButton = new JButton("Change");
-        ChangeTargetObjButton.setActionCommand("Change link target");
-        ChangeTargetObjButton.addActionListener(this);
+        // no change
+        if (target_name.equals(hObject.getLinkTargetObjName())) return;
 
-        if (isH5) {
-            if (hObject.getLinkTargetObjName() != null) {
-                linkField = new JTextField(hObject.getLinkTargetObjName());
-                linkField.setName("linkField");
-                targetObjPanel.setLayout(new BorderLayout());
-                targetObjPanel.add(linkField, BorderLayout.CENTER);
-                // targetObjPanel.add(ChangeTargetObjButton, BorderLayout.EAST);
-                rp.add(targetObjPanel);
-            }
+        // invalid name
+        if (target_name == null || target_name.length() < 1) return;
+
+        try {
+            fileFormat.createLink(pgroup, hObject.getName(), target_name, linkType);
+            hObject.setLinkTargetObjName(target_name);
         }
-
-        JLabel pathField = new JLabel();
-        if (isRoot) {
-            pathField.setText((new File(hObject.getFile())).getParent());
+        catch (Exception ex) {
+        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+        	error.setText(shell.getText());
+        	error.setMessage(ex.getMessage());
+        	error.open();
         }
-        else {
-            pathField.setText(hObject.getPath());
-        }
-        rp.add(pathField);
-
-        String typeStr = "Unknown";
-        String fileInfo = "";
-        if (isRoot) {
-            long size = 0;
-            try {
-                size = (new File(hObject.getFile())).length();
-            }
-            catch (Exception ex) {
-                size = -1;
-            }
-            size /= 1024;
-
-            int groupCount = 0, datasetCount = 0;
-            DefaultMutableTreeNode root = (DefaultMutableTreeNode) theFile.getRootNode();
-            DefaultMutableTreeNode theNode = null;
-            Enumeration<?> local_enum = root.depthFirstEnumeration();
-            while (local_enum.hasMoreElements()) {
-                theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-                if (theNode.getUserObject() instanceof Group) {
-                    groupCount++;
-                }
-                else {
-                    datasetCount++;
-                }
-            }
-            fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
-        }
-
-        if (isRoot) {
-            if (isH5) {
-                typeStr = "HDF5,  " + fileInfo;
-            }
-            else if (isH4) {
-                typeStr = "HDF4,  " + fileInfo;
-            }
-            else {
-                typeStr = fileInfo;
-            }
-        }
-        else if (isH5) {
-            if (hObject instanceof Group) {
-                typeStr = "HDF5 Group";
-            }
-            else if (hObject instanceof ScalarDS) {
-                typeStr = "HDF5 Scalar Dataset";
-            }
-            else if (hObject instanceof CompoundDS) {
-                typeStr = "HDF5 Compound Dataset";
-            }
-            else if (hObject instanceof Datatype) {
-                typeStr = "HDF5 Named Datatype";
-            }
-        }
-        else if (isH4) {
-            if (hObject instanceof Group) {
-                typeStr = "HDF4 Group";
-            }
-            else if (hObject instanceof ScalarDS) {
-                ScalarDS ds = (ScalarDS) hObject;
-                if (ds.isImage()) {
-                    typeStr = "HDF4 Raster Image";
-                }
-                else {
-                    typeStr = "HDF4 SDS";
-                }
-            }
-            else if (hObject instanceof CompoundDS) {
-                typeStr = "HDF4 Vdata";
-            }
-        }
-        else {
-            if (hObject instanceof Group) {
-                typeStr = "Group";
-            }
-            else if (hObject instanceof ScalarDS) {
-                typeStr = "Scalar Dataset";
-            }
-            else if (hObject instanceof CompoundDS) {
-                typeStr = "Compound Dataset";
-            }
-        }
-
-        JLabel typeField = new JLabel(typeStr);
-        rp.add(typeField);
-
-        if (isRoot && isH5) {
-            String libversion = null;
-            if ((libver[0] == 0) && (libver[1] == 1))
-                libversion = "Earliest and Latest";
-            else if ((libver[0] == 1) && (libver[1] == 1)) libversion = "Latest and Latest";
-            JLabel libverbound = new JLabel(libversion);
-            libverbound.setName("libverbound");
-            rp.add(libverbound);
-        }
-
-        // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
-        String oidStr = null;
-        long[] OID = hObject.getOID();
-        if (OID != null) {
-            oidStr = String.valueOf(OID[0]);
-            for (int i = 1; i < OID.length; i++) {
-                oidStr += ", " + OID[i];
-            }
-        }
-
-        if (!isRoot) {
-            JLabel oidField = new JLabel(oidStr);
-            rp.add(oidField);
-        }
-
-        JPanel tmpP = new JPanel();
-        tmpP.setLayout(new BorderLayout());
-        tmpP.add("West", lp);
-        tmpP.add("Center", rp);
-        tmpP.setBorder(new TitledBorder(""));
-
-        topPanel.add("North", new JLabel(""));
-        topPanel.add("Center", tmpP);
-
-        JPanel infoPanel = null;
-        if (hObject instanceof Group) {
-            infoPanel = createGroupInfoPanel((Group) hObject);
-        }
-        else if (hObject instanceof Dataset) {
-            infoPanel = createDatasetInfoPanel((Dataset) hObject);
-        }
-        else if (hObject instanceof Datatype) {
-            infoPanel = createNamedDatatypeInfoPanel((Datatype) hObject);
-        }
-
-        panel.add(topPanel, BorderLayout.NORTH);
-        if (infoPanel != null) {
-            panel.add(infoPanel, BorderLayout.CENTER);
-        }
-
-        return panel;
-        */
-    	
-    	return null; // Remove when fixed
     }
-
-    /**
-     * Creates a panel used to display HDF group information.
+	
+	/**
+     * update attribute value. Currently can only update single data point.
+     * 
+     * @param newValue
+     *            the string of the new value.
+     * @param row
+     *            the row number of the selected cell.
+     * @param col
+     *            the column number of the selected cell.
      */
-    private JPanel createGroupInfoPanel(Group g) {
-        JPanel panel = new JPanel();
+    private void updateAttributeValue(String newValue, int row, int col) {
+        log.trace("updateAttributeValue:start value={}[{},{}]", newValue, row, col);
 
-        List<?> mlist = g.getMemberList();
-        if (mlist == null) {
-            return panel;
-        }
-
-        int n = mlist.size();
-        if (n <= 0) {
-            return panel;
-        }
-
-        String rowData[][] = new String[n][2];
-        for (int i = 0; i < n; i++) {
-            HObject theObj = (HObject) mlist.get(i);
-            rowData[i][0] = theObj.getName();
-            if (theObj instanceof Group) {
-                rowData[i][1] = "Group";
-            }
-            else if (theObj instanceof Dataset) {
-                rowData[i][1] = "Dataset";
-            }
-        }
-
-        String[] columnNames = { "Name", "Type" };
-        JTable table = new JTable(rowData, columnNames) {
-            private static final long serialVersionUID = -834321929059590629L;
-
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        table.setName("GroupInfo");
-        table.setCellSelectionEnabled(false);
-
-        // set cell height for large fonts
-        int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
-        table.setRowHeight(cellRowHeight);
-
-        table.getTableHeader().setReorderingAllowed(false);
-        JScrollPane scroller = new JScrollPane(table);
-
-        panel.setLayout(new BorderLayout());
-        if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
-            panel.add(new JLabel("Number of members: " + n), BorderLayout.NORTH);
-        }
-        else {
-            panel.add(new JLabel("Number of members: " + n + " (in memory), " + g.getNumberOfMembersInFile()
-                    + " (in file)"), BorderLayout.NORTH);
-        }
-        panel.add(scroller, BorderLayout.CENTER);
-        panel.setBorder(new TitledBorder("Group Members"));
-
-        return panel;
-    }
-
-    private JPanel createNamedDatatypeInfoPanel(Datatype t) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        JTextArea infoArea = new JTextArea(t.getDatatypeDescription());
-        infoArea.setEditable(false);
-
-        panel.add(infoArea, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    /**
-     * Creates a panel used to display HDF dataset information.
-     */
-    private JPanel createDatasetInfoPanel(Dataset d) {
-        JPanel lp = new JPanel();
-        lp.setLayout(new GridLayout(4, 1));
-        lp.add(new JLabel("No. of Dimension(s): "));
-        lp.add(new JLabel("Dimension Size(s): "));
-        lp.add(new JLabel("Max Dimension Size(s): "));
-        lp.add(new JLabel("Data Type: "));
-
-        JPanel rp = new JPanel();
-        rp.setLayout(new GridLayout(4, 1));
-        log.trace("createDatasetInfoPanel: start");
-
-        if (d.getRank() <= 0) {
-            d.init();
-        }
-        JTextField txtf = new JTextField("" + d.getRank());
-        txtf.setName("dimensions");
-        txtf.setEditable(false);
-        rp.add(txtf);
-        log.trace("createDatasetInfoPanel inited");
-
-        String dimStr = null;
-        String maxDimStr = null;
-        long dims[] = d.getDims();
-        long maxDims[] = d.getMaxDims();
-        if (dims != null) {
-            String[] dimNames = d.getDimNames();
-            boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
-            StringBuffer sb = new StringBuffer();
-            StringBuffer sb2 = new StringBuffer();
-
-            sb.append(dims[0]);
-            if (hasDimNames) {
-                sb.append(" (");
-                sb.append(dimNames[0]);
-                sb.append(")");
-            }
-
-            if (maxDims[0] < 0)
-                sb2.append("Unlimited");
-            else
-                sb2.append(maxDims[0]);
-
-            for (int i = 1; i < dims.length; i++) {
-                sb.append(" x ");
-                sb.append(dims[i]);
-                if (hasDimNames) {
-                    sb.append(" (");
-                    sb.append(dimNames[i]);
-                    sb.append(")");
-                }
-
-                sb2.append(" x ");
-                if (maxDims[i] < 0)
-                    sb2.append("Unlimited");
-                else
-                    sb2.append(maxDims[i]);
-
-            }
-            dimStr = sb.toString();
-            maxDimStr = sb2.toString();
-        }
-        txtf = new JTextField(dimStr);
-        txtf.setName("dimensionsize");
-        txtf.setEditable(false);
-        rp.add(txtf);
-
-        txtf = new JTextField(maxDimStr);
-        txtf.setEditable(false);
-        rp.add(txtf);
-
-        String typeStr = null;
-        if (d instanceof ScalarDS) {
-            ScalarDS sd = (ScalarDS) d;
-            typeStr = sd.getDatatype().getDatatypeDescription();
-        }
-        else if (d instanceof CompoundDS) {
-            if (isH4) {
-                typeStr = "Vdata";
-            }
-            else {
-                typeStr = "Compound";
-            }
-        }
-
-        txtf = new JTextField(typeStr);
-        txtf.setEditable(false);
-        rp.add(txtf);
-
-        JPanel infoP = new JPanel();
-        infoP.setLayout(new BorderLayout());
-        infoP.add(lp, BorderLayout.WEST);
-        infoP.add(rp, BorderLayout.CENTER);
-        infoP.setBorder(new TitledBorder(""));
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(infoP, BorderLayout.NORTH);
-        panel.setBorder(new TitledBorder("Dataspace and Datatype"));
-
-        // add compound datatype information
-        if (d instanceof CompoundDS) {
-            CompoundDS compound = (CompoundDS) d;
-
-            int n = compound.getMemberCount();
-            if (n > 0) {
-                String rowData[][] = new String[n][3];
-                String names[] = compound.getMemberNames();
-                Datatype types[] = compound.getMemberTypes();
-                int orders[] = compound.getMemberOrders();
-
-                for (int i = 0; i < n; i++) {
-                    rowData[i][0] = names[i];
-                    int mDims[] = compound.getMemberDims(i);
-                    if (mDims == null) {
-                        rowData[i][2] = String.valueOf(orders[i]);
-
-                        if (isH4 && types[i].getDatatypeClass() == Datatype.CLASS_STRING) {
-                            rowData[i][2] = String.valueOf(types[i].getDatatypeSize());
-                        }
-                    }
-                    else {
-                        String mStr = String.valueOf(mDims[0]);
-                        int m = mDims.length;
-                        for (int j = 1; j < m; j++) {
-                            mStr += " x " + mDims[j];
-                        }
-                        rowData[i][2] = mStr;
-                    }
-                    rowData[i][1] = types[i].getDatatypeDescription();
-                }
-
-                String[] columnNames = { "Name", "Type", "Array Size" };
-                JTable table = new JTable(rowData, columnNames) {
-                    private static final long serialVersionUID = -1517773307922536859L;
-
-                    public boolean isCellEditable(int row, int column) {
-                        return false;
-                    }
-                };
-                table.setName("CompoundMetaData");
-                table.setCellSelectionEnabled(false);
-                table.getTableHeader().setReorderingAllowed(false);
-                panel.add(new JScrollPane(table), BorderLayout.CENTER);
-
-                // set cell height for large fonts
-                int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
-                table.setRowHeight(cellRowHeight);
-            } // if (n > 0)
-        } // if (d instanceof Compound)
-
-        // // add compression and data layout information
-        // try { d.getMetadata(); } catch (Exception ex) {}
-        String chunkInfo = "";
-        long[] chunks = d.getChunkSize();
-        if (chunks == null) {
-            chunkInfo = "NONE";
-        }
-        else {
-            int n = chunks.length;
-            chunkInfo = String.valueOf(chunks[0]);
-            for (int i = 1; i < n; i++) {
-                chunkInfo += " X " + chunks[i];
-            }
-        }
-
-        JPanel bPanel = new JPanel();
-        bPanel.setBorder(new TitledBorder(""));
-        bPanel.setLayout(new BorderLayout());
-        lp = new JPanel();
-        lp.setName("genmetainfo");
-        lp.setLayout(new GridLayout(5, 1));
-        lp.add(new JLabel("Chunking: "));
-        lp.add(new JLabel("Compression: "));
-        lp.add(new JLabel("Filters: "));
-        lp.add(new JLabel("Storage: "));
-        lp.add(new JLabel("Fill value: "));
-        bPanel.add(lp, BorderLayout.WEST);
-
-        Object fillValue = null;
-        String fillValueInfo = "NONE";
-        if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
-        if (fillValue != null) {
-            if (fillValue.getClass().isArray()) {
-                int len = Array.getLength(fillValue);
-                fillValueInfo = Array.get(fillValue, 0).toString();
-                for (int i = 1; i < len; i++) {
-                    fillValueInfo += ", ";
-                    fillValueInfo += Array.get(fillValue, i).toString();
-                }
-            }
-            else
-                fillValueInfo = fillValue.toString();
-        }
-
-        rp = new JPanel();
-        rp.setName("genmetadata");
-        rp.setLayout(new GridLayout(5, 1));
-        JLabel rpchunk = new JLabel(chunkInfo);
-        rpchunk.setName("chunkdata");
-        rp.add(rpchunk);
-        JLabel rpcomp = new JLabel(d.getCompression());
-        rpcomp.setName("compressiondata");
-        rp.add(rpcomp);
-        JLabel rpfilt = new JLabel(d.getFilters());
-        rpfilt.setName("filterdata");
-        rp.add(rpfilt);
-        JLabel rpstore = new JLabel(d.getStorage());
-        rpstore.setName("storagedata");
-        rp.add(rpstore);
-        JLabel rpfillval = new JLabel(fillValueInfo);
-        rpfillval.setName("fillvaluedata");
-        rp.add(rpfillval);
-        bPanel.add(rp, BorderLayout.CENTER);
-
-        panel.add(bPanel, BorderLayout.SOUTH);
-        log.trace("createDatasetInfoPanel: finish");
-
-        return panel;
-    }
-
-    /**
-     * Creates a panel used to display attribute information.
-     */
-    private JPanel createAttributePanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        // panel.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
-
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BorderLayout());
-        attrNumberLabel = new JLabel("Number of attributes = 0");
-        topPanel.add(attrNumberLabel, BorderLayout.WEST);
-
-        FileFormat theFile = hObject.getFileFormat();
-        JPanel bPanel = new JPanel();
-        JButton b = new JButton(" Add ");
-        b.setName("Add");
-        b.setMnemonic('A');
-        b.addActionListener(this);
-        b.setActionCommand("Add attribute");
-        bPanel.add(b);
-        b.setEnabled(!theFile.isReadOnly());
-
-        if (isH5) {
-            // deleting is not supported by HDF4
-            b = new JButton("Delete");
-            b.setName("Delete");
-            b.setMnemonic('D');
-            b.addActionListener(this);
-            b.setActionCommand("Delete attribute");
-            bPanel.add(b);
-            b.setEnabled(!theFile.isReadOnly());
-        }
-        topPanel.add(bPanel, BorderLayout.EAST);
-
-        panel.add(topPanel, BorderLayout.NORTH);
-
+        String attrName = (String) attrTable.getItem(row).getText();
+        System.out.println(attrName);
+        //String attrName = (String) attrTable.getValueAt(row, 0);
         List<?> attrList = null;
-        log.trace("createAttributePanel: start");
-
         try {
             attrList = hObject.getMetadata();
         }
         catch (Exception ex) {
-            attrList = null;
+        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+        	error.setText(shell.getText());
+        	error.setMessage(ex.getMessage());
+        	error.open();
+            return;
         }
-        if (attrList != null) {
-            numAttributes = attrList.size();
-        }
-        log.trace("createAttributePanel:  isH5={} numAttributes={}", isH5, numAttributes);
 
-        String[] columnNames = { "Name", "Value", "Type", "Array Size" };
-        attrTableModel = new DefaultTableModel(columnNames, numAttributes);
+        Attribute attr = (Attribute) attrList.get(row);
 
-        attrTable = new JTable(attrTableModel) {
-            private static final long serialVersionUID = 2590244645972259454L;
-            int                       lastSelectedRow  = -1;
-            int                       lastSelectedCol  = -1;
-
-            public boolean isCellEditable(int row, int column) {
-                return ((column == 1) || (isH5 && (column == 0))); 
-                // only attribute value and name can be changed
+        if (col == 1) { // To change attribute value
+            log.trace("updateAttributeValue: change attribute value");
+            Object data = attr.getValue();
+            if (data == null) {
+                return;
             }
 
-            public void editingStopped(ChangeEvent e) {
-                int row = getEditingRow();
-                int col = getEditingColumn();
-                String oldValue = (String) getValueAt(row, col);
-
-                super.editingStopped(e);
-
-                Object source = e.getSource();
-
-                if (source instanceof CellEditor) {
-                    CellEditor editor = (CellEditor) source;
-                    String newValue = (String) editor.getCellEditorValue();
-                    setValueAt(oldValue, row, col); // set back to what it is
-                    updateAttributeValue(newValue, row, col);
-                }
+            int array_length = Array.getLength(data);
+            StringTokenizer st = new StringTokenizer(newValue, ",");
+            if (st.countTokens() < array_length) {
+            	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            	error.setText(shell.getText());
+            	error.setMessage("More data values needed: " + newValue);
+            	error.open();
+                return;
             }
 
-            public boolean isCellSelected(int row, int col) {
+            char NT = ' ';
+            String cName = data.getClass().getName();
+            int cIndex = cName.lastIndexOf("[");
+            if (cIndex >= 0) {
+                NT = cName.charAt(cIndex + 1);
+            }
+            boolean isUnsigned = attr.isUnsigned();
+            log.trace("updateAttributeValue:start array_length={} cName={} NT={} isUnsigned={}", array_length, cName, NT, isUnsigned);
 
-                if ((getSelectedRow() == row) && (getSelectedColumn() == col)
-                        && !((lastSelectedRow == row) && (lastSelectedCol == col))) {
-                    // selection is changed
-                    Object attrV = getValueAt(row, col);
-                    if (attrV != null) {
-                        attrContentArea.setText(attrV.toString());
+            double d = 0;
+            String theToken = null;
+            long max = 0, min = 0;
+            for (int i = 0; i < array_length; i++) {
+                max = min = 0;
+                theToken = st.nextToken().trim();
+                try {
+                    if (!(Array.get(data, i) instanceof String)) {
+                        d = Double.parseDouble(theToken);
                     }
-                    lastSelectedRow = row;
-                    lastSelectedCol = col;
+                }
+                catch (NumberFormatException ex) {
+                	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                	error.setText(shell.getText());
+                	error.setMessage(ex.getMessage());
+                	error.open();
+                    return;
                 }
 
-                return super.isCellSelected(row, col);
+                if (isUnsigned && (d < 0)) {
+                	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                	error.setText(shell.getText());
+                	error.setMessage("Negative value for unsigned integer: " + theToken);
+                	error.open();
+                    return;
+                }
+
+                switch (NT) {
+                    case 'B': {
+                        if (isUnsigned) {
+                            min = 0;
+                            max = 255;
+                        }
+                        else {
+                            min = Byte.MIN_VALUE;
+                            max = Byte.MAX_VALUE;
+                        }
+
+                        if ((d > max) || (d < min)) {
+                        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                        	error.setText(shell.getText());
+                        	error.setMessage("Data is out of range[" + min + ", " + max
+                                    + "]: " + theToken);
+                        	error.open();
+                        }
+                        else {
+                            Array.setByte(data, i, (byte) d);
+                        }
+                        break;
+                    }
+                    case 'S': {
+                        if (isUnsigned) {
+                            min = 0;
+                            max = 65535;
+                        }
+                        else {
+                            min = Short.MIN_VALUE;
+                            max = Short.MAX_VALUE;
+                        }
+
+                        if ((d > max) || (d < min)) {
+                        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                        	error.setText(shell.getText());
+                        	error.setMessage("Data is out of range[" + min + ", " + max
+                                    + "]: " + theToken);
+                        	error.open();
+                        }
+                        else {
+                            Array.setShort(data, i, (short) d);
+                        }
+                        break;
+                    }
+                    case 'I': {
+                        if (isUnsigned) {
+                            min = 0;
+                            max = 4294967295L;
+                        }
+                        else {
+                            min = Integer.MIN_VALUE;
+                            max = Integer.MAX_VALUE;
+                        }
+
+                        if ((d > max) || (d < min)) {
+                        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                        	error.setText(shell.getText());
+                        	error.setMessage("Data is out of range[" + min + ", " + max
+                                    + "]: " + theToken);
+                        	error.open();
+                        }
+                        else {
+                            Array.setInt(data, i, (int) d);
+                        }
+                        break;
+                    }
+                    case 'J':
+                        long lvalue = 0;
+                        if (isUnsigned) {
+                            if (theToken != null) {
+                                String theValue = theToken;
+                                BigInteger Jmax = new BigInteger("18446744073709551615");
+                                BigInteger big = new BigInteger(theValue); 
+                                if ((big.compareTo(Jmax)>0) || (big.compareTo(BigInteger.ZERO)<0)) {
+                                	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                                	error.setText(shell.getText());
+                                	error.setMessage("Data is out of range[" + min + ", " + max
+                                            + "]: " + theToken);
+                                	error.open();
+                                }
+                                lvalue = big.longValue();
+                        		log.trace("updateAttributeValue: big.longValue={}", lvalue);
+                                Array.setLong(data, i, lvalue);
+                            }
+                            else
+                                Array.set(data, i, (Object)theToken);
+                        }
+                        else {
+                            min = Long.MIN_VALUE;
+                            max = Long.MAX_VALUE;
+                            if ((d > max) || (d < min)) {
+                            	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                            	error.setText(shell.getText());
+                            	error.setMessage("Data is out of range[" + min + ", " + max
+                                        + "]: " + theToken);
+                            	error.open();
+                            }
+                            lvalue = (long)d;
+                    		log.trace("updateAttributeValue: longValue={}", lvalue);
+                            Array.setLong(data, i, lvalue);
+                        }
+                        break;
+                    case 'F':
+                        Array.setFloat(data, i, (float) d);
+                        break;
+                    case 'D':
+                        Array.setDouble(data, i, d);
+                        break;
+                    default:
+                        Array.set(data, i, (Object)theToken);
+                        break;
+                }
             }
-        };
 
-        attrTable.setName("attributes");
-        attrTable.setRowSelectionAllowed(false);
-        attrTable.setCellSelectionEnabled(true);
-        attrTable.getTableHeader().setReorderingAllowed(false);
-        attrTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            try {
+                hObject.getFileFormat().writeAttribute(hObject, attr, true);
+            }
+            catch (Exception ex) {
+            	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            	error.setText(shell.getText());
+            	error.setMessage(ex.getMessage());
+            	error.open();
+                return;
+            }
 
-        // set cell height for large fonts
-        int cellRowHeight = Math.max(16, attrTable.getFontMetrics(attrTable.getFont()).getHeight());
-        attrTable.setRowHeight(cellRowHeight);
-
-        JScrollPane scroller1 = new JScrollPane(attrTable);
-        attrContentArea = new JTextArea();
-        attrContentArea.setLineWrap(true);
-        attrContentArea.setEditable(false);
-        Insets m = new Insets(5, 5, 5, 5);
-        attrContentArea.setMargin(m);
-
-        JScrollPane scroller2 = new JScrollPane(attrContentArea);
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scroller1, scroller2);
-
-        // set the divider location
-        int h = Math.min((numAttributes + 2) * attrTable.getRowHeight(), scroller1.getPreferredSize().height - 40);
-        splitPane.setDividerLocation(h);
-        panel.add(splitPane, BorderLayout.CENTER);
-
-        if (attrList == null) {
-            log.trace("createAttributePanel:  attrList == null");
-            return panel;
+            // update the attribute table
+            //attrTable.setValueAt(attr.toString(", "), row, 1);
         }
 
-        Attribute attr = null;
-        String name, type, size;
-        attrNumberLabel.setText("Number of attributes = " + numAttributes);
-        for (int i = 0; i < numAttributes; i++) {
-            attr = (Attribute) attrList.get(i);
-            name = attr.getName();
-            type = attr.getType().getDatatypeDescription();
-            log.trace("createAttributePanel:  attr[{}] is {} as {}", i, name, type);
-
-            if (attr.isScalar()) {
-                size = "Scalar";
+        if ((col == 0) && isH5) { // To change attribute name
+            log.trace("updateAttributeValue: change attribute name");
+            try {
+                hObject.getFileFormat().renameAttribute(hObject, attrName, newValue);
             }
-            else {
-                long dims[] = attr.getDataDims();
-                size = String.valueOf(dims[0]);
-                for (int j = 1; j < dims.length; j++) {
-                    size += " x " + dims[j];
-                }
+            catch (Exception ex) {
+            	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            	error.setText(shell.getText());
+            	error.setMessage(ex.getMessage());
+            	error.open();
+                return;
             }
 
-            if (attr.getProperty("field") !=null) {
-            	String fieldInfo = " {Field: "+attr.getProperty("field")+"}";
-            	attrTable.setValueAt(name+fieldInfo, i, 0);
-            } 
-            else
-                attrTable.setValueAt(name, i, 0);
-            
-            attrTable.setValueAt(attr.toString(", "), i, 1);
-            attrTable.setValueAt(type, i, 2);
-            attrTable.setValueAt(size, i, 3);
-        } // for (int i=0; i<n; i++)
-
-        log.trace("createAttributePanel: finish");
-        return panel;
-    }
-
-    /**
-     * Creates a panel used to display HDF5 user block.
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private JPanel createUserBlockPanel() {
-        JPanel panel = new JPanel();
-
-        userBlock = DefaultFileFilter.getHDF5UserBlock(hObject.getFile());
-
-        panel.setLayout(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        userBlockArea = new JTextArea();
-        userBlockArea.setEditable(true);
-        userBlockArea.setLineWrap(true);
-        Insets m = new Insets(5, 5, 5, 5);
-        userBlockArea.setMargin(m);
-
-        String[] displayChoices = { "Text", "Binary", "Octal", "Hexadecimal", "Decimal" };
-        JComboBox userBlockDisplayChoice = new JComboBox(displayChoices);
-        userBlockDisplayChoice.setSelectedIndex(0);
-        userBlockDisplayChoice.addActionListener(this);
-        userBlockDisplayChoice.setEditable(false);
-        userBlockDisplayChoice.setActionCommand("Display user block as");
-
-        JLabel sizeLabel = new JLabel("Header Size (Bytes): 0");
-        jamButton = new JButton("Save User Block");
-        jamButton.setActionCommand("Jam user block");
-        jamButton.addActionListener(this);
-        JPanel topPane = new JPanel();
-        topPane.setLayout(new BorderLayout(10, 5));
-        topPane.add(new JLabel("Display As:"), BorderLayout.WEST);
-        JPanel topPane0 = new JPanel();
-        topPane0.setLayout(new GridLayout(1, 2, 10, 5));
-        topPane0.add(userBlockDisplayChoice);
-        topPane0.add(sizeLabel);
-        topPane.add(topPane0, BorderLayout.CENTER);
-        topPane.add(jamButton, BorderLayout.EAST);
-
-        JScrollPane scroller = new JScrollPane(userBlockArea);
-        panel.add(topPane, BorderLayout.NORTH);
-        panel.add(scroller, BorderLayout.CENTER);
-
-        int headSize = 0;
-        if (userBlock != null) {
-            headSize = showUserBlockAs(0);
-            sizeLabel.setText("Header Size (Bytes): " + headSize);
+            // update the attribute table
+            //attrTable.setValueAt(newValue, row, 0);
+        }
+        if (hObject instanceof ScalarDS) {
+            ScalarDS ds = (ScalarDS) hObject;
+            try {
+                log.trace("updateAttributeValue: ScalarDS:updateMetadata");
+                ds.updateMetadata(attr);
+            }
+            catch (Exception ex) {
+            	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            	error.setText(shell.getText());
+            	error.setMessage(ex.getMessage());
+            	error.open();
+            }
         }
         else {
-            userBlockDisplayChoice.setEnabled(false);
+            log.trace("updateAttributeValue: hObject is not instanceof ScalarDS");
         }
-
-        return panel;
     }
-
+    
     private int showUserBlockAs(int radix) {
         int headerSize = 0;
 
@@ -1136,218 +608,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
 
         return headerSize;
     }
-
-    /**
-     * update attribute value. Currently can only update single data point.
-     * 
-     * @param newValue
-     *            the string of the new value.
-     * @param row
-     *            the row number of the selected cell.
-     * @param col
-     *            the column number of the selected cell.
-     */
-    private void updateAttributeValue(String newValue, int row, int col) {
-        log.trace("updateAttributeValue:start value={}[{},{}]", newValue, row, col);
-
-        String attrName = (String) attrTable.getValueAt(row, 0);
-        List<?> attrList = null;
-        try {
-            attrList = hObject.getMetadata();
-        }
-        catch (Exception ex) {
-            JOptionPane.showMessageDialog(getOwner(), ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Attribute attr = (Attribute) attrList.get(row);
-
-        if (col == 1) { // To change attribute value
-            log.trace("updateAttributeValue: change attribute value");
-            Object data = attr.getValue();
-            if (data == null) {
-                return;
-            }
-
-            int array_length = Array.getLength(data);
-            StringTokenizer st = new StringTokenizer(newValue, ",");
-            if (st.countTokens() < array_length) {
-                JOptionPane.showMessageDialog(getOwner(), "More data value needed: " + newValue, getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            char NT = ' ';
-            String cName = data.getClass().getName();
-            int cIndex = cName.lastIndexOf("[");
-            if (cIndex >= 0) {
-                NT = cName.charAt(cIndex + 1);
-            }
-            boolean isUnsigned = attr.isUnsigned();
-            log.trace("updateAttributeValue:start array_length={} cName={} NT={} isUnsigned={}", array_length, cName, NT, isUnsigned);
-
-            double d = 0;
-            String theToken = null;
-            long max = 0, min = 0;
-            for (int i = 0; i < array_length; i++) {
-                max = min = 0;
-                theToken = st.nextToken().trim();
-                try {
-                    if (!(Array.get(data, i) instanceof String)) {
-                        d = Double.parseDouble(theToken);
-                    }
-                }
-                catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(getOwner(), ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if (isUnsigned && (d < 0)) {
-                    JOptionPane.showMessageDialog(getOwner(), "Negative value for unsigned integer: " + theToken,
-                            getTitle(), JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                switch (NT) {
-                    case 'B': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 255;
-                        }
-                        else {
-                            min = Byte.MIN_VALUE;
-                            max = Byte.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            JOptionPane.showMessageDialog(getOwner(), "Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken, getTitle(), JOptionPane.ERROR_MESSAGE);
-                        }
-                        else {
-                            Array.setByte(data, i, (byte) d);
-                        }
-                        break;
-                    }
-                    case 'S': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 65535;
-                        }
-                        else {
-                            min = Short.MIN_VALUE;
-                            max = Short.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            JOptionPane.showMessageDialog(getOwner(), "Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken, getTitle(), JOptionPane.ERROR_MESSAGE);
-                        }
-                        else {
-                            Array.setShort(data, i, (short) d);
-                        }
-                        break;
-                    }
-                    case 'I': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 4294967295L;
-                        }
-                        else {
-                            min = Integer.MIN_VALUE;
-                            max = Integer.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            JOptionPane.showMessageDialog(getOwner(), "Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken, getTitle(), JOptionPane.ERROR_MESSAGE);
-                        }
-                        else {
-                            Array.setInt(data, i, (int) d);
-                        }
-                        break;
-                    }
-                    case 'J':
-                        long lvalue = 0;
-                        if (isUnsigned) {
-                            if (theToken != null) {
-                                String theValue = theToken;
-                                BigInteger Jmax = new BigInteger("18446744073709551615");
-                                BigInteger big = new BigInteger(theValue); 
-                                if ((big.compareTo(Jmax)>0) || (big.compareTo(BigInteger.ZERO)<0)) {
-                                    JOptionPane.showMessageDialog(getOwner(), "Data is out of range[" + min + ", " + max
-                                            + "]: " + theToken, getTitle(), JOptionPane.ERROR_MESSAGE);
-                                }
-                                lvalue = big.longValue();
-                        		log.trace("updateAttributeValue: big.longValue={}", lvalue);
-                                Array.setLong(data, i, lvalue);
-                            }
-                            else
-                                Array.set(data, i, (Object)theToken);
-                        }
-                        else {
-                            min = Long.MIN_VALUE;
-                            max = Long.MAX_VALUE;
-                            if ((d > max) || (d < min)) {
-                                JOptionPane.showMessageDialog(getOwner(), "Data is out of range[" + min + ", " + max
-                                        + "]: " + theToken, getTitle(), JOptionPane.ERROR_MESSAGE);
-                            }
-                            lvalue = (long)d;
-                    		log.trace("updateAttributeValue: longValue={}", lvalue);
-                            Array.setLong(data, i, lvalue);
-                        }
-                        break;
-                    case 'F':
-                        Array.setFloat(data, i, (float) d);
-                        break;
-                    case 'D':
-                        Array.setDouble(data, i, d);
-                        break;
-                    default:
-                        Array.set(data, i, (Object)theToken);
-                        break;
-                }
-            }
-
-            try {
-                hObject.getFileFormat().writeAttribute(hObject, attr, true);
-            }
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog(getOwner(), ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // update the attribute table
-            attrTable.setValueAt(attr.toString(", "), row, 1);
-        }
-
-        if ((col == 0) && isH5) { // To change attribute name
-            log.trace("updateAttributeValue: change attribute name");
-            try {
-                hObject.getFileFormat().renameAttribute(hObject, attrName, newValue);
-            }
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog(getOwner(), ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // update the attribute table
-            attrTable.setValueAt(newValue, row, 0);
-        }
-        if (hObject instanceof ScalarDS) {
-            ScalarDS ds = (ScalarDS) hObject;
-            try {
-                log.trace("updateAttributeValue: ScalarDS:updateMetadata");
-                ds.updateMetadata(attr);
-            }
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog(getOwner(), ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        else {
-            log.trace("updateAttributeValue: hObject is not instanceof ScalarDS");
-        }
-    }
-
+    
     private void writeUserBlock() {
         if (!isH5) {
             return;
@@ -1387,8 +648,10 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                 raf = new java.io.RandomAccessFile(hObject.getFile(), "rw");
             }
             catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Can't open output file: " + hObject.getFile(), getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+            	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            	error.setText(shell.getText());
+            	error.setMessage("Can't open output file: " + hObject.getFile());
+            	error.open();
                 return;
             }
 
@@ -1411,24 +674,27 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
             	log.debug("raf close:", ex);
             }
 
-            JOptionPane.showMessageDialog(this, "Saving user block is successful.", getTitle(),
-                    JOptionPane.INFORMATION_MESSAGE);
+            MessageBox success = new MessageBox(shell, SWT.ICON_INFORMATION);
+        	success.setText(shell.getText());
+        	success.setMessage("Saving user block is successful.");
+        	success.open();
         }
         else {
             // must rewrite the whole file
-            // must rewrite the whole file
-            int op = JOptionPane.showConfirmDialog(this,
-                    "The user block to write is " + blkSize1 + " (bytes),\n"
-                            + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
-                            + "To expand the user block, the file must be rewriten.\n\n"
-                            + "Do you want to replace the current file? Click "
-                            + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
-                            + "\n\"Cancel\" to quit without saving the change.\n\n ", getTitle(),
-                            JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        	MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
+        	confirm.setText(shell.getText());
+        	confirm.setMessage("The user block to write is " + blkSize1 + " (bytes),\n"
+                    + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
+                    + "To expand the user block, the file must be rewriten.\n\n"
+                    + "Do you want to replace the current file? Click "
+                    + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
+                    + "\n\"Cancel\" to quit without saving the change.\n\n ");
 
-            if (op == JOptionPane.CANCEL_OPTION) {
-                return;
-            }
+        	int op = confirm.open();
+        	
+        	if(op == SWT.CANCEL) {
+        		return;
+        	}
 
             String fin = hObject.getFile();
 
@@ -1442,22 +708,18 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
 
             File outFile = null;
 
-            if (op == JOptionPane.NO_OPTION) {
-                JFileChooser fchooser = new JFileChooser();
-                fchooser.setFileFilter(DefaultFileFilter.getFileFilterHDF5());
-                fchooser.setSelectedFile(new File(fout));
+            if (op == SWT.NO) {
+            	FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            	fChooser.setFileName(fout);
+                // fchooser.setFileFilter(DefaultFileFilter.getFileFilterHDF5());
 
-                int returnVal = fchooser.showSaveDialog(this);
-                if (returnVal != JFileChooser.APPROVE_OPTION) {
-                    return;
-                }
+            	if(fChooser.open() == null) {
+            		return;
+            	}
 
-                File choosedFile = fchooser.getSelectedFile();
-                if (choosedFile == null) {
-                    return;
-                }
+                File chosenFile = new File(fChooser.getFileName());
 
-                outFile = choosedFile;
+                outFile = chosenFile;
                 fout = outFile.getAbsolutePath();
             }
             else {
@@ -1469,18 +731,19 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                     outFile.createNewFile();
                 }
                 catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Fail to write user block into file. ", getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                	error.setText(shell.getText());
+                	error.setMessage("Failed to write user block into file.");
+                	error.open();
                     return;
                 }
             }
 
             // close the file
             ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Close file");
-            //((HDFView) viewer).actionPerformed(e);
 
             if (DefaultFileFilter.setHDF5UserBlock(fin, fout, buf)) {
-                if (op == JOptionPane.NO_OPTION) {
+                if (op == SWT.NO) {
                     fin = fout; // open the new file
                 }
                 else {
@@ -1490,24 +753,809 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                         outFile.renameTo(oldFile);
                     }
                     else {
-                        JOptionPane.showMessageDialog(this,
-                                "Cannot replace the current file.\nPlease save to a different file.", getTitle(),
-                                JOptionPane.ERROR_MESSAGE);
+                    	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                    	error.setText(shell.getText());
+                    	error.setMessage("Cannot replace the current file.\nPlease save to a different file.");
+                    	error.open();
                         outFile.delete();
                     }
                 }
             }
             else {
-                JOptionPane.showMessageDialog(this, "Fail to write user block into file. ", getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+            	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+            	error.setText(shell.getText());
+            	error.setMessage("Failed to write user block into file.");
+            	error.open();
                 outFile.delete();
             }
 
             // reopen the file
-            dispose();
+            shell.dispose();
             e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Open file://" + fin);
-            //((HDFView) viewer).actionPerformed(e);
         }
     }
+	
+	private Composite createGeneralComposite(TabFolder folder) {
+		boolean isRoot = ((hObject instanceof Group) && ((Group) hObject).isRoot());
+		FileFormat theFile = hObject.getFileFormat();
+		
+		Composite composite = new Composite(folder, SWT.NONE);
+		composite.setLayout(new GridLayout(1, true));
+		
+		Composite detailComposite = new Composite(composite, SWT.BORDER);
+		detailComposite.setLayout(new GridLayout(2, false));
+		detailComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		String typeStr = "Unknown";
+        String fileInfo = "";
+		
+		if(isRoot) {
+			long size = 0;
+            try {
+                size = (new File(hObject.getFile())).length();
+            }
+            catch (Exception ex) {
+                size = -1;
+            }
+            size /= 1024;
+            
+            int groupCount = 0, datasetCount = 0;
+            //DefaultMutableTreeNode root = (DefaultMutableTreeNode) theFile.getRootNode();
+            //DefaultMutableTreeNode theNode = null;
+            //Enumeration<?> local_enum = root.depthFirstEnumeration();
+            //while (local_enum.hasMoreElements()) {
+            //    theNode = (DefaultMutableTreeNode) local_enum.nextElement();
+            //    if (theNode.getUserObject() instanceof Group) {
+            //        groupCount++;
+            //    }
+            //    else {
+            //        datasetCount++;
+            //    }
+            //}
+            
+            fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
+			
+			new Label(detailComposite, SWT.RIGHT).setText("File Name: ");
+			
+			new Label(detailComposite, SWT.RIGHT).setText(hObject.getName());
+			
+			new Label(detailComposite, SWT.RIGHT).setText("File Path: ");
+			
+			new Label(detailComposite, SWT.RIGHT).setText((new File(hObject.getFile())).getParent());
+			
+			new Label(detailComposite, SWT.RIGHT).setText("File Type: ");
+			
+			if (isH5) {
+                typeStr = "HDF5,  " + fileInfo;
+            }
+            else if (isH4) {
+                typeStr = "HDF4,  " + fileInfo;
+            }
+            else {
+                typeStr = fileInfo;
+            }
+			
+			new Label(detailComposite, SWT.RIGHT).setText(typeStr);
+			
+			if (isH5) {
+                try {
+                    libver = hObject.getFileFormat().getLibBounds();
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                
+                if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
+                    new Label(detailComposite, SWT.RIGHT).setText("Library version: ");
+                }
+                
+                String libversion = null;
+                if ((libver[0] == 0) && (libver[1] == 1))
+                    libversion = "Earliest and Latest";
+                else if ((libver[0] == 1) && (libver[1] == 1)) libversion = "Latest and Latest";
+                
+                new Label(detailComposite, SWT.RIGHT).setText(libversion);
+            }
+		}
+		else {
+			new Label(detailComposite, SWT.RIGHT).setText("Name: ");
+			
+			new Label(detailComposite, SWT.RIGHT).setText(hObject.getName());
+			
+			if(isH5) {
+				if (hObject.getLinkTargetObjName() != null) {
+					new Label(detailComposite, SWT.RIGHT).setText("Link To Target: ");
+				}
+			}
+			
+			new Label(detailComposite, SWT.RIGHT).setText("Path: ");
+			
+			new Label(detailComposite, SWT.RIGHT).setText(hObject.getPath());
+			
+			new Label(detailComposite, SWT.RIGHT).setText("Type: ");
+			
+			if(isH5) {
+				if (hObject instanceof Group) {
+	                typeStr = "HDF5 Group";
+	            }
+	            else if (hObject instanceof ScalarDS) {
+	                typeStr = "HDF5 Scalar Dataset";
+	            }
+	            else if (hObject instanceof CompoundDS) {
+	                typeStr = "HDF5 Compound Dataset";
+	            }
+	            else if (hObject instanceof Datatype) {
+	                typeStr = "HDF5 Named Datatype";
+	            }
+			} else if(isH4) {
+				if (hObject instanceof Group) {
+	                typeStr = "HDF4 Group";
+	            }
+	            else if (hObject instanceof ScalarDS) {
+	                ScalarDS ds = (ScalarDS) hObject;
+	                if (ds.isImage()) {
+	                    typeStr = "HDF4 Raster Image";
+	                }
+	                else {
+	                    typeStr = "HDF4 SDS";
+	                }
+	            }
+	            else if (hObject instanceof CompoundDS) {
+	                typeStr = "HDF4 Vdata";
+	            }
+			} else {
+				if (hObject instanceof Group) {
+	                typeStr = "Group";
+	            }
+	            else if (hObject instanceof ScalarDS) {
+	                typeStr = "Scalar Dataset";
+	            }
+	            else if (hObject instanceof CompoundDS) {
+	                typeStr = "Compound Dataset";
+	            }
+			}
+			
+			new Label(detailComposite, SWT.RIGHT).setText(typeStr);
+			
+			// bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+            if (isH4) {
+                new Label(detailComposite, SWT.RIGHT).setText("Tag, Ref:        ");
+            }
+            else {
+                new Label(detailComposite, SWT.RIGHT).setText("Object Ref:       ");
+            }
+            
+            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+	        String oidStr = null;
+	        long[] OID = hObject.getOID();
+	        if (OID != null) {
+	            oidStr = String.valueOf(OID[0]);
+	            for (int i = 1; i < OID.length; i++) {
+	                oidStr += ", " + OID[i];
+	            }
+	        }
+			
+			if (!isRoot) {
+	            new Label(detailComposite, SWT.RIGHT).setText(oidStr);
+	        }
+		}
+		
+		
+		if (hObject instanceof Group) {
+            createGroupInfoComposite(composite, (Group) hObject);
+        }
+        else if (hObject instanceof Dataset) {
+            createDatasetInfoComposite(composite, (Dataset) hObject);
+        }
+        else if (hObject instanceof Datatype) {
+            createNamedDatatypeInfoComposite(composite, (Datatype) hObject);
+        }
+		
+		return composite;
+	}
+	
+	/**
+     * Creates a composite used to display HDF group information.
+     */
+	private Composite createGroupInfoComposite(Composite parent, Group g) {
+		log.trace("createGroupInfoComposite: start");
+		
+		List<?> mlist = g.getMemberList();
+        if (mlist == null) {
+            return null;
+        }
 
+        int n = mlist.size();
+        if (n <= 0) {
+            return null;
+        }
+		
+		org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
+		groupInfoGroup.setText("Group Members");
+		GridLayout layout = new GridLayout(1, true);
+		layout.verticalSpacing = 10;
+		groupInfoGroup.setLayout(layout);
+		groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
+            new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n);
+        }
+        else {
+            new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n + " (in memory),"
+            		+ "" + g.getNumberOfMembersInFile() + " (in file)");
+        }
+		
+		String rowData[][] = new String[n][2];
+        for (int i = 0; i < n; i++) {
+            HObject theObj = (HObject) mlist.get(i);
+            rowData[i][0] = theObj.getName();
+            if (theObj instanceof Group) {
+                rowData[i][1] = "Group";
+            }
+            else if (theObj instanceof Dataset) {
+                rowData[i][1] = "Dataset";
+            }
+        }
+        
+        String[] columnNames = { "Name", "Type" };
+        
+        Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
+        memberTable.setLinesVisible(true);
+        memberTable.setHeaderVisible(true);
+        memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        for(int i = 0; i < columnNames.length; i++) {
+        	TableColumn column = new TableColumn(memberTable, SWT.NONE);
+        	column.setText(columnNames[i]);
+        	column.setMoveable(false);
+        }
+        
+        for(int i = 0; i < rowData.length; i++) {
+        	TableItem item = new TableItem(memberTable, SWT.NONE);
+        	item.setText(0, rowData[i][0]);
+        	item.setText(1, rowData[i][1]);
+        }
+        
+        for(int i = 0; i < columnNames.length; i++) {
+        	memberTable.getColumn(i).pack();
+        }
+        
+        // set cell height for large fonts
+        //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
+        //table.setRowHeight(cellRowHeight);
+		
+		log.trace("createGroupInfoComposite: finish");
+		
+		return groupInfoGroup;
+	}
+	
+	/**
+     * Creates a composite used to display HDF dataset information.
+     */
+	private Composite createDatasetInfoComposite(Composite parent, Dataset d) {
+		log.trace("createDatasetInfoComposite: start");
+		
+		if (d.getRank() <= 0) {
+            d.init();
+        }
+		
+		org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
+		datasetInfoGroup.setText("Dataspace and Datatype");
+		GridLayout layout = new GridLayout(1, true);
+		layout.verticalSpacing = 40;
+		datasetInfoGroup.setLayout(layout);
+		datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		
+		// Create composite for displaying dataset dimensions, dimension size,
+		// max dimension size, and data type
+		Composite dimensionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
+		dimensionComposite.setLayout(new GridLayout(2, false));
+		dimensionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		new Label(dimensionComposite, SWT.RIGHT).setText("No. of Dimension(s): ");
+		
+		Text text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+		text.setEditable(false);
+		text.setText("" + d.getRank());
+		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		new Label(dimensionComposite, SWT.RIGHT).setText("Dimension Size(s): ");
+		
+		// Set Dimension Size
+		String dimStr = null;
+		String maxDimStr = null;
+		long dims[] = d.getDims();
+		long maxDims[] = d.getMaxDims();
+		if (dims != null) {
+			String[] dimNames = d.getDimNames();
+			boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
+			StringBuffer sb = new StringBuffer();
+			StringBuffer sb2 = new StringBuffer();
+
+			sb.append(dims[0]);
+			if (hasDimNames) {
+				sb.append(" (");
+				sb.append(dimNames[0]);
+				sb.append(")");
+			}
+
+			if (maxDims[0] < 0)
+				sb2.append("Unlimited");
+			else
+				sb2.append(maxDims[0]);
+
+			for (int i = 1; i < dims.length; i++) {
+				sb.append(" x ");
+				sb.append(dims[i]);
+				if (hasDimNames) {
+					sb.append(" (");
+					sb.append(dimNames[i]);
+					sb.append(")");
+				}
+
+				sb2.append(" x ");
+				if (maxDims[i] < 0)
+					sb2.append("Unlimited");
+				else
+					sb2.append(maxDims[i]);
+
+			}
+			dimStr = sb.toString();
+			maxDimStr = sb2.toString();
+		}
+
+		text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+		text.setEditable(false);
+		text.setText(dimStr);
+		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		new Label(dimensionComposite, SWT.RIGHT).setText("Max Dimension Size(s): ");
+		
+		text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+		text.setEditable(false);
+		text.setText(maxDimStr);
+		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		new Label(dimensionComposite, SWT.RIGHT).setText("Data Type: ");
+		
+		String typeStr = null;
+        if (d instanceof ScalarDS) {
+            ScalarDS sd = (ScalarDS) d;
+            typeStr = sd.getDatatype().getDatatypeDescription();
+        }
+        else if (d instanceof CompoundDS) {
+            if (isH4) {
+                typeStr = "Vdata";
+            }
+            else {
+                typeStr = "Compound";
+            }
+        }
+        
+        text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+        text.setEditable(false);
+        text.setText(typeStr);
+        text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        
+        
+        // Create composite for possible compound dataset info
+        if (d instanceof CompoundDS) {
+            CompoundDS compound = (CompoundDS) d;
+
+            int n = compound.getMemberCount();
+            if (n > 0) {
+                String rowData[][] = new String[n][3];
+                String names[] = compound.getMemberNames();
+                Datatype types[] = compound.getMemberTypes();
+                int orders[] = compound.getMemberOrders();
+
+                for (int i = 0; i < n; i++) {
+                    rowData[i][0] = names[i];
+                    int mDims[] = compound.getMemberDims(i);
+                    if (mDims == null) {
+                        rowData[i][2] = String.valueOf(orders[i]);
+
+                        if (isH4 && types[i].getDatatypeClass() == Datatype.CLASS_STRING) {
+                            rowData[i][2] = String.valueOf(types[i].getDatatypeSize());
+                        }
+                    }
+                    else {
+                        String mStr = String.valueOf(mDims[0]);
+                        int m = mDims.length;
+                        for (int j = 1; j < m; j++) {
+                            mStr += " x " + mDims[j];
+                        }
+                        rowData[i][2] = mStr;
+                    }
+                    rowData[i][1] = types[i].getDatatypeDescription();
+                }
+
+                String[] columnNames = { "Name", "Type", "Array Size" };
+                
+                Table memberTable = new Table(datasetInfoGroup, SWT.BORDER);
+                memberTable.setLinesVisible(true);
+                memberTable.setHeaderVisible(true);
+                memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+                
+                for(int i = 0; i < columnNames.length; i++) {
+                	TableColumn column = new TableColumn(memberTable, SWT.NONE);
+                	column.setText(columnNames[i]);
+                	column.setMoveable(false);
+                }
+                
+                for(int i = 0; i < rowData.length; i++) {
+                	TableItem item = new TableItem(memberTable, SWT.NONE);
+                	item.setText(0, rowData[i][0]);
+                	item.setText(1, rowData[i][1]);
+                	item.setText(2, rowData[i][2]);
+                }
+                
+                for(int i = 0; i < columnNames.length; i++) {
+                	memberTable.getColumn(i).pack();
+                }
+                
+                // set cell height for large fonts
+                //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
+                //table.setRowHeight(cellRowHeight);
+            } // if (n > 0)
+        } // if (d instanceof Compound)
+		
+		
+		// Create composite for displaying dataset chunking, compression, filters,
+		// storage type, and fill value
+		Composite compressionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
+		compressionComposite.setLayout(new GridLayout(2, false));
+		compressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		// Add compression and data layout information
+        new Label(compressionComposite, SWT.RIGHT).setText("Chunking: ");
+        
+        // try { d.getMetadata(); } catch (Exception ex) {}
+        String chunkInfo = "";
+        long[] chunks = d.getChunkSize();
+        if (chunks == null) {
+            chunkInfo = "NONE";
+        }
+        else {
+            int n = chunks.length;
+            chunkInfo = String.valueOf(chunks[0]);
+            for (int i = 1; i < n; i++) {
+                chunkInfo += " X " + chunks[i];
+            }
+        }
+        
+        new Label(compressionComposite, SWT.RIGHT).setText(chunkInfo);
+        
+        new Label(compressionComposite, SWT.RIGHT).setText("Compression: ");
+        
+        new Label(compressionComposite, SWT.RIGHT).setText(d.getCompression());
+        
+        new Label(compressionComposite, SWT.RIGHT).setText("Filters: ");
+        
+        new Label(compressionComposite, SWT.RIGHT).setText(d.getFilters());
+        
+        new Label(compressionComposite, SWT.RIGHT).setText("Storage: ");
+        
+        new Label(compressionComposite, SWT.RIGHT).setText(d.getStorage());
+        
+        new Label(compressionComposite, SWT.RIGHT).setText("Fill value: ");
+        
+        Object fillValue = null;
+        String fillValueInfo = "NONE";
+        if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
+        if (fillValue != null) {
+            if (fillValue.getClass().isArray()) {
+                int len = Array.getLength(fillValue);
+                fillValueInfo = Array.get(fillValue, 0).toString();
+                for (int i = 1; i < len; i++) {
+                    fillValueInfo += ", ";
+                    fillValueInfo += Array.get(fillValue, i).toString();
+                }
+            }
+            else
+                fillValueInfo = fillValue.toString();
+        }
+        
+        new Label(compressionComposite, SWT.RIGHT).setText(fillValueInfo);
+		
+		log.trace("createDatasetInfoComposite: finish");
+		
+		return datasetInfoGroup;
+	}
+	
+	private Composite createNamedDatatypeInfoComposite(Composite parent, Datatype t) {
+		log.trace("createNamedDatatypeInfoComposite: start");
+		
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new FillLayout());
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Text infoArea = new Text(composite, SWT.MULTI);
+		
+		infoArea.setText(t.getDatatypeDescription());
+		infoArea.setEditable(false);
+		
+		log.trace("createNamedDatatypeInfoComposite: finish");
+		
+		return composite;
+	}
+	
+	private Composite createAttributesComposite(TabFolder folder) {
+		log.trace("createAttributesComposite: start");
+		
+		List<?> attrList = null;
+		FileFormat theFile = hObject.getFileFormat();
+		
+		try {
+            attrList = hObject.getMetadata();
+        }
+        catch (Exception ex) {
+            attrList = null;
+        }
+        if (attrList != null) {
+            numAttributes = attrList.size();
+        }
+        
+        log.trace("createAttributesComposite:  isH5={} numAttributes={}", isH5, numAttributes);
+		
+		Composite composite = new Composite(folder, SWT.NONE);
+		composite.setLayout(new GridLayout(5, false));
+		
+		attrNumberLabel = new Label(composite, SWT.RIGHT);
+		attrNumberLabel.setText("Number of attributes = 0");
+		
+		// Add dummy labels
+		Label dummyLabel = new Label(composite, SWT.RIGHT);
+		dummyLabel.setText("");
+		dummyLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Button addButton = new Button(composite, SWT.PUSH);
+		addButton.setText(" &Add ");
+		addButton.setEnabled(!theFile.isReadOnly());
+		addButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		addButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				addAttribute(hObject);
+			}
+		});
+		
+		// deleting is not supported by HDF4
+		if(isH5) {
+			Button delButton = new Button(composite, SWT.PUSH);
+			delButton.setText(" &Delete ");
+			delButton.setEnabled(!theFile.isReadOnly());
+			delButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			delButton.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					deleteAttribute(hObject);
+				}
+			});
+		}
+		
+		
+        SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
+        sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 2));
+        
+        String[] columnNames = { "Name", "Value", "Type", "Array Size" };
+        
+        attrTable = new Table(sashForm, SWT.FULL_SELECTION | SWT.BORDER);
+        attrTable.setLinesVisible(true);
+        attrTable.setHeaderVisible(true);
+        attrTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        // Only allow editing of attribute name and value
+        attrTable.addListener(SWT.MouseDown, attrTableCellEditor);
+        
+        for(int i = 0; i < columnNames.length; i++) {
+        	TableColumn column = new TableColumn(attrTable, SWT.NONE);
+        	column.setText(columnNames[i]);
+        	column.setMoveable(false);
+        }
+        
+        if (attrList == null) {
+            log.trace("createAttributesComposite:  attrList == null");
+        } else {
+        	attrNumberLabel.setText("Number of attributes = " + numAttributes);
+        	
+        	Attribute attr = null;
+            String name, type, size;
+            for (int i = 0; i < numAttributes; i++) {
+                attr = (Attribute) attrList.get(i);
+                name = attr.getName();
+                type = attr.getType().getDatatypeDescription();
+                log.trace("createAttributesComposite:  attr[{}] is {} as {}", i, name, type);
+
+                if (attr.isScalar()) {
+                    size = "Scalar";
+                }
+                else {
+                    long dims[] = attr.getDataDims();
+                    size = String.valueOf(dims[0]);
+                    for (int j = 1; j < dims.length; j++) {
+                        size += " x " + dims[j];
+                    }
+                }
+                
+                TableItem item = new TableItem(attrTable, SWT.NONE);
+
+                if (attr.getProperty("field") != null) {
+                	String fieldInfo = " {Field: "+attr.getProperty("field")+"}";
+                	item.setText(0, name + fieldInfo);
+                } else {
+                    item.setText(0, name);
+                }
+                
+                item.setText(1, attr.toString(", "));
+                item.setText(2, type);
+                item.setText(3, size);
+            } // for (int i=0; i<n; i++)
+        }
+        
+        for(int i = 0; i < columnNames.length; i++) {
+        	attrTable.getColumn(i).pack();
+        }
+        
+        // set cell height for large fonts
+        //int cellRowHeight = Math.max(16, attrTable.getFontMetrics(attrTable.getFont()).getHeight());
+        //attrTable.setRowHeight(cellRowHeight);
+        
+        attrContentArea = new Text(sashForm, SWT.MULTI | SWT.BORDER);
+        attrContentArea.setEditable(false);
+        
+        
+        
+        log.trace("createAttributesComposite: finish");
+		
+		return composite;
+	}
+	
+	/**
+     * Creates a panel used to display HDF5 user block.
+     */
+	private Composite createUserBlockComposite(TabFolder folder) {
+		log.trace("createUserBlockComposite: start");
+		
+		userBlock = DefaultFileFilter.getHDF5UserBlock(hObject.getFile());
+		
+		Composite composite = new Composite(folder, SWT.NONE);
+		composite.setLayout(new GridLayout(5, false));
+		
+		new Label(composite, SWT.RIGHT).setText("Display As: ");
+		
+		String[] displayChoices = { "Text", "Binary", "Octal", "Hexadecimal", "Decimal" };
+		
+		Combo userBlockDisplayChoice = new Combo(composite, SWT.SINGLE);
+		userBlockDisplayChoice.setItems(displayChoices);
+		userBlockDisplayChoice.select(0);
+		userBlockDisplayChoice.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Combo source = (Combo) e.item;
+				int type = 0;
+	            String typeName = (String) source.getItem(source.getSelectionIndex());
+	            System.out.println(typeName);
+	            jamButton.setEnabled(false);
+	            userBlockArea.setEditable(false);
+
+	            if (typeName.equalsIgnoreCase("Text")) {
+	                type = 0;
+	                jamButton.setEnabled(true);
+	                userBlockArea.setEditable(true);
+	            }
+	            else if (typeName.equalsIgnoreCase("Binary")) {
+	                type = 2;
+	            }
+	            else if (typeName.equalsIgnoreCase("Octal")) {
+	                type = 8;
+	            }
+	            else if (typeName.equalsIgnoreCase("Hexadecimal")) {
+	                type = 16;
+	            }
+	            else if (typeName.equalsIgnoreCase("Decimal")) {
+	                type = 10;
+	            }
+
+	            showUserBlockAs(type);
+			}
+		});
+		
+		Label dummyLabel = new Label(composite, SWT.RIGHT);
+		dummyLabel.setText("");
+		dummyLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label sizeLabel = new Label(composite, SWT.RIGHT);
+		sizeLabel.setText("Header Size (Bytes): 0");
+		
+		int headSize = 0;
+        if (userBlock != null) {
+            headSize = showUserBlockAs(0);
+            sizeLabel.setText("Header Size (Bytes): " + headSize);
+        }
+        else {
+            userBlockDisplayChoice.setEnabled(false);
+        }
+        
+        Button writeButton = new Button(composite, SWT.PUSH);
+        writeButton.setText("Save User Block");
+        writeButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        writeButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		writeUserBlock();
+        	}
+        });
+        
+        ScrolledComposite userBlockScroller = new ScrolledComposite(composite, SWT.V_SCROLL | SWT.BORDER);
+        userBlockScroller.setExpandHorizontal(true);
+        userBlockScroller.setExpandVertical(true);
+        userBlockScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
+        
+		userBlockArea = new Text(userBlockScroller, SWT.MULTI | SWT.WRAP);
+		userBlockArea.setEditable(true);
+		userBlockScroller.setContent(userBlockArea);
+		
+		log.trace("createUserBlockComposite: finish");
+		
+		return composite;
+	}
+	
+	// Listener to allow user to only change attribute name or value
+	private Listener attrTableCellEditor = new Listener() {
+		public void handleEvent(Event event) {
+			final TableEditor editor = new TableEditor(attrTable);
+			editor.horizontalAlignment = SWT.LEFT;
+			editor.grabHorizontal = true;
+
+			Rectangle clientArea = attrTable.getClientArea();
+			Point pt = new Point(event.x, event.y);
+			int index = attrTable.getTopIndex();
+
+			while (index < attrTable.getItemCount()) {
+				boolean visible = false;
+				final TableItem item = attrTable.getItem(index);
+
+				for (int i = 0; i < attrTable.getColumnCount(); i++) {
+					Rectangle rect = item.getBounds(i);
+
+					if (rect.contains(pt)) {
+						final int column = i;
+						final Text text = new Text(attrTable, SWT.NONE);
+
+						Listener textListener = new Listener() {
+							public void handleEvent(final Event e) {
+								switch (e.type) {
+								case SWT.FocusOut:
+									item.setText(column, text.getText());
+									text.dispose();
+									break;
+								case SWT.Traverse:
+									switch (e.detail) {
+									case SWT.TRAVERSE_RETURN:
+										item.setText(column, text.getText());
+									case SWT.TRAVERSE_ESCAPE:
+										text.dispose();
+										e.doit = false;
+									}
+
+									break;
+								}
+							}
+						};
+						text.addListener(SWT.FocusOut, textListener);
+						text.addListener(SWT.Traverse, textListener);
+						editor.setEditor(text, item, i);
+						text.setText(item.getText(i));
+						text.selectAll();
+						text.setFocus();
+						return;
+					}
+					if (!visible && rect.intersects(clientArea)) {
+						visible = true;
+					}
+				}
+				if (!visible)
+					return;
+				index++;
+			}
+		}
+	};
 }

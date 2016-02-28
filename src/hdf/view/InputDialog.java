@@ -15,12 +15,15 @@
 package hdf.view;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -85,22 +88,43 @@ public class InputDialog extends Dialog {
     public String open() {
         Shell parent = getParent();
         final Shell shell = new Shell(parent, SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL);
-        
         shell.setText(title);
-        shell.setLayout(new GridLayout(2, true));
+        shell.setLayout(new GridLayout(1, true));
         
         Label label = new Label(shell, SWT.NULL);
         label.setText(message);
         
         inputField = new Text(shell, SWT.SINGLE | SWT.BORDER);
         inputField.setText(initialText);
+        inputField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
-        final Button okButton = new Button(shell, SWT.PUSH);
-        okButton.setText("Ok");
-        okButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
+        Composite buttonComposite = new Composite(shell, SWT.NONE);
+        buttonComposite.setLayout(new GridLayout(2, true));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         
-        final Button cancelButton = new Button(shell, SWT.PUSH);
-        cancelButton.setText("Cancel");
+        Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("   &Ok   ");
+        okButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		shell.dispose();
+        	}
+        });
+        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        okButton.setLayoutData(gridData);
+        
+        Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setText("&Cancel");
+        cancelButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		result = null;
+                shell.dispose();
+        	}
+        });
+        
+        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        cancelButton.setLayoutData(gridData);
         
         inputField.addListener(SWT.Modify, new Listener() {
             public void handleEvent(Event event) {
@@ -113,19 +137,6 @@ public class InputDialog extends Dialog {
             }
         });
         
-        okButton.addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event event) {
-                shell.dispose();
-            }
-        });
-        
-        cancelButton.addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event event) {
-                result = null;
-                shell.dispose();
-            }
-        });
-        
         shell.addListener(SWT.Traverse, new Listener() {
             public void handleEvent(Event event) {
                 if(event.detail == SWT.TRAVERSE_ESCAPE)
@@ -134,6 +145,10 @@ public class InputDialog extends Dialog {
         });
         
         shell.pack();
+        
+        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        
+        shell.setSize(computedSize.x + 100, computedSize.y);
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

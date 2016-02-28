@@ -393,6 +393,7 @@ public class NewDatasetDialog extends Dialog {
         
         Button setMaxSizeButton = new Button(dataspaceGroup, SWT.PUSH);
         setMaxSizeButton.setText("Set Max Size");
+        setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		String strMax = maxSizeField.getText();

@@ -132,7 +132,7 @@ public class NewGroupDialog extends Dialog {
     	
     	Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
     	parentGroupLabel.setText("Parent group:");
-    	parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    	parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
     	
     	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
     	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
