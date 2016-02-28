@@ -92,8 +92,7 @@ public class ImageConversionDialog extends Dialog {
     
     public void open() {
     	Shell parent = getParent();
-    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("New Dataset...");
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
@@ -119,7 +118,9 @@ public class ImageConversionDialog extends Dialog {
     	label.setText("IMAGE File: ");
     	
     	srcFileField = new Text(contentComposite, SWT.SINGLE | SWT.BORDER);
-    	srcFileField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+    	fieldData.minimumWidth = 350;
+    	srcFileField.setLayoutData(fieldData);
     	
     	Button browseButton = new Button(contentComposite, SWT.PUSH);
     	browseButton.setText("Browse...");
@@ -171,11 +172,14 @@ public class ImageConversionDialog extends Dialog {
     		}
     	});
     	
+    	// Dummy label to fill space as dialog is resized
+    	new Label(shell, SWT.NONE).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
     	
     	// Create Ok/Cancel button
     	Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
-        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
@@ -209,8 +213,7 @@ public class ImageConversionDialog extends Dialog {
     	
         shell.pack();
         
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 200 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

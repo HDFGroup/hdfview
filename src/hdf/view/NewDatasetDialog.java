@@ -135,8 +135,7 @@ public class NewDatasetDialog extends Dialog {
 	
 	public void open() {
 		Shell parent = getParent();
-    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("New Dataset...");
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
@@ -145,11 +144,10 @@ public class NewDatasetDialog extends Dialog {
     	// Create Dataset name / Parent Group region
     	Composite fieldComposite = new Composite(shell, SWT.NONE);
     	fieldComposite.setLayout(new GridLayout(2, false));
-    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	Label datasetNameLabel = new Label(fieldComposite, SWT.LEFT);
     	datasetNameLabel.setText("Dataset name: ");
-    	//datasetNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, ));
     	
     	Text datasetNameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
     	datasetNameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -194,7 +192,7 @@ public class NewDatasetDialog extends Dialog {
     	org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
     	datatypeGroup.setText("Datatype");
     	datatypeGroup.setLayout(new GridLayout(4, true));
-    	datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	Label label = new Label(datatypeGroup, SWT.LEFT);
     	label.setText("Datatype Class");
@@ -334,7 +332,7 @@ public class NewDatasetDialog extends Dialog {
     	org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
     	dataspaceGroup.setText("Dataspace");
     	dataspaceGroup.setLayout(new GridLayout(3, true));
-    	dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	label = new Label(dataspaceGroup, SWT.LEFT);
     	label.setText("No. of dimensions");
@@ -417,7 +415,7 @@ public class NewDatasetDialog extends Dialog {
     	org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
     	storagePropertiesGroup.setText("Storage Properties");
     	storagePropertiesGroup.setLayout(new GridLayout(5, true));
-    	storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	label = new Label(storagePropertiesGroup, SWT.LEFT);
     	label.setText("Storage layout: ");
@@ -594,8 +592,7 @@ public class NewDatasetDialog extends Dialog {
     	
         shell.pack();
         
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

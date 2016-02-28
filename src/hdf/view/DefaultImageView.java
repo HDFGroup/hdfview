@@ -41,6 +41,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -209,7 +210,7 @@ public class DefaultImageView implements ImageView {
 	 */
 	private Object autoGainData;
 
-	//private BitSet bitmask;
+	private BitSet bitmask;
 	private boolean convertByteData = false;
 	private BITMASK_OP bitmaskOP = BITMASK_OP.EXTRACT;
 
@@ -244,9 +245,7 @@ public class DefaultImageView implements ImageView {
 	 */
 	public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
 		shell = new Shell(display);
-
-		//setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-		//setFrameIcon(ViewProperties.getImageIcon());
+		shell.setImage(ViewProperties.getImageIcon());
 
 		viewer = theView;
 		zoomFactor = 1.0f;
@@ -913,7 +912,9 @@ public class DefaultImageView implements ImageView {
 			item.setText(String.valueOf(i));
 			item.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					//animationSpeed = i;
+					MenuItem item = (MenuItem) e.item;
+					
+					animationSpeed = Integer.parseInt(item.getText());
 				}
 			});
 		}
@@ -1255,7 +1256,6 @@ public class DefaultImageView implements ImageView {
 	 * @throws OutOfMemoryError
 	 */
 	private void getIndexedImage() throws Exception, OutOfMemoryError {
-		/*
 		if (imagePalette==null)
 			imagePalette = dataset.getPalette();
 
@@ -1303,7 +1303,6 @@ public class DefaultImageView implements ImageView {
 		}
 
 		image = createIndexedImage(imageByteData, imagePalette, w, h);
-		*/
 	}
 
 	/**
@@ -1311,7 +1310,6 @@ public class DefaultImageView implements ImageView {
 	 * @throws OutOfMemoryError
 	 */
 	private void getTrueColorImage() throws Exception, OutOfMemoryError {
-		/*
 		isPlaneInterlace = (dataset.getInterlace() == ScalarDS.INTERLACE_PLANE);
 
 		long[] selected = dataset.getSelectedDims();
@@ -1329,7 +1327,6 @@ public class DefaultImageView implements ImageView {
 		dataset.clearData();
 		data = dataset.getData();
 
-
 		int w = dataset.getWidth();
 		int h = dataset.getHeight();
 
@@ -1339,7 +1336,6 @@ public class DefaultImageView implements ImageView {
 
 
 		image = createTrueColorImage(imageByteData, isPlaneInterlace, w, h);
-		*/
 	}
 
 	/**

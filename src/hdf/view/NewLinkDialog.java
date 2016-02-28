@@ -111,8 +111,7 @@ public class NewLinkDialog extends Dialog {
     
     public void open() {
     	Shell parent = getParent();
-    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("New Link...");
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
@@ -120,13 +119,15 @@ public class NewLinkDialog extends Dialog {
     	// Create the main content region
     	Composite content = new Composite(shell, SWT.NONE);
     	content.setLayout(new GridLayout(2, false));
-    	content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	Label label = new Label(content, SWT.LEFT);
     	label.setText("Link name: ");
     	
     	nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
-    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+    	fieldData.minimumWidth = 300;
+    	nameField.setLayoutData(fieldData);
     	
     	label = new Label(content, SWT.LEFT);
     	label.setText("Parent group: ");
@@ -141,7 +142,7 @@ public class NewLinkDialog extends Dialog {
     	
         Composite helpComposite = new Composite(content, SWT.NONE);
         helpComposite.setLayout(new GridLayout(1, true));
-        helpComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        helpComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
         
         label = new Label(helpComposite, SWT.LEFT);
         label.setText("Type of Link: ");
@@ -180,7 +181,7 @@ public class NewLinkDialog extends Dialog {
         
         Composite typeComposite = new Composite(content, SWT.BORDER);
         typeComposite.setLayout(new GridLayout(3, true));
-        typeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        typeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         hardLink = new Button(typeComposite, SWT.RADIO);
         hardLink.setText("Hard Link");
@@ -246,7 +247,7 @@ public class NewLinkDialog extends Dialog {
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         fileComposite.setLayout(layout);
-        fileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        fileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         targetFile = new Text(fileComposite, SWT.SINGLE | SWT.BORDER);
         targetFile.setEnabled(false);
@@ -357,8 +358,7 @@ public class NewLinkDialog extends Dialog {
     	
         shell.pack();
         
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 200, computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

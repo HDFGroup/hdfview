@@ -124,8 +124,7 @@ public class UserOptionsDialog extends Dialog {
 
 	public void open() {
 		Shell parent = getParent();
-		shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-				SWT.BORDER | SWT.APPLICATION_MODAL);
+		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
 		shell.setText("User Options");
 		shell.setImage(ViewProperties.getHdfIcon());
 		shell.setLayout(new GridLayout(1, false));
@@ -185,9 +184,7 @@ public class UserOptionsDialog extends Dialog {
 
 		shell.pack();
 
-		int w = 700 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 550 + (ViewProperties.getFontSize() - 12) * 16;
-		shell.setSize(w, h);
+		shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		Rectangle parentBounds = parent.getBounds();
 		Point shellSize = shell.getSize();

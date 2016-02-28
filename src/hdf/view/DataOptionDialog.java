@@ -165,8 +165,7 @@ public class DataOptionDialog extends Dialog {
 	
 	public void open() {
 		Shell parent = getParent();
-    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("Dataset Selection - " + dataset.getPath() + dataset.getName());
     	shell.setImage(ViewProperties.getHdfIcon());
     	GridLayout layout = new GridLayout(1, true);
@@ -275,8 +274,7 @@ public class DataOptionDialog extends Dialog {
         
         //init();
         
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

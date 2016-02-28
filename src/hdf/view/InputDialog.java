@@ -87,7 +87,7 @@ public class InputDialog extends Dialog {
      */
     public String open() {
         Shell parent = getParent();
-        final Shell shell = new Shell(parent, SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL);
+        final Shell shell = new Shell(parent, SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
         shell.setText(title);
         shell.setLayout(new GridLayout(1, true));
         
@@ -96,11 +96,16 @@ public class InputDialog extends Dialog {
         
         inputField = new Text(shell, SWT.SINGLE | SWT.BORDER);
         inputField.setText(initialText);
-        inputField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        fieldData.minimumWidth = 300;
+        inputField.setLayoutData(fieldData);
+        
+        // Dummy label to fill space as dialog is resized
+        new Label(shell, SWT.NONE).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
-        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
@@ -146,9 +151,7 @@ public class InputDialog extends Dialog {
         
         shell.pack();
         
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        
-        shell.setSize(computedSize.x + 100, computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

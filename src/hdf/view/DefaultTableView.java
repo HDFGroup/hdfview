@@ -2061,21 +2061,32 @@ public class DefaultTableView implements TableView {
             }
             else {
                 int rows = selectionLayer.getSelectedRowCount();
-                //int r0 = table.getSelectedRow();
-                //int c0 = table.getSelectedColumn();
+                
+                // Since NatTable returns the selected row positions as a Set<Range>, convert this to
+            	// an Integer[]
+            	Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+            	Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+            	Iterator<Range> i1 = rowPositions.iterator();
+            	while(i1.hasNext()) {
+            		selectedRowPos.addAll(i1.next().getMembers());
+            	}
+            	
+                int r0 = selectedRowPos.toArray(new Integer[0])[0];
+                int c0 = selectionLayer.getSelectedColumnPositions()[0];
+                
                 int w = table.getPreferredColumnCount() - 1;
                 int idx_src = 0;
                 int idx_dst = 0;
-                //for (int i = 0; i < rows; i++) {
-                //    idx_dst = (r0 + i) * w + c0;
-                //    System.arraycopy(theData, idx_src, dataValue, idx_dst, cols);
-                //    idx_src += cols;
-                //}
+                
+                for (int i = 0; i < rows; i++) {
+                    idx_dst = (r0 + i) * w + c0;
+                    System.arraycopy(theData, idx_src, dataValue, idx_dst, cols);
+                    idx_src += cols;
+                }
             }
 
             theData = null;
             System.gc();
-            //table.updateUI();
             isValueChanged = true;
         }
     }
@@ -2302,25 +2313,26 @@ public class DefaultTableView implements TableView {
             	showError(ex.getMessage(), "Region Reference:" + shell.getText());
             }
 
-            Shell dataView = null;
+            DataView dataView = null;
             HashMap map = new HashMap(1);
             map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
             switch (viewType) {
                 case TEXT:
-                    dataView = null;//new DefaultTextView(viewer, map);
+                    dataView = new DefaultTextView(shell, viewer, map);
                     break;
                 case IMAGE:
-                    dataView = null;//new DefaultImageView(viewer, map);
+                    dataView = new DefaultImageView(shell, viewer, map);
                     break;
                 default:
-                    dataView = null;//new DefaultTableViewOld(viewer, map);
+                    dataView = new DefaultTableView(shell, viewer, map);
                     break;
             }
 
             if (dataView != null) {
                 viewer.addDataView((DataView) dataView);
-                dataView.setText(dataView.getText() + "; " + titleSB.toString());
+                //dataView.setText(dataView.getText() + "; " + titleSB.toString());
             }
+            
             log.trace("DefaultTableView showRegRefData: st.hasMoreTokens() end");
         } // while (st.hasMoreTokens())
     } // private void showRegRefData(String reg)

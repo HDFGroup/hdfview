@@ -104,8 +104,7 @@ public class MathConversionDialog extends Dialog {
     
     public void open() {
     	Shell parent = getParent();
-    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("Convert Data...");
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
@@ -122,7 +121,9 @@ public class MathConversionDialog extends Dialog {
         
         functionList = new List(contentGroup, SWT.SINGLE | SWT.BORDER);
         functionList.setItems(functionNames);
-        functionList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData functionListData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        functionListData.minimumWidth = 350;
+        functionList.setLayoutData(functionListData);
         functionList.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		int index = functionList.getSelectionIndex();
@@ -144,17 +145,19 @@ public class MathConversionDialog extends Dialog {
         });
     	
     	Composite fieldComposite = new Composite(contentGroup, SWT.NONE);
-    	fieldComposite.setLayout(new GridLayout(2, true));
+    	fieldComposite.setLayout(new GridLayout(2, false));
     	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	
-    	new Label(fieldComposite, SWT.NONE).setText("a = ");
+    	new Label(fieldComposite, SWT.RIGHT).setText("a = ");
     	
     	aField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	aField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	GridData aFieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+    	aFieldData.minimumWidth = 100;
+    	aField.setLayoutData(aFieldData);
     	aField.setText("0");
     	aField.setEnabled(false);
     	
-    	new Label(fieldComposite, SWT.NONE).setText("b = ");
+    	new Label(fieldComposite, SWT.RIGHT).setText("b = ");
     	
     	bField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
     	bField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -164,7 +167,9 @@ public class MathConversionDialog extends Dialog {
     	infoArea = new Text(contentGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP);
     	infoArea.setEditable(false);
     	infoArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
-    	infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+    	GridData infoAreaData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+    	infoAreaData.minimumHeight = 150;
+    	infoArea.setLayoutData(infoAreaData);
     	
     	// Create Ok/Cancel button region
     	Composite buttonComposite = new Composite(shell, SWT.NONE);
@@ -200,8 +205,7 @@ public class MathConversionDialog extends Dialog {
     	
         shell.pack();
         
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 200 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y + 100);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

@@ -230,10 +230,6 @@ public class DefaultTextView implements TextView {
 				display.sleep();
 		}
     }
-    
-    public void open() {
-    	
-    }
 
     /**
      * Creates a Table to hold a compound dataset.
