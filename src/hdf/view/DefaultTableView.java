@@ -74,6 +74,7 @@ import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
+import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.EditableRule;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
@@ -98,7 +99,10 @@ import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
+import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
+import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
+import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.BodyCellEditorMouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
@@ -704,6 +708,22 @@ public class DefaultTableView implements TableView {
             }
         });
         
+        // Left-align cells
+        natTable.addConfiguration(new AbstractRegistryConfiguration() {
+        	@Override
+        	public void configureRegistry(IConfigRegistry configRegistry) {
+        		Style cellStyle = new Style();
+        		
+        		cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);        		
+        		cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
+        				Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        		
+        		configRegistry.registerConfigAttribute(
+        				CellConfigAttributes.CELL_STYLE,
+        				cellStyle);
+        	}
+        });
+        
         natTable.configure();
         
         dataLayer.setDefaultRowHeight(2 * natTable.getFont().getFontData()[0].getHeight());
@@ -786,7 +806,7 @@ public class DefaultTableView implements TableView {
         final String[] allColumnNames = subColumnNames;
         
         // Create body layer
-        IDataProvider bodyDataProvider = new CompoundDSDataProvider();
+        final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
         final DataLayer dataLayer = new DataLayer(bodyDataProvider);
         final SelectionLayer selectionLayer = new SelectionLayer(dataLayer);
         ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
@@ -812,8 +832,57 @@ public class DefaultTableView implements TableView {
         // Create the Grid layer
         GridLayer gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
                 rowHeaderLayer, cornerLayer);
+        gridLayer.addConfiguration(new DefaultEditConfiguration());
+        
+        // Change cell editing to be on double click rather than single click
+        gridLayer.addConfiguration(new AbstractUiBindingConfiguration() {
+        	@Override
+        	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+        		uiBindingRegistry.registerFirstDoubleClickBinding(
+        		    new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
+        		//uiBindingRegistry.registerFirstMouseDragMode(mouseEventMatcher, new CellEditDragMode());
+        	}
+        });
         
         final NatTable natTable = new NatTable(parent, gridLayer);
+        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+        
+        // Register cell editing rules with table
+        natTable.addConfiguration(new AbstractRegistryConfiguration() {
+            @Override
+            public void configureRegistry(IConfigRegistry configRegistry) {
+                configRegistry.registerConfigAttribute(
+                		EditConfigAttributes.CELL_EDITABLE_RULE,
+                		getCompoundDSEditRule(bodyDataProvider),
+                		DisplayMode.EDIT);
+            }
+
+            @Override
+            public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+            	//uiBindingRegistry.registerDoubleClickBinding(mouseEventMatcher, action);
+            }
+        });
+        
+        
+        // Left-align cells
+        natTable.addConfiguration(new AbstractRegistryConfiguration() {
+        	@Override
+        	public void configureRegistry(IConfigRegistry configRegistry) {
+        		Style cellStyle = new Style();
+        		
+        		cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);        		
+        		cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
+        				Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        		
+        		configRegistry.registerConfigAttribute(
+        				CellConfigAttributes.CELL_STYLE,
+        				cellStyle);
+        	}
+        });
+        
+        natTable.configure();
+        
+        dataLayer.setDefaultRowHeight(2 * natTable.getFont().getFontData()[0].getHeight());
         
         log.trace("createTable(CompoundDS): finish");
         

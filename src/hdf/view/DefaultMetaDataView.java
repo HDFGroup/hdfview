@@ -169,8 +169,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
 		shell.pack();
 
-		Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		shell.setMinimumSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+		shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		Rectangle parentBounds = parent.getBounds();
 		Point shellSize = shell.getSize();

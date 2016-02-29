@@ -471,6 +471,8 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
+		shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
 		shell.open();
 		
 		while (!shell.isDisposed()) {

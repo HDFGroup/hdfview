@@ -223,6 +223,10 @@ public class DefaultTextView implements TextView {
         	}
         });
         
+        shell.pack();
+        
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        
         shell.open();
         
         while (!shell.isDisposed()) {

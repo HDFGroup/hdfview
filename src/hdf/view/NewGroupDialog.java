@@ -49,9 +49,11 @@ import hdf.object.HObject;
  * @version 2.4 12/30/2015
  */
 public class NewGroupDialog extends Dialog {
-	private static final long serialVersionUID = 7340860373483987075L;
 	
 	private Shell shell;
+	
+	/* Used to restore original size after click "less" button */
+	private Point originalSize;
 
 	private Text nameField;
 	private Text compactField;
@@ -227,6 +229,8 @@ public class NewGroupDialog extends Dialog {
         shell.pack();
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        
+        originalSize = shell.getSize();
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
@@ -496,8 +500,7 @@ public class NewGroupDialog extends Dialog {
         
         shell.pack();
 
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = shell.getParent().getBounds();
         Point shellSize = shell.getSize();
@@ -517,8 +520,8 @@ public class NewGroupDialog extends Dialog {
     	shell.layout(true, true);
     	shell.pack();
     	
-    	Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-    	shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+    	shell.setMinimumSize(originalSize);
+    	shell.setSize(originalSize);
     	
     	Rectangle parentBounds = shell.getParent().getBounds();
         Point shellSize = shell.getSize();

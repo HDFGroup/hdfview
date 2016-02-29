@@ -330,12 +330,8 @@ public class DefaultPaletteView extends Dialog {
     	
 
 		shell.pack();
-		
-		int w = 700 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 500 + (ViewProperties.getFontSize() - 12) * 10;
 
-		//Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		shell.setMinimumSize(w, h);
+		shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		Rectangle parentBounds = parent.getBounds();
 		Point shellSize = shell.getSize();

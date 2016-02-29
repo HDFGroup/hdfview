@@ -54,7 +54,6 @@ import hdf.object.HObject;
  * @version 2.4 1/1/2016
  */
 public class NewLinkDialog extends Dialog {
-	private static final long serialVersionUID = 7100424106041533918L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewLinkDialog.class);
 
@@ -185,7 +184,7 @@ public class NewLinkDialog extends Dialog {
         
         hardLink = new Button(typeComposite, SWT.RADIO);
         hardLink.setText("Hard Link");
-        hardLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        hardLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         hardLink.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		targetFile.setEnabled(false);
@@ -210,7 +209,7 @@ public class NewLinkDialog extends Dialog {
         
         softLink = new Button(typeComposite, SWT.RADIO);
         softLink.setText("Soft Link");
-        softLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        softLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         softLink.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		targetFile.setEnabled(false);
@@ -227,7 +226,7 @@ public class NewLinkDialog extends Dialog {
         
         externalLink = new Button(typeComposite, SWT.RADIO);
         externalLink.setText("External Link");
-        externalLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        externalLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         externalLink.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		targetFile.setEnabled(true);
@@ -247,16 +246,16 @@ public class NewLinkDialog extends Dialog {
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         fileComposite.setLayout(layout);
-        fileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        fileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
         targetFile = new Text(fileComposite, SWT.SINGLE | SWT.BORDER);
         targetFile.setEnabled(false);
-        targetFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        targetFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         
         targetFileButton = new Button(fileComposite, SWT.PUSH);
         targetFileButton.setText("Browse...");
         targetFileButton.setEnabled(false);
-        targetFileButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        targetFileButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
         targetFileButton.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		String filename = null;
