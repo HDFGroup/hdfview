@@ -60,14 +60,18 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
+import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
@@ -227,6 +231,9 @@ public class DefaultTableView implements TableView {
     
     // Keep track of table row selections
     private SelectionLayer                  selectionLayer;
+    
+    // Used to get/set column header
+    private IDataProvider                   columnHeaderDataProvider;
 
     /**
      * Constructs a TableView.
@@ -647,7 +654,7 @@ public class DefaultTableView implements TableView {
         dataLayer.setDefaultColumnWidth(80);
         
         // Create the Column Header layer
-        IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnNames);
+        columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnNames);
         ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
         
@@ -1045,17 +1052,18 @@ public class DefaultTableView implements TableView {
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Copy to New Dataset");
-        //item.setActionCommand("Write selection to dataset");
         item.setEnabled(isEditable && (dataset instanceof ScalarDS));
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                /*
-                JTable jtable = getTable();
-                if ((jtable.getSelectedColumnCount() <= 0) || (jtable.getSelectedRowCount() <= 0)) {
-                    JOptionPane.showMessageDialog(this, "Select table cells to write.", "HDFView", JOptionPane.INFORMATION_MESSAGE);
+                if ((selectionLayer.getSelectedColumnPositions().length <= 0) || (selectionLayer.getSelectedRowCount() <= 0)) {
+                	MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                	info.setText(shell.getText());
+                	info.setMessage("Select table cells to write.");
+                	info.open();
                     return;
                 }
 
+                /*
                 TreeView treeView = viewer.getTreeView();
                 TreeNode node = viewer.getTreeView().findTreeNode(dataset);
                 Group pGroup = (Group) ((DefaultMutableTreeNode) node.getParent()).getUserObject();
@@ -1131,7 +1139,7 @@ public class DefaultTableView implements TableView {
         item.setText("Show Lineplot");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                //showLineplot();
+                showLineplot();
             }
         });
 
@@ -1212,7 +1220,8 @@ public class DefaultTableView implements TableView {
                     } else {
                         numberFormat = normalFormat;
                     }
-                    //this.updateUI();  //redraw menu
+                    
+                    table.doCommand(new VisualRefreshCommand());
                 }
             });
             
@@ -1232,7 +1241,8 @@ public class DefaultTableView implements TableView {
                     } else {
                         numberFormat = normalFormat;
                     }
-                    //this.updateUI(); // redraw menu
+                    
+                    table.doCommand(new VisualRefreshCommand());
                 }
             });
         }
@@ -1278,7 +1288,8 @@ public class DefaultTableView implements TableView {
                         showAsBin = false;
                         numberFormat = normalFormat;
                     }
-                    //this.updateUI();
+                    
+                    table.doCommand(new VisualRefreshCommand());
                 }
             });
             
@@ -1297,7 +1308,8 @@ public class DefaultTableView implements TableView {
                         showAsHex = false;
                         numberFormat = normalFormat;
                     }
-                    //this.updateUI();
+                    
+                    table.doCommand(new VisualRefreshCommand());
                 }
             });
         }
@@ -1313,47 +1325,41 @@ public class DefaultTableView implements TableView {
                 shell.dispose();
             }
         });
+        
+        new MenuItem(menuBar, SWT.SEPARATOR).setText("     ");
 
-        //new Label(menuBar, SWT.NONE).setText("     ");
-
-        // add icons to the menubar
-
-        //Insets margin = new Insets(0, 2, 0, 2);
+        // Add icons to the menubar
 
         // chart button
-        /*
-        button = new JButton(ViewProperties.getChartIcon());
-        bar.add(button);
-        button.setToolTipText("Line Plot");
-        button.setMargin(margin);
-        button.addActionListener(this);
-        button.setActionCommand("Show chart");
-         */
+        item = new MenuItem(menuBar, SWT.PUSH);
+        item.setImage(ViewProperties.getChartIcon());
+        //button.setToolTipText("Line Plot");
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		showLineplot();
+        	}
+        });
 
         if (is3D) {
-            //bar.add(new JLabel("     "));
-
-            // first button
-            //button = new Button(menuBar, SWT.PUSH);
-            //button.setImage(ViewProperties.getFirstIcon());
-            //button.setToolTipText("First");
-            //button.setMargin(margin);
-            //button.addSelectionListener(new SelectionAdapter() {
-            //  public void widgetSelected(SelectionEvent e) {
-            //      firstPage();
-            //  }
-            //});
-
-            // previous button
-            //button = new Button(menuBar, SWT.PUSH);
-            //button.setImage(ViewProperties.getPreviousIcon());
-            //button.setToolTipText("Previous");
-            //button.setMargin(margin);
-            //button.addSelectionListener(new SelectionAdapter() {
-            //  public void widgetSelected(SelectionEvent e) {
-            //      previousPage();
-            //  }
-            //});
+        	new MenuItem(menuBar, SWT.SEPARATOR).setText("     ");
+        	
+        	item = new MenuItem(menuBar, SWT.PUSH);
+        	item.setImage(ViewProperties.getFirstIcon());
+        	//button.setToolTipText("First");
+        	item.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			firstPage();
+        		}
+        	});
+        	
+        	item = new MenuItem(menuBar, SWT.PUSH);
+        	item.setImage(ViewProperties.getPreviousIcon());
+        	//button.setToolTipText("Previous");
+        	item.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			previousPage();
+        		}
+        	});
 
             //frameField = new Text(menuBar, SWT.SINGLE);
             //frameField.setText(String.valueOf(curFrame));
@@ -1374,31 +1380,28 @@ public class DefaultTableView implements TableView {
             //  }
             //});
 
-            //JLabel tmpField = new JLabel(String.valueOf(maxFrame), SwingConstants.CENTER);
+        	item = new MenuItem(menuBar, SWT.SEPARATOR_FILL);
+        	item.setText(String.valueOf(maxFrame));
+        	item.setEnabled(false);
             //tmpField.setMaximumSize(new Dimension(50, 30));
-            //bar.add(tmpField);
-
-            // next button
-            //button = new Button(menuBar, SWT.PUSH);
-            //button.setImage(ViewProperties.getNextIcon());
-            //button.setToolTipText("Next");
-            //button.setMargin(margin);
-            //button.addSelectionListener(new SelectionAdapter() {
-            //  public void widgetSelected(SelectionEvent e) {
-            //      nextPage();
-            //  }
-            //});
-
-            // last button
-            //button = new Button(menuBar, SWT.PUSH);
-            //button.setImage(ViewProperties.getLastIcon());
-            //button.setToolTipText("Last");
-            //button.setMargin(margin);
-            //button.addSelectionListener(new SelectionAdapter() {
-            //  public void widgetSelected(SelectionEvent e) {
-            //      lastPage();
-            //  }
-            //});
+        	
+        	item = new MenuItem(menuBar, SWT.PUSH);
+        	item.setImage(ViewProperties.getNextIcon());
+        	//button.setToolTipText("Next");
+        	item.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			nextPage();
+        		}
+        	});
+        	
+        	item = new MenuItem(menuBar, SWT.PUSH);
+        	item.setImage(ViewProperties.getLastIcon());
+        	//button.setToolTipText("Last");
+        	item.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			lastPage();
+        		}
+        	});
         }
 
         return menuBar;
@@ -1532,7 +1535,6 @@ public class DefaultTableView implements TableView {
         if (dataset.getRank() < 3) return;
 
         long[] start = dataset.getStartDims();
-        //dataset.getDims();
         int[] selectedIndex = dataset.getSelectedIndex();
         long idx = start[selectedIndex[2]];
         if (idx == 0) {
@@ -1565,7 +1567,6 @@ public class DefaultTableView implements TableView {
 
         long[] start = dataset.getStartDims();
         int[] selectedIndex = dataset.getSelectedIndex();
-        //dataset.getDims();
         long idx = start[selectedIndex[2]];
         if (idx == 0) {
             return; // current page is the first page
@@ -1633,9 +1634,9 @@ public class DefaultTableView implements TableView {
 
         shell.setCursor(null);
 
-        frameField.setText(String.valueOf(curFrame));
+        //frameField.setText(String.valueOf(curFrame));
         
-        table.doCommand(new StructuralRefreshCommand());
+        table.doCommand(new VisualRefreshCommand());
     }
 
     /**
@@ -1798,8 +1799,6 @@ public class DefaultTableView implements TableView {
             shell.getDisplay().beep();
             showError(ex.getMessage(), shell.getText());
         }
-
-        //table.updateUI();
     }
     
     /**
@@ -1884,7 +1883,7 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView getSelectedScalarData: {}", size);
 
         // the whole table is selected
-        if ((table.getPreferredColumnCount() - 1 == selectedCols.length) && (table.getPreferredRowCount() == selectedRows.length)) {
+        if ((table.getPreferredColumnCount() - 1 == selectedCols.length) && (table.getPreferredRowCount() - 1 == selectedRows.length)) {
             return dataValue;
         }
 
@@ -2048,7 +2047,7 @@ public class DefaultTableView implements TableView {
             if (dataset instanceof CompoundDS) {
                 Object colData = null;
                 try {
-                    //colData = ((List<?>) dataset.getData()).get(table.getSelectedColumn());
+                    colData = ((List<?>) dataset.getData()).get(selectionLayer.getSelectedColumnPositions()[0]);
                 }
                 catch (Exception ex) {
                     log.debug("colData:", ex);
@@ -3351,6 +3350,211 @@ public class DefaultTableView implements TableView {
         viewer.showStatus("Data saved to: " + fname);
     }
     
+    private void showLineplot() {
+    	// Since NatTable returns the selected row positions as a Set<Range>, convert this to
+    	// an Integer[]
+    	Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+    	Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+    	Iterator<Range> i1 = rowPositions.iterator();
+    	while(i1.hasNext()) {
+    		selectedRowPos.addAll(i1.next().getMembers());
+    	}
+    	
+        Integer[] rows = selectedRowPos.toArray(new Integer[0]);
+        int[] cols = selectionLayer.getSelectedColumnPositions();
+
+        if ((rows == null) || (cols == null) || (rows.length <= 0) || (cols.length <= 0)) {
+            shell.getDisplay().beep();
+            showError("Select rows/columns to draw line plot.", shell.getText());
+            return;
+        }
+
+        int nrow = table.getPreferredRowCount() - 1;
+        int ncol = table.getPreferredColumnCount() - 1;
+
+        log.trace("DefaultTableView showLineplot: {} - {}", nrow, ncol);
+        LinePlotOption lpo = new LinePlotOption(shell, SWT.NONE, nrow, ncol);
+        lpo.open();
+
+        int plotType = lpo.getPlotBy();
+        if (plotType == LinePlotOption.NO_PLOT) {
+            return;
+        }
+
+        boolean isRowPlot = (plotType == LinePlotOption.ROW_PLOT);
+        int xIndex = lpo.getXindex();
+
+        // figure out to plot data by row or by column
+        // Plot data by rows if all columns are selected and part of
+        // rows are selected, otherwise plot data by column
+        double[][] data = null;
+        int nLines = 0;
+        String title = "Lineplot - " + dataset.getPath() + dataset.getName();
+        String[] lineLabels = null;
+        double[] yRange = { Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY };
+        double xData[] = null;
+
+        if (isRowPlot) {
+            title += " - by row";
+            nLines = rows.length;
+            if (nLines > 10) {
+                shell.getDisplay().beep();
+                nLines = 10;
+                MessageBox warning = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                warning.setText(shell.getText());
+                warning.setMessage("More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
+                warning.open();
+            }
+            lineLabels = new String[nLines];
+            data = new double[nLines][cols.length];
+
+            double value = 0.0;
+            for (int i = 0; i < nLines; i++) {
+                lineLabels[i] = String.valueOf(rows[i] + indexBase);
+                for (int j = 0; j < cols.length; j++) {
+                    data[i][j] = 0;
+                    try {
+                    	value = Double.parseDouble(table.getDataValueByPosition(cols[j], rows[i]).toString());
+                        data[i][j] = value;
+                        yRange[0] = Math.min(yRange[0], value);
+                        yRange[1] = Math.max(yRange[1], value);
+                    }
+                    catch (NumberFormatException ex) {
+                        log.debug("rows[{}]:", i, ex);
+                    }
+                } // for (int j = 0; j < ncols; j++)
+            } // for (int i = 0; i < rows.length; i++)
+
+            if (xIndex >= 0) {
+                xData = new double[cols.length];
+                for (int j = 0; j < cols.length; j++) {
+                    xData[j] = 0;
+                    try {
+                    	value = Double.parseDouble(table.getDataValueByPosition(cols[j], xIndex).toString());
+                        xData[j] = value;
+                    }
+                    catch (NumberFormatException ex) {
+                        log.debug("xIndex of {}:", xIndex, ex);
+                    }
+                }
+            }
+        } // if (isRowPlot)
+        else {
+            title += " - by column";
+            nLines = cols.length;
+            if (nLines > 10) {
+                shell.getDisplay().beep();
+                nLines = 10;
+                MessageBox warning = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                warning.setText(shell.getText());
+                warning.setMessage("More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
+                warning.open();
+            }
+            lineLabels = new String[nLines];
+            data = new double[nLines][rows.length];
+            double value = 0.0;
+            for (int j = 0; j < nLines; j++) {
+            	lineLabels[j] = columnHeaderDataProvider.getDataValue(cols[j] + indexBase, 0).toString();
+                for (int i = 0; i < rows.length; i++) {
+                    data[j][i] = 0;
+                    try {
+                    	value = Double.parseDouble(table.getDataValueByPosition(cols[j], rows[i]).toString());
+                        data[j][i] = value;
+                        yRange[0] = Math.min(yRange[0], value);
+                        yRange[1] = Math.max(yRange[1], value);
+                    }
+                    catch (NumberFormatException ex) {
+                        log.debug("cols[{}]:", j, ex);
+                    }
+                } // for (int j=0; j<ncols; j++)
+            } // for (int i=0; i<rows.length; i++)
+
+            if (xIndex >= 0) {
+                xData = new double[rows.length];
+                for (int j = 0; j < rows.length; j++) {
+                    xData[j] = 0;
+                    try {
+                    	value = Double.parseDouble(table.getDataValueByPosition(xIndex, rows[j]).toString());
+                        xData[j] = value;
+                    }
+                    catch (NumberFormatException ex) {
+                        log.debug("xIndex of {}:", xIndex, ex);
+                    }
+                }
+            }
+        } // else
+
+        int n = removeInvalidPlotData(data, xData, yRange);
+        if (n < data[0].length) {
+            double[][] dataNew = new double[data.length][n];
+            for (int i = 0; i < data.length; i++)
+                System.arraycopy(data[i], 0, dataNew[i], 0, n);
+
+            data = dataNew;
+
+            if (xData != null) {
+                double[] xDataNew = new double[n];
+                System.arraycopy(xData, 0, xDataNew, 0, n);
+                xData = xDataNew;
+            }
+        }
+
+        // allow to draw a flat line: all values are the same
+        if (yRange[0] == yRange[1]) {
+            yRange[1] += 1;
+            yRange[0] -= 1;
+        }
+        else if (yRange[0] > yRange[1]) {
+            shell.getDisplay().beep();
+            showError("Cannot show line plot for the selected data. \n" + "Please check the data range: ("
+                    + yRange[0] + ", " + yRange[1] + ").", shell.getText());
+            data = null;
+            return;
+        }
+        if (xData == null) { // use array index and length for x data range
+            xData = new double[2];
+            xData[0] = indexBase; // 1- or zero-based
+            xData[1] = data[0].length + indexBase - 1; // maximum index
+        }
+
+        Chart cv = new Chart(shell, title, Chart.LINEPLOT, data, xData, yRange);
+        cv.setLineLabels(lineLabels);
+
+        String cname = dataValue.getClass().getName();
+        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        if ((dname == 'B') || (dname == 'S') || (dname == 'I') || (dname == 'J')) {
+            cv.setTypeToInteger();
+        }
+
+        cv.open();
+    }
+    
+    // Allow a ScalarDS cell to be edited under specific conditions
+    private IEditableRule getScalarDSEditRule(final IDataProvider dataProvider) {
+        return new EditableRule() {
+            @Override
+            public boolean isEditable(int columnIndex, int rowIndex) {
+            	if (isReadOnly || isDisplayTypeChar || showAsBin || showAsHex
+            			|| dataset.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
+                    return false;
+                }
+                else {
+                	return true;
+                }
+            }
+        };
+    }
+    
+    // Allow a CompoundDS cell to be edited as long as TableView is not in read-only mode
+    private IEditableRule getCompoundDSEditRule(final IDataProvider dataProvider) {
+        return new EditableRule() {
+            @Override
+            public boolean isEditable(int columnIndex, int rowIndex) {
+            	return !isReadOnly;
+            }
+        };
+    }
+    
     private class ScalarDSDataProvider implements IDataProvider {
     	private final StringBuffer stringBuffer     = new StringBuffer();
         private final Datatype     dtype            = dataset.getDatatype();
@@ -3690,29 +3894,166 @@ public class DefaultTableView implements TableView {
     	}
     }
     
-    // Allow a ScalarDS cell to be edited under specific conditions
-    private IEditableRule getScalarDSEditRule(final IDataProvider dataProvider) {
-        return new EditableRule() {
-            @Override
-            public boolean isEditable(int columnIndex, int rowIndex) {
-            	if (isReadOnly || isDisplayTypeChar || showAsBin || showAsHex
-            			|| dataset.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
-                    return false;
-                }
-                else {
-                	return true;
-                }
+    private class LinePlotOption extends Dialog {
+    	
+    	private Shell             linePlotOptionShell;
+    	
+    	private Button            rowButton, colButton;
+    	
+    	private Combo             rowBox, colBox;
+    	
+    	public static final int   NO_PLOT          = -1;
+        public static final int   ROW_PLOT         = 0;
+        public static final int   COLUMN_PLOT      = 1;
+        
+        private int               nrow, ncol;
+        
+        private int               idx_xaxis        = -1, plotType = -1;
+    	
+    	public LinePlotOption(Shell parent, int style, int nrow, int ncol) {
+    		super(parent, style);
+    		
+    		this.nrow = nrow;
+    		this.ncol = ncol;
+    	}
+    	
+    	public void open() {
+    		Shell parent = getParent();
+        	linePlotOptionShell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        	linePlotOptionShell.setText("Line Plot Options -- " + dataset.getName());
+        	linePlotOptionShell.setImage(ViewProperties.getHdfIcon());
+        	linePlotOptionShell.setLayout(new GridLayout(1, true));
+        	
+        	new Label(linePlotOptionShell, SWT.RIGHT).setText("Select Line Plot Options:");
+        	
+        	Composite content = new Composite(linePlotOptionShell, SWT.BORDER);
+        	content.setLayout(new GridLayout(3, false));
+        	content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        	
+        	new Label(content, SWT.RIGHT).setText(" Series in:");
+        	
+        	colButton = new Button(content, SWT.RADIO);
+        	colButton.setText("Column");
+        	colButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        	colButton.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			colBox.setEnabled(true);
+        			rowBox.setEnabled(false);
+        		}
+        	});
+        	
+        	rowButton = new Button(content, SWT.RADIO);
+        	rowButton.setText("Row");
+        	rowButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        	rowButton.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			rowBox.setEnabled(true);
+        			colBox.setEnabled(false);
+        		}
+        	});
+        	
+        	new Label(content, SWT.RIGHT).setText(" For abscissa use:");
+        	
+        	long[] startArray = dataset.getStartDims();
+            long[] strideArray = dataset.getStride();
+            int[] selectedIndex = dataset.getSelectedIndex();
+            int start = (int) startArray[selectedIndex[0]];
+            int stride = (int) strideArray[selectedIndex[0]];
+        	
+        	colBox = new Combo(content, SWT.SINGLE);
+        	GridData colBoxData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        	colBoxData.minimumWidth = 100;
+        	colBox.setLayoutData(colBoxData);
+        	
+        	colBox.add("array index");
+        	
+        	for (int i = 0; i < ncol; i++) {
+                colBox.add("column " + columnHeaderDataProvider.getDataValue(i, 0));
             }
-        };
-    }
-    
-    // Allow a CompoundDS cell to be edited as long as TableView is not in read-only mode
-    private IEditableRule getCompoundDSEditRule(final IDataProvider dataProvider) {
-        return new EditableRule() {
-            @Override
-            public boolean isEditable(int columnIndex, int rowIndex) {
-            	return !isReadOnly;
+        	
+        	rowBox = new Combo(content, SWT.SINGLE);
+        	GridData rowBoxData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        	rowBoxData.minimumWidth = 100;
+        	rowBox.setLayoutData(rowBoxData);
+        	
+        	rowBox.add("array index");
+        	
+        	for (int i = 0; i < nrow; i++) {
+                rowBox.add("row " + (start + indexBase + i * stride));
             }
-        };
+        	
+        	
+        	// Create Ok/Cancel button region
+        	Composite buttonComposite = new Composite(linePlotOptionShell, SWT.NONE);
+            buttonComposite.setLayout(new GridLayout(2, true));
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+            
+            Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setText("   &Ok   ");
+            okButton.addSelectionListener(new SelectionAdapter() {
+            	public void widgetSelected(SelectionEvent e) {
+            		if (colButton.getSelection()) {
+                        idx_xaxis = colBox.getSelectionIndex() - 1;
+                        plotType = COLUMN_PLOT;
+                    }
+                    else {
+                        idx_xaxis = rowBox.getSelectionIndex() - 1;
+                        plotType = ROW_PLOT;
+                    }
+            		
+            		linePlotOptionShell.dispose();
+            	}
+            });
+            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+            gridData.widthHint = 70;
+            okButton.setLayoutData(gridData);
+            
+            Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+            cancelButton.setText("&Cancel");
+            cancelButton.addSelectionListener(new SelectionAdapter() {
+            	public void widgetSelected(SelectionEvent e) {
+            		plotType = NO_PLOT;            		
+            		linePlotOptionShell.dispose();
+            	}
+            });
+            
+            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+            gridData.widthHint = 70;
+            cancelButton.setLayoutData(gridData);
+            
+            colButton.setSelection(true);
+            rowButton.setSelection(false);
+            
+            colBox.select(0);
+            rowBox.select(0);
+            
+            colBox.setEnabled(colButton.getSelection());
+            rowBox.setEnabled(rowButton.getSelection());
+        	
+        	linePlotOptionShell.pack();
+            
+        	linePlotOptionShell.setMinimumSize(linePlotOptionShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            
+            Rectangle parentBounds = parent.getBounds();
+            Point shellSize = linePlotOptionShell.getSize();
+            linePlotOptionShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+            
+            linePlotOptionShell.open();
+            
+            Display display = parent.getDisplay();
+            while(!linePlotOptionShell.isDisposed()) {
+                if (!display.readAndDispatch())
+                    display.sleep();
+            }
+    	}
+    	
+    	int getXindex ( ) {
+            return idx_xaxis;
+        }
+
+        int getPlotBy ( ) {
+            return plotType;
+        }
     }
 }

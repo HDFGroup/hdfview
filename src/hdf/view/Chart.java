@@ -14,7 +14,6 @@
 
 package hdf.view;
 
-import java.awt.Color;
 import java.lang.reflect.Array;
 
 import org.eclipse.swt.SWT;
@@ -22,6 +21,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -55,9 +55,9 @@ public class Chart extends Dialog {
 	public static final int LINEPLOT = 1;
 
 	/** The default colors of lines for selected columns */
-	public static final Color[] LINE_COLORS = { Color.black, Color.red,
-			Color.green.darker(), Color.blue, Color.magenta, Color.pink,
-			Color.yellow, Color.orange, Color.gray, Color.cyan };
+	public static final int[] LINE_COLORS = { SWT.COLOR_BLACK, SWT.COLOR_RED,
+			SWT.COLOR_DARK_GREEN, SWT.COLOR_BLUE, SWT.COLOR_MAGENTA, /*Pink*/
+			SWT.COLOR_YELLOW, /*Orange*/ SWT.COLOR_GRAY, SWT.COLOR_CYAN };
 
 	/** the data values of line points or histogram */
 	protected double data[][];
@@ -87,7 +87,7 @@ public class Chart extends Dialog {
 	private String lineLabels[];
 
 	/** line colors */
-	private Color lineColors[];
+	private int lineColors[];
 
 	/** number of lines */
 	private int numberOfLines;
@@ -186,24 +186,22 @@ public class Chart extends Dialog {
 
 	public void open() {
 		Shell parent = getParent();
-		shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-				SWT.BORDER | SWT.APPLICATION_MODAL);
+		shell = new Shell(parent, SWT.SHELL_TRIM);
 		shell.setText(windowTitle);
 		shell.setImage(ViewProperties.getHdfIcon());
 		shell.setLayout(new GridLayout(1, true));
 
-
-		// Create main content region for the Chart
-		Composite canvasComposite = new Composite(shell, SWT.BORDER);
-		canvasComposite.setLayout(new FillLayout());
-		canvasComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		chartP = new ChartCanvas(canvasComposite, SWT.DOUBLE_BUFFERED);
+		chartP = new ChartCanvas(shell, SWT.DOUBLE_BUFFERED);
 		chartP.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		chartP.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 
 		// Add close button
-		Button closeButton = new Button(shell, SWT.PUSH);
+		Composite buttonComposite = new Composite(shell, SWT.NONE);
+		buttonComposite.setLayout(new GridLayout(1, true));
+		buttonComposite.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+		
+		Button closeButton = new Button(buttonComposite, SWT.PUSH);
 		closeButton.setText("   &Close   ");
 		closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 		closeButton.addSelectionListener(new SelectionAdapter() {
@@ -215,9 +213,8 @@ public class Chart extends Dialog {
 		shell.pack();
 
 		int w = 640 + (ViewProperties.getFontSize() - 12) * 15;
-		int h = 400 + (ViewProperties.getFontSize() - 12) * 10;
-
-		//org.eclipse.swt.graphics.Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        int h = 400 + (ViewProperties.getFontSize() - 12) * 10;
+        
 		shell.setMinimumSize(w, h);
 
 		Rectangle parentBounds = parent.getBounds();
@@ -235,7 +232,7 @@ public class Chart extends Dialog {
 	}
 
 	/** Sets the color of each line of a line plot */
-	public void setLineColors(Color c[]) {
+	public void setLineColors(int c[]) {
 		lineColors = c;
 	}
 
@@ -272,11 +269,9 @@ public class Chart extends Dialog {
 	/** The canvas that paints the data lines. */
 	private class ChartCanvas extends Canvas {
 		public ChartCanvas(Composite parent, int style) {
-			super(parent, style);
+			super(parent, style | SWT.BORDER);
 
-			final Canvas canvas = new Canvas(parent, SWT.NONE);
-
-			canvas.addPaintListener(new PaintListener() {
+			this.addPaintListener(new PaintListener() {
 				public void paintControl(PaintEvent e) {
 					// Get the graphics context for this paint event
 					GC g = e.gc;
@@ -284,8 +279,8 @@ public class Chart extends Dialog {
 					if (numberOfLines <= 0) {
 						return; // no data
 					}
-
-					Point p = canvas.getSize();
+					
+                    Point p = getSize();
 					int gap = 20;
 					int xgap = 2 * gap;
 					int ygap = 2 * gap;
@@ -341,7 +336,7 @@ public class Chart extends Dialog {
 						}
 					}
 
-					org.eclipse.swt.graphics.Color c = g.getForeground();
+					Color c = g.getForeground();
 					double x0, y0, x1, y1;
 					if (chartStyle == LINEPLOT) {
 						dw = (double) w / (double) (numberOfPoints - 1);
@@ -358,8 +353,7 @@ public class Chart extends Dialog {
 							if ((lineColors != null)
 									&& (lineColors.length >= numberOfLines)) {
 								
-								//TODO: Change line colors to SWT.COLOR
-								//g.setForeground(lineColors[i]);
+								g.setForeground(Display.getCurrent().getSystemColor(lineColors[i]));
 							}
 
 							// set up the line data for drawing one line a time
@@ -425,6 +419,10 @@ public class Chart extends Dialog {
 					} // else if (chartStyle == HISTOGRAM)
 				}
 			});
+		}
+		
+		public void refresh() {
+			this.redraw();
 		}
 	}
 }

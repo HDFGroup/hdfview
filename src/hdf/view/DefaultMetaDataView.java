@@ -1345,7 +1345,7 @@ public class DefaultMetaDataView implements MetaDataView {
         attrTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         // Only allow editing of attribute name and value
-        attrTable.addListener(SWT.MouseDown, attrTableCellEditor);
+        attrTable.addListener(SWT.MouseDoubleClick, attrTableCellEditor);
         
         for(int i = 0; i < columnNames.length; i++) {
         	TableColumn column = new TableColumn(attrTable, SWT.NONE);
