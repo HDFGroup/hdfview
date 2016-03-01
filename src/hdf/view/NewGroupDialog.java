@@ -49,9 +49,11 @@ import hdf.object.HObject;
  * @version 2.4 12/30/2015
  */
 public class NewGroupDialog extends Dialog {
-    private static final long serialVersionUID = 7340860373483987075L;
 
     private Shell shell;
+
+    /* Used to restore original size after click "less" button */
+    private Point originalSize;
 
     private Text nameField;
     private Text compactField;
@@ -112,8 +114,7 @@ public class NewGroupDialog extends Dialog {
 
     public void open() {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-                SWT.BORDER | SWT.APPLICATION_MODAL);
+        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setText("New Group...");
         shell.setImage(ViewProperties.getHdfIcon());
         GridLayout layout = new GridLayout(1, false);
@@ -128,11 +129,13 @@ public class NewGroupDialog extends Dialog {
         groupNameLabel.setText("Group name:");
 
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-        nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        fieldData.minimumWidth = 250;
+        nameField.setLayoutData(fieldData);
 
         Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
         parentGroupLabel.setText("Parent group:");
-        parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+        parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
         parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -171,7 +174,7 @@ public class NewGroupDialog extends Dialog {
         if(isH5) {
             moreOptionsComposite = new Composite(shell, SWT.NONE);
             moreOptionsComposite.setLayout(new GridLayout(2, false));
-            moreOptionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+            moreOptionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
             moreButton = new Button(moreOptionsComposite, SWT.PUSH);
             moreButton.setText("   More   ");
@@ -190,11 +193,14 @@ public class NewGroupDialog extends Dialog {
 
             dummyComposite = new Composite(moreOptionsComposite, SWT.NONE);
             dummyComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        } else {
+            // Add dummy label to take up space as dialog is resized
+            new Label(shell, SWT.NONE).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         }
 
         buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
-        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
@@ -225,8 +231,9 @@ public class NewGroupDialog extends Dialog {
 
         shell.pack();
 
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+        originalSize = shell.getSize();
 
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
@@ -496,8 +503,7 @@ public class NewGroupDialog extends Dialog {
 
         shell.pack();
 
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = shell.getParent().getBounds();
         Point shellSize = shell.getSize();
@@ -517,8 +523,8 @@ public class NewGroupDialog extends Dialog {
         shell.layout(true, true);
         shell.pack();
 
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x + 100 + ((ViewProperties.getFontSize() - 12) * 15), computedSize.y);
+        shell.setMinimumSize(originalSize);
+        shell.setSize(originalSize);
 
         Rectangle parentBounds = shell.getParent().getBounds();
         Point shellSize = shell.getSize();

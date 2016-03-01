@@ -49,7 +49,6 @@ import hdf.object.HObject;
  * @version 2.4 1/1/2016
  */
 public class NewDatatypeDialog extends Dialog {
-	private static final long serialVersionUID = -1930736056916611522L;
 	
 	private Shell             shell;
 
@@ -95,8 +94,7 @@ public class NewDatatypeDialog extends Dialog {
 	
 	public void open() {
 		Shell parent = getParent();
-    	shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("New Datatype...");
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, false));
@@ -153,7 +151,7 @@ public class NewDatatypeDialog extends Dialog {
     	org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
     	datatypeGroup.setText("Datatype");
     	datatypeGroup.setLayout(new GridLayout(4, true));
-    	datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	label = new Label(datatypeGroup, SWT.LEFT);
     	label.setText("Datatype class");
@@ -318,7 +316,7 @@ public class NewDatatypeDialog extends Dialog {
     	
         shell.pack();
         
-        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

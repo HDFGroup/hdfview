@@ -218,6 +218,7 @@ public class H5ScalarDS extends ScalarDS {
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 tid = H5.H5Dget_type(did);
                 tclass = H5.H5Tget_class(tid);
+                log.debug("H5Tget_class: {} is Array {}", tclass, HDF5Constants.H5T_ARRAY);
 
                 long tmptid = 0;
                 if (tclass == HDF5Constants.H5T_ARRAY) {
@@ -545,9 +546,9 @@ public class H5ScalarDS extends ScalarDS {
                 }
 
                 tid = H5.H5Dget_type(did);
-                int size = H5.H5Tget_size(tid) * (int) lsize[0];
+                long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("H5ScalarDS readBytes: size = {}", size);
-                theData = new byte[size];
+                theData = new byte[(int)size];
                 H5.H5Dread(did, tid, mspace, fspace, HDF5Constants.H5P_DEFAULT, theData);
             }
             finally {
@@ -666,7 +667,7 @@ public class H5ScalarDS extends ScalarDS {
                 if (theData != null) {
                     if (isVLEN) {
                         log.trace("H5ScalarDS read: H5DreadVL");
-                        H5.H5DreadVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
+                        H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
                     }
                     else {
                         log.trace("H5ScalarDS read: H5Dread did={} spaceIDs[0]={} spaceIDs[1]={}", did, spaceIDs[0], spaceIDs[1]);
@@ -700,7 +701,7 @@ public class H5ScalarDS extends ScalarDS {
                 try {
                     if (isText && convertByteToString) {
                         log.trace("H5ScalarDS read: H5Dread convertByteToString");
-                        theData = byteToString((byte[]) theData, H5.H5Tget_size(tid));
+                        theData = byteToString((byte[]) theData, (int)H5.H5Tget_size(tid));
                     }
                     else if (isREF) {
                         log.trace("H5ScalarDS read: H5Dread isREF");
@@ -776,7 +777,7 @@ public class H5ScalarDS extends ScalarDS {
                 isText = (H5.H5Tget_class(tid) == HDF5Constants.H5T_STRING);
 
                 // check if need to convert integer data
-                int tsize = H5.H5Tget_size(tid);
+                int tsize = (int)H5.H5Tget_size(tid);
                 String cname = buf.getClass().getName();
                 char dname = cname.charAt(cname.lastIndexOf("[") + 1);
                 boolean doConversion = (((tsize == 1) && (dname == 'S')) || ((tsize == 2) && (dname == 'I'))
@@ -791,7 +792,7 @@ public class H5ScalarDS extends ScalarDS {
                 // do not convert v-len strings, regardless of conversion request
                 // type
                 else if (isText && convertByteToString && !H5.H5Tis_variable_str(tid)) {
-                    tmpData = stringToByte((String[]) buf, H5.H5Tget_size(tid));
+                    tmpData = stringToByte((String[]) buf, (int)H5.H5Tget_size(tid));
                 }
                 else if (isEnum && (Array.get(buf, 0) instanceof String)) {
                     tmpData = H5Datatype.convertEnumNameToValue(tid, (String[]) buf, null);
@@ -1621,7 +1622,7 @@ public class H5ScalarDS extends ScalarDS {
             // try to find out interlace mode
             aid = H5.H5Aopen_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             atid = H5.H5Aget_type(aid);
-            int size = H5.H5Tget_size(atid);
+            int size = (int)H5.H5Tget_size(atid);
             byte[] attrValue = new byte[size];
             H5.H5Aread(aid, atid, attrValue);
             String strValue = new String(attrValue).trim();
@@ -1906,7 +1907,7 @@ public class H5ScalarDS extends ScalarDS {
             return null;
 
         int datatypeClass = type.getDatatypeClass();
-        int datatypeSize = type.getDatatypeSize();
+        int datatypeSize = (int)type.getDatatypeSize();
 
         double val_dbl = 0;
         String val_str = null;

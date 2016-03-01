@@ -56,7 +56,6 @@ import hdf.object.ScalarDS;
  * @version 2.4 9/6/2007
  */
 public class DefaultTextView implements TextView {
-    private static final long serialVersionUID = 3892752752951438428L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTextView.class);
 
@@ -94,16 +93,9 @@ public class DefaultTextView implements TextView {
     private RowHeader rowHeaders = null;
     
     private int indexBase = 0;
-
-    /**
-     * Constructs an TextView.
-     * <p>
-     * 
-     * @param theView
-     *            the main HDFView.
-     */
-    public DefaultTextView(ViewManager theView) {
-        this(theView, null);
+    
+    public DefaultTextView(Shell parent, ViewManager theView) {
+    	this(parent, theView, null);
     }
 
     /**
@@ -119,7 +111,7 @@ public class DefaultTextView implements TextView {
      *            applying bitmask, and etc. Predefined keys are listed at
      *            ViewProperties.DATA_VIEW_KEY.
      */
-    public DefaultTextView(ViewManager theView, HashMap map) {
+    public DefaultTextView(Shell parent, ViewManager theView, HashMap map) {
         shell = new Shell(display);
     	
     	viewer = theView;
@@ -167,10 +159,9 @@ public class DefaultTextView implements TextView {
         }
         
         String fname = new java.io.File(dataset.getFile()).getName();
-        //this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         shell.setText("TextView  -  " + dataset.getName() + "  -  "
                 + dataset.getPath() + "  -  " + fname);
-        //this.setFrameIcon(ViewProperties.getTextIcon());
+        shell.setImage(ViewProperties.getTextIcon());
         
         int rank = dataset.getRank();
         long start[] = dataset.getStartDims();
@@ -230,6 +221,10 @@ public class DefaultTextView implements TextView {
                 //viewer.removeDataView();
         	}
         });
+        
+        shell.pack();
+        
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         shell.open();
         

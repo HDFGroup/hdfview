@@ -51,7 +51,6 @@ import hdf.object.HObject;
  * @version 2.4 1/7/2016
  */
 public class NewAttributeDialog extends Dialog {
-	private static final long serialVersionUID                = 4883237570834215275L;
 	
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 	
@@ -113,8 +112,7 @@ public class NewAttributeDialog extends Dialog {
 	
 	public void open() {
 		Shell parent = getParent();
-		shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("New Attribute...");
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
@@ -365,8 +363,7 @@ public class NewAttributeDialog extends Dialog {
     	
         shell.pack();
         
-        Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        shell.setSize(computedSize.x, computedSize.y);
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();

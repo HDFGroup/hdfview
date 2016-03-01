@@ -14,404 +14,410 @@
 
 package hdf.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.lang.reflect.Array;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 /**
- * ChartView displays histogram/line chart of selected row/column of table data
- * or image. There are two types of chart, histogram and line plot.
+ * ChartView displays a histogram/line chart of selected row/column of table data
+ * or image data. There are two types of chart, histogram and line plot.
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 2/27/16
  */
-public class Chart extends JDialog implements ActionListener {
+public class Chart extends Dialog {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6306479533747330357L;
+	private Shell shell;
 
-    /** histogram style chart */
-    public static final int HISTOGRAM = 0;
+	private String windowTitle;
 
-    /** line style chart */
-    public static final int LINEPLOT = 1;
+	/** histogram style chart */
+	public static final int HISTOGRAM = 0;
 
-    /** The default colors of lines for selected columns */
-    public static final Color[] LINE_COLORS = { Color.black, Color.red,
-            Color.green.darker(), Color.blue, Color.magenta, Color.pink,
-            Color.yellow, Color.orange, Color.gray, Color.cyan };
+	/** line style chart */
+	public static final int LINEPLOT = 1;
 
-    /** the data values of line points or histogram */
-    protected double data[][];
+	/** The default colors of lines for selected columns */
+	public static final int[] LINE_COLORS = { SWT.COLOR_BLACK, SWT.COLOR_RED,
+			SWT.COLOR_DARK_GREEN, SWT.COLOR_BLUE, SWT.COLOR_MAGENTA, /*Pink*/
+			SWT.COLOR_YELLOW, /*Orange*/ SWT.COLOR_GRAY, SWT.COLOR_CYAN };
 
-    /** Panel that draws plot of data values. */
-    protected ChartPanel chartP;
+	/** the data values of line points or histogram */
+	protected double data[][];
 
-    /** number of data points */
-    protected int numberOfPoints;
+	/** Panel that draws plot of data values. */
+	protected ChartCanvas chartP;
 
-    /** the style of chart: histogram or line */
-    private int chartStyle;
+	/** number of data points */
+	protected int numberOfPoints;
 
-    /** the maximum value of the Y axis */
-    private double ymax;
+	/** the style of chart: histogram or line */
+	private int chartStyle;
 
-    /** the minimum value of the Y axis */
-    private double ymin;
+	/** the maximum value of the Y axis */
+	private double ymax;
 
-    /** the maximum value of the X axis */
-    private double xmax;
+	/** the minimum value of the Y axis */
+	private double ymin;
 
-    /** the minimum value of the X axis */
-    private double xmin;
+	/** the maximum value of the X axis */
+	private double xmax;
 
-    /** line labels */
-    private String lineLabels[];
+	/** the minimum value of the X axis */
+	private double xmin;
 
-    /** line colors */
-    private Color lineColors[];
+	/** line labels */
+	private String lineLabels[];
 
-    /** number of lines */
-    private int numberOfLines;
+	/** line colors */
+	private int lineColors[];
 
-    /* the data to plot against */
-    private double[] xData = null;
+	/** number of lines */
+	private int numberOfLines;
 
-    /**
-     * True if the original data is integer (byte, short, integer, long).
-     */
-    private boolean isInteger;
+	/* the data to plot against */
+	private double[] xData = null;
 
-    private java.text.DecimalFormat format;
+	/**
+	 * True if the original data is integer (byte, short, integer, long).
+	 */
+	private boolean isInteger;
 
-    /**
-     * Constructs a new ChartView given data and data ranges.
-     * <p>
-     * 
-     * @param owner
-     *            the owner frame of this dialog.
-     * @param title
-     *            the title of this dialog.
-     * @param style
-     *            the style of the chart. Valid values are: HISTOGRAM and LINE
-     * @param data
-     *            the two dimensional data array: data[linenumber][datapoints]
-     * @param xData
-     *            the range of the X values, xRange[0]=xmin, xRange[1]=xmax.
-     * @param yRange
-     *            the range of the Y values, yRange[0]=ymin, yRange[1]=ymax.
-     */
-    public Chart(Frame owner, String title, int style, double[][] data,
-            double[] xData, double[] yRange) {
-        super(owner, title, false);
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        format = new java.text.DecimalFormat("0.00E0");
+	private java.text.DecimalFormat format;
 
-        if (data == null) {
-            return;
-        }
 
-        this.chartStyle = style;
-        this.data = data;
+	/**
+	 * Constructs a new ChartView given data and data ranges.
+	 * <p>
+	 * 
+	 * @param owner
+	 *            the owner frame of this dialog.
+	 * @param title
+	 *            the title of this dialog.
+	 * @param style
+	 *            the style of the chart. Valid values are: HISTOGRAM and LINE
+	 * @param data
+	 *            the two dimensional data array: data[linenumber][datapoints]
+	 * @param xData
+	 *            the range of the X values, xRange[0]=xmin, xRange[1]=xmax.
+	 * @param yRange
+	 *            the range of the Y values, yRange[0]=ymin, yRange[1]=ymax.
+	 */
+	public Chart(Shell parent, String title, int style, double[][] data, double[] xData, double[] yRange) {
+		super(parent, style);
 
-        if (style == HISTOGRAM) {
-            isInteger = true;
-        }
-        else {
-            isInteger = false;
-        }
+		if (data == null) {
+			return;
+		}
 
-        if (xData != null) {
-            int len = xData.length;
-            if (len == 2) {
-                this.xmin = xData[0];
-                this.xmax = xData[1];
-            }
-            else {
-                this.xData = xData;
-                xmin = xmax = xData[0];
-                for (int i = 0; i < len; i++) {
-                    if (xData[i] < xmin) {
-                        xmin = xData[i];
-                    }
+		this.windowTitle = title;
 
-                    if (xData[i] > xmax) {
-                        xmax = xData[i];
-                    }
-                }
-            }
-        }
-        else {
-            this.xmin = 1;
-            this.xmax = data[0].length;
-        }
+		format = new java.text.DecimalFormat("0.00E0");
+		this.chartStyle = style;
+		this.data = data;
 
-        this.numberOfLines = Array.getLength(data);
-        this.numberOfPoints = Array.getLength(data[0]);
-        this.lineColors = LINE_COLORS;
+		if (style == HISTOGRAM) {
+			isInteger = true;
+		}
+		else {
+			isInteger = false;
+		}
 
-        if (yRange != null) {
-            // data range is given
-            this.ymin = yRange[0];
-            this.ymax = yRange[1];
-        }
-        else {
-            // search data range from the data
-            findDataRange();
-        }
+		if (xData != null) {
+			int len = xData.length;
+			if (len == 2) {
+				this.xmin = xData[0];
+				this.xmax = xData[1];
+			}
+			else {
+				this.xData = xData;
+				xmin = xmax = xData[0];
+				for (int i = 0; i < len; i++) {
+					if (xData[i] < xmin) {
+						xmin = xData[i];
+					}
 
-        if ((ymax < 0.0001) || (ymax > 100000)) {
-            format = new java.text.DecimalFormat("###.####E0#");
-        }
-        chartP = new ChartPanel();
-        chartP.setBackground(Color.white);
+					if (xData[i] > xmax) {
+						xmax = xData[i];
+					}
+				}
+			}
+		}
+		else {
+			this.xmin = 1;
+			this.xmax = data[0].length;
+		}
 
-        createUI();
-    }
+		this.numberOfLines = Array.getLength(data);
+		this.numberOfPoints = Array.getLength(data[0]);
+		this.lineColors = LINE_COLORS;
 
-    /**
-     * Creates and layouts GUI components.
-     */
-    protected void createUI() {
-        Window owner = getOwner();
+		if (yRange != null) {
+			// data range is given
+			this.ymin = yRange[0];
+			this.ymax = yRange[1];
+		}
+		else {
+			// search data range from the data
+			findDataRange();
+		}
 
-        JPanel contentPane = (JPanel) getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        int w = 640 + (ViewProperties.getFontSize() - 12) * 15;
+		if ((ymax < 0.0001) || (ymax > 100000)) {
+			format = new java.text.DecimalFormat("###.####E0#");
+		}
+	}
+
+	public void open() {
+		Shell parent = getParent();
+		shell = new Shell(parent, SWT.SHELL_TRIM);
+		shell.setText(windowTitle);
+		shell.setImage(ViewProperties.getHdfIcon());
+		shell.setLayout(new GridLayout(1, true));
+
+		chartP = new ChartCanvas(shell, SWT.DOUBLE_BUFFERED);
+		chartP.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		chartP.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+
+		// Add close button
+		Composite buttonComposite = new Composite(shell, SWT.NONE);
+		buttonComposite.setLayout(new GridLayout(1, true));
+		buttonComposite.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+		
+		Button closeButton = new Button(buttonComposite, SWT.PUSH);
+		closeButton.setText("   &Close   ");
+		closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+		closeButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				shell.dispose();
+			}
+		});
+
+		shell.pack();
+
+		int w = 640 + (ViewProperties.getFontSize() - 12) * 15;
         int h = 400 + (ViewProperties.getFontSize() - 12) * 10;
+        
+		shell.setMinimumSize(w, h);
 
-        contentPane.setPreferredSize(new Dimension(w, h));
+		Rectangle parentBounds = parent.getBounds();
+		Point shellSize = shell.getSize();
+		shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+				(parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
-        contentPane.add(chartP, BorderLayout.CENTER);
+		shell.open();
 
-        JButton button = new JButton("Close");
-        button.addActionListener(this);
-        button.setActionCommand("Close");
-        JPanel tmp = new JPanel();
-        tmp.add(button);
-        contentPane.add(tmp, BorderLayout.SOUTH);
+		Display display = parent.getDisplay();
+		while(!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
+	}
 
-        Point l = owner.getLocation();
-        l.x += 220;
-        l.y += 100;
-        setLocation(l);
-        pack();
-    }
+	/** Sets the color of each line of a line plot */
+	public void setLineColors(int c[]) {
+		lineColors = c;
+	}
 
-    public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
+	/** Sets the labels of each line. */
+	public void setLineLabels(String l[]) {
+		lineLabels = l;
+	}
 
-        if (cmd.equals("Close")) {
-            dispose();
-        }
-    }
+	/** Sets the data type of the plot data to be integer. */
+	public void setTypeToInteger() {
+		isInteger = true;
+	}
 
-    /** Sets the color of each line of a line plot */
-    public void setLineColors(Color c[]) {
-        lineColors = c;
-    }
+	/** Find and set the minimum and maximum values of the data */
+	private void findDataRange() {
+		if (data == null) {
+			return;
+		}
 
-    /** Sets the labels of each line. */
-    public void setLineLabels(String l[]) {
-        lineLabels = l;
-    }
+		ymin = ymax = data[0][0];
+		for (int i = 0; i < numberOfLines; i++) {
+			for (int j = 0; j < numberOfPoints; j++) {
+				if (data[i][j] < ymin) {
+					ymin = data[i][j];
+				}
 
-    /** Set the data type of the plot data to be integer. */
-    public void setTypeToInteger() {
-        isInteger = true;
-    }
+				if (data[i][j] > ymax) {
+					ymax = data[i][j];
+				}
+			}
+		}
+	}
 
-    /** find and set the minimum and maximum values of the data */
-    private void findDataRange() {
-        if (data == null) {
-            return;
-        }
+	/** The canvas that paints the data lines. */
+	private class ChartCanvas extends Canvas {
+		public ChartCanvas(Composite parent, int style) {
+			super(parent, style | SWT.BORDER);
 
-        ymin = ymax = data[0][0];
-        for (int i = 0; i < numberOfLines; i++) {
-            for (int j = 0; j < numberOfPoints; j++) {
-                if (data[i][j] < ymin) {
-                    ymin = data[i][j];
-                }
+			this.addPaintListener(new PaintListener() {
+				public void paintControl(PaintEvent e) {
+					// Get the graphics context for this paint event
+					GC g = e.gc;
 
-                if (data[i][j] > ymax) {
-                    ymax = data[i][j];
-                }
-            }
-        }
-    }
+					if (numberOfLines <= 0) {
+						return; // no data
+					}
+					
+                    Point p = getSize();
+					int gap = 20;
+					int xgap = 2 * gap;
+					int ygap = 2 * gap;
+					int legendSpace = 0;
+					if ((chartStyle == LINEPLOT) && (lineLabels != null)) {
+						legendSpace = 60;
+					}
 
-    /** The canvas that paints the data lines. */
-    private class ChartPanel extends JComponent {
-        private static final long serialVersionUID = -3701826094727309097L;
+					int h = p.y - gap;
+					int w = p.x - (3 * gap + legendSpace);
+					int xnpoints = Math.min(10, numberOfPoints - 1);
+					int ynpoints = 10;
 
-        /**
-         * Paints the plot components.
-         */
-        @Override
-        public void paint(Graphics g) {
-            if (numberOfLines <= 0) {
-                return; // no data
-            }
+					// draw the X axis
+					g.drawLine(xgap, h, w + xgap, h);
 
-            Dimension d = getSize();
-            int gap = 20;
-            int xgap = 2 * gap;
-            int ygap = 2 * gap;
-            int legendSpace = 0;
-            if ((chartStyle == LINEPLOT) && (lineLabels != null)) {
-                legendSpace = 60;
-            }
+					// draw the Y axis
+					g.drawLine(ygap, h, ygap, 0);
 
-            int h = d.height - gap;
-            int w = d.width - (3 * gap + legendSpace);
-            int xnpoints = Math.min(10, numberOfPoints - 1);
-            int ynpoints = 10;
+					// draw x labels
+					double xp = 0, x = xmin;
+					double dw = (double) w / (double) xnpoints;
+					double dx = (xmax - xmin) / xnpoints;
+					boolean gtOne = (dx >= 1);
+					for (int i = 0; i <= xnpoints; i++) {
+						x = xmin + i * dx;
+						xp = xgap + i * dw;
+						g.drawLine((int) xp, h, (int) xp, h - 5);
+						if (gtOne) {
+							g.drawString(String.valueOf((int) x), (int) xp - 5, h + gap);
+						}
+						else {
+							g.drawString(String.valueOf(x), (int) xp - 5, h + gap);
+						}
+					}
 
-            // draw the X axis
-            g.drawLine(xgap, h, w + xgap, h);
+					// draw y labels
+					double yp = 0, y = ymin;
+					double dh = (double) h / (double) ynpoints;
+					double dy = (ymax - ymin) / (ynpoints);
+					if (dy > 1) {
+						dy = Math.round(dy * 10.0) / 10.0;
+					}
+					for (int i = 0; i <= ynpoints; i++) {
+						yp = i * dh;
+						y = i * dy + ymin;
+						g.drawLine(ygap, h - (int) yp, ygap + 5, h - (int) yp);
+						if (isInteger) {
+							g.drawString(String.valueOf((int) y), 0, h - (int) yp + 8);
+						}
+						else {
+							g.drawString(format.format(y), 0, h - (int) yp + 8);
+						}
+					}
 
-            // draw the Y axis
-            g.drawLine(ygap, h, ygap, 0);
+					Color c = g.getForeground();
+					double x0, y0, x1, y1;
+					if (chartStyle == LINEPLOT) {
+						dw = (double) w / (double) (numberOfPoints - 1);
 
-            // draw x labels
-            double xp = 0, x = xmin;
-            double dw = (double) w / (double) xnpoints;
-            double dx = (xmax - xmin) / xnpoints;
-            boolean gtOne = (dx >= 1);
-            for (int i = 0; i <= xnpoints; i++) {
-                x = xmin + i * dx;
-                xp = xgap + i * dw;
-                g.drawLine((int) xp, h, (int) xp, h - 5);
-                if (gtOne) {
-                    g
-                            .drawString(String.valueOf((int) x), (int) xp - 5,
-                                    h + gap);
-                }
-                else {
-                    g.drawString(String.valueOf(x), (int) xp - 5, h + gap);
-                }
-            }
+						// use y = a + b* x to calculate pixel positions
+						double b = h / (ymin - ymax);
+						double a = -b * ymax;
+						boolean hasXdata = ((xData != null) && (xData.length >= numberOfPoints));
+						double xRatio = (1 / (xmax - xmin)) * w;
+						double xD = (xmin / (xmax - xmin)) * w;
 
-            // draw y labels
-            double yp = 0, y = ymin;
-            double dh = (double) h / (double) ynpoints;
-            double dy = (ymax - ymin) / (ynpoints);
-            if (dy > 1) {
-                dy = Math.round(dy * 10.0) / 10.0;
-            }
-            for (int i = 0; i <= ynpoints; i++) {
-                yp = i * dh;
-                y = i * dy + ymin;
-                g.drawLine(ygap, h - (int) yp, ygap + 5, h - (int) yp);
-                if (isInteger) {
-                    g.drawString(String.valueOf((int) y), 0, h - (int) yp + 8);
-                }
-                else {
-                    g.drawString(format.format(y), 0, h - (int) yp + 8);
-                }
-            }
+						// draw lines for selected spreadsheet columns
+						for (int i = 0; i < numberOfLines; i++) {
+							if ((lineColors != null)
+									&& (lineColors.length >= numberOfLines)) {
+								
+								g.setForeground(Display.getCurrent().getSystemColor(lineColors[i]));
+							}
 
-            Color c = g.getColor();
-            double x0, y0, x1, y1;
-            if (chartStyle == LINEPLOT) {
-                dw = (double) w / (double) (numberOfPoints - 1);
+							// set up the line data for drawing one line a time
+							if (hasXdata) {
+								x0 = xgap + xData[0] * xRatio - xD;
+							}
+							else {
+								x0 = xgap;
+							}
+							y0 = a + b * data[i][0];
 
-                // use y = a + b* x to calculate pixel positions
-                double b = h / (ymin - ymax);
-                double a = -b * ymax;
-                boolean hasXdata = ((xData != null) && (xData.length >= numberOfPoints));
-                double xRatio = (1 / (xmax - xmin)) * w;
-                double xD = (xmin / (xmax - xmin)) * w;
+							for (int j = 1; j < numberOfPoints; j++) {
+								if (hasXdata) {
+									x1 = xgap + xData[j] * xRatio - xD;
+								}
+								else {
+									x1 = xgap + j * dw;
+								}
 
-                // draw lines for selected spreadsheet columns
-                for (int i = 0; i < numberOfLines; i++) {
-                    if ((lineColors != null)
-                            && (lineColors.length >= numberOfLines)) {
-                        g.setColor(lineColors[i]);
-                    }
+								y1 = a + b * data[i][j];
+								g.drawLine((int) x0, (int) y0, (int) x1, (int) y1);
 
-                    // set up the line data for drawing one line a time
-                    if (hasXdata) {
-                        x0 = xgap + xData[0] * xRatio - xD;
-                    }
-                    else {
-                        x0 = xgap;
-                    }
-                    y0 = a + b * data[i][0];
+								x0 = x1;
+								y0 = y1;
+							}
 
-                    for (int j = 1; j < numberOfPoints; j++) {
-                        if (hasXdata) {
-                            x1 = xgap + xData[j] * xRatio - xD;
-                        }
-                        else {
-                            x1 = xgap + j * dw;
-                        }
+							// draw line legend
+							if ((lineLabels != null)
+									&& (lineLabels.length >= numberOfLines)) {
+								x0 = w + legendSpace;
+								y0 = gap + gap * i;
+								g.drawLine((int) x0, (int) y0, (int) x0 + 7, (int) y0);
+								g.drawString(lineLabels[i], (int) x0 + 10, (int) y0 + 3);
+							}
+						}
 
-                        y1 = a + b * data[i][j];
-                        g.drawLine((int) x0, (int) y0, (int) x1, (int) y1);
+						g.setForeground(c); // set the color back to its default
 
-                        x0 = x1;
-                        y0 = y1;
-                    }
+						// draw a box on the legend
+						if ((lineLabels != null)
+								&& (lineLabels.length >= numberOfLines)) {
+							g.drawRectangle(w + legendSpace - 10, 10, legendSpace, 10 * gap);
+						}
 
-                    // draw line legend
-                    if ((lineLabels != null)
-                            && (lineLabels.length >= numberOfLines)) {
-                        x0 = w + legendSpace;
-                        y0 = gap + gap * i;
-                        g.drawLine((int) x0, (int) y0, (int) x0 + 7, (int) y0);
-                        g
-                                .drawString(lineLabels[i], (int) x0 + 10,
-                                        (int) y0 + 3);
-                    }
-                }
+					} // if (chartStyle == LINEPLOT)
+					else if (chartStyle == HISTOGRAM) {
+						// draw histogram for selected image area
+						xp = xgap;
+						yp = 0;
+						g.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
+						int barWidth = w / numberOfPoints;
+						if (barWidth <= 0) {
+							barWidth = 1;
+						}
+						dw = (double) w / (double) numberOfPoints;
+						for (int j = 0; j < numberOfPoints; j++) {
+							xp = xgap + j * dw;
+							yp = (int) (h * (data[0][j] - ymin) / (ymax - ymin));
+							g.fillRectangle((int) xp, (int) (h - yp), barWidth, (int) yp);
+						}
 
-                g.setColor(c); // set the color back to its default
-
-                // draw a box on the legend
-                if ((lineLabels != null)
-                        && (lineLabels.length >= numberOfLines)) {
-                    g.drawRect(w + legendSpace - 10, 10, legendSpace, 10 * gap);
-                }
-
-            } // if (chartStyle == LINEPLOT)
-            else if (chartStyle == HISTOGRAM) {
-                // draw histogram for selected image area
-                xp = xgap;
-                yp = 0;
-                g.setColor(Color.blue);
-                int barWidth = w / numberOfPoints;
-                if (barWidth <= 0) {
-                    barWidth = 1;
-                }
-                dw = (double) w / (double) numberOfPoints;
-                for (int j = 0; j < numberOfPoints; j++) {
-                    xp = xgap + j * dw;
-                    yp = (int) (h * (data[0][j] - ymin) / (ymax - ymin));
-                    g.fillRect((int) xp, (int) (h - yp), barWidth, (int) yp);
-                }
-
-                g.setColor(c); // set the color back to its default
-            } // else if (chartStyle == HISTOGRAM)
-        } // public void paint(Graphics g)
-    } // private class ChartPanel extends Canvas
-
+						g.setForeground(c); // set the color back to its default
+					} // else if (chartStyle == HISTOGRAM)
+				}
+			});
+		}
+	}
 }

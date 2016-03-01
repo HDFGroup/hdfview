@@ -51,7 +51,6 @@ import hdf.object.ScalarDS;
  * @version 2.4 1/1/2016
  */
 public class NewImageDialog extends Dialog {
-	private static final long serialVersionUID = 6204900461720887966L;
 	
 	private Shell       shell;
 
@@ -98,8 +97,7 @@ public class NewImageDialog extends Dialog {
 
 	public void open() {
 		Shell parent = getParent();
-		shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-    			SWT.BORDER | SWT.APPLICATION_MODAL);
+		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("New HDF Image...");
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
@@ -114,7 +112,9 @@ public class NewImageDialog extends Dialog {
     	label.setText("Image name: ");
     	
     	nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
-    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+    	fieldData.minimumWidth = 300;
+    	nameField.setLayoutData(fieldData);
     	
     	label = new Label(content, SWT.LEFT);
     	label.setText("Parent Group: ");
@@ -174,7 +174,7 @@ public class NewImageDialog extends Dialog {
         
         checkIndex = new Button(typeComposite, SWT.RADIO);
         checkIndex.setText("Indexed colormap");
-        checkIndex.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkIndex.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkIndex.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		checkInterlacePixel.setSelection(true);
@@ -186,7 +186,7 @@ public class NewImageDialog extends Dialog {
         
         checkTrueColor = new Button(typeComposite, SWT.RADIO);
         checkTrueColor.setText("24-bit truecolor");
-        checkTrueColor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkTrueColor.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkTrueColor.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		checkInterlacePixel.setEnabled(true);
@@ -203,11 +203,11 @@ public class NewImageDialog extends Dialog {
         
         checkInterlacePixel = new Button(layoutComposite, SWT.RADIO);
         checkInterlacePixel.setText("Pixel interlace");
-        checkInterlacePixel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkInterlacePixel.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         
         checkInterlacePlane = new Button(layoutComposite, SWT.RADIO);
         checkInterlacePlane.setText("Plane interlace");
-        checkInterlacePlane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkInterlacePlane.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
     	
     	
     	// Create Ok/Cancel button region
@@ -249,7 +249,7 @@ public class NewImageDialog extends Dialog {
     	
         shell.pack();
         
-        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
@@ -276,7 +276,7 @@ public class NewImageDialog extends Dialog {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
             error.setText(shell.getText());
-            error.setMessage("Dataset name is not specified.");
+            error.setMessage("Image name is not specified.");
             error.open();
             return null;
         }
@@ -285,7 +285,7 @@ public class NewImageDialog extends Dialog {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
             error.setText(shell.getText());
-            error.setMessage("Dataset name cannot contain path.");
+            error.setMessage("Image name cannot contain path.");
             error.open();
             return null;
         }

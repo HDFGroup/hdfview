@@ -174,15 +174,15 @@ public class H5Datatype extends Datatype {
      * <p>
      *
      * @see #fromNative(int nativeID)
-     * @param tid
+     * @param nativeID
      *            the native datatype identifier.
      */
-    public H5Datatype(long tid) {
-        super(tid);
+    public H5Datatype(long nativeID) {
+        super(nativeID);
 
-        description = getDatatypeDescription(tid);
+        description = getDatatypeDescription(nativeID);
         log.trace("H5Datatype(int nativeID) description={}", description);
-        fromNative(tid);
+        fromNative(nativeID);
     }
 
     /*
@@ -378,7 +378,9 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public void fromNative(long tid) {
-        int tclass = -1, tsize = -1, torder = -1;
+        int tclass = -1;
+        long tsize = -1;
+        int torder = -1;
         boolean isChar = false, isUchar = false;
         log.trace("fromNative start");
 
@@ -474,13 +476,13 @@ public class H5Datatype extends Datatype {
                 try {
                     int nMember = H5.H5Tget_nmembers(tid);
                     String name = null;
-                    byte[] val = new byte[tsize];
+                    byte[] val = new byte[(int)tsize];
                     String enumStr = "";
                     for (int i = 0; i < nMember; i++) {
                         name = H5.H5Tget_member_name(tid, i);
                         H5.H5Tget_member_value(tid, i, val);
                         enumStr += name + "=";
-                        switch (H5.H5Tget_size(tid)) {
+                        switch ((int)H5.H5Tget_size(tid)) {
                         case 1:
                             enumStr += (HDFNativeData.byteToByte(val[0]))[0];
                             break;
@@ -915,7 +917,8 @@ public class H5Datatype extends Datatype {
         }
 
         // data type information
-        int tclass = -1, tsize = -1;
+        int tclass = -1;
+        long tsize = -1;
 
         try {
             tclass = H5.H5Tget_class(tid);
@@ -993,7 +996,7 @@ public class H5Datatype extends Datatype {
         }
         else if ((tclass == HDF5Constants.H5T_STRING) || (tclass == HDF5Constants.H5T_REFERENCE)) {
             log.trace("allocateArray class.H5T_STRING || H5T_REFERENCE={}", tclass);
-            data = new byte[size * tsize];
+            data = new byte[(int) (size * tsize)];
         }
         else if (tclass == HDF5Constants.H5T_ARRAY) {
             // use the base datatype to define the array
@@ -1025,7 +1028,7 @@ public class H5Datatype extends Datatype {
         }
         else if ((tclass == HDF5Constants.H5T_OPAQUE) || (tclass == HDF5Constants.H5T_BITFIELD)) {
             log.trace("allocateArray class.H5T_OPAQUE || H5T_BITFIELD={}", tclass);
-            data = new byte[size * tsize];
+            data = new byte[(int) (size * tsize)];
         }
         else {
             log.debug("allocateArray class.????={}", tclass);
@@ -1044,11 +1047,11 @@ public class H5Datatype extends Datatype {
      *            The datatype identifier.
      * @return The size of the datatype in bytes.
      *
-     * @see hdf.hdf5lib.H5#H5Tget_size(int)
+     * @see hdf.hdf5lib.H5#H5Tget_size(long)
      */
-    public static final int getDatatypeSize(int tid) {
+    public static final long getDatatypeSize(long tid) {
         // data type information
-        int tsize = -1;
+        long tsize = -1;
 
         try {
             tsize = H5.H5Tget_size(tid);
@@ -1092,7 +1095,9 @@ public class H5Datatype extends Datatype {
         String description = "Unknown";
 
         // data type information
-        int tclass = -1, tsize = -1, tsign = -1;
+        int tclass = -1;
+        long tsize = -1;
+        int tsign = -1;
 
         try {
             tclass = H5.H5Tget_class(tid);
@@ -1188,7 +1193,7 @@ public class H5Datatype extends Datatype {
             description = "Bitfield";
         }
         else if (tclass == HDF5Constants.H5T_ENUM) {
-            byte[] evalue = new byte[tsize];
+            byte[] evalue = new byte[(int) tsize];
             String enames = " ( ";
             try {
                 int n = H5.H5Tget_nmembers(tid);
@@ -1343,6 +1348,7 @@ public class H5Datatype extends Datatype {
         if (tid >= 0) {
             try {
                 int tclass = H5.H5Tget_class(tid);
+                log.trace("isUnsigned() tclass = {}", tclass);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
                         && tclass != HDF5Constants.H5T_OPAQUE) {

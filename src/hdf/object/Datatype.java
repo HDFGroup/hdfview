@@ -182,7 +182,7 @@ public abstract class Datatype extends HObject {
     /**
      * The size (in bytes) of the datatype.
      */
-    protected int datatypeSize;
+    protected long datatypeSize;
 
     /**
      * The byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, and
@@ -363,7 +363,7 @@ public abstract class Datatype extends HObject {
      *
      * @return the size of the datatype.
      */
-    public int getDatatypeSize() {
+    public long getDatatypeSize() {
         return datatypeSize;
     }
 

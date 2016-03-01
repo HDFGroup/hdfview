@@ -41,6 +41,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -209,7 +210,7 @@ public class DefaultImageView implements ImageView {
     */
     private Object autoGainData;
 
-    //private BitSet bitmask;
+    private BitSet bitmask;
     private boolean convertByteData = false;
     private BITMASK_OP bitmaskOP = BITMASK_OP.EXTRACT;
 
@@ -225,8 +226,8 @@ public class DefaultImageView implements ImageView {
     * @param theView
     *            the main HDFView.
     */
-    public DefaultImageView(ViewManager theView) {
-        this(theView, null);
+    public DefaultImageView(Shell parent, ViewManager theView) {
+        this(parent, theView, null);
     }
 
     /**
@@ -242,11 +243,9 @@ public class DefaultImageView implements ImageView {
     *            applying bitmask, and etc. Predefined keys are listed at
     *            ViewProperties.DATA_VIEW_KEY.
     */
-    public DefaultImageView(ViewManager theView, HashMap map) {
+    public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
         shell = new Shell(display);
-
-        //setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-        //setFrameIcon(ViewProperties.getImageIcon());
+        shell.setImage(ViewProperties.getImageIcon());
 
         viewer = theView;
         zoomFactor = 1.0f;
@@ -471,6 +470,8 @@ public class DefaultImageView implements ImageView {
                 //viewer.removeDataView(this);
             }
         });
+
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         shell.open();
 
@@ -913,7 +914,9 @@ public class DefaultImageView implements ImageView {
             item.setText(String.valueOf(i));
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    //animationSpeed = i;
+                    MenuItem item = (MenuItem) e.item;
+
+                    animationSpeed = Integer.parseInt(item.getText());
                 }
             });
         }
@@ -1255,7 +1258,6 @@ public class DefaultImageView implements ImageView {
     * @throws OutOfMemoryError
     */
     private void getIndexedImage() throws Exception, OutOfMemoryError {
-        /*
         if (imagePalette==null)
             imagePalette = dataset.getPalette();
 
@@ -1290,8 +1292,8 @@ public class DefaultImageView implements ImageView {
             isAutoContrastFailed = (!computeAutoGainImageData(gainBias,null));
         }
 
-        int w = dataset.getWidth();
-        int h = dataset.getHeight();
+        long w = dataset.getWidth();
+        long h = dataset.getHeight();
 
         if (isAutoContrastFailed) {
             doAutoGainContrast = false;
@@ -1303,7 +1305,6 @@ public class DefaultImageView implements ImageView {
         }
 
         image = createIndexedImage(imageByteData, imagePalette, w, h);
-        */
     }
 
     /**
@@ -1311,7 +1312,6 @@ public class DefaultImageView implements ImageView {
     * @throws OutOfMemoryError
     */
     private void getTrueColorImage() throws Exception, OutOfMemoryError {
-        /*
         isPlaneInterlace = (dataset.getInterlace() == ScalarDS.INTERLACE_PLANE);
 
         long[] selected = dataset.getSelectedDims();
@@ -1329,17 +1329,15 @@ public class DefaultImageView implements ImageView {
         dataset.clearData();
         data = dataset.getData();
 
-
-        int w = dataset.getWidth();
-        int h = dataset.getHeight();
+        long w = dataset.getWidth();
+        long h = dataset.getHeight();
 
         // converts raw data to image data
         imageByteData = Tools.getBytes(data, dataRange, w, h, false, dataset.getFilteredImageValues(),
                 imageByteData);
 
 
-        image = createTrueColorImage(imageByteData, isPlaneInterlace, w, h);
-        */
+        image = createTrueColorImage(imageByteData, isPlaneInterlace, (int)w, (int)h);
     }
 
     /**
@@ -1577,8 +1575,8 @@ public class DefaultImageView implements ImageView {
     private void applyAutoGain(double[] gb, double[] range) {
 
         if (computeAutoGainImageData(gb, range)) {
-            int w = (int)dataset.getWidth();
-            int h = (int)dataset.getHeight();
+            long w = dataset.getWidth();
+            long h = dataset.getHeight();
             image = createIndexedImage(imageByteData, imagePalette, w, h);
             //imageComponent.setImage(image);
             zoomTo(zoomFactor);
@@ -2015,7 +2013,7 @@ public class DefaultImageView implements ImageView {
     *            the height of the image.
     * @return the image.
     */
-    private Image createIndexedImage(byte[] imageData, byte[][] palette, int w, int h)
+    private Image createIndexedImage(byte[] imageData, byte[][] palette, long w, long h)
     {
         /*
         bufferedImage = (BufferedImage)Tools.createIndexedImage(bufferedImage, imageData, palette, w, h);
@@ -2117,8 +2115,8 @@ public class DefaultImageView implements ImageView {
             applyAutoGain(gainBias_current, newRange);
         }
         else {
-            int w = (int)dataset.getWidth();
-            int h = (int)dataset.getHeight();
+            long w = dataset.getWidth();
+            long h = dataset.getHeight();
 
             invalidValueIndex.clear(); // data range changed. need to reset invalid values
             imageByteData = Tools.getBytes(data, newRange, w, h, !dataset

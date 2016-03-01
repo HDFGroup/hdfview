@@ -14,63 +14,71 @@
 
 package hdf.view;
 
-import org.eclipse.swt.graphics.Image;
-
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.CellEditor;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.WindowConstants;
-import javax.swing.border.LineBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
 /**
- * To view and change palette.
- * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * Displays a dialog for viewing and change palettes.
+ *
+ * @author Jordan T. Henderson
+ * @version 2.4 2/27/16
  */
-public class DefaultPaletteView extends JDialog implements PaletteView,
-        MouseListener, MouseMotionListener, ActionListener, ItemListener {
-    private static final long serialVersionUID = -5092012421988388661L;
+public class DefaultPaletteView extends Dialog {
+
+    private Shell shell;
+
+    private ScalarDS dataset;
+
+    /** Panel that draws plot of data values. */
+    private ChartCanvas chartP;
+    private ImageView imageView;
+    private PaletteValueTable paletteValueTable;
+
+    private Button checkRed, checkGreen, checkBlue;
+
+    private Combo choicePalette;
+
+    private Image originalImage, currentImage;
+
     private final Color[] lineColors = { Color.red, Color.green, Color.blue };
     private final String lineLabels[] = { "Red", "Green", "Blue" };
+
 
     private static String PALETTE_GRAY = "Gray";
     private static String PALETTE_DEFAULT = "Default";
@@ -80,49 +88,172 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
     private static String PALETTE_NATURE = "Nature";
     private static String PALETTE_WAVE = "Wave";
 
-    private JRadioButton checkRed, checkGreen, checkBlue;
-    /** Panel that draws plot of data values. */
-    private ChartPanel chartP;
     private int x0, y0; // starting point of mouse drag
-    private Image originalImage, currentImage;
-    boolean isPaletteChanged = false;
-    byte[][] palette;
-    private ScalarDS dataset;
-    private ImageView imageView;
-    private int[][] paletteData;
-    @SuppressWarnings("rawtypes")
-    private JComboBox choicePalette;
-    private PaletteValueTable paletteValueTable;
-    private int  numberOfPalettes;
-    private boolean startEditing = false;
 
-    public DefaultPaletteView(ImageView theImageView) {
-        this(null, theImageView);
+    byte[][] palette;
+    private int numberOfPalettes;
+    private int[][] paletteData;
+
+    boolean isPaletteChanged = false;
+    private boolean startEditing = false;
+    private boolean isH5 = false;
+
+
+    public DefaultPaletteView(Shell parent, ImageView theImageView) {
+        this(parent, null, theImageView);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public DefaultPaletteView(ViewManager theViewer, ImageView theImageView) {
-        super((JFrame) theViewer, true);
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    public DefaultPaletteView(Shell parent, ViewManager theViewer, ImageView theImageView) {
+        super(parent, SWT.APPLICATION_MODAL);
+
         imageView = theImageView;
         dataset = (ScalarDS) imageView.getDataObject();
-        
+
         numberOfPalettes = 1;
-        choicePalette = new JComboBox();
-        choicePalette.addItemListener(this);
 
-        boolean isH5 = dataset.getFileFormat().isThisType(
+        paletteData = new int[3][256];
+        byte[][] imagePalette = imageView.getPalette();
+
+        int d = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 256; j++) {
+                d = imagePalette[i][j];
+                if (d < 0) {
+                    d += 256;
+                }
+                paletteData[i][j] = d;
+            }
+        }
+
+        imageView = theImageView;
+
+        x0 = y0 = 0;
+        originalImage = currentImage = imageView.getImage();
+        palette = new byte[3][256];
+
+        isH5 = dataset.getFileFormat().isThisType(
                 FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+    }
 
-        choicePalette.addItem("Select palette");
+    public void open() {
+        Shell parent = getParent();
+        shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+                SWT.BORDER | SWT.APPLICATION_MODAL);
+        shell.setText("Image Palette for - " + dataset.getPath() + dataset.getName());
+        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setLayout(new GridLayout(1, true));
+
+
+        // Create the content composite for the Canvas
+        Composite content = new Composite(shell, SWT.BORDER);
+        content.setLayout(new FillLayout());
+        content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        chartP = new ChartCanvas(content, SWT.DOUBLE_BUFFERED);
+        chartP.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+
+
+
+        // Create the toolbar composite
+        Composite tools = new Composite(shell, SWT.NONE);
+        tools.setLayout(new RowLayout(SWT.HORIZONTAL));
+        tools.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        // Add buttons for changing line colors
+        Composite rgbComposite = new Composite(tools, SWT.BORDER);
+        rgbComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rgbComposite.setLayoutData(new RowData());
+
+        checkRed = new Button(rgbComposite, SWT.RADIO);
+        checkRed.setText("Red");
+        checkRed.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+
+        checkGreen = new Button(rgbComposite, SWT.RADIO);
+        checkGreen.setText("Green");
+        checkGreen.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_GREEN));
+
+        checkBlue = new Button(rgbComposite, SWT.RADIO);
+        checkBlue.setText("Blue");
+        checkBlue.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
+
+        checkRed.setSelection(true);
+        checkGreen.setSelection(false);
+        checkBlue.setSelection(false);
+
+        // Add controls for selecting palettes and showing values
+        Composite paletteComposite = new Composite(tools, SWT.BORDER);
+        paletteComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
+        paletteComposite.setLayoutData(new RowData());
+
+        choicePalette = new Combo(paletteComposite, SWT.SINGLE);
+        choicePalette.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                int idx = choicePalette.getSelectionIndex();
+                if (idx <= 0) {
+                    return;
+                }
+
+                byte[][] imagePalette = null;
+                Object item = choicePalette.getItem(idx);
+
+                if (item.equals(PALETTE_DEFAULT)) {
+                    imagePalette = dataset.getPalette();
+                }
+                else if (item.equals(PALETTE_GRAY)) {
+                    imagePalette = Tools.createGrayPalette();
+                }
+                else if (item.equals(PALETTE_REVERSE_GRAY)) {
+                    imagePalette = Tools.createReverseGrayPalette();
+                }
+                else if (item.equals(PALETTE_GRAY_WAVE)) {
+                    imagePalette = Tools.createGrayWavePalette();
+                }
+                else if (item.equals(PALETTE_RAINBOW)) {
+                    imagePalette = Tools.createRainbowPalette();
+                }
+                else if (item.equals(PALETTE_NATURE)) {
+                    imagePalette = Tools.createNaturePalette();
+                }
+                else if (item.equals(PALETTE_WAVE)) {
+                    imagePalette = Tools.createWavePalette();
+                }
+                else if (idx > 0 && idx <= numberOfPalettes) {
+                    imagePalette = ((ScalarDS) dataset).readPalette(idx - 1);
+                }
+                else {
+                    imagePalette = Tools.readPalette((String)item);
+                }
+
+                if (imagePalette == null) {
+                    return;
+                }
+
+                int d = 0;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 256; j++) {
+                        d = imagePalette[i][j];
+                        if (d < 0) {
+                            d += 256;
+                        }
+                        paletteData[i][j] = d;
+                    }
+                }
+
+                //chartP.repaint();
+                isPaletteChanged = true;
+            }
+        });
+
+        choicePalette.add("Select palette");
+
         String paletteName = ((ScalarDS) dataset).getPaletteName(0);
-        
+
         if (paletteName!= null)
             paletteName = paletteName.trim();
-        
+
         if (paletteName!= null && paletteName.length()>0)
-            choicePalette.addItem(paletteName);
-        
+            choicePalette.add(paletteName);
+
         if (isH5 && (dataset instanceof ScalarDS)) {
             byte[] palRefs = ((ScalarDS) dataset).getPaletteRefs();
             if ((palRefs != null) && (palRefs.length > 8)) {
@@ -131,226 +262,94 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
         }
         for (int i = 1; i < numberOfPalettes; i++) {
             paletteName = ((ScalarDS) dataset).getPaletteName(i);
-            choicePalette.addItem(paletteName);
+            choicePalette.add(paletteName);
         }
-        choicePalette.addItem(PALETTE_GRAY);
-        choicePalette.addItem(PALETTE_GRAY_WAVE);
-        choicePalette.addItem(PALETTE_RAINBOW);
-        choicePalette.addItem(PALETTE_NATURE);
-        choicePalette.addItem(PALETTE_WAVE);
+        choicePalette.add(PALETTE_GRAY);
+        choicePalette.add(PALETTE_GRAY_WAVE);
+        choicePalette.add(PALETTE_RAINBOW);
+        choicePalette.add(PALETTE_NATURE);
+        choicePalette.add(PALETTE_WAVE);
         Vector<?> plist = ViewProperties.getPaletteList();
         int n = plist.size();
         for (int i = 0; i < n; i++)
-            choicePalette.addItem((String) plist.get(i));
+            choicePalette.add((String) plist.get(i));
 
-        chartP = new ChartPanel();
-        chartP.setBackground(Color.white);
+        choicePalette.select(0);
 
-        paletteData = new int[3][256];
-        byte[][] imagePalette = imageView.getPalette();
-        this.setTitle("Image Palette for - " + dataset.getPath()
-                + dataset.getName());
 
-        int d = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 256; j++) {
-                d = imagePalette[i][j];
-                if (d < 0) {
-                    d += 256;
+        Button showValueButton = new Button(paletteComposite, SWT.PUSH);
+        showValueButton.setText("Show Values");
+        showValueButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                if (paletteValueTable == null) {
+                    paletteValueTable = new PaletteValueTable(shell, SWT.NONE);
                 }
-                paletteData[i][j] = d;
+                //paletteValueTable.refresh();
+                //paletteValueTable.setVisible(true);
             }
-        }
+        });
 
-        imageView = theImageView;
-        chartP.addMouseListener(this);
-        chartP.addMouseMotionListener(this);
 
-        x0 = y0 = 0;
-        //originalImage = currentImage = imageView.getImage();
-        palette = new byte[3][256];
+        // Add Ok/Cancel/Preview buttons
+        Composite buttonComposite = new Composite(tools, SWT.BORDER);
+        buttonComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
+        buttonComposite.setLayoutData(new RowData());
 
-        createUI();
-        setVisible(true);
-    }
+        Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("   &Ok   ");
+        okButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                if (isPaletteChanged) {
+                    //updatePalette();
+                    isPaletteChanged = false;
+                    imageView.setPalette(palette);
+                    imageView.setImage(currentImage);
+                }
 
-    /** returns the data object displayed in this data viewer */
-    public HObject getDataObject() {
-        return dataset;
-    }
+                shell.dispose();
+            }
+        });
 
-    /**
-     * Creates and layouts GUI componentes.
-     */
-    private void createUI() {
-        Window owner = getOwner();
+        Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setText("&Cancel");
+        cancelButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                imageView.setImage(originalImage);
+                shell.dispose();
+            }
+        });
 
-        JPanel contentPane = (JPanel) getContentPane();
-        contentPane.setLayout(new BorderLayout(5, 5));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        int w = 700 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 500 + (ViewProperties.getFontSize() - 12) * 10;
-        contentPane.setPreferredSize(new Dimension(w, h));
-
-        contentPane.add(chartP, BorderLayout.CENTER);
-
-        JButton button = new JButton("  Ok  ");
-        button.addActionListener(this);
-        button.setActionCommand("Ok");
-        JPanel buttonP = new JPanel();
-        buttonP.setBorder(new LineBorder(Color.GRAY));
-        buttonP.add(button);
-        button = new JButton("Cancel");
-        button.addActionListener(this);
-        button.setActionCommand("Cancel");
-        buttonP.add(button);
-        button = new JButton("Preview");
-        button.addActionListener(this);
-        button.setActionCommand("Preview");
-        buttonP.add(button);
-
-        JPanel bottomP = new JPanel();
-        bottomP.setLayout(new BorderLayout(20, 2));
-        bottomP.add(buttonP, BorderLayout.EAST);
-
-        checkRed = new JRadioButton("Red");
-        checkRed.setForeground(Color.red);
-        checkGreen = new JRadioButton("Green");
-        checkGreen.setForeground(Color.green);
-        checkBlue = new JRadioButton("Blue");
-        checkBlue.setForeground(Color.blue);
-        checkRed.setSelected(true);
-        ButtonGroup bgroup = new ButtonGroup();
-        bgroup.add(checkRed);
-        bgroup.add(checkGreen);
-        bgroup.add(checkBlue);
-        JPanel checkP = new JPanel();
-        checkP.setBorder(new LineBorder(Color.GRAY));
-        checkP.add(checkRed);
-        checkP.add(checkGreen);
-        checkP.add(checkBlue);
-        bottomP.add(checkP, BorderLayout.WEST);
-
-        JPanel valueP = new JPanel();
-        valueP.setLayout(new GridLayout(1, 2));
-        valueP.setBorder(new LineBorder(Color.GRAY));
-        JButton valueButton = new JButton("Show Values");
-        valueButton.setActionCommand("Show palette values");
-        valueButton.addActionListener(this);
-        valueP.add(choicePalette);
-        valueP.add(valueButton);
-        bottomP.add(valueP, BorderLayout.CENTER);
-
-        contentPane.add(bottomP, BorderLayout.SOUTH);
-
-        Point l = owner.getLocation();
-        l.x += 350;
-        l.y += 200;
-        setLocation(l);
-        pack();
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-
-        if (cmd.equals("Ok")) {
-            if (isPaletteChanged) {
-                this.updatePalette();
-                isPaletteChanged = false;
-                imageView.setPalette(palette);
+        Button previewButton = new Button(buttonComposite, SWT.PUSH);
+        previewButton.setText("&Preview");
+        previewButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                //updatePalette();
                 imageView.setImage(currentImage);
             }
-            super.dispose();
-        }
-        else if (cmd.equals("Cancel")) {
-            imageView.setImage(originalImage);
-            super.dispose();
-        }
-        else if (cmd.equals("Preview")) {
-            this.updatePalette();
-            imageView.setImage(currentImage);
-        }
-        else if (cmd.equals("Show palette values")) {
-            if (paletteValueTable == null) {
-                paletteValueTable = new PaletteValueTable(this);
-            }
-            paletteValueTable.refresh();
-            paletteValueTable.setVisible(true);
-        }
-        else if (cmd.equals("Hide palette values")) {
-            if (paletteValueTable != null) {
-                paletteValueTable.setVisible(false);
-            }
+        });
+
+
+        shell.pack();
+
+        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+        Rectangle parentBounds = parent.getBounds();
+        Point shellSize = shell.getSize();
+        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+
+        shell.open();
+
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
         }
     }
 
-    @Override
-    public void dispose() {
-        imageView.setImage(originalImage);
-        super.dispose();
-    }
-
-    public void itemStateChanged(ItemEvent e) {
-        Object src = e.getSource();
-
-        if (!src.equals(choicePalette)) {
-            return;
-        }
-
-        int idx = choicePalette.getSelectedIndex();
-        if (idx <= 0) {
-            return;
-        }
-
-        byte[][] imagePalette = null;
-        Object item = choicePalette.getSelectedItem();
-
-        if (item.equals(PALETTE_DEFAULT)) {
-            imagePalette = dataset.getPalette();
-        }
-        else if (item.equals(PALETTE_GRAY)) {
-            imagePalette = Tools.createGrayPalette();
-        }
-        else if (item.equals(PALETTE_REVERSE_GRAY)) {
-            imagePalette = Tools.createReverseGrayPalette();
-        }
-        else if (item.equals(PALETTE_GRAY_WAVE)) {
-            imagePalette = Tools.createGrayWavePalette();
-        }
-        else if (item.equals(PALETTE_RAINBOW)) {
-            imagePalette = Tools.createRainbowPalette();
-        }
-        else if (item.equals(PALETTE_NATURE)) {
-            imagePalette = Tools.createNaturePalette();
-        }
-        else if (item.equals(PALETTE_WAVE)) {
-            imagePalette = Tools.createWavePalette();
-        }
-        else if (idx > 0 && idx <= numberOfPalettes) {
-            imagePalette = ((ScalarDS) dataset).readPalette(idx - 1);
-        }
-        else {
-            imagePalette = Tools.readPalette((String)item);
-        }
-
-        if (imagePalette == null) {
-            return;
-        }
-
-        int d = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 256; j++) {
-                d = imagePalette[i][j];
-                if (d < 0) {
-                    d += 256;
-                }
-                paletteData[i][j] = d;
-            }
-        }
-
-        chartP.repaint();
-        isPaletteChanged = true;
-
+    /** Returns the data object displayed in this data viewer */
+    public HObject getDataObject() {
+        return dataset;
     }
 
     private void updatePalette() {
@@ -368,8 +367,8 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
                 palette[1], // g - the array of green color components
                 palette[2]); // b - the array of blue color components
 
-        int w = (int)dataset.getWidth();
-        int h = (int)dataset.getHeight();
+        long w = dataset.getWidth();
+        long h = dataset.getHeight();
         MemoryImageSource memoryImageSource = null;
 
         try {
@@ -380,345 +379,239 @@ public class DefaultPaletteView extends JDialog implements PaletteView,
         }
 
         if (memoryImageSource == null) {
-            memoryImageSource = new MemoryImageSource(w, h, colorModel,
-                    imageView.getImageByteData(), 0, w);
+            memoryImageSource = new MemoryImageSource((int)w, (int)h, colorModel,
+                    imageView.getImageByteData(), 0, (int)w);
         }
         else {
             memoryImageSource.newPixels(imageView.getImageByteData(),
-                    colorModel, 0, w);
+                    colorModel, 0, (int)w);
         }
 
         //currentImage = Toolkit.getDefaultToolkit().createImage(
         //        memoryImageSource);
     }
 
-    public void mouseClicked(MouseEvent e) {
-    } // MouseListener
+    /** The canvas that paints the data lines. */
+    private class ChartCanvas extends Canvas {
+        private Canvas canvas;
 
-    public void mouseReleased(MouseEvent e) {
-        if ((paletteValueTable != null) && paletteValueTable.isVisible()) {
-            paletteValueTable.refresh();
-        }
-    } // MouseListener
+        public ChartCanvas(Composite parent, int style) {
+            super(parent, style);
 
-    public void mouseEntered(MouseEvent e) {
-    } // MouseListener
+            canvas = new Canvas(parent, style);
 
-    public void mouseExited(MouseEvent e) {
-    } // MouseListener
+            canvas.addPaintListener(new PaintListener() {
+                public void paintControl(PaintEvent e) {
+                    // Get the graphics context for this paint event
+                    GC g = e.gc;
 
-    public void mouseMoved(MouseEvent e) {
-    } // MouseMotionListener
+                    Point p = canvas.getSize();
+                    int gap = 20;
+                    int legendSpace = 60;
+                    int h = p.y - gap;
+                    int w = p.x - 3 * gap - legendSpace;
 
-    // implementing MouseListener
-    public void mousePressed(MouseEvent e) {
-        // x0 = e.getX()-40; // takes the horizontal gap
-        // if (x0 < 0) x0 = 0;
-        // y0 = e.getY()+20;
-    }
+                    // draw the X axis
+                    g.drawLine(2 * gap, h, w + 2 * gap, h);
 
-    // implementing MouseMotionListener
-    public void mouseDragged(MouseEvent e) {
-        int x1 = e.getX() - 40;// takes the vertical gap
-        if (x1 < 0) {
-            x1 = 0;
-        }
-        int y1 = e.getY() + 20;
+                    // draw the Y axis
+                    g.drawLine(2 * gap, h, 2 * gap, 0);
 
-        Dimension d = chartP.getSize();
-        double ry = 255 / (double) d.height;
-        double rx = 255 / (double) d.width;
+                    // draw X and Y labels: 10 labels for x and y
+                    int dh = h / 10;
+                    int dw = w / 10;
+                    int dx = 25;
+                    double dy = 25;
+                    int xp = 2 * gap, yp = 0, x = 0, x0, y0, x1, y1;
+                    double y = 0;
 
-        int lineIdx = 0;
-        if (checkGreen.isSelected()) {
-            lineIdx = 1;
-        }
-        else if (checkBlue.isSelected()) {
-            lineIdx = 2;
-        }
-
-        int idx = 0;
-        double b = (double) (y1 - y0) / (double) (x1 - x0);
-        double a = y0 - b * x0;
-        double value = y0 * ry;
-        int i0 = Math.min(x0, x1);
-        int i1 = Math.max(x0, x1);
-        for (int i = i0; i < i1; i++) {
-            idx = (int) (rx * i);
-            if (idx > 255) {
-                continue;
-            }
-            value = 255 - (a + b * i) * ry;
-            if (value < 0) {
-                value = 0;
-            }
-            else if (value > 255) {
-                value = 255;
-            }
-            paletteData[lineIdx][idx] = (int) value;
-        }
-
-        chartP.repaint();
-        isPaletteChanged = true;
-    }
-
-    /** The dialog to show the palette values in spreadsheet. */
-    private final class PaletteValueTable extends JDialog {
-        private static final long serialVersionUID = 6105012612969555535L;
-        private JTable valueTable;
-        private DefaultTableModel valueTableModel;
-        String rgbName = "Color";
-        String idxName = "Index";
-        int editingRow =-1, editingCol=-1;
-
-        public PaletteValueTable(DefaultPaletteView owner) {
-            super(owner);
-            String[] columnNames = { idxName, "Red", "Green", "Blue", rgbName };
-            valueTableModel = new DefaultTableModel(columnNames, 256);
-
-            valueTable = new JTable(valueTableModel) {
-                private static final long serialVersionUID = -2823793138915014637L;
-
-                @Override
-                public boolean isCellEditable(int row, int col) {
-                    return (col > 0 && col < 4);
-                }
-
-                @Override
-                public Object getValueAt(int row, int col) {
-                    if (startEditing && row==editingRow && col==editingCol)
-                        return "";
-
-                    if (col == 0)
-                        return String.valueOf(row);
-                    else if (col < 4) {
-                        return String.valueOf(paletteData[col - 1][row]);
-                    }
-                    else {
-                        return "";
-                    }
-                }
-
-                @Override
-                public boolean editCellAt(int row, int column, java.util.EventObject e) 
-                {
-                    if (!isCellEditable(row, column)) {
-                        return super.editCellAt(row, column, e);
+                    // draw X and Y grid labels
+                    g.drawString(String.valueOf((int) y), 0, h + 8);
+                    g.drawString(String.valueOf(x), xp - 5, h + gap);
+                    for (int i = 0; i < 10; i++) {
+                        xp += dw;
+                        yp += dh;
+                        x += dx;
+                        y += dy;
+                        g.drawLine(xp, h, xp, h - 5);
+                        g.drawLine(2 * gap, h - yp, 2 * gap + 5, h - yp);
+                        g.drawString(String.valueOf((int) y), 0, h - yp + 8);
+                        g.drawString(String.valueOf(x), xp - 5, h + gap);
                     }
 
-                    if (e instanceof KeyEvent) {
-                        KeyEvent ke = (KeyEvent) e;
-                        if (ke.getID() == KeyEvent.KEY_PRESSED) {
-                            startEditing = true;
-                            editingRow = row;
-                            editingCol = column;
+                    org.eclipse.swt.graphics.Color c = g.getForeground();
+                    for (int i = 0; i < 3; i++) {
+                        //TODO: Change line colors to SWT.COLOR
+                        //g.setForeground(lineColors[i]);
+
+                        // set up the line data for drawing one line a time
+                        for (int j = 0; j < 255; j++) {
+                            x0 = (w * j / 255) + 2 * gap;
+                            y0 = (h - h * paletteData[i][j] / 255);
+                            x1 = (w * (j + 1) / 255) + 2 * gap;
+                            y1 = (h - h * (paletteData[i][j + 1]) / 255);
+                            g.drawLine(x0, y0, x1, y1);
                         }
+
+                        x0 = w + legendSpace;
+                        y0 = gap + gap * i;
+                        g.drawLine(x0, y0, x0 + 7, y0);
+                        g.drawString(lineLabels[i], x0 + 10, y0 + 3);
                     }
 
-                    return super.editCellAt(row, column, e);
+                    g.setForeground(c); // set the color back to its default
+
+                    // draw a box on the legend
+                    g.drawRectangle(w + legendSpace - 10, 10, legendSpace, 10 * gap);
                 }
+            });
 
-                @Override
-                public void editingStopped(ChangeEvent e) {
-                    int row = getEditingRow();
-                    int col = getEditingColumn();
-
-                    if (!isCellEditable(row, col)) {
-                        return;
-                    }
-
-                    String oldValue = (String) getValueAt(row, col);
-                    super.editingStopped(e);
-                    startEditing = false;
-                    editingRow = -1;
-                    editingCol = -1;
-
-                    Object source = e.getSource();
-
-                    if (source instanceof CellEditor) {
-                        CellEditor editor = (CellEditor) source;
-                        String newValue = (String) editor.getCellEditorValue();
-                        setValueAt(oldValue, row, col); // set back to what it
-                                                        // is
-                        updatePaletteValue(newValue, row, col - 1);
+            canvas.addMouseListener(new MouseAdapter() {
+                public void mouseUp(MouseEvent e) {
+                    if ((paletteValueTable != null) /*&& paletteValueTable.isVisible()*/) {
+                        paletteValueTable.refresh();
                     }
                 }
-            };
+            });
 
-            valueTable.setName("PaletteValue");
-            valueTable.getColumn(rgbName).setCellRenderer(
-                    new DefaultTableCellRenderer() {
-                        private static final long serialVersionUID = 8390954944015521331L;
-                        Color color = Color.white;
 
-                        @Override
-                        public java.awt.Component getTableCellRendererComponent(
-                                JTable table, Object value, boolean isSelected,
-                                boolean hasFocus, int row, int col) {
-                            java.awt.Component comp = super
-                                    .getTableCellRendererComponent(table,
-                                            value, isSelected, hasFocus, row,
-                                            col);
-                            color = new Color(paletteData[0][row],
-                                    paletteData[1][row], paletteData[2][row]);
-                            comp.setBackground(color);
-                            return comp;
-                        }
-                    });
-
-            valueTable.getColumn(idxName).setCellRenderer(
-                    new DefaultTableCellRenderer() {
-                        private static final long serialVersionUID = 2786027382023940417L;
-
-                        @Override
-                        public java.awt.Component getTableCellRendererComponent(
-                                JTable table, Object value, boolean isSelected,
-                                boolean hasFocus, int row, int col) {
-                            java.awt.Component comp = super
-                                    .getTableCellRendererComponent(table,
-                                            value, isSelected, hasFocus, row,
-                                            col);
-                            comp.setBackground(Color.LIGHT_GRAY);
-                            return comp;
-                        }
-                    });
-
-            valueTable.setRowSelectionAllowed(false);
-            valueTable.setCellSelectionEnabled(true);
-            valueTable.getTableHeader().setReorderingAllowed(false);
-            valueTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-            // set cell height for large fonts
-            int cellRowHeight = Math.max(16, valueTable.getFontMetrics(
-                    valueTable.getFont()).getHeight());
-            valueTable.setRowHeight(cellRowHeight);
-
-            JScrollPane scroller = new JScrollPane(valueTable);
-
-            JPanel contentPane = (JPanel) getContentPane();
-            int w = 300 + (ViewProperties.getFontSize() - 12) * 10;
-            int h = 600 + (ViewProperties.getFontSize() - 12) * 15;
-            contentPane.setPreferredSize(new Dimension(w, h));
-            contentPane.setLayout(new BorderLayout(5, 5));
-            contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            contentPane.add(scroller, BorderLayout.CENTER);
-
-            JButton button = new JButton("  Ok  ");
-            button.addActionListener(owner);
-            button.setActionCommand("Hide palette values");
-
-            JPanel tmpP = new JPanel();
-            tmpP.add(button);
-            contentPane.add(tmpP, BorderLayout.SOUTH);
-
-            Point l = owner.getLocation();
-            l.x += 100;
-            l.y += 100;
-            setLocation(l);
-            pack();
-        }
-
-        private void updatePaletteValue(String strValue, int row, int col) {
-            if (strValue == null) {
-                return;
-            }
-
-            int value = 0;
-
-            try {
-                value = Integer.parseInt(strValue);
-            }
-            catch (Exception ex) {
-                return;
-            }
-
-            if (value < 0 || value > 255) {
-                JOptionPane.showMessageDialog(this,
-                        "Value is out of range [0, 255]\n", getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            paletteData[col][row] = value;
-            chartP.repaint();
-            isPaletteChanged = true;
         }
 
         public void refresh() {
-            valueTable.editingStopped(new ChangeEvent(valueTable));
-            valueTable.updateUI();
+            canvas.redraw();
         }
     }
 
-    /** The canvas that paints the data lines. */
-    private final class ChartPanel extends JComponent {
-        private static final long serialVersionUID = -6861041412971944L;
+    /** The dialog to show the palette values in spreadsheet. */
+    private class PaletteValueTable extends Dialog {
 
-        /**
-         * Paints the plot components.
-         */
-        @Override
-        public void paint(Graphics g) {
-            Dimension d = getSize();
-            int gap = 20;
-            int legendSpace = 60;
-            int h = d.height - gap;
-            int w = d.width - 3 * gap - legendSpace;
+        private Shell tableShell;
 
-            // draw the X axis
-            g.drawLine(2 * gap, h, w + 2 * gap, h);
+        Table valueTable;
 
-            // draw the Y axis
-            g.drawLine(2 * gap, h, 2 * gap, 0);
+        String rgbName = "Color";
+        String idxName = "Index";
 
-            // draw X and Y labels: 10 labels for x and y
-            int dh = h / 10;
-            int dw = w / 10;
-            int dx = 25;
-            double dy = 25;
-            int xp = 2 * gap, yp = 0, x = 0, x0, y0, x1, y1;
-            double y = 0;
+        public PaletteValueTable(Shell parent, int style) {
+            super(parent, style);
+        }
 
-            // draw X and Y grid labels
-            g.drawString(String.valueOf((int) y), 0, h + 8);
-            g.drawString(String.valueOf(x), xp - 5, h + gap);
-            for (int i = 0; i < 10; i++) {
-                xp += dw;
-                yp += dh;
-                x += dx;
-                y += dy;
-                g.drawLine(xp, h, xp, h - 5);
-                g.drawLine(2 * gap, h - yp, 2 * gap + 5, h - yp);
-                g.drawString(String.valueOf((int) y), 0, h - yp + 8);
-                g.drawString(String.valueOf(x), xp - 5, h + gap);
-            }
+        public void open() {
+            Shell parent = getParent();
+            tableShell = new Shell(parent, SWT.SHELL_TRIM | SWT.PRIMARY_MODAL);
+            tableShell.setText("");
+            tableShell.setImage(ViewProperties.getHdfIcon());
+            tableShell.setLayout(new GridLayout(1, true));
 
-            Color c = g.getColor();
-            for (int i = 0; i < 3; i++) {
-                g.setColor(lineColors[i]);
+            Composite content = new Composite(tableShell, SWT.NONE);
+            content.setLayout(new GridLayout(1, true));
+            content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-                // set up the line data for drawing one line a time
-                for (int j = 0; j < 255; j++) {
-                    x0 = (w * j / 255) + 2 * gap;
-                    y0 = (h - h * paletteData[i][j] / 255);
-                    x1 = (w * (j + 1) / 255) + 2 * gap;
-                    y1 = (h - h * (paletteData[i][j + 1]) / 255);
-                    g.drawLine(x0, y0, x1, y1);
+            String[] columnNames = { idxName, "Red", "Green", "Blue", rgbName };
+
+            valueTable = new Table(content, SWT.BORDER | SWT.FULL_SELECTION);
+
+            // Only allow editing of rgb values
+            valueTable.addListener(SWT.MouseDoubleClick, valueTableCellEditor);
+
+
+            // set cell height for large fonts
+            //int cellRowHeight = Math.max(16, valueTable.getFontMetrics(
+            //        valueTable.getFont()).getHeight());
+            //valueTable.setRowHeight(cellRowHeight);
+
+
+
+
+            Button okButton = new Button(content, SWT.PUSH);
+            okButton.setText("   &Ok   ");
+            okButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    tableShell.dispose();
                 }
+            });
 
-                x0 = w + legendSpace;
-                y0 = gap + gap * i;
-                g.drawLine(x0, y0, x0 + 7, y0);
-                g.drawString(lineLabels[i], x0 + 10, y0 + 3);
+
+            tableShell.pack();
+
+            tableShell.setMinimumSize(tableShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+            Rectangle parentBounds = parent.getBounds();
+            Point shellSize = tableShell.getSize();
+            tableShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+
+            tableShell.open();
+
+            Display display = parent.getDisplay();
+            while(!tableShell.isDisposed()) {
+                if (!display.readAndDispatch())
+                    display.sleep();
             }
+        }
 
-            g.setColor(c); // set the color back to its default
+        public void refresh() {
+            valueTable.redraw();
+        }
 
-            // draw a box on the legend
-            g.drawRect(w + legendSpace - 10, 10, legendSpace, 10 * gap);
-        } // public void paint(Graphics g)
+        private Listener valueTableCellEditor = new Listener() {
+            public void handleEvent(Event event) {
+                final TableEditor editor = new TableEditor(valueTable);
+                editor.horizontalAlignment = SWT.LEFT;
+                editor.grabHorizontal = true;
 
-    } // private class ChartPanel extends Canvas
+                Rectangle clientArea = valueTable.getClientArea();
+                Point pt = new Point(event.x, event.y);
+                int index = valueTable.getTopIndex();
 
-} // private class PaletteView extends ChartView
+                while (index < valueTable.getItemCount()) {
+                    boolean visible = false;
+                    final TableItem item = valueTable.getItem(index);
 
+                    for (int i = 0; i < valueTable.getColumnCount(); i++) {
+                        Rectangle rect = item.getBounds(i);
+
+                        if (rect.contains(pt)) {
+                            final int column = i;
+                            final Text text = new Text(valueTable, SWT.NONE);
+
+                            Listener textListener = new Listener() {
+                                public void handleEvent(final Event e) {
+                                    switch (e.type) {
+                                    case SWT.FocusOut:
+                                        item.setText(column, text.getText());
+                                        text.dispose();
+                                        break;
+                                    case SWT.Traverse:
+                                        switch (e.detail) {
+                                        case SWT.TRAVERSE_RETURN:
+                                            item.setText(column, text.getText());
+                                        case SWT.TRAVERSE_ESCAPE:
+                                            text.dispose();
+                                            e.doit = false;
+                                        }
+
+                                        break;
+                                    }
+                                }
+                            };
+                            text.addListener(SWT.FocusOut, textListener);
+                            text.addListener(SWT.Traverse, textListener);
+                            editor.setEditor(text, item, i);
+                            text.setText(item.getText(i));
+                            text.selectAll();
+                            text.setFocus();
+                            return;
+                        }
+                        if (!visible && rect.intersects(clientArea)) {
+                            visible = true;
+                        }
+                    }
+                    if (!visible)
+                        return;
+                    index++;
+                }
+            }
+        };
+    }
+}
