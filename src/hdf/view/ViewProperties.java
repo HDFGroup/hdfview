@@ -1380,13 +1380,13 @@ public class ViewProperties extends Properties {
 
     /** returns the default work directory, where the open file starts. */
     public static String getWorkDir() {
-        String workPath = System.getProperty("hdfview.workdir");
+        String workPath = workDir;
         if (workPath == null) {
             if (workDir.equals("user.home")) {
                 workPath = System.getProperty("user.home");
             }
         }
-
+        log.trace("getWorkDir: workPath={}", workPath);
         return workPath;
     }
 
@@ -1520,6 +1520,7 @@ public class ViewProperties extends Properties {
 
     /** set the path of the default work directory */
     public static void setWorkDir(String wDir) {
+        log.trace("ViewProperties:setWorkDir wDir={}", wDir);
         workDir = wDir;
     }
 

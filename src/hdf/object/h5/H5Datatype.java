@@ -30,9 +30,9 @@ import hdf.object.FileFormat;
 /**
  * This class defines HDF5 data type characteristics and APIs for a data type.
  * <p>
- * This class provides several methods to convert an HDF5 dataype identifier to a dataype object, and vice versa. A
- * dataype object is described by four basic fields: datatype class, size, byte order, and sign, while an HDF5 dataype
- * is presented by a datetype identifier.
+ * This class provides several methods to convert an HDF5 datatype identifier to a datatype object, and vice versa. A
+ * datatype object is described by four basic fields: datatype class, size, byte order, and sign, while an HDF5 datatype
+ * is presented by a datatype identifier.
  * <p>
  *
  * @version 1.1 9/4/2007
@@ -284,11 +284,17 @@ public class H5Datatype extends Datatype {
         // Look for matches
         for (int i = 0; i < inSize; i++) {
             val = Array.getInt(inValues, i);
+            boolean notfound = true;
             for (int j = 0; j < nMembers; j++) {
                 if (val == values[j]) {
                     outNames[i] = names[j];
+                    notfound = false;
                     break;
                 }
+            }
+            if(notfound) {
+                outNames[i] = "**ENUM ERR "+String.valueOf(val)+"**";
+                log.trace("convertEnumValueToName default name");
             }
         }
 
@@ -1325,21 +1331,21 @@ public class H5Datatype extends Datatype {
      * Checks if a datatype specified by the identifier is an unsigned integer.
      * <p>
      *
-     * @param datatype
+     * @param tid
      *            the datatype ID to be checked.
      *
      * @return true is the datatype is an unsigned integer; otherwise returns false.
      */
-    public static final boolean isUnsigned(int datatype) {
+    public static final boolean isUnsigned(int tid) {
         boolean unsigned = false;
 
-        if (datatype >= 0) {
+        if (tid >= 0) {
             try {
-                int tclass = H5.H5Tget_class(datatype);
+                int tclass = H5.H5Tget_class(tid);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
                         && tclass != HDF5Constants.H5T_OPAQUE) {
-                    int tsign = H5.H5Tget_sign(datatype);
+                    int tsign = H5.H5Tget_sign(tid);
                     if (tsign == HDF5Constants.H5T_SGN_NONE) {
                         unsigned = true;
                     }
@@ -1352,7 +1358,7 @@ public class H5Datatype extends Datatype {
                 }
             }
             catch (Exception ex) {
-                log.debug("{} Datatype {} failure", getDatatypeDescription(datatype), datatype, ex);
+                log.debug("{} Datatype {} failure", getDatatypeDescription(tid), tid, ex);
                 unsigned = false;
             }
         }

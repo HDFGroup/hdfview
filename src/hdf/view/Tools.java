@@ -1663,9 +1663,9 @@ public final class Tools {
      * example, if v=15, nbytes=1, the string will be "00001111".
      * 
      * @param v
-     *            the lon value
+     *            the long value
      * @param nbytes
-     *            nubmer of bytes in the integer
+     *            number of bytes in the integer
      * @return the string representation of the unsigned long value represented
      *         by the argument in binary (base 2).
      */

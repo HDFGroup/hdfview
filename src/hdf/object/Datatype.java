@@ -327,10 +327,10 @@ public abstract class Datatype extends HObject {
      * <p>
      * 
      * @see #fromNative(int nativeID)
-     * @param type
+     * @param tid
      *            the native datatype identifier.
      */
-    public Datatype(int type) {
+    public Datatype(int tid) {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE);
     }
 

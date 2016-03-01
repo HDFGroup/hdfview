@@ -79,7 +79,7 @@ import hdf.HDFVersions;
  * @author Jordan T. Henderson
  * @version 2.4 DATE
  */
-public class HDFView implements ViewManager, DropTargetListener {	
+public class HDFView implements ViewManager, DropTargetListener {
 	
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 	

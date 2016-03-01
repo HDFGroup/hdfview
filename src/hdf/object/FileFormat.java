@@ -1884,7 +1884,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      * 
      */
-    public int open(int... propList) throws Exception {
+    public int open(int... indexList) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 

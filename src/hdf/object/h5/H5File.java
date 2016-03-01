@@ -755,6 +755,7 @@ public class H5File extends FileFormat {
                     if (rank > 0) {
                         long[] dims = new long[rank];
                         H5.H5Sget_simple_extent_dims(sid, dims, null);
+                        log.trace("updateReferenceDataset() rank={}, dims={}", rank, dims);
                         for (int j = 0; j < rank; j++) {
                             size *= (int) dims[j];
                         }
@@ -778,7 +779,7 @@ public class H5File extends FileFormat {
                     H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, refs);
                 }
                 else {
-                    log.debug("dest file dataset failed to open");
+                    log.debug("updateReferenceDataset() dest file dataset failed to open");
                 }
             }
             catch (Exception ex) {
@@ -892,7 +893,6 @@ public class H5File extends FileFormat {
         if (doCreateFile) {
 
             int fapl = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
-            ;
 
             if ((createFlag & FILE_CREATE_EARLY_LIB) != FILE_CREATE_EARLY_LIB) {
                 H5.H5Pset_libver_bounds(fapl, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST);
@@ -945,8 +945,9 @@ public class H5File extends FileFormat {
      * @see hdf.object.FileFormat#open(int...)
      */
     @Override
-    public int open(int... propList) throws Exception {
-        setIndexType(propList[0]);
+    public int open(int... indexList) throws Exception {
+        setIndexType(indexList[0]);
+        setIndexOrder(indexList[1]);
         return open(true);
     }
 
@@ -1010,7 +1011,7 @@ public class H5File extends FileFormat {
             return;
         }
         // The current working directory may be changed at Dataset.read()
-        // by H5Dchdir_ext()by this file to make it work for external
+        // by System.setProperty("user.dir", newdir) to make it work for external
         // datasets. We need to set it back to the original current working
         // directory (when hdf-java application started) before the file
         // is closed/opened. Otherwise, relative path, e.g. "./test.h5" may
@@ -1019,7 +1020,7 @@ public class H5File extends FileFormat {
         if (rootPath == null) {
             rootPath = System.getProperty("user.dir");
         }
-        H5.H5Dchdir_ext(rootPath);
+        System.setProperty("user.dir", rootPath);//H5.H5Dchdir_ext(rootPath);
 
         // clean up unused objects
         if (rootObject != null) {
@@ -1645,7 +1646,7 @@ public class H5File extends FileFormat {
     public void reloadTree(Group g) {
         if (fid < 0 || rootObject == null || g == null)
             return;
-        
+
         depth_first(g, Integer.MIN_VALUE);
     }
 
@@ -1867,7 +1868,7 @@ public class H5File extends FileFormat {
      * Opens access to this file.
      *
      * @param loadFullHierarchy
-     *            if true, load the full hierarchy into memory; otherwise just opens the file idenfitier.
+     *            if true, load the full hierarchy into memory; otherwise just opens the file identifier.
      * @return the file identifier if successful; otherwise returns negative value.
      */
     private int open(boolean loadFullHierarchy) throws Exception {
@@ -1882,6 +1883,7 @@ public class H5File extends FileFormat {
          * open(loadFullHierarchy, plist); try { H5.H5Pclose(plist); } catch (Exception ex) {}
          */
 
+        log.trace("H5File:open loadFull={}", loadFullHierarchy);
         the_fid = open(loadFullHierarchy, plist);
 
         return the_fid;
@@ -1900,14 +1902,14 @@ public class H5File extends FileFormat {
         }
         log.trace("open(loadFullHierarchy = {}, plist = {}) start", loadFullHierarchy, plist);
 
-        // The cwd may be changed at Dataset.read() by H5Dchdir_ext()
+        // The cwd may be changed at Dataset.read() by System.setProperty("user.dir", newdir)
         // to make it work for external datasets. We need to set it back
         // before the file is closed/opened.
         String rootPath = System.getProperty("hdfview.workdir");
         if (rootPath == null) {
             rootPath = System.getProperty("user.dir");
         }
-        H5.H5Dchdir_ext(rootPath);
+        System.setProperty("user.dir", rootPath);//H5.H5Dchdir_ext(rootPath);
 
         // check for valid file access permission
         if (flag < 0) {
@@ -1974,13 +1976,13 @@ public class H5File extends FileFormat {
         log.trace("open(loadFullHeirarchy = {}, plist = {}): finish", loadFullHierarchy, plist);
         return fid;
     }
-    
+
     /**
      * Loads the file structure into memory.
      */
     private void loadIntoMemory() {
         if (fid < 0) return;
-        
+
         rootObject = new H5Group(this, "/", null, null);
         depth_first(rootObject, 0);
     }
@@ -2001,7 +2003,7 @@ public class H5File extends FileFormat {
         String fullPath = null;
         String ppath = null;
         int gid = -1;
-        
+
         log.trace("depth_first({}): start", parentObject);
 
         H5Group pgroup = (H5Group) parentObject;
@@ -2079,7 +2081,7 @@ public class H5File extends FileFormat {
             if (obj_type == HDF5Constants.H5O_TYPE_GROUP) {
                 //H5Group g = new H5Group(this, obj_name, fullPath, pgroup, oid);
                 H5Group g = new H5Group(this, obj_name, fullPath, pgroup);
-                
+
                 pgroup.addToMemberList(g);
 
                 // detect and stop loops
@@ -2184,7 +2186,7 @@ public class H5File extends FileFormat {
         log.trace("depth_first({}): finish", parentObject);
         return nTotal;
     } // private depth_first()
-    
+
     /**
      * Returns a list of all the members of this H5File in a
      * breadth-first ordering that are rooted at the specified
@@ -2194,20 +2196,20 @@ public class H5File extends FileFormat {
         List<HObject> allMembers = new Vector<HObject>();
         Queue<HObject> queue = new LinkedList<HObject>();
         HObject currentObject = obj;
-        
+
         queue.add(currentObject);
-        
+
         while(!queue.isEmpty()) {
             currentObject = queue.remove();
             allMembers.add(currentObject);
-            
+
             if(currentObject instanceof Group) {
                 queue.addAll(((Group) currentObject).getMemberList());
             } else {
                 continue;
             }
         }
-        
+
         return allMembers;
     }
 
@@ -2344,7 +2346,7 @@ public class H5File extends FileFormat {
         Datatype datatype = null;
         int tid_src = -1, gid_dst = -1;
         String path = null;
-        
+
         if (pgroup.isRoot()) {
             path = HObject.separator;
         }
