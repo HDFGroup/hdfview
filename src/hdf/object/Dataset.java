@@ -1308,7 +1308,7 @@ public abstract class Dataset extends HObject {
      *
      * @return The size of the datatype
      */
-    public int getSize(long tid) {
+    public long getSize(long tid) {
         return -1;
     }
 
