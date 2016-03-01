@@ -193,6 +193,9 @@ public class NewGroupDialog extends Dialog {
         	
         	dummyComposite = new Composite(moreOptionsComposite, SWT.NONE);
         	dummyComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        } else {
+        	// Add dummy label to take up space as dialog is resized
+        	new Label(shell, SWT.NONE).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         }
         
         buttonComposite = new Composite(shell, SWT.NONE);

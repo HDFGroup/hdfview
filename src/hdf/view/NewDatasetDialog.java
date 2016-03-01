@@ -61,7 +61,9 @@ public class NewDatasetDialog extends Dialog {
 
 	private Shell             shell;
 	
-    private Text              nameField, currentSizeField, maxSizeField, chunkSizeField,
+	private String            maxSize;
+	
+    private Text              nameField, currentSizeField, chunkSizeField,
                               stringLengthField, fillValueField;
 
     private Combo             parentChoice, classChoice, sizeChoice, endianChoice,
@@ -149,8 +151,8 @@ public class NewDatasetDialog extends Dialog {
     	Label datasetNameLabel = new Label(fieldComposite, SWT.LEFT);
     	datasetNameLabel.setText("Dataset name: ");
     	
-    	Text datasetNameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	datasetNameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	
     	Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
     	parentGroupLabel.setText("Parent group: ");
@@ -358,7 +360,6 @@ public class NewDatasetDialog extends Dialog {
                 }
 
                 currentSizeField.setText(currentSizeStr);
-                maxSizeField.setText(maxSizeStr);
 
                 String currentStr = currentSizeField.getText();
                 int idx = currentStr.lastIndexOf("x");
@@ -394,17 +395,17 @@ public class NewDatasetDialog extends Dialog {
         setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
-        		String strMax = maxSizeField.getText();
-                if (strMax == null || strMax.length() < 1) strMax = currentSizeField.getText();
-
+                if (maxSize == null || maxSize.length() < 1)
+                	maxSize = currentSizeField.getText();
+        		
                 String msg = new InputDialog(shell, "Set Max Size", "Enter max dimension sizes. \n"
                         + "Use \"unlimited\" for unlimited dimension size.\n\n" + "For example,\n" + "    200 x 100\n"
-                        + "    100 x unlimited\n\n", strMax).open();
+                        + "    100 x unlimited\n\n", maxSize).open();
 
                 if (msg == null || msg.length() < 1)
-                    maxSizeField.setText(currentSizeField.getText());
+                    maxSize = currentSizeField.getText();
                 else
-                    maxSizeField.setText(msg);
+                    maxSize = msg;
 
                 checkMaxSize();
         	}
@@ -612,17 +613,17 @@ public class NewDatasetDialog extends Dialog {
 	private void checkMaxSize() {
 		boolean isChunkNeeded = false;
         String dimStr = currentSizeField.getText();
-        String maxStr = maxSizeField.getText();
-        StringTokenizer stMax = new StringTokenizer(maxStr, "x");
+        String maxSizeStr = maxSize;
+        StringTokenizer stMax = new StringTokenizer(maxSizeStr, "x");
         StringTokenizer stDim = new StringTokenizer(dimStr, "x");
 
         if (stMax.countTokens() != stDim.countTokens()) {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
             error.setText(shell.getText());
-            error.setMessage("Wrong number of values in the max dimension size " + maxStr);
+            error.setMessage("Wrong number of values in the max dimension size " + maxSize);
             error.open();
-            maxSizeField.setText(null);
+            maxSize = null;
             return;
         }
 
@@ -645,9 +646,9 @@ public class NewDatasetDialog extends Dialog {
                     shell.getDisplay().beep();
                     MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
                     error.setText(shell.getText());
-                    error.setMessage("Invalid max dimension size: " + maxStr);
+                    error.setMessage("Invalid max dimension size: " + maxSize);
                     error.open();
-                    maxSizeField.setText(null);
+                    maxSize = null;
                     return;
                 }
             }
@@ -669,9 +670,9 @@ public class NewDatasetDialog extends Dialog {
                 shell.getDisplay().beep();
                 MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
                 error.setText(shell.getText());
-                error.setMessage("Invalid max dimension size: " + maxStr);
+                error.setMessage("Invalid max dimension size: " + maxSize);
                 error.open();
-                maxSizeField.setText(null);
+                maxSize = null;
                 return;
             }
             else if (max > dim) {
@@ -686,7 +687,7 @@ public class NewDatasetDialog extends Dialog {
                 shell.getDisplay().beep();
                 MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
                 error.setText(shell.getText());
-                error.setMessage("Chunking is required for the max dimensions of " + maxStr);
+                error.setMessage("Chunking is required for the max dimensions of " + maxSize);
                 error.open();
                 checkChunked.setSelection(true);
             }
@@ -694,11 +695,11 @@ public class NewDatasetDialog extends Dialog {
         else {
             for (int i = 1; i < rank; i++) {
                 if (maxdims[i] <= 0) {
-                    maxSizeField.setText(currentSizeField.getText());
+                    maxSize = currentSizeField.getText();
                     shell.getDisplay().beep();
                     MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
                     error.setText(shell.getText());
-                    error.setMessage("Only dim[0] can be unlimited." + maxStr);
+                    error.setMessage("Only dim[0] can be unlimited." + maxSize);
                     error.open();
                     return;
                 }
@@ -714,6 +715,7 @@ public class NewDatasetDialog extends Dialog {
         long dims[], maxdims[] = null, chunks[] = null;
 
         name = nameField.getText().trim();
+        System.out.println(name);
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
@@ -896,9 +898,9 @@ public class NewDatasetDialog extends Dialog {
             dims[i] = l;
         }
 
-        String maxFieldStr = maxSizeField.getText();
-        if (maxFieldStr != null && maxFieldStr.length() > 1) {
-            st = new StringTokenizer(maxFieldStr, "x");
+        String maxSizeStr = maxSize;
+        if (maxSizeStr != null && maxSizeStr.length() > 1) {
+            st = new StringTokenizer(maxSizeStr, "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
                 MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
@@ -924,7 +926,7 @@ public class NewDatasetDialog extends Dialog {
                         shell.getDisplay().beep();
                         MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
                         error.setText(shell.getText());
-                        error.setMessage("Invalid max dimension size: " + maxSizeField.getText());
+                        error.setMessage("Invalid max dimension size: " + maxSize);
                         error.open();
                         return null;
                     }

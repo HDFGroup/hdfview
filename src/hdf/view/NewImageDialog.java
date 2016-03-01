@@ -277,7 +277,7 @@ public class NewImageDialog extends Dialog {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
             error.setText(shell.getText());
-            error.setMessage("Dataset name is not specified.");
+            error.setMessage("Image name is not specified.");
             error.open();
             return null;
         }
@@ -286,7 +286,7 @@ public class NewImageDialog extends Dialog {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
             error.setText(shell.getText());
-            error.setMessage("Dataset name cannot contain path.");
+            error.setMessage("Image name cannot contain path.");
             error.open();
             return null;
         }

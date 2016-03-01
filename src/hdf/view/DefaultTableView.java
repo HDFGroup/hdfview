@@ -663,8 +663,7 @@ public class DefaultTableView implements TableView {
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
         
         // Create the Row Header layer
-        IDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(
-                bodyDataProvider);
+        IDataProvider rowHeaderDataProvider = new RowHeader(bodyDataProvider);
         ILayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
                 rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer);
 
@@ -818,8 +817,7 @@ public class DefaultTableView implements TableView {
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
         
         // Create the Row Header layer
-        IDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(
-                bodyDataProvider);
+        IDataProvider rowHeaderDataProvider = new RowHeader(bodyDataProvider);
         ILayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
                 rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer);
 
@@ -3945,6 +3943,61 @@ public class DefaultTableView implements TableView {
 		public int getRowCount() {
 			return nRows;
 		}
+    }
+    
+    // Custom Row Header renderer to set Row Header based on Index Base
+    private class RowHeader implements IDataProvider {
+    	
+    	private int rank;
+    	private long[] dims;
+    	
+    	private int nrows;
+        
+        public RowHeader(IDataProvider bodyDataProvider) {
+        	this.rank = dataset.getRank();
+        	
+        	if (rank <= 0) {
+                try {
+                    dataset.init();
+                    log.trace("createTable: dataset inited");
+                }
+                catch (Exception ex) {
+                	showError(ex.getMessage(), "createTable:" + shell.getText());
+                	dataValue = null;
+                    return;
+                }
+
+                rank = dataset.getRank();
+            }
+        	
+        	this.dims = dataset.getSelectedDims();
+        	
+        	if (rank > 1) {
+                this.nrows = dataset.getHeight();
+            } else {
+            	this.nrows = (int) dims[0];
+            }
+        }
+    	
+    	@Override
+    	public int getColumnCount() {
+    		return 1;
+    	}
+    	
+    	@Override
+    	public int getRowCount() {
+    		return nrows;
+    	}
+    	
+    	@Override
+    	public Object getDataValue(int columnIndex, int rowIndex) {
+    		return String.valueOf(indexBase + rowIndex);
+    	}
+    	
+    	@Override
+    	public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
+    		// Should not allow user to set row header titles
+    	}
     }
     
     // Context-menu for dealing with region and object references
