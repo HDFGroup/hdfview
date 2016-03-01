@@ -83,7 +83,6 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
  * @version 2.4 9/6/2007
  */
 public class DefaultTreeView implements TreeView {
-    private static final long             serialVersionUID    = 4092566164712521186L;
     
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
     
@@ -1983,7 +1982,7 @@ public class DefaultTreeView implements TreeView {
         if (isNewFile) accessID = accessID - FileFormat.OPEN_NEW;
         
         if (isFileOpen(filename)) {
-            viewer.showStatus("File is in use");
+            viewer.showStatus("File is in use.");
             return null;
         }
 
@@ -2505,7 +2504,6 @@ public class DefaultTreeView implements TreeView {
      * ChangeIndexingDialog displays file index options.
      */
     private class ChangeIndexingDialog extends Dialog {
-        private static final long serialVersionUID = 1048114401768228742L;
         
         Object result;
         

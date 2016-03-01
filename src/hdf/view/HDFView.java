@@ -76,11 +76,10 @@ import hdf.HDFVersions;
  * library package. The source code of the view package (hdf.view) should
  * be compiled with the library package (hdf.hdflib and hdf.hdf5lib).
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 DATE
  */
-public class HDFView implements ViewManager, DropTargetListener {
-	private static final long     serialVersionUID = 2211017444445918998L;	
+public class HDFView implements ViewManager, DropTargetListener {	
 	
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 	
@@ -1016,6 +1015,8 @@ public class HDFView implements ViewManager, DropTargetListener {
 			public void widgetSelected(SelectionEvent e) {
 				String filename = url_bar.getText();
 				
+				if(filename.length() <= 0) return;
+				
 				if(!(filename.startsWith("http://") || filename.startsWith("ftp://"))) {
 			        openLocalFile(filename, FileFormat.WRITE);
 				} else {
@@ -1427,11 +1428,6 @@ public class HDFView implements ViewManager, DropTargetListener {
     	return null;
     }
     
-    // Switch to SWT when possible (only here for compile reasons)
-    public void mouseEventFired(java.awt.event.MouseEvent e) {
-    	
-    }
-    
     public void dragEnter(DropTargetEvent evt) {
     }
     
@@ -1607,6 +1603,15 @@ public class HDFView implements ViewManager, DropTargetListener {
 			} else {
     		    currentFile = filename;
 			}
+			
+			try {
+		        url_bar.remove(filename);
+		    }
+		    catch (Exception ex) {
+		    }
+		    
+		    url_bar.add(filename, 0);
+            url_bar.select(0);
     		
     		try {
 		        treeView.openFile(filename, accessMode);

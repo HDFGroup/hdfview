@@ -51,7 +51,6 @@ import hdf.object.ScalarDS;
  * @version 2.4 1/1/2016
  */
 public class NewImageDialog extends Dialog {
-	private static final long serialVersionUID = 6204900461720887966L;
 	
 	private Shell       shell;
 

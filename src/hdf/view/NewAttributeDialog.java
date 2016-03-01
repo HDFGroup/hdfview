@@ -51,7 +51,6 @@ import hdf.object.HObject;
  * @version 2.4 1/7/2016
  */
 public class NewAttributeDialog extends Dialog {
-	private static final long serialVersionUID                = 4883237570834215275L;
 	
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 	

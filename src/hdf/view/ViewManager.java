@@ -46,7 +46,4 @@ public abstract interface ViewManager {
 
     /** Returns the current TreeView */
     public abstract TreeView getTreeView();
-
-    /** Tree mouse event fired */
-    public abstract void mouseEventFired(java.awt.event.MouseEvent e);
 }

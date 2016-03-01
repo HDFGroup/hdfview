@@ -54,8 +54,7 @@ import hdf.object.ScalarDS;
  * @author Jordan T. Henderson
  * @version 2.4 12/31/2015
  */
-public class NewDatasetDialog extends Dialog {	
-	private static final long serialVersionUID = 5381164938654184532L;
+public class NewDatasetDialog extends Dialog {
 
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 

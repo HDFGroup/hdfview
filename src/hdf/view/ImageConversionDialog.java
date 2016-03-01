@@ -59,7 +59,7 @@ public class ImageConversionDialog extends Dialog {
 
     private String toFileExtension;
 
-    private List fileList;
+    private List<FileFormat> fileList;
 
     private String currentDir;
 
@@ -78,7 +78,7 @@ public class ImageConversionDialog extends Dialog {
      *            The list of currently open files
      */
     public ImageConversionDialog(Shell parent, String typeFrom, String typeTo,
-            String dir, List openFiles) {
+            String dir, List<FileFormat> openFiles) {
     	super(parent, SWT.APPLICATION_MODAL);
     	
     	fileTypeFrom = typeFrom;
@@ -286,7 +286,7 @@ public class ImageConversionDialog extends Dialog {
         // check if the file is in use
         if (fileList != null) {
             FileFormat theFile = null;
-            Iterator iterator = fileList.iterator();
+            Iterator<FileFormat> iterator = fileList.iterator();
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(dstFile)) {

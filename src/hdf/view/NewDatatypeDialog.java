@@ -49,7 +49,6 @@ import hdf.object.HObject;
  * @version 2.4 1/1/2016
  */
 public class NewDatatypeDialog extends Dialog {
-	private static final long serialVersionUID = -1930736056916611522L;
 	
 	private Shell             shell;
 
