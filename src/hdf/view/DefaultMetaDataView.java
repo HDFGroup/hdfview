@@ -67,7 +67,7 @@ import hdf.object.ScalarDS;
  * @version 2.4 2/21/2016
  */
 public class DefaultMetaDataView implements MetaDataView {
-	private Display display = Display.getCurrent();
+	private final Display display;
 	private Shell shell;
 
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
@@ -95,6 +95,8 @@ public class DefaultMetaDataView implements MetaDataView {
 		log.trace("DefaultMetaDataView: start");
 
 		shell = new Shell(parent, SWT.SHELL_TRIM);
+		display = shell.getDisplay();
+		
 		shell.setImage(ViewProperties.getHdfIcon());
 		shell.setLayout(new GridLayout(1, true));
 

@@ -86,11 +86,9 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * @version 2.4 9/6/2007
  */
 public class DefaultImageView implements ImageView {
-	private static final long serialVersionUID = -6534336542813587242L;
-
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
 	
-	private final Display display = Display.getCurrent();
+	private final Display display;
 	private final Shell shell;
 
 	/** Horizontal direction to flip an image. */
@@ -244,7 +242,9 @@ public class DefaultImageView implements ImageView {
 	 *            ViewProperties.DATA_VIEW_KEY.
 	 */
 	public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
-		shell = new Shell(display);
+		shell = new Shell(parent);
+		display = shell.getDisplay();
+		
 		shell.setImage(ViewProperties.getImageIcon());
 
 		viewer = theView;
