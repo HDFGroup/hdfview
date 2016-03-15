@@ -967,7 +967,7 @@ public final class Tools {
                 if (params.length == n) {
                     // check if all the parameters are matched
                     isConstructorMatched = params[0].isInstance(initargs[0]);
-                    for (int j = 1; j < n; j++) {
+                    for (int j = 0; j < n; j++) {
                         isConstructorMatched = isConstructorMatched && params[j].isInstance(initargs[j]);
                     }
 
