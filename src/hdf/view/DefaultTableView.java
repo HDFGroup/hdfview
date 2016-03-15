@@ -129,7 +129,7 @@ public class DefaultTableView implements TableView {
 
     private final static org.slf4j.Logger log       = org.slf4j.LoggerFactory.getLogger(DefaultTableView.class);
 
-    private final Display display                   = Display.getCurrent();
+    private final Display display;
     private final Shell shell;
 
     // The main HDFView
@@ -265,6 +265,8 @@ public class DefaultTableView implements TableView {
 
         shell = new Shell(parent, SWT.SHELL_TRIM);
         //shell = new Shell(display, SWT.SHELL_TRIM);
+        display = shell.getDisplay();
+        
         shell.setLayout(new FillLayout());
 
         shell.addDisposeListener(new DisposeListener() {

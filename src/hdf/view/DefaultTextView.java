@@ -64,7 +64,7 @@ public class DefaultTextView implements TextView {
      */
     private final ViewManager viewer;
     
-    private final Display display = Display.getCurrent();
+    private final Display display;
     
     private final Shell shell;
 
@@ -112,7 +112,8 @@ public class DefaultTextView implements TextView {
      *            ViewProperties.DATA_VIEW_KEY.
      */
     public DefaultTextView(Shell parent, ViewManager theView, HashMap map) {
-        shell = new Shell(display);
+        shell = new Shell(parent);
+        display = shell.getDisplay();
     	
     	viewer = theView;
         text = null;

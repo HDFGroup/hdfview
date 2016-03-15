@@ -1990,9 +1990,13 @@ public class HDFView implements ViewManager, DropTargetListener {
         if(rootDir == null) rootDir = System.getProperty("user.dir");
 
         File tmpFile = null;
+        Monitor primaryMonitor = display.getPrimaryMonitor();
+		Point margin = new Point(primaryMonitor.getBounds().width,
+				          primaryMonitor.getBounds().height);
+        
         int j = args.length;
-        int W = display.getClientArea().width / 3,
-            H = (display.getClientArea().height * 3) / 4,
+        int W = margin.x / 2,
+            H = margin.y,
             X = 0,
             Y = 0;
 
