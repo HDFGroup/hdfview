@@ -298,8 +298,9 @@ public class DefaultImageView implements ImageView {
 			}            
 		}
 
-		if (hobject == null)
+		if (hobject == null) {
 			hobject = (HObject) theView.getTreeView().getCurrentObject();
+		}
 
 		if ((hobject == null) || !(hobject instanceof ScalarDS)) {
 			viewer.showStatus("Display data in image failed for - " + hobject);
@@ -328,18 +329,18 @@ public class DefaultImageView implements ImageView {
 		// add the text field to display pixel data
 		//contentPane.add(valueField = new JTextField(), BorderLayout.SOUTH);
 		//valueField.setName("valuefield");
-		valueField.setEditable(false);
-		valueField.setVisible(ViewProperties.showImageValues());
+		//valueField.setEditable(false);
+		//valueField.setVisible(ViewProperties.showImageValues());
 
 		if (image == null) {
 			getImage();
 		}
 
-		if (image == null) {
+		/*if (image == null) {
 			viewer.showStatus("Loading image failed - " + dataset.getName());
 			dataset = null;
 			return;
-		}
+		}*/
 
 		originalRange[0] = dataRange[0];
 		originalRange[1] = dataRange[1];
@@ -485,12 +486,18 @@ public class DefaultImageView implements ImageView {
 		Menu menuBar = new Menu(shell, SWT.BAR);
 
 		MenuItem item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("Image");
+		
+		Menu menu = new Menu(item);
+		item.setMenu(menu);
+		
+		item = new MenuItem(menu, SWT.CASCADE);
 		item.setText("Save Image As");
 
 		Menu saveAsMenu = new Menu(item);
 		item.setMenu(saveAsMenu);
 
-		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item = new MenuItem(saveAsMenu, SWT.PUSH);
 		item.setText("JPEG");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -509,7 +516,7 @@ public class DefaultImageView implements ImageView {
 		/*
 		 * ImageIO does not support tiff by default
 		 */
-		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item = new MenuItem(saveAsMenu, SWT.PUSH);
 		item.setText("TIFF");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -525,7 +532,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item = new MenuItem(saveAsMenu, SWT.PUSH);
 		item.setText("PNG");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -540,7 +547,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item = new MenuItem(saveAsMenu, SWT.PUSH);
 		item.setText("GIF");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -555,7 +562,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(saveAsMenu, SWT.NONE);
+		item = new MenuItem(saveAsMenu, SWT.PUSH);
 		item.setText("BMP");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -570,9 +577,9 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Write Selection to Image");
 		item.setEnabled(!dataset.getFileFormat().isReadOnly());
 		item.addSelectionListener(new SelectionAdapter() {
@@ -620,9 +627,9 @@ public class DefaultImageView implements ImageView {
 		});
 		rotateRelatedItems.add(item);
 		
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Change Palette");
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
@@ -631,7 +638,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Import Palette");
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
@@ -658,7 +665,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Export Palette");
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
@@ -725,9 +732,9 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Set Value Range");
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
@@ -766,9 +773,9 @@ public class DefaultImageView implements ImageView {
 		// }
 		// } catch (Exception ex) {}
 
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Show Histogram");
 		item.setEnabled(!isTrueColor);
 		item.addSelectionListener(new SelectionAdapter() {
@@ -778,9 +785,9 @@ public class DefaultImageView implements ImageView {
 		});
 		rotateRelatedItems.add(item);
 
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Zoom In");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -788,7 +795,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Zoom Out");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -796,15 +803,15 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		item = new MenuItem(menuBar, SWT.CASCADE);
+		item = new MenuItem(menu, SWT.CASCADE);
 		item.setText("Flip Image");
 		
 		Menu flipMenu = new Menu(item);
 		item.setMenu(flipMenu);
 
-		item = new MenuItem(flipMenu, SWT.NONE);
+		item = new MenuItem(flipMenu, SWT.PUSH);
 		item.setText("Horizontal");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -812,7 +819,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(flipMenu, SWT.NONE);
+		item = new MenuItem(flipMenu, SWT.PUSH);
 		item.setText("Vertical");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -820,7 +827,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(menuBar, SWT.CASCADE);
+		item = new MenuItem(menu, SWT.CASCADE);
 		item.setText("Rotate Image");
 		
 		Menu rotateMenu = new Menu(item);
@@ -828,7 +835,7 @@ public class DefaultImageView implements ImageView {
 		
 		char t = 186;
 		
-		item = new MenuItem(rotateMenu, SWT.NONE);
+		item = new MenuItem(rotateMenu, SWT.PUSH);
 		item.setText("90" + t + " CW");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -842,7 +849,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(rotateMenu, SWT.NONE);
+		item = new MenuItem(rotateMenu, SWT.PUSH);
 		item.setText("90" + t + " CCW");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -856,9 +863,9 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Brightness/Contrast");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -871,14 +878,14 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 		
-		item = new MenuItem(menuBar, SWT.CASCADE);
+		item = new MenuItem(menu, SWT.CASCADE);
 		item.setText("Contour");
 		
 		Menu contourMenu = new Menu(item);
 		item.setMenu(contourMenu);
 		
 		for (int i = 3; i < 10; i += 2) {
-			item = new MenuItem(contourMenu, SWT.NONE);
+			item = new MenuItem(contourMenu, SWT.PUSH);
 			item.setText(String.valueOf(i));
 			item.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -887,9 +894,9 @@ public class DefaultImageView implements ImageView {
 			});
 		}
 
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Show Animation");
 		item.setEnabled(is3D);
 		item.addSelectionListener(new SelectionAdapter() {
@@ -902,7 +909,7 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 
-		item = new MenuItem(menuBar, SWT.CASCADE);
+		item = new MenuItem(menu, SWT.CASCADE);
 		item.setText("Animation Speed (frames/second)");
 		item.setEnabled(is3D);
 		
@@ -910,7 +917,7 @@ public class DefaultImageView implements ImageView {
 		item.setMenu(animationSpeedMenu);
 		
 		for (int i = 2; i < 12; i += 2) {
-			item = new MenuItem(animationSpeedMenu, SWT.NONE);
+			item = new MenuItem(animationSpeedMenu, SWT.PUSH);
 			item.setText(String.valueOf(i));
 			item.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -921,9 +928,9 @@ public class DefaultImageView implements ImageView {
 			});
 		}
 		
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 
-		item = new MenuItem(menuBar, SWT.CHECK);
+		item = new MenuItem(menu, SWT.CHECK);
 		item.setText("Show Value");
 		item.setSelection(ViewProperties.showImageValues());
 		item.addSelectionListener(new SelectionAdapter() {
@@ -933,7 +940,7 @@ public class DefaultImageView implements ImageView {
 		});
 		rotateRelatedItems.add(item);
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Show Statistics");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -968,9 +975,9 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Select All");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -984,13 +991,13 @@ public class DefaultImageView implements ImageView {
 			}
 		});
 
-		new MenuItem(menuBar, SWT.SEPARATOR);
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		item = new MenuItem(menuBar, SWT.NONE);
+		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Close");
 		item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				display.dispose();
+				shell.dispose();
 			}
 		});
 
