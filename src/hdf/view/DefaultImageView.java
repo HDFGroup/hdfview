@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
@@ -38,6 +39,7 @@ import java.awt.image.ImageFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.ColorModel;
+import java.awt.image.ImageProducer;
 import java.awt.Color;
 
 import java.beans.PropertyChangeEvent;
@@ -414,6 +416,7 @@ public class DefaultImageView implements ImageView {
 
         // Add toolbar for Histogram, Frame selection, etc.
         ToolBar bar = createToolbar(shell);
+        bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         bar.setSize(shell.getSize().x, 30);
         bar.setLocation(0, 0);
 
@@ -882,12 +885,11 @@ public class DefaultImageView implements ImageView {
         item.setText("Brightness/Contrast");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                /*
-                if (contrastSlider == null)
-                    contrastSlider = new ContrastSlider((JFrame) viewer, image.getSource());
+                if (contrastSlider == null) {
+                    contrastSlider = new ContrastSlider(shell, SWT.NONE, image.getImageData());
+                }
 
-                contrastSlider.setVisible(true);
-                */
+                contrastSlider.open();
             }
         });
 
@@ -914,11 +916,13 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(is3D);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                /*
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                new Animation((JFrame) viewer, dataset);
-                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                */
+                Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
+            
+                shell.setCursor(cursor);
+                new Animation(shell, SWT.NONE, dataset).open();
+                
+                shell.setCursor(null);
+                cursor.dispose();
             }
         });
 
@@ -1018,8 +1022,7 @@ public class DefaultImageView implements ImageView {
     }
 
     private ToolBar createToolbar(final Shell shell) {
-        ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT
-                | SWT.BORDER_DOT);
+        ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER_DOT);
         toolbar.setFont(Display.getCurrent().getSystemFont());
 
         // Chart button
@@ -1029,7 +1032,7 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(!isTrueColor);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-
+                showHistogram();
             }
         });
 
@@ -1040,7 +1043,7 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(!isTrueColor);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-
+                showColorTable();
             }
         });
 
@@ -1050,7 +1053,11 @@ public class DefaultImageView implements ImageView {
         item.setToolTipText("Brightness");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-
+                if (contrastSlider == null) {
+                    contrastSlider = new ContrastSlider(shell, SWT.NONE, image.getImageData());
+                }
+            
+                contrastSlider.open();
             }
         });
 
@@ -1069,7 +1076,7 @@ public class DefaultImageView implements ImageView {
         item.setToolTipText("Zoom In");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-
+                zoomIn();
             }
         });
 
@@ -1079,7 +1086,7 @@ public class DefaultImageView implements ImageView {
         item.setToolTipText("Zoom Out");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-
+                zoomOut();
             }
         });
 
@@ -1124,9 +1131,10 @@ public class DefaultImageView implements ImageView {
                 }
             });
 
-            new ToolItem(toolbar, SWT.SEPARATOR).setWidth(10);
+            ToolItem separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
-            Text frameField = new Text(toolbar, SWT.SINGLE | SWT.BORDER);
+            frameField = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            frameField.setText(String.valueOf(curFrame));
             frameField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent e) {
                     if (e.keyCode == SWT.CR) {
@@ -1152,10 +1160,23 @@ public class DefaultImageView implements ImageView {
                     }
                 }
             });
+            
+            frameField.pack();
+            
+            separator.setWidth(frameField.getSize().x + 30);
+            separator.setControl(frameField);
+            
+            separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
-            new Text(toolbar, SWT.SINGLE | SWT.BORDER);
-
-            new Label(toolbar, SWT.RIGHT).setText(String.valueOf(maxFrame));
+            Text maxFrameText = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            maxFrameText.setText(String.valueOf(maxFrame - 1));
+            maxFrameText.setEditable(false);
+            maxFrameText.setEnabled(false);
+            
+            maxFrameText.pack();
+            
+            separator.setWidth(maxFrameText.getSize().x + 30);
+            separator.setControl(maxFrameText);
 
             new ToolItem(toolbar, SWT.SEPARATOR).setWidth(10);
 
@@ -1498,7 +1519,7 @@ public class DefaultImageView implements ImageView {
 
     // implementing ImageObserver
     private void zoomTo(float zf) {
-    	/*
+        /*
         if (zf > 8)
             zf = 8;
         else if (zf < 0.125)
@@ -3258,22 +3279,33 @@ public class DefaultImageView implements ImageView {
     /**
      * Makes animation for 3D images.
      */
-    private class Animation
-    // extends JDialog implements ActionListener, Runnable
-    {
-    	/*
-        private static final long serialVersionUID = 6717628496771098250L;
-
+    private class Animation extends Dialog {
+    
         private final int MAX_ANIMATION_IMAGE_SIZE = 300;
-
+    
+        private Shell shell;
+        private Canvas canvas; // Canvas to draw the image
         private Image[] frames = null; // a list of images for animation
-        private JComponent canvas = null; // canvas to draw the image
         private Thread engine = null; // Thread animating the images
         private int numberOfImages = 0;
         private int currentFrame = 0;
         private int sleepTime = 200;
         private Image offScrImage; // Offscreen image
-        private Graphics offScrGC; // Offscreen graphics context
+        //private Graphics offScrGC; // Offscreen graphics context
+        
+        public Animation(Shell parent, int style, ScalarDS dataset) {
+            super(parent, style);
+        }
+    
+        public void open() {
+            Shell parent = getParent();
+    
+        }
+    }
+    
+    //private class Animation
+    //{
+    /*
         private JFrame owner;
         private int x0 = 0, y0 = 0; // offset of the image drawing
         */
@@ -3282,7 +3314,6 @@ public class DefaultImageView implements ImageView {
         public Animation(JFrame theOwner, ScalarDS dataset) {
             super(theOwner, "Animation", true);
             owner = theOwner;
-            setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 
             long[] dims = dataset.getDims();
             long[] stride = dataset.getStride();
@@ -3476,13 +3507,25 @@ public class DefaultImageView implements ImageView {
             }
         } // public void run() {
         */
-    } // private class Animation extends JDialog
+    //} // private class Animation extends JDialog
+    
+    private class DataRangeDialog extends Dialog {
+    
+    
+        public DataRangeDialog(Shell parent, int style, double[] minmaxCurrent,
+                               double[] minmaxOriginal, final int[] dataDist) {
+    
+            super(parent, style);
+        }
+    
+        public void open() {
+            
+        }
+    }
 
-    private class DataRangeDialog
-    // extends JDialog implements ActionListener, ChangeListener,
-    // PropertyChangeListener
-    {
-    	/*
+    //private class DataRangeDialog
+    //{
+    /*
         final int NTICKS = 10;
         double tickRatio = 1;
         final int W = 500, H = 400;
@@ -3762,14 +3805,23 @@ public class DefaultImageView implements ImageView {
             return minmax_current;
         }
         */
-    } // private class DataRangeDialog extends JDialog implements ActionListener
+    //} // private class DataRangeDialog extends JDialog implements ActionListener
 
-    private class ContrastSlider
-    // extends JDialog
-    // implements ActionListener, ChangeListener, PropertyChangeListener
-    {
-    	/*
-        private static final long serialVersionUID = -3002524363351111565L;
+    private class ContrastSlider extends Dialog {
+    
+        public ContrastSlider(Shell parent, int style, ImageData data) {
+            super(parent, style);
+        }
+    
+        public void open() {
+            
+        }
+    }
+    
+    
+    //private class ContrastSlider
+    //{
+    /*
         JSlider brightSlider, contrastSlider;
         JFormattedTextField brightField, contrastField;
         ImageProducer imageProducer;
@@ -3975,5 +4027,5 @@ public class DefaultImageView implements ImageView {
             }
         }
         */
-    } // private class ContrastSlider extends JDialog implements ActionListener
+    //} // private class ContrastSlider extends JDialog implements ActionListener
 }

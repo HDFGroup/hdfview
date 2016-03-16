@@ -399,23 +399,20 @@ public class DefaultTableView implements TableView {
         formData.bottom = new FormAttachment(100, 0);
         formData.left = new FormAttachment(10, 0);
         cellValueField.setLayoutData(formData);
-
-        Composite tableComposite = new Composite(content, SWT.BORDER);
-        tableComposite.setLayout(new FillLayout());
-
+        
         // Create the NatTable
         if (dataset instanceof CompoundDS) {
             log.trace("createTable((CompoundDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
 
             isDataTransposed = false; // Disable transpose for compound dataset
             shell.setImage(ViewProperties.getTableIcon());
-            table = createTable(tableComposite, (CompoundDS) dataset);
+            table = createTable(content, (CompoundDS) dataset);
         }
         else { /* if (dataset instanceof ScalarDS) */
             log.trace("createTable((ScalarDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
 
             shell.setImage(ViewProperties.getDatasetIcon());
-            table = createTable(tableComposite, (ScalarDS) dataset);
+            table = createTable(content, (ScalarDS) dataset);
 
             if (dtype.getDatatypeClass() == Datatype.CLASS_REFERENCE) {
                 if (dtype.getDatatypeSize() > 8) {

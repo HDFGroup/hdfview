@@ -1558,10 +1558,6 @@ public class HDFView implements ViewManager, DropTargetListener {
     private void closeAllWindows() {
         Shell[] sList = mainWindow.getShells();
 
-        for(int i = 0; i < sList.length; i++) {
-            System.out.println("Shell: " + sList[i].getText());
-        }
-
         // Return if main window (shell) is the only open shell
         if (sList.length < 1) return;
 
