@@ -67,7 +67,7 @@ import hdf.object.ScalarDS;
  * @version 2.4 2/21/2016
  */
 public class DefaultMetaDataView implements MetaDataView {
-	private Display display;
+	private final Display display;
 	private Shell shell;
 
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
@@ -169,8 +169,12 @@ public class DefaultMetaDataView implements MetaDataView {
 		log.trace("DefaultMetaDataView: finish");
 
 		shell.pack();
+		
+		Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		minimumSize.x += 200;
 
-		shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		shell.setMinimumSize(minimumSize);
+		shell.setSize(minimumSize);
 
 		Rectangle parentBounds = parent.getBounds();
 		Point shellSize = shell.getSize();
@@ -1404,6 +1408,8 @@ public class DefaultMetaDataView implements MetaDataView {
         attrContentArea.setEditable(false);
         
         
+        
+        sashForm.setWeights(new int[] {1, 3});
         
         log.trace("createAttributesComposite: finish");
 		
