@@ -44,7 +44,6 @@ public class DefaultMetaDataViewOld extends JDialog implements ActionListener, M
         attrTableModel = new DefaultTableModel(columnNames, numAttributes);
 
         attrTable = new JTable(attrTableModel) {
-            private static final long serialVersionUID = 2590244645972259454L;
             int                       lastSelectedRow  = -1;
             int                       lastSelectedCol  = -1;
 
@@ -89,7 +88,5 @@ public class DefaultMetaDataViewOld extends JDialog implements ActionListener, M
 
         // set the divider location
         int h = Math.min((numAttributes + 2) * attrTable.getRowHeight(), scroller1.getPreferredSize().height - 40);
-        splitPane.setDividerLocation(h);
-        panel.add(splitPane, BorderLayout.CENTER);
     }
 }
