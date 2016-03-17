@@ -197,6 +197,22 @@ public abstract class Group extends HObject {
 
         return memberList;
     }
+    
+    /**
+     * Returns the members of this Group in breadth-first order.
+     */
+    public List<HObject> breadthFirstEnumeration() {
+    	
+    	return null;
+    }
+    
+    /**
+     * Returns the members of this Group in depth-first order.
+     */
+    public List<HObject> depthFirstEnumeration() {
+    	
+    	return null;
+    }
 
     /**
      * Sets the name of the group.

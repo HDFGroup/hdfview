@@ -34,7 +34,7 @@ import java.io.Serializable;
  *    ---------------------Implementing classes such as-------------------------
  *      ____|____       _____|______        _____|_____          _____|_____
  *      |       |       |          |        |         |          |         |
- *   H5Group H4Group H5ScalarDS H4SclarDS H5CompDS H4CompDS H5Datatype H4Datatype
+ *   H5Group H4Group H5ScalarDS H4ScalarDS H5CompDS H4CompDS H5Datatype H4Datatype
  * 
  * </pre>
  * 
