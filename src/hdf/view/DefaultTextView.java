@@ -229,6 +229,10 @@ public class DefaultTextView implements TextView {
         
         shell.open();
         
+        // Workaround to prevent parent shell cursor from staying in "wait"
+        // mode while TableView is open
+        parent.setCursor(null);
+        
         while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();

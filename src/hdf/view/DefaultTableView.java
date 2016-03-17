@@ -513,7 +513,11 @@ public class DefaultTableView implements TableView {
         shell.setLocation(dataClientArea.getBounds().x, dataClientArea.getBounds().y);
 
         shell.open();
-
+        
+        // Workaround to prevent parent shell cursor from staying in "wait"
+        // mode while TableView is open
+        parent.setCursor(null);
+        
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
