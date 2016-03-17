@@ -2442,16 +2442,15 @@ public class DefaultTreeView implements TreeView {
             initargs = tmpargs;
         }
 
-        //Cursor cursor = new Cursor(Display.getDefault(), SWT.CURSOR_WAIT);
+        Cursor cursor = new Cursor(Display.getDefault(), SWT.CURSOR_WAIT);
 
         try {
-            //shell.setCursor(cursor);
-
+        	shell.setCursor(cursor);
+        	
             theView = Tools.newInstance(theClass, initargs);
             log.trace("showDataContent: Tools.newInstance");
 
-            //cursor.dispose();
-            //shell.setCursor(null);
+            cursor.dispose();
             
             viewer.addDataView((DataView) theView);
         } catch (Exception ex) {}

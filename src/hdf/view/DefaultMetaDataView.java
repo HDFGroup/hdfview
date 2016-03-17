@@ -182,6 +182,10 @@ public class DefaultMetaDataView implements MetaDataView {
 				(parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
 		shell.open();
+		
+        // Workaround to prevent parent shell cursor from staying in "wait"
+        // mode while TableView is open
+        parent.setCursor(null);
 
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
