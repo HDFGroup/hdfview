@@ -31,6 +31,10 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.PaintEvent;
 
@@ -38,6 +42,8 @@ import java.awt.Dimension;
 import java.awt.image.ImageFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageProducer;
 import java.awt.Color;
@@ -53,9 +59,9 @@ import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -93,8 +99,8 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * href="http://hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and
  * Palette Specification </a>
  * 
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 2//2016
  */
 public class DefaultImageView implements ImageView {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
@@ -256,7 +262,7 @@ public class DefaultImageView implements ImageView {
      *            ViewProperties.DATA_VIEW_KEY.
      */
     public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
-        shell = new Shell(parent);
+        shell = new Shell(parent, SWT.SHELL_TRIM);
         display = shell.getDisplay();
 
         shell.setImage(ViewProperties.getImageIcon());
@@ -443,28 +449,25 @@ public class DefaultImageView implements ImageView {
         group.setLayout(new GridLayout(2, false));
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
-        // imageComponent = new ImageComponent(group, image);
-        // ScrolledComposite scroller = new ScrolledComposite(imageComponent);
-        // scroller.getVerticalBar().setIncrement(50);
-        // scroller.getHorizontalBar().setIncrement(50);
-        // imageScroller = scroller;
-        // contentPane.add(scroller, BorderLayout.CENTER);
+        imageScroller = new ScrolledComposite(group, SWT.H_SCROLL | SWT.V_SCROLL);
+        imageScroller.getHorizontalBar().setIncrement(50);
+        imageScroller.getVerticalBar().setIncrement(50);
+        imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        //imageComponent = new ImageComponent(imageScroller, SWT.NONE, image);
+        //imageScroller.setContent(imageComponent);
         
         // add palette canvas to show the palette
-        // if (imagePalette != null) {
-        // paletteComponent = new PaletteComponent(group, imagePalette,
-        // dataRange);
-        // contentPane.add(paletteComponent, BorderLayout.EAST);
-        // }
+        if (imagePalette != null) {
+            //paletteComponent = new PaletteComponent(group, imagePalette, dataRange);
+            //contentPane.add(paletteComponent, BorderLayout.EAST);
+        }
         
         // Add the text field to display pixel data
         if (ViewProperties.showImageValues()) {
             valueField = new Text(group, SWT.BORDER | SWT.SINGLE);
             valueField.setEditable(false);
         }
-
-        // if (imageComponent.getParent() !=null)
-        // imageComponent.getParent().setBackground(Color.black);
 
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
@@ -488,7 +491,14 @@ public class DefaultImageView implements ImageView {
             }
         });
 
-        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        
+        shell.setMinimumSize(minimumSize);
+        shell.setSize(minimumSize);
+        
+        Rectangle parentBounds = parent.getBounds();
+        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (minimumSize.x / 2),
+                          (parentBounds.y + (parentBounds.height / 2)) - (minimumSize.y / 2));
 
         shell.open();
         
@@ -604,47 +614,42 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(!dataset.getFileFormat().isReadOnly());
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                /*
                 if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
                     showError("No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
                 }
 
                 TreeView treeView = viewer.getTreeView();
-                //TreeNode node = treeView.findTreeNode(dataset);
-                //Group pGroup = (Group) ((DefaultMutableTreeNode) node
-                //        .getParent()).getUserObject();
+                TreeItem item = treeView.findTreeItem(dataset);
+                Group pGroup = (Group) item.getParentItem().getData();
                 HObject root = dataset.getFileFormat().getRootObject();
 
                 if (root == null) return;
 
-                Vector list = new Vector(dataset.getFileFormat().getNumberOfMembers() + 5);
-                DefaultMutableTreeNode theNode = null;
-                Enumeration local_enum = root.depthFirstEnumeration();
-
-                while (local_enum.hasMoreElements()) {
-                    theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-                    list.add(theNode.getUserObject());
+                Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
+                Iterator<HObject> it = ((Group) root).depthFirstEnumeration().iterator();
+                
+                while (it.hasNext()) {
+                    list.add(it.next());
                 }
 
-                NewDatasetDialog dialog = new NewDatasetDialog((JFrame) viewer,
-                        pGroup, list, this);
-                dialog.setVisible(true);
+                //NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, );
+                //dialog.open();
 
-                HObject obj = (HObject) dialog.getObject();
-                if (obj != null) {
-                    Group pgroup = dialog.getParentGroup();
-                    try {
-                        treeView.addObject(obj, pgroup);
-                    }
-                    catch (Exception ex) {
-                        log.debug("Write selection to image:", ex);
-                    }
-                }
+                //HObject obj = (HObject) dialog.getObject();
+                //if (obj != null) {
+                //    Group pgroup = dialog.getParentGroup();
+                //    try {
+                //        treeView.addObject(obj, pgroup);
+                //    }
+                //    catch (Exception ex) {
+                //        log.debug("Write selection to image: ", ex);
+                //    }
+                //}
 
                 list.setSize(0);
-                */
             }
         });
+        
         rotateRelatedItems.add(item);
 
         new MenuItem(menu, SWT.SEPARATOR);
@@ -663,25 +668,22 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(!isTrueColor);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                /*
-                JFileChooser fchooser = new JFileChooser(ViewProperties
-                        .getWorkDir());
-                int returnVal = fchooser.showOpenDialog(this);
-
-                if (returnVal != JFileChooser.APPROVE_OPTION) {
+                FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
+                fChooser.setFilterPath(ViewProperties.getWorkDir());
+                
+                if(fChooser.open() == null) {
                     return;
                 }
-
-                File choosedFile = fchooser.getSelectedFile();
-                if (choosedFile == null || choosedFile.isDirectory()) {
+                
+                File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
+                if(chosenFile == null || !chosenFile.exists() || chosenFile.isDirectory()) {
                     return;
                 }
-
+                
                 Vector<String> palList = ViewProperties.getPaletteList();
-                String palPath = choosedFile.getAbsolutePath();
+                String palPath = chosenFile.getAbsolutePath();
                 if(!palList.contains(palList))
                     palList.addElement(palPath);
-                */
             }
         });
 
@@ -690,32 +692,34 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(!isTrueColor);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                /*
                 if (imagePalette == null) return;
 
                 String workDir = ViewProperties.getWorkDir() + File.separator;
-                JFileChooser fchooser = new JFileChooser(workDir);
-                FileNameExtensionFilter filter = new FileNameExtensionFilter("Color lookup table", "lut");
+                FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
+                fChooser.setFilterPath(workDir);
+                
+                //FileNameExtensionFilter filter = new FileNameExtensionFilter("Color lookup table", "lut");
+                
                 File pfile = Tools.checkNewFile(workDir, ".lut");
-                fchooser.setSelectedFile(pfile);
-                fchooser.setFileFilter(filter);
-                int returnVal = fchooser.showOpenDialog(this);
-
-                if (returnVal != JFileChooser.APPROVE_OPTION) {
+                
+                fChooser.setFileName(pfile.getName());
+                //fChooser.setFileFilter(filter);
+                
+                if (fChooser.open() == null) {
                     return;
                 }
 
-                File choosedFile = fchooser.getSelectedFile();
-                if (choosedFile == null || choosedFile.isDirectory()) {
+                File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
+                if (chosenFile == null || chosenFile.isDirectory()) {
                     return;
                 }
 
-                if (choosedFile.exists()) {
-                    int newFileFlag = JOptionPane.showConfirmDialog(this,
-                            "File exists. Do you want to replace it ?",
-                                    this.getTitle(),
-                                    JOptionPane.YES_NO_OPTION);
-                    if (newFileFlag == JOptionPane.NO_OPTION) {
+                if (chosenFile.exists()) {
+                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                    confirm.setText(shell.getText());
+                    confirm.setMessage("File exists. Do you want to replace it ?");
+                    
+                    if(confirm.open() == SWT.NO) {
                         return;
                     }
                 }
@@ -723,14 +727,13 @@ public class DefaultImageView implements ImageView {
                 PrintWriter out = null;
 
                 try {
-                    out = new PrintWriter(new BufferedWriter(new FileWriter(choosedFile)));
+                    out = new PrintWriter(new BufferedWriter(new FileWriter(chosenFile)));
                 }
                 catch (Exception ex) {
                     out = null;
                 }
 
-                if (out == null)
-                    return;
+                if (out == null) return;
 
                 int cols = 3;
                 int rows = 256;
@@ -748,7 +751,6 @@ public class DefaultImageView implements ImageView {
 
                 out.flush();
                 out.close();
-                */
             }
         });
 
@@ -759,7 +761,6 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(!isTrueColor);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-            	/*
                 if (originalRange == null || originalRange[0] == originalRange[1]) return;
 
                 // Call only once
@@ -768,17 +769,16 @@ public class DefaultImageView implements ImageView {
                     Tools.findDataDist(data, dataDist, originalRange);
                 }
 
-                DataRangeDialog drd = new DataRangeDialog((JFrame) viewer, dataRange, originalRange,dataDist);
-                double[] drange = drd.getRange();
+                DataRangeDialog drd = new DataRangeDialog(shell, SWT.NONE, dataRange, originalRange, dataDist);
+                //double[] drange = drd.getRange();
 
-                if ((drange == null)
+                /*if ((drange == null)
                         || (drange[0] == drange[1])
                         || ((drange[0] == dataRange[0]) && (drange[1] == dataRange[1]))) {
                     return;
-                }
+                }*/
 
-                applyDataRange(drange);
-                */
+                //applyDataRange(drange);
             }
         });
 
@@ -908,7 +908,8 @@ public class DefaultImageView implements ImageView {
             item.setText(String.valueOf(i));
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    // contour(i);
+                    MenuItem item = (MenuItem) e.item;
+                    contour(Integer.parseInt(item.getText()));
                 }
             });
         }
@@ -923,6 +924,7 @@ public class DefaultImageView implements ImageView {
                 Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
             
                 shell.setCursor(cursor);
+                
                 new Animation(shell, SWT.NONE, dataset).open();
                 
                 shell.setCursor(null);
@@ -943,7 +945,6 @@ public class DefaultImageView implements ImageView {
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     MenuItem item = (MenuItem) e.item;
-
                     animationSpeed = Integer.parseInt(item.getText());
                 }
             });
@@ -1026,7 +1027,7 @@ public class DefaultImageView implements ImageView {
     }
 
     private ToolBar createToolbar(final Shell shell) {
-        ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER_DOT);
+        ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
         toolbar.setFont(Display.getCurrent().getSystemFont());
 
         // Chart button
@@ -1639,15 +1640,14 @@ public class DefaultImageView implements ImageView {
      * @throws Exception
      */
     private void selectAll() throws Exception {
-        // imageComponent.selectAll();
+        imageComponent.selectAll();
     }
 
     // implementing ImageObserver
     private void flip(int direction) {
-    	/*
         ImageFilter filter = new FlipFilter(direction);
 
-        if (applyImageFilter(filter)) {
+        /*if (applyImageFilter(filter)) {
             // toggle flip flag
             if (direction == FLIP_HORIZONTAL) {
                 isHorizontalFlipped = !isHorizontalFlipped;
@@ -1655,18 +1655,16 @@ public class DefaultImageView implements ImageView {
             else {
                 isVerticalFlipped = !isVerticalFlipped;
             }
-        }
-        */
+        }*/
     }
 
     // implementing ImageObserver
     private void rotate(int direction) {
-    	/*
         if ( !(direction == ROTATE_CW_90 || direction == ROTATE_CCW_90))
             return;
 
         Rotate90Filter filter = new Rotate90Filter(direction);
-        applyImageFilter(filter);
+        //applyImageFilter(filter);
 
         if (direction == ROTATE_CW_90) {
             rotateCount++;
@@ -1680,12 +1678,11 @@ public class DefaultImageView implements ImageView {
                 rotateCount = 0;
             }
         }
-        */
     }
 
     // implementing ImageObserver
     private void contour(int level) {
-        // applyImageFilter(new ContourFilter(level));
+        //applyImageFilter(new ContourFilter(level));
     }
 
     /** Apply contrast/brightness to unsigned short integer */
@@ -1701,7 +1698,7 @@ public class DefaultImageView implements ImageView {
 
     // implementing ImageObserver
     private void setValueVisible(boolean b) {
-        // valueField.setVisible(b);
+        valueField.setVisible(b);
         // validate();
         // updateUI(); //bug !!! on Windows. gives NullPointerException at
         // javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener.mousePressed(BasicInternalFrameUI.java:693)
@@ -1778,78 +1775,77 @@ public class DefaultImageView implements ImageView {
         if (image == null) {
             return;
         }
-
-        /*
-        final JFileChooser fchooser = new JFileChooser(dataset.getFile());
+        
+        FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+        fChooser.setFilterPath(dataset.getFile());
+        
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
-            fchooser.setFileFilter(DefaultFileFilter.getFileFilterJPEG());
+            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterJPEG());
             // } else if (type.equals(Tools.FILE_TYPE_TIFF)) {
             // fchooser.setFileFilter(DefaultFileFilter.getFileFilterTIFF());
         }
         else if (type.equals(Tools.FILE_TYPE_PNG)) {
-            fchooser.setFileFilter(DefaultFileFilter.getFileFilterPNG());
+            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterPNG());
         }
         else if (type.equals(Tools.FILE_TYPE_GIF)) {
-            fchooser.setFileFilter(DefaultFileFilter.getFileFilterGIF());
+            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterGIF());
         }
         else if (type.equals(Tools.FILE_TYPE_BMP)) {
-            fchooser.setFileFilter(DefaultFileFilter.getFileFilterBMP());
+            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterBMP());
         }
-
-        // fchooser.changeToParentDirectory();
-        fchooser.setDialogTitle("Save Current Image To " + type + " File --- "
-                + dataset.getName());
-
-        File choosedFile = new File(dataset.getName() + "."
-                + type.toLowerCase());
-        fchooser.setSelectedFile(choosedFile);
-
-        int returnVal = fchooser.showSaveDialog(this);
-        if (returnVal != JFileChooser.APPROVE_OPTION) {
+        
+        fChooser.setText("Save Current Image To " + type + " File --- " + dataset.getName());
+        
+        File chosenFile = new File(dataset.getName() + "." + type.toLowerCase());
+        fChooser.setFileName(chosenFile.getName());
+        
+        if(fChooser.open() == null) {
             return;
         }
-
-        choosedFile = fchooser.getSelectedFile();
-        if (choosedFile == null) {
+        
+        chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
+        if(chosenFile == null) {
             return;
         }
-        String fname = choosedFile.getAbsolutePath();
-
-        if (choosedFile.exists()) {
-            int newFileFlag = JOptionPane.showConfirmDialog(this,
-                    "File exists. Do you want to replace it ?",
-                            this.getTitle(), JOptionPane.YES_NO_OPTION);
-            if (newFileFlag == JOptionPane.NO_OPTION) {
+        
+        if(chosenFile.exists()) {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText(shell.getText());
+            confirm.setMessage("File exists. Do you want to replace it ?");
+            
+            if(confirm.open() == SWT.NO) {
                 return;
             }
         }
-
+        
         BufferedImage bi = null;
         try {
-            bi = toBufferedImage(image);
+            //bi = toBufferedImage(image);
         }
         catch (OutOfMemoryError err) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, err.getMessage(), getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+            shell.getDisplay().beep();
+            showError(err.getMessage(), shell.getText());
             return;
         }
-
-        Tools.saveImageAs(bi, choosedFile, type);
-
+        
+        Tools.saveImageAs(bi, chosenFile, type);
+        
         bi = null;
 
-        viewer.showStatus("Current image saved to: " + fname);
+        viewer.showStatus("Current image saved to: " + chosenFile.getAbsolutePath());
 
         try {
-            RandomAccessFile rf = new RandomAccessFile(choosedFile, "r");
+            RandomAccessFile rf = new RandomAccessFile(chosenFile, "r");
             long size = rf.length();
             rf.close();
             viewer.showStatus("File size (bytes): " + size);
         }
         catch (Exception ex) {
-            log.debug("File {} size:", choosedFile.getName(), ex);
+            log.debug("File {} size:", chosenFile.getName(), ex);
         }
+
+        /*
+        // fchooser.changeToParentDirectory();        
         */
     }
 
@@ -1868,7 +1864,6 @@ public class DefaultImageView implements ImageView {
      * @return the selected data object.
      */
     public Object getSelectedData() {
-    	/*
         Object selectedData = null;
 
         int cols = imageComponent.originalSelectedArea.width;
@@ -1907,8 +1902,8 @@ public class DefaultImageView implements ImageView {
 
         int r0 = imageComponent.originalSelectedArea.y;
         int c0 = imageComponent.originalSelectedArea.x;
-        int w = imageComponent.originalSize.width;
-        int h = imageComponent.originalSize.height;
+        int w = imageComponent.originalSize.x;
+        int h = imageComponent.originalSize.y;
 
         // transfer location to the original coordinator
         if (isHorizontalFlipped) {
@@ -1952,9 +1947,6 @@ public class DefaultImageView implements ImageView {
         }
 
         return selectedData;
-        */
-
-        return null; // Remove when fixed
     }
 
     /**
@@ -1963,9 +1955,7 @@ public class DefaultImageView implements ImageView {
      * @return the rectangle of the selected image area.
      */
     public Rectangle getSelectedArea() {
-        // return imageComponent.originalSelectedArea;
-
-        return null; // Remove when fixed
+        return imageComponent.originalSelectedArea;
     }
 
     /** @return true if the image is a truecolor image. */
@@ -1980,7 +1970,7 @@ public class DefaultImageView implements ImageView {
 
     public void setImage(Image img) {
         image = img;
-        // imageComponent.setImage(img);
+        imageComponent.setImage(img);
 
         setImageDirection();
     }
@@ -2032,7 +2022,7 @@ public class DefaultImageView implements ImageView {
 
     public void setPalette(byte[][] pal) {
         imagePalette = pal;
-        // paletteComponent.updatePalette(pal);
+        //paletteComponent.updatePalette(pal);
     }
 
     private void gotoPage(long idx) {
@@ -2056,7 +2046,7 @@ public class DefaultImageView implements ImageView {
         dataset.clearData();
         image = null;
         gainBias = null;
-        // imageComponent.setImage(getImage());
+        imageComponent.setImage(getImage());
         frameField.setText(String.valueOf(curFrame));
 
         isHorizontalFlipped = false;
@@ -2134,7 +2124,7 @@ public class DefaultImageView implements ImageView {
     private Image createTrueColorImage(byte[] imageData, boolean planeInterlace,
             int w, int h)
     {
-    	/*
+        /*
         if (bufferedImage == null)
             bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
@@ -2318,15 +2308,14 @@ public class DefaultImageView implements ImageView {
 
         private Image image;
         private Point originalSize, imageSize;
+        private Point scrollDim = null;
         private Point startPosition, currentPosition; // mouse clicked position
         private Rectangle selectedArea, originalSelectedArea;
         private StringBuffer strBuff; // to hold display value
-        private int yMousePosition = 0; // the vertical position of the current
-        // mouse
-        private Dimension scrollDim = null;
-        /*private JScrollBar hbar = null;
-        private JScrollBar vbar = null;
-        */
+        private int yMousePosition = 0; // the vertical position of the current mouse
+        private ScrollBar hbar = null;
+        private ScrollBar vbar = null;
+        private Cursor currentCursor = null;
 
         public ImageComponent(Composite parent, int style, Image img) {
             super(parent, style);
@@ -2340,10 +2329,87 @@ public class DefaultImageView implements ImageView {
             originalSelectedArea = new Rectangle(0, 0, 0, 0);
             setSize(imageSize);
             strBuff = new StringBuffer();
+            
+            this.addMouseMoveListener(new MouseMoveListener() {
+                @Override
+                public void mouseMove(MouseEvent e) {
+                    yMousePosition = e.y;
+                    showPixelValue(e.x, yMousePosition);
+                }
+            });
+            
+            this.addMouseListener(new MouseListener() {
+                @Override
+                public void mouseDoubleClick(MouseEvent e) {
+                    
+                }
+                
+                @Override
+                public void mouseDown(MouseEvent e) {
+                    startPosition = new Point(e.x, e.y);
+                    
+                    selectedArea.x = startPosition.x; selectedArea.y = startPosition.y;
+                    selectedArea.width = 0; selectedArea.height = 0;
+                    
+                    scrollDim = imageScroller.getSize();
+                    hbar = imageScroller.getHorizontalBar();
+                    vbar = imageScroller.getVerticalBar();
 
-            // addMouseListener(this);
-            // addMouseMotionListener(this);
-            // addMouseWheelListener(this);
+                    /*if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK) {
+                        setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                    }
+                    else {
+                        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }*/
+                }
+                
+                @Override
+                public void mouseUp(MouseEvent e) {
+                    shell.setCursor(null);
+                    currentCursor.dispose();
+                    
+                    // Single mouse click
+                    if(e.count == 1) {
+                        startPosition = new Point(e.x, e.y);
+                        
+                        selectedArea.x = startPosition.x; selectedArea.y = startPosition.y;
+                        selectedArea.width = 0; selectedArea.height = 0;
+                        
+                        if (hbar.isVisible()) {
+                            hbar.setSelection(startPosition.x - scrollDim.x / 2);
+                        }
+
+                        if (vbar.isVisible()) {
+                            vbar.setSelection(startPosition.y - scrollDim.y / 2);
+                        }
+
+                        redraw();
+                    }
+                }
+            });
+            
+            this.addMouseWheelListener(new MouseWheelListener() {
+                public void mouseScrolled(MouseEvent e) {
+                    ScrollBar jb = imageScroller.getVerticalBar();
+                    
+                    //int us = e.getUnitsToScroll();
+                    //int wr = e.getWheelRotation();
+                    //int n = us * jb.getIncrement();
+                    int y = jb.getSelection();
+
+                    /*if (((y <= 0) && (wr < 0))
+                            || (y + jb.getVisibleAmount() * wr >= zoomFactor
+                                    * originalSize.y)) {
+                        return;
+                    }
+                    */
+
+                    //yMousePosition += n;
+                    //jb.setSelection(jb.getSelection() + n);
+
+                    showPixelValue(e.x, yMousePosition);
+                }
+            });
 
             this.addPaintListener(new PaintListener() {
                 public void paintControl(PaintEvent e) {
@@ -2580,32 +2646,6 @@ public class DefaultImageView implements ImageView {
          * 
          * return ret; }
          */
-        /*
-         * public void mousePressed(MouseEvent e) { startPosition =
-         * e.getPoint(); //selectedArea.setBounds(startPosition.x,
-         * startPosition.y, 0, 0); scrollDim = imageScroller.getSize(); hbar =
-         * imageScroller.getHorizontalScrollBar(); vbar =
-         * imageScroller.getVerticalScrollBar();
-         * 
-         * if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) ==
-         * InputEvent.SHIFT_DOWN_MASK) {
-         * setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)); }
-         * else { setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); } }
-         */
-
-        /*
-         * public void mouseClicked(MouseEvent e) { startPosition =
-         * e.getPoint(); //selectedArea.setBounds(startPosition.x,
-         * startPosition.y, 0, 0);
-         * 
-         * if (hbar.isVisible()) { hbar.setValue(startPosition.x -
-         * scrollDim.width / 2); }
-         * 
-         * if (vbar.isVisible()) { vbar.setValue(startPosition.y -
-         * scrollDim.height / 2); }
-         * 
-         * repaint(); }
-         */
 
         /*
          * public void mouseDragged(MouseEvent e) { // don't update too often.
@@ -2633,24 +2673,6 @@ public class DefaultImageView implements ImageView {
          * 
          * if (vbar.isVisible()) { int dy = startPosition.y - currentPosition.y;
          * vbar.setValue(vbar.getValue() + dy); } } }
-         * 
-         * public void mouseReleased(MouseEvent e) {
-         * setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); }
-         * 
-         * public void mouseMoved(MouseEvent e) { yMousePosition = e.getY();
-         * showPixelValue(e.getX(), yMousePosition); }
-         * 
-         * public void mouseWheelMoved(MouseWheelEvent e) { JScrollBar jb =
-         * imageScroller.getVerticalScrollBar(); int us = e.getUnitsToScroll();
-         * int wr = e.getWheelRotation(); int n = us * jb.getUnitIncrement();
-         * int y = jb.getValue();
-         * 
-         * if (((y <= 0) && (wr < 0)) || (y + jb.getVisibleAmount() * wr >=
-         * zoomFactor originalSize.height)) { return; }
-         * 
-         * yMousePosition += n; jb.setValue(jb.getValue() + n);
-         * 
-         * showPixelValue(e.getX(), yMousePosition); }
          */
     } // private class ImageComponent extends JComponent
 
