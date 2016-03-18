@@ -17,7 +17,8 @@ package hdf.view;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
@@ -85,7 +86,7 @@ public class NewAttributeDialog extends Dialog {
 
     private FileFormat        fileFormat;
     
-    private Enumeration<?>    objList;
+    private List<HObject>     objList;
     
     private Label             arrayLengthLabel;
 
@@ -100,7 +101,7 @@ public class NewAttributeDialog extends Dialog {
      * @param obj
      *            the object for the attribute to be attached to.
      */
-	public NewAttributeDialog(Shell parent, HObject obj, Enumeration<?> objs) {
+	public NewAttributeDialog(Shell parent, HObject obj, List<HObject> objs) {
 		super(parent, SWT.APPLICATION_MODAL);
 		
 		hObject = obj;
@@ -304,9 +305,10 @@ public class NewAttributeDialog extends Dialog {
     		}
     	});
     	
+    	Iterator<HObject> it = objList.iterator();
         HObject hobj;
-        while (objList.hasMoreElements()) {
-            hobj = (HObject) objList.nextElement();
+        while (it.hasNext()) {
+            hobj = it.next();
             
             if (hobj instanceof Group) {
                 if (((Group) hobj).isRoot()) continue;

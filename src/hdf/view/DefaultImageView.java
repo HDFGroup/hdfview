@@ -422,7 +422,6 @@ public class DefaultImageView implements ImageView {
 
         // Add toolbar for Histogram, Frame selection, etc.
         ToolBar bar = createToolbar(shell);
-        bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         bar.setSize(shell.getSize().x, 30);
         bar.setLocation(0, 0);
 
@@ -626,7 +625,7 @@ public class DefaultImageView implements ImageView {
                 if (root == null) return;
 
                 Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
-                Iterator<HObject> it = ((Group) root).depthFirstEnumeration().iterator();
+                Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
                 
                 while (it.hasNext()) {
                     list.add(it.next());
@@ -1029,6 +1028,7 @@ public class DefaultImageView implements ImageView {
     private ToolBar createToolbar(final Shell shell) {
         ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
         toolbar.setFont(Display.getCurrent().getSystemFont());
+        toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         // Chart button
         ToolItem item = new ToolItem(toolbar, SWT.PUSH);

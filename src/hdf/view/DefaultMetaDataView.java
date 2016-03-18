@@ -195,13 +195,12 @@ public class DefaultMetaDataView implements MetaDataView {
 
 	/** Add an attribute to a data object. */
     public Attribute addAttribute(HObject obj) {
-    	/*
         if (obj == null) {
             return null;
         }
         
         HObject node = obj.getFileFormat().getRootObject();
-        NewAttributeDialog dialog = new NewAttributeDialog(this, obj, node.breadthFirstEnumeration());
+        NewAttributeDialog dialog = new NewAttributeDialog(shell, obj, ((Group) node).breadthFirstMemberList());
         dialog.open();
 
         Attribute attr = dialog.getAttribute();
@@ -222,17 +221,16 @@ public class DefaultMetaDataView implements MetaDataView {
         for (int j = 1; j < dims.length; j++) {
             rowData[3] += " x " + dims[j];
         }
+        
+        TableItem item = new TableItem(attrTable, SWT.NONE);
+        item.setText(rowData);
 
-        attrTableModel.addRow(rowData);
-        attrTableModel.fireTableRowsInserted(attrTableModel.getRowCount() - 1, attrTableModel.getRowCount() - 1);
+        //attrTableModel.fireTableRowsInserted(attrTableModel.getRowCount() - 1, attrTableModel.getRowCount() - 1);
         numAttributes++;
         attrContentArea.setText("");
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
 
         return attr;
-        */
-    	
-    	return null;
     }
 
 	/** Delete an attribute from a data object. */
