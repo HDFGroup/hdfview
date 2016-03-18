@@ -1291,6 +1291,10 @@ public class HDFView implements ViewManager, DropTargetListener {
         return treeView;
     }
     
+    public Combo getUrlBar() {
+    	return url_bar;
+    }
+    
     /**
      * Display feedback message.
      * 
