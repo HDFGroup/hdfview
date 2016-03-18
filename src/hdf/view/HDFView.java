@@ -479,11 +479,31 @@ public class HDFView implements ViewManager, DropTargetListener {
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                NewFileDialog dialog = new NewFileDialog(shell, currentDir, FileFormat.FILE_TYPE_HDF4, treeView.getCurrentFiles());
-                String filename = dialog.open();
+            	if (currentDir != null) {
+                    currentDir += File.separator;
+                }
+                else {
+                    currentDir = "";
+                }
+            	
+            	FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            	fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
+            	//setFileFilter(DefaultFileFilter.getFileFilterHDF4());
+            	
+                String filename = fChooser.open();
                 
-                if(!dialog.isFileCreated() || filename == null)
-                    return;
+                if(filename == null) return;
+                
+                try {
+                	FileFormat file = Tools.createNewFile(filename, currentDir,
+                			FileFormat.FILE_TYPE_HDF4, getTreeView().getCurrentFiles());
+                	
+                	currentDir = file.getParent();
+                }
+                catch (Exception ex) {
+                	showError(ex.getMessage(), mainWindow.getText());
+                	return;
+                }
                 
                 try {
                     treeView.openFile(filename, FileFormat.WRITE);
@@ -508,11 +528,31 @@ public class HDFView implements ViewManager, DropTargetListener {
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                NewFileDialog dialog = new NewFileDialog(shell, currentDir, FileFormat.FILE_TYPE_HDF5, treeView.getCurrentFiles());
-                String filename = dialog.open();
+            	if (currentDir != null) {
+                    currentDir += File.separator;
+                }
+                else {
+                    currentDir = "";
+                }
+            	
+            	FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            	fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
+            	//setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+            	
+                String filename = fChooser.open();
                 
-                if(!dialog.isFileCreated() || filename == null)
-                    return;
+                if(filename == null) return;
+                
+                try {
+                	FileFormat theFile = Tools.createNewFile(filename, currentDir,
+                			FileFormat.FILE_TYPE_HDF5, getTreeView().getCurrentFiles());
+                	
+                	currentDir = theFile.getParent();
+                }
+                catch (Exception ex) {
+                	showError(ex.getMessage(), mainWindow.getText());
+                	return;
+                }
                 
                 try {
                     treeView.openFile(filename, FileFormat.WRITE);

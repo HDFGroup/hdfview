@@ -32,10 +32,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -1854,6 +1859,88 @@ public final class Tools {
                 runtime.exec(new String[] { browser, url });
         }
     } /* public static final void launchBrowser(String url) */
+    
+    /** Create a new HDF file with default file creation properties */
+    public static FileFormat createNewFile(String filename, String dir,
+    		String type, List<FileFormat> openFiles) throws Exception {
+    	File f = new File(filename);
+
+        String fname = f.getAbsolutePath();
+        if (fname == null) return null;
+
+        fname = fname.trim();
+        if ((fname == null) || (fname.length() == 0)) {
+        	throw new Exception("Invalid file name.");
+        }
+
+        String extensions = FileFormat.getFileExtensions();
+        boolean noExtension = true;
+        if ((extensions != null) && (extensions.length() > 0)) {
+            java.util.StringTokenizer currentExt = new java.util.StringTokenizer(extensions, ",");
+            String extension = "";
+            String tmpFilename = fname.toLowerCase();
+            while (currentExt.hasMoreTokens() && noExtension) {
+                extension = currentExt.nextToken().trim().toLowerCase();
+                noExtension = !tmpFilename.endsWith("." + extension);
+            }
+        }
+
+        if (noExtension) {
+            if (type == FileFormat.FILE_TYPE_HDF4) {
+                fname += ".hdf";
+                f = new File(fname);
+                //setSelectedFile(f);
+            }
+            else if (type == FileFormat.FILE_TYPE_HDF5) {
+                fname += ".h5";
+                f = new File(fname);
+                //setSelectedFile(f);
+            }
+        }
+
+        if (f.exists() && f.isDirectory()) {
+            throw new Exception("File is a directory.");
+        }
+
+        File pfile = f.getParentFile();
+        if (pfile == null) {
+            fname = dir + File.separator + fname;
+            f = new File(fname);
+        }
+        else if (!pfile.exists()) {
+            throw new Exception("File path does not exist at\n" + pfile.getPath());
+        }
+
+        // check if the file is in use
+        if (openFiles != null) {
+            FileFormat theFile = null;
+            Iterator<FileFormat> iterator = openFiles.iterator();
+            while (iterator.hasNext()) {
+                theFile = (FileFormat) iterator.next();
+                if (theFile.getFilePath().equals(fname)) {
+                    throw new Exception("Unable to create the new file. \nThe file is being used.");
+                }
+            }
+        }
+
+        if (f.exists()) {
+        	MessageBox confirm = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+        	confirm.setText(Display.getCurrent().getActiveShell().getText());
+        	confirm.setMessage("File exists. Do you want to replace it?");
+        	if (confirm.open() == SWT.NO) return null;
+        }
+        
+        try {
+        	int aFlag = FileFormat.FILE_CREATE_DELETE;
+        	if (ViewProperties.isEarlyLib())
+        		aFlag = FileFormat.FILE_CREATE_DELETE | FileFormat.FILE_CREATE_EARLY_LIB;
+            FileFormat theFile = FileFormat.getFileFormat(type).createFile(fname, aFlag);
+            return theFile;
+        }
+        catch (Exception ex) {
+        	throw new Exception(ex.getMessage());
+        }
+    }
 
     /**
      * Check and find a non-exist file.

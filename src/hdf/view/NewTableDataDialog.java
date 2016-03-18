@@ -453,7 +453,7 @@ public class NewTableDataDialog extends Dialog {
     	// Create Ok/Cancel button region
     	Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
-        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
