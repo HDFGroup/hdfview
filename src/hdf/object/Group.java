@@ -14,7 +14,12 @@
 
 package hdf.object;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.Vector;
 
 /**
@@ -201,17 +206,52 @@ public abstract class Group extends HObject {
     /**
      * Returns the members of this Group in breadth-first order.
      */
-    public List<HObject> breadthFirstEnumeration() {
+    public List<HObject> breadthFirstMemberList() {
+    	Vector<HObject> members = new Vector<HObject>();
+    	Queue<HObject> queue = new LinkedList<HObject>();
+    	HObject currentObj = this;
     	
-    	return null;
+    	queue.addAll(((Group) currentObj).getMemberList());
+    	
+    	while(!queue.isEmpty()) {
+    		currentObj = queue.remove();
+    		members.add(currentObj);
+    		
+    		if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0) {
+    			queue.addAll(((Group) currentObj).getMemberList());
+    		}
+    	}
+    	
+    	return members;
     }
     
     /**
      * Returns the members of this Group in depth-first order.
      */
-    public List<HObject> depthFirstEnumeration() {
+    public List<HObject> depthFirstMemberList() {
+    	Vector<HObject> members = new Vector<HObject>();
+    	Stack<HObject> stack = new Stack<HObject>();
+    	HObject currentObj = this;
     	
-    	return null;
+    	// Push elements onto the stack in reverse order
+    	List<HObject> list = ((Group) currentObj).getMemberList();
+    	for(int i = list.size() - 1; i >= 0; i--) {
+    		stack.push(list.get(i));
+    	}
+    	
+    	while(!stack.empty()) {
+    		currentObj = stack.pop();
+    		members.add(currentObj);
+
+    		if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0) {
+    			list = ((Group) currentObj).getMemberList();
+    			for(int i = list.size() - 1; i >= 0; i--) {
+    				stack.push(list.get(i));
+    			}
+    		}
+    	}
+    	
+    	return members;
     }
 
     /**
