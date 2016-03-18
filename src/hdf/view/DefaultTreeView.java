@@ -331,6 +331,33 @@ public class DefaultTreeView implements TreeView {
                 Point pt = display.map(null, tree, new Point(e.x, e.y));
                 TreeItem item = tree.getItem(pt);
                 if(item == null) return;
+                
+                FileFormat theFile = null;
+                
+                selectedItem = item;
+                
+                try {
+                    selectedObject = (HObject) selectedItem.getData();
+                }
+                catch(NullPointerException ex) {
+                    System.err.println("TreeItem " + selectedItem.getText() + " had no associated data.");
+                    return;
+                }
+
+                try {
+                    theFile = selectedObject.getFileFormat();
+                }
+                catch(NullPointerException ex) {
+                    System.err.println("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    return;
+                }
+
+                if ((theFile != null) && !theFile.equals(selectedFile)) {
+                    // A different file is selected, handle only one file at a time
+                    selectedFile = theFile;
+                    //tree.deselectAll();
+                    //tree.setSelection(selPath);
+                }
 
                 popupMenu.setLocation(display.getCursorLocation());
                 popupMenu.setVisible(true);
