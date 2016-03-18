@@ -842,7 +842,7 @@ public class DefaultTableView implements TableView {
         	}
         });
         
-        final NatTable natTable = new NatTable(parent, gridLayer);
+        final NatTable natTable = new NatTable(parent, gridLayer, false);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
         
         // Register cell editing rules with table
