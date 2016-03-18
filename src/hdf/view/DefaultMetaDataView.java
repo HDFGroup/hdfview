@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Iterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -806,18 +807,20 @@ public class DefaultMetaDataView implements MetaDataView {
             size /= 1024;
             
             int groupCount = 0, datasetCount = 0;
-            //DefaultMutableTreeNode root = (DefaultMutableTreeNode) theFile.getRootNode();
-            //DefaultMutableTreeNode theNode = null;
-            //Enumeration<?> local_enum = root.depthFirstEnumeration();
-            //while (local_enum.hasMoreElements()) {
-            //    theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-            //    if (theNode.getUserObject() instanceof Group) {
-            //        groupCount++;
-            //    }
-            //    else {
-            //        datasetCount++;
-            //    }
-            //}
+            
+            HObject root = theFile.getRootObject();
+            HObject theObj = null;
+            Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
+            
+            while(it.hasNext()) {
+            	theObj = it.next();
+            	
+            	if(theObj instanceof Group) {
+            		groupCount++;
+            	} else {
+            		datasetCount++;
+            	}
+            }
             
             fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
 			
@@ -859,6 +862,9 @@ public class DefaultMetaDataView implements MetaDataView {
                 if ((libver[0] == 0) && (libver[1] == 1))
                     libversion = "Earliest and Latest";
                 else if ((libver[0] == 1) && (libver[1] == 1)) libversion = "Latest and Latest";
+                else {
+                	libversion = "";
+                }
                 
                 new Label(detailComposite, SWT.RIGHT).setText(libversion);
             }

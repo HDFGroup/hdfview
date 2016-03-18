@@ -317,7 +317,18 @@ public class DefaultTreeView implements TreeView {
                     //tree.setSelection(selPath);
                 }
 
-                // Add way to set url_bar text to this current file
+                // Set this file to the most recently selected file in the recent files bar
+                Combo recentFilesCombo = ((HDFView) viewer).getUrlBar();
+                String filename = selectedFile.getAbsolutePath();
+                
+                try {
+                	recentFilesCombo.remove(filename);
+                }
+                catch (Exception ex) {
+                }
+                
+                recentFilesCombo.add(filename, 0);
+                recentFilesCombo.select(0);
 
                 ((HDFView) viewer).showMetaData(selectedObject);
             }
