@@ -14,8 +14,8 @@
 
 package hdf.view;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
+import java.awt.Image;
+import java.awt.Rectangle;
 
 /**
  * The image view interface for displaying image object
