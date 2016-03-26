@@ -48,13 +48,6 @@ import org.eclipse.swt.widgets.Text;
 public class UserOptionsDialog extends Dialog {
     private Shell shell;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
-
-    /**
-    * The main HDFView.
-    */
-    //private final JFrame          viewer;
-
     private String                H4toH5Path;
     private Text                  H4toH5Field, UGField, workField, fileExtField, maxMemberField, startMemberField;
     private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
@@ -113,7 +106,7 @@ public class UserOptionsDialog extends Dialog {
         if (workDir == null) {
             workDir = rootDir;
         }
-        log.trace("UserOptionsDialog: workDir={}", workDir);
+        //log.trace("UserOptionsDialog: workDir={}", workDir);
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
         textViews = ViewProperties.getTextViewList();
@@ -253,7 +246,7 @@ public class UserOptionsDialog extends Dialog {
         // set font size
         int fsize = 12;
         try {
-            fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
+        	fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
             ViewProperties.setFontSize(fsize);
 
             if ((fontSize != ViewProperties.getFontSize())) {
@@ -475,8 +468,14 @@ public class UserOptionsDialog extends Dialog {
         fontSizeChoice = new Combo(textFontGroup, SWT.SINGLE);
         fontSizeChoice.setItems(fontSizeChoices);
         fontSizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        //fontSizeChoice.setSelectedItem(String.valueOf(ViewProperties.getFontSize()));
-
+        
+        try {
+        	int selectionIndex = fontSizeChoice.indexOf(String.valueOf(ViewProperties.getFontSize()));
+            fontSizeChoice.select(selectionIndex);
+        } catch (Exception ex) {
+        	fontSizeChoice.select(0);
+        }
+        
         new Label(textFontGroup, SWT.RIGHT).setText("Font Type: ");
 
         String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
@@ -486,7 +485,6 @@ public class UserOptionsDialog extends Dialog {
         fontTypeChoice.setItems(fontNames);
         fontTypeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        /*
         boolean isFontValid = false;
         if (fontNames != null) {
             for (int i = 0; i < fontNames.length; i++) {
@@ -496,12 +494,16 @@ public class UserOptionsDialog extends Dialog {
             }
         }
         if (!isFontValid) {
-            fname = (viewer).getFont().getFamily();
-            ViewProperties.setFontType(fname);
+            //fname = (viewer).getFont().getFamily();
+            //ViewProperties.setFontType(fname);
         }
 
-        fontTypeChoice.setSelectedItem(fname);
-        */
+        try {
+        	int selectionIndex = fontTypeChoice.indexOf(fname);
+            fontTypeChoice.select(selectionIndex);
+        } catch (Exception ex) {
+        	fontTypeChoice.select(0);
+        }
 
 
         org.eclipse.swt.widgets.Group imageGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
@@ -559,8 +561,14 @@ public class UserOptionsDialog extends Dialog {
 
         imageOriginChoice = new Combo(imageGroup, SWT.SINGLE);
         imageOriginChoice.setItems(imageOriginChoices);
-        //imageOriginChoice.setSelectedItem(ViewProperties.getImageOrigin());
         imageOriginChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        
+        try {
+        	int selectionIndex = imageOriginChoice.indexOf(ViewProperties.getImageOrigin());
+        	imageOriginChoice.select(selectionIndex);
+        } catch (Exception ex) {
+        	imageOriginChoice.select(0);
+        }
 
 
         org.eclipse.swt.widgets.Group dataGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
@@ -618,9 +626,15 @@ public class UserOptionsDialog extends Dialog {
                 ViewProperties.DELIMITER_SPACE, ViewProperties.DELIMITER_COLON, ViewProperties.DELIMITER_SEMI_COLON };
         delimiterChoice = new Combo(dataGroup, SWT.SINGLE);
         delimiterChoice.setItems(delimiterChoices);
-        //delimiterChoice.setSelectedItem(ViewProperties.getDataDelimiter());
         delimiterChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+        try {
+        	int selectionIndex = delimiterChoice.indexOf(ViewProperties.getDataDelimiter());
+        	delimiterChoice.select(selectionIndex);
+        } catch (Exception ex) {
+        	delimiterChoice.select(0);
+        }
+        
 
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         objectsGroup.setLayout(new GridLayout(5, false));
@@ -710,6 +724,7 @@ public class UserOptionsDialog extends Dialog {
 
         choiceTreeView = new Combo(treeViewGroup, SWT.SINGLE);
         choiceTreeView.setItems(treeViews.toArray(new String[0]));
+        choiceTreeView.select(0);
 
         org.eclipse.swt.widgets.Group metadataViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         metadataViewGroup.setLayout(new FillLayout());
@@ -718,6 +733,7 @@ public class UserOptionsDialog extends Dialog {
 
         choiceMetaDataView = new Combo(metadataViewGroup, SWT.SINGLE);
         choiceMetaDataView.setItems(metaDataViews.toArray(new String[0]));
+        choiceMetaDataView.select(0);
 
         org.eclipse.swt.widgets.Group textViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         textViewGroup.setLayout(new FillLayout());
@@ -726,6 +742,7 @@ public class UserOptionsDialog extends Dialog {
 
         choiceTextView = new Combo(textViewGroup, SWT.SINGLE);
         choiceTextView.setItems(textViews.toArray(new String[0]));
+        choiceTextView.select(0);
 
         org.eclipse.swt.widgets.Group tableViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         tableViewGroup.setLayout(new FillLayout());
@@ -734,6 +751,7 @@ public class UserOptionsDialog extends Dialog {
 
         choiceTableView = new Combo(tableViewGroup, SWT.SINGLE);
         choiceTableView.setItems(tableViews.toArray(new String[0]));
+        choiceTableView.select(0);
 
         org.eclipse.swt.widgets.Group imageViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         imageViewGroup.setLayout(new FillLayout());
@@ -742,6 +760,7 @@ public class UserOptionsDialog extends Dialog {
 
         choiceImageView = new Combo(imageViewGroup, SWT.SINGLE);
         choiceImageView.setItems(imageViews.toArray(new String[0]));
+        choiceImageView.select(0);
 
         org.eclipse.swt.widgets.Group paletteViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         paletteViewGroup.setLayout(new FillLayout());
@@ -750,6 +769,7 @@ public class UserOptionsDialog extends Dialog {
 
         choicePaletteView = new Combo(paletteViewGroup, SWT.SINGLE);
         choicePaletteView.setItems(paletteViews.toArray(new String[0]));
+        choicePaletteView.select(0);
 
         return composite;
     }

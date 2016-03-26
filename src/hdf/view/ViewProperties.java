@@ -209,13 +209,12 @@ public class ViewProperties extends Properties {
         recentFiles = new Vector<String>(MAX_RECENT_FILES + 5);
 
         // find the property file
-        String userHome, userDir, h5v, propertyFileName;
+        String userHome, userDir, propertyFileName;
 
         // look for the property file in the user's home directory
         propertyFileName = USER_PROPERTY_FILE;
         userHome = System.getProperty("user.home") + File.separator + propertyFileName;
         userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
-        h5v = viewRoot + File.separator + "lib" + File.separator + propertyFileName;
         
         if ((new File(userHome)).exists()) {
             propertyFile = userHome;
@@ -304,6 +303,8 @@ public class ViewProperties extends Properties {
                             classList.add(entryName.substring(0, idx));
                         }
                     }
+                    
+                    jarFile.close();
                 }
                 catch (Exception ex) {
                     log.debug("loadExtClass: load jar[{}] failed", i, ex);

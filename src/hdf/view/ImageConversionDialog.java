@@ -93,7 +93,7 @@ public class ImageConversionDialog extends Dialog {
     public void open() {
     	Shell parent = getParent();
     	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-    	shell.setText("New Dataset...");
+    	shell.setText(parent.getText());
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
     	

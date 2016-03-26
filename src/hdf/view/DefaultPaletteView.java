@@ -16,6 +16,7 @@ package hdf.view;
 
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.Vector;
@@ -55,31 +56,31 @@ import hdf.object.ScalarDS;
 
 /**
  * Displays a dialog for viewing and change palettes.
- *
+ * 
  * @author Jordan T. Henderson
  * @version 2.4 2/27/16
  */
 public class DefaultPaletteView extends Dialog {
-
+    
     private Shell shell;
-
+    
     private ScalarDS dataset;
-
+    
     /** Panel that draws plot of data values. */
     private ChartCanvas chartP;
     private ImageView imageView;
     private PaletteValueTable paletteValueTable;
-
+    
     private Button checkRed, checkGreen, checkBlue;
-
+    
     private Combo choicePalette;
-
+    
     private Image originalImage, currentImage;
-
+    
     private final Color[] lineColors = { Color.red, Color.green, Color.blue };
     private final String lineLabels[] = { "Red", "Green", "Blue" };
-
-
+    
+    
     private static String PALETTE_GRAY = "Gray";
     private static String PALETTE_DEFAULT = "Default";
     private static String PALETTE_REVERSE_GRAY = "Reverse Gray";
@@ -87,33 +88,33 @@ public class DefaultPaletteView extends Dialog {
     private static String PALETTE_RAINBOW = "Rainbow";
     private static String PALETTE_NATURE = "Nature";
     private static String PALETTE_WAVE = "Wave";
-
+    
     private int x0, y0; // starting point of mouse drag
-
+    
     byte[][] palette;
     private int numberOfPalettes;
     private int[][] paletteData;
-
+    
     boolean isPaletteChanged = false;
     private boolean startEditing = false;
     private boolean isH5 = false;
-
-
+    
+    
     public DefaultPaletteView(Shell parent, ImageView theImageView) {
         this(parent, null, theImageView);
     }
-
+    
     public DefaultPaletteView(Shell parent, ViewManager theViewer, ImageView theImageView) {
         super(parent, SWT.APPLICATION_MODAL);
-
+        
         imageView = theImageView;
         dataset = (ScalarDS) imageView.getDataObject();
-
+        
         numberOfPalettes = 1;
-
+        
         paletteData = new int[3][256];
         byte[][] imagePalette = imageView.getPalette();
-
+        
         int d = 0;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 256; j++) {
@@ -124,17 +125,17 @@ public class DefaultPaletteView extends Dialog {
                 paletteData[i][j] = d;
             }
         }
-
+        
         imageView = theImageView;
-
+        
         x0 = y0 = 0;
         originalImage = currentImage = imageView.getImage();
         palette = new byte[3][256];
-
+        
         isH5 = dataset.getFileFormat().isThisType(
                 FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
-
+    
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
@@ -142,49 +143,49 @@ public class DefaultPaletteView extends Dialog {
         shell.setText("Image Palette for - " + dataset.getPath() + dataset.getName());
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
-
-
+        
+        
         // Create the content composite for the Canvas
         Composite content = new Composite(shell, SWT.BORDER);
         content.setLayout(new FillLayout());
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+        
         chartP = new ChartCanvas(content, SWT.DOUBLE_BUFFERED);
         chartP.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-
-
-
+        
+        
+        
         // Create the toolbar composite
         Composite tools = new Composite(shell, SWT.NONE);
         tools.setLayout(new RowLayout(SWT.HORIZONTAL));
         tools.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
+        
         // Add buttons for changing line colors
         Composite rgbComposite = new Composite(tools, SWT.BORDER);
         rgbComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
         rgbComposite.setLayoutData(new RowData());
-
+        
         checkRed = new Button(rgbComposite, SWT.RADIO);
         checkRed.setText("Red");
         checkRed.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
-
+        
         checkGreen = new Button(rgbComposite, SWT.RADIO);
         checkGreen.setText("Green");
         checkGreen.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_GREEN));
-
+        
         checkBlue = new Button(rgbComposite, SWT.RADIO);
         checkBlue.setText("Blue");
         checkBlue.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
-
+        
         checkRed.setSelection(true);
         checkGreen.setSelection(false);
         checkBlue.setSelection(false);
-
+        
         // Add controls for selecting palettes and showing values
         Composite paletteComposite = new Composite(tools, SWT.BORDER);
         paletteComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
         paletteComposite.setLayoutData(new RowData());
-
+        
         choicePalette = new Combo(paletteComposite, SWT.SINGLE);
         choicePalette.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -243,17 +244,17 @@ public class DefaultPaletteView extends Dialog {
                 isPaletteChanged = true;
             }
         });
-
+        
         choicePalette.add("Select palette");
-
+        
         String paletteName = ((ScalarDS) dataset).getPaletteName(0);
-
+        
         if (paletteName!= null)
             paletteName = paletteName.trim();
-
+        
         if (paletteName!= null && paletteName.length()>0)
             choicePalette.add(paletteName);
-
+        
         if (isH5 && (dataset instanceof ScalarDS)) {
             byte[] palRefs = ((ScalarDS) dataset).getPaletteRefs();
             if ((palRefs != null) && (palRefs.length > 8)) {
@@ -273,10 +274,10 @@ public class DefaultPaletteView extends Dialog {
         int n = plist.size();
         for (int i = 0; i < n; i++)
             choicePalette.add((String) plist.get(i));
-
+        
         choicePalette.select(0);
-
-
+        
+        
         Button showValueButton = new Button(paletteComposite, SWT.PUSH);
         showValueButton.setText("Show Values");
         showValueButton.addSelectionListener(new SelectionAdapter() {
@@ -288,28 +289,28 @@ public class DefaultPaletteView extends Dialog {
                 //paletteValueTable.setVisible(true);
             }
         });
-
-
+        
+        
         // Add Ok/Cancel/Preview buttons
         Composite buttonComposite = new Composite(tools, SWT.BORDER);
         buttonComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
         buttonComposite.setLayoutData(new RowData());
-
+        
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (isPaletteChanged) {
-                    //updatePalette();
+                    updatePalette();
                     isPaletteChanged = false;
                     imageView.setPalette(palette);
                     imageView.setImage(currentImage);
                 }
-
+                
                 shell.dispose();
             }
         });
-
+        
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setText("&Cancel");
         cancelButton.addSelectionListener(new SelectionAdapter() {
@@ -318,16 +319,16 @@ public class DefaultPaletteView extends Dialog {
                 shell.dispose();
             }
         });
-
+        
         Button previewButton = new Button(buttonComposite, SWT.PUSH);
         previewButton.setText("&Preview");
         previewButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                //updatePalette();
+                updatePalette();
                 imageView.setImage(currentImage);
             }
         });
-
+        
 
         shell.pack();
 
@@ -346,12 +347,12 @@ public class DefaultPaletteView extends Dialog {
                 display.sleep();
         }
     }
-
+    
     /** Returns the data object displayed in this data viewer */
     public HObject getDataObject() {
         return dataset;
     }
-
+    
     private void updatePalette() {
         for (int i = 0; i < 256; i++) {
             palette[0][i] = (byte) paletteData[0][i];
@@ -372,7 +373,7 @@ public class DefaultPaletteView extends Dialog {
         MemoryImageSource memoryImageSource = null;
 
         try {
-            //memoryImageSource = (MemoryImageSource) originalImage.getSource();
+            memoryImageSource = (MemoryImageSource) originalImage.getSource();
         }
         catch (Throwable err) {
             memoryImageSource = null;
@@ -387,24 +388,23 @@ public class DefaultPaletteView extends Dialog {
                     colorModel, 0, (int)w);
         }
 
-        //currentImage = Toolkit.getDefaultToolkit().createImage(
-        //        memoryImageSource);
+        currentImage = Toolkit.getDefaultToolkit().createImage(memoryImageSource);
     }
-
+    
     /** The canvas that paints the data lines. */
     private class ChartCanvas extends Canvas {
         private Canvas canvas;
-
+        
         public ChartCanvas(Composite parent, int style) {
             super(parent, style);
-
+            
             canvas = new Canvas(parent, style);
-
+            
             canvas.addPaintListener(new PaintListener() {
                 public void paintControl(PaintEvent e) {
                     // Get the graphics context for this paint event
                     GC g = e.gc;
-
+                    
                     Point p = canvas.getSize();
                     int gap = 20;
                     int legendSpace = 60;
@@ -465,7 +465,7 @@ public class DefaultPaletteView extends Dialog {
                     g.drawRectangle(w + legendSpace - 10, 10, legendSpace, 10 * gap);
                 }
             });
-
+            
             canvas.addMouseListener(new MouseAdapter() {
                 public void mouseUp(MouseEvent e) {
                     if ((paletteValueTable != null) /*&& paletteValueTable.isVisible()*/) {
@@ -473,56 +473,56 @@ public class DefaultPaletteView extends Dialog {
                     }
                 }
             });
-
-
+            
+            
         }
-
+        
         public void refresh() {
             canvas.redraw();
         }
     }
-
+    
     /** The dialog to show the palette values in spreadsheet. */
     private class PaletteValueTable extends Dialog {
-
+        
         private Shell tableShell;
-
+        
         Table valueTable;
-
+        
         String rgbName = "Color";
         String idxName = "Index";
-
+        
         public PaletteValueTable(Shell parent, int style) {
             super(parent, style);
         }
-
+        
         public void open() {
             Shell parent = getParent();
             tableShell = new Shell(parent, SWT.SHELL_TRIM | SWT.PRIMARY_MODAL);
             tableShell.setText("");
             tableShell.setImage(ViewProperties.getHdfIcon());
             tableShell.setLayout(new GridLayout(1, true));
-
+            
             Composite content = new Composite(tableShell, SWT.NONE);
             content.setLayout(new GridLayout(1, true));
             content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+            
             String[] columnNames = { idxName, "Red", "Green", "Blue", rgbName };
-
+            
             valueTable = new Table(content, SWT.BORDER | SWT.FULL_SELECTION);
-
+            
             // Only allow editing of rgb values
             valueTable.addListener(SWT.MouseDoubleClick, valueTableCellEditor);
-
-
+            
+            
             // set cell height for large fonts
             //int cellRowHeight = Math.max(16, valueTable.getFontMetrics(
             //        valueTable.getFont()).getHeight());
             //valueTable.setRowHeight(cellRowHeight);
-
-
-
-
+            
+            
+            
+            
             Button okButton = new Button(content, SWT.PUSH);
             okButton.setText("   &Ok   ");
             okButton.addSelectionListener(new SelectionAdapter() {
@@ -530,30 +530,30 @@ public class DefaultPaletteView extends Dialog {
                     tableShell.dispose();
                 }
             });
-
-
+            
+            
             tableShell.pack();
-
+            
             tableShell.setMinimumSize(tableShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
+            
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = tableShell.getSize();
             tableShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                               (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-
+            
             tableShell.open();
-
+            
             Display display = parent.getDisplay();
             while(!tableShell.isDisposed()) {
                 if (!display.readAndDispatch())
                     display.sleep();
             }
         }
-
+        
         public void refresh() {
             valueTable.redraw();
         }
-
+        
         private Listener valueTableCellEditor = new Listener() {
             public void handleEvent(Event event) {
                 final TableEditor editor = new TableEditor(valueTable);
