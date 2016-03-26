@@ -713,7 +713,7 @@ public class DefaultTableView implements TableView {
         	public void configureRegistry(IConfigRegistry configRegistry) {
         		Style cellStyle = new Style();
         		
-        		cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);        		
+        		cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
         		cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
         				Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         		
@@ -868,7 +868,7 @@ public class DefaultTableView implements TableView {
         	public void configureRegistry(IConfigRegistry configRegistry) {
         		Style cellStyle = new Style();
         		
-        		cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);        		
+        		cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
         		cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
         				Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         		
@@ -1435,14 +1435,14 @@ public class DefaultTableView implements TableView {
             //frameField.addSelectionListener(new SelectionAdapter() {
             //  public void widgetSelected(SelectionEvent e) {
             //      int page = 0;
-            //      
+            //
             //      try {
             //          page = Integer.parseInt(frameField.getText().trim()) - indexBase;
             //      }
             //      catch (Exception ex) {
             //          page = -1;
             //      }
-            //      
+            //
             //      gotoPage(page);
             //  }
             //});
@@ -1922,6 +1922,16 @@ public class DefaultTableView implements TableView {
         else {
             return getSelectedScalarData();
         }
+    }
+    
+    @Override
+    public int getSelectedColumnCount() {
+    	return selectionLayer.getSelectedColumnPositions().length;
+    }
+    
+    @Override
+    public int getSelectedRowCount() {
+    	return selectionLayer.getSelectedRowCount();
     }
     
     /**
@@ -3639,7 +3649,7 @@ public class DefaultTableView implements TableView {
         private int                rowCount         = dataset.getHeight();
         private int                colCount         = dataset.getWidth();
     	
-    	public ScalarDSDataProvider() {
+        public ScalarDSDataProvider() {
     		
     	}
     	
@@ -4134,7 +4144,7 @@ public class DefaultTableView implements TableView {
             cancelButton.setText("&Cancel");
             cancelButton.addSelectionListener(new SelectionAdapter() {
             	public void widgetSelected(SelectionEvent e) {
-            		plotType = NO_PLOT;            		
+            		plotType = NO_PLOT;
             		linePlotOptionShell.dispose();
             	}
             });

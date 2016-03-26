@@ -29,6 +29,10 @@ public abstract interface TableView extends DataView {
 
     /** Returns array of selected data */
     public abstract Object getSelectedData();
+    
+    public abstract int getSelectedColumnCount();
+    
+    public abstract int getSelectedRowCount();
 
     /** Write the change of a dataset into file. */
     public abstract void updateValueInFile();

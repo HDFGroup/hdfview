@@ -275,7 +275,7 @@ public class NewLinkDialog extends Dialog {
         label = new Label(content, SWT.LEFT);
         label.setText("Target Object: ");
         
-        targetObject = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
+        targetObject = new Combo(content, SWT.DROP_DOWN);
         targetObject.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         //targetObject.setEditable(false);
         

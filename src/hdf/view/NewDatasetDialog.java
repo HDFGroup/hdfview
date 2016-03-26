@@ -1091,9 +1091,9 @@ public class NewDatasetDialog extends Dialog {
         if (theData == null) {
             return null;
         }
-
-        /*int w = tableView.getTable().getSelectedColumnCount();
-        int h = tableView.getTable().getSelectedRowCount();
+        
+        int w = tableView.getSelectedColumnCount();
+        int h = tableView.getSelectedRowCount();
         Dataset dataset = (Dataset) tableView.getDataObject();
         if (dataset instanceof ScalarDS) {
             ScalarDS sd = (ScalarDS) dataset;
@@ -1107,11 +1107,13 @@ public class NewDatasetDialog extends Dialog {
             obj = dataset.copy(pgroup, name, dims, theData);
         }
         catch (Exception ex) {
-            toolkit.beep();
-            JOptionPane.showMessageDialog(this, ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
+        	shell.getDisplay().beep();
+        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+        	error.setText(shell.getText());
+        	error.setMessage(ex.getMessage());
+        	error.open();
             return null;
         }
-        */
 
         return obj;
 	}

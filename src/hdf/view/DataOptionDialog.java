@@ -25,8 +25,11 @@ import java.util.BitSet;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -168,9 +171,7 @@ public class DataOptionDialog extends Dialog {
     	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
     	shell.setText("Dataset Selection - " + dataset.getPath() + dataset.getName());
     	shell.setImage(ViewProperties.getHdfIcon());
-    	GridLayout layout = new GridLayout(1, true);
-    	//layout.verticalSpacing = 0;
-    	shell.setLayout(layout);
+    	shell.setLayout(new GridLayout(1, true));
     	
     	
     	// Create display type region
@@ -702,7 +703,6 @@ public class DataOptionDialog extends Dialog {
     /** PreviewNavigator draws a selection rectangle for selecting a subset
      *  of the data to be displayed. */
     private class PreviewNavigator extends Canvas {
-        private static final long serialVersionUID = -4458114008420664965L;
         private final int         NAVIGATOR_SIZE   = 150;
         private int               dimX, dimY, x, y;
         private double            r;
@@ -739,6 +739,28 @@ public class DataOptionDialog extends Dialog {
 
             //addMouseListener(this);
             //addMouseMotionListener(this);
+            
+            this.addPaintListener(new PaintListener() {
+            	public void paintControl(PaintEvent e) {
+            		GC gc = e.gc;
+            		
+            		gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
+
+                    if (previewImage != null) {
+                        //gc.drawImage(previewImage, 0, 0);
+                    }
+                    else {
+                        gc.fillRectangle(0, 0, x, y);
+                    }
+
+                    int w = selectedArea.width;
+                    int h = selectedArea.height;
+                    if ((w > 0) && (h > 0)) {
+                        gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+                        gc.drawRectangle(selectedArea.x, selectedArea.y, w, h);
+                    }
+            	}
+            });
         }
 
         private Image createPreviewImage ( ) throws Exception {
@@ -853,25 +875,6 @@ public class DataOptionDialog extends Dialog {
 
             return preImage;
         }
-
-        //@Override
-        /*public void paint(Graphics g) {
-            g.setColor(Color.blue);
-
-            if (previewImage != null) {
-                g.drawImage(previewImage, 0, 0, this);
-            }
-            else {
-                g.fillRect(0, 0, x, y);
-            }
-
-            int w = selectedArea.width;
-            int h = selectedArea.height;
-            if ((w > 0) && (h > 0)) {
-                g.setColor(Color.red);
-                g.drawRect(selectedArea.x, selectedArea.y, w, h);
-            }
-        }*/
 
         //@Override
         /*public void mousePressed (MouseEvent e) {
