@@ -14,26 +14,30 @@
 
 package hdf.view;
 
-import java.awt.Color;
 import java.awt.Rectangle;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DirectColorModel;
+import java.awt.image.IndexColorModel;
+import java.awt.image.WritableRaster;
 import java.awt.Image;
 import java.util.BitSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -118,7 +122,7 @@ public class DataOptionDialog extends Dialog {
     
     private String                 dataViewName;
 
-    private Label                  maxLabels[], selLabel;
+    private Label                  maxLabels[];
 
     private Text                   startFields[], endFields[], strideFields[], dataRangeField, fillValueField;
 
@@ -320,7 +324,7 @@ public class DataOptionDialog extends Dialog {
         // set the imagebutton state
         boolean isImage = false;
 
-        /*if (dataset instanceof ScalarDS) {
+        if (dataset instanceof ScalarDS) {
         	if(!((ScalarDS) dataset).isText()) {
         		ScalarDS sd = (ScalarDS) dataset;
         		isImage = sd.isImageDisplay();
@@ -330,7 +334,7 @@ public class DataOptionDialog extends Dialog {
             	dataRangeField.setEnabled(isImage);
             	fillValueField.setEnabled(isImage);
             }
-        }*/
+        }
         
         if(choiceTableView != null) {
         	choiceTableView.setEnabled(!isImage);
@@ -390,15 +394,15 @@ public class DataOptionDialog extends Dialog {
             endFields[2].setEnabled(false);
             strideFields[2].setEnabled(false);
             
-            if(imageButton != null) {
-            	if (isTrueColorImage && imageButton.getSelection()) {
-                    choices[0].setEnabled(false);
-                    choices[1].setEnabled(false);
-                    choices[2].setEnabled(false);
-                    startFields[2].setEnabled(false);
-                    startFields[2].setText("0");
-                    endFields[2].setText("0");
-                }
+            if (isTrueColorImage && imageButton != null) {
+            	if(imageButton.getSelection()) {
+            		choices[0].setEnabled(false);
+            		choices[1].setEnabled(false);
+            		choices[2].setEnabled(false);
+            		startFields[2].setEnabled(false);
+            		startFields[2].setText("0");
+            		endFields[2].setText("0");
+            	}
             }
             else {
                 choices[0].setEnabled(true);
@@ -727,6 +731,8 @@ public class DataOptionDialog extends Dialog {
 		displayAsGroup.setLayout(new GridLayout(1, true));
 		displayAsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		int tclass = dataset.getDatatype().getDatatypeClass();
+		
 		Composite spreadsheetComposite = new Composite(displayAsGroup, SWT.BORDER);
 		spreadsheetComposite.setLayout(new GridLayout(2, false));
 		spreadsheetComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -754,13 +760,18 @@ public class DataOptionDialog extends Dialog {
 		charCheckbox = new Button(spreadsheetComposite, SWT.CHECK);
 		charCheckbox.setText("Show As &Char");
 		charCheckbox.setSelection(false);
-		charCheckbox.setEnabled(false);
 		charCheckbox.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 		charCheckbox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				
 			}
 		});
+		
+		if (tclass == Datatype.CLASS_CHAR
+                || (tclass == Datatype.CLASS_INTEGER && dataset
+                        .getDatatype().getDatatypeSize() == 1)) {
+            charCheckbox.setEnabled(false);
+        }
 		
 		new Label(spreadsheetComposite, SWT.RIGHT).setText("TableView: ");
 		
@@ -817,8 +828,45 @@ public class DataOptionDialog extends Dialog {
 		
 		new Label(imageComposite, SWT.RIGHT).setText("Valid Range: ");
 		
+		dataRangeField = new Text(imageComposite, SWT.SINGLE | SWT.BORDER);
+		dataRangeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
+		String minmaxStr = "min, max";
 		
+		double minmax[] = ((ScalarDS) dataset).getImageDataRange();
+        if (minmax != null) {
+            if (dataset.getDatatype().getDatatypeClass() == Datatype.CLASS_FLOAT)
+                minmaxStr = minmax[0] + "," + minmax[1];
+            else
+                minmaxStr = ((long) minmax[0]) + "," + ((long) minmax[1]);
+        }
+		
+		dataRangeField.setText(minmaxStr);
+		
+		new Label(imageComposite, SWT.RIGHT).setText("ImageView: ");
+		
+		choiceImageView = new Combo(imageComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+		choiceImageView.setItems(HDFView.getListOfImageViews().toArray(new String[0]));
+		choiceImageView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		choiceImageView.select(0);
+		
+		new Label(imageComposite, SWT.RIGHT).setText("Invalid Values: ");
+		
+		fillValueField = new Text(imageComposite, SWT.SINGLE | SWT.BORDER);
+		fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		String fillStr = "val1, val2, ...";
+		
+		java.util.List<Number> fillValue = ((ScalarDS) dataset).getFilteredImageValues();
+        int n = fillValue.size();
+        if (n > 0) {
+            fillStr = fillValue.get(0).toString();
+            for (int i = 1; i < n; i++) {
+                fillStr += ", " + fillValue.get(i);
+            }
+        }
+        
+        fillValueField.setText(fillStr);
 		
 		// Create Index Base region
 		org.eclipse.swt.widgets.Group indexBaseGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
@@ -828,15 +876,19 @@ public class DataOptionDialog extends Dialog {
 		
 		base0Button = new Button(indexBaseGroup, SWT.RADIO);
 		base0Button.setText("0-based");
+		base0Button.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 		
 		base1Button = new Button(indexBaseGroup, SWT.RADIO);
 		base1Button.setText("1-based");
+		base1Button.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 		
-		if(ViewProperties.isIndexBase1())
+		if(ViewProperties.isIndexBase1()) {
+			base0Button.setSelection(false);
             base1Button.setSelection(true);
-        else
+		} else {
             base0Button.setSelection(true);
-		
+            base1Button.setSelection(false);
+		}
 		
 		
 		// Create Bitmask region
@@ -845,13 +897,159 @@ public class DataOptionDialog extends Dialog {
 		bitmaskGroup.setLayout(new GridLayout(2, false));
 		bitmaskGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		extractBitButton = new Button(bitmaskGroup, SWT.CHECK);
+		extractBitButton.setText("Show &Value of Selected Bits");
+		extractBitButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+		extractBitButton.setSelection(false);
+		extractBitButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean selected = extractBitButton.getSelection();
+				
+				if(selected) {
+					if(applyBitmaskButton.getSelection()) {
+					    applyBitmaskButton.setSelection(false);
+					}
+					
+					if(!bitmaskButtons[0].getEnabled()) {
+						for(int i = 0; i < bitmaskButtons.length; i++) {
+							bitmaskButtons[i].setEnabled(true);
+						}
+					}
+					
+					int n = 0;
+					
+					if(bitmaskButtons[0].getSelection()) n = 1;
+					
+					for(int i = 1; i < bitmaskButtons.length; i++) {
+						if(bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
+							n++;
+						}
+					}
+					
+					if(n > 1) {
+						extractBitButton.setSelection(false);
+						applyBitmaskButton.setSelection(true);
+						
+						MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+						error.setText("Select Bitmask");
+						error.setMessage("Selecting non-adjacent bits is only allowed \nfor the \"Apply Bitmask\" option.");
+						error.open();
+						return;
+					}
+				} else {
+					for(int i = 0; i < bitmaskButtons.length; i++) {
+						bitmaskButtons[i].setEnabled(false);
+					}
+				}
+			}
+		});
 		
+		bitmaskHelp = new Button(bitmaskGroup, SWT.PUSH);
+		bitmaskHelp.setImage(ViewProperties.getHelpIcon());
+		bitmaskHelp.setToolTipText("Help on how to set bitmask");
+		bitmaskHelp.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
+		bitmaskHelp.setEnabled(false);
+		bitmaskHelp.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String msg = ""
+						+ "\"Apply Bitmask\" applies bitwise \"AND\" to the original data.\n"
+						+ "For example, bits 2, 3, and 4 are selected for the bitmask\n"
+						+ "         10010101 (data)\n"
+						+ "AND 00011100 (mask)  \n"
+						+ "  =     00010100 (result) ==> the decimal value is 20. \n"
+						+ "\n"
+						+ "\"Extract Bit(s)\" removes all the bits from the result above where\n"
+						+ "their corresponding bits in the bitmask are 0. \nFor the same example above, "
+						+ "the result is \n101 ==> the decimal value is 5.\n\n";
+
+				MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+				info.setText(shell.getText());
+				info.setMessage(msg);
+				info.open();
+			}
+		});
+		
+		applyBitmaskButton = new Button(bitmaskGroup, SWT.CHECK);
+		applyBitmaskButton.setText("&Apply Bitmask");
+		applyBitmaskButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+		applyBitmaskButton.setSelection(false);
+		applyBitmaskButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if(extractBitButton.getSelection()) {
+					extractBitButton.setSelection(false);
+				}
+				else if (!applyBitmaskButton.getSelection()) {
+					for(int i = 0; i < bitmaskButtons.length; i++) {
+						bitmaskButtons[i].setEnabled(false);
+					}
+				}
+				else {
+					if(!bitmaskButtons[0].getEnabled()) {
+						for(int i = 0; i < bitmaskButtons.length; i++) {
+							bitmaskButtons[i].setEnabled(true);
+						}
+					}
+				}
+			}
+		});
+		
+		new Label(bitmaskGroup, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite buttonComposite = new Composite(bitmaskGroup, SWT.NO_RADIO_GROUP);
+		buttonComposite.setLayout(new GridLayout(16, true));
+		buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		int tsize = (int) dataset.getDatatype().getDatatypeSize();
+		bitmaskButtons = new Button[8 * tsize];
+		
+		for (int i = 0; i < bitmaskButtons.length; i++) {
+            bitmaskButtons[i] = new Button(buttonComposite, SWT.RADIO);
+            bitmaskButtons[i].setText(String.valueOf(bitmaskButtons.length - i - 1));
+            bitmaskButtons[i].setEnabled(false);
+            bitmaskButtons[i].addSelectionListener(
+            		new SelectionAdapter() {
+            			public void widgetSelected(SelectionEvent e) {
+            				if(extractBitButton.getSelection()) {
+            					Button source = (Button) e.widget;
+            					
+            					// Don't allow non-adjacent selection of bits when extracting bits
+            					int n = 0;
+            					
+            					if(bitmaskButtons[0].getSelection()) n = 1;
+            					
+            					for(int i = 1; i < bitmaskButtons.length; i++) {
+            						if(bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
+            							n++;
+            						}
+            					}
+            					
+            					if(n > 1) {
+            						MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+        							error.setText("Select Bitmask");
+        							error.setMessage("Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
+        							error.open();
+
+        							source.setSelection(false);
+        							return;
+            					}
+            				}
+            			}
+            		}
+            );
+        }
+		
+		if (tclass == Datatype.CLASS_CHAR
+                || (tclass == Datatype.CLASS_INTEGER && tsize <= 8)) {
+            extractBitButton.setEnabled(true);
+            applyBitmaskButton.setEnabled(true);
+            bitmaskHelp.setEnabled(true);
+        }
 		
 		
 		// Create Dimension/Subset selection region
 		org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
 		dimSubGroup.setText("Dimension and Subset Selection");
-		dimSubGroup.setLayout(new GridLayout(5, true));
+		dimSubGroup.setLayout(new GridLayout(2, false));
 		dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		int h = 1, w = 1;
@@ -860,7 +1058,13 @@ public class DataOptionDialog extends Dialog {
             w = (int) dims[selectedIndex[1]];
         }
 		
-		navigator = new PreviewNavigator(dimSubGroup, SWT.DOUBLE_BUFFERED, w, h);
+        if (rank > 1) {
+        	navigator = new PreviewNavigator(dimSubGroup, SWT.DOUBLE_BUFFERED | SWT.BORDER, w, h);
+        } else {
+        	dimSubGroup.setLayout(new GridLayout(1, true));
+        }
+		
+		createDimSubSelectionComposite(dimSubGroup);
     }
     
     private void createCompoundDSContents() {
@@ -967,6 +1171,13 @@ public class DataOptionDialog extends Dialog {
     	
     	choices[0] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
     	choices[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	choices[0].addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			Combo source = (Combo) e.widget;
+    			
+    			processComboBoxEvent(source);
+    		}
+    	});
     	
     	for (int j = 0; j < rank; j++) {
             if (dimNames == null) {
@@ -991,9 +1202,9 @@ public class DataOptionDialog extends Dialog {
     	strideFields[0].setText("1");
     	strideFields[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     	
-    	maxLabels[0] = new Label(selectionComposite, SWT.RIGHT);
+    	maxLabels[0] = new Label(selectionComposite, SWT.NONE);
     	maxLabels[0].setText("1");
-    	maxLabels[0].setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+    	maxLabels[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     	
     	
     	// Create Width selection row
@@ -1003,6 +1214,13 @@ public class DataOptionDialog extends Dialog {
     	
     	choices[1] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
     	choices[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	choices[1].addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+                Combo source = (Combo) e.widget;
+    			
+    			processComboBoxEvent(source);
+    		}
+    	});
     	
     	for (int j = 0; j < rank; j++) {
             if (dimNames == null) {
@@ -1027,9 +1245,9 @@ public class DataOptionDialog extends Dialog {
     	strideFields[1].setText("1");
     	strideFields[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     	
-    	maxLabels[1] = new Label(selectionComposite, SWT.RIGHT);
+    	maxLabels[1] = new Label(selectionComposite, SWT.NONE);
     	maxLabels[1].setText("1");
-    	maxLabels[1].setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+    	maxLabels[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     	
     	
     	// Create Depth selection row
@@ -1039,6 +1257,13 @@ public class DataOptionDialog extends Dialog {
     	
     	choices[2] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
     	choices[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	choices[2].addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+                Combo source = (Combo) e.widget;
+    			
+    			processComboBoxEvent(source);
+    		}
+    	});
     	
     	for (int j = 0; j < rank; j++) {
             if (dimNames == null) {
@@ -1063,9 +1288,9 @@ public class DataOptionDialog extends Dialog {
     	strideFields[2].setText("1");
     	strideFields[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     	
-    	maxLabels[2] = new Label(selectionComposite, SWT.RIGHT);
+    	maxLabels[2] = new Label(selectionComposite, SWT.NONE);
     	maxLabels[2].setText("1");
-    	maxLabels[2].setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+    	maxLabels[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     	
     	
     	// Create row for Dims and reset button
@@ -1181,6 +1406,90 @@ public class DataOptionDialog extends Dialog {
             maxLabels[i].setEnabled(false);
     	}
     }
+    
+    private void processComboBoxEvent(Combo source) {
+    	int theSelectedChoice = -1;
+
+        int n = Math.min(3, rank);
+        for (int i = 0; i < n; i++) {
+            if (source.equals(choices[i])) {
+                theSelectedChoice = i;
+            }
+        }
+
+        if (theSelectedChoice < 0) {
+            return; // the selected JComboBox is not a dimension choice
+        }
+
+        int theIndex = source.getSelectionIndex();
+        if (theIndex == currentIndex[theSelectedChoice]) {
+            return; // select the same item, no change
+        }
+        
+        start[currentIndex[theSelectedChoice]] = 0;
+
+        // reset the selected dimension choice
+        startFields[theSelectedChoice].setText("0");
+        endFields[theSelectedChoice].setText(String
+                .valueOf(dims[theIndex] - 1));
+        strideFields[theSelectedChoice].setText("1");
+        maxLabels[theSelectedChoice]
+                .setText(String.valueOf(dims[theIndex]));
+
+        // if the selected choice selects the dimension that is selected by
+        // other dimension choice, exchange the dimensions
+        for (int i = 0; i < n; i++) {
+            if (i == theSelectedChoice) {
+                continue; // don't exchange itself
+            }
+            else if (theIndex == choices[i].getSelectionIndex()) {
+            	choices[i].select(currentIndex[theSelectedChoice]);
+                startFields[i].setText("0");
+                endFields[i]
+                        .setText(String
+                                .valueOf(dims[currentIndex[theSelectedChoice]] - 1));
+                strideFields[i].setText("1");
+                maxLabels[i].setText(String
+                        .valueOf(dims[currentIndex[theSelectedChoice]]));
+            }
+        }
+
+        for (int i = 0; i < n; i++) {
+            currentIndex[i] = choices[i].getSelectionIndex();
+        }
+
+        // update the navigator
+        if (rank > 1) {
+            if (isText) {
+                endFields[1].setText(startFields[1].getText());
+            }
+            else {
+                int hIdx = choices[0].getSelectionIndex();
+                int wIdx = choices[1].getSelectionIndex();
+                transposeChoice.select(0);
+
+                // Use transpose option only if the dims are not in original
+                // order
+                if (hIdx < wIdx)
+                    transposeChoice.setEnabled(false);
+                else
+                    transposeChoice.setEnabled(true);
+
+                long dims[] = dataset.getDims();
+                int w = (int) dims[wIdx];
+                int h = (int) dims[hIdx];
+                
+                if(navigator != null) {
+                    navigator.setDimensionSize(w, h);
+                    navigator.redraw();
+                }
+            }
+        }
+
+        if (rank > 2) {
+            endFields[2].setText(startFields[2].getText());
+        }
+    }
 	
     /** PreviewNavigator draws a selection rectangle for selecting a subset
      *  of the data to be displayed. */
@@ -1191,9 +1500,15 @@ public class DataOptionDialog extends Dialog {
         private Point             startPosition; // mouse clicked position
         private Rectangle         selectedArea;
         private Image             previewImage     = null;
-
+        private String            selStr;
+        
         private PreviewNavigator(Composite parent, int style, int w, int h) {
         	super(parent, style);
+        	
+        	GridData data = new GridData(SWT.FILL, SWT.FILL, false, true);
+        	data.widthHint = NAVIGATOR_SIZE;
+        	data.heightHint = NAVIGATOR_SIZE;
+        	this.setLayoutData(data);
         	
             dimX = w;
             dimY = h;
@@ -1209,7 +1524,8 @@ public class DataOptionDialog extends Dialog {
             }
 
             selectedArea = new Rectangle();
-            //setPreferredSize(new Dimension(NAVIGATOR_SIZE, NAVIGATOR_SIZE));
+            
+            selStr = "";
             
             try {
                 previewImage = createPreviewImage();
@@ -1218,13 +1534,55 @@ public class DataOptionDialog extends Dialog {
                 ex.printStackTrace();
             }
             
-            this.addMouseListener(new MouseAdapter() {
+            this.addMouseListener(new MouseListener() {
+            	@Override
+            	public void mouseDoubleClick(MouseEvent e) {
+            		
+            	}
+            	
+            	@Override
+            	public void mouseDown(MouseEvent e) {
+            		startPosition = new Point(e.x, e.y);
+            		selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
+            	}
+            	
+            	@Override
+            	public void mouseUp(MouseEvent e) {
+            		System.out.println(startPosition.y);
+            		System.out.println(e.y);
+            		
+            		if(startPosition.x == e.x && startPosition.y == e.y) {
+            			selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
+            		    redraw();
+            		}
+            	}
             });
             
             this.addMouseMoveListener(new MouseMoveListener() {
             	@Override
             	public void mouseMove(MouseEvent e) {
-            		
+            		if(e.stateMask == SWT.BUTTON1 || e.stateMask == SWT.BUTTON3) {
+            			Point p0 = startPosition;
+                        Point p1 = new Point(e.x, e.y);
+
+                        int x0 = Math.max(0, Math.min(p0.x, p1.x));
+                        int y0 = Math.max(0, Math.min(p0.y, p1.y));
+                        int x1 = Math.min(x, Math.max(p0.x, p1.x));
+                        int y1 = Math.min(y, Math.max(p0.y, p1.y));
+
+                        int w = x1 - x0;
+                        int h = y1 - y0;
+                        
+                        selectedArea.setBounds(x0, y0, w, h);
+
+                        try {
+                            updateSelection(x0, y0, w, h);
+                        }
+                        catch (Exception ex) {
+                        }
+
+                        redraw();
+            		}
             	}
             });
             
@@ -1235,7 +1593,7 @@ public class DataOptionDialog extends Dialog {
             		gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
 
                     if (previewImage != null) {
-                        //gc.drawImage(previewImage, 0, 0);
+                        gc.drawImage(convertBufferedImageToSWTImage((BufferedImage) previewImage), 0, 0);
                     }
                     else {
                         gc.fillRectangle(0, 0, x, y);
@@ -1247,6 +1605,11 @@ public class DataOptionDialog extends Dialog {
                         gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
                         gc.drawRectangle(selectedArea.x, selectedArea.y, w, h);
                     }
+                    
+                    org.eclipse.swt.graphics.Rectangle bounds = ((Canvas) e.widget).getBounds();
+                    Point textSize = gc.stringExtent(selStr);
+                    gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+                    gc.drawString(selStr, (bounds.width / 2) - (textSize.x / 2), bounds.height - textSize.y - 4);
             	}
             });
         }
@@ -1281,8 +1644,11 @@ public class DataOptionDialog extends Dialog {
             }
 
             if (choices != null) {
-                selectedIndex[0] = choices[0].getSelectionIndex();
-                selectedIndex[1] = choices[1].getSelectionIndex();
+            	try {
+            	    selectedIndex[0] = choices[0].getSelectionIndex();
+            	    selectedIndex[1] = choices[1].getSelectionIndex();
+            	} catch (Exception ex) {
+            	}
             }
             long steps = (long) Math.ceil(r);
             selected[selectedIndex[0]] = (dims[selectedIndex[0]] / steps);
@@ -1302,7 +1668,7 @@ public class DataOptionDialog extends Dialog {
                 stride[selectedIndex[2]] = 1;
             }
 
-            // update the ration of preview image size to the real dataset
+            // update the ratio of preview image size to the real dataset
             y = (int) selected[selectedIndex[0]];
             x = (int) selected[selectedIndex[1]];
             r = Math.min((double) dims[selectedIndex[0]]
@@ -1363,46 +1729,9 @@ public class DataOptionDialog extends Dialog {
 
             return preImage;
         }
-
-        //@Override
-        /*public void mousePressed (MouseEvent e) {
-            startPosition = e.getPoint();
-            selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
-        }*/
-
-        //@Override
-        /*public void mouseClicked (MouseEvent e) {
-            startPosition = e.getPoint();
-            selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
-            repaint();
-        }*/
-
-        //@Override
-        /*public void mouseDragged (MouseEvent e) {
-            Point p0 = startPosition;
-            Point p1 = e.getPoint();
-
-            int x0 = Math.max(0, Math.min(p0.x, p1.x));
-            int y0 = Math.max(0, Math.min(p0.y, p1.y));
-            int x1 = Math.min(x, Math.max(p0.x, p1.x));
-            int y1 = Math.min(y, Math.max(p0.y, p1.y));
-
-            int w = x1 - x0;
-            int h = y1 - y0;
-            selectedArea.setBounds(x0, y0, w, h);
-
-            try {
-                updateSelection(x0, y0, w, h);
-            }
-            catch (Exception ex) {
-            }
-
-            repaint();
-        }*/
-
-        /*private void updateSelection (int x0, int y0, int w, int h) {
+        
+        private void updateSelection (int x0, int y0, int w, int h) {
             int i0 = 0, i1 = 0;
-            String selStr;
 
             i0 = (int) (y0 * r);
             if (i0 > dims[currentIndex[0]]) {
@@ -1434,11 +1763,9 @@ public class DataOptionDialog extends Dialog {
 
                 selStr += " x " + ((int) (w * r));
             }
+        }
 
-            selLabel.setText(selStr);
-        }*/
-
-        /*private void setDimensionSize (int w, int h) {
+        private void setDimensionSize (int w, int h) {
             dimX = w;
             dimY = h;
             if (dimX > dimY) {
@@ -1451,15 +1778,99 @@ public class DataOptionDialog extends Dialog {
                 r = dimY / (double) y;
                 x = (int) (dimX / r);
             }
-            setPreferredSize(new Dimension(NAVIGATOR_SIZE, NAVIGATOR_SIZE));
+            
             selectedArea.setSize(0, 0);
+            
             try {
                 previewImage = createPreviewImage();
             }
             catch (Exception ex) {
             }
 
-            repaint();
-        }*/
+            this.redraw();
+        }
+        
+        /**
+         * Converts a given BufferedImage to ImageData for a SWT-readable Image
+         * @param image The BufferedImage to be converted
+         * @return
+         */
+        private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage image) {
+        	Display display = this.getDisplay();
+        	
+        	if (image.getColorModel() instanceof DirectColorModel) {
+        		DirectColorModel colorModel = (DirectColorModel) image
+        				.getColorModel();
+        		PaletteData palette = new PaletteData(colorModel.getRedMask(),
+        				colorModel.getGreenMask(), colorModel.getBlueMask());
+        		ImageData data = new ImageData(image.getWidth(),
+        				image.getHeight(), colorModel.getPixelSize(),
+        				palette);
+        		
+        		for (int y = 0; y < data.height; y++) {
+                    for (int x = 0; x < data.width; x++) {
+                        int rgb = image.getRGB(x, y);
+                        int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
+                        data.setPixel(x, y, pixel);
+                        if (colorModel.hasAlpha()) {
+                            data.setAlpha(x, y, (rgb >> 24) & 0xFF);
+                        }
+                    }
+                }
+        		
+        		return new org.eclipse.swt.graphics.Image(display, data);
+        	} else if (image.getColorModel() instanceof IndexColorModel) {
+        		IndexColorModel colorModel = (IndexColorModel) image
+        				.getColorModel();
+        		int size = colorModel.getMapSize();
+        		byte[] reds = new byte[size];
+        		byte[] greens = new byte[size];
+        		byte[] blues = new byte[size];
+        		colorModel.getReds(reds);
+        		colorModel.getGreens(greens);
+        		colorModel.getBlues(blues);
+        		RGB[] rgbs = new RGB[size];
+        		for (int i = 0; i < rgbs.length; i++) {
+        			rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF,
+        					blues[i] & 0xFF);
+        		}
+        		PaletteData palette = new PaletteData(rgbs);
+        		ImageData data = new ImageData(image.getWidth(),
+        				image.getHeight(), colorModel.getPixelSize(),
+        				palette);
+        		data.transparentPixel = colorModel.getTransparentPixel();
+        		WritableRaster raster = image.getRaster();
+        		int[] pixelArray = new int[1];
+        		for (int y = 0; y < data.height; y++) {
+        			for (int x = 0; x < data.width; x++) {
+        				raster.getPixel(x, y, pixelArray);
+        				data.setPixel(x, y, pixelArray[0]);
+        			}
+        		}
+        		
+        		return new org.eclipse.swt.graphics.Image(display, data);
+        	}
+        	else if (image.getColorModel() instanceof ComponentColorModel) {
+        		ComponentColorModel colorModel = (ComponentColorModel) image.getColorModel();
+        		//ASSUMES: 3 BYTE BGR IMAGE TYPE
+        		PaletteData palette = new PaletteData(0x0000FF, 0x00FF00,0xFF0000);
+        		ImageData data = new ImageData(image.getWidth(), image.getHeight(),
+        				colorModel.getPixelSize(), palette);
+        		//This is valid because we are using a 3-byte Data model with no transparent pixels
+        		data.transparentPixel = -1;
+        		WritableRaster raster = image.getRaster();
+        		int[] pixelArray = new int[3];
+        		for (int y = 0; y < data.height; y++) {
+        			for (int x = 0; x < data.width; x++) {
+        				raster.getPixel(x, y, pixelArray);
+        				int pixel = palette.getPixel(new RGB(pixelArray[0], pixelArray[1], pixelArray[2]));
+        				data.setPixel(x, y, pixel);
+        			}
+        		}
+        		return new org.eclipse.swt.graphics.Image(display, data);
+        	}
+        	
+        	return null;
+        }
     }
 }

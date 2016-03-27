@@ -2541,7 +2541,7 @@ public class DefaultTreeView implements TreeView {
             return null;
         }
 
-        List<?> metaDataViewList = HDFView.getListOfMetaDataView();
+        List<?> metaDataViewList = HDFView.getListOfMetaDataViews();
         if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
             return null;
         }
