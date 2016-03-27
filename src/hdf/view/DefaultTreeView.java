@@ -462,6 +462,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
+                    err.printStackTrace();
                     showError(err.getMessage(), shell.getText());
                     return;
                 }
@@ -2392,13 +2393,13 @@ public class DefaultTreeView implements TreeView {
             }
 
             if (isText) {
-                dataViewName = (String) HDFView.getListOfTextView().get(0);
+                dataViewName = (String) HDFView.getListOfTextViews().get(0);
             }
             else if (isImage) {
-                dataViewName = (String) HDFView.getListOfImageView().get(0);
+                dataViewName = (String) HDFView.getListOfImageViews().get(0);
             }
             else {
-                dataViewName = (String) HDFView.getListOfTableView().get(0);
+                dataViewName = (String) HDFView.getListOfTableViews().get(0);
             }
         }
         else {

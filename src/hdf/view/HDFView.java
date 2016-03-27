@@ -1248,42 +1248,42 @@ public class HDFView implements ViewManager, DropTargetListener {
     /**
      * @return a list of treeview implementations.
      */
-    public static final List<String> getListOfTreeView() {
+    public static final List<String> getListOfTreeViews() {
         return treeViews;
     }
 
     /**
      * @return a list of imageview implementations.
      */
-    public static final List<String> getListOfImageView() {
+    public static final List<String> getListOfImageViews() {
         return imageViews;
     }
 
     /**
      * @return a list of tableview implementations.
      */
-    public static final List<?> getListOfTableView() {
+    public static final List<?> getListOfTableViews() {
         return tableViews;
     }
 
     /**
      * @return a list of textview implementations.
      */
-    public static final List<?> getListOfTextView() {
+    public static final List<?> getListOfTextViews() {
         return textViews;
     }
 
     /**
      * @return a list of metaDataview implementations.
      */
-    public static final List<?> getListOfMetaDataView() {
+    public static final List<?> getListOfMetaDataViews() {
         return metaDataViews;
     }
 
     /**
      * @return a list of paletteview implementations.
      */
-    public static final List<?> getListOfPaletteView() {
+    public static final List<?> getListOfPaletteViews() {
         return paletteViews;
     }
     

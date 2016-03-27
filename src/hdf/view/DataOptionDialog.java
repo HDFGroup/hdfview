@@ -15,23 +15,25 @@
 package hdf.view;
 
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.BitSet;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -40,7 +42,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -104,12 +109,20 @@ public class DataOptionDialog extends Dialog {
     private boolean                isText;
 
     private boolean                isH5;
+    
+    private boolean                isImageDisplay = false;
+    private boolean                isDisplayTypeChar = false;
+    private boolean                isTransposed = false;
+    private boolean                isIndexBase1 = false;
+    private boolean                isApplyBitmaskOnly = false;
+    
+    private String                 dataViewName;
 
     private Label                  maxLabels[], selLabel;
 
     private Text                   startFields[], endFields[], strideFields[], dataRangeField, fillValueField;
 
-    //private JList                  fieldList;
+    private List                   fieldList;
 
     private PreviewNavigator navigator;
 
@@ -145,6 +158,7 @@ public class DataOptionDialog extends Dialog {
                 numberOfPalettes = palRefs.length / 8;
             }
         }
+        
         rank = dataset.getRank();
         dims = dataset.getDims();
         selected = dataset.getSelectedDims();
@@ -152,16 +166,13 @@ public class DataOptionDialog extends Dialog {
         selectedIndex = dataset.getSelectedIndex();
         stride = dataset.getStride();
         currentIndex = new int[Math.min(3, rank)];
-        //fieldList = null;
-
-        int h = 1, w = 1;
-        h = (int) dims[selectedIndex[0]];
-        if (rank > 1) {
-            w = (int) dims[selectedIndex[1]];
-        }
-    	
-        navigator = new PreviewNavigator(shell, SWT.DOUBLE_BUFFERED, w, h);
-		
+        
+        maxLabels = new Label[3];
+        startFields = new Text[3];
+        endFields = new Text[3];
+        strideFields = new Text[3];
+        choices = new Combo[3];
+        
 		isH5 = dataset.getFileFormat().isThisType(
                 FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
 	}
@@ -173,74 +184,35 @@ public class DataOptionDialog extends Dialog {
     	shell.setImage(ViewProperties.getHdfIcon());
     	shell.setLayout(new GridLayout(1, true));
     	
-    	
-    	// Create display type region
-    	org.eclipse.swt.widgets.Group displayAsGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-		displayAsGroup.setText("Display As");
-		displayAsGroup.setLayout(new GridLayout(1, true));
-		displayAsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Composite spreadsheetComposite = new Composite(displayAsGroup, SWT.NONE);
-		spreadsheetComposite.setLayout(new GridLayout(2, false));
-		spreadsheetComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Composite imageComposite = new Composite(displayAsGroup, SWT.NONE);
-		imageComposite.setLayout(new GridLayout(3, false));
-		imageComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		
-		
-		
-		// Create Index Base region
-		org.eclipse.swt.widgets.Group indexBaseGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-		indexBaseGroup.setText("Index Base");
-		indexBaseGroup.setLayout(new GridLayout(2, true));
-		indexBaseGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		base0Button = new Button(indexBaseGroup, SWT.RADIO);
-		base0Button.setText("0-based");
-		
-		base1Button = new Button(indexBaseGroup, SWT.RADIO);
-		base1Button.setText("1-based");
-		
-		if(ViewProperties.isIndexBase1())
-            base1Button.setSelection(true);
-        else
-            base0Button.setSelection(true);
-		
-		
-		
-		// Create Bitmask region
-		org.eclipse.swt.widgets.Group bitmaskGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-		bitmaskGroup.setText("Bitmask");
-		bitmaskGroup.setLayout(new GridLayout(2, false));
-		bitmaskGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		
-		
-		
-		// Create Dimension/Subset selection region
-		org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-		dimSubGroup.setText("Dimension and Subset Selection");
-		dimSubGroup.setLayout(new GridLayout(5, true));
-		dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		
-		
+    	if (dataset instanceof ScalarDS) {
+    		ScalarDS ds = (ScalarDS) dataset;
+    		isText = ds.isText();
+    		
+    		if(isText) {
+    			createTextContents();
+    		} else {
+    			createScalarDSContents();
+    		}
+    	}
+    	else if (dataset instanceof CompoundDS) {
+    		createCompoundDSContents();
+    	}
 		
 		// Create Ok/Cancel button region
 		Composite buttonComposite = new Composite(shell, SWT.NONE);
 		buttonComposite.setLayout(new GridLayout(2, true));
-		buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
         okButton.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		// set palette for image view
-                if ((dataset instanceof ScalarDS) && imageButton.getSelection()) {
-                    setPalette();
-                }
+        		if(imageButton != null) {
+        			if ((dataset instanceof ScalarDS) && imageButton.getSelection()) {
+        				setPalette();
+        			}
+        		}
 
                 isSelectionCancelled = !setSelection();
 
@@ -248,9 +220,13 @@ public class DataOptionDialog extends Dialog {
                     return;
                 }
 
-                if (dataset instanceof ScalarDS) {
-                    ((ScalarDS) dataset).setIsImageDisplay(imageButton.getSelection());
+                if(imageButton != null) {
+                	if (dataset instanceof ScalarDS) {
+                		((ScalarDS) dataset).setIsImageDisplay(imageButton.getSelection());
+                	}
                 }
+                
+                shell.notifyListeners(SWT.Close, null);
                 
                 shell.dispose();
         	}
@@ -263,7 +239,9 @@ public class DataOptionDialog extends Dialog {
         cancelButton.setText("&Cancel");
         cancelButton.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
-                shell.dispose();
+                shell.notifyListeners(SWT.Close, null);
+        		
+        		shell.dispose();
         	}
         });
         
@@ -273,14 +251,58 @@ public class DataOptionDialog extends Dialog {
 		
         shell.pack();
         
-        //init();
+        init();
         
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
-        Rectangle parentBounds = parent.getBounds();
+        org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+        
+        shell.addListener(SWT.Close, new Listener() {
+        	public void handleEvent(Event e) {
+        		if (imageButton == null) {
+        			isImageDisplay = false;
+        		} else {
+        			isImageDisplay = imageButton.getSelection();
+        		}
+        		
+        		if (charCheckbox == null) {
+        			isDisplayTypeChar = false;
+        		} else {
+        			isDisplayTypeChar = charCheckbox.getSelection();
+        		}
+        		
+        		if (transposeChoice == null) {
+        		    isTransposed = false;
+        		} else {
+        			isTransposed = transposeChoice.getSelectionIndex() == 1;
+        		}
+        		
+        		if (base1Button == null) {
+                    isIndexBase1 = false;
+        		} else {
+        			isIndexBase1 = base1Button.getSelection();
+        		}
+        		
+        		if (applyBitmaskButton == null) {
+        			isApplyBitmaskOnly = false;
+        		} else {
+        			isApplyBitmaskOnly = applyBitmaskButton.getSelection();
+        		}
+        		
+        		if (isText) {
+                    dataViewName = choiceTextView.getItem(choiceTextView.getSelectionIndex());
+                }
+                else if (isImageDisplay()) {
+                    dataViewName = choiceImageView.getItem(choiceImageView.getSelectionIndex());
+                }
+                else {
+                    dataViewName = choiceTableView.getItem(choiceTableView.getSelectionIndex());
+                }
+        	}
+        });
         
         shell.open();
         
@@ -298,7 +320,7 @@ public class DataOptionDialog extends Dialog {
         // set the imagebutton state
         boolean isImage = false;
 
-        if (dataset instanceof ScalarDS) {
+        /*if (dataset instanceof ScalarDS) {
         	if(!((ScalarDS) dataset).isText()) {
         		ScalarDS sd = (ScalarDS) dataset;
         		isImage = sd.isImageDisplay();
@@ -308,15 +330,23 @@ public class DataOptionDialog extends Dialog {
             	dataRangeField.setEnabled(isImage);
             	fillValueField.setEnabled(isImage);
             }
-        }
-        else if (dataset instanceof CompoundDS) {
-            imageButton.setEnabled(false);
+        }*/
+        
+        if(choiceTableView != null) {
+        	choiceTableView.setEnabled(!isImage);
         }
 
-        choiceTableView.setEnabled(!isImage);
-        choiceImageView.setEnabled(isImage);
-        imageButton.setSelection(isImage);
-        choicePalette.setEnabled(isImage && !isTrueColorImage);
+        if(choiceImageView != null) {
+        	choiceImageView.setEnabled(isImage);
+        }
+        
+        if(imageButton != null) {
+        	imageButton.setSelection(isImage);
+        }
+        
+        if(choicePalette != null) {
+        	choicePalette.setEnabled(isImage && !isTrueColorImage);
+        }
 
         int n = Math.min(3, rank);
         long endIdx = 0;
@@ -333,7 +363,7 @@ public class DataOptionDialog extends Dialog {
                 endIdx = dims[idx];
             }
 
-            //setJComboBoxSelectedIndex(choices[i], idx);
+            choices[i].select(idx);
             maxLabels[i].setText(String.valueOf(dims[idx]));
             startFields[i].setText(String.valueOf(start[idx]));
             endFields[i].setText(String.valueOf(endIdx - 1));
@@ -359,13 +389,16 @@ public class DataOptionDialog extends Dialog {
         if (rank > 2) {
             endFields[2].setEnabled(false);
             strideFields[2].setEnabled(false);
-            if (isTrueColorImage && imageButton.getSelection()) {
-                choices[0].setEnabled(false);
-                choices[1].setEnabled(false);
-                choices[2].setEnabled(false);
-                startFields[2].setEnabled(false);
-                startFields[2].setText("0");
-                endFields[2].setText("0");
+            
+            if(imageButton != null) {
+            	if (isTrueColorImage && imageButton.getSelection()) {
+                    choices[0].setEnabled(false);
+                    choices[1].setEnabled(false);
+                    choices[2].setEnabled(false);
+                    startFields[2].setEnabled(false);
+                    startFields[2].setText("0");
+                    endFields[2].setText("0");
+                }
             }
             else {
                 choices[0].setEnabled(true);
@@ -386,21 +419,35 @@ public class DataOptionDialog extends Dialog {
         Datatype dtype = dataset.getDatatype();
         int tclass = dtype.getDatatypeClass();
         if (tclass == Datatype.CLASS_CHAR || tclass == Datatype.CLASS_INTEGER) {
-            int tsize = (int)dtype.getDatatypeSize();
-            charCheckbox.setEnabled((tsize == 1) && spreadsheetButton.getSelection());
-            extractBitButton.setEnabled(tsize <= 8);
-            applyBitmaskButton.setEnabled(tsize <= 8);
+            int tsize = (int) dtype.getDatatypeSize();
+            
+            if(charCheckbox != null) {
+            	charCheckbox.setEnabled((tsize == 1) && spreadsheetButton.getSelection());
+            }
+            
+            if(extractBitButton != null) {
+            	extractBitButton.setEnabled(tsize <= 8);
+            }
+            
+            if(applyBitmaskButton != null) {
+            	applyBitmaskButton.setEnabled(tsize <= 8);
+            }
         }
         else {
-            charCheckbox.setEnabled(false);
-            charCheckbox.setSelection(false);
-            extractBitButton.setEnabled(false);
-            applyBitmaskButton.setEnabled(false);
+        	if(charCheckbox != null) {
+        		charCheckbox.setEnabled(false);
+        		charCheckbox.setSelection(false);
+        	}
+        	
+        	if(extractBitButton != null) {
+        		extractBitButton.setEnabled(false);
+        	}
+            
+        	if(applyBitmaskButton != null) {
+                applyBitmaskButton.setEnabled(false);
+        	}
         }
     }
-	
-	
-	
 	
 	private void setPalette() {
         if (!(dataset instanceof ScalarDS)) {
@@ -493,10 +540,7 @@ public class DataOptionDialog extends Dialog {
 
         if (dataset instanceof CompoundDS) {
             CompoundDS d = (CompoundDS) dataset;
-            /*
-             * TODO: switch back
-             */
-            int[] selectedFieldIndices = {0, 0};//fieldList.getSelectedIndices();
+            int[] selectedFieldIndices = fieldList.getSelectionIndices();
             if ((selectedFieldIndices == null)
                     || (selectedFieldIndices.length < 1)) {
                 shell.getDisplay().beep();
@@ -606,25 +650,16 @@ public class DataOptionDialog extends Dialog {
         }
 
         return true;
-    }
-	
-	
-	
-	
+    }	
 
     /** Returns true if the display option is image. */
     public boolean isImageDisplay() {
-        return imageButton.getSelection();
+        return isImageDisplay;
     }
     
     public boolean isIndexBase1() {
-        if (base1Button == null)
-            return false;
-
-        return base1Button.getSelection();
+        return isIndexBase1;
     }
-	
-	
 
     /**
      * Return the bitmask.
@@ -654,19 +689,7 @@ public class DataOptionDialog extends Dialog {
     
     /** Return the name of the selected dataview */
     public String getDataViewName() {
-        String viewName = null;
-
-        if (isText) {
-            viewName = choiceTextView.getItem(choiceTextView.getSelectionIndex());
-        }
-        else if (isImageDisplay()) {
-            viewName = choiceImageView.getItem(choiceImageView.getSelectionIndex());
-        }
-        else {
-            viewName = choiceTableView.getItem(choiceTableView.getSelectionIndex());
-        }
-
-        return viewName;
+        return dataViewName;
     }
     
     /**
@@ -674,17 +697,14 @@ public class DataOptionDialog extends Dialog {
      * @return true if display the data as characters; otherwise, display as numbers.
      */
     public boolean isDisplayTypeChar ( ) {
-        return charCheckbox.getSelection();
+        return isDisplayTypeChar;
     }
 
     /**
      * Check if it only apply bitmask.
      */
     public boolean isApplyBitmaskOnly ( ) {
-        if (getBitmask() == null)
-            return false;
-
-        return applyBitmaskButton.getSelection();
+    	return isApplyBitmaskOnly;
     }
 
     /**
@@ -692,12 +712,474 @@ public class DataOptionDialog extends Dialog {
      * @return true if transpose the data in 2D table; otherwise, do not transpose the data.
      */
     public boolean isTransposed ( ) {
-        return (transposeChoice.getSelectionIndex() == 1);
+        return isTransposed;
     }
     
     /** Returns true if the data selection is cancelled. */
     public boolean isCancelled ( ) {
         return isSelectionCancelled;
+    }
+    
+    private void createScalarDSContents() {
+    	// Create display type region
+    	org.eclipse.swt.widgets.Group displayAsGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+		displayAsGroup.setText("Display As");
+		displayAsGroup.setLayout(new GridLayout(1, true));
+		displayAsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite spreadsheetComposite = new Composite(displayAsGroup, SWT.BORDER);
+		spreadsheetComposite.setLayout(new GridLayout(2, false));
+		spreadsheetComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		spreadsheetButton = new Button(spreadsheetComposite, SWT.RADIO);
+		spreadsheetButton.setText("&Spreadsheet");
+		spreadsheetButton.setSelection(true);
+		spreadsheetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		spreadsheetButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				imageButton.setSelection(!spreadsheetButton.getSelection());
+				choicePalette.setEnabled(false);
+	            choiceImageView.setEnabled(false);
+	            choiceTableView.setEnabled(true);
+	            dataRangeField.setEnabled(false);
+	            fillValueField.setEnabled(false);
+	            Datatype dtype = dataset.getDatatype();
+	            int tclass = dtype.getDatatypeClass();
+	            charCheckbox.setEnabled((tclass == Datatype.CLASS_CHAR ||
+	                    tclass == Datatype.CLASS_INTEGER) &&
+	                    (dtype.getDatatypeSize() == 1));
+			}
+		});
+		
+		charCheckbox = new Button(spreadsheetComposite, SWT.CHECK);
+		charCheckbox.setText("Show As &Char");
+		charCheckbox.setSelection(false);
+		charCheckbox.setEnabled(false);
+		charCheckbox.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+		charCheckbox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				
+			}
+		});
+		
+		new Label(spreadsheetComposite, SWT.RIGHT).setText("TableView: ");
+		
+		choiceTableView = new Combo(spreadsheetComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+		choiceTableView.setItems(HDFView.getListOfTableViews().toArray(new String[0]));
+		choiceTableView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		choiceTableView.select(0);
+		
+		
+		Composite imageComposite = new Composite(displayAsGroup, SWT.BORDER);
+		imageComposite.setLayout(new GridLayout(4, false));
+		imageComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		imageButton = new Button(imageComposite, SWT.RADIO);
+		imageButton.setText("&Image");
+		imageButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		imageButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				spreadsheetButton.setSelection(!imageButton.getSelection());
+				choicePalette.setEnabled(!isTrueColorImage);
+	            dataRangeField.setEnabled(true);
+	            fillValueField.setEnabled(true);
+	            choiceImageView.setEnabled(true);
+	            choiceTableView.setEnabled(false);
+	            charCheckbox.setSelection(false);
+	            charCheckbox.setEnabled(false);
+			}
+		});
+		
+		choicePalette = new Combo(imageComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+		choicePalette.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		choicePalette.add("Select palette");
+		
+		if (dataset instanceof ScalarDS) {
+			String paletteName = ((ScalarDS) dataset).getPaletteName(0);
+			if (paletteName == null) {
+				paletteName = "Default";
+			}
+			choicePalette.add(paletteName);
+			for (int i = 2; i <= numberOfPalettes; i++) {
+				paletteName = ((ScalarDS) dataset).getPaletteName(i - 1);
+				choicePalette.add(paletteName);
+			}
+		}
+		choicePalette.add("Gray");
+		choicePalette.add("ReverseGray");
+		choicePalette.add("GrayWave");
+		choicePalette.add("Rainbow");
+		choicePalette.add("Nature");
+		choicePalette.add("Wave");
+		
+		choicePalette.select(0);
+		
+		new Label(imageComposite, SWT.RIGHT).setText("Valid Range: ");
+		
+		
+		
+		
+		// Create Index Base region
+		org.eclipse.swt.widgets.Group indexBaseGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+		indexBaseGroup.setText("Index Base");
+		indexBaseGroup.setLayout(new GridLayout(2, true));
+		indexBaseGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		base0Button = new Button(indexBaseGroup, SWT.RADIO);
+		base0Button.setText("0-based");
+		
+		base1Button = new Button(indexBaseGroup, SWT.RADIO);
+		base1Button.setText("1-based");
+		
+		if(ViewProperties.isIndexBase1())
+            base1Button.setSelection(true);
+        else
+            base0Button.setSelection(true);
+		
+		
+		
+		// Create Bitmask region
+		org.eclipse.swt.widgets.Group bitmaskGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+		bitmaskGroup.setText("Bitmask");
+		bitmaskGroup.setLayout(new GridLayout(2, false));
+		bitmaskGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		
+		
+		// Create Dimension/Subset selection region
+		org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+		dimSubGroup.setText("Dimension and Subset Selection");
+		dimSubGroup.setLayout(new GridLayout(5, true));
+		dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		int h = 1, w = 1;
+        h = (int) dims[selectedIndex[0]];
+        if (rank > 1) {
+            w = (int) dims[selectedIndex[1]];
+        }
+		
+		navigator = new PreviewNavigator(dimSubGroup, SWT.DOUBLE_BUFFERED, w, h);
+    }
+    
+    private void createCompoundDSContents() {
+    	Composite content = new Composite(shell, SWT.NONE);
+    	content.setLayout(new GridLayout(2, false));
+    	content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
+    	org.eclipse.swt.widgets.Group membersGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
+    	membersGroup.setText("Select Members");
+    	membersGroup.setLayout(new GridLayout(1, true));
+    	membersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+    	
+    	String[] names = ((CompoundDS) dataset).getMemberNames();
+    	fieldList = new List(membersGroup, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+    	fieldList.setItems(names);
+    	fieldList.selectAll();
+    	
+    	GridData data = new GridData(SWT.FILL, SWT.FILL, false, true);
+    	data.heightHint = fieldList.getItemHeight() * 10;
+    	data.widthHint = fieldList.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + 10;
+        fieldList.setLayoutData(data);
+    	
+    	org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
+    	dimSubGroup.setText("Dimension and Subset Selection");
+    	dimSubGroup.setLayout(new GridLayout());
+    	dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
+    	createDimSubSelectionComposite(dimSubGroup);
+    	
+    	Composite tableViewComposite = new Composite(dimSubGroup, SWT.BORDER);
+    	tableViewComposite.setLayout(new GridLayout(2, false));
+    	tableViewComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	new Label(tableViewComposite, SWT.RIGHT).setText("TableView: ");
+    	
+    	choiceTableView = new Combo(tableViewComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+    	choiceTableView.setItems(HDFView.getListOfTableViews().toArray(new String[0]));
+    	choiceTableView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	choiceTableView.select(0);
+    }
+    
+    private void createTextContents() {
+    	org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+    	dimSubGroup.setText("Dimension and Subset Selection");
+    	dimSubGroup.setLayout(new GridLayout(1, true));
+    	dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
+    	createDimSubSelectionComposite(dimSubGroup);
+    	
+    	Composite textViewComposite = new Composite(dimSubGroup, SWT.BORDER);
+    	textViewComposite.setLayout(new GridLayout(2, false));
+    	textViewComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	new Label(textViewComposite, SWT.RIGHT).setText("TextView: ");
+    	
+    	choiceTextView = new Combo(textViewComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+    	choiceTextView.setItems(HDFView.getListOfTextViews().toArray(new String[0]));
+    	choiceTextView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	choiceTextView.select(0);
+    }
+    
+    private void createDimSubSelectionComposite(Composite parent) {
+        String[] dimNames = dataset.getDimNames();
+    	
+    	Composite selectionComposite = new Composite(parent, SWT.BORDER);
+    	selectionComposite.setLayout(new GridLayout(6, true));
+    	selectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
+    	new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	
+    	if (rank > 1) {
+    		transposeChoice = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+    		transposeChoice.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
+    		
+    		transposeChoice.add("Reshape");
+            transposeChoice.add("Transpose");
+            
+            transposeChoice.select(0);
+    	} else {
+    	    new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	}
+    	
+    	Label label = new Label(selectionComposite, SWT.RIGHT);
+    	label.setText("Start: ");
+    	label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
+    	
+    	label = new Label(selectionComposite, SWT.RIGHT);
+    	label.setText("End: ");
+    	label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
+    	
+    	label = new Label(selectionComposite, SWT.RIGHT);
+    	label.setText("Stride: ");
+    	label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
+    	
+    	label = new Label(selectionComposite, SWT.RIGHT);
+    	label.setText("Max Size");
+    	label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
+    	
+    	
+    	// Create Height selection row
+    	label = new Label(selectionComposite, SWT.RIGHT);
+    	label.setText("Height: ");
+    	label.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, true));
+    	
+    	choices[0] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+    	choices[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	for (int j = 0; j < rank; j++) {
+            if (dimNames == null) {
+                choices[0].add("dim " + j);
+            }
+            else {
+                choices[0].add(dimNames[j]);
+            }
+        }
+    	
+    	choices[0].select(0);
+    	
+    	startFields[0] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	startFields[0].setText("0");
+    	startFields[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	endFields[0] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	endFields[0].setText("0");
+    	endFields[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	strideFields[0] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	strideFields[0].setText("1");
+    	strideFields[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	maxLabels[0] = new Label(selectionComposite, SWT.RIGHT);
+    	maxLabels[0].setText("1");
+    	maxLabels[0].setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+    	
+    	
+    	// Create Width selection row
+    	label = new Label(selectionComposite, SWT.RIGHT);
+    	label.setText("Width: ");
+    	label.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, true));
+    	
+    	choices[1] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+    	choices[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	for (int j = 0; j < rank; j++) {
+            if (dimNames == null) {
+                choices[1].add("dim " + j);
+            }
+            else {
+                choices[1].add(dimNames[j]);
+            }
+        }
+    	
+    	choices[1].select(0);
+    	
+    	startFields[1] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	startFields[1].setText("0");
+    	startFields[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	endFields[1] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	endFields[1].setText("0");
+    	endFields[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	strideFields[1] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	strideFields[1].setText("1");
+    	strideFields[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	maxLabels[1] = new Label(selectionComposite, SWT.RIGHT);
+    	maxLabels[1].setText("1");
+    	maxLabels[1].setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+    	
+    	
+    	// Create Depth selection row
+    	label = new Label(selectionComposite, SWT.RIGHT);
+    	label.setText("Depth: ");
+    	label.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, true));
+    	
+    	choices[2] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+    	choices[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	for (int j = 0; j < rank; j++) {
+            if (dimNames == null) {
+                choices[2].add("dim " + j);
+            }
+            else {
+                choices[2].add(dimNames[j]);
+            }
+        }
+    	
+    	choices[2].select(0);
+    	
+    	startFields[2] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	startFields[2].setText("0");
+    	startFields[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	endFields[2] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	endFields[2].setText("0");
+    	endFields[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	strideFields[2] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+    	strideFields[2].setText("1");
+    	strideFields[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	
+    	maxLabels[2] = new Label(selectionComposite, SWT.RIGHT);
+    	maxLabels[2].setText("1");
+    	maxLabels[2].setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+    	
+    	
+    	// Create row for Dims and reset button
+    	new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	Button dimsButton = new Button(selectionComposite, SWT.PUSH);
+    	dimsButton.setText("Dims...");
+    	dimsButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	dimsButton.setEnabled((rank > 3));
+    	dimsButton.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			if (rank < 4) {
+                    return;
+                }
+
+                int idx = 0;
+                Vector<Object> choice4 = new Vector<Object>(rank);
+                int[] choice4Index = new int[rank - 3];
+                for (int i = 0; i < rank; i++) {
+                    if ((i != currentIndex[0]) && (i != currentIndex[1])
+                            && (i != currentIndex[2])) {
+                        choice4.add(choices[0].getItem(i));
+                        choice4Index[idx++] = i;
+                    }
+                }
+
+                String msg = "Select slice location for dimension(s):\n\""
+                        + choice4.get(0) + " [0 .. " + (dims[choice4Index[0]] - 1)
+                        + "]\"";
+                String initValue = String.valueOf(start[choice4Index[0]]);
+                int n = choice4.size();
+                for (int i = 1; i < n; i++) {
+                    msg += " x \"" + choice4.get(i) + " [0 .. "
+                            + (dims[choice4Index[i]] - 1) + "]\"";
+                    initValue += " x " + String.valueOf(start[choice4Index[i]]);
+                }
+
+                String result = new InputDialog(shell, shell.getText(), msg, initValue).open();
+                if ((result == null) || ((result = result.trim()) == null)
+                        || (result.length() < 1)) {
+                    return;
+                }
+
+                StringTokenizer st = new StringTokenizer(result, "x");
+                if (st.countTokens() < n) {
+                	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                	error.setText("Select Slice Location");
+                	error.setMessage("Number of dimension(s) is less than " + n + "\n" + result);
+                	error.open();
+                    return;
+                }
+
+                long[] start4 = new long[n];
+                for (int i = 0; i < n; i++) {
+                    try {
+                        start4[i] = Long.parseLong(st.nextToken().trim());
+                    }
+                    catch (Exception ex) {
+                    	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                    	error.setText("Select Slice Location");
+                    	error.setMessage(ex.getMessage());
+                    	error.open();
+                    	return;
+                    }
+
+                    if ((start4[i] < 0) || (start4[i] >= dims[choice4Index[i]])) {
+                    	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                    	error.setText("Select Slice Location");
+                    	error.setMessage("Slice location is out of range.\n" + start4[i]
+                                + " >= " + dims[choice4Index[i]]);
+                    	error.open();
+                        return;
+                    }
+
+                }
+
+                for (int i = 0; i < n; i++) {
+                    start[choice4Index[i]] = start4[i];
+                }
+    		}
+    	});
+    	
+    	new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	Button resetButton = new Button(selectionComposite, SWT.PUSH);
+    	resetButton.setText("Reset");
+    	resetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	resetButton.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			int n = startFields.length;
+
+                for (int i = 0; i < n; i++) {
+                    startFields[i].setText("0");
+                    strideFields[i].setText("1");
+                    long l = Long.valueOf(maxLabels[i].getText()) - 1;
+                    endFields[i].setText(String.valueOf(l));
+                }
+    		}
+    	});
+    	
+    	new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	
+    	
+    	for (int i = 0; i < 3; i++) {
+    		// Disable the selection components
+            // init() will set them appropriately
+            choices[i].setEnabled(false);
+            startFields[i].setEnabled(false);
+            endFields[i].setEnabled(false);
+            strideFields[i].setEnabled(false);
+            maxLabels[i].setEnabled(false);
+    	}
     }
 	
     /** PreviewNavigator draws a selection rectangle for selecting a subset
@@ -706,9 +1188,7 @@ public class DataOptionDialog extends Dialog {
         private final int         NAVIGATOR_SIZE   = 150;
         private int               dimX, dimY, x, y;
         private double            r;
-        private Point             startPosition;                           // mouse
-                                                                            // clicked
-                                                                            // position
+        private Point             startPosition; // mouse clicked position
         private Rectangle         selectedArea;
         private Image             previewImage     = null;
 
@@ -728,17 +1208,25 @@ public class DataOptionDialog extends Dialog {
                 x = (int) (dimX / r);
             }
 
-            //selectedArea = new Rectangle();
+            selectedArea = new Rectangle();
             //setPreferredSize(new Dimension(NAVIGATOR_SIZE, NAVIGATOR_SIZE));
+            
             try {
                 previewImage = createPreviewImage();
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-
-            //addMouseListener(this);
-            //addMouseMotionListener(this);
+            
+            this.addMouseListener(new MouseAdapter() {
+            });
+            
+            this.addMouseMoveListener(new MouseMoveListener() {
+            	@Override
+            	public void mouseMove(MouseEvent e) {
+            		
+            	}
+            });
             
             this.addPaintListener(new PaintListener() {
             	public void paintControl(PaintEvent e) {
