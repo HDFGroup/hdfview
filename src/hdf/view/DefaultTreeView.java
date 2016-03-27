@@ -317,7 +317,7 @@ public class DefaultTreeView implements TreeView {
                     //tree.setSelection(selPath);
                 }
 
-                // Add way to set url_bar text to this current file
+                // Set this file to the most recently selected file in the recent files bar
                 Combo recentFilesCombo = ((HDFView) viewer).getUrlBar();
                 String filename = selectedFile.getAbsolutePath();
                 
@@ -462,6 +462,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
+                    err.printStackTrace();
                     showError(err.getMessage(), shell.getText());
                     return;
                 }
@@ -2392,13 +2393,13 @@ public class DefaultTreeView implements TreeView {
             }
 
             if (isText) {
-                dataViewName = (String) HDFView.getListOfTextView().get(0);
+                dataViewName = (String) HDFView.getListOfTextViews().get(0);
             }
             else if (isImage) {
-                dataViewName = (String) HDFView.getListOfImageView().get(0);
+                dataViewName = (String) HDFView.getListOfImageViews().get(0);
             }
             else {
-                dataViewName = (String) HDFView.getListOfTableView().get(0);
+                dataViewName = (String) HDFView.getListOfTableViews().get(0);
             }
         }
         else {
@@ -2540,7 +2541,7 @@ public class DefaultTreeView implements TreeView {
             return null;
         }
 
-        List<?> metaDataViewList = HDFView.getListOfMetaDataView();
+        List<?> metaDataViewList = HDFView.getListOfMetaDataViews();
         if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
             return null;
         }

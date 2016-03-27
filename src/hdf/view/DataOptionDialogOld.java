@@ -33,51 +33,10 @@ public class DataOptionDialogOld extends JDialog implements ActionListener, Item
     private boolean                performJComboBoxEvent = false;
 
     public DataOptionDialogOld(ViewManager theview, Dataset theDataset) {
-        transposeChoice = new JComboBox();
-        transposeChoice.addItem("Reshape");
-        transposeChoice.addItem("Transpose");
-
         selLabel = new JLabel("", SwingConstants.CENTER);
 
-        choicePalette = new JComboBox();
-        choicePalette.setName("modulepalette");
-        choiceTextView = new JComboBox((Vector<?>) HDFView.getListOfTextView());
-        choiceTextView.setName("moduletext");
         choiceImageView = new JComboBox((Vector<?>) HDFView.getListOfImageView());
         choiceImageView.setName("moduleimage");
-        choiceTableView = new JComboBox((Vector<?>) HDFView.getListOfTableView());
-        choiceTableView.setName("moduletable");
-
-        choicePalette.addItem("Select palette");
-        if (dataset instanceof ScalarDS) {
-            String paletteName = ((ScalarDS) dataset).getPaletteName(0);
-            if (paletteName == null) {
-                paletteName = "Default";
-            }
-            choicePalette.addItem(paletteName);
-            for (int i = 2; i <= numberOfPalettes; i++) {
-                paletteName = ((ScalarDS) dataset).getPaletteName(i - 1);
-                choicePalette.addItem(paletteName);
-            }
-        }
-        choicePalette.addItem("Gray");
-        choicePalette.addItem("ReverseGray");
-        choicePalette.addItem("GrayWave");
-        choicePalette.addItem("Rainbow");
-        choicePalette.addItem("Nature");
-        choicePalette.addItem("Wave");
-
-        spreadsheetButton = new JRadioButton("Spreadsheet ", true);
-        spreadsheetButton.setMnemonic(KeyEvent.VK_S);
-        spreadsheetButton.setName("spreadsheetbutton");
-        imageButton = new JRadioButton("Image ");
-        imageButton.setMnemonic(KeyEvent.VK_I);
-        imageButton.setName("imagebutton");
-
-        charCheckbox = new JCheckBox("Show As Char", false);
-        charCheckbox.setMnemonic(KeyEvent.VK_C);
-        charCheckbox.setEnabled(false);
-        charCheckbox.addItemListener(this);
 
         extractBitButton = new JCheckBox("Show Value of Selected Bits", false);
         extractBitButton.setMnemonic(KeyEvent.VK_V);
@@ -114,48 +73,17 @@ public class DataOptionDialogOld extends JDialog implements ActionListener, Item
 
 
         if (dataset instanceof CompoundDS) {
-            // setup GUI components for the field selection
-            CompoundDS d = (CompoundDS) dataset;
-            String[] names = d.getMemberNames();
-            fieldList = new JList(names);
-            fieldList.addSelectionInterval(0, names.length - 1);
-            JPanel fieldP = new JPanel();
-            fieldP.setLayout(new BorderLayout());
             w1 = 150 + (ViewProperties.getFontSize() - 12) * 10;
             h1 = 250 + (ViewProperties.getFontSize() - 12) * 15;
             fieldP.setPreferredSize(new Dimension(w1, h1));
-            JScrollPane scrollP = new JScrollPane(fieldList);
-            fieldP.add(scrollP);
-            tborder = new TitledBorder("Select Members");
-            tborder.setTitleColor(Color.gray);
-            fieldP.setBorder(tborder);
-            contentPane.add(fieldP, BorderLayout.WEST);
-
-            JPanel tviewP = new JPanel();
-            tviewP.setLayout(new BorderLayout());
-            tviewP.add(new JLabel("        TableView:  "), BorderLayout.WEST);
-            tviewP.add(choiceTableView, BorderLayout.CENTER);
-            tviewP.setBorder(new LineBorder(Color.LIGHT_GRAY));
-
-            centerP.add(tviewP, BorderLayout.SOUTH);
         }
         else if (dataset instanceof ScalarDS) {
             ScalarDS sd = (ScalarDS) dataset;
-            isText = sd.isText();
-
+            
             if (isText) {
                 w1 = 700 + (ViewProperties.getFontSize() - 12) * 15;
                 h1 = 280 + (ViewProperties.getFontSize() - 12) * 10;
                 contentPane.setPreferredSize(new Dimension(w1, h1));
-                // add textview selection
-                JPanel txtviewP = new JPanel();
-                txtviewP.setLayout(new BorderLayout());
-                txtviewP.add(new JLabel("          TextView:  "),
-                        BorderLayout.WEST);
-                txtviewP.add(choiceTextView, BorderLayout.CENTER);
-                txtviewP.setBorder(new LineBorder(Color.LIGHT_GRAY));
-
-                centerP.add(txtviewP, BorderLayout.SOUTH);
             }
             else {
                 w1 = 800 + (ViewProperties.getFontSize() - 12) * 15;
@@ -164,18 +92,6 @@ public class DataOptionDialogOld extends JDialog implements ActionListener, Item
                 if (rank > 1) {
                     centerP.add(navigatorP, BorderLayout.WEST);
                 }
-
-                // setup GUI components for the display options: table or image
-                imageButton.addItemListener(this);
-                spreadsheetButton.addItemListener(this);
-                ButtonGroup rgroup = new ButtonGroup();
-                rgroup.add(spreadsheetButton);
-                rgroup.add(imageButton);
-                JPanel viewP = new JPanel();
-                viewP.setLayout(new GridLayout(2, 1, 5, 5));
-                tborder = new TitledBorder("Display As");
-                tborder.setTitleColor(Color.gray);
-                viewP.setBorder(tborder);
 
                 JPanel sheetP = new JPanel();
                 sheetP.setLayout(new GridLayout(1, 2, 25, 5));
@@ -326,177 +242,13 @@ public class DataOptionDialogOld extends JDialog implements ActionListener, Item
                 }
             }
         }
-
-        // setup GUI for dimension and subset selection
-        JPanel selectionP = new JPanel();
-        selectionP.setLayout(new GridLayout(5, 6, 10, 3));
-        selectionP.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
-
-        centerP.add(selectionP, BorderLayout.CENTER);
-        contentPane.add(centerP, BorderLayout.CENTER);
-
-        selectionP.add(new JLabel(" "));
-        if (rank > 1)
-            selectionP.add(transposeChoice);
-        else
-            selectionP.add(new JLabel(" "));
-
-        JLabel label = new JLabel("Start:");
-        selectionP.add(label);
-        label = new JLabel("End: ");
-        selectionP.add(label);
-        label = new JLabel("Stride:");
-        selectionP.add(label);
-        label = new JLabel("Max Size");
-        selectionP.add(label);
-
-        choices = new JComboBox[3];
-        maxLabels = new JLabel[3];
-        startFields = new JTextField[3];
-        endFields = new JTextField[3];
-        strideFields = new JTextField[3];
-        JLabel dimLabels[] = { new JLabel("Height", SwingConstants.RIGHT),
-                new JLabel("Width", SwingConstants.RIGHT),
-                new JLabel("Depth", SwingConstants.RIGHT), };
-
-        String[] dimNames = dataset.getDimNames();
-        for (int i = 0; i < 3; i++) {
-            choices[i] = new JComboBox();
-            choices[i].addItemListener(this);
-            for (int j = 0; j < rank; j++) {
-                if (dimNames == null) {
-                    choices[i].addItem("dim " + j);
-                }
-                else {
-                    choices[i].addItem(dimNames[j]);
-                }
-            }
-            maxLabels[i] = new JLabel("1");
-            startFields[i] = new JTextField("0");
-            endFields[i] = new JTextField("0");
-            strideFields[i] = new JTextField("1");
-            selectionP.add(dimLabels[i]);
-            selectionP.add(choices[i]);
-            selectionP.add(startFields[i]);
-            selectionP.add(endFields[i]);
-            selectionP.add(strideFields[i]);
-            selectionP.add(maxLabels[i]);
-
-            // disable the selection components
-            // init() will set them appropriate
-            choices[i].setEnabled(false);
-            startFields[i].setEnabled(false);
-            endFields[i].setEnabled(false);
-            strideFields[i].setEnabled(false);
-            maxLabels[i].setEnabled(false);
-            
-            // Provide fields with names for access
-            startFields[i].setName("startField"+i);
-            endFields[i].setName("endField"+i);
-            strideFields[i].setName("strideField"+i);
-            choices[i].setName("dimensionBox"+i);
-        }
-
-        // add button dimension selection when dimension size >= 4
-        JButton button = new JButton("dims...");
-        selectionP.add(new JLabel("", SwingConstants.RIGHT));
-        selectionP.add(button);
-
-        button.setActionCommand("Select more dimensions");
-        button.addActionListener(this);
-        button.setEnabled((rank > 3));
-        selectionP.add(new JLabel(" "));
-        selectionP.add(new JLabel(" "));
-        button = new JButton("Reset");
-        button.setName("Reset");
-        button.setActionCommand("Reset data range");
-        button.addActionListener(this);
-        selectionP.add(button);
-        selectionP.add(new JLabel(" "));
     }
 
     //@Override
     public void actionPerformed (ActionEvent e) {
         String cmd = e.getActionCommand();
 
-        else if (cmd.equals("Reset data range")) {
-            int n = startFields.length;
-
-            for (int i = 0; i < n; i++) {
-                startFields[i].setText("0");
-                strideFields[i].setText("1");
-                long l = Long.valueOf(maxLabels[i].getText()) - 1;
-                endFields[i].setText(String.valueOf(l));
-            }
-        }
-        else if (cmd.equals("Select more dimensions")) {
-            if (rank < 4) {
-                return;
-            }
-
-            int idx = 0;
-            Vector<Object> choice4 = new Vector<Object>(rank);
-            int[] choice4Index = new int[rank - 3];
-            for (int i = 0; i < rank; i++) {
-                if ((i != currentIndex[0]) && (i != currentIndex[1])
-                        && (i != currentIndex[2])) {
-                    choice4.add(choices[0].getItemAt(i));
-                    choice4Index[idx++] = i;
-                }
-            }
-
-            String msg = "Select slice location for dimension(s):\n\""
-                    + choice4.get(0) + " [0 .. " + (dims[choice4Index[0]] - 1)
-                    + "]\"";
-            String initValue = String.valueOf(start[choice4Index[0]]);
-            int n = choice4.size();
-            for (int i = 1; i < n; i++) {
-                msg += " x \"" + choice4.get(i) + " [0 .. "
-                        + (dims[choice4Index[i]] - 1) + "]\"";
-                initValue += " x " + String.valueOf(start[choice4Index[i]]);
-            }
-
-            String result = JOptionPane.showInputDialog(this, msg, initValue);
-            if ((result == null) || ((result = result.trim()) == null)
-                    || (result.length() < 1)) {
-                return;
-            }
-
-            StringTokenizer st = new StringTokenizer(result, "x");
-            if (st.countTokens() < n) {
-                JOptionPane.showMessageDialog(this,
-                        "Number of dimension(s) is less than " + n + "\n"
-                                + result, "Select Slice Location",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            long[] start4 = new long[n];
-            for (int i = 0; i < n; i++) {
-                try {
-                    start4[i] = Long.parseLong(st.nextToken().trim());
-                }
-                catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, ex.getMessage(),
-                            "Select Slice Location", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if ((start4[i] < 0) || (start4[i] >= dims[choice4Index[i]])) {
-                    JOptionPane.showMessageDialog(this,
-                            "Slice location is out of range.\n" + start4[i]
-                                    + " >= " + dims[choice4Index[i]],
-                            "Select Slice Location", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-            }
-
-            for (int i = 0; i < n; i++) {
-                start[choice4Index[i]] = start4[i];
-            }
-        } // else if (cmd.equals("Select more dimensions"))
-        else if (cmd.equals("Help on how to set bitmask")) {
+        if (cmd.equals("Help on how to set bitmask")) {
             String msg = ""
                     + "\"Apply Bitmask\" applies bitwise \"AND\" to the original data.\n"
                     + "For example, bits 2, 3, and 4 are selected for the bitmask\n"
@@ -516,28 +268,7 @@ public class DataOptionDialogOld extends JDialog implements ActionListener, Item
     public void itemStateChanged (ItemEvent e) {
         Object source = e.getSource();
 
-        if (source.equals(imageButton)) {
-            choicePalette.setEnabled(!isTrueColorImage);
-            dataRangeField.setEnabled(true);
-            fillValueField.setEnabled(true);
-            choiceImageView.setEnabled(true);
-            choiceTableView.setEnabled(false);
-            charCheckbox.setSelected(false);
-            charCheckbox.setEnabled(false);
-        }
-        else if (source.equals(spreadsheetButton)) {
-            choicePalette.setEnabled(false);
-            choiceImageView.setEnabled(false);
-            choiceTableView.setEnabled(true);
-            dataRangeField.setEnabled(false);
-            fillValueField.setEnabled(false);
-            Datatype dtype = dataset.getDatatype();
-            int tclass = dtype.getDatatypeClass();
-            charCheckbox.setEnabled((tclass == Datatype.CLASS_CHAR ||
-                    tclass == Datatype.CLASS_INTEGER) &&
-                    (dtype.getDatatypeSize() == 1));
-        }
-        else if (source instanceof JToggleButton) {
+        if (source instanceof JToggleButton) {
             checkBitmaskButtons((JToggleButton) source);
         }
         else if (source instanceof JComboBox) {
@@ -676,19 +407,5 @@ public class DataOptionDialogOld extends JDialog implements ActionListener, Item
                 source.setSelected(false);
             }
         } // if (extractBitButton.isSelected() && n>1) {
-    }
-
-    /**
-     * JComboBox.setSelectedItem() or setSelectedIndex() always fires action event. If you call
-     * setSelectedItem() or setSelectedIndex() at itemStateChanged() or actionPerformed(), the
-     * setSelectedItem() or setSelectedIndex() will make loop calls of itemStateChanged() or
-     * actionPerformed(). This is not what we want. We want the setSelectedItem() or
-     * setSelectedIndex() behavior like java.awt.Choice. This flag is used to serve this purpose.
-     */
-    @SuppressWarnings("rawtypes")
-    private void setJComboBoxSelectedIndex (JComboBox box, int idx) {
-        performJComboBoxEvent = false;
-        box.setSelectedIndex(idx);
-        performJComboBoxEvent = true;
     }
 }

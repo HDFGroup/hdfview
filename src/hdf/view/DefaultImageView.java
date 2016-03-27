@@ -1574,7 +1574,7 @@ public class DefaultImageView implements ImageView {
             return;
         }
 
-        String viewName = (String) HDFView.getListOfPaletteView().get(0);
+        String viewName = (String) HDFView.getListOfPaletteViews().get(0);
 
         try {
             Class theClass = Class.forName(viewName);
