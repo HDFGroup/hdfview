@@ -79,8 +79,7 @@ public class DefaultPaletteView extends Dialog {
     
     private final Color[] lineColors = { Color.red, Color.green, Color.blue };
     private final String lineLabels[] = { "Red", "Green", "Blue" };
-    
-    
+
     private static String PALETTE_GRAY = "Gray";
     private static String PALETTE_DEFAULT = "Default";
     private static String PALETTE_REVERSE_GRAY = "Reverse Gray";

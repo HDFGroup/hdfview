@@ -22,7 +22,6 @@ import ucar.ma2.DataType;
 /**
  * Datatype encapsulates information of a datatype. Information includes the
  * class, size, endian of a datatype.
- * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -34,18 +33,17 @@ public class NC2Datatype extends Datatype {
     /**
      * Create an Datatype with specified class, size, byte order and sign. The
      * following list a few example of how to create a Datatype.
-     * <OL>
-     * <LI>to create unsigned native integer<br>
+     * <ol>
+     * <li>to create unsigned native integer<br>
      * NC2Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
-     * SIGN_NONE);
-     * <LI>to create 16-bit signed integer with big endian<br>
-     * NC2Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <LI>to create native float<br>
-     * NC2Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <LI>to create 64-bit double<br>
-     * NC2Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </OL>
-     * <p>
+     * SIGN_NONE);</li>
+     * <li>to create 16-bit signed integer with big endian<br>
+     * NC2Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);</li>
+     * <li>to create native float<br>
+     * NC2Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);</li>
+     * <li>to create 64-bit double<br>
+     * NC2Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);</li>
+     * </ol>
      *
      * @param tclass
      *            the class of the datatype.
@@ -71,7 +69,6 @@ public class NC2Datatype extends Datatype {
 
     /**
      * Create a Datatype with a given Netcdf native datatype.
-     * <p>
      *
      * @param theType
      *            the netcdf native datatype.
@@ -86,7 +83,6 @@ public class NC2Datatype extends Datatype {
      * Allocate an one-dimensional array of byte, short, int, long, float,
      * double, or String to store data retrieved from an Netcdf file based on
      * the given Netcdf datatype and dimension sizes.
-     * <p>
      *
      * @param dtype
      *            the netdcdf datatype.
@@ -129,7 +125,6 @@ public class NC2Datatype extends Datatype {
 
     /**
      * Translate Netcdf datatype identifier into NC2Datatype.
-     * <p>
      *
      * @param nativeID
      *            the netcdf native datatype.

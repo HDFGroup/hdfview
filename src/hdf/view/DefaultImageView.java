@@ -92,7 +92,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * model of 256 colors or 24-bit true color raster image. Data of other type
  * will be converted to 8-bit integer. The simple linear conversion is used for
  * this purpose:
- * 
+ *
  * <pre>
  * y = f * (x - min),
  *       where y   = the value of 8-bit integer,
@@ -107,7 +107,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * For more infomation on palette, read <a
  * href="http://hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and
  * Palette Specification </a>
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 2//2016
  */
@@ -252,7 +252,7 @@ public class DefaultImageView implements ImageView {
     /**
      * Constructs an ImageView.
      * <p>
-     * 
+     *
      * @param theView
      *            the main HDFView.
      */
@@ -263,7 +263,7 @@ public class DefaultImageView implements ImageView {
     /**
      * Constructs an ImageView.
      * <p>
-     * 
+     *
      * @param theView
      *            the main HDFView.
      * @param map
@@ -350,7 +350,8 @@ public class DefaultImageView implements ImageView {
                     && !convertByteData) {
                 dataRange[1] = 255; // byte image data rang = [0, 255]
             }
-        } else {
+        }
+        else {
             if (dataRange[0] < dataRange[1])
                 convertByteData = true;
         }
@@ -461,15 +462,15 @@ public class DefaultImageView implements ImageView {
         group.setText(originTag);
         group.setLayout(new GridLayout(2, false));
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         imageScroller = new ScrolledComposite(group, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
         imageScroller.getHorizontalBar().setIncrement(50);
         imageScroller.getVerticalBar().setIncrement(50);
         imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         imageComponent = new ImageComponent(imageScroller, SWT.DOUBLE_BUFFERED, image);
         imageScroller.setContent(imageComponent);
-        
+
         // add palette canvas to show the palette
         if (imagePalette != null) {
         	paletteComponent = new PaletteComponent(group, SWT.DOUBLE_BUFFERED, imagePalette, dataRange);
@@ -477,7 +478,7 @@ public class DefaultImageView implements ImageView {
         	// Make ImageComponent take entire width
         	imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         }
-        
+
         // Add the text field to display pixel data
         valueField = new Text(group, SWT.BORDER | SWT.SINGLE);
         valueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -507,15 +508,15 @@ public class DefaultImageView implements ImageView {
         });
 
         Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-        
+
         shell.setSize(minimumSize);
-        
+
         org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (minimumSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (minimumSize.y / 2));
 
         shell.open();
-        
+
         // Workaround to prevent parent shell cursor from staying in "wait"
         // mode while TableView is open
         parent.setCursor(null);
@@ -631,6 +632,7 @@ public class DefaultImageView implements ImageView {
                 writeSelectionToImage();
             }
         });
+
         rotateRelatedItems.add(item);
 
         new MenuItem(menu, SWT.SEPARATOR);
@@ -651,16 +653,16 @@ public class DefaultImageView implements ImageView {
             public void widgetSelected(SelectionEvent e) {
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(ViewProperties.getWorkDir());
-                
+
                 if(fChooser.open() == null) {
                     return;
                 }
-                
+
                 File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
                 if(chosenFile == null || !chosenFile.exists() || chosenFile.isDirectory()) {
                     return;
                 }
-                
+
                 Vector<String> palList = ViewProperties.getPaletteList();
                 String palPath = chosenFile.getAbsolutePath();
                 if(!palList.contains(palList))
@@ -678,14 +680,14 @@ public class DefaultImageView implements ImageView {
                 String workDir = ViewProperties.getWorkDir() + File.separator;
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(workDir);
-                
+
                 //FileNameExtensionFilter filter = new FileNameExtensionFilter("Color lookup table", "lut");
-                
+
                 File pfile = Tools.checkNewFile(workDir, ".lut");
-                
+
                 fChooser.setFileName(pfile.getName());
                 //fChooser.setFileFilter(filter);
-                
+
                 if (fChooser.open() == null) {
                     return;
                 }
@@ -699,7 +701,7 @@ public class DefaultImageView implements ImageView {
                     MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
                     confirm.setText(shell.getText());
                     confirm.setMessage("File exists. Do you want to replace it ?");
-                    
+
                     if(confirm.open() == SWT.NO) {
                         return;
                     }
@@ -905,11 +907,11 @@ public class DefaultImageView implements ImageView {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
-            
+
                 shell.setCursor(cursor);
-                
+
                 new Animation(shell, SWT.NONE, dataset).open();
-                
+
                 shell.setCursor(null);
                 cursor.dispose();
             }
@@ -1046,7 +1048,7 @@ public class DefaultImageView implements ImageView {
                 if (contrastSlider == null) {
                     contrastSlider = new ContrastSlider(shell, SWT.NONE, image.getSource());
                 }
-            
+
                 contrastSlider.open();
             }
         });
@@ -1150,21 +1152,21 @@ public class DefaultImageView implements ImageView {
                     }
                 }
             });
-            
+
             frameField.pack();
-            
+
             separator.setWidth(frameField.getSize().x + 30);
             separator.setControl(frameField);
-            
+
             separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
             Text maxFrameText = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
             maxFrameText.setText(String.valueOf(maxFrame - 1));
             maxFrameText.setEditable(false);
             maxFrameText.setEnabled(false);
-            
+
             maxFrameText.pack();
-            
+
             separator.setWidth(maxFrameText.getSize().x + 30);
             separator.setControl(maxFrameText);
 
@@ -1405,7 +1407,8 @@ public class DefaultImageView implements ImageView {
             imageByteData = Tools.getBytes(data, dataRange, w, h, !dataset
                     .isDefaultImageOrder(), dataset.getFilteredImageValues(),
                     convertByteData, imageByteData, invalidValueIndex);
-        } else if (dataRange!= null && dataRange[0]==dataRange[1]) {
+        }
+        else if (dataRange!= null && dataRange[0]==dataRange[1]) {
             Tools.findMinMax(data, dataRange, null);
         }
 
@@ -1441,13 +1444,12 @@ public class DefaultImageView implements ImageView {
         imageByteData = Tools.getBytes(data, dataRange, w, h, false, dataset.getFilteredImageValues(),
                 imageByteData);
 
-
         image = createTrueColorImage(imageByteData, isPlaneInterlace, (int)w, (int)h);
     }
 
     /**
      * Compute image data from autogain
-     * 
+     *
      * @return
      */
     private boolean computeAutoGainImageData(double[] gb, double[] range) {
@@ -1615,7 +1617,7 @@ public class DefaultImageView implements ImageView {
 
     /**
      * Selects the whole image.
-     * 
+     *
      * @throws Exception
      */
     private void selectAll() throws Exception {
@@ -1715,7 +1717,7 @@ public class DefaultImageView implements ImageView {
 
     /**
      * This method returns a buffered image with the contents of an image.
-     * 
+     *
      * @param image
      *            the plain image object.
      * @return buffered image for the given image.
@@ -1753,7 +1755,7 @@ public class DefaultImageView implements ImageView {
 
     /**
      * Save the image to an image file.
-     * 
+     *
      * @param type
      *            the image type.
      * @throws Exception
@@ -1762,11 +1764,11 @@ public class DefaultImageView implements ImageView {
         if (image == null) {
             return;
         }
-        
+
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFilterPath(dataset.getFile());
         fChooser.setOverwrite(true);
-        
+
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
             //fChooser.setFileFilter(DefaultFileFilter.getFileFilterJPEG());
             // } else if (type.equals(Tools.FILE_TYPE_TIFF)) {
@@ -1781,14 +1783,14 @@ public class DefaultImageView implements ImageView {
         else if (type.equals(Tools.FILE_TYPE_BMP)) {
             //fChooser.setFileFilter(DefaultFileFilter.getFileFilterBMP());
         }
-        
+
         fChooser.setText("Save Current Image To " + type + " File --- " + dataset.getName());
-        
+
         File chosenFile = new File(dataset.getName() + "." + type.toLowerCase());
         fChooser.setFileName(chosenFile.getName());
-        
+
         String filename = fChooser.open();
-        
+
         if(filename == null) {
             return;
         }
@@ -1804,9 +1806,9 @@ public class DefaultImageView implements ImageView {
             showError(err.getMessage(), shell.getText());
             return;
         }
-        
+
         Tools.saveImageAs(bi, chosenFile, type);
-        
+
         bi = null;
 
         viewer.showStatus("Current image saved to: " + chosenFile.getAbsolutePath());
@@ -1822,7 +1824,7 @@ public class DefaultImageView implements ImageView {
         }
 
         /*
-        // fchooser.changeToParentDirectory();        
+        // fchooser.changeToParentDirectory();
         */
     }
 
@@ -1837,7 +1839,7 @@ public class DefaultImageView implements ImageView {
 
     /**
      * Returns the selected data values.
-     * 
+     *
      * @return the selected data object.
      */
     public Object getSelectedData() {
@@ -1928,7 +1930,7 @@ public class DefaultImageView implements ImageView {
 
     /**
      * returns the selected area of the image
-     * 
+     *
      * @return the rectangle of the selected image area.
      */
     public Rectangle getSelectedArea() {
@@ -2123,7 +2125,7 @@ public class DefaultImageView implements ImageView {
 
     /**
      * Creates a RGB indexed image of 256 colors.
-     * 
+     *
      * @param imageData
      *            the byte array of the image data.
      * @param palette
@@ -2442,7 +2444,7 @@ public class DefaultImageView implements ImageView {
             originalSelectedArea = new Rectangle();
             setSize(imageSize.width, imageSize.height);
             strBuff = new StringBuffer();
-            
+
             this.addMouseMoveListener(new MouseMoveListener() {
                 @Override
                 public void mouseMove(MouseEvent e) {
@@ -2502,20 +2504,20 @@ public class DefaultImageView implements ImageView {
                 	}
                 }
             });
-            
+
             this.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseDoubleClick(MouseEvent e) {
-                    
+
                 }
-                
+
                 @Override
                 public void mouseDown(MouseEvent e) {
                     startPosition = new Point(e.x, e.y);
-                    
+
                     selectedArea.x = startPosition.x; selectedArea.y = startPosition.y;
                     selectedArea.width = 0; selectedArea.height = 0;
-                    
+
                     scrollDim = imageScroller.getSize();
                     hbar = imageScroller.getHorizontalBar();
                     vbar = imageScroller.getVerticalBar();
@@ -2526,17 +2528,17 @@ public class DefaultImageView implements ImageView {
                     	shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_HAND));
                     }
                 }
-                
+
                 @Override
                 public void mouseUp(MouseEvent e) {
                     shell.setCursor(null);
-                    
+
                     // Single mouse click
                     if(e.count == 1) {
                         startPosition = new Point(e.x, e.y);
-                        
+
                         //selectedArea.setBounds(startPosition.x, startPosition.y , 0, 0);
-                        
+
                         if (hbar.isVisible()) {
                             hbar.setSelection(startPosition.x - scrollDim.x / 2);
                         }
@@ -2549,11 +2551,11 @@ public class DefaultImageView implements ImageView {
                     }
                 }
             });
-            
+
             this.addMouseWheelListener(new MouseWheelListener() {
                 public void mouseScrolled(MouseEvent e) {
                     ScrollBar jb = imageScroller.getVerticalBar();
-                    
+
                     //int us = e.getUnitsToScroll();
                     //int wr = e.getWheelRotation();
                     //int n = us * jb.getIncrement();
@@ -2831,7 +2833,7 @@ public class DefaultImageView implements ImageView {
         /**
          * Constructs an image filter to flip horizontally or vertically.
          * <p>
-         * 
+         *
          * @param d
          *            the flip direction.
          */
@@ -2929,25 +2931,25 @@ public class DefaultImageView implements ImageView {
     /**
      * Apply general brightness/contrast algorithm. For details, visit
      * http://www.developerfusion.co.uk/
-     * 
+     *
      * The general algorithm is represented by: If Brighten = True New_Value =
      * Old_Value + Adjustment_Amount Else New_Value = Old_Value -
      * Adjustment_Amount If New_Value < Value_Minimum New_Value = Value_Minimum
      * If New_Value > Value_Maximum New_Value = Value_Maximum
-     * 
+     *
      * Contrast is a complicated operation. It is hard to formulate a
      * "general algorithm". Here is the closest representation
      * (Contrast_Value=[0, 2]):
-     * 
+     *
      * //Converts to a percent //[0, 1] New_Value = Old_Value / 255
-     * 
+     *
      * //Centers on 0 instead of .5 //[-.5, .5] New_Value -= 0.5
-     * 
+     *
      * //Adjusts by Contrast_Value //[-127.5, 127.5], usually [-1, 1] New_Value
      * *= Contrast_Value
-     * 
+     *
      * //Re-add .5 (un-center over 0) //[-127, 128] New_Value += 0.5
-     * 
+     *
      * //Re-multiply by 255 (un-convert to percent) //[-32385, 32640], usually
      * [0, 255] New_Value *= 255 //Clamp [0, 255] If(New_Value > 255) New_Value
      * = 255 If(New_Value < 0) New_Value = 0
@@ -3112,7 +3114,7 @@ public class DefaultImageView implements ImageView {
 
         /**
          * Create an contour filter for a given level contouring.
-         * 
+         *
          * @param theLevel
          *            the contour level.
          */
@@ -3225,7 +3227,7 @@ public class DefaultImageView implements ImageView {
 
         /**
          * draw a contour line based on the current parameter---level, color
-         * 
+         *
          * @param raster
          *            the data of the raster image.
          * @param pixels
@@ -3443,16 +3445,16 @@ public class DefaultImageView implements ImageView {
      * Makes animation for 3D images.
      */
     private class Animation extends Dialog {
-    
+
         private final int MAX_ANIMATION_IMAGE_SIZE = 300;
-    
+
         private Shell shell;
         private Canvas canvas; // Canvas to draw the image
         private Image[] frames = null; // a list of images for animation
         private int numberOfImages = 0;
         private int currentFrame = 0;
         private int sleepTime = 200;
-        
+
         public Animation(Shell parent, int style, ScalarDS dataset) {
             super(parent, style);
             
@@ -3619,7 +3621,7 @@ public class DefaultImageView implements ImageView {
         	}
         }
     }
-    
+
     private class DataRangeDialog extends Dialog {
     	
     	private Shell shell;
@@ -3632,10 +3634,11 @@ public class DefaultImageView implements ImageView {
         double min, max, min_org, max_org;
         final double[] minmax_previous = {0, 0};
         final double[] minmax_dist = {0,0};
-    
+
+
         public DataRangeDialog(Shell parent, int style, double[] minmaxCurrent,
                                double[] minmaxOriginal, final int[] dataDist) {
-    
+
             super(parent, style);
             
             Tools.findMinMax(dataDist, minmax_dist, null);
@@ -3956,13 +3959,13 @@ public class DefaultImageView implements ImageView {
     	ImageProducer imageProducer;
         double[] autoGainBias = {0, 0};
         int bLevel=0, cLevel=0;
-    
+
         public ContrastSlider(Shell parent, int style, ImageProducer producer) {
             super(parent, style);
             
             imageProducer = producer;
         }
-    
+
         public void open() {
         	Shell parent = getParent();
     		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

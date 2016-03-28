@@ -124,7 +124,6 @@ public class UserOptionsDialog extends Dialog {
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, false));
 
-
         // Create tabbed region
         TabFolder folder = new TabFolder(shell, SWT.TOP);
         folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -145,7 +144,6 @@ public class UserOptionsDialog extends Dialog {
             item.setControl(createSrbConnectionPanel());
         } catch (Exception ex) {;}
         */
-
 
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);

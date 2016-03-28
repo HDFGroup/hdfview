@@ -146,11 +146,11 @@ public class H5File extends FileFormat {
      * <p>
      * The access parameter values and corresponding behaviors:
      * <ul>
-     * <li>READ: Read-only access; open() will fail file doesn't exist.
+     * <li>READ: Read-only access; open() will fail file doesn't exist.</li>
      * <li>WRITE: Read/Write access; open() will fail if file doesn't exist or if file can't be opened with read/write
-     * access.
+     * access.</li>
      * <li>CREATE: Read/Write access; create a new file or truncate an existing one; open() will fail if file can't be
-     * created or if file exists but can't be opened read/write.
+     * created or if file exists but can't be opened read/write.</li>
      * </ul>
      * <p>
      * This constructor does not open the file for access, nor does it confirm that the file can later be opened
@@ -210,7 +210,7 @@ public class H5File extends FileFormat {
      * there is no H5Object class and it is specific to HDF5 objects.
      * <p>
      * The copy can fail for a number of reasons, including an invalid source or destination object, but no exceptions
-     * are thrown. The actual copy is carried out by the method: {@link #copyAttributes(long, long)}
+     * are thrown. The actual copy is carried out by the method: {@link #copyAttributes(int, int)}
      *
      * @param src
      *            The source object.
@@ -1018,7 +1018,7 @@ public class H5File extends FileFormat {
         }
         log.trace("H5File:close start");
         // The current working directory may be changed at Dataset.read()
-        // by H5Dchdir_ext()by this file to make it work for external
+        // by System.setProperty("user.dir", newdir) to make it work for external
         // datasets. We need to set it back to the original current working
         // directory (when hdf-java application started) before the file
         // is closed/opened. Otherwise, relative path, e.g. "./test.h5" may
@@ -1896,6 +1896,7 @@ public class H5File extends FileFormat {
          * open(loadFullHierarchy, plist); try { H5.H5Pclose(plist); } catch (Exception ex) {}
          */
 
+        log.trace("H5File:open loadFull={}", loadFullHierarchy);
         the_fid = open(loadFullHierarchy, plist);
 
         return the_fid;

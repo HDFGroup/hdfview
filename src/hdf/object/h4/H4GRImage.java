@@ -871,7 +871,7 @@ public class H4GRImage extends ScalarDS
             if (grid > 0) {
                 HDFLibrary.GRendaccess(grid);
             }
-           }
+        }
         catch (Exception ex) {
             log.debug("create.GRendaccess:", ex);
         }

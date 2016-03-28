@@ -54,123 +54,103 @@ public abstract class Datatype extends HObject {
     public static final int NATIVE = -1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_NO_CLASS = -1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_INTEGER = 0;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_FLOAT = 1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_CHAR = 2;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_STRING = 3;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_BITFIELD = 4;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_OPAQUE = 5;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_COMPOUND = 6;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_REFERENCE = 7;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_ENUM = 8;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_VLEN = 9;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_ARRAY = 10;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int CLASS_TIME = 11;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int ORDER_LE = 0;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int ORDER_BE = 1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int ORDER_VAX = 2;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int ORDER_NONE = 3;
 
     // sign
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int SIGN_NONE = 0;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int SIGN_2 = 1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5
-     * User's Guide</a>}
+     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
      */
     public static final int NSGN = 2;
 

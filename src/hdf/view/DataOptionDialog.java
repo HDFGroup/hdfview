@@ -452,8 +452,8 @@ public class DataOptionDialog extends Dialog {
         	}
         }
     }
-	
-	private void setPalette() {
+
+    private void setPalette() {
         if (!(dataset instanceof ScalarDS)) {
             return;
         }
@@ -654,7 +654,7 @@ public class DataOptionDialog extends Dialog {
         }
 
         return true;
-    }	
+    }
 
     /** Returns true if the display option is image. */
     public boolean isImageDisplay() {

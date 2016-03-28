@@ -28,7 +28,6 @@ import ucar.nc2.NetcdfFile;
  * similar to that of the UNIX file system in that the group may contain
  * references to other groups or data objects just as the UNIX directory may
  * contain subdirectories or files.
- * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -47,7 +46,6 @@ public class NC2Group extends Group {
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
-     * <p>
      *
      * @param fileFormat
      *            the file which containing the group.

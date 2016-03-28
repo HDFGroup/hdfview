@@ -28,8 +28,6 @@ import hdf.object.HObject;
  * Once the object being linked to is created, and the type is known, then
  * H5link object will change its type.
  *
- * <p>
- *
  * @version 2.7.2 7/6/2010
  * @author Nidhi Gupta
  */
@@ -44,7 +42,6 @@ public class H5Link extends HObject {
 
     /**
      * Constructs an HDF5 link with specific name, path, and parent.
-     * <p>
      *
      * @param theFile
      *            the file which containing the link.

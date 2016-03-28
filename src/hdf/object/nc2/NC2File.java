@@ -33,7 +33,6 @@ import ucar.nc2.Variable;
 /**
  * This class provides file level APIs. File access APIs include retrieving the
  * file hierarchy, opening and closing file, and writing file content to disk.
- * <p>
  *
  * @version 2.4 9/4/2007
  * @author Peter X. Cao
@@ -88,7 +87,7 @@ public class NC2File extends FileFormat {
         }
         catch (Exception ex) {
 //            if(!pathname.isEmpty())
-//            	log.debug("constuctor {}:", fullFileName, ex);
+//                log.debug("constuctor {}:", fullFileName, ex);
         }
     }
 
@@ -132,7 +131,7 @@ public class NC2File extends FileFormat {
                 raf.close();
             }
             catch (Exception ex) {
-//            	log.debug("raf close:", ex);
+//                log.debug("raf close:", ex);
             }
             return false;
         }
@@ -160,7 +159,7 @@ public class NC2File extends FileFormat {
             raf.close();
         }
         catch (Exception ex) {
-//        	log.debug("raf close:", ex);
+//            log.debug("raf close:", ex);
         }
 
         return is_netcdf;
@@ -203,7 +202,7 @@ public class NC2File extends FileFormat {
         //DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
 
         //    /**
-        //     * 
+        //     *
         //     */
         //    private static final long serialVersionUID = -9190644912409119072L;
 

@@ -35,7 +35,7 @@ import java.io.Serializable;
  *      ____|____       _____|______        _____|_____          _____|_____
  *      |       |       |          |        |         |          |         |
  *   H5Group H4Group H5ScalarDS H4ScalarDS H5CompDS H4CompDS H5Datatype H4Datatype
- * 
+ *
  * </pre>
  *
  * All HDF4 and HDF5 data objects are inherited from HObject. At the top level
@@ -86,7 +86,7 @@ public abstract class HObject implements Serializable, DataFormat {
     /**
      * The separator of object path, i.e. "/".
      */
-    public final static String separator        = "/";
+    public final static String separator = "/";
 
     /**
      * The full path of the file that contains the object.
@@ -304,6 +304,9 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * Sets the name of the target object that is linked to.
+     *
+     * @param targetObjName
+     *            The new name of the object.
      */
     public final void setLinkTargetObjName(String targetObjName) {
         linkTargetObjName = targetObjName;
@@ -330,11 +333,13 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * Sets the name of the object.
-     * <p>
+     *
      * setName (String newName) changes the name of the object in the file.
      *
      * @param newName
      *            The new name of the object.
+     *
+     * @throws  IllegalArgumentException
      */
     public void setName(String newName) throws Exception {
         if (newName != null) {
@@ -370,7 +375,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * @param newPath
      *            The new path of the object.
      */
-    public void setPath(String newPath) throws Exception {
+    public void setPath(String newPath) {
         if (newPath == null) {
             newPath = "/";
         }
@@ -388,7 +393,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * dst_id) and other purposes. The open() function should be used in pair
      * with close(long) function.
      *
-     * @see hdf.object.HObject#close(int)
+     * @see hdf.object.HObject#close(long)
      *
      * @return the object identifier if successful; otherwise returns a negative
      *         value.

@@ -38,9 +38,8 @@ import hdf.object.ScalarDS;
  * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
  * float, double and string, and operations performed on the scalar dataset.
  * <p>
- * The library predefines a modest number of datatypes. For details, read <a
- * href="http://hdfgroup.org/HDF5/doc/Datatypes.html">The Datatype Interface (H5T).</a>
- * <p>
+ * The library predefines a modest number of datatypes. For details,
+ * read <a href="http://hdfgroup.org/HDF5/doc/Datatypes.html">The Datatype Interface (H5T).</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao

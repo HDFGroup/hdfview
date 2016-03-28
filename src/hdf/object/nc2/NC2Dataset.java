@@ -34,7 +34,6 @@ import ucar.nc2.Variable;
  * The library predefines a modest number of datatypes. For details, read <a
  * href="http://hdfgroup.org/HDF5/doc/Datatypes.html"> The Datatype Interface
  * (H5T)</a>
- * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -52,7 +51,6 @@ public class NC2Dataset extends ScalarDS {
 
     /**
      * Constructs an NC2Dataset object with specific netcdf variable.
-     * <p>
      *
      * @param fileFormat
      *            the netcdf file.

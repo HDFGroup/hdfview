@@ -40,7 +40,7 @@ import hdf.object.HObject;
  * For more information on HDF5 Groups,
  *
  * @see <a href="http://hdfgroup.org/HDF5/doc/UG/">HDF5 User's Guide</a>
- *      <p>
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
