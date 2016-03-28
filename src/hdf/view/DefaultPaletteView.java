@@ -186,7 +186,7 @@ public class DefaultPaletteView extends Dialog {
         paletteComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
         paletteComposite.setLayoutData(new RowData());
         
-        choicePalette = new Combo(paletteComposite, SWT.SINGLE);
+        choicePalette = new Combo(paletteComposite, SWT.SINGLE | SWT.READ_ONLY);
         choicePalette.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 int idx = choicePalette.getSelectionIndex();

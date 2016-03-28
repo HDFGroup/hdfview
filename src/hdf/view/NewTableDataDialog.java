@@ -146,7 +146,7 @@ public class NewTableDataDialog extends Dialog {
     	
     	new Label(fieldComposite, SWT.LEFT).setText("Parent group: ");
     	
-    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN);
+    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
     	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	parentChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -183,14 +183,18 @@ public class NewTableDataDialog extends Dialog {
     	
     	new Label(fieldComposite, SWT.LEFT).setText("Import template: ");
     	
-    	templateChoice = new Combo(fieldComposite, SWT.DROP_DOWN);
+    	templateChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
     	templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	templateChoice.setItems(compoundDSList.toArray(new String[0]));
     	templateChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
     			
     		}
     	});
+    	
+    	Iterator<Object> it = compoundDSList.iterator();
+    	while(it.hasNext()) {
+    		templateChoice.add(((CompoundDS) it.next()).getName());
+    	}
     	
     	
     	// Create Dataspace region
@@ -205,7 +209,7 @@ public class NewTableDataDialog extends Dialog {
     	
     	new Label(dataspaceGroup, SWT.LEFT).setText("Max size (-1 for unlimited)");
     	
-    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN);
+    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	rankChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -356,7 +360,7 @@ public class NewTableDataDialog extends Dialog {
     	
     	new Label(layoutGroup, SWT.LEFT).setText("Level: ");
     	
-    	compressionLevel = new Combo(layoutGroup, SWT.DROP_DOWN);
+    	compressionLevel = new Combo(layoutGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	compressionLevel.setEnabled(false);
     	

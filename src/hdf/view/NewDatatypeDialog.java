@@ -114,7 +114,7 @@ public class NewDatatypeDialog extends Dialog {
     	label = new Label(fieldComposite, SWT.LEFT);
     	label.setText("Parent Group: ");
     	
-    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
+    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
     	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	parentChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -166,7 +166,7 @@ public class NewDatatypeDialog extends Dialog {
     	checkUnsigned.setText("Unsigned");
     	checkUnsigned.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	
-    	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	classChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -238,7 +238,7 @@ public class NewDatatypeDialog extends Dialog {
             classChoice.add("VLEN_STRING");
     	}
     	
-    	sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	sizeChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -259,7 +259,7 @@ public class NewDatatypeDialog extends Dialog {
         sizeChoice.add("32");
         sizeChoice.add("64");
     	
-    	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	endianChoice.setEnabled(isH5);
     	

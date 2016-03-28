@@ -628,39 +628,7 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(!dataset.getFileFormat().isReadOnly());
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
-                    showError("No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
-                }
-
-                TreeView treeView = viewer.getTreeView();
-                TreeItem item = treeView.findTreeItem(dataset);
-                Group pGroup = (Group) item.getParentItem().getData();
-                HObject root = dataset.getFileFormat().getRootObject();
-
-                if (root == null) return;
-
-                Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
-                Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
-                
-                while (it.hasNext()) {
-                    list.add(it.next());
-                }
-
-                //NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, );
-                //dialog.open();
-
-                //HObject obj = (HObject) dialog.getObject();
-                //if (obj != null) {
-                //    Group pgroup = dialog.getParentGroup();
-                //    try {
-                //        treeView.addObject(obj, pgroup);
-                //    }
-                //    catch (Exception ex) {
-                //        log.debug("Write selection to image: ", ex);
-                //    }
-                //}
-
-                list.setSize(0);
+                writeSelectionToImage();
             }
         });
         rotateRelatedItems.add(item);
@@ -2294,6 +2262,43 @@ public class DefaultImageView implements ImageView {
         dataRange[1] = newRange[1];
     }
     
+    private void writeSelectionToImage() {
+    	if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
+            showError("No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
+            return;
+        }
+
+        TreeView treeView = viewer.getTreeView();
+        TreeItem item = treeView.findTreeItem(dataset);
+        Group pGroup = (Group) item.getParentItem().getData();
+        HObject root = dataset.getFileFormat().getRootObject();
+
+        if (root == null) return;
+
+        Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
+        Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
+        
+        while (it.hasNext()) {
+            list.add(it.next());
+        }
+
+        NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, this);
+        dialog.open();
+
+        HObject obj = (HObject) dialog.getObject();
+        if (obj != null) {
+            Group pgroup = dialog.getParentGroup();
+            try {
+                treeView.addObject(obj, pgroup);
+            }
+            catch (Exception ex) {
+                log.debug("Write selection to image: ", ex);
+            }
+        }
+
+        list.setSize(0);
+    }
+    
     private void showError(String errorMsg, String title) {
         MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
         error.setText(title);
@@ -2443,7 +2448,6 @@ public class DefaultImageView implements ImageView {
             super(parent, style);
 
             image = img;
-            //imageSize = new Dimension(image.getWidth(this), image.getHeight(this));
             imageSize = new Dimension(image.getWidth(null), image.getHeight(null));
             
             originalSize = imageSize;
@@ -2456,16 +2460,16 @@ public class DefaultImageView implements ImageView {
                 @Override
                 public void mouseMove(MouseEvent e) {
                 	// don't update too often.
-            		try {
+            		/*try {
             			Thread.sleep(20);
             		}
             		catch (Exception ex) {
             			log.debug("thread sleep:", ex);
-            		}
+            		}*/
                 	
                 	currentPosition = new Point(e.x, e.y);
                 	
-                	if(e.button == SWT.BUTTON1) {
+                	if((e.stateMask & SWT.BUTTON1) != 0) {
                 		// If a drag event has occured, draw a selection Rectangle
                     	if((e.stateMask & SWT.SHIFT) != 0) {
                     		int x0 = Math.max(0, Math.min(startPosition.x,
@@ -2486,8 +2490,6 @@ public class DefaultImageView implements ImageView {
                 			originalSelectedArea.setBounds((int) (x0 * ratio),
                 					(int) (y0 * ratio), (int) (w * ratio),
                 					(int) (h * ratio));
-
-                			//redraw();
                     	} else {
                     		if(hbar != null) {
                     			if(hbar.isVisible()) {
@@ -2503,6 +2505,8 @@ public class DefaultImageView implements ImageView {
                     			}
                     		}
                     	}
+                    	
+                    	redraw();
                 	}
                 	
                 	if(showValues) {
@@ -2542,10 +2546,9 @@ public class DefaultImageView implements ImageView {
                     
                     // Single mouse click
                     if(e.count == 1) {
-                    	
                         startPosition = new Point(e.x, e.y);
                         
-                        selectedArea.setBounds(startPosition.x, startPosition.y , 0, 0);
+                        //selectedArea.setBounds(startPosition.x, startPosition.y , 0, 0);
                         
                         if (hbar.isVisible()) {
                             hbar.setSelection(startPosition.x - scrollDim.x / 2);

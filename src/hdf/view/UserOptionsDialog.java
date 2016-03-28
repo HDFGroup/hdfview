@@ -465,7 +465,7 @@ public class UserOptionsDialog extends Dialog {
         new Label(textFontGroup, SWT.RIGHT).setText("Font Size: ");
 
         String[] fontSizeChoices = { "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "48" };
-        fontSizeChoice = new Combo(textFontGroup, SWT.SINGLE);
+        fontSizeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
         fontSizeChoice.setItems(fontSizeChoices);
         fontSizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
@@ -481,7 +481,7 @@ public class UserOptionsDialog extends Dialog {
         String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         String fname = ViewProperties.getFontType();
 
-        fontTypeChoice = new Combo(textFontGroup, SWT.SINGLE);
+        fontTypeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
         fontTypeChoice.setItems(fontNames);
         fontTypeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -559,7 +559,7 @@ public class UserOptionsDialog extends Dialog {
         String[] imageOriginChoices = { ViewProperties.ORIGIN_UL, ViewProperties.ORIGIN_LL, ViewProperties.ORIGIN_UR,
                 ViewProperties.ORIGIN_LR };
 
-        imageOriginChoice = new Combo(imageGroup, SWT.SINGLE);
+        imageOriginChoice = new Combo(imageGroup, SWT.SINGLE | SWT.READ_ONLY);
         imageOriginChoice.setItems(imageOriginChoices);
         imageOriginChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
@@ -609,7 +609,7 @@ public class UserOptionsDialog extends Dialog {
         new Label(dataGroup, SWT.RIGHT).setText("Index Base: ");
 
         String[] indexBaseChoices = { "0-based", "1-based" };
-        indexBaseChoice = new Combo(dataGroup, SWT.SINGLE);
+        indexBaseChoice = new Combo(dataGroup, SWT.SINGLE | SWT.READ_ONLY);
         indexBaseChoice.setItems(indexBaseChoices);
         indexBaseChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -624,7 +624,8 @@ public class UserOptionsDialog extends Dialog {
 
         String[] delimiterChoices = { ViewProperties.DELIMITER_TAB, ViewProperties.DELIMITER_COMMA,
                 ViewProperties.DELIMITER_SPACE, ViewProperties.DELIMITER_COLON, ViewProperties.DELIMITER_SEMI_COLON };
-        delimiterChoice = new Combo(dataGroup, SWT.SINGLE);
+        
+        delimiterChoice = new Combo(dataGroup, SWT.SINGLE | SWT.READ_ONLY);
         delimiterChoice.setItems(delimiterChoices);
         delimiterChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -722,7 +723,7 @@ public class UserOptionsDialog extends Dialog {
         treeViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         treeViewGroup.setText("TreeView");
 
-        choiceTreeView = new Combo(treeViewGroup, SWT.SINGLE);
+        choiceTreeView = new Combo(treeViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choiceTreeView.setItems(treeViews.toArray(new String[0]));
         choiceTreeView.select(0);
 
@@ -731,7 +732,7 @@ public class UserOptionsDialog extends Dialog {
         metadataViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         metadataViewGroup.setText("MetaDataView");
 
-        choiceMetaDataView = new Combo(metadataViewGroup, SWT.SINGLE);
+        choiceMetaDataView = new Combo(metadataViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choiceMetaDataView.setItems(metaDataViews.toArray(new String[0]));
         choiceMetaDataView.select(0);
 
@@ -740,7 +741,7 @@ public class UserOptionsDialog extends Dialog {
         textViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         textViewGroup.setText("TextView");
 
-        choiceTextView = new Combo(textViewGroup, SWT.SINGLE);
+        choiceTextView = new Combo(textViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choiceTextView.setItems(textViews.toArray(new String[0]));
         choiceTextView.select(0);
 
@@ -749,7 +750,7 @@ public class UserOptionsDialog extends Dialog {
         tableViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         tableViewGroup.setText("TableView");
 
-        choiceTableView = new Combo(tableViewGroup, SWT.SINGLE);
+        choiceTableView = new Combo(tableViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choiceTableView.setItems(tableViews.toArray(new String[0]));
         choiceTableView.select(0);
 
@@ -758,7 +759,7 @@ public class UserOptionsDialog extends Dialog {
         imageViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         imageViewGroup.setText("ImageView");
 
-        choiceImageView = new Combo(imageViewGroup, SWT.SINGLE);
+        choiceImageView = new Combo(imageViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choiceImageView.setItems(imageViews.toArray(new String[0]));
         choiceImageView.select(0);
 
@@ -767,7 +768,7 @@ public class UserOptionsDialog extends Dialog {
         paletteViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         paletteViewGroup.setText("PaletteView");
 
-        choicePaletteView = new Combo(paletteViewGroup, SWT.SINGLE);
+        choicePaletteView = new Combo(paletteViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choicePaletteView.setItems(paletteViews.toArray(new String[0]));
         choicePaletteView.select(0);
 
