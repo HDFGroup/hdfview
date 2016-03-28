@@ -65,7 +65,7 @@ import hdf.object.ScalarDS;
  * selection of subset, display type (image, text, or spreadsheet).
  * 
  * @author Jordan T. Henderson
- * @version 2.4 1/28/2016
+ * @version 2.4 3/26/2016
  */
 public class DataOptionDialog extends Dialog {
     
@@ -1548,9 +1548,6 @@ public class DataOptionDialog extends Dialog {
             	
             	@Override
             	public void mouseUp(MouseEvent e) {
-            		System.out.println(startPosition.y);
-            		System.out.println(e.y);
-            		
             		if(startPosition.x == e.x && startPosition.y == e.y) {
             			selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
             		    redraw();
