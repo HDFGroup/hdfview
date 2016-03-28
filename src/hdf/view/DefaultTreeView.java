@@ -1288,6 +1288,8 @@ public class DefaultTreeView implements TreeView {
             shell.getDisplay().beep();
             showError("Rename Object", ex.getMessage());
         }
+        
+        selectedItem.setText(newName);
     }
 
     private void removeSelectedObjects() {
@@ -2566,7 +2568,7 @@ public class DefaultTreeView implements TreeView {
             theClass = ViewProperties.loadExtClass().loadClass(className);
         }
 
-        Object[] initargs = { shell, dataObject };
+        Object[] initargs = { shell, viewer, dataObject };
         MetaDataView dataView = (MetaDataView) Tools.newInstance(theClass, initargs);
 
         return dataView;

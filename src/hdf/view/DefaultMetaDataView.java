@@ -73,6 +73,8 @@ public class DefaultMetaDataView implements MetaDataView {
 
 	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
 
+	private ViewManager viewer;
+	
 	/** The HDF data object */
 	private HObject hObject;
 
@@ -92,7 +94,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
 	private int[] libver;
 
-	public DefaultMetaDataView(Shell parent, HObject theObj) {
+	public DefaultMetaDataView(Shell parent, ViewManager theView, HObject theObj) {
 		log.trace("DefaultMetaDataView: start");
 
 		shell = new Shell(parent, SWT.SHELL_TRIM);
@@ -100,6 +102,8 @@ public class DefaultMetaDataView implements MetaDataView {
 		
 		shell.setImage(ViewProperties.getHdfIcon());
 		shell.setLayout(new GridLayout(1, true));
+		
+		viewer = theView;
 
 		hObject = theObj;
 		fileFormat = hObject.getFileFormat();
@@ -347,9 +351,7 @@ public class DefaultMetaDataView implements MetaDataView {
     private void updateAttributeValue(String newValue, int row, int col) {
         log.trace("updateAttributeValue:start value={}[{},{}]", newValue, row, col);
 
-        String attrName = (String) attrTable.getItem(row).getText();
-        System.out.println(attrName);
-        //String attrName = (String) attrTable.getValueAt(row, 0);
+        String attrName = (String) attrTable.getItem(row).getText(0);
         List<?> attrList = null;
         try {
             attrList = hObject.getMetadata();
@@ -544,7 +546,7 @@ public class DefaultMetaDataView implements MetaDataView {
             }
 
             // update the attribute table
-            //attrTable.setValueAt(attr.toString(", "), row, 1);
+            attrTable.getItem(row).setText(1, attr.toString(", "));
         }
 
         if ((col == 0) && isH5) { // To change attribute name
@@ -561,7 +563,7 @@ public class DefaultMetaDataView implements MetaDataView {
             }
 
             // update the attribute table
-            //attrTable.setValueAt(newValue, row, 0);
+            attrTable.getItem(row).setText(0, newValue);
         }
         if (hObject instanceof ScalarDS) {
             ScalarDS ds = (ScalarDS) hObject;
@@ -624,8 +626,7 @@ public class DefaultMetaDataView implements MetaDataView {
         int blkSize0 = 0;
         if (userBlock != null) {
             blkSize0 = userBlock.length;
-            // The super block space is allocated by offset 0, 512, 1024, 2048,
-            // etc
+            // The super block space is allocated by offset 0, 512, 1024, 2048, etc
             if (blkSize0 > 0) {
                 int offset = 512;
                 while (offset < blkSize0) {
@@ -747,7 +748,13 @@ public class DefaultMetaDataView implements MetaDataView {
             }
 
             // close the file
-            ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Close file");
+            TreeView view = ((HDFView) viewer).getTreeView();
+            
+            try {
+                view.closeFile((view.getSelectedFile()));
+            } catch (Exception ex) {
+            	log.debug("Error closing file {}", fin);
+            }
 
             if (DefaultFileFilter.setHDF5UserBlock(fin, fout, buf)) {
                 if (op == SWT.NO) {
@@ -778,7 +785,12 @@ public class DefaultMetaDataView implements MetaDataView {
 
             // reopen the file
             shell.dispose();
-            e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Open file://" + fin);
+            
+            try {
+                view.openFile(fin, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
+            } catch (Exception ex) {
+            	log.debug("Error opening file {}", fin);
+            }
         }
     }
 	
@@ -1359,6 +1371,23 @@ public class DefaultMetaDataView implements MetaDataView {
         // Only allow editing of attribute name and value
         attrTable.addListener(SWT.MouseDoubleClick, attrTableCellEditor);
         
+        attrTable.addListener(SWT.MouseDown, new Listener() {
+        	public void handleEvent(Event e) {
+        		Point location = new Point(e.x, e.y);
+        		TableItem item = attrTable.getItem(location);
+        		
+        		if(item == null) return;
+        		
+        		for(int i = 0; i < attrTable.getColumnCount(); i++) {
+        			Rectangle rect = item.getBounds(i);
+        			
+        		    if(rect.contains(location)) {
+        		    	attrContentArea.setText(item.getText(i));
+        		    }
+        		}
+        	}
+        });
+        
         for(int i = 0; i < columnNames.length; i++) {
         	TableColumn column = new TableColumn(attrTable, SWT.NONE);
         	column.setText(columnNames[i]);
@@ -1416,7 +1445,6 @@ public class DefaultMetaDataView implements MetaDataView {
         attrContentArea.setEditable(false);
         
         
-        
         sashForm.setWeights(new int[] {1, 3});
         
         log.trace("createAttributesComposite: finish");
@@ -1439,15 +1467,16 @@ public class DefaultMetaDataView implements MetaDataView {
 		
 		String[] displayChoices = { "Text", "Binary", "Octal", "Hexadecimal", "Decimal" };
 		
-		Combo userBlockDisplayChoice = new Combo(composite, SWT.SINGLE);
+		Combo userBlockDisplayChoice = new Combo(composite, SWT.SINGLE | SWT.READ_ONLY);
 		userBlockDisplayChoice.setItems(displayChoices);
 		userBlockDisplayChoice.select(0);
 		userBlockDisplayChoice.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				Combo source = (Combo) e.item;
+				Combo source = (Combo) e.widget;
 				int type = 0;
-	            String typeName = (String) source.getItem(source.getSelectionIndex());
-	            System.out.println(typeName);
+				
+				String typeName = (String) source.getItem(source.getSelectionIndex());
+				
 	            jamButton.setEnabled(false);
 	            userBlockArea.setEditable(false);
 
@@ -1479,20 +1508,11 @@ public class DefaultMetaDataView implements MetaDataView {
 		
 		Label sizeLabel = new Label(composite, SWT.RIGHT);
 		sizeLabel.setText("Header Size (Bytes): 0");
-		
-		int headSize = 0;
-        if (userBlock != null) {
-            headSize = showUserBlockAs(0);
-            sizeLabel.setText("Header Size (Bytes): " + headSize);
-        }
-        else {
-            userBlockDisplayChoice.setEnabled(false);
-        }
         
-        Button writeButton = new Button(composite, SWT.PUSH);
-        writeButton.setText("Save User Block");
-        writeButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-        writeButton.addSelectionListener(new SelectionAdapter() {
+        jamButton = new Button(composite, SWT.PUSH);
+        jamButton.setText("Save User Block");
+        jamButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        jamButton.addSelectionListener(new SelectionAdapter() {
         	public void widgetSelected(SelectionEvent e) {
         		writeUserBlock();
         	}
@@ -1506,6 +1526,15 @@ public class DefaultMetaDataView implements MetaDataView {
 		userBlockArea = new Text(userBlockScroller, SWT.MULTI | SWT.WRAP);
 		userBlockArea.setEditable(true);
 		userBlockScroller.setContent(userBlockArea);
+		
+		int headSize = 0;
+        if (userBlock != null) {
+            headSize = showUserBlockAs(0);
+            sizeLabel.setText("Header Size (Bytes): " + headSize);
+        }
+        else {
+            userBlockDisplayChoice.setEnabled(false);
+        }
 		
 		log.trace("createUserBlockComposite: finish");
 		
@@ -1521,6 +1550,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
 			Rectangle clientArea = attrTable.getClientArea();
 			Point pt = new Point(event.x, event.y);
+			
 			int index = attrTable.getTopIndex();
 
 			while (index < attrTable.getItemCount()) {
@@ -1531,7 +1561,14 @@ public class DefaultMetaDataView implements MetaDataView {
 					Rectangle rect = item.getBounds(i);
 
 					if (rect.contains(pt)) {
+						if (!(i == 1 || (isH5 && (i == 0)))) {
+							// Only attribute value and name can be changed
+							return;
+						}
+						
 						final int column = i;
+						final int row = index;
+						
 						final Text text = new Text(attrTable, SWT.NONE);
 
 						Listener textListener = new Listener() {
@@ -1545,6 +1582,7 @@ public class DefaultMetaDataView implements MetaDataView {
 									switch (e.detail) {
 									case SWT.TRAVERSE_RETURN:
 										item.setText(column, text.getText());
+										updateAttributeValue(text.getText(), row, column);
 									case SWT.TRAVERSE_ESCAPE:
 										text.dispose();
 										e.doit = false;
@@ -1554,6 +1592,7 @@ public class DefaultMetaDataView implements MetaDataView {
 								}
 							}
 						};
+						
 						text.addListener(SWT.FocusOut, textListener);
 						text.addListener(SWT.Traverse, textListener);
 						editor.setEditor(text, item, i);
@@ -1561,13 +1600,16 @@ public class DefaultMetaDataView implements MetaDataView {
 						text.selectAll();
 						text.setFocus();
 						return;
+						
 					}
+					
 					if (!visible && rect.intersects(clientArea)) {
 						visible = true;
 					}
 				}
-				if (!visible)
-					return;
+				
+				if (!visible) return;
+				
 				index++;
 			}
 		}

@@ -130,7 +130,7 @@ public class ImageConversionDialog extends Dialog {
     			fChooser.setFilterPath(currentDir);
     			
     			if(isConvertedFromImage)
-//    			    fChooser.setFileFilter(DefaultFileFilter.getImageFileFilter());
+    			    //fChooser.setFileFilter(DefaultFileFilter.getImageFileFilter());
     				
     			if(fChooser.open() == null) {
     				return;

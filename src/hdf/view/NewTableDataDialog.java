@@ -379,7 +379,6 @@ public class NewTableDataDialog extends Dialog {
     	
     	nFieldBox = new Combo(propertiesGroup, SWT.DROP_DOWN);
     	nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	//nFieldBox.setEditable(true);
     	nFieldBox.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
     			int n = 0;

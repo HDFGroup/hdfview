@@ -614,6 +614,11 @@ public class HDFView implements ViewManager, DropTargetListener {
                     return;
                 }
                 
+                if (treeView.getSelectedFile() == null) {
+                	showError("No files currently selected.", shell.getText());
+                	return;
+                }
+                
                 // Save what has been changed in memory into file
                 try {
                     FileFormat file = treeView.getSelectedFile();
@@ -623,19 +628,21 @@ public class HDFView implements ViewManager, DropTargetListener {
                     TextView textView = null;
                     FileFormat theFile = null;
                     
-                    for (Iterator<Shell> i = views.iterator(); i.hasNext(); ) {
-                        theView = i.next();
-                        
-                        if (theView instanceof TableView) {
-                            tableView = (TableView) theView;
-                            theFile = tableView.getDataObject().getFileFormat();
-                            if (file.equals(theFile)) tableView.updateValueInFile();
-                        }
-                        else if (theView instanceof TextView) {
-                            textView = (TextView) theView;
-                            theFile = textView.getDataObject().getFileFormat();
-                            if (file.equals(theFile)) textView.updateValueInFile();
-                        }
+                    if (views != null) {
+                    	for (Iterator<Shell> i = views.iterator(); i.hasNext(); ) {
+                    		theView = i.next();
+
+                    		if (theView instanceof TableView) {
+                    			tableView = (TableView) theView;
+                    			theFile = tableView.getDataObject().getFileFormat();
+                    			if (file.equals(theFile)) tableView.updateValueInFile();
+                    		}
+                    		else if (theView instanceof TextView) {
+                    			textView = (TextView) theView;
+                    			theFile = textView.getDataObject().getFileFormat();
+                    			if (file.equals(theFile)) textView.updateValueInFile();
+                    		}
+                    	}
                     }
                 } catch (Exception ex) {
                     display.beep();
@@ -651,6 +658,11 @@ public class HDFView implements ViewManager, DropTargetListener {
                 if (treeView.getCurrentFiles().size() <= 0) {
                     showError("No files currently open.", shell.getText());
                     return;
+                }
+                
+                if (treeView.getSelectedFile() == null) {
+                	showError("No files currently selected.", shell.getText());
+                	return;
                 }
                 
                 try {

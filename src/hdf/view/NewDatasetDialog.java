@@ -351,11 +351,9 @@ public class NewDatasetDialog extends Dialog {
     		public void widgetSelected(SelectionEvent e) {
     			int rank = rankChoice.getSelectionIndex() + 1;
                 String currentSizeStr = "1";
-                String maxSizeStr = "0";
 
                 for (int i = 1; i < rank; i++) {
                     currentSizeStr += " x 1";
-                    maxSizeStr += " x 0";
                 }
 
                 currentSizeField.setText(currentSizeStr);
@@ -714,7 +712,6 @@ public class NewDatasetDialog extends Dialog {
         long dims[], maxdims[] = null, chunks[] = null;
 
         name = nameField.getText().trim();
-        System.out.println(name);
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
