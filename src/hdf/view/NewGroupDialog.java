@@ -137,7 +137,7 @@ public class NewGroupDialog extends Dialog {
         parentGroupLabel.setText("Parent group:");
         parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
         
-        parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
+        parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -393,7 +393,7 @@ public class NewGroupDialog extends Dialog {
         label.setText("Order Flags: ");
         label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        orderFlags = new Combo(creationOrderComposite, SWT.DROP_DOWN);
+        orderFlags = new Combo(creationOrderComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
         orderFlags.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         orderFlags.add("Tracked");
         orderFlags.add("Tracked+Indexed");

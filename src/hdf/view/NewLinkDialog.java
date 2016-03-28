@@ -131,7 +131,7 @@ public class NewLinkDialog extends Dialog {
     	label = new Label(content, SWT.LEFT);
     	label.setText("Parent group: ");
     	
-    	parentChoice = new Combo(content, SWT.DROP_DOWN | SWT.BORDER);
+    	parentChoice = new Combo(content, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
     	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	parentChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {

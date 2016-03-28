@@ -158,7 +158,7 @@ public class NewAttributeDialog extends Dialog {
     		label.setText("");
     	}
     	
-    	classChoice = new Combo(optionsComposite, SWT.DROP_DOWN);
+    	classChoice = new Combo(optionsComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
     	classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	classChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -230,7 +230,7 @@ public class NewAttributeDialog extends Dialog {
             classChoice.add("VLEN_STRING");
         }
     	
-    	sizeChoice = new Combo(optionsComposite, SWT.DROP_DOWN);
+    	sizeChoice = new Combo(optionsComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
     	sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	sizeChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -276,7 +276,7 @@ public class NewAttributeDialog extends Dialog {
     	label = new Label(content, SWT.LEFT);
     	label.setText("Object List: ");
     	
-    	objChoice = new Combo(content, SWT.DROP_DOWN);
+    	objChoice = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
     	objChoice.setEnabled(false);
     	objChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {

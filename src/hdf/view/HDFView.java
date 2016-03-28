@@ -340,7 +340,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         
         mainWindow.setLocation(x, y);
         mainWindow.setMinimumSize(winDim.x / 2, winDim.y / 2);
-        mainWindow.setSize(winDim.x, winDim.y);
+        mainWindow.setSize(winDim.x + 200, winDim.y);
         
         // Display the window
         mainWindow.open();

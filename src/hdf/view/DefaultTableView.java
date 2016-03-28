@@ -4092,7 +4092,7 @@ public class DefaultTableView implements TableView {
             int start = (int) startArray[selectedIndex[0]];
             int stride = (int) strideArray[selectedIndex[0]];
         	
-        	colBox = new Combo(content, SWT.SINGLE);
+        	colBox = new Combo(content, SWT.SINGLE | SWT.READ_ONLY);
         	GridData colBoxData = new GridData(SWT.FILL, SWT.FILL, true, false);
         	colBoxData.minimumWidth = 100;
         	colBox.setLayoutData(colBoxData);
@@ -4103,7 +4103,7 @@ public class DefaultTableView implements TableView {
                 colBox.add("column " + columnHeaderDataProvider.getDataValue(i, 0));
             }
         	
-        	rowBox = new Combo(content, SWT.SINGLE);
+        	rowBox = new Combo(content, SWT.SINGLE | SWT.READ_ONLY);
         	GridData rowBoxData = new GridData(SWT.FILL, SWT.FILL, true, false);
         	rowBoxData.minimumWidth = 100;
         	rowBox.setLayoutData(rowBoxData);

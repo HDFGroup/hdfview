@@ -156,7 +156,7 @@ public class NewDatasetDialog extends Dialog {
     	Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
     	parentGroupLabel.setText("Parent group: ");
     	
-    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER);
+    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
     	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	parentChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -207,7 +207,7 @@ public class NewDatasetDialog extends Dialog {
     	checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
     	checkUnsigned.setText("Unsigned");
     	
-    	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	classChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -286,7 +286,7 @@ public class NewDatasetDialog extends Dialog {
             classChoice.add("VLEN_STRING");
         }
 
-    	sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	sizeChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -307,7 +307,7 @@ public class NewDatasetDialog extends Dialog {
         sizeChoice.add("32");
         sizeChoice.add("64");
     	
-    	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN);
+    	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	endianChoice.setEnabled(isH5);
     	
@@ -345,7 +345,7 @@ public class NewDatasetDialog extends Dialog {
     	label = new Label(dataspaceGroup, SWT.LEFT);
     	label.setText("");
     	
-    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN);
+    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	rankChoice.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
@@ -500,7 +500,7 @@ public class NewDatasetDialog extends Dialog {
     		}
     	});
     	
-    	compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN);
+    	compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
     	compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	
     	for (int i = 0; i < 10; i++) {
