@@ -48,8 +48,7 @@ import org.eclipse.swt.widgets.Text;
 public class UserOptionsDialog extends Dialog {
     private Shell shell;
 
-    private String                H4toH5Path;
-    private Text                  H4toH5Field, UGField, workField, fileExtField, maxMemberField, startMemberField;
+    private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField;
     private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
     private Combo                 choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView, choiceImageView, choicePaletteView;
     private String                rootDir, workDir;
@@ -208,7 +207,8 @@ public class UserOptionsDialog extends Dialog {
         return isWorkDirChanged;
     }
 
-    private void setUserOptions() {
+    @SuppressWarnings("unchecked")
+	private void setUserOptions() {
         String UGPath = UGField.getText();
         if ((UGPath != null) && (UGPath.length() > 0)) {
             UGPath = UGPath.trim();

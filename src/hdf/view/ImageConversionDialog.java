@@ -129,17 +129,17 @@ public class ImageConversionDialog extends Dialog {
     			FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
     			fChooser.setFilterPath(currentDir);
     			
-    			if(isConvertedFromImage)
+    			if(isConvertedFromImage) {
     			    //fChooser.setFileFilter(DefaultFileFilter.getImageFileFilter());
+    			}
     				
-    			if(fChooser.open() == null) {
+    		    String filename = fChooser.open();
+    			
+    			if(filename == null) {
     				return;
     			}
 
-                File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
-                if (chosenFile == null) {
-                    return;
-                }
+                File chosenFile = new File(filename);
 
                 currentDir = chosenFile.getParent();
                 srcFileField.setText(chosenFile.getAbsolutePath());
@@ -159,16 +159,13 @@ public class ImageConversionDialog extends Dialog {
     		public void widgetSelected(SelectionEvent e) {
     			FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
     			
-    			if(fChooser.open() == null) {
+    			String filename = fChooser.open();
+    			
+    			if(filename == null) {
     				return;
     			}
     			
-    			File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
-                if (chosenFile == null) {
-                    return;
-                }
-
-                dstFileField.setText(chosenFile.getAbsolutePath());
+                dstFileField.setText(filename);
     		}
     	});
     	

@@ -1240,7 +1240,6 @@ public class DefaultImageView implements ImageView {
         }
 
         long[] start = dataset.getStartDims();
-        long[] dims = dataset.getDims();
         long idx = start[selectedIndex[2]];
         if (idx == 0) {
             return; // current page is the first page
@@ -1290,7 +1289,6 @@ public class DefaultImageView implements ImageView {
         }
 
         long[] start = dataset.getStartDims();
-        long[] dims = dataset.getDims();
         long idx = start[selectedIndex[2]];
         if (idx == 0) {
             return; // current page is the first page
@@ -1336,7 +1334,6 @@ public class DefaultImageView implements ImageView {
         isTrueColor = dataset.isTrueColor();
         is3D = (dataset.getRank() > 2) && !((ScalarDS) dataset).isTrueColor();
 
-        String strValue = null;
         try {
             if (isTrueColor) {
                 getTrueColorImage();
@@ -1768,6 +1765,7 @@ public class DefaultImageView implements ImageView {
         
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFilterPath(dataset.getFile());
+        fChooser.setOverwrite(true);
         
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
             //fChooser.setFileFilter(DefaultFileFilter.getFileFilterJPEG());
@@ -1789,24 +1787,13 @@ public class DefaultImageView implements ImageView {
         File chosenFile = new File(dataset.getName() + "." + type.toLowerCase());
         fChooser.setFileName(chosenFile.getName());
         
-        if(fChooser.open() == null) {
+        String filename = fChooser.open();
+        
+        if(filename == null) {
             return;
         }
         
-        chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
-        if(chosenFile == null) {
-            return;
-        }
-        
-        if(chosenFile.exists()) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText(shell.getText());
-            confirm.setMessage("File exists. Do you want to replace it ?");
-            
-            if(confirm.open() == SWT.NO) {
-                return;
-            }
-        }
+        chosenFile = new File(filename);
         
         BufferedImage bi = null;
         try {
