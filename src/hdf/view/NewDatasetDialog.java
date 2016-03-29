@@ -50,18 +50,18 @@ import hdf.object.ScalarDS;
 /**
  * NewDatasetDialog shows a message dialog requesting user input for creating a
  * new HDF4/5 dataset.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 12/31/2015
  */
 public class NewDatasetDialog extends Dialog {
 
-	private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 
-	private Shell             shell;
-	
-	private String            maxSize;
-	
+    private Shell             shell;
+
+    private String            maxSize;
+
     private Text              nameField, currentSizeField, chunkSizeField,
                               stringLengthField, fillValueField;
 
@@ -76,7 +76,7 @@ public class NewDatasetDialog extends Dialog {
 
     /** A list of current groups */
     private List<Group>       groupList;
-    
+
     private List<?>           objList;
 
     private HObject           newObject;
@@ -86,10 +86,10 @@ public class NewDatasetDialog extends Dialog {
 
     private final DataView    dataView;
 
-	/**
+    /**
      * Constructs a NewDatasetDialog with specified list of possible parent
      * groups.
-     * 
+     *
      * @param parent
      *            the parent shell of the dialog
      * @param pGroup
@@ -97,73 +97,75 @@ public class NewDatasetDialog extends Dialog {
      * @param objs
      *            the list of all objects.
      */
-	public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
-		super(parent, SWT.APPLICATION_MODAL);
-		
+    public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
+        super(parent, SWT.APPLICATION_MODAL);
+
         parentGroup = pGroup;
         newObject = null;
         dataView = null;
-        
+
         objList = objs;
 
         fileFormat = pGroup.getFileFormat();
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-	}
-	
-	/**
+    }
+
+    /**
      * Constructs a NewDatasetDialog with specified list of possible parent
      * groups.
-     * 
+     *
      * @param parent
      *            the parent shell of the dialog
      * @param pGroup
      *            the parent group which the new group is added to.
      * @param objs
      *            the list of all objects.
+     * @param observer
+     *            the Dataview attached to this dialog.
      */
-	public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
+    public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         parentGroup = pGroup;
         newObject = null;
         dataView = observer;
-        
+
         objList = objs;
 
         fileFormat = pGroup.getFileFormat();
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-	}
-	
-	public void open() {
-		Shell parent = getParent();
-		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-    	shell.setText("New Dataset...");
-    	shell.setImage(ViewProperties.getHdfIcon());
-    	shell.setLayout(new GridLayout(1, true));
-    	
-    	
-    	// Create Dataset name / Parent Group region
-    	Composite fieldComposite = new Composite(shell, SWT.NONE);
-    	fieldComposite.setLayout(new GridLayout(2, false));
-    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	Label datasetNameLabel = new Label(fieldComposite, SWT.LEFT);
-    	datasetNameLabel.setText("Dataset name: ");
-    	
-    	nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
-    	parentGroupLabel.setText("Parent group: ");
-    	
-    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	parentChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
-    		}
-    	});
-    	
+    }
+
+    public void open() {
+        Shell parent = getParent();
+        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setText("New Dataset...");
+        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setLayout(new GridLayout(1, true));
+
+
+        // Create Dataset name / Parent Group region
+        Composite fieldComposite = new Composite(shell, SWT.NONE);
+        fieldComposite.setLayout(new GridLayout(2, false));
+        fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        Label datasetNameLabel = new Label(fieldComposite, SWT.LEFT);
+        datasetNameLabel.setText("Dataset name: ");
+
+        nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
+        parentGroupLabel.setText("Parent group: ");
+
+        parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+        parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        parentChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+            }
+        });
+
         groupList = new Vector<Group>();
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
@@ -180,38 +182,37 @@ public class NewDatasetDialog extends Dialog {
                 }
             }
         }
-        
+
         if (parentGroup.isRoot()) {
-        	parentChoice.select(parentChoice.indexOf(HObject.separator));
+            parentChoice.select(parentChoice.indexOf(HObject.separator));
         }
         else {
-        	parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
+            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
-        
-    	
+
         // Create Datatype region
-    	org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	datatypeGroup.setText("Datatype");
-    	datatypeGroup.setLayout(new GridLayout(4, true));
-    	datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	Label label = new Label(datatypeGroup, SWT.LEFT);
-    	label.setText("Datatype Class");
-    	
-    	label = new Label(datatypeGroup, SWT.LEFT);
-    	label.setText("Size (bits)");
-    	
-    	label = new Label(datatypeGroup, SWT.LEFT);
-    	label.setText("Byte Ordering");
-    	
-    	checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
-    	checkUnsigned.setText("Unsigned");
-    	
-    	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	classChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			int idx = classChoice.getSelectionIndex();
+        org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        datatypeGroup.setText("Datatype");
+        datatypeGroup.setLayout(new GridLayout(4, true));
+        datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        Label label = new Label(datatypeGroup, SWT.LEFT);
+        label.setText("Datatype Class");
+
+        label = new Label(datatypeGroup, SWT.LEFT);
+        label.setText("Size (bits)");
+
+        label = new Label(datatypeGroup, SWT.LEFT);
+        label.setText("Byte Ordering");
+
+        checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
+        checkUnsigned.setText("Unsigned");
+
+        classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        classChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                int idx = classChoice.getSelectionIndex();
                 sizeChoice.select(0);
                 endianChoice.select(0);
                 stringLengthField.setEnabled(false);
@@ -270,15 +271,15 @@ public class NewDatasetDialog extends Dialog {
                     checkUnsigned.setEnabled(false);
                     stringLengthField.setEnabled(false);
                 }
-    		}
-    	});
-    	
-    	classChoice.add("INTEGER");
+            }
+        });
+
+        classChoice.add("INTEGER");
         classChoice.add("FLOAT");
         classChoice.add("CHAR");
-        
+
         if(isH5) {
-        	classChoice.add("STRING");
+            classChoice.add("STRING");
             classChoice.add("REFERENCE");
             classChoice.add("ENUM");
             classChoice.add("VLEN_INTEGER");
@@ -286,70 +287,70 @@ public class NewDatasetDialog extends Dialog {
             classChoice.add("VLEN_STRING");
         }
 
-    	sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	sizeChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			if (classChoice.getSelectionIndex() == 0) {
+        sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        sizeChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                if (classChoice.getSelectionIndex() == 0) {
                     checkUnsigned.setEnabled(true);
                 }
-    		}
-    	});
-    	
-    	if(isH5) {
-    		sizeChoice.add("NATIVE");
-    	} else {
-    		sizeChoice.add("DEFAULT");
-    	}
-    	
+            }
+        });
+
+        if(isH5) {
+            sizeChoice.add("NATIVE");
+        } else {
+            sizeChoice.add("DEFAULT");
+        }
+
         sizeChoice.add("8");
         sizeChoice.add("16");
         sizeChoice.add("32");
         sizeChoice.add("64");
-    	
-    	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	endianChoice.setEnabled(isH5);
-    	
-    	if(isH5) {
-    		endianChoice.add("NATIVE");
+
+        endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        endianChoice.setEnabled(isH5);
+
+        if(isH5) {
+            endianChoice.add("NATIVE");
             endianChoice.add("LITTLE ENDIAN");
             endianChoice.add("BIG ENDIAN");
-    	} else {
-    		endianChoice.add("DEFAULT");
-    	}
-    	
-    	stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
-    	stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	stringLengthField.setText("String Length");
-    	stringLengthField.setEnabled(false);
-    	
-    	classChoice.select(0);
-    	sizeChoice.select(0);
-    	endianChoice.select(0);
-    	
-    	
-    	// Create Dataspace region
-    	org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	dataspaceGroup.setText("Dataspace");
-    	dataspaceGroup.setLayout(new GridLayout(3, true));
-    	dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	label = new Label(dataspaceGroup, SWT.LEFT);
-    	label.setText("No. of dimensions");
-    	
-    	label = new Label(dataspaceGroup, SWT.LEFT);
-    	label.setText("Current size");
-    	
-    	// Dummy label
-    	label = new Label(dataspaceGroup, SWT.LEFT);
-    	label.setText("");
-    	
-    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	rankChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			int rank = rankChoice.getSelectionIndex() + 1;
+        } else {
+            endianChoice.add("DEFAULT");
+        }
+
+        stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
+        stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        stringLengthField.setText("String Length");
+        stringLengthField.setEnabled(false);
+
+        classChoice.select(0);
+        sizeChoice.select(0);
+        endianChoice.select(0);
+
+
+        // Create Dataspace region
+        org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        dataspaceGroup.setText("Dataspace");
+        dataspaceGroup.setLayout(new GridLayout(3, true));
+        dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setText("No. of dimensions");
+
+        label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setText("Current size");
+
+        // Dummy label
+        label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setText("");
+
+        rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        rankChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                int rank = rankChoice.getSelectionIndex() + 1;
                 String currentSizeStr = "1";
 
                 for (int i = 1; i < rank; i++) {
@@ -375,10 +376,10 @@ public class NewDatasetDialog extends Dialog {
                 }
 
                 chunkSizeField.setText(chunkStr);
-    		}
-    	});
-    	
-    	for (int i = 1; i < 33; i++) {
+            }
+        });
+
+        for (int i = 1; i < 33; i++) {
             rankChoice.add(String.valueOf(i));
         }
         rankChoice.select(1);
@@ -386,15 +387,15 @@ public class NewDatasetDialog extends Dialog {
         currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
         currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         currentSizeField.setText("1 x 1");
-        
+
         Button setMaxSizeButton = new Button(dataspaceGroup, SWT.PUSH);
         setMaxSizeButton.setText("Set Max Size");
         setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 if (maxSize == null || maxSize.length() < 1)
-                	maxSize = currentSizeField.getText();
-        		
+                    maxSize = currentSizeField.getText();
+
                 String msg = new InputDialog(shell, "Set Max Size", "Enter max dimension sizes. \n"
                         + "Use \"unlimited\" for unlimited dimension size.\n\n" + "For example,\n" + "    200 x 100\n"
                         + "    100 x unlimited\n\n", maxSize).open();
@@ -405,40 +406,40 @@ public class NewDatasetDialog extends Dialog {
                     maxSize = msg;
 
                 checkMaxSize();
-        	}
+            }
         });
-        
-    	
+
+
         // Create Storage Properties region
-    	org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	storagePropertiesGroup.setText("Storage Properties");
-    	storagePropertiesGroup.setLayout(new GridLayout(5, true));
-    	storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	label = new Label(storagePropertiesGroup, SWT.LEFT);
-    	label.setText("Storage layout: ");
-    	
-    	checkContiguous = new Button(storagePropertiesGroup, SWT.RADIO);
-    	checkContiguous.setText("Contiguous");
-    	checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-    	checkContiguous.setSelection(true);
-    	checkContiguous.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			chunkSizeField.setEnabled(false);
-    		}
-    	});
-    	
-    	// Dummy label
-    	label = new Label(storagePropertiesGroup, SWT.LEFT);
-    	label.setText("");
-    	label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	checkChunked = new Button(storagePropertiesGroup, SWT.RADIO);
-    	checkChunked.setText("Chunked (size) ");
-    	checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-    	checkChunked.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			chunkSizeField.setEnabled(true);
+        org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        storagePropertiesGroup.setText("Storage Properties");
+        storagePropertiesGroup.setLayout(new GridLayout(5, true));
+        storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        label = new Label(storagePropertiesGroup, SWT.LEFT);
+        label.setText("Storage layout: ");
+
+        checkContiguous = new Button(storagePropertiesGroup, SWT.RADIO);
+        checkContiguous.setText("Contiguous");
+        checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkContiguous.setSelection(true);
+        checkContiguous.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                chunkSizeField.setEnabled(false);
+            }
+        });
+
+        // Dummy label
+        label = new Label(storagePropertiesGroup, SWT.LEFT);
+        label.setText("");
+        label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        checkChunked = new Button(storagePropertiesGroup, SWT.RADIO);
+        checkChunked.setText("Chunked (size) ");
+        checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkChunked.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                chunkSizeField.setEnabled(true);
                 String chunkStr = "";
                 StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
                 int rank = rankChoice.getSelectionIndex() + 1;
@@ -448,23 +449,23 @@ public class NewDatasetDialog extends Dialog {
                 }
                 chunkStr = chunkStr.substring(0, chunkStr.lastIndexOf('x'));
                 chunkSizeField.setText(chunkStr);
-    		}
-    	});
-    	
-    	chunkSizeField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
-    	chunkSizeField.setText("1 x 1");
-    	chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	chunkSizeField.setEnabled(false);
-    	
-    	label = new Label(storagePropertiesGroup, SWT.LEFT);
-    	label.setText("Compression: ");
-    	
-    	checkCompression = new Button(storagePropertiesGroup, SWT.CHECK);
-    	checkCompression.setText("gzip (level) ");
-    	checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-    	checkCompression.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			boolean isCompressed = checkCompression.getSelection();
+            }
+        });
+
+        chunkSizeField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
+        chunkSizeField.setText("1 x 1");
+        chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        chunkSizeField.setEnabled(false);
+
+        label = new Label(storagePropertiesGroup, SWT.LEFT);
+        label.setText("Compression: ");
+
+        checkCompression = new Button(storagePropertiesGroup, SWT.CHECK);
+        checkCompression.setText("gzip (level) ");
+        checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkCompression.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                boolean isCompressed = checkCompression.getSelection();
 
                 if (isCompressed && isH5) {
                     if (!checkChunked.getSelection()) {
@@ -497,13 +498,13 @@ public class NewDatasetDialog extends Dialog {
                     compressionLevel.setEnabled(isCompressed);
                     checkContiguous.setEnabled(true);
                 }
-    		}
-    	});
-    	
-    	compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	for (int i = 0; i < 10; i++) {
+            }
+        });
+
+        compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        for (int i = 0; i < 10; i++) {
             compressionLevel.add(String.valueOf(i));
         }
         compressionLevel.select(6);
@@ -515,40 +516,40 @@ public class NewDatasetDialog extends Dialog {
             checkFillValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             checkFillValue.setSelection(false);
             checkFillValue.addSelectionListener(new SelectionAdapter() {
-        	    public void widgetSelected(SelectionEvent e) {
-        	    	fillValueField.setEnabled(checkFillValue.getSelection());
-        	    }
+                public void widgetSelected(SelectionEvent e) {
+                    fillValueField.setEnabled(checkFillValue.getSelection());
+                }
             });
-            
+
             fillValueField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
             fillValueField.setText("0");
             fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             fillValueField.setEnabled(false);
         } else {
-        	// Add two dummy labels
-        	label = new Label(storagePropertiesGroup, SWT.LEFT);
-        	label.setText("");
-        	label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	
-        	label = new Label(storagePropertiesGroup, SWT.LEFT);
-        	label.setText("");
-        	label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            // Add two dummy labels
+            label = new Label(storagePropertiesGroup, SWT.LEFT);
+            label.setText("");
+            label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            label = new Label(storagePropertiesGroup, SWT.LEFT);
+            label.setText("");
+            label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         }
-    	
-    	
-    	// Create Ok/Cancel/Help button region
-    	Composite buttonComposite = new Composite(shell, SWT.NONE);
-    	buttonComposite.setLayout(new GridLayout(3, false));
-    	buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	Button okButton = new Button(buttonComposite, SWT.PUSH);
-    	okButton.setText("   &Ok   ");
-    	GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-    	gridData.widthHint = 70;
-    	okButton.setLayoutData(gridData);
-    	okButton.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			if (dataView instanceof TableView) {
+
+
+        // Create Ok/Cancel/Help button region
+        Composite buttonComposite = new Composite(shell, SWT.NONE);
+        buttonComposite.setLayout(new GridLayout(3, false));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("   &Ok   ");
+        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        okButton.setLayoutData(gridData);
+        okButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                if (dataView instanceof TableView) {
                     newObject = createFromTable();
                 }
                 else if (dataView instanceof ImageView) {
@@ -561,54 +562,54 @@ public class NewDatasetDialog extends Dialog {
                 if (newObject != null) {
                     shell.dispose();
                 }
-    		}
-    	});
-        
+            }
+        });
+
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setText("&Cancel");
         gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
         gridData.widthHint = 70;
         cancelButton.setLayoutData(gridData);
         cancelButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		newObject = null;
+            public void widgetSelected(SelectionEvent e) {
+                newObject = null;
                 shell.dispose();
                 ((Vector<Group>) groupList).setSize(0);
-        	}
+            }
         });
-        
+
         Button helpButton = new Button(buttonComposite, SWT.PUSH);
         helpButton.setText("&Help");
         gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
         gridData.widthHint = 70;
         helpButton.setLayoutData(gridData);
         helpButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		new HelpDialog(shell).open();
-        	}
+            public void widgetSelected(SelectionEvent e) {
+                new HelpDialog(shell).open();
+            }
         });
-    	
+
         shell.pack();
-        
+
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         shell.open();
-        
+
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-	}
-	
-	/** Check if the max size is valid */
-	private void checkMaxSize() {
-		boolean isChunkNeeded = false;
+    }
+
+    /** Check if the max size is valid */
+    private void checkMaxSize() {
+        boolean isChunkNeeded = false;
         String dimStr = currentSizeField.getText();
         String maxSizeStr = maxSize;
         StringTokenizer stMax = new StringTokenizer(maxSizeStr, "x");
@@ -702,10 +703,10 @@ public class NewDatasetDialog extends Dialog {
                 }
             }
         }
-	}
-	
-	private HObject createFromScratch() {
-		String name = null;
+    }
+
+    private HObject createFromScratch() {
+        String name = null;
         Group pgroup = null;
         boolean isVLen = false;
         int rank = -1, gzip = -1, tclass = -1, tsize = -1, torder = -1, tsign = -1;
@@ -797,7 +798,7 @@ public class NewDatasetDialog extends Dialog {
                 catch (NumberFormatException ex) {
                     stringLength = -1;
                 }
-    
+
                 if (stringLength <= 0) {
                     shell.getDisplay().beep();
                     MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
@@ -997,7 +998,7 @@ public class NewDatasetDialog extends Dialog {
                 confirm.setMessage("Chunk size is equal/greater than the current size. "
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
                 if(confirm.open() == SWT.NO) {
-                	return null;
+                    return null;
                 }
             }
 
@@ -1008,7 +1009,7 @@ public class NewDatasetDialog extends Dialog {
                 confirm.setMessage("Chunk size is one, which may cause large memory overhead for large dataset."
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
                 if(confirm.open() == SWT.NO) {
-                	return null;
+                    return null;
                 }
             }
         } // if (checkChunked.isSelected())
@@ -1046,10 +1047,10 @@ public class NewDatasetDialog extends Dialog {
         }
 
         return obj;
-	}
-	
-	private HObject createFromTable() {
-		HObject obj = null;
+    }
+
+    private HObject createFromTable() {
+        HObject obj = null;
 
         String name = null;
         Group pgroup = null;
@@ -1088,7 +1089,7 @@ public class NewDatasetDialog extends Dialog {
         if (theData == null) {
             return null;
         }
-        
+
         int w = tableView.getSelectedColumnCount();
         int h = tableView.getSelectedRowCount();
         Dataset dataset = (Dataset) tableView.getDataObject();
@@ -1104,19 +1105,19 @@ public class NewDatasetDialog extends Dialog {
             obj = dataset.copy(pgroup, name, dims, theData);
         }
         catch (Exception ex) {
-        	shell.getDisplay().beep();
-        	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-        	error.setText(shell.getText());
-        	error.setMessage(ex.getMessage());
-        	error.open();
+            shell.getDisplay().beep();
+            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+            error.setText(shell.getText());
+            error.setMessage(ex.getMessage());
+            error.open();
             return null;
         }
 
         return obj;
-	}
-	
-	private HObject createFromImage() {
-		HObject obj = null;
+    }
+
+    private HObject createFromImage() {
+        HObject obj = null;
         String name = null;
         Group pgroup = null;
 
@@ -1206,120 +1207,120 @@ public class NewDatasetDialog extends Dialog {
         }
 
         return obj;
-	}
-	
-	private class HelpDialog extends Dialog {
-		private Shell helpShell;
-		
-		public HelpDialog(Shell parent) {
-			super(parent, SWT.APPLICATION_MODAL);
-		}
-		
-		public void open() {
-			Shell parent = getParent();
-			helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-	    			SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
-	    	helpShell.setText("Create New Dataset");
-	    	helpShell.setImage(ViewProperties.getHdfIcon());
-	    	helpShell.setLayout(new GridLayout(1, true));
-	    	
-	    	// Try to create a Browser on platforms that support it
-	    	Browser browser;
-	    	try {
-	    	    browser = new Browser(helpShell, SWT.NONE);
-	    	    browser.setBounds(0, 0, 500, 500);
-	    	    browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    }
 
-	    	    //TODO: Fix URLClassLoader URLs to load local html file from .jar
-		    	try {
-		            URL url = null, url2 = null, url3 = null;
-		            String rootPath = ViewProperties.getViewRoot();
+    private class HelpDialog extends Dialog {
+        private Shell helpShell;
 
-		            try {
-		                url = new URL("file://" + rootPath + "/HDFView.jar");
-		            }
-		            catch (java.net.MalformedURLException mfu) {
-		            	log.debug("help information:", mfu);
-		            }
+        public HelpDialog(Shell parent) {
+            super(parent, SWT.APPLICATION_MODAL);
+        }
 
-		            try {
-		                url2 = new URL("file://" + rootPath + "/");
-		            }
-		            catch (java.net.MalformedURLException mfu) {
-		            	log.debug("help information:", mfu);
-		            }
+        public void open() {
+            Shell parent = getParent();
+            helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
+                    SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+            helpShell.setText("Create New Dataset");
+            helpShell.setImage(ViewProperties.getHdfIcon());
+            helpShell.setLayout(new GridLayout(1, true));
 
-		            try {
-		                url3 = new URL("file://" + rootPath + "/src/");
-		            }
-		            catch (java.net.MalformedURLException mfu) {
-		            	log.debug("help information:", mfu);
-		            }
-		            
-		            URL uu[] = { url, url2, url3 };
-		            URLClassLoader cl = new URLClassLoader(uu);
-		            URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
-		            
-		            browser.setUrl(u.toString());
-		            
-		            cl.close();
-		        }
-		        catch (Exception e) {
-		        	StringBuffer buff = new StringBuffer();
-		            buff.append("<html>");
-		            buff.append("<body>");
-		            buff.append("ERROR: cannot load help information.");
-		            buff.append("</body>");
-		            buff.append("</html>");
-		            browser.setText(buff.toString(), true);
-		        }
-		    	
-		    	Button okButton = new Button(helpShell, SWT.PUSH);
-		    	okButton.setText("   Ok   ");
-		    	okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
-		    	okButton.addSelectionListener(new SelectionAdapter() {
-		    		public void widgetSelected(SelectionEvent e) {
-		    			helpShell.dispose();
-		    		}
-		    	});
-		    	
-		    	helpShell.pack();
-		    	
-		    	helpShell.setSize(helpShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		        
-		        Rectangle parentBounds = parent.getBounds();
-		        Point shellSize = helpShell.getSize();
-		        helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-		                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-		    	
-		    	helpShell.open();
-		    	
-		    	Display display = parent.getDisplay();
-		        while(!helpShell.isDisposed()) {
-		            if (!display.readAndDispatch())
-		                display.sleep();
-		        }
-	    	} catch (Exception ex) {
-	    		// Try opening help link in external browser if platform
-	    		// doesn't support SWT browser
-	    		browser = null;
-	    		MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-	    		error.setMessage("Platform doesn't support Browser. Opening external link in web browser...");
-	    		error.setText("Browser support");
-	    		error.open();
-	    		helpShell.dispose();
-	    		
-	    		//TODO: Add support for launching in external browser
-	    	}
-		}
-	}
+            // Try to create a Browser on platforms that support it
+            Browser browser;
+            try {
+                browser = new Browser(helpShell, SWT.NONE);
+                browser.setBounds(0, 0, 500, 500);
+                browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-    /** Returns the new dataset created. */
+                //TODO: Fix URLClassLoader URLs to load local html file from .jar
+                try {
+                    URL url = null, url2 = null, url3 = null;
+                    String rootPath = ViewProperties.getViewRoot();
+
+                    try {
+                        url = new URL("file://" + rootPath + "/HDFView.jar");
+                    }
+                    catch (java.net.MalformedURLException mfu) {
+                        log.debug("help information:", mfu);
+                    }
+
+                    try {
+                        url2 = new URL("file://" + rootPath + "/");
+                    }
+                    catch (java.net.MalformedURLException mfu) {
+                        log.debug("help information:", mfu);
+                    }
+
+                    try {
+                        url3 = new URL("file://" + rootPath + "/src/");
+                    }
+                    catch (java.net.MalformedURLException mfu) {
+                        log.debug("help information:", mfu);
+                    }
+
+                    URL uu[] = { url, url2, url3 };
+                    URLClassLoader cl = new URLClassLoader(uu);
+                    URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
+
+                    browser.setUrl(u.toString());
+
+                    cl.close();
+                }
+                catch (Exception e) {
+                    StringBuffer buff = new StringBuffer();
+                    buff.append("<html>");
+                    buff.append("<body>");
+                    buff.append("ERROR: cannot load help information.");
+                    buff.append("</body>");
+                    buff.append("</html>");
+                    browser.setText(buff.toString(), true);
+                }
+
+                Button okButton = new Button(helpShell, SWT.PUSH);
+                okButton.setText("   Ok   ");
+                okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+                okButton.addSelectionListener(new SelectionAdapter() {
+                    public void widgetSelected(SelectionEvent e) {
+                        helpShell.dispose();
+                    }
+                });
+
+                helpShell.pack();
+
+                helpShell.setSize(helpShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+                Rectangle parentBounds = parent.getBounds();
+                Point shellSize = helpShell.getSize();
+                helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+
+                helpShell.open();
+
+                Display display = parent.getDisplay();
+                while(!helpShell.isDisposed()) {
+                    if (!display.readAndDispatch())
+                        display.sleep();
+                }
+            } catch (Exception ex) {
+                // Try opening help link in external browser if platform
+                // doesn't support SWT browser
+                browser = null;
+                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
+                error.setMessage("Platform doesn't support Browser. Opening external link in web browser...");
+                error.setText("Browser support");
+                error.open();
+                helpShell.dispose();
+
+                //TODO: Add support for launching in external browser
+            }
+        }
+    }
+
+    /** @return the new dataset created. */
     public DataFormat getObject() {
         return newObject;
     }
 
-    /** Returns the parent group of the new dataset. */
+    /** @return the parent group of the new dataset. */
     public Group getParentGroup() {
         return parentGroup;
     }

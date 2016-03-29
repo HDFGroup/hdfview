@@ -17,21 +17,21 @@ package hdf.view;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 
 /**
- * 
+ *
  * The table view interface for displaying data in table form
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public abstract interface TableView extends DataView {
-    /** Returns the table */
+    /** @return the table */
     public abstract NatTable getTable();
 
-    /** Returns array of selected data */
+    /** @return array of selected data */
     public abstract Object getSelectedData();
-    
+
     public abstract int getSelectedColumnCount();
-    
+
     public abstract int getSelectedRowCount();
 
     /** Write the change of a dataset into file. */

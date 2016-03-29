@@ -107,6 +107,15 @@ public class H5ScalarDS extends ScalarDS {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #H5ScalarDS(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the file that contains the data object.
+     * @param theName
+     *            the name of the data object, e.g. "dset".
+     * @param thePath
+     *            the full path of the data object, e.g. "/arrays/".
+     * @param oid
+     *            the oid of the data object.
      */
     @Deprecated
     public H5ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid) {
@@ -731,6 +740,9 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @param buf
      *            The buffer that contains the data values.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     @Override
     public void write(Object buf) throws HDF5Exception {
@@ -835,7 +847,11 @@ public class H5ScalarDS extends ScalarDS {
      *            IN dataset ID
      * @param spaceIDs
      *            IN/OUT memory and file space IDs -- spaceIDs[0]=mspace, spaceIDs[1]=fspace
+     *
      * @return total number of data point selected
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     private long selectHyperslab(long did, long[] spaceIDs) throws HDF5Exception {
         long lsize = 1;
@@ -1320,11 +1336,15 @@ public class H5ScalarDS extends ScalarDS {
      * @param chunks
      *            the chunk size of the dataset. No chunking if chunk = null.
      * @param gzip
-     *            GZIP compression level (1 to 9). No compression if gzip<=0.
+     *            GZIP compression level (1 to 9). No compression if gzip&lt;=0.
+     * @param fillValue
+     *            the default data value.
      * @param data
      *            the array of data values.
      *
      * @return the new scalar dataset if successful; otherwise returns null.
+     *
+     * @throws Exception if there is a failure.
      */
     public static Dataset create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
             long[] chunks, int gzip, Object fillValue, Object data) throws Exception {
@@ -2051,6 +2071,11 @@ public class H5ScalarDS extends ScalarDS {
      * This function can be applied to the following datasets: 1) Any dataset with unlimited dimensions 2) A dataset
      * with fixed dimensions if the current dimension sizes are less than the maximum sizes set with maxdims (see
      * H5Screate_simple)
+     *
+     * @param newDims the dimension target size
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     public void extend(long[] newDims) throws HDF5Exception {
         long did = -1;

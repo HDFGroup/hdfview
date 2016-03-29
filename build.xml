@@ -175,15 +175,15 @@
     <replace file="${build.dir}/HDFVersions.java" token="@HDFJAVA_VERSION@" value='"${hdfjava.version}"' />
 
     <!-- Generate Versions file -->
-    <javac srcdir="${build.dir}" destdir="${classes.dir}" 
-    includes="HDFVersions.java" 
-    includeantruntime="false" 
+    <javac srcdir="${build.dir}" destdir="${classes.dir}"
+    includes="HDFVersions.java"
+    includeantruntime="false"
     />
 
-    <javac srcdir="${src.dir}" destdir="${classes.dir}" 
-    classpathref="project-classpath" 
-    excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java hdf/object/fits/** hdf/object/h4/**" 
-    includeantruntime="false" 
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+    classpathref="project-classpath"
+    excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java hdf/object/fits/** hdf/object/h4/**"
+    includeantruntime="false"
     />
 
     <copy todir="${classes.dir}">
@@ -563,7 +563,7 @@
     <copy todir="${release.dir}/share/doc">
       <fileset dir="${docs.dir}" excludes="UserGuide.tar.gz" />
     </copy>
-    <untar src="${docs.dir}/UserGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
+    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/share/samples">

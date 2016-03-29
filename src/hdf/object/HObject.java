@@ -170,6 +170,8 @@ public abstract class HObject implements Serializable, DataFormat {
      *            the name of the data object, e.g. "dset".
      * @param thePath
      *            the group path of the data object, e.g. "/arrays".
+     * @param oid
+     *            the ids of the data object.
      */
     @Deprecated
     public HObject(FileFormat theFile, String theName, String thePath, long[] oid) {
@@ -339,7 +341,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * @param newName
      *            The new name of the object.
      *
-     * @throws  IllegalArgumentException
+     * @throws Exception if name is root or contains separator
      */
     public void setName(String newName) throws Exception {
         if (newName != null) {
@@ -374,8 +376,10 @@ public abstract class HObject implements Serializable, DataFormat {
      *
      * @param newPath
      *            The new path of the object.
+     *
+     * @throws Exception if a failure occurred
      */
-    public void setPath(String newPath) {
+    public void setPath(String newPath) throws Exception {
         if (newPath == null) {
             newPath = "/";
         }
@@ -440,6 +444,9 @@ public abstract class HObject implements Serializable, DataFormat {
      * objects with different names are pointed to the same object within the
      * same file.
      *
+     * @param theID
+     *            The list object identifiers.
+     *
      * @return true if the ID of the object equals the given OID; otherwise,
      *         returns false.
      */
@@ -494,6 +501,11 @@ public abstract class HObject implements Serializable, DataFormat {
     /**
      * Returns whether this HObject is equal to the specified HObject
      * by comparing their OIDs.
+     *
+     * @param obj
+     *            The object
+     *
+     * @return true if the object is equal by OID
      */
     public boolean equals(HObject obj) {
         return this.equalsOID(obj.getOID());

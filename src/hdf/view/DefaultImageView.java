@@ -104,8 +104,8 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * <p>
  * A default color table is provided for images without palette attached to it.
  * Current choice of default palettes include Gray, Rainbow, Nature and Wave.
- * For more infomation on palette, read <a
- * href="http://hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and
+ * For more infomation on palette,
+ * read <a href="http://hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and
  * Palette Specification </a>
  *
  * @author Jordan T. Henderson
@@ -177,7 +177,7 @@ public class DefaultImageView implements ImageView {
 
     /** Flag to indicate if the image is a 3D */
     private boolean is3D;
-    
+
     /** Flag to indicate whether to show pixel values in ImageComponent */
     private boolean showValues = false;
 
@@ -251,8 +251,9 @@ public class DefaultImageView implements ImageView {
 
     /**
      * Constructs an ImageView.
-     * <p>
      *
+     * @param parent
+     *            the parent of this dialog
      * @param theView
      *            the main HDFView.
      */
@@ -262,8 +263,9 @@ public class DefaultImageView implements ImageView {
 
     /**
      * Constructs an ImageView.
-     * <p>
      *
+     * @param parent
+     *            the parent of this dialog
      * @param theView
      *            the main HDFView.
      * @param map
@@ -276,7 +278,7 @@ public class DefaultImageView implements ImageView {
     public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
         shell = new Shell(parent, SWT.SHELL_TRIM);
         display = shell.getDisplay();
-        
+
         shell.setData(this);
 
         shell.setImage(ViewProperties.getImageIcon());
@@ -448,9 +450,11 @@ public class DefaultImageView implements ImageView {
 
         if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_UR)) {
             titleJustification = SWT.RIGHT;
-        } else if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_LL)) {
+        }
+        else if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_LL)) {
             titlePosition = SWT.BOTTOM;
-        } else if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_LR)) {
+        }
+        else if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_LR)) {
             titleJustification = SWT.RIGHT;
             titlePosition = SWT.BOTTOM;
         }
@@ -475,10 +479,10 @@ public class DefaultImageView implements ImageView {
 
         // add palette canvas to show the palette
         if (imagePalette != null) {
-        	paletteComponent = new PaletteComponent(group, SWT.DOUBLE_BUFFERED, imagePalette, dataRange);
+            paletteComponent = new PaletteComponent(group, SWT.DOUBLE_BUFFERED, imagePalette, dataRange);
         } else {
-        	// Make ImageComponent take entire width
-        	imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+            // Make ImageComponent take entire width
+            imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         }
 
         // Add the text field to display pixel data
@@ -518,7 +522,7 @@ public class DefaultImageView implements ImageView {
                           (parentBounds.y + (parentBounds.height / 2)) - (minimumSize.y / 2));
 
         viewer.addDataView(this);
-        
+
         shell.open();
 
         // Workaround to prevent parent shell cursor from staying in "wait"
@@ -529,7 +533,7 @@ public class DefaultImageView implements ImageView {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-        
+
         viewer.removeDataView(this);
     }
 
@@ -760,7 +764,7 @@ public class DefaultImageView implements ImageView {
 
                 DataRangeDialog drd = new DataRangeDialog(shell, SWT.NONE, dataRange, originalRange, dataDist);
                 drd.open();
-                
+
                 double[] drange = drd.getRange();
 
                 if ((drange == null)
@@ -948,7 +952,7 @@ public class DefaultImageView implements ImageView {
         item.setSelection(showValues);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-            	showValues = !showValues;
+                showValues = !showValues;
                 setValueVisible(showValues);
             }
         });
@@ -1222,9 +1226,9 @@ public class DefaultImageView implements ImageView {
             item.setToolTipText("View Animation");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                	shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
-    				new Animation(shell, SWT.DOUBLE_BUFFERED, dataset).open();
-    				shell.setCursor(null);
+                    shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
+                    new Animation(shell, SWT.DOUBLE_BUFFERED, dataset).open();
+                    shell.setCursor(null);
                 }
             });
         }
@@ -1367,8 +1371,8 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-     * @throws Exception
-     * @throws OutOfMemoryError
+     * @throws Exception if a failure occurred
+     * @throws OutOfMemoryError if memory is exhausted
      */
     private void getIndexedImage() throws Exception, OutOfMemoryError {
         if (imagePalette == null)
@@ -1456,7 +1460,10 @@ public class DefaultImageView implements ImageView {
     /**
      * Compute image data from autogain
      *
-     * @return
+     * @param gb the gain bias
+     * @param range the contrast range to apply
+     *
+     * @return true if the image buffer is converted
      */
     private boolean computeAutoGainImageData(double[] gb, double[] range) {
         boolean retValue = true;
@@ -1624,7 +1631,7 @@ public class DefaultImageView implements ImageView {
     /**
      * Selects the whole image.
      *
-     * @throws Exception
+     * @throws Exception if a failure occurred
      */
     private void selectAll() throws Exception {
         imageComponent.selectAll();
@@ -1672,7 +1679,11 @@ public class DefaultImageView implements ImageView {
         //applyImageFilter(new ContourFilter(level));
     }
 
-    /** Apply contrast/brightness to unsigned short integer */
+    /** Apply contrast/brightness to unsigned short integer
+     *
+     * @param gb the gain bias
+     * @param range the contrast range to apply
+     */
     private void applyAutoGain(double[] gb, double[] range) {
         if (computeAutoGainImageData(gb, range)) {
             long w = dataset.getWidth();
@@ -1685,23 +1696,29 @@ public class DefaultImageView implements ImageView {
 
     private void setValueVisible(boolean b) {
         valueField.setVisible(b);
-        
+
         GridData data = (GridData) valueField.getLayoutData();
-        
+
         if(!b) {
-        	data.exclude = true;
+            data.exclude = true;
         } else {
-        	data.exclude = false;
+            data.exclude = false;
         }
-        
+
         valueField.setLayoutData(data);
-        
+
         valueField.getParent().pack();
-        
+
         shell.pack();
     }
 
-    /** change alpha value for a given list of pixel locations */
+    /** change alpha value for a given list of pixel locations
+     *
+     * @param img the image to adjust
+     * @param alpha the alpha value
+     * @param idx the list of indices to adjust
+     *
+     */
     private void adjustAlpha(BufferedImage img, int alpha, List<Integer> idx)
     {
         if (img == null || idx.size() <= 0)
@@ -1726,6 +1743,7 @@ public class DefaultImageView implements ImageView {
      *
      * @param image
      *            the plain image object.
+     *
      * @return buffered image for the given image.
      */
     /*
@@ -1764,7 +1782,8 @@ public class DefaultImageView implements ImageView {
      *
      * @param type
      *            the image type.
-     * @throws Exception
+     *
+     * @throws Exception if a failure occured
      */
     private void saveImageAs(String type) throws Exception {
         if (image == null) {
@@ -1800,9 +1819,9 @@ public class DefaultImageView implements ImageView {
         if(filename == null) {
             return;
         }
-        
+
         chosenFile = new File(filename);
-        
+
         BufferedImage bi = null;
         try {
             //bi = toBufferedImage(image);
@@ -2047,23 +2066,25 @@ public class DefaultImageView implements ImageView {
             rotate(ROTATE_CW_90);
         }
     }
-    
+
     /**
      * Converts a given BufferedImage to ImageData for a SWT-readable Image
+     *
      * @param image The BufferedImage to be converted
-     * @return
+     *
+     * @return the image object
      */
     private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage image) {
-    	if (image.getColorModel() instanceof DirectColorModel) {
-    		DirectColorModel colorModel = (DirectColorModel) image
-    				.getColorModel();
-    		PaletteData palette = new PaletteData(colorModel.getRedMask(),
-    				colorModel.getGreenMask(), colorModel.getBlueMask());
-    		ImageData data = new ImageData(image.getWidth(),
-    				image.getHeight(), colorModel.getPixelSize(),
-    				palette);
-    		
-    		for (int y = 0; y < data.height; y++) {
+        if (image.getColorModel() instanceof DirectColorModel) {
+            DirectColorModel colorModel = (DirectColorModel) image
+                    .getColorModel();
+            PaletteData palette = new PaletteData(colorModel.getRedMask(),
+                    colorModel.getGreenMask(), colorModel.getBlueMask());
+            ImageData data = new ImageData(image.getWidth(),
+                    image.getHeight(), colorModel.getPixelSize(),
+                    palette);
+
+            for (int y = 0; y < data.height; y++) {
                 for (int x = 0; x < data.width; x++) {
                     int rgb = image.getRGB(x, y);
                     int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
@@ -2073,60 +2094,61 @@ public class DefaultImageView implements ImageView {
                     }
                 }
             }
-    		
-    		return new org.eclipse.swt.graphics.Image(display, data);
-    	} else if (image.getColorModel() instanceof IndexColorModel) {
-    		IndexColorModel colorModel = (IndexColorModel) image
-    				.getColorModel();
-    		int size = colorModel.getMapSize();
-    		byte[] reds = new byte[size];
-    		byte[] greens = new byte[size];
-    		byte[] blues = new byte[size];
-    		colorModel.getReds(reds);
-    		colorModel.getGreens(greens);
-    		colorModel.getBlues(blues);
-    		RGB[] rgbs = new RGB[size];
-    		for (int i = 0; i < rgbs.length; i++) {
-    			rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF,
-    					blues[i] & 0xFF);
-    		}
-    		PaletteData palette = new PaletteData(rgbs);
-    		ImageData data = new ImageData(image.getWidth(),
-    				image.getHeight(), colorModel.getPixelSize(),
-    				palette);
-    		data.transparentPixel = colorModel.getTransparentPixel();
-    		WritableRaster raster = image.getRaster();
-    		int[] pixelArray = new int[1];
-    		for (int y = 0; y < data.height; y++) {
-    			for (int x = 0; x < data.width; x++) {
-    				raster.getPixel(x, y, pixelArray);
-    				data.setPixel(x, y, pixelArray[0]);
-    			}
-    		}
-    		
-    		return new org.eclipse.swt.graphics.Image(display, data);
-    	}
-    	else if (image.getColorModel() instanceof ComponentColorModel) {
-    		ComponentColorModel colorModel = (ComponentColorModel) image.getColorModel();
-    		//ASSUMES: 3 BYTE BGR IMAGE TYPE
-    		PaletteData palette = new PaletteData(0x0000FF, 0x00FF00,0xFF0000);
-    		ImageData data = new ImageData(image.getWidth(), image.getHeight(),
-    				colorModel.getPixelSize(), palette);
-    		//This is valid because we are using a 3-byte Data model with no transparent pixels
-    		data.transparentPixel = -1;
-    		WritableRaster raster = image.getRaster();
-    		int[] pixelArray = new int[3];
-    		for (int y = 0; y < data.height; y++) {
-    			for (int x = 0; x < data.width; x++) {
-    				raster.getPixel(x, y, pixelArray);
-    				int pixel = palette.getPixel(new RGB(pixelArray[0], pixelArray[1], pixelArray[2]));
-    				data.setPixel(x, y, pixel);
-    			}
-    		}
-    		return new org.eclipse.swt.graphics.Image(display, data);
-    	}
-    	
-    	return null;
+
+            return new org.eclipse.swt.graphics.Image(display, data);
+        }
+        else if (image.getColorModel() instanceof IndexColorModel) {
+            IndexColorModel colorModel = (IndexColorModel) image
+                    .getColorModel();
+            int size = colorModel.getMapSize();
+            byte[] reds = new byte[size];
+            byte[] greens = new byte[size];
+            byte[] blues = new byte[size];
+            colorModel.getReds(reds);
+            colorModel.getGreens(greens);
+            colorModel.getBlues(blues);
+            RGB[] rgbs = new RGB[size];
+            for (int i = 0; i < rgbs.length; i++) {
+                rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF,
+                        blues[i] & 0xFF);
+            }
+            PaletteData palette = new PaletteData(rgbs);
+            ImageData data = new ImageData(image.getWidth(),
+                    image.getHeight(), colorModel.getPixelSize(),
+                    palette);
+            data.transparentPixel = colorModel.getTransparentPixel();
+            WritableRaster raster = image.getRaster();
+            int[] pixelArray = new int[1];
+            for (int y = 0; y < data.height; y++) {
+                for (int x = 0; x < data.width; x++) {
+                    raster.getPixel(x, y, pixelArray);
+                    data.setPixel(x, y, pixelArray[0]);
+                }
+            }
+
+            return new org.eclipse.swt.graphics.Image(display, data);
+        }
+        else if (image.getColorModel() instanceof ComponentColorModel) {
+            ComponentColorModel colorModel = (ComponentColorModel) image.getColorModel();
+            //ASSUMES: 3 BYTE BGR IMAGE TYPE
+            PaletteData palette = new PaletteData(0x0000FF, 0x00FF00,0xFF0000);
+            ImageData data = new ImageData(image.getWidth(), image.getHeight(),
+                    colorModel.getPixelSize(), palette);
+            //This is valid because we are using a 3-byte Data model with no transparent pixels
+            data.transparentPixel = -1;
+            WritableRaster raster = image.getRaster();
+            int[] pixelArray = new int[3];
+            for (int y = 0; y < data.height; y++) {
+                for (int x = 0; x < data.width; x++) {
+                    raster.getPixel(x, y, pixelArray);
+                    int pixel = palette.getPixel(new RGB(pixelArray[0], pixelArray[1], pixelArray[2]));
+                    data.setPixel(x, y, pixel);
+                }
+            }
+            return new org.eclipse.swt.graphics.Image(display, data);
+        }
+
+        return null;
     }
 
     /**
@@ -2140,6 +2162,7 @@ public class DefaultImageView implements ImageView {
      *            the width of the image.
      * @param h
      *            the height of the image.
+     *
      * @return the image.
      */
     private Image createIndexedImage(byte[] imageData, byte[][] palette, long w, long h)
@@ -2170,7 +2193,6 @@ public class DefaultImageView implements ImageView {
     * INTERLACE_PIXEL = [height][width][pixel components]
     *            INTERLACE_PLANE = [pixel components][height][width]
     * </pre>
-    * <p>
     *
     * @param imageData
     *            the byte array of the image data.
@@ -2180,6 +2202,7 @@ public class DefaultImageView implements ImageView {
     *            the width of the image.
     * @param h
     *            the height of the image.
+    *
     * @return the image.
     */
     private Image createTrueColorImage(byte[] imageData, boolean planeInterlace,
@@ -2209,7 +2232,7 @@ public class DefaultImageView implements ImageView {
         }
 
         adjustAlpha(bufferedImage, 0, invalidValueIndex);
-        
+
         return bufferedImage;
     }
 
@@ -2240,7 +2263,7 @@ public class DefaultImageView implements ImageView {
             long h = dataset.getHeight();
 
             invalidValueIndex.clear(); // data range changed. need to reset
-            
+
             // invalid values
             imageByteData = Tools.getBytes(data, newRange, w, h,
                     !dataset.isDefaultImageOrder(),
@@ -2256,9 +2279,9 @@ public class DefaultImageView implements ImageView {
         dataRange[0] = newRange[0];
         dataRange[1] = newRange[1];
     }
-    
+
     private void writeSelectionToImage() {
-    	if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
+        if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
             showError("No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
             return;
         }
@@ -2272,9 +2295,9 @@ public class DefaultImageView implements ImageView {
 
         Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
         Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
-        
+
         list.add(dataset.getFileFormat().getRootObject());
-        
+
         while (it.hasNext()) {
             list.add(it.next());
         }
@@ -2295,7 +2318,7 @@ public class DefaultImageView implements ImageView {
 
         list.setSize(0);
     }
-    
+
     private void showError(String errorMsg, String title) {
         MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
         error.setText(title);
@@ -2305,8 +2328,8 @@ public class DefaultImageView implements ImageView {
 
     /** PaletteComponent draws the palette on the side of the image. */
     private class PaletteComponent extends Canvas {
-        
-    	private org.eclipse.swt.graphics.Color[] colors = null;
+
+        private org.eclipse.swt.graphics.Color[] colors = null;
         private double[] pixelData = null;
         private Dimension paintSize = null;
         DecimalFormat format;
@@ -2314,8 +2337,8 @@ public class DefaultImageView implements ImageView {
 
         private PaletteComponent(Composite parent, int style, byte[][] palette, double[] range) {
             super(parent, style);
-        	
-        	paintSize = new Dimension(25, 2);
+
+            paintSize = new Dimension(25, 2);
             format = new DecimalFormat("0.00E0");
             dRange = range;
 
@@ -2329,59 +2352,59 @@ public class DefaultImageView implements ImageView {
             }
 
             updatePalette(palette);
-            
+
             this.addDisposeListener(new DisposeListener() {
-            	public void widgetDisposed(DisposeEvent e) {
-            		// Dispose all created colors to prevent memory leak
-            		for(int i = 0; i < colors.length; i++) {
-            			if(colors[i] != null) colors[i].dispose();
-            		}
-            	}
+                public void widgetDisposed(DisposeEvent e) {
+                    // Dispose all created colors to prevent memory leak
+                    for(int i = 0; i < colors.length; i++) {
+                        if(colors[i] != null) colors[i].dispose();
+                    }
+                }
             });
-            
+
             this.addPaintListener(new PaintListener() {
-            	public void paintControl(PaintEvent e) {
-            		if ((colors == null) && (pixelData == null)) {
+                public void paintControl(PaintEvent e) {
+                    if ((colors == null) && (pixelData == null)) {
                         return;
                     }
-            		
-            		GC gc = e.gc;
-            		org.eclipse.swt.graphics.Color oldBackground = gc.getBackground();
-            		int fontHeight = 10;
-                    
+
+                    GC gc = e.gc;
+                    org.eclipse.swt.graphics.Color oldBackground = gc.getBackground();
+                    int fontHeight = 10;
+
                     for (int i = 0; i < 256; i++) {
                         gc.setBackground(colors[i]);
                         gc.fillRectangle(0, paintSize.height * i, paintSize.width,
                                 paintSize.height);
                     }
-                    
+
                     FontData[] fontData = gc.getFont().getFontData();
                     Font newFont = new Font(display, fontData[0].getName(), fontHeight, fontData[0].getStyle());
                     gc.setFont(newFont);
 
                     gc.setBackground(oldBackground);
                     gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
-                    
+
                     int trueHeight;
                     int i = 0;
                     while(i < 25) {
-                    	String str = format.format(pixelData[i * 10]);
-                    	trueHeight = gc.textExtent(str).y;
-                    	
+                        String str = format.format(pixelData[i * 10]);
+                        trueHeight = gc.textExtent(str).y;
+
                         gc.drawString(str, paintSize.width + 5, (trueHeight + paintSize.height + 1) * i - ((trueHeight - fontHeight) / 2));
-                        
+
                         i++;
                     }
-                    
+
                     String str = format.format(pixelData[255]);
                     trueHeight = gc.textExtent(str).y;
-                    
+
                     gc.drawString(str, paintSize.width + 5, (trueHeight + paintSize.height + 1) * i - ((trueHeight - fontHeight) / 2));
-                    
+
                     newFont.dispose();
-            	}
+                }
             });
-            
+
             GridData data = new GridData(SWT.FILL, SWT.FILL, false, true);
             data.widthHint = paintSize.width + 60;
             this.setLayoutData(data);
@@ -2446,7 +2469,7 @@ public class DefaultImageView implements ImageView {
 
             image = img;
             imageSize = new Dimension(image.getWidth(null), image.getHeight(null));
-            
+
             originalSize = imageSize;
             selectedArea = new Rectangle();
             originalSelectedArea = new Rectangle();
@@ -2456,60 +2479,60 @@ public class DefaultImageView implements ImageView {
             this.addMouseMoveListener(new MouseMoveListener() {
                 @Override
                 public void mouseMove(MouseEvent e) {
-                	// don't update too often.
-            		/*try {
-            			Thread.sleep(20);
-            		}
-            		catch (Exception ex) {
-            			log.debug("thread sleep:", ex);
-            		}*/
-                	
-                	currentPosition = new Point(e.x, e.y);
-                	
-                	if((e.stateMask & SWT.BUTTON1) != 0) {
-                		// If a drag event has occured, draw a selection Rectangle
-                    	if((e.stateMask & SWT.SHIFT) != 0) {
-                    		int x0 = Math.max(0, Math.min(startPosition.x,
-                					currentPosition.x));
-                			int y0 = Math.max(0, Math.min(startPosition.y,
-                					currentPosition.y));
-                			int x1 = Math.min(imageSize.width, Math.max(startPosition.x,
-                					currentPosition.x));
-                			int y1 = Math.min(imageSize.height, Math.max(startPosition.y,
-                					currentPosition.y));
+                    // don't update too often.
+                    /*try {
+                        Thread.sleep(20);
+                    }
+                    catch (Exception ex) {
+                        log.debug("thread sleep:", ex);
+                    }*/
 
-                			int w = x1 - x0;
-                			int h = y1 - y0;
+                    currentPosition = new Point(e.x, e.y);
 
-                			selectedArea.setBounds(x0, y0, w, h);
-                			double ratio = 1.0 / zoomFactor;
+                    if((e.stateMask & SWT.BUTTON1) != 0) {
+                        // If a drag event has occured, draw a selection Rectangle
+                        if((e.stateMask & SWT.SHIFT) != 0) {
+                            int x0 = Math.max(0, Math.min(startPosition.x,
+                                    currentPosition.x));
+                            int y0 = Math.max(0, Math.min(startPosition.y,
+                                    currentPosition.y));
+                            int x1 = Math.min(imageSize.width, Math.max(startPosition.x,
+                                    currentPosition.x));
+                            int y1 = Math.min(imageSize.height, Math.max(startPosition.y,
+                                    currentPosition.y));
 
-                			originalSelectedArea.setBounds((int) (x0 * ratio),
-                					(int) (y0 * ratio), (int) (w * ratio),
-                					(int) (h * ratio));
-                    	} else {
-                    		if(hbar != null) {
-                    			if(hbar.isVisible()) {
-                    				int dx = startPosition.x - currentPosition.x;
-                    				hbar.setSelection(hbar.getSelection() + dx);
-                    			}
-                    		}
-                    		
-                    		if(vbar != null) {
-                    			if(vbar.isVisible()) {
-                    				int dy = startPosition.y - currentPosition.y;
-                    				vbar.setSelection(vbar.getSelection() + dy);
-                    			}
-                    		}
-                    	}
-                    	
-                    	redraw();
-                	}
-                	
-                	if(showValues) {
+                            int w = x1 - x0;
+                            int h = y1 - y0;
+
+                            selectedArea.setBounds(x0, y0, w, h);
+                            double ratio = 1.0 / zoomFactor;
+
+                            originalSelectedArea.setBounds((int) (x0 * ratio),
+                                    (int) (y0 * ratio), (int) (w * ratio),
+                                    (int) (h * ratio));
+                        } else {
+                            if(hbar != null) {
+                                if(hbar.isVisible()) {
+                                    int dx = startPosition.x - currentPosition.x;
+                                    hbar.setSelection(hbar.getSelection() + dx);
+                                }
+                            }
+
+                            if(vbar != null) {
+                                if(vbar.isVisible()) {
+                                    int dy = startPosition.y - currentPosition.y;
+                                    vbar.setSelection(vbar.getSelection() + dy);
+                                }
+                            }
+                        }
+
+                        redraw();
+                    }
+
+                    if(showValues) {
                         yMousePosition = e.y;
                         showPixelValue(e.x, yMousePosition);
-                	}
+                    }
                 }
             });
 
@@ -2529,11 +2552,11 @@ public class DefaultImageView implements ImageView {
                     scrollDim = imageScroller.getSize();
                     hbar = imageScroller.getHorizontalBar();
                     vbar = imageScroller.getVerticalBar();
-                    
+
                     if((e.stateMask & SWT.SHIFT) != 0) {
-                    	shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_CROSS));
+                        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_CROSS));
                     } else {
-                    	shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_HAND));
+                        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_HAND));
                     }
                 }
 
@@ -2543,13 +2566,13 @@ public class DefaultImageView implements ImageView {
 
                     // Single mouse click
                     if(e.count == 1) {
-                    	if(startPosition.x == e.x && startPosition.y == e.y) {
-                    		selectedArea.setBounds(startPosition.x, startPosition.y , 0, 0);
-                    		originalSelectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
-                    	}
-                    	
+                        if(startPosition.x == e.x && startPosition.y == e.y) {
+                            selectedArea.setBounds(startPosition.x, startPosition.y , 0, 0);
+                            originalSelectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
+                        }
+
                         startPosition = new Point(e.x, e.y);
-                        
+
                         if (hbar.isVisible()) {
                             hbar.setSelection(startPosition.x - scrollDim.x / 2);
                         }
@@ -2588,96 +2611,98 @@ public class DefaultImageView implements ImageView {
 
             this.addPaintListener(new PaintListener() {
                 public void paintControl(PaintEvent e) {
-                	GC gc = e.gc;
-                	
-                	org.eclipse.swt.graphics.Image converted = convertBufferedImageToSWTImage((BufferedImage) image);
-                	
-                	/*if (gc instanceof Graphics2D && (zoomFactor<0.99)) {
-        				Graphics2D g2 = (Graphics2D) g;
+                    GC gc = e.gc;
 
-        				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-        						RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        				Image scaledImg = multiBiliner(image, imageSize.width, imageSize.height, true);
-        				g2.drawImage(scaledImg, 0, 0, imageSize.width, imageSize.height, this);
+                    org.eclipse.swt.graphics.Image converted = convertBufferedImageToSWTImage((BufferedImage) image);
 
-        			} 
-        			else {*/
-        				gc.drawImage(converted, 0, 0);
-        			//}
-        			
-        			converted.dispose();
+                    /*if (gc instanceof Graphics2D && (zoomFactor<0.99)) {
+                        Graphics2D g2 = (Graphics2D) g;
 
-        			if ((selectedArea.width > 0) && (selectedArea.height > 0)) {
-        				gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
-        				gc.drawRectangle(selectedArea.x, selectedArea.y, selectedArea.width,
-        						selectedArea.height);
-        			}
+                        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        Image scaledImg = multiBiliner(image, imageSize.width, imageSize.height, true);
+                        g2.drawImage(scaledImg, 0, 0, imageSize.width, imageSize.height, this);
+
+                    }
+                    else {*/
+                        gc.drawImage(converted, 0, 0);
+                    //}
+
+                    converted.dispose();
+
+                    if ((selectedArea.width > 0) && (selectedArea.height > 0)) {
+                        gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+                        gc.drawRectangle(selectedArea.x, selectedArea.y, selectedArea.width,
+                                selectedArea.height);
+                    }
                 }
             });
         }
-        
+
         @Override
         public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-        	return false;
+            return false;
         }
-        
+
         /**
-		 * Create an image using multiple step bilinear, see details at
-		 * http://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
-		 *
-		 * @param img the original image to be scaled
-		 * @param targetWidth the desired width of the scaled instance
-		 * @param targetHeight the desired height of the scaled instance,
-		 * @return a scaled version of the original 
-		 */
-		private Image multiBilinear(Image img, int targetWidth, int targetHeight, boolean highquality)
-		{
-			Image ret = img;
-			int w = img.getWidth(null)/2;
-			int h = img.getHeight(null)/2;
+        * Create an image using multiple step bilinear, see details at
+        * http://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
+        *
+        * @param img          the original image to be scaled
+        * @param targetWidth  the desired width of the scaled instance
+        * @param targetHeight the desired height of the scaled instance
+        * @param highquality  the quality desired
+        *
+        * @return a scaled version of the original
+        */
+        private Image multiBilinear(Image img, int targetWidth, int targetHeight, boolean highquality)
+        {
+            Image ret = img;
+            int w = img.getWidth(null)/2;
+            int h = img.getHeight(null)/2;
 
-			// only do multiple step bilinear for down scale more than two times
-			if (!highquality || w <=targetWidth || h <=targetHeight)
-				return ret;
+            // only do multiple step bilinear for down scale more than two times
+            if (!highquality || w <=targetWidth || h <=targetHeight)
+                return ret;
 
-			int type = BufferedImage.TYPE_INT_RGB;
-			if (image instanceof BufferedImage) {
-				BufferedImage tmp = (BufferedImage)image;
-				if (tmp.getColorModel().hasAlpha())
-					type = BufferedImage.TYPE_INT_ARGB;
-			} 
-			else {
-				PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-				ColorModel cm = pg.getColorModel();
-				if (cm!=null && cm.hasAlpha())
-					type = BufferedImage.TYPE_INT_ARGB;
-			}
+            int type = BufferedImage.TYPE_INT_RGB;
+            if (image instanceof BufferedImage) {
+                BufferedImage tmp = (BufferedImage)image;
+                if (tmp.getColorModel().hasAlpha())
+                    type = BufferedImage.TYPE_INT_ARGB;
+            }
+            else {
+                PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
+                ColorModel cm = pg.getColorModel();
+                if (cm!=null && cm.hasAlpha())
+                    type = BufferedImage.TYPE_INT_ARGB;
+            }
 
-			do {
-				BufferedImage tmp = new BufferedImage(w, h, type);
-				Graphics2D g2 = tmp.createGraphics();
-				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-				g2.drawImage(ret, 0, 0, w, h, null);
-				g2.dispose();
-				ret = tmp;
+            do {
+                BufferedImage tmp = new BufferedImage(w, h, type);
+                Graphics2D g2 = tmp.createGraphics();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2.drawImage(ret, 0, 0, w, h, null);
+                g2.dispose();
+                ret = tmp;
 
-				w /= 2;
-				if (w < targetWidth) {
-					w = targetWidth;
-				}
+                w /= 2;
+                if (w < targetWidth) {
+                    w = targetWidth;
+                }
 
-				h /= 2;
-				if (h < targetHeight) {
-					h = targetHeight;
-				}
+                h /= 2;
+                if (h < targetHeight) {
+                    h = targetHeight;
+                }
 
-			} while (w != targetWidth || h != targetHeight);
+            } while (w != targetWidth || h != targetHeight);
 
-			return ret;
-		}
+            return ret;
+        }
 
         private void showPixelValue(int x, int y) {
-        	if (!valueField.isVisible() || rotateCount != 0) {
+            if (!valueField.isVisible() || rotateCount != 0) {
                 return;
             }
 
@@ -2789,8 +2814,8 @@ public class DefaultImageView implements ImageView {
         }
 
         private void selectAll() {
-        	selectedArea.setBounds(0, 0, imageSize.width, imageSize.height);
-        	originalSelectedArea.setBounds(0, 0, originalSize.width, originalSize.height);
+            selectedArea.setBounds(0, 0, imageSize.width, imageSize.height);
+            originalSelectedArea.setBounds(0, 0, originalSize.width, originalSize.height);
 
             redraw();
         }
@@ -3468,7 +3493,7 @@ public class DefaultImageView implements ImageView {
 
         public Animation(Shell parent, int style, ScalarDS dataset) {
             super(parent, style);
-            
+
             long[] dims = dataset.getDims();
             long[] stride = dataset.getStride();
             long[] start = dataset.getStartDims();
@@ -3478,7 +3503,7 @@ public class DefaultImageView implements ImageView {
             if (animationSpeed != 0) {
                 sleepTime = 1000 / animationSpeed;
             }
-            
+
             // back up the start and selected size
             long[] tstart = new long[rank];
             long[] tselected = new long[rank];
@@ -3486,14 +3511,14 @@ public class DefaultImageView implements ImageView {
             System.arraycopy(start, 0, tstart, 0, rank);
             System.arraycopy(selected, 0, tselected, 0, rank);
             System.arraycopy(stride, 0, tstride, 0, rank);
-            
+
             int stride_n = 1;
             int max_size = (int) Math.max(selected[selectedIndex[0]],
                     selected[selectedIndex[1]]);
             if (max_size > MAX_ANIMATION_IMAGE_SIZE) {
                 stride_n = (int)( (double)max_size / (double)MAX_ANIMATION_IMAGE_SIZE +0.5);
             }
-            
+
             start[selectedIndex[0]] = 0;
             start[selectedIndex[1]] = 0;
             start[selectedIndex[2]] = 0;
@@ -3543,102 +3568,102 @@ public class DefaultImageView implements ImageView {
                 System.arraycopy(tstride, 0, stride, 0, rank);
             }
         }
-    
+
         public void open() {
-        	Shell parent = getParent();
-    		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-        	shell.setText("Animation - " + dataset.getName());
-        	shell.setImage(ViewProperties.getHdfIcon());
-        	shell.setLayout(new GridLayout(1, true));
-        	
+            Shell parent = getParent();
+            shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            shell.setText("Animation - " + dataset.getName());
+            shell.setImage(ViewProperties.getHdfIcon());
+            shell.setLayout(new GridLayout(1, true));
+
             canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
             canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             canvas.addPaintListener(new PaintListener() {
-            	public void paintControl(PaintEvent e) {
-            		GC gc = e.gc;
-            		
-            		//org.eclipse.swt.graphics.Color oldBackground = gc.getBackground();
-            		
-            		//gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-            		//gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-            		
-            		//gc.fillRectangle(0, 0, MAX_ANIMATION_IMAGE_SIZE,
+                public void paintControl(PaintEvent e) {
+                    GC gc = e.gc;
+
+                    //org.eclipse.swt.graphics.Color oldBackground = gc.getBackground();
+
+                    //gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+                    //gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+
+                    //gc.fillRectangle(0, 0, MAX_ANIMATION_IMAGE_SIZE,
                             //MAX_ANIMATION_IMAGE_SIZE);
-            		//gc.setBackground(oldBackground);
-            		
+                    //gc.setBackground(oldBackground);
+
                     if (frames == null) return;
-                    
+
                     org.eclipse.swt.graphics.Image image = convertBufferedImageToSWTImage((BufferedImage) frames[currentFrame]);
                     org.eclipse.swt.graphics.Rectangle canvasBounds = canvas.getBounds();
                     int x = ((canvasBounds.width / 2) - (image.getBounds().width / 2));
                     int y = ((canvasBounds.height / 2) - (image.getBounds().height / 2));
                     gc.drawImage(image, x, y);
-                    
+
                     image.dispose();
                     gc.dispose();
-            	}
+                }
             });
-            
+
             Button closeButton = new Button(shell, SWT.PUSH);
             closeButton.setText("&Close");
             closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             closeButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		shell.dispose();
-            	}
+                public void widgetSelected(SelectionEvent e) {
+                    shell.dispose();
+                }
             });
-            
+
             shell.pack();
-            
+
             shell.setSize(MAX_ANIMATION_IMAGE_SIZE, MAX_ANIMATION_IMAGE_SIZE);
-            
+
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                               (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-            
+
             shell.open();
-            
+
             Runnable runnable = new AnimationThread();
-            
+
             /**
              * Run the animation. This method is called by class Thread.
              *
              * @see java.lang.Thread
              */
             Display.getDefault().timerExec(sleepTime, runnable);
-            
+
             Display display = parent.getDisplay();
             while(!shell.isDisposed()) {
                 if (!display.readAndDispatch())
                     display.sleep();
             }
-            
+
             display.timerExec(-1, runnable);
         }
-        
+
         private class AnimationThread implements Runnable {
-        	public void run() {
+            public void run() {
                 if ((frames == null) || (canvas == null)) {
-                	return;
+                    return;
                 }
 
                 if (++currentFrame >= numberOfImages)
-                	currentFrame = 0;
+                    currentFrame = 0;
 
                 canvas.redraw();
-                
+
                 Display.getCurrent().timerExec(sleepTime, this);
-        	}
+            }
         }
     }
 
     private class DataRangeDialog extends Dialog {
-    	
-    	private Shell shell;
-    	private Slider minSlider, maxSlider;
-    	private Text minField, maxField;
-    	final int NTICKS = 10;
+
+        private Shell shell;
+        private Slider minSlider, maxSlider;
+        private Text minField, maxField;
+        final int NTICKS = 10;
         double tickRatio = 1;
         final int W = 500, H = 400;
         double[] minmax_current = {0, 0};
@@ -3651,9 +3676,9 @@ public class DefaultImageView implements ImageView {
                                double[] minmaxOriginal, final int[] dataDist) {
 
             super(parent, style);
-            
+
             Tools.findMinMax(dataDist, minmax_dist, null);
-            
+
             if ((minmaxCurrent == null) || (minmaxCurrent.length <= 1)) {
                 minmax_current[0] = 0;
                 minmax_current[1] = 255;
@@ -3678,38 +3703,38 @@ public class DefaultImageView implements ImageView {
             //NumberFormatter formatter = new NumberFormatter(numberFormat);
             //formatter.setMinimum(new Double(min));
             //formatter.setMaximum(new Double(max));
-            
-            
+
+
         }
-    
+
         public void open() {
-        	Shell parent = getParent();
-    		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-        	shell.setText("Image Value Range");
-        	shell.setImage(ViewProperties.getHdfIcon());
-        	shell.setLayout(new GridLayout(1, true));
-        	
-        	
-        	
-        	org.eclipse.swt.widgets.Group lowerBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        	lowerBoundGroup.setText("Lower Bound");
-        	lowerBoundGroup.setLayout(new GridLayout(1, true));
-        	lowerBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        	
-        	minField = new Text(lowerBoundGroup, SWT.SINGLE | SWT.BORDER);
-        	minField.setText("");
-        	minField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	
-        	minSlider = new Slider(lowerBoundGroup, SWT.HORIZONTAL);
-        	minSlider.setMinimum(0);
-        	minSlider.setMaximum(NTICKS);
-        	minSlider.setIncrement(1);
-        	minSlider.setThumb(1);
-        	minSlider.setSelection(0);
-        	minSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	minSlider.addSelectionListener(new SelectionAdapter() {
-        		public void widgetSelected(SelectionEvent e) {
-        			double value = minSlider.getSelection();
+            Shell parent = getParent();
+            shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            shell.setText("Image Value Range");
+            shell.setImage(ViewProperties.getHdfIcon());
+            shell.setLayout(new GridLayout(1, true));
+
+
+
+            org.eclipse.swt.widgets.Group lowerBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            lowerBoundGroup.setText("Lower Bound");
+            lowerBoundGroup.setLayout(new GridLayout(1, true));
+            lowerBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            minField = new Text(lowerBoundGroup, SWT.SINGLE | SWT.BORDER);
+            minField.setText("");
+            minField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            minSlider = new Slider(lowerBoundGroup, SWT.HORIZONTAL);
+            minSlider.setMinimum(0);
+            minSlider.setMaximum(NTICKS);
+            minSlider.setIncrement(1);
+            minSlider.setThumb(1);
+            minSlider.setSelection(0);
+            minSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            minSlider.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    double value = minSlider.getSelection();
                     double maxValue = maxSlider.getSelection();
                     if (value > maxValue) {
                         value = maxValue;
@@ -3717,83 +3742,83 @@ public class DefaultImageView implements ImageView {
                     }
 
                     minField.setText(Double.toString(new Double(value*tickRatio+min_org)));
-        		}
-        	});
-        	
-        	
-        	org.eclipse.swt.widgets.Group upperBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        	upperBoundGroup.setText("Upper Bound");
-        	upperBoundGroup.setLayout(new GridLayout(1, true));
-        	upperBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        	
-        	maxField = new Text(upperBoundGroup, SWT.SINGLE | SWT.BORDER);
-        	maxField.setText("");
-        	maxField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	
-        	maxSlider = new Slider(upperBoundGroup, SWT.HORIZONTAL);
-        	maxSlider.setMinimum(0);
-        	maxSlider.setMaximum(NTICKS);
-        	maxSlider.setIncrement(1);
-        	maxSlider.setThumb(1);
-        	maxSlider.setSelection(NTICKS);
-        	maxSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	maxSlider.addSelectionListener(new SelectionAdapter() {
-        		public void widgetSelected(SelectionEvent e) {
-        			double value = maxSlider.getSelection();
-        			double minValue = minSlider.getSelection();
+                }
+            });
+
+
+            org.eclipse.swt.widgets.Group upperBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            upperBoundGroup.setText("Upper Bound");
+            upperBoundGroup.setLayout(new GridLayout(1, true));
+            upperBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            maxField = new Text(upperBoundGroup, SWT.SINGLE | SWT.BORDER);
+            maxField.setText("");
+            maxField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            maxSlider = new Slider(upperBoundGroup, SWT.HORIZONTAL);
+            maxSlider.setMinimum(0);
+            maxSlider.setMaximum(NTICKS);
+            maxSlider.setIncrement(1);
+            maxSlider.setThumb(1);
+            maxSlider.setSelection(NTICKS);
+            maxSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            maxSlider.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    double value = maxSlider.getSelection();
+                    double minValue = minSlider.getSelection();
                     if (value < minValue) {
                         value = minValue;
                         maxSlider.setSelection((int) value);
                     }
-                    
+
                     maxField.setText(Double.toString(new Double(value*tickRatio+min_org)));
-        		}
-        	});
-        	
-        	
-        	// Create Ok/Cancel/Apply button region
-        	Composite buttonComposite = new Composite(shell, SWT.NONE);
-        	buttonComposite.setLayout(new GridLayout(3, false));
-        	buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	
-        	Button okButton = new Button(buttonComposite, SWT.PUSH);
-        	okButton.setText("   &Ok   ");
-        	GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        	gridData.widthHint = 70;
-        	okButton.setLayoutData(gridData);
-        	okButton.addSelectionListener(new SelectionAdapter() {
-        		public void widgetSelected(SelectionEvent e) {
-        			minmax_current[0] = Double.valueOf(minField.getText());
+                }
+            });
+
+
+            // Create Ok/Cancel/Apply button region
+            Composite buttonComposite = new Composite(shell, SWT.NONE);
+            buttonComposite.setLayout(new GridLayout(3, false));
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setText("   &Ok   ");
+            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+            gridData.widthHint = 70;
+            okButton.setLayoutData(gridData);
+            okButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    minmax_current[0] = Double.valueOf(minField.getText());
                     minmax_current[1] = Double.valueOf(maxField.getText());
 
                     shell.dispose();
-        		}
-        	});
-            
+                }
+            });
+
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
             cancelButton.setText("&Cancel");
             gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
             gridData.widthHint = 70;
             cancelButton.setLayoutData(gridData);
             cancelButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		minmax_current[0] = minmax_previous[0];
+                public void widgetSelected(SelectionEvent e) {
+                    minmax_current[0] = minmax_previous[0];
                     minmax_current[1] = minmax_previous[1];
 
                     applyDataRange(minmax_previous);
 
                     shell.dispose();
-            	}
+                }
             });
-            
+
             Button applyButton = new Button(buttonComposite, SWT.PUSH);
             applyButton.setText("&Apply");
             gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
             gridData.widthHint = 70;
             applyButton.setLayoutData(gridData);
             applyButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		minmax_previous[0] = minmax_current[0];
+                public void widgetSelected(SelectionEvent e) {
+                    minmax_previous[0] = minmax_current[0];
                     minmax_previous[1] = minmax_current[1];
 
                     minmax_current[0] = Double.valueOf(minField.getText());
@@ -3801,28 +3826,28 @@ public class DefaultImageView implements ImageView {
 
                     applyDataRange(minmax_current);
                     minmax_current[0] = minmax_current[1] = 0;
-            	}
+                }
             });
-            
-        	
+
+
             shell.pack();
-            
+
             shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-            
+
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                               (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-            
+
             shell.open();
-            
+
             Display display = parent.getDisplay();
             while(!shell.isDisposed()) {
                 if (!display.readAndDispatch())
                     display.sleep();
             }
         }
-        
+
         public double[] getRange() {
             return minmax_current;
         }
@@ -3961,166 +3986,166 @@ public class DefaultImageView implements ImageView {
 
     //TODO: Adjust sliders range since SWT doesnt have negative slider values
     private class ContrastSlider extends Dialog {
-    	
-    	private Shell shell;
-    	private Scale brightSlider, contrastSlider;
-    	private Text brightField, contrastField;
-    	private String bLabel = "Brightness", cLabel = "Contrast";
-    	
-    	ImageProducer imageProducer;
+
+        private Shell shell;
+        private Scale brightSlider, contrastSlider;
+        private Text brightField, contrastField;
+        private String bLabel = "Brightness", cLabel = "Contrast";
+
+        ImageProducer imageProducer;
         double[] autoGainBias = {0, 0};
         int bLevel=0, cLevel=0;
 
         public ContrastSlider(Shell parent, int style, ImageProducer producer) {
             super(parent, style);
-            
+
             imageProducer = producer;
         }
 
         public void open() {
-        	Shell parent = getParent();
-    		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-        	shell.setText("Brightness/Contrast");
-        	shell.setImage(ViewProperties.getHdfIcon());
-        	shell.setLayout(new GridLayout(1, true));
-        	
-        	if (doAutoGainContrast && gainBias!= null) {
+            Shell parent = getParent();
+            shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            shell.setText("Brightness/Contrast");
+            shell.setImage(ViewProperties.getHdfIcon());
+            shell.setLayout(new GridLayout(1, true));
+
+            if (doAutoGainContrast && gainBias!= null) {
                 bLabel = "Bias";
                 cLabel = "Gain";
                 shell.setText(bLabel + "/" + cLabel);
             }
-        	
-        	//java.text.NumberFormat numberFormat = java.text.NumberFormat.getNumberInstance();
+
+            //java.text.NumberFormat numberFormat = java.text.NumberFormat.getNumberInstance();
             //NumberFormatter formatter = new NumberFormatter(numberFormat);
-        	
-        	org.eclipse.swt.widgets.Group brightnessGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        	brightnessGroup.setText(bLabel + " %");
-        	brightnessGroup.setLayout(new GridLayout(1, true));
-        	brightnessGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        	
-        	brightField = new Text(brightnessGroup, SWT.SINGLE | SWT.BORDER);
-        	brightField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	
-        	//formatter = new NumberFormatter(numberFormat);
-        	//formatter.setMinimum(new Integer(-100));
+
+            org.eclipse.swt.widgets.Group brightnessGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            brightnessGroup.setText(bLabel + " %");
+            brightnessGroup.setLayout(new GridLayout(1, true));
+            brightnessGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            brightField = new Text(brightnessGroup, SWT.SINGLE | SWT.BORDER);
+            brightField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            //formatter = new NumberFormatter(numberFormat);
+            //formatter.setMinimum(new Integer(-100));
             //formatter.setMaximum(new Integer(100));
             //brightField = new JFormattedTextField(formatter);
             //brightField.addPropertyChangeListener(this);
             //brightField.setText(new Integer(0));
-        	
-        	
-        	brightSlider = new Scale(brightnessGroup, SWT.HORIZONTAL);
-        	brightSlider.setMinimum(-100);
-        	brightSlider.setMaximum(100);
-        	brightSlider.setIncrement(1);
-        	brightSlider.setSelection(0);
-        	brightSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	brightSlider.addSelectionListener(new SelectionAdapter() {
-        		public void widgetSelected(SelectionEvent e) {
-        			int value = ((Scale) e.widget).getSelection();
-        			brightField.setText(String.valueOf(value));
-        		}
-        	});
-        	
-        	
-        	org.eclipse.swt.widgets.Group contrastGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        	contrastGroup.setText(cLabel + " %");
-        	contrastGroup.setLayout(new GridLayout(1, true));
-        	contrastGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        	
-        	contrastField = new Text(contrastGroup, SWT.SINGLE | SWT.BORDER);
-        	contrastField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	
-        	//formatter = new NumberFormatter(numberFormat);
+
+
+            brightSlider = new Scale(brightnessGroup, SWT.HORIZONTAL);
+            brightSlider.setMinimum(-100);
+            brightSlider.setMaximum(100);
+            brightSlider.setIncrement(1);
+            brightSlider.setSelection(0);
+            brightSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            brightSlider.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    int value = ((Scale) e.widget).getSelection();
+                    brightField.setText(String.valueOf(value));
+                }
+            });
+
+
+            org.eclipse.swt.widgets.Group contrastGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            contrastGroup.setText(cLabel + " %");
+            contrastGroup.setLayout(new GridLayout(1, true));
+            contrastGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            contrastField = new Text(contrastGroup, SWT.SINGLE | SWT.BORDER);
+            contrastField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            //formatter = new NumberFormatter(numberFormat);
             //formatter.setMinimum(new Integer(-100));
             //formatter.setMaximum(new Integer(100));
             //contrastField = new JFormattedTextField(formatter);
             //contrastField.addPropertyChangeListener(this);
             //contrastField.setValue(new Integer(0));
-            
-        	contrastSlider = new Scale(contrastGroup, SWT.HORIZONTAL);
-        	contrastSlider.setMinimum(-100);
-        	contrastSlider.setMaximum(100);
-        	contrastSlider.setIncrement(1);
-        	contrastSlider.setSelection(0);
-        	contrastSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	contrastSlider.addSelectionListener(new SelectionAdapter() {
-        		public void widgetSelected(SelectionEvent e) {
-        			int value = ((Scale) e.widget).getSelection();
-        			contrastField.setText(String.valueOf(value));
-        		}
-        	});
-        	
-        	
-        	// Create Ok/Cancel/Apply button region
-        	Composite buttonComposite = new Composite(shell, SWT.NONE);
-        	buttonComposite.setLayout(new GridLayout(3, false));
-        	buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        	
-        	Button okButton = new Button(buttonComposite, SWT.PUSH);
-        	okButton.setText("   &Ok   ");
-        	GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        	gridData.widthHint = 70;
-        	okButton.setLayoutData(gridData);
-        	okButton.addSelectionListener(new SelectionAdapter() {
-        		public void widgetSelected(SelectionEvent e) {
-        			int b = Integer.valueOf(brightField.getText());
+
+            contrastSlider = new Scale(contrastGroup, SWT.HORIZONTAL);
+            contrastSlider.setMinimum(-100);
+            contrastSlider.setMaximum(100);
+            contrastSlider.setIncrement(1);
+            contrastSlider.setSelection(0);
+            contrastSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            contrastSlider.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    int value = ((Scale) e.widget).getSelection();
+                    contrastField.setText(String.valueOf(value));
+                }
+            });
+
+
+            // Create Ok/Cancel/Apply button region
+            Composite buttonComposite = new Composite(shell, SWT.NONE);
+            buttonComposite.setLayout(new GridLayout(3, false));
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setText("   &Ok   ");
+            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+            gridData.widthHint = 70;
+            okButton.setLayoutData(gridData);
+            okButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    int b = Integer.valueOf(brightField.getText());
                     int c = Integer.valueOf(contrastField.getText());
 
                     applyBrightContrast(b, c);
-                    
+
                     bLevel = b;
                     cLevel = c;
-                    
+
                     shell.dispose();
-        		}
-        	});
-            
+                }
+            });
+
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
             cancelButton.setText("&Cancel");
             gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
             gridData.widthHint = 70;
             cancelButton.setLayoutData(gridData);
             cancelButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		applyBrightContrast(bLevel, cLevel);
+                public void widgetSelected(SelectionEvent e) {
+                    applyBrightContrast(bLevel, cLevel);
                     shell.dispose();
-            	}
+                }
             });
-            
+
             Button applyButton = new Button(buttonComposite, SWT.PUSH);
             applyButton.setText("&Apply");
             gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
             gridData.widthHint = 70;
             applyButton.setLayoutData(gridData);
             applyButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		int b = Integer.valueOf(brightField.getText());
+                public void widgetSelected(SelectionEvent e) {
+                    int b = Integer.valueOf(brightField.getText());
                     int c = Integer.valueOf(contrastField.getText());
 
                     applyBrightContrast(b, c);
-            	}
+                }
             });
-        	
-        	
+
+
             shell.pack();
-            
+
             shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-            
+
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                               (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-            
+
             shell.open();
-            
+
             Display display = parent.getDisplay();
             while(!shell.isDisposed()) {
                 if (!display.readAndDispatch())
                     display.sleep();
             }
         }
-        
+
         private void applyBrightContrast(int blevel, int clevel) {
             // do not separate autogain and simple contrast process
             //            ImageFilter filter = new BrightnessFilter(blevel, clevel);
@@ -4142,7 +4167,7 @@ public class DefaultImageView implements ImageView {
             }
         }
     }
-    
+
     /*
         /**
         * Listen to the text field. This method detects when the value of the

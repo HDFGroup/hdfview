@@ -29,7 +29,7 @@ import javax.swing.filechooser.FileFilter;
 /**
  * A convenience implementation of FileFilter that filters out all files except
  * for those type extensions that it knows about.
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
@@ -56,7 +56,7 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * Creates a file filter. If no filters are added, then all files are
      * accepted.
-     * 
+     *
      * @see #addExtension
      */
     public DefaultFileFilter() {
@@ -66,8 +66,10 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * Creates a file filter that accepts files with the given extension.
      * Example: new DefaultFileFilter("jpg");
-     * 
+     *
      * @see #addExtension
+     *
+     * @param extension the file extension to filter on
      */
     public DefaultFileFilter(String extension) {
         this(extension, null);
@@ -76,11 +78,14 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * Creates a file filter that accepts the given file type. Example: new
      * DefaultFileFilter("jpg", "JPEG Image Images");
-     * 
+     *
      * Note that the "." before the extension is not needed. If provided, it
      * will be ignored.
-     * 
+     *
      * @see #addExtension
+     *
+     * @param extension the file extension to filter on
+     * @param description the file extension full description
      */
     public DefaultFileFilter(String extension, String description) {
         this();
@@ -95,10 +100,13 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * Creates a file filter from the given string array. Example: new
      * DefaultFileFilter(String {"gif", "jpg"});
-     * 
+     *
      * Note that the "." before the extension is not needed adn will be ignored.
-     * 
+     *
      * @see #addExtension
+     *
+     * @param filters
+     *          the list of filter names
      */
     public DefaultFileFilter(String[] filters) {
         this(filters, null);
@@ -108,10 +116,15 @@ public class DefaultFileFilter extends FileFilter {
      * Creates a file filter from the given string array and description.
      * Example: new DefaultFileFilter(String {"gif", "jpg"},
      * "Gif and JPG Images");
-     * 
+     *
      * Note that the "." before the extension is not needed and will be ignored.
-     * 
+     *
      * @see #addExtension
+     *
+     * @param filters
+     *          the list of filter names
+     * @param description
+     *          the name of the filter list
      */
     public DefaultFileFilter(String[] filters, String description) {
         this();
@@ -125,15 +138,17 @@ public class DefaultFileFilter extends FileFilter {
     }
 
     /**
-     * Return true if this file should be shown in the directory pane, false if
+     * @param f the file to be accepted
+     *
+     * @return true if this file should be shown in the directory pane, false if
      * it shouldn't.
-     * 
+     *
      * Files that begin with "." are ignored.
-     * 
+     *
      * @see #getExtension
      */
     @Override
-	public boolean accept(File f) {
+    public boolean accept(File f) {
         if (f != null) {
             if (f.isDirectory()) {
                 return true;
@@ -148,8 +163,10 @@ public class DefaultFileFilter extends FileFilter {
     }
 
     /**
-     * Return the extension portion of the file's name .
-     * 
+     * @param f the file under query
+     *
+     * @return the extension portion of the file's name .
+     *
      * @see #getExtension
      * @see FileFilter#accept
      */
@@ -166,15 +183,17 @@ public class DefaultFileFilter extends FileFilter {
 
     /**
      * Adds a filetype "dot" extension to filter against.
-     * 
+     *
      * For example: the following code will create a filter that filters out all
      * files except those that end in ".jpg" and ".tif":
-     * 
+     *
      * DefaultFileFilter filter = new DefaultFileFilter();
      * filter.addExtension("jpg"); filter.addExtension("tif"); or
      * filter.addExtension("jpg, tif");
-     * 
+     *
      * Note that the "." before the extension is not needed and will be ignored.
+     *
+     * @param extension the file extension to add to the file filter
      */
     public void addExtension(String extension) {
         if (filters == null) {
@@ -191,11 +210,11 @@ public class DefaultFileFilter extends FileFilter {
     }
 
     /**
-     * Returns the human readable description of this filter. For example:
+     * @return the human readable description of this filter. For example:
      * "JPEG and GIF Image Files (*.jpg, *.gif)"
      */
     @Override
-	public String getDescription() {
+    public String getDescription() {
         if (fullDescription == null) {
             if ((description == null) || isExtensionListInDescription()) {
                 fullDescription = description == null ? "(" : description
@@ -227,6 +246,8 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * Sets the human readable description of this filter. For example:
      * filter.setDescription("Gif and JPG Images");
+     *
+     * @param description the full description of the file filter
      */
     public void setDescription(String description) {
         this.description = description;
@@ -236,10 +257,11 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * Determines whether the extension list (.jpg, .gif, etc) should show up in
      * the human readable description.
-     * 
+     *
      * Only relevent if a description was provided in the constructor or using
      * setDescription();
-     * 
+     *
+     * @param b the show state of the extension list
      */
     public void setExtensionListInDescription(boolean b) {
         useExtensionsInDescription = b;
@@ -247,9 +269,9 @@ public class DefaultFileFilter extends FileFilter {
     }
 
     /**
-     * Returns whether the extension list (.jpg, .gif, etc) should show up in
+     * @return whether the extension list (.jpg, .gif, etc) should show up in
      * the human readable description.
-     * 
+     *
      * Only relevent if a description was provided in the constructor or using
      * setDescription();
      */
@@ -257,7 +279,7 @@ public class DefaultFileFilter extends FileFilter {
         return useExtensionsInDescription;
     }
 
-    /** Return a file filter for HDF4/5 file. */
+    /** @return a file filter for HDF4/5 file. */
     public static FileFilter getFileFilter() {
         boolean extensionNotChanged = (fileExtension
                 .equalsIgnoreCase(ViewProperties.getFileExtension()));
@@ -277,7 +299,7 @@ public class DefaultFileFilter extends FileFilter {
         return (FILE_FILTER_HDF = filter);
     }
 
-    /** Return a file filter for HDF4 file. */
+    /** @return a file filter for HDF4 file. */
     public static FileFilter getFileFilterHDF4() {
         if (FILE_FILTER_HDF4 != null) {
             return FILE_FILTER_HDF4;
@@ -293,7 +315,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_HDF4;
     }
 
-    /** Return a file filter for HDF5 file. */
+    /** @return a file filter for HDF5 file. */
     public static FileFilter getFileFilterHDF5() {
         if (FILE_FILTER_HDF5 != null) {
             return FILE_FILTER_HDF5;
@@ -308,7 +330,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_HDF5;
     }
 
-    /** Return a file filter for JPEG image files. */
+    /** @return a file filter for JPEG image files. */
     public static FileFilter getFileFilterJPEG() {
         if (FILE_FILTER_JPEG != null) {
             return FILE_FILTER_JPEG;
@@ -327,7 +349,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_JPEG;
     }
 
-    /** Return a file filter for TIFF image files. */
+    /** @return a file filter for TIFF image files. */
     public static FileFilter getFileFilterTIFF() {
         if (FILE_FILTER_TIFF != null) {
             return FILE_FILTER_TIFF;
@@ -342,7 +364,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_TIFF;
     }
 
-    /** Return a file filter for PNG image files. */
+    /** @return a file filter for PNG image files. */
     public static FileFilter getFileFilterPNG() {
         if (FILE_FILTER_PNG != null) {
             return FILE_FILTER_PNG;
@@ -356,7 +378,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_PNG;
     }
 
-    /** Return a file filter for BMP image files. */
+    /** @return a file filter for BMP image files. */
     public static FileFilter getFileFilterBMP() {
         if (FILE_FILTER_BMP != null) {
             return FILE_FILTER_BMP;
@@ -371,7 +393,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_BMP;
     }
 
-    /** Return a file filter for GIF image files. */
+    /** @return a file filter for GIF image files. */
     public static FileFilter getFileFilterGIF() {
         if (FILE_FILTER_GIF != null) {
             return FILE_FILTER_GIF;
@@ -385,7 +407,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_GIF;
     }
 
-    /** Return a file filter for GIF, JPEG, BMP, or PNG image files. */
+    /** @return a file filter for GIF, JPEG, BMP, or PNG image files. */
     public static FileFilter getImageFileFilter() {
         if (FILE_FILTER_IMG != null) {
             return FILE_FILTER_IMG;
@@ -408,7 +430,7 @@ public class DefaultFileFilter extends FileFilter {
         return FILE_FILTER_IMG;
     }
 
-    /** Return a file filter for text file. */
+    /** @return a file filter for text file. */
     public static FileFilter getFileFilterText() {
         if (FILE_FILTER_TEXT != null) {
             return FILE_FILTER_TEXT;
@@ -422,8 +444,8 @@ public class DefaultFileFilter extends FileFilter {
 
         return FILE_FILTER_TEXT;
     }
-    
-    /** Return a file filter for binary file. */
+
+    /** @return a file filter for binary file. */
     public static FileFilter getFileFilterBinary() {
         if (FILE_FILTER_BINARY != null) {
             return FILE_FILTER_BINARY;
@@ -440,7 +462,11 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * look at the first 4 bytes of the file to see if it is an HDF4 file.
      * byte[0]=14, byte[1]=3, byte[2]=19, byte[3]=1 or if it is a netCDF file
-     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1 or
+     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1
+     *
+     * @param filename the file to test if HDF4
+     *
+     * @return true if the file is of type HDF4
      */
     public static boolean isHDF4(String filename) {
         boolean ish4 = false;
@@ -494,6 +520,10 @@ public class DefaultFileFilter extends FileFilter {
      * look at the first 8 bytes of the file to see if it is an HDF5 file.
      * byte[0]=-199 which is 137 in unsigned byte, byte[1]=72, byte[2]=68,
      * byte[3]=70, byte[4]=13, byte[5]=10, byte[6]=26, byte[7]=10
+     *
+     * @param filename the file to test if HDF5
+     *
+     * @return true if the file is of type HDF5
      */
     public static boolean isHDF5(String filename) {
         boolean ish5 = false;
@@ -561,6 +591,10 @@ public class DefaultFileFilter extends FileFilter {
     /**
      * look at the first 4 bytes of the file to see if it is a netCDF file
      * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1 or
+     *
+     * @param filename the file to test if netcdf
+     *
+     * @return true if the file is of type netcdf
      */
     public static boolean isNetcdf(String filename) {
         boolean isnc = false;
@@ -608,7 +642,9 @@ public class DefaultFileFilter extends FileFilter {
 
     /**
      * Read HDF5 user block data into byte array.
-     * 
+     *
+     * @param filename the HDF5 file from which to get the user block
+     *
      * @return a byte array of user block, or null if there is user data.
      */
     public static byte[] getHDF5UserBlock(String filename) {
@@ -714,7 +750,11 @@ public class DefaultFileFilter extends FileFilter {
 
     /**
      * Write HDF5 user block data into byte array.
-     * 
+     *
+     * @param fin the input filename
+     * @param fout the output filename
+     * @param buf  the data to write into the user block
+     *
      * @return a byte array of user block, or null if there is user data.
      */
     public static boolean setHDF5UserBlock(String fin, String fout, byte[] buf) {

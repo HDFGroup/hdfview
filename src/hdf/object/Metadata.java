@@ -20,18 +20,22 @@ package hdf.object;
  * component. Particular implementations of Metadata often provide additional
  * context-specific objects as well.
  * <p>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public interface Metadata extends java.io.Serializable {
     /**
      * Returns the value of this Metadata.
+     *
+     * @return the value of this Metadata.
      */
     public abstract Object getValue();
 
     /**
      * Sets the value of this Metadata.
+     *
+     * @param value the value of this Metadata.
      */
     public abstract void setValue(Object value);
 }

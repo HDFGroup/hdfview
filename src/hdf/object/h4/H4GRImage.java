@@ -75,7 +75,7 @@ import hdf.object.ScalarDS;
      selectedIndex[1] = 0;
 
      // reset the selection arrays
-     for (int i=0; i<rank; i++) {
+     for (int i=0; i&lt;rank; i++) {
          start[i] = 0;
          selected[i] = 1;
          stride[i] = 1;
@@ -96,7 +96,6 @@ import hdf.object.ScalarDS;
 
  * </pre>
  *
- * <p>
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -138,7 +137,7 @@ public class H4GRImage extends ScalarDS
 
     /**
      * Creates a H4GRImage object with specific name, path, and object ID.
-     * <p>
+     *
      * @param theFile the HDF file.
      * @param name the name of this H4GRImage.
      * @param path the full path of this H4GRImage.
@@ -735,6 +734,8 @@ public class H4GRImage extends ScalarDS
 
     /**
      * Returns the number of components of this image data.
+     *
+     * @return the number of components
      */
     public int getComponentCount()
     {
@@ -743,6 +744,7 @@ public class H4GRImage extends ScalarDS
 
     /**
      * Creates a new image.
+     *
      * @param name the name of the dataset to create.
      * @param pgroup the parent group of the new dataset.
      * @param type the datatype of the dataset.
@@ -753,7 +755,10 @@ public class H4GRImage extends ScalarDS
      * @param ncomp number of components of the image data.
      * @param interlace the interlace mode.
      * @param data the array of data values.
+     *
      * @return the new image if successful. Otherwise returns null.
+     *
+     * @throws Exception if the image can not be created
      */
     public static H4GRImage create(
         String name,

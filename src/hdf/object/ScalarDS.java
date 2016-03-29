@@ -26,14 +26,13 @@ import java.util.Vector;
  * spreadsheets.
  * <p>
  * ScalarDS is an abstract class. Current implementing classes are the H4SDS, H5GRImage and H5ScalarDS.
- * <p>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public abstract class ScalarDS extends Dataset {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 8925371455928203981L;
 
@@ -122,7 +121,7 @@ public abstract class ScalarDS extends Dataset {
      * <p>
      * For example, in H5ScalarDS(h5file, "dset", "/arrays/"), "dset" is the name of the dataset, "/arrays" is the group
      * path of the dataset.
-     * 
+     *
      * @param theFile
      *            the file that contains the data object.
      * @param theName
@@ -137,6 +136,15 @@ public abstract class ScalarDS extends Dataset {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #ScalarDS(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the file that contains the data object.
+     * @param theName
+     *            the name of the data object, e.g. "dset".
+     * @param thePath
+     *            the full path of the data object, e.g. "/arrays/".
+     * @param oid
+     *            the v of the data object.
      */
     @Deprecated
     public ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid) {
@@ -158,7 +166,7 @@ public abstract class ScalarDS extends Dataset {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.Dataset#clearData()
      */
     @Override
@@ -169,10 +177,10 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Converts the data values of this dataset to appropriate Java integer if they are unsigned integers.
-     * 
+     *
      * @see hdf.object.Dataset#convertToUnsignedC(Object)
      * @see hdf.object.Dataset#convertFromUnsignedC(Object, Object)
-     * 
+     *
      * @return the converted data buffer.
      */
     public Object convertFromUnsignedC() {
@@ -201,11 +209,11 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Converts Java integer data of this dataset back to unsigned C-type integer data if they are unsigned integers.
-     * 
+     *
      * @see hdf.object.Dataset#convertToUnsignedC(Object)
      * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
      * @see #convertFromUnsignedC(Object data_in)
-     * 
+     *
      * @return the converted data buffer.
      */
     public Object convertToUnsignedC() {
@@ -239,14 +247,14 @@ public abstract class ScalarDS extends Dataset {
      * <p>
      * Sub-classes have to implement this interface. HDF4 and HDF5 images use different libraries to retrieve the
      * associated palette.
-     * 
+     *
      * @return the 2D palette byte array.
      */
     public abstract byte[][] getPalette();
 
     /**
      * Sets the palette for this dataset.
-     * 
+     *
      * @param pal
      *            the 2D palette byte array.
      */
@@ -259,9 +267,11 @@ public abstract class ScalarDS extends Dataset {
      * <p>
      * A scalar dataset may have multiple palettes attached to it. readPalette(int idx) returns a specific palette
      * identified by its index.
-     * 
+     *
      * @param idx
      *            the index of the palette to read.
+     *
+     * @return the image palette
      */
     public abstract byte[][] readPalette(int idx);
 
@@ -270,9 +280,10 @@ public abstract class ScalarDS extends Dataset {
      * <p>
      * A scalar dataset may have multiple palettes attached to it. getPaletteName(int idx) returns the name of a
      * specific palette identified by its index.
-     * 
+     *
      * @param idx
      *            the index of the palette to retrieve the name.
+     *
      * @return The name of the palette
      */
     public String getPaletteName(int idx) {
@@ -289,7 +300,7 @@ public abstract class ScalarDS extends Dataset {
      * <p>
      * For example, Dataset "Iceberg" has an attribute of object reference "Palette". The arrtibute "Palette" has value
      * "2538" that is the object reference of the palette data set "Iceberg Palette".
-     * 
+     *
      * @return null if there is no palette attribute attached to this dataset.
      */
     public abstract byte[] getPaletteRefs();
@@ -300,7 +311,7 @@ public abstract class ScalarDS extends Dataset {
      * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For more
      * details, read <a href="http://hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification
      * </a>
-     * 
+     *
      * @return true if the dataset is an image; otherwise, returns false.
      */
     public final boolean isImage() {
@@ -311,7 +322,7 @@ public abstract class ScalarDS extends Dataset {
      * Returns true if this dataset is displayed as an image.
      * <p>
      * A ScalarDS can be displayed as an image or table.
-     * 
+     *
      * @return true if this dataset is displayed as an image; otherwise, returns false.
      */
     public final boolean isImageDisplay() {
@@ -323,7 +334,7 @@ public abstract class ScalarDS extends Dataset {
      * Returns true if this dataset is displayed as an image with default image order.
      * <p>
      * A ScalarDS can be displayed as an image with different orders of dimensions.
-     * 
+     *
      * @return true if this dataset is displayed as an image with default image order; otherwise, returns false.
      */
     public final boolean isDefaultImageOrder() {
@@ -332,7 +343,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Sets the flag to display the dataset as an image.
-     * 
+     *
      * @param b
      *            if b is true, display the dataset as an image
      */
@@ -346,7 +357,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Sets the flag to indicate this dataset is an image.
-     * 
+     *
      * @param b
      *            if b is true, the dataset is an image.
      */
@@ -360,7 +371,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Sets data range for an image.
-     * 
+     *
      * @param min
      *            the data range start.
      * @param max
@@ -379,7 +390,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Add a value that will be filtered out in image
-     * 
+     *
      * @param x
      *            value to be filtered
      */
@@ -396,13 +407,16 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * get a list of values that will be filtered out in image
+     *
+     * @return the list of Image values
      */
     public List<Number> getFilteredImageValues() {
         return filteredImageValues;
     }
 
     /**
-     * Returns true if this dataset is a true color image.
+     * @return true if this dataset is a true color image.
+     *
      */
 
     public final boolean isTrueColor() {
@@ -411,7 +425,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns true if this dataset is ASCII text.
-     * 
+     *
      * @return true if this dataset is ASCII text.
      */
     public final boolean isText() {
@@ -420,15 +434,15 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns the interlace mode of a true color image (RGB).
-     * 
+     *
      * Valid values:
-     * 
+     *
      * <pre>
      *     INTERLACE_PIXEL -- RGB components are contiguous, i.e. rgb, rgb, rgb, ...
      *     INTERLACE_LINE -- each RGB component is stored as a scan line
      *     INTERLACE_PLANE -- each RGB component is stored as a plane
      * </pre>
-     * 
+     *
      * @return the interlace mode of a true color image (RGB).
      */
     public final int getInterlace() {
@@ -437,7 +451,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns true if the original C data are unsigned integers.
-     * 
+     *
      * @return true if the original C data are unsigned integers.
      */
     public final boolean isUnsigned() {
@@ -446,7 +460,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns the (min, max) pair of image data range.
-     * 
+     *
      * @return the (min, max) pair of image data range.
      */
     public double[] getImageDataRange() {
@@ -455,7 +469,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns the fill values for the dataset.
-     * 
+     *
      * @return the fill values for the dataset.
      */
     public final Object getFillValue() {

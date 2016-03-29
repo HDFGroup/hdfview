@@ -21,8 +21,8 @@ import java.util.List;
  * for a data type.
  * <p>
  * A datatype has four basic characteristics: class, size, byte order and sign.
- * These charactertics are defeined in the <a
- * href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>.
+ * These charactertics are defeined in the
+ * <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>.
  * <p>
  * These charactertics apply to all the sub-classes. The sub-classes may have
  * different ways to describe a datatype. We here define the <strong> native
@@ -54,103 +54,103 @@ public abstract class Datatype extends HObject {
     public static final int NATIVE = -1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_NO_CLASS = -1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_INTEGER = 0;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_FLOAT = 1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_CHAR = 2;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_STRING = 3;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_BITFIELD = 4;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_OPAQUE = 5;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_COMPOUND = 6;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_REFERENCE = 7;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_ENUM = 8;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_VLEN = 9;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_ARRAY = 10;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_TIME = 11;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_LE = 0;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_BE = 1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_VAX = 2;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_NONE = 3;
 
     // sign
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int SIGN_NONE = 0;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int SIGN_2 = 1;
 
     /**
-     * See {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
      */
     public static final int NSGN = 2;
 
@@ -194,7 +194,6 @@ public abstract class Datatype extends HObject {
 
     /**
      * Constructs a named datatype with a given file, name and path.
-     * <p>
      *
      * @param theFile
      *            the HDF file.
@@ -210,6 +209,15 @@ public abstract class Datatype extends HObject {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #Datatype(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the HDF file.
+     * @param name
+     *            the name of the datatype, e.g "12-bit Integer".
+     * @param path
+     *            the full group path of the datatype, e.g. "/datatypes/".
+     * @param oid
+     *            the oidof the datatype.
      */
     @Deprecated
     public Datatype(FileFormat theFile, String name, String path, long[] oid) {
@@ -220,17 +228,17 @@ public abstract class Datatype extends HObject {
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
      * The following is a list of a few example of H5Datatype.
-     * <OL>
-     * <LI>to create unsigned native integer<br>
+     * <ol>
+     * <li>to create unsigned native integer<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
      * SIGN_NONE);
-     * <LI>to create 16-bit signed integer with big endian<br>
+     * <li>to create 16-bit signed integer with big endian<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <LI>to create native float<br>
+     * <li>to create native float<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <LI>to create 64-bit double<br>
+     * <li>to create 64-bit double<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </OL>
+     * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
@@ -253,17 +261,17 @@ public abstract class Datatype extends HObject {
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
      * The following is a list of a few example of H5Datatype.
-     * <OL>
-     * <LI>to create unsigned native integer<br>
+     * <ol>
+     * <li>to create unsigned native integer<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
      * SIGN_NONE);
-     * <LI>to create 16-bit signed integer with big endian<br>
+     * <li>to create 16-bit signed integer with big endian<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <LI>to create native float<br>
+     * <li>to create native float<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <LI>to create 64-bit double<br>
+     * <li>to create 64-bit double<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </OL>
+     * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
@@ -304,9 +312,8 @@ public abstract class Datatype extends HObject {
      *
      * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4,
      * NATIVE, SIGN_NONE);
-     * <p>
      *
-     * @see #fromNative(int nativeID)
+     * @see #fromNative(long nativeID)
      * @param tid
      *            the native datatype identifier.
      */
@@ -464,7 +471,6 @@ public abstract class Datatype extends HObject {
      *
      * Where dtype is equivalent to <br>
      * new H5Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
-     * <p>
      *
      * @param nativeID
      *            the datatype identifier.

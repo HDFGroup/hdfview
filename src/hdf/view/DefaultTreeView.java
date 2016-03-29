@@ -1044,6 +1044,7 @@ public class DefaultTreeView implements TreeView {
      * @param pobj
      *            the parent TreeItem to insert the new object under.
      *            If null, inserts the object at the end of the Tree.
+     *
      * @return the newly created TreeItem
      */
     private TreeItem insertObject(HObject obj, TreeItem pobj) {
@@ -1287,7 +1288,7 @@ public class DefaultTreeView implements TreeView {
             shell.getDisplay().beep();
             showError("Rename Object", ex.getMessage());
         }
-        
+
         selectedItem.setText(newName);
     }
 
@@ -1298,7 +1299,7 @@ public class DefaultTreeView implements TreeView {
             showError("Unsupported operation: cannot delete HDF4 object.", shell.getText());
             return;
         }
-        
+
         TreeItem[] currentSelections = tree.getSelection();
 
         if (moveFlag == true) {
@@ -1407,6 +1408,7 @@ public class DefaultTreeView implements TreeView {
     /**
      * Recursively expand/collapse a given selected TreeItem.
      *
+     * @param item the selected tree item
      * @param expand
      *            Expands the TreeItem and its children if true.
      *            Collapse the TreeItem and its children if false.
@@ -1439,8 +1441,10 @@ public class DefaultTreeView implements TreeView {
     /**
      * Gets the Image to set on the TreeItem for the specified HObject,
      * based on the type of HObject it is.
+     *
      * @param obj
-     * @return
+     *
+     * @return the image for the specified HObject
      */
     private Image getObjectTypeImage(HObject obj) {
         boolean hasAttribute = obj.hasAttribute();
@@ -1515,6 +1519,10 @@ public class DefaultTreeView implements TreeView {
 
     /**
      * Checks if a file is already open.
+     *
+     * @param filename the file to query
+     *
+     * @return true if the file is open
      */
     private boolean isFileOpen(String filename) {
         boolean isOpen = false;
@@ -1939,7 +1947,10 @@ public class DefaultTreeView implements TreeView {
         }
     }
 
-    /** Save data as file. */
+    /** Save data as file.
+     *
+     * @throws Exception if a failure occurred
+     */
     private void saveDataAsFile() throws Exception {
         if (!(selectedObject instanceof Dataset) || (selectedObject == null) || (selectedItem == null)) return;
 
@@ -2045,6 +2056,8 @@ public class DefaultTreeView implements TreeView {
      *
      * @return the FileFormat of this file if successful; otherwise returns
      *         null.
+     *
+     * @throws Exception if a failure occurred
      */
     public FileFormat openFile(String filename, int accessID) throws Exception {
         log.trace("openFile: {},{}", filename, accessID);
@@ -2186,6 +2199,8 @@ public class DefaultTreeView implements TreeView {
      *
      * @param file
      *            the file to close
+     *
+     * @throws Exception if a failure occurred
      */
     public void closeFile(FileFormat file) throws Exception {
         if (file == null) return;
@@ -2226,6 +2241,8 @@ public class DefaultTreeView implements TreeView {
      *
      * @param file
      *            the file to save
+     *
+     * @throws Exception if a failure occurred
      */
     public void saveFile(FileFormat file) throws Exception {
         if (file == null) {
@@ -2344,8 +2361,6 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Returns the Tree which holds the file structure.
-     *
      * @return the Tree which holds the file structure.
      */
     public Tree getTree() {
@@ -2353,7 +2368,7 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Returns the list of currently open files.
+     * @return the list of currently open files.
      */
     public List<FileFormat> getCurrentFiles() {
         return fileList;
@@ -2364,8 +2379,10 @@ public class DefaultTreeView implements TreeView {
      *
      * @param dataObject
      *            the data object
+     *
      * @return the DataView that displays the data content
-     * @throws Exception
+     *
+     * @throws Exception if a failure occurred
      */
     public DataView showDataContent(HObject dataObject) throws Exception {
         log.trace("showDataContent({}): start", dataObject.getName());
@@ -2535,8 +2552,10 @@ public class DefaultTreeView implements TreeView {
      *
      * @param dataObject
      *            the data object
+     *
      * @return the MetaDataView that displays the MetaData of the data object
-     * @throws Exception
+     *
+     * @throws Exception if a failure occurred
      */
     public MetaDataView showMetaData(HObject dataObject) throws Exception {
         if (dataObject == null) {
@@ -2815,13 +2834,13 @@ public class DefaultTreeView implements TreeView {
             gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
             gridData.widthHint = 70;
             cancelButton.setLayoutData(gridData);
-    		
-    		shell.pack();
-    		
-    		Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-    		
-    		shell.setMinimumSize(minimumSize);
-    		shell.setSize(minimumSize.x + 50, minimumSize.y);
+
+            shell.pack();
+
+            Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+
+            shell.setMinimumSize(minimumSize);
+            shell.setSize(minimumSize.x + 50, minimumSize.y);
 
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();

@@ -146,13 +146,13 @@ public class DefaultTableView implements TableView {
     /**
      * The value of the dataset.
      */
-    private Object                          dataValue;
-    
-    private Object                          fillValue               = null;
+    private Object                            dataValue;
+
+    private Object                           fillValue               = null;
 
     private enum ViewType { TABLE, IMAGE, TEXT };
-    private ViewType viewType = ViewType.TABLE;
-    
+    private    ViewType viewType = ViewType.TABLE;
+
     // Used for bitmask operations on data
     private BitSet                          bitmask                 = null;
     private BITMASK_OP                      bitmaskOP               = BITMASK_OP.EXTRACT;
@@ -203,7 +203,6 @@ public class DefaultTableView implements TableView {
 
     private final boolean                   startEditing[]   = { false };
 
-
     /**
      * Global variables for GUI components
      */
@@ -224,14 +223,14 @@ public class DefaultTableView implements TableView {
     private Group                           group;
 
     // Text field to display the value of the current cell.
-    private Text                            cellValueField;
-    
+    private Text                              cellValueField;
+
     // Label to indicate the current cell location.
-    private Label                           cellLabel;
+    private Label                             cellLabel;
 
     // The value of the current cell value in editing.
-    private Object                          currentEditingCellValue = null;
-    
+    private Object                           currentEditingCellValue = null;
+
     // Keep track of table row selections
     private SelectionLayer                  selectionLayer;
 
@@ -241,6 +240,8 @@ public class DefaultTableView implements TableView {
     /**
      * Constructs a TableView.
      *
+     * @param parent
+     *             the parent of this dialog
      * @param theView
      *             the main HDFView.
      */
@@ -251,9 +252,10 @@ public class DefaultTableView implements TableView {
     /**
      * Constructs a TableView.
      *
+     * @param parent
+     *             the parent of this dialog
      * @param theView
      *             the main HDFView.
-     *
      * @param map
      *             the properties on how to show the data. The map is used to allow applications to
      *          pass properties on how to display the data, such as, transposing data, showing
@@ -268,9 +270,9 @@ public class DefaultTableView implements TableView {
         display = shell.getDisplay();
 
         shell.setData(this);
-        
+
         shell.setLayout(new GridLayout(1, true));
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
@@ -369,7 +371,7 @@ public class DefaultTableView implements TableView {
 
         log.trace("dataset isDisplayTypeChar={} isConvertEnum={}", isDisplayTypeChar, ViewProperties.isConvertEnum());
         dataset.setEnumConverted(ViewProperties.isConvertEnum());
-        
+
         // Setup subset information
         log.trace("DefaultTableView: Setup subset information");
         int rank = dataset.getRank();
@@ -382,17 +384,17 @@ public class DefaultTableView implements TableView {
             curFrame = start[selectedIndex[2]] + indexBase;
             maxFrame = dims[selectedIndex[2]];
         }
-        
+
         ToolBar bar = createToolbar(shell);
         bar.setSize(shell.getSize().x, 30);
         bar.setLocation(0, 0);
-        
+
         group = new Group(shell, SWT.SHADOW_ETCHED_OUT);
         group.setFont(Display.getCurrent().getSystemFont());
         group.setText(indexBase + "-based");
         group.setLayout(new GridLayout(1, true));
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         SashForm content = new SashForm(group, SWT.VERTICAL);
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         content.setSashWidth(10);
@@ -469,9 +471,9 @@ public class DefaultTableView implements TableView {
             shell.dispose();
             return;
         }
-        
+
         table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         StringBuffer sb = new StringBuffer(hObject.getName());
         sb.append("  at  ");
         sb.append(hObject.getPath());
@@ -523,7 +525,7 @@ public class DefaultTableView implements TableView {
         shell.setLocation(dataClientArea.getBounds().x, dataClientArea.getBounds().y);
 
         viewer.addDataView(this);
-        
+
         shell.open();
 
         // Workaround to prevent parent shell cursor from staying in "wait"
@@ -534,7 +536,7 @@ public class DefaultTableView implements TableView {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-        
+
         viewer.removeDataView(this);
     }
 
@@ -1418,7 +1420,7 @@ public class DefaultTableView implements TableView {
 
         return menuBar;
     }
-    
+
     private ToolBar createToolbar(final Shell shell) {
         ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
         toolbar.setFont(Display.getCurrent().getSystemFont());
@@ -1433,7 +1435,7 @@ public class DefaultTableView implements TableView {
                 showLineplot();
             }
         });
-        
+
         if (dataset.getRank() > 2) {
             new ToolItem(toolbar, SWT.SEPARATOR).setWidth(20);
 
@@ -1443,7 +1445,7 @@ public class DefaultTableView implements TableView {
             item.setToolTipText("First Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                	firstPage();
+                    firstPage();
                 }
             });
 
@@ -1453,7 +1455,7 @@ public class DefaultTableView implements TableView {
             item.setToolTipText("Previous Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                	previousPage();
+                    previousPage();
                 }
             });
 
@@ -1512,7 +1514,7 @@ public class DefaultTableView implements TableView {
             item.setToolTipText("Next Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                	nextPage();
+                    nextPage();
                 }
             });
 
@@ -1522,7 +1524,7 @@ public class DefaultTableView implements TableView {
             item.setToolTipText("Last Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                	lastPage();
+                    lastPage();
                 }
             });
         }
@@ -1738,7 +1740,7 @@ public class DefaultTableView implements TableView {
         start[selectedIndex[2]] = idx;
         curFrame = idx + indexBase;
         frameField.setText(String.valueOf(curFrame));
-        
+
         dataset.clearData();
 
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
@@ -1798,6 +1800,8 @@ public class DefaultTableView implements TableView {
      *            the row of the editing cell.
      * @param col
      *            the column of the editing cell.
+     *
+     * @throws Exception if a failure occurred
      */
     private void updateValueInMemory(String cellValue, int row, int col) throws Exception {
         log.trace("DefaultTableView: updateValueInMemory()");
@@ -1987,12 +1991,12 @@ public class DefaultTableView implements TableView {
     public int getSelectedColumnCount() {
         return selectionLayer.getSelectedColumnPositions().length;
     }
-    
+
     @Override
     public int getSelectedRowCount() {
         return selectionLayer.getSelectedRowCount();
     }
-    
+
     /**
      * Returns the selected data values of the ScalarDS
      */
@@ -2313,7 +2317,7 @@ public class DefaultTableView implements TableView {
     /**
      * Display data pointed by region references. Data of each region is shown in a separate
      * spreadsheet. The reg. ref. information is stored in strings of the format below:
-     * <p />
+     * <p>
      * <ul>
      * <li>For point selections: "file_id:obj_id { <point1> <point2> ...) }", where <point1> is in
      * the form of (location_of_dim0, location_of_dim1, ...). For example, 0:800 { (0,1) (2,11)
@@ -2326,7 +2330,7 @@ public class DefaultTableView implements TableView {
      *
      * @param reg
      *            the array of strings that contain the reg. ref information.
-     * 
+     *
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void showRegRefData (String reg) {
@@ -2481,6 +2485,8 @@ public class DefaultTableView implements TableView {
      *            the row of the editing cell.
      * @param col
      *            the column of the editing cell.
+     *
+     * @throws Exception if a failure occurred
      */
     private void updateScalarData (String cellValue, int row, int col) throws Exception {
         if (!(dataset instanceof ScalarDS) || (cellValue == null) || ((cellValue = cellValue.trim()) == null)
@@ -2730,6 +2736,8 @@ public class DefaultTableView implements TableView {
 
     /**
      * Import data values from text file.
+     *
+     * @param fname  the file to import text from
      */
     private void importTextData (String fname) {
         int cols = selectionLayer.getPreferredColumnCount();
@@ -2748,7 +2756,8 @@ public class DefaultTableView implements TableView {
             if (r0 < 0) {
                 r0 = 0;
             }
-        } else {
+        }
+        else {
             r0 = 0;
             c0 = 0;
         }
@@ -2867,7 +2876,8 @@ public class DefaultTableView implements TableView {
             // Start at the first column for compound datasets
             if (dataset instanceof CompoundDS) {
                 c = 0;
-            } else {
+            }
+            else {
                 c = c0;
             }
 
@@ -2912,7 +2922,10 @@ public class DefaultTableView implements TableView {
         getBinaryDataFromFile(chosenFile.getAbsolutePath());
     }
 
-    /** Reads data from a binary file into a buffer and updates table. */
+    /** Reads data from a binary file into a buffer and updates table.
+     *
+     * @param filename the file to read binary data from
+     */
     private void getBinaryDataFromFile (String fileName) {
         String fname = fileName;
         FileInputStream inputFile = null;
@@ -3154,7 +3167,10 @@ public class DefaultTableView implements TableView {
         table.doCommand(new StructuralRefreshCommand());
     }
 
-    /** Save data as text. */
+    /** Save data as text.
+     *
+     * @throws Exception if a failure occurred
+     */
     private void saveAsText() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
         fchooser.setFilterPath(dataset.getFile());
@@ -3236,7 +3252,10 @@ public class DefaultTableView implements TableView {
         viewer.showStatus("Data saved to: " + fname);
     }
 
-    /** Save data as binary. */
+    /** Save data as binary.
+     *
+     * @throws Exception if a failure occurred
+     */
     private void saveAsBinary() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
         fchooser.setFilterPath(dataset.getFile());

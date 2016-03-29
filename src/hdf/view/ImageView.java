@@ -19,14 +19,14 @@ import java.awt.Rectangle;
 
 /**
  * The image view interface for displaying image object
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public abstract interface ImageView extends DataView {
     /**
      * Returns the selected area of the image
-     * 
+     *
      * @return the rectangle of the selected image area.
      */
     public abstract Rectangle getSelectedArea();
@@ -37,22 +37,28 @@ public abstract interface ImageView extends DataView {
     /** @return true if the image interlace is plane interlace. */
     public abstract boolean isPlaneInterlace();
 
-    /** Returns array of selected data */
+    /** @return array of selected data */
     public abstract Object getSelectedData();
 
-    /** Returns the image displayed in this imageView */
+    /** @return the image displayed in this imageView */
     public abstract Image getImage();
 
-    /** Sets the image */
+    /** Sets the image
+     *
+     * @param img the image to view
+     */
     public abstract void setImage(Image img);
 
-    /** Returns the palette of the image */
+    /** @return the palette of the image */
     public abstract byte[][] getPalette();
 
-    /** Sets the image palette */
+    /** Sets the image palette
+     *
+     * @param palette the palette for the image to view
+     */
     public abstract void setPalette(byte[][] palette);
 
-    /** Returns the byte array of the image data */
+    /** @return the byte array of the image data */
     public abstract byte[] getImageByteData();
 
 }

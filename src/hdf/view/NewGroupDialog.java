@@ -539,12 +539,12 @@ public class NewGroupDialog extends Dialog {
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
     }
 
-    /** Returns the new group created. */
+    /** @return the new group created. */
     public DataFormat getObject() {
         return newObject;
     }
 
-    /** Returns the parent group of the new group. */
+    /** @return the parent group of the new group. */
     public Group getParentGroup() {
         return parentGroup;
     }

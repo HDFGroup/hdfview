@@ -85,7 +85,12 @@ public final class Tools {
     /** Key for all image file type. */
     public static final String     FILE_TYPE_IMAGE = "IMG";
 
-    /** Print out debug information */
+    /** Print out debug information
+     * @param caller
+     *            the caller object.
+     * @param msg
+     *            the message to be displayed.
+     */
     public static final void debug(Object caller, Object msg) {
         if (caller != null) System.out.println("*** " + caller.getClass().getName() + ": " + msg);
     }
@@ -101,6 +106,8 @@ public final class Tools {
      *            the type of image.
      * @param toType
      *            the type of file converted to.
+     *
+     * @throws Exception if a failure occurred
      */
     public static void convertImageToHDF(String imgFileName, String hFileName, String fromType, String toType)
             throws Exception {
@@ -201,6 +208,8 @@ public final class Tools {
      *            the image file.
      * @param type
      *            the image type.
+     *
+     * @throws Exception if a failure occurred
      */
     public static void saveImageAs(BufferedImage image, File file, String type) throws Exception {
         if (image == null) {
@@ -543,6 +552,7 @@ public final class Tools {
      *
      * @param image
      *            the image to be check if has alpha.
+     *
      * @return true if the image has alpha setting.
      */
     public static boolean hasAlpha(Image image) {
@@ -573,6 +583,8 @@ public final class Tools {
     /**
      * Creates a RGB indexed image of 256 colors.
      *
+     * @param bufferedImage
+     *            the target image.
      * @param imageData
      *            the byte array of the image data.
      * @param palette
@@ -581,6 +593,7 @@ public final class Tools {
      *            the width of the image.
      * @param h
      *            the height of the image.
+     *
      * @return the image.
      */
     public static Image createIndexedImage(BufferedImage bufferedImage, byte[] imageData, byte[][] palette, long w, long h)
@@ -654,6 +667,7 @@ public final class Tools {
      *            the width of the image.
      * @param h
      *            the height of the image.
+     *
      * @return the image.
      */
     public static Image createTrueColorImage(byte[] imageData, boolean planeInterlace, long w, long h) {
@@ -701,6 +715,15 @@ public final class Tools {
      *            The input raw data.
      * @param minmax
      *            the range of the raw data.
+     * @param w
+     *            the width of the raw data.
+     * @param h
+     *            the height of the raw data.
+     * @param isTransposed
+     *            if the data is transposed.
+     * @param byteData
+     *            the data in.
+     *
      * @return the byte array of pixel data.
      */
     public static byte[] getBytes(Object rawData, double[] minmax, long w, long h, boolean isTransposed, byte[] byteData) {
@@ -724,8 +747,21 @@ public final class Tools {
      *            The input raw data.
      * @param minmax
      *            the range of the raw data.
+     * @param w
+     *            the width of the raw data.
+     * @param h
+     *            the height of the raw data.
      * @param isTransposed
-     *            if the data is transposeed
+     *            if the data is transposed.
+     * @param invalidValues
+     *            the list of invalid values.
+     * @param convertByteData
+     *            the converted data out.
+     * @param byteData
+     *            the data in.
+     * @param list
+     *            the list of integers.
+     *
      * @return the byte array of pixel data.
      */
     public static byte[] getBytes(Object rawData, double[] minmax, long w, long h, boolean isTransposed,
@@ -936,9 +972,14 @@ public final class Tools {
     /**
      * Create and initialize a new instance of the given class.
      *
+     * @param cls
+     *           the class of the instance
      * @param initargs
-     *            - array of objects to be passed as arguments
+     *            array of objects to be passed as arguments.
+     *
      * @return a new instance of the given class.
+     *
+     * @throws Exception if a failure occurred
      */
     public static Object newInstance(Class<?> cls, Object[] initargs) throws Exception {
         log.trace("newInstance(Class = {}): start", cls);
@@ -1012,7 +1053,8 @@ public final class Tools {
      * @param params
      *            the auto gain parameter. params[0]=gain, params[1]=bias,
      * @param isUnsigned
-     *            the flag to indicate if the data array is unsigned integer
+     *            the flag to indicate if the data array is unsigned integer.
+     *
      * @return non-negative if successful; otherwise, returns negative
      */
     public static int autoContrastCompute(Object data, double[] params, boolean isUnsigned) {
@@ -1229,13 +1271,13 @@ public final class Tools {
      *
      * <pre>
      *         uint_8       x
-     *         int_8       (x & 0x7F) << 1
-     *         uint_16     (x >> 8) & 0xFF
-     *         int_16      (x >> 7) & 0xFF
-     *         uint_32     (x >> 24) & 0xFF
-     *         int_32      (x >> 23) & 0xFF
-     *         uint_64     (x >> 56) & 0xFF
-     *         int_64      (x >> 55) & 0xFF
+     *         int_8       (x &amp; 0x7F) &lt;&lt; 1
+     *         uint_16     (x &gt;&gt; 8) &amp; 0xFF
+     *         int_16      (x &gt;&gt; 7) &amp; 0xFF
+     *         uint_32     (x &gt;&gt; 24) &amp; 0xFF
+     *         int_32      (x &gt;&gt; 23) &amp; 0xFF
+     *         uint_64     (x &gt;&gt; 56) &amp; 0xFF
+     *         int_64      (x &gt;&gt; 55) &amp; 0xFF
      * </pre>
      *
      * @param src
@@ -1243,7 +1285,8 @@ public final class Tools {
      * @param dst
      *            the destination data array of bytes
      * @param isUnsigned
-     *            the flag to indicate if the data array is unsigned integer
+     *            the flag to indicate if the data array is unsigned integer.
+     *
      * @return non-negative if successful; otherwise, returns negative
      */
     public static int autoContrastConvertImageBuffer(Object src, byte[] dst, boolean isUnsigned) {
@@ -1329,6 +1372,7 @@ public final class Tools {
      *            the raw data array
      * @param minmax
      *            the min and max values.
+     *
      * @return non-negative if successful; otherwise, returns negative
      */
     public static int autoContrastComputeMinMax(Object data, double[] minmax) {
@@ -1360,6 +1404,7 @@ public final class Tools {
      * @param fillValue
      *            the missing value or fill value. Exclude this value when check
      *            for min/max
+     *
      * @return non-negative if successful; otherwise, returns negative
      */
     public static int findMinMax(Object data, double[] minmax, Object fillValue) {
@@ -1492,6 +1537,7 @@ public final class Tools {
      *            the data distirbution.
      * @param minmax
      *            the data range
+     *
      * @return non-negative if successful; otherwise, returns negative
      */
     public static int findDataDist(Object data, int[] dataDist, double[] minmax) {
@@ -1530,6 +1576,7 @@ public final class Tools {
      * @param fillValue
      *            the missing value or fill value. Exclude this value when
      *            compute statistics
+     *
      * @return non-negative if successful; otherwise, returns negative
      */
     public static int computeStatistics(Object data, double[] avgstd, Object fillValue) {
@@ -1668,6 +1715,7 @@ public final class Tools {
      *            the long value
      * @param nbytes
      *            number of bytes in the integer
+     *
      * @return the string representation of the unsigned long value represented
      *         by the argument in binary (base 2).
      */
@@ -1741,6 +1789,8 @@ public final class Tools {
         return sb.toString();
     }
 
+    final static char[] HEXCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
     /**
      * Returns a string representation of the long argument as an unsigned integer in base 16. This
      * is different from Long.toHexString(long i). This function add padding (0's) to the string
@@ -1753,8 +1803,6 @@ public final class Tools {
      * @return the string representation of the unsigned long value represented by the argument in
      *         hexadecimal (base 16).
      */
-    final static char[] HEXCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-
     public static final String toHexString (long v, int nbytes) {
         if (nbytes <= 0) return null;
 
@@ -1780,6 +1828,9 @@ public final class Tools {
      *            the data array which the bitmask is applied to.
      * @param theMask
      *            the bitmask to be applied to the data array.
+     * @param op
+     *            the bitmask op to be applied
+     *
      * @return true if bitmask is applied successfuly; otherwise, false.
      */
     public static final boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op) {
@@ -1851,8 +1902,9 @@ public final class Tools {
      * Launch default browser for a given URL.
      *
      * @param url
-     *            -- the URL to open.
-     * @throws Exception
+     *            the URL to open.
+     *
+     * @throws Exception if a failure occurred
      */
     public static final void launchBrowser(String url) throws Exception {
         String os = System.getProperty("os.name");
@@ -1889,7 +1941,21 @@ public final class Tools {
         }
     } /* public static final void launchBrowser(String url) */
 
-    /** Create a new HDF file with default file creation properties */
+    /** Create a new HDF file with default file creation properties
+     *
+     * @param filename
+     *          the file to create
+     * @param dir
+     *          the directory for file
+     * @param type
+     *          the type of the file
+     * @param openFiles
+     *          the list of already opened files
+     *
+     * @return the FileFormat instance of the newly created file
+     *
+     * @throws Exception if a failure occurred
+     */
     public static FileFormat createNewFile(String filename, String dir,
             String type, List<FileFormat> openFiles) throws Exception {
         File f = new File(filename);
@@ -1978,6 +2044,7 @@ public final class Tools {
      *            -- the path that the new file will be checked.
      * @param ext
      *            -- the extention of the new file.
+     *
      * @return -- the new file.
      */
     public static final File checkNewFile(String path, String ext) {
@@ -1997,6 +2064,7 @@ public final class Tools {
      *
      * @param val
      *            the nubmer to be checked
+     *
      * @return true if the number is Nan or INF; otherwise, false.
      */
     public static final boolean isNaNINF(double val) {

@@ -57,7 +57,7 @@ import hdf.object.ScalarDS;
 
 /**
  * TextView displays an HDF string dataset in text.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 3/27/2016
  */
@@ -69,9 +69,9 @@ public class DefaultTextView implements TextView {
      * The main HDFView.
      */
     private final ViewManager viewer;
-    
+
     private final Display display;
-    
+
     private final Shell shell;
 
     /**
@@ -98,17 +98,18 @@ public class DefaultTextView implements TextView {
     private TextAreaEditor textEditor = null;
 
     private RowHeader rowHeaders = null;
-    
+
     private int indexBase = 0;
-    
+
     public DefaultTextView(Shell parent, ViewManager theView) {
-    	this(parent, theView, null);
+        this(parent, theView, null);
     }
 
     /**
      * Constructs an TextView.
-     * <p>
-     * 
+     *
+     * @param parent
+     *             the parent of this dialog
      * @param theView
      *            the main HDFView.
      * @param map
@@ -121,19 +122,19 @@ public class DefaultTextView implements TextView {
     public DefaultTextView(Shell parent, ViewManager theView, HashMap map) {
         shell = new Shell(parent, SWT.SHELL_TRIM);
         display = shell.getDisplay();
-        
+
         shell.setData(this);
-        
+
         GridLayout layout = new GridLayout(2, false);
         layout.marginWidth = layout.marginHeight = layout.horizontalSpacing = 0;
         shell.setLayout(layout);
-    	
-    	viewer = theView;
+
+        viewer = theView;
         text = null;
         table = null;
         dataset = null;
         //textEditor = new TextAreaEditor(this);
-        
+
         if (ViewProperties.isIndexBase1())
             indexBase = 1;
 
@@ -154,7 +155,7 @@ public class DefaultTextView implements TextView {
             dataset = null;
             return;
         }
-        
+
         String fname = new java.io.File(dataset.getFile()).getName();
         shell.setText("TextView  -  " + dataset.getName() + "  -  "
                 + dataset.getPath() + "  -  " + fname);
@@ -164,10 +165,10 @@ public class DefaultTextView implements TextView {
 
         try {
             text = (String[]) dataset.getData();
-        } 
+        }
         catch (Exception ex) {
-        	showError(ex.getMessage(), "TextView" + shell.getText());
-            text = null; 
+            showError(ex.getMessage(), "TextView" + shell.getText());
+            text = null;
         }
 
         if (text == null) {
@@ -176,11 +177,11 @@ public class DefaultTextView implements TextView {
             dataset = null;
             return;
         }
-        
+
         int rank = dataset.getRank();
         long start[] = dataset.getStartDims();
         long count[] = dataset.getSelectedDims();
-        
+
         String colName = "Data selection:   ["+start[0];
         for (int i=1; i<rank; i++) {
             colName += ", "+start[i];
@@ -188,104 +189,104 @@ public class DefaultTextView implements TextView {
         colName += "] ~ ["+(start[0]+count[0]-1);
         for (int i=1; i<rank; i++) {
             colName += ", "+(start[i]+count[i]-1);
-        }  
+        }
         colName += "]";
-        
+
         //JTableHeader colHeader = table.getTableHeader();
         //colHeader.setReorderingAllowed(false);
         //colHeader.setBackground(Color.black);
-        
+
         //rowHeaders = new RowHeader(table, dataset);
 
         //scrollingTable.getVerticalBar().setIncrement(100);
         //scrollingTable.getHorizontalBar().setIncrement(100);
-        
+
         long[] startArray = dataset.getStartDims();
         long[] strideArray = dataset.getStride();
         int[] selectedIndex = dataset.getSelectedIndex();
         int startIndex = (int) startArray[selectedIndex[0]];
         int stride = (int) strideArray[selectedIndex[0]];
-        
+
         ScrolledComposite fixedTableScroller = new ScrolledComposite(shell, SWT.V_SCROLL);
         fixedTableScroller.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
         fixedTableScroller.setExpandHorizontal(true);
         fixedTableScroller.setExpandVertical(true);
         fixedTableScroller.setAlwaysShowScrollBars(true);
-        
+
         fixedTableScroller.getVerticalBar().addListener(SWT.Selection, new Listener() {
-        	public void handleEvent(Event e) {
-        		table.setTopIndex(fixedTable.getTopIndex());
-        	}
+            public void handleEvent(Event e) {
+                table.setTopIndex(fixedTable.getTopIndex());
+            }
         });
-        
+
         fixedTable = new Table(fixedTableScroller, SWT.FULL_SELECTION | SWT.MULTI | SWT.NO_SCROLL);
         fixedTable.setHeaderVisible(true);
         fixedTable.addListener(SWT.Selection, new Listener() {
-        	public void handleEvent(Event e) {
-        		table.setSelection(fixedTable.getSelectionIndices());
-        	}
+            public void handleEvent(Event e) {
+                table.setSelection(fixedTable.getSelectionIndices());
+            }
         });
-        
+
         fixedTableScroller.setContent(fixedTable);
-        
+
         TableColumn fixedColumn = new TableColumn(fixedTable, SWT.NONE);
         fixedColumn.setText("");
         fixedColumn.setAlignment(SWT.CENTER);
         fixedColumn.setWidth(70);
         fixedColumn.setMoveable(false);
         fixedColumn.setResizable(false);
-        
+
         ScrolledComposite tableScroller = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
         tableScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         tableScroller.setExpandHorizontal(true);
         tableScroller.setExpandVertical(true);
         tableScroller.setAlwaysShowScrollBars(true);
-        
+
         tableScroller.getVerticalBar().addListener(SWT.Selection, new Listener() {
-        	public void handleEvent(Event e) {
-        		fixedTable.setTopIndex(table.getTopIndex());
-        	}
+            public void handleEvent(Event e) {
+                fixedTable.setTopIndex(table.getTopIndex());
+            }
         });
-        
+
         table = new Table(tableScroller, SWT.FULL_SELECTION | SWT.MULTI | SWT.NO_SCROLL);
         table.setHeaderVisible(true);
         table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 2));
         table.addListener(SWT.MouseDoubleClick, CellEditor);
         table.addListener(SWT.Selection, new Listener() {
-        	public void handleEvent(Event e) {
-        		fixedTable.setSelection(table.getSelectionIndices());
-        	}
+            public void handleEvent(Event e) {
+                fixedTable.setSelection(table.getSelectionIndices());
+            }
         });
-        
+
         table.addListener(SWT.Resize, new Listener() {
-        	public void handleEvent(Event e) {
-        		table.getColumn(0).setWidth(table.getBounds().width);
-        	}
+            public void handleEvent(Event e) {
+                table.getColumn(0).setWidth(table.getBounds().width);
+            }
         });
-        
+
         tableScroller.setContent(table);
-        
+
         TableColumn column = new TableColumn(table, SWT.NONE);
         column.setText(colName);
         column.setMoveable(false);
         column.setResizable(false);
         column.setWidth(400);
-        
+
         for (int i = 0; i < start[0] + count[0]; i++) {
-        	TableItem item = new TableItem(fixedTable, SWT.NONE);
-        	item.setText(String.valueOf(startIndex + indexBase + i * stride));
-        	
-        	item = new TableItem(table, SWT.NONE);
-        	item.setText(text[i]);
+            TableItem item = new TableItem(fixedTable, SWT.NONE);
+            item.setText(String.valueOf(startIndex + indexBase + i * stride));
+
+            item = new TableItem(table, SWT.NONE);
+            item.setText(text[i]);
         }
-        
+
         //ScrollBar contentTableBar = table.getHorizontalBar();
         //Label spacer = new Label(fixedTableScroller, SWT.NONE);
         //GridData data = new GridData();
         //data.heightHint = contentTableBar.getSize().y;
         //spacer.setLayoutData(data);
         //spacer.setVisible(false);
-        
+
 
         //JViewport viewp = new JViewport();
         //viewp.add(rowHeaders);
@@ -299,15 +300,15 @@ public class DefaultTextView implements TextView {
         //cmodel.getColumn(0).setCellEditor(textEditor);
 
         shell.setMenuBar(createMenuBar());
-        
+
         shell.addDisposeListener(new DisposeListener() {
-        	public void widgetDisposed(DisposeEvent e) {
-        		if (isTextChanged && !isReadOnly) {
-                	MessageBox confirm = new MessageBox(shell, SWT.YES | SWT.NO);
-                	confirm.setMessage("\""
+            public void widgetDisposed(DisposeEvent e) {
+                if (isTextChanged && !isReadOnly) {
+                    MessageBox confirm = new MessageBox(shell, SWT.YES | SWT.NO);
+                    confirm.setMessage("\""
                             + dataset.getName() + "\" has changed.\n"
                             + "Do you want to save the changes?");
-                	confirm.setText(shell.getText());
+                    confirm.setText(shell.getText());
 
                     if (confirm.open() == SWT.YES) {
                         updateValueInFile();
@@ -315,31 +316,33 @@ public class DefaultTextView implements TextView {
                 }
 
                 //viewer.removeDataView();
-        	}
+            }
         });
-        
+
         shell.pack();
-        
+
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
-    	viewer.addDataView(this);
-        
+
+        viewer.addDataView(this);
+
         shell.open();
-        
+
         // Workaround to prevent parent shell cursor from staying in "wait"
         // mode while TableView is open
         parent.setCursor(null);
-        
+
         while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-        
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
+
         viewer.removeDataView(this);
     }
 
     /**
      * Creates a Table to hold a compound dataset.
+     *
+     * @param colName the name of the column
      */
     private void createTable(final String colName) {
         /*
@@ -363,7 +366,7 @@ public class DefaultTextView implements TextView {
             }
         };
         */
-        
+
         /*
         theTable = new Table(tm) {
             @Override
@@ -392,24 +395,24 @@ public class DefaultTextView implements TextView {
 
     private Menu createMenuBar() {
         Menu menuBar = new Menu(shell, SWT.BAR);
-        
+
         MenuItem textMenu = new MenuItem(menuBar, SWT.CASCADE);
         textMenu.setText("&Text");
-        
+
         Menu menu = new Menu(shell, SWT.DROP_DOWN);
         textMenu.setMenu(menu);
 
         MenuItem item = new MenuItem(menu, SWT.PUSH);
         item.setText("Save To &Text File");
         item.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		try {
-        			saveAsText();
-        		}
-        		catch (Exception ex) {
-        			showError(ex.getMessage(), shell.getText());
-        		}
-        	}
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    saveAsText();
+                }
+                catch (Exception ex) {
+                    showError(ex.getMessage(), shell.getText());
+                }
+            }
         });
 
         new MenuItem(menu, SWT.SEPARATOR);
@@ -417,19 +420,19 @@ public class DefaultTextView implements TextView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Save Changes");
         item.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		updateValueInFile();
-        	}
+            public void widgetSelected(SelectionEvent e) {
+                updateValueInFile();
+            }
         });
-        
+
         new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Close");
         item.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		shell.dispose();
-        	}
+            public void widgetSelected(SelectionEvent e) {
+                shell.dispose();
+            }
         });
 
         return menuBar;
@@ -450,43 +453,43 @@ public class DefaultTextView implements TextView {
         if (!isTextChanged) {
             return;
         }
-        
+
         int row = table.getSelectionIndex();
         if (row >= 0) {
-        	String cellValue = (String) null;
+            String cellValue = (String) null;
             // String cellValue = (String) textEditor.getCellEditorValue();
-        	text[row] = cellValue;
+            text[row] = cellValue;
         }
 
         try {
             dataset.write();
         }
         catch (Exception ex) {
-        	showError(ex.getMessage(), shell.getText());
+            showError(ex.getMessage(), shell.getText());
             return;
         }
-        
+
         isTextChanged = false;
     }
 
     /** Save data as text. */
     private void saveAsText() throws Exception {
-    	FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-    	fChooser.setText("Save Current Data To Text File --- " + dataset.getName());
-    	fChooser.setFilterPath(dataset.getFileFormat().getParent());
-    	// fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
-    	// fchooser.changeToParentDirectory();
-    	fChooser.setFileName(dataset.getName() + ".txt");
-    	fChooser.setOverwrite(true);
-    	
-    	String filename = fChooser.open();
-    	
-    	if (filename == null) return;
-    	
-    	File chosenFile = new File(filename);
-    	
+        FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+        fChooser.setText("Save Current Data To Text File --- " + dataset.getName());
+        fChooser.setFilterPath(dataset.getFileFormat().getParent());
+        // fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
+        // fchooser.changeToParentDirectory();
+        fChooser.setFileName(dataset.getName() + ".txt");
+        fChooser.setOverwrite(true);
+
+        String filename = fChooser.open();
+
+        if (filename == null) return;
+
+        File chosenFile = new File(filename);
+
         // check if the file is in use
-    	String fname = chosenFile.getAbsolutePath();
+        String fname = chosenFile.getAbsolutePath();
         List<FileFormat> fileList = viewer.getTreeView().getCurrentFiles();
         if (fileList != null) {
             FileFormat theFile = null;
@@ -494,7 +497,7 @@ public class DefaultTextView implements TextView {
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(fname)) {
-                	showError("Unable to save data to file \"" + fname
+                    showError("Unable to save data to file \"" + fname
                             + "\". \nThe file is being used.", shell.getText());
                     return;
                 }
@@ -522,7 +525,7 @@ public class DefaultTextView implements TextView {
             viewer.showStatus("File size (bytes): " + size);
         }
         catch (Exception ex) {
-        	log.debug("raf file size:", ex);
+            log.debug("raf file size:", ex);
         }
     }
 
@@ -556,7 +559,7 @@ public class DefaultTextView implements TextView {
                     "e:\\temp\\t.html"));
         }
         catch (Exception ex) {
-        	log.debug("Get a text DocFlavor:", ex);
+            log.debug("Get a text DocFlavor:", ex);
         }
         DocFlavor flavor = DocFlavor.STRING.TEXT_HTML;
 
@@ -576,12 +579,12 @@ public class DefaultTextView implements TextView {
             System.out.println(ex);
         }
     }
-    
+
     private void showError(String errorMsg, String title) {
-    	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-    	error.setText(title);
-    	error.setMessage(errorMsg);
-    	error.open();
+        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+        error.setText(title);
+        error.setMessage(errorMsg);
+        error.open();
     }
 
     private class TextAreaRenderer
@@ -684,77 +687,77 @@ public class DefaultTextView implements TextView {
 
     // Listener to allow in-place editing of Text area cells
     private Listener CellEditor = new Listener() {
-    	public void handleEvent(Event event) {
-    		if (isReadOnly) return;
-    		
-			final TableEditor editor = new TableEditor(table);
-			editor.horizontalAlignment = SWT.LEFT;
-			editor.grabHorizontal = true;
+        public void handleEvent(Event event) {
+            if (isReadOnly) return;
 
-			Rectangle clientArea = table.getClientArea();
-			Point pt = new Point(event.x, event.y);
-			
-			int index = table.getTopIndex();
+            final TableEditor editor = new TableEditor(table);
+            editor.horizontalAlignment = SWT.LEFT;
+            editor.grabHorizontal = true;
 
-			while (index < table.getItemCount()) {
-				boolean visible = false;
-				final TableItem item = table.getItem(index);
+            Rectangle clientArea = table.getClientArea();
+            Point pt = new Point(event.x, event.y);
 
-				for (int i = 0; i < table.getColumnCount(); i++) {
-					Rectangle rect = item.getBounds(i);
+            int index = table.getTopIndex();
 
-					if (rect.contains(pt)) {
-						final int column = i;
-						
-						final Text text = new Text(table, SWT.NONE);
+            while (index < table.getItemCount()) {
+                boolean visible = false;
+                final TableItem item = table.getItem(index);
 
-						Listener textListener = new Listener() {
-							public void handleEvent(final Event e) {
-								switch (e.type) {
-								case SWT.FocusOut:
-									item.setText(column, text.getText());
-									text.dispose();
-									break;
-								case SWT.Traverse:
-									switch (e.detail) {
-									case SWT.TRAVERSE_RETURN:
-										item.setText(column, text.getText());
-									case SWT.TRAVERSE_ESCAPE:
-										text.dispose();
-										e.doit = false;
-									}
+                for (int i = 0; i < table.getColumnCount(); i++) {
+                    Rectangle rect = item.getBounds(i);
 
-									break;
-								}
-							}
-						};
-						
-						text.addListener(SWT.FocusOut, textListener);
-						text.addListener(SWT.Traverse, textListener);
-						editor.setEditor(text, item, i);
-						text.setText(item.getText(i));
-						text.selectAll();
-						text.setFocus();
-						return;
-						
-					}
-					
-					if (!visible && rect.intersects(clientArea)) {
-						visible = true;
-					}
-					
-				}
-				
-				if (!visible) return;
-				
-				index++;
-			}
-		}
+                    if (rect.contains(pt)) {
+                        final int column = i;
+
+                        final Text text = new Text(table, SWT.NONE);
+
+                        Listener textListener = new Listener() {
+                            public void handleEvent(final Event e) {
+                                switch (e.type) {
+                                case SWT.FocusOut:
+                                    item.setText(column, text.getText());
+                                    text.dispose();
+                                    break;
+                                case SWT.Traverse:
+                                    switch (e.detail) {
+                                    case SWT.TRAVERSE_RETURN:
+                                        item.setText(column, text.getText());
+                                    case SWT.TRAVERSE_ESCAPE:
+                                        text.dispose();
+                                        e.doit = false;
+                                    }
+
+                                    break;
+                                }
+                            }
+                        };
+
+                        text.addListener(SWT.FocusOut, textListener);
+                        text.addListener(SWT.Traverse, textListener);
+                        editor.setEditor(text, item, i);
+                        text.setText(item.getText(i));
+                        text.selectAll();
+                        text.setFocus();
+                        return;
+
+                    }
+
+                    if (!visible && rect.intersects(clientArea)) {
+                        visible = true;
+                    }
+
+                }
+
+                if (!visible) return;
+
+                index++;
+            }
+        }
     };
-    
+
     private class TextAreaEditor
     {
-    	/*
+        /*
         public TextAreaEditor(KeyListener keyListener) {
             textArea.addKeyListener(keyListener);
             textArea.setWrapStyleWord(true);
@@ -773,15 +776,15 @@ public class DefaultTextView implements TextView {
 
     /** RowHeader defines the row header component of the Spreadsheet. */
     private class RowHeader extends Table {
-		private int currentRowIndex = -1;
+        private int currentRowIndex = -1;
         private int lastRowIndex = -1;
         private Table parentTable;
-        
+
         // Only here for compile reasons
         public RowHeader(Composite parent, int style) {
-			super(parent, style);
-			// TODO Auto-generated constructor stub
-		}
+            super(parent, style);
+            // TODO Auto-generated constructor stub
+        }
 
         /** This is called when the selection changes in the row headers. */
         /*

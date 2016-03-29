@@ -46,13 +46,13 @@ import hdf.object.ScalarDS;
 /**
  * NewImageDialog shows a message dialog requesting user input for creating a
  * new HDF4/5 Image.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 1/1/2016
  */
 public class NewImageDialog extends Dialog {
-	
-	private Shell       shell;
+
+    private Shell       shell;
 
     private Text        nameField, widthField, heightField;
 
@@ -63,7 +63,7 @@ public class NewImageDialog extends Dialog {
 
     /** A list of current groups */
     private List<Group> groupList;
-    
+
     private List<?>     objList;
 
     private boolean     isH5;
@@ -71,11 +71,11 @@ public class NewImageDialog extends Dialog {
     private HObject     newObject;
     private Group       parentGroup;
 
-    private FileFormat  fileFormat;	
-	
+    private FileFormat  fileFormat;
+
     /**
      * Constructs a NewImageDialog with specified list of possible parent groups.
-     * 
+     *
      * @param parent
      *            the parent shell of the dialog
      * @param pGroup
@@ -83,50 +83,50 @@ public class NewImageDialog extends Dialog {
      * @param objs
      *            the list of all objects.
      */
-	public NewImageDialog(Shell parent, Group pGroup, List<?> objs) {
-		super(parent, SWT.APPLICATION_MODAL);
-		
-		newObject = null;
-		parentGroup = pGroup;
-		objList = objs;
+    public NewImageDialog(Shell parent, Group pGroup, List<?> objs) {
+        super(parent, SWT.APPLICATION_MODAL);
+
+        newObject = null;
+        parentGroup = pGroup;
+        objList = objs;
 
         isH5 = pGroup.getFileFormat().isThisType(
                 FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
         fileFormat = pGroup.getFileFormat();
-	}
+    }
 
-	public void open() {
-		Shell parent = getParent();
-		shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-    	shell.setText("New HDF Image...");
-    	shell.setImage(ViewProperties.getHdfIcon());
-    	shell.setLayout(new GridLayout(1, true));
-    	
-    	
-    	// Create main content region
-    	Composite content = new Composite(shell, SWT.BORDER);
-    	content.setLayout(new GridLayout(2, false));
-    	content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	Label label = new Label(content, SWT.LEFT);
-    	label.setText("Image name: ");
-    	
-    	nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
-    	GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
-    	fieldData.minimumWidth = 300;
-    	nameField.setLayoutData(fieldData);
-    	
-    	label = new Label(content, SWT.LEFT);
-    	label.setText("Parent Group: ");
-    	
-    	parentChoice = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	parentChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
-    		}
-    	});
-    	
+    public void open() {
+        Shell parent = getParent();
+        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setText("New HDF Image...");
+        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setLayout(new GridLayout(1, true));
+
+
+        // Create main content region
+        Composite content = new Composite(shell, SWT.BORDER);
+        content.setLayout(new GridLayout(2, false));
+        content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        Label label = new Label(content, SWT.LEFT);
+        label.setText("Image name: ");
+
+        nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        fieldData.minimumWidth = 300;
+        nameField.setLayoutData(fieldData);
+
+        label = new Label(content, SWT.LEFT);
+        label.setText("Parent Group: ");
+
+        parentChoice = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
+        parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        parentChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+            }
+        });
+
         groupList = new Vector<Group>();
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
@@ -152,120 +152,120 @@ public class NewImageDialog extends Dialog {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName()
                     + HObject.separator));
         }
-        
+
         label = new Label(content, SWT.LEFT);
         label.setText("Height: ");
-        
+
         heightField = new Text(content, SWT.SINGLE | SWT.BORDER);
         heightField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         label = new Label(content, SWT.LEFT);
         label.setText("Width: ");
-        
+
         widthField = new Text(content, SWT.SINGLE | SWT.BORDER);
         widthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         label = new Label(content, SWT.LEFT);
         label.setText("Image type: ");
-        
+
         Composite typeComposite = new Composite(content, SWT.BORDER);
         typeComposite.setLayout(new GridLayout(2, true));
         typeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         checkIndex = new Button(typeComposite, SWT.RADIO);
         checkIndex.setText("Indexed colormap");
         checkIndex.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkIndex.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		checkInterlacePixel.setSelection(true);
-        		checkInterlacePlane.setSelection(false);
-        		checkInterlacePixel.setEnabled(false);
+            public void widgetSelected(SelectionEvent e) {
+                checkInterlacePixel.setSelection(true);
+                checkInterlacePlane.setSelection(false);
+                checkInterlacePixel.setEnabled(false);
                 checkInterlacePlane.setEnabled(false);
-        	}
+            }
         });
-        
+
         checkTrueColor = new Button(typeComposite, SWT.RADIO);
         checkTrueColor.setText("24-bit truecolor");
         checkTrueColor.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkTrueColor.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		checkInterlacePixel.setEnabled(true);
+            public void widgetSelected(SelectionEvent e) {
+                checkInterlacePixel.setEnabled(true);
                 checkInterlacePlane.setEnabled(true);
-        	}
+            }
         });
-        
+
         label = new Label(content, SWT.LEFT);
         label.setText("Data layout: ");
-        
+
         Composite layoutComposite = new Composite(content, SWT.BORDER);
         layoutComposite.setLayout(new GridLayout(2, true));
         layoutComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         checkInterlacePixel = new Button(layoutComposite, SWT.RADIO);
         checkInterlacePixel.setText("Pixel interlace");
         checkInterlacePixel.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
-        
+
         checkInterlacePlane = new Button(layoutComposite, SWT.RADIO);
         checkInterlacePlane.setText("Plane interlace");
         checkInterlacePlane.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
-    	
-    	
-    	// Create Ok/Cancel button region
-    	Composite buttonComposite = new Composite(shell, SWT.NONE);
-    	buttonComposite.setLayout(new GridLayout(2, true));
-    	buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	Button okButton = new Button(buttonComposite, SWT.PUSH);
-    	okButton.setText("   &Ok   ");
-    	GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-    	gridData.widthHint = 70;
-    	okButton.setLayoutData(gridData);
-    	okButton.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			newObject = createHDFimage();
+
+
+        // Create Ok/Cancel button region
+        Composite buttonComposite = new Composite(shell, SWT.NONE);
+        buttonComposite.setLayout(new GridLayout(2, true));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("   &Ok   ");
+        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        okButton.setLayoutData(gridData);
+        okButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                newObject = createHDFimage();
                 if (newObject != null) {
                     shell.dispose();
                 }
-    		}
-    	});
-    	
-    	Button cancelButton = new Button(buttonComposite, SWT.PUSH);
-    	cancelButton.setText("&Cancel");
-    	gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-    	gridData.widthHint = 70;
-    	cancelButton.setLayoutData(gridData);
-    	cancelButton.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			newObject = null;
+            }
+        });
+
+        Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setText("&Cancel");
+        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        cancelButton.setLayoutData(gridData);
+        cancelButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                newObject = null;
                 shell.dispose();
                 ((Vector<Group>) groupList).setSize(0);
-    		}
-    	});
-    	
-    	checkIndex.setSelection(true);
-    	checkInterlacePixel.setSelection(true);
+            }
+        });
+
+        checkIndex.setSelection(true);
+        checkInterlacePixel.setSelection(true);
         checkInterlacePixel.setEnabled(false);
         checkInterlacePlane.setEnabled(false);
-    	
+
         shell.pack();
-        
+
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         shell.open();
-        
+
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-	}
-	
-	private Dataset createHDFimage() {
+    }
+
+    private Dataset createHDFimage() {
         Dataset dataset = null;
 
         String name = nameField.getText();
@@ -291,7 +291,7 @@ public class NewImageDialog extends Dialog {
         }
 
         Group pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
-        
+
         if (pgroup == null) {
             shell.getDisplay().beep();
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
@@ -378,12 +378,12 @@ public class NewImageDialog extends Dialog {
         return dataset;
     }
 
-    /** Returns the new dataset created. */
+    /** @return the new dataset created. */
     public DataFormat getObject() {
         return newObject;
     }
 
-    /** Returns the parent group of the new dataset. */
+    /** @return the parent group of the new dataset. */
     public Group getParentGroup() {
         return parentGroup;
     }

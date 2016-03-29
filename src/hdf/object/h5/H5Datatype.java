@@ -33,7 +33,6 @@ import hdf.object.FileFormat;
  * This class provides several methods to convert an HDF5 datatype identifier to a datatype object, and vice versa. A
  * datatype object is described by four basic fields: datatype class, size, byte order, and sign, while an HDF5 datatype
  * is presented by a datatype identifier.
- * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -67,7 +66,6 @@ public class H5Datatype extends Datatype {
      * <p>
      * The datatype object represents an existing named datatype in file. For example, new H5Datatype(file, "dtype1",
      * "/g0") constructs a datatype object that corresponds to the dataset,"dset1", at group "/g0".
-     * <p>
      *
      * @param theFile
      *            the file that contains the dataset.
@@ -83,6 +81,15 @@ public class H5Datatype extends Datatype {
     /**
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #H5Datatype(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the file that contains the dataset.
+     * @param name
+     *            the name of the dataset such as "dset1".
+     * @param path
+     *            the group path to the dataset such as "/g0/".
+     * @param oid
+     *            the oid of the dataset.
      */
     @Deprecated
     public H5Datatype(FileFormat theFile, String name, String path, long[] oid) {
@@ -106,16 +113,16 @@ public class H5Datatype extends Datatype {
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
      * The following is a list of a few example of H5Datatype.
-     * <OL>
-     * <LI>to create unsigned native integer<br>
+     * <ol>
+     * <li>to create unsigned native integer<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
-     * <LI>to create 16-bit signed integer with big endian<br>
+     * <li>to create 16-bit signed integer with big endian<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <LI>to create native float<br>
+     * <li>to create native float<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <LI>to create 64-bit double<br>
+     * <li>to create 64-bit double<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </OL>
+     * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
@@ -134,16 +141,16 @@ public class H5Datatype extends Datatype {
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
      * The following is a list of a few example of H5Datatype.
-     * <OL>
-     * <LI>to create unsigned native integer<br>
+     * <ol>
+     * <li>to create unsigned native integer<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
-     * <LI>to create 16-bit signed integer with big endian<br>
+     * <li>to create 16-bit signed integer with big endian<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <LI>to create native float<br>
+     * <li>to create native float<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <LI>to create 64-bit double<br>
+     * <li>to create 64-bit double<br>
      * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </OL>
+     * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
@@ -171,9 +178,9 @@ public class H5Datatype extends Datatype {
      * </pre>
      *
      * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
-     * <p>
      *
-     * @see #fromNative(int nativeID)
+     * @see #fromNative(long nativeID)
+     *
      * @param nativeID
      *            the native datatype identifier.
      */
@@ -235,7 +242,9 @@ public class H5Datatype extends Datatype {
      * @param outNames
      *            The array of names to be populated. If null, the array will be created. If <code>outNames</code> is
      *            not null, the number of entries must be the same as the number of values in <code>inValues</code>.
+     *
      * @return The string array of names if successful; otherwise return null.
+     *
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      *
@@ -316,6 +325,7 @@ public class H5Datatype extends Datatype {
      *            The array of values to be populated.
      *
      * @return The int array of values if successful; otherwise return null.
+     *
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      *
@@ -547,12 +557,13 @@ public class H5Datatype extends Datatype {
 
     /**
      * @deprecated Not for public use in the future.<br>
-     *             Using {@link hdf.hdf5lib.H5#H5Tget_native_type(int)}
+     *             Using {@link hdf.hdf5lib.H5#H5Tget_native_type(long)}
      *             <p>
      *             Return the HDF5 memory datatype identifier based on the HDF5 datatype identifier on disk
      *             <p>
      * @param tid
      *            the datatype identification disk.
+     *
      * @return the memory datatype identifier if successful, and negative otherwise.
      */
     @Deprecated
@@ -897,7 +908,11 @@ public class H5Datatype extends Datatype {
      *            the datatype id.
      * @param size
      *            the total number of data points of the array.
+     *
      * @return the array object if successful; otherwise, return null.
+     *
+     * @throws OutOfMemoryError
+     *            If there is a failure.
      */
     public static Object allocateArray(long tid, int size) throws OutOfMemoryError {
         Object data = null;
@@ -1045,6 +1060,7 @@ public class H5Datatype extends Datatype {
      *
      * @param tid
      *            The datatype identifier.
+     *
      * @return The size of the datatype in bytes.
      *
      * @see hdf.hdf5lib.H5#H5Tget_size(long)
@@ -1089,6 +1105,7 @@ public class H5Datatype extends Datatype {
      *
      * @param tid
      *            the HDF5 datatype identifier
+     *
      * @return a string describing the data type.
      */
     public static final String getDatatypeDescription(long tid) {
@@ -1335,7 +1352,6 @@ public class H5Datatype extends Datatype {
 
     /**
      * Checks if a datatype specified by the identifier is an unsigned integer.
-     * <p>
      *
      * @param tid
      *            the datatype ID to be checked.
@@ -1383,7 +1399,7 @@ public class H5Datatype extends Datatype {
      *
      * @return the datatype identifier if successful; otherwise returns negative value.
      *
-     * @see hdf.hdf5lib.H5#H5Topen(int, String)
+     * @see hdf.hdf5lib.H5#H5Topen(long, String, long)
      */
     @Override
     public long open() {

@@ -37,7 +37,7 @@ public class ViewProperties extends Properties {
     private static final long   serialVersionUID     = -6411465283887959066L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
-    
+
     /** the version of the HDFViewer */
     public static final String  VERSION              = HDFVersions.HDFVIEW_VERSION;
 
@@ -144,8 +144,8 @@ public class ViewProperties extends Properties {
      * read/write.
      */
     private static boolean          isReadOnly             = false;
-    
-    private static boolean 			isEarlyLib 			   = true;
+
+    private static boolean             isEarlyLib                = true;
 
     /** a list of palette files */
     private static Vector<String>   paletteList            = new Vector<String>(5);
@@ -201,6 +201,9 @@ public class ViewProperties extends Properties {
 
     /**
      * Creates a property list with given root directory of the HDFView.
+     *
+     * @param viewRoot
+     *            the root directory of the HDFView
      */
     public ViewProperties(String viewRoot) {
         super();
@@ -215,7 +218,7 @@ public class ViewProperties extends Properties {
         propertyFileName = USER_PROPERTY_FILE;
         userHome = System.getProperty("user.home") + File.separator + propertyFileName;
         userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
-        
+
         if ((new File(userHome)).exists()) {
             propertyFile = userHome;
         }
@@ -248,7 +251,11 @@ public class ViewProperties extends Properties {
         return keyList.elements();
     }
 
-    /** load module classes */
+    /**
+     * load module classes
+     *
+     * @return the ClassLoader
+     */
     public static ClassLoader loadExtClass() {
         if (extClassLoader != null) {
             return extClassLoader;
@@ -303,7 +310,7 @@ public class ViewProperties extends Properties {
                             classList.add(entryName.substring(0, idx));
                         }
                     }
-                    
+
                     jarFile.close();
                 }
                 catch (Exception ex) {
@@ -364,7 +371,7 @@ public class ViewProperties extends Properties {
                         for (int j = 0; j < interfaces.length; j++) {
                             String interfaceName = interfaces[j].getName();
                             log.trace("loadExtClass: load interfaces[{}] is {}", j, interfaceName);
-    
+
                             if ("hdf.view.TreeView".equals(interfaceName) && !moduleListTreeView.contains(theName)) {
                                 moduleListTreeView.add(theName);
                                 break;
@@ -412,7 +419,7 @@ public class ViewProperties extends Properties {
         return extClassLoader;
     }
 
-    /** returns the root directory where the HDFView is installed. */
+    /** @return the root directory where the HDFView is installed. */
     public static String getViewRoot() {
         return rootDir;
     }
@@ -608,7 +615,7 @@ public class ViewProperties extends Properties {
         if (hdfIcon == null) {
             s = ViewProperties.class.getResourceAsStream("icons/hdf.gif");
             if (s != null) {
-            	hdfIcon = new Image(null, s);
+                hdfIcon = new Image(null, s);
             }
         }
 
@@ -934,14 +941,16 @@ public class ViewProperties extends Properties {
         }
     }
 
-    /** Load user properties from property file */
+    /** Load user properties from property file
+     * @throws Exception if a failure occurred
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void load() throws Exception {
         if (propertyFile == null)
             return;
-        
+
         log.trace("load user properties: begin");
-        
+
         String propVal = null;
 
         // add default module.
@@ -1044,7 +1053,7 @@ public class ViewProperties extends Properties {
         if (propVal != null) {
             isReadOnly = ("r".equalsIgnoreCase(propVal));
         }
-        
+
         propVal = (String) get("lib.version");
         if (propVal != null) {
             isEarlyLib = ("early".equalsIgnoreCase(propVal));
@@ -1201,7 +1210,7 @@ public class ViewProperties extends Properties {
     public void save() {
         if (propertyFile == null)
             return;
-        
+
         clear();
 
         // update data saving options
@@ -1269,7 +1278,7 @@ public class ViewProperties extends Properties {
         else {
             put("file.mode", "rw");
         }
-        
+
         if (isEarlyLib) {
             put("lib.version", "early");
         }
@@ -1374,12 +1383,12 @@ public class ViewProperties extends Properties {
         }
     }
 
-    /** returns the name of the user property file */
+    /** @return the name of the user property file */
     public static String getPropertyFile() {
         return propertyFile;
     }
 
-    /** returns the default work directory, where the open file starts. */
+    /** @return the default work directory, where the open file starts. */
     public static String getWorkDir() {
         String workPath = workDir;
         if (workPath == null) {
@@ -1391,52 +1400,56 @@ public class ViewProperties extends Properties {
         return workPath;
     }
 
-    /** returns the maximum number of the most recent file */
+    /** @return the maximum number of the most recent file */
     public static int getMaxRecentFiles() {
         return MAX_RECENT_FILES;
     }
 
-    /** return the path of the HDFView users guide */
+    /** @return the path of the HDFView users guide */
     public static String getUsersGuide() {
         return usersGuide;
     };
 
-    /** returns the delimiter of data values */
+    /** @return the delimiter of data values */
     public static String getDataDelimiter() {
         return delimiter;
     }
 
-    /** returns the image origin */
+    /** @return the image origin */
     public static String getImageOrigin() {
         return origin;
     }
 
-    /** returns the default index type for display */
+    /** @return the default index type for display */
     public static String getIndexType() {
         return indexType;
     }
 
-    /** returns the default index order for display */
+    /** @return the default index order for display */
     public static String getIndexOrder() {
         return indexOrder;
     }
 
-    /** returns the font size */
+    /** @return the font size */
     public static int getFontSize() {
         return fontSize;
     }
 
-    /** returns the font type */
+    /** @return the font type */
     public static String getFontType() {
         return fontType;
     }
 
-    /** gets the file extensions of supported file formats */
+    /** @return the file extensions of supported file formats */
     public static String getFileExtension() {
         return fileExt;
     }
 
-    /** sets the font size */
+    /** sets the font size
+     *
+     * @param fsize
+     *            the font size
+     */
     public static void setFontSize(int fsize) {
         fontSize = (fsize / 2) * 2;
 
@@ -1445,24 +1458,28 @@ public class ViewProperties extends Properties {
         }
     }
 
-    /** sets the font size */
+    /** sets the font type
+     *
+     * @param ftype
+     *            the font type
+     */
     public static void setFontType(String ftype) {
         if (ftype != null) {
             fontType = ftype.trim();
         }
     }
 
-    /** returns the path of the H5toH5 converter */
+    /** @return the path of the H5toH5 converter */
     public static String getH4toH5() {
         return h4toh5;
     }
 
-    /** returns the list of most recent files */
+    /** @return the list of most recent files */
     public static Vector<String> getMRF() {
         return recentFiles;
     }
 
-    /** returns the list of palette files */
+    /** @return the list of palette files */
     public static Vector<String> getPaletteList() {
         return paletteList;
     }
@@ -1471,42 +1488,46 @@ public class ViewProperties extends Properties {
         return srbAccountList;
     }
 
-    /** returns a list of treeview modules */
+    /** @return a list of treeview modules */
     public static Vector<String> getTreeViewList() {
         return moduleListTreeView;
     }
 
-    /** returns a list of metadataview modules */
+    /** @return a list of metadataview modules */
     public static Vector<String> getMetaDataViewList() {
         return moduleListMetaDataView;
     }
 
-    /** returns a list of textview modules */
+    /** @return a list of textview modules */
     public static Vector<String> getTextViewList() {
         return moduleListTextView;
     }
 
-    /** returns a list of tableview modules */
+    /** @return a list of tableview modules */
     public static Vector<String> getTableViewList() {
         return moduleListTableView;
     }
 
-    /** returns a list of imageview modules */
+    /** @return a list of imageview modules */
     public static Vector<String> getImageViewList() {
         return moduleListImageView;
     }
 
-    /** returns a list of paletteview modules */
+    /** @return a list of paletteview modules */
     public static Vector<String> getPaletteViewList() {
         return moduleListPaletteView;
     }
 
-    /** returns a list of helpview modules */
+    /** @return a list of helpview modules */
     public static Vector<String> getHelpViewList() {
         return moduleListHelpView;
     }
 
-    /** set the path of H5View User's guide */
+    /** set the path of H5View User's guide
+     *
+     * @param str
+     *            the path
+     */
     public static void setUsersGuide(String str) {
         if ((str == null) || (str.length() <= 0)) {
             return;
@@ -1514,38 +1535,66 @@ public class ViewProperties extends Properties {
         usersGuide = str;
     }
 
-    /** set the path of the H5to H5 converter */
+    /** set the path of the H4 to H5 converter
+     *
+     * @param tool
+     *            the path of the H4 to H5 converter
+     */
     public static void setH4toH5(String tool) {
         h4toh5 = tool;
     }
 
-    /** set the path of the default work directory */
+    /** set the path of the default work directory
+     *
+     * @param wDir
+     *            the default work directory
+     */
     public static void setWorkDir(String wDir) {
         log.trace("ViewProperties:setWorkDir wDir={}", wDir);
         workDir = wDir;
     }
 
-    /** set the file extension */
+    /** set the file extension
+     *
+     * @param ext
+     *            the file extension
+     */
     public static void setFileExtension(String ext) {
         fileExt = ext;
     }
 
-    /** set the delimiter of data values */
+    /** set the delimiter of data values
+     *
+     * @param delim
+     *            the delimiter of data values
+     */
     public static void setDataDelimiter(String delim) {
         delimiter = delim;
     }
 
-    /** set the image origin */
+    /** set the image origin
+     *
+     * @param o
+     *            the image origin
+     */
     public static void setImageOrigin(String o) {
         origin = o;
     }
 
-    /** set the index type */
+    /** set the index type
+     *
+     * @param idxType
+     *            the index type
+     */
     public static void setIndexType(String idxType) {
         indexType = idxType;
     }
 
-    /** set the index order */
+    /** set the index order
+     *
+     * @param idxOrder
+     *            the index order
+     */
     public static void setIndexOrder(String idxOrder) {
         indexOrder = idxOrder;
     }
@@ -1554,7 +1603,7 @@ public class ViewProperties extends Properties {
      * Current Java applications such as HDFView cannot handle files with large
      * number of objects such as 1,000,000 objects. setMaxMembers() sets the
      * maximum number of objects that will be loaded into memory.
-     * 
+     *
      * @param n
      *            the maximum number of objects to load into memory
      */
@@ -1566,7 +1615,7 @@ public class ViewProperties extends Properties {
      * Current Java applications such as HDFView cannot handle files with large
      * number of objects such as 1,000,000 objects. setStartMember() sets the
      * starting index of objects that will be loaded into memory.
-     * 
+     *
      * @param idx
      *            the maximum number of objects to load into memory
      */
@@ -1582,11 +1631,13 @@ public class ViewProperties extends Properties {
      * Current Java applications such as HDFView cannot handle files with large
      * number of objects such as 1,000,000 objects. getMaxMembers() returns the
      * maximum number of objects that will be loaded into memory.
+     *
+     * @return the maximum members
      */
     public static int getMaxMembers() {
-    	if (max_members < 0)
-    		return Integer.MAX_VALUE; // load the whole file
-    	
+        if (max_members < 0)
+            return Integer.MAX_VALUE; // load the whole file
+
         return max_members;
     }
 
@@ -1594,6 +1645,8 @@ public class ViewProperties extends Properties {
      * Current Java applications such as HDFView cannot handle files with large
      * number of objects such as 1,000,000 objects. getStartMembers() returns the
      * starting index of objects that will be loaded into memory.
+     *
+     * @return the start members
      */
     public static int getStartMembers() {
         return start_members;
@@ -1601,7 +1654,7 @@ public class ViewProperties extends Properties {
 
     /**
      * Returns true if auto contrast is used in image processing.
-     * 
+     *
      * @return true if auto contrast is used in image processing; otherwise,
      *         returns false.
      */
@@ -1611,7 +1664,7 @@ public class ViewProperties extends Properties {
 
     /**
      * Returns true if "show image values" is set.
-     * 
+     *
      * @return true if "show image values" is set; otherwise, returns false.
      */
     public static boolean showImageValues() {
@@ -1620,7 +1673,7 @@ public class ViewProperties extends Properties {
 
     /**
      * Set the flag to indicate if auto contrast is used in image process.
-     * 
+     *
      * @param b
      *            the flag to indicate if auto contrast is used in image
      *            process.
@@ -1631,7 +1684,7 @@ public class ViewProperties extends Properties {
 
     /**
      * Set the flag to indicate if "show image values" is set.
-     * 
+     *
      * @param b
      *            the flag to indicate if if "show image values" is set.
      */
@@ -1641,27 +1694,27 @@ public class ViewProperties extends Properties {
 
     /**
      * Returns true if default file access is read only.
-     * 
+     *
      * @return true if default file access is read only; otherwise, returns
      *         false.
      */
     public static boolean isReadOnly() {
         return isReadOnly;
     }
-  
+
     /**
      * Set the flag to indicate if default file access is read only.
-     * 
+     *
      * @param b
      *            the flag to indicate if default file access is read only.
      */
     public static void setReadOnly(boolean b) {
         isReadOnly = b;
     }
-    
+
     /**
      * Returns true if default lib version is the earliest.
-     * 
+     *
      * @return true if default lib version is the earliest; otherwise, returns
      *         false.
      */
@@ -1671,12 +1724,12 @@ public class ViewProperties extends Properties {
 
     /**
      * Set the flag to indicate if default lib version is the earliest.
-     * 
+     *
      * @param b
      *            the flag to indicate if default lib version is the earliest.
      */
     public static void setEarlyLib(boolean b) {
-    	isEarlyLib = b;
+        isEarlyLib = b;
     }
 
     /**
@@ -1688,7 +1741,7 @@ public class ViewProperties extends Properties {
 
     /**
      * Returns true if "show regref values" is set.
-     * 
+     *
      * @return true if "show regref values" is set; otherwise, returns false.
      */
     public static boolean showRegRefValues() {
@@ -1712,7 +1765,7 @@ public class ViewProperties extends Properties {
 
     /**
      * Set the flag to indicate if "show RegRef values" is set.
-     * 
+     *
      * @param b
      *            the flag to indicate if if "show RegRef values" is set.
      */
@@ -1722,7 +1775,7 @@ public class ViewProperties extends Properties {
 
     /**
      * Set the flag to indicate if IndexBase should start at 1.
-     * 
+     *
      * @param b
      *            the flag to indicate if IndexBase should start at 1.
      */
