@@ -143,6 +143,7 @@ public class DefaultPaletteView extends Dialog {
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
         
+        shell.setData(this);
         
         // Create the content composite for the Canvas
         Composite content = new Composite(shell, SWT.BORDER);

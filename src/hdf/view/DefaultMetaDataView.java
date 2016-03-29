@@ -100,6 +100,8 @@ public class DefaultMetaDataView implements MetaDataView {
 		shell = new Shell(parent, SWT.SHELL_TRIM);
 		display = shell.getDisplay();
 		
+		shell.setData(this);
+		
 		shell.setImage(ViewProperties.getHdfIcon());
 		shell.setLayout(new GridLayout(1, true));
 		
@@ -186,6 +188,9 @@ public class DefaultMetaDataView implements MetaDataView {
 		shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
 				(parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
+
+		viewer.addDataView(this);
+		
 		shell.open();
 		
         // Workaround to prevent parent shell cursor from staying in "wait"
@@ -196,6 +201,8 @@ public class DefaultMetaDataView implements MetaDataView {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
+		
+		viewer.removeDataView(this);
 	}
 
 	/** Add an attribute to a data object. */
