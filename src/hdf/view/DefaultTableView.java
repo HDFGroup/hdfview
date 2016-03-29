@@ -267,6 +267,8 @@ public class DefaultTableView implements TableView {
         //shell = new Shell(display, SWT.SHELL_TRIM);
         display = shell.getDisplay();
         
+        shell.setData(this);
+        
         shell.setLayout(new FillLayout());
         
         shell.addDisposeListener(new DisposeListener() {
@@ -512,6 +514,8 @@ public class DefaultTableView implements TableView {
         shell.setSize(dataClientArea.getClientArea().width, dataClientArea.getClientArea().height);
         shell.setLocation(dataClientArea.getBounds().x, dataClientArea.getBounds().y);
         
+        viewer.addDataView(this);
+        
         shell.open();
         
         // Workaround to prevent parent shell cursor from staying in "wait"
@@ -522,6 +526,8 @@ public class DefaultTableView implements TableView {
             if (!display.readAndDispatch())
                 display.sleep();
         }
+        
+        viewer.removeDataView(this);
     }
     
     /**

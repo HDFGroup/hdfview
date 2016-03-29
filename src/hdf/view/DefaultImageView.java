@@ -276,6 +276,8 @@ public class DefaultImageView implements ImageView {
     public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
         shell = new Shell(parent, SWT.SHELL_TRIM);
         display = shell.getDisplay();
+        
+        shell.setData(this);
 
         shell.setImage(ViewProperties.getImageIcon());
         shell.setLayout(new GridLayout(1, true));
@@ -514,6 +516,8 @@ public class DefaultImageView implements ImageView {
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (minimumSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (minimumSize.y / 2));
 
+        viewer.addDataView(this);
+        
         shell.open();
         
         // Workaround to prevent parent shell cursor from staying in "wait"
@@ -524,6 +528,8 @@ public class DefaultImageView implements ImageView {
             if (!display.readAndDispatch())
                 display.sleep();
         }
+        
+        viewer.removeDataView(this);
     }
 
     private Menu createMenuBar() {
@@ -2261,6 +2267,8 @@ public class DefaultImageView implements ImageView {
         Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
         Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
         
+        list.add(dataset.getFileFormat().getRootObject());
+        
         while (it.hasNext()) {
             list.add(it.next());
         }
@@ -2529,9 +2537,12 @@ public class DefaultImageView implements ImageView {
                     
                     // Single mouse click
                     if(e.count == 1) {
+                    	if(startPosition.x == e.x && startPosition.y == e.y) {
+                    		selectedArea.setBounds(startPosition.x, startPosition.y , 0, 0);
+                    		originalSelectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
+                    	}
+                    	
                         startPosition = new Point(e.x, e.y);
-                        
-                        //selectedArea.setBounds(startPosition.x, startPosition.y , 0, 0);
                         
                         if (hbar.isVisible()) {
                             hbar.setSelection(startPosition.x - scrollDim.x / 2);

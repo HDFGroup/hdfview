@@ -122,6 +122,8 @@ public class DefaultTextView implements TextView {
         shell = new Shell(parent, SWT.SHELL_TRIM);
         display = shell.getDisplay();
         
+        shell.setData(this);
+        
         GridLayout layout = new GridLayout(2, false);
         layout.marginWidth = layout.marginHeight = layout.horizontalSpacing = 0;
         shell.setLayout(layout);
@@ -320,6 +322,8 @@ public class DefaultTextView implements TextView {
         
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         
+    	viewer.addDataView(this);
+        
         shell.open();
         
         // Workaround to prevent parent shell cursor from staying in "wait"
@@ -330,6 +334,8 @@ public class DefaultTextView implements TextView {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
+        
+        viewer.removeDataView(this);
     }
 
     /**

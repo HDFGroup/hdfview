@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Font;
 
 import org.eclipse.swt.dnd.*;
@@ -103,37 +104,37 @@ public class HDFView implements ViewManager, DropTargetListener {
     private static List<String>        imageViews;
 
     /* A list of tree table implementations. */
-    private static List<?>            tableViews;
+    private static List<?>             tableViews;
 
     /* A list of Text view implementations. */
     private static List<String>        textViews;
 
     /* A list of metadata view implementations. */
-    private static List<?>            metaDataViews;
+    private static List<?>             metaDataViews;
 
     /* A list of palette view implementations. */
-    private static List<?>            paletteViews;
+    private static List<?>             paletteViews;
     
     /* A list of help view implementations. */
-    private static List<?>            helpViews;
+    private static List<?>             helpViews;
     
     /* The list of GUI components related to HDF4 */
-    private final List<MenuItem>     h4GUIs = new Vector<MenuItem>();
+    private final List<MenuItem>       h4GUIs = new Vector<MenuItem>();
     
     /* The list of GUI components related to HDF5 */
-    private final List<MenuItem>     h5GUIs = new Vector<MenuItem>();
+    private final List<MenuItem>       h5GUIs = new Vector<MenuItem>();
     
     /* The list of GUI components related to editing */
     //private final List<?>            editGUIs;
     
     /* GUI component: the TreeView */
-    private TreeView                treeView;
+    private TreeView                   treeView;
     
-    private static final String     HDF4_VERSION = HDFVersions.HDF4_VERSION;
-    private static final String     HDF5_VERSION = HDFVersions.HDF5_VERSION;
-    private static final String     HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
-    private static final String     HDFVIEW_USERSGUIDE_URL = "http://www.hdfgroup.org/products/java/hdfview/UsersGuide/index.html";
-    private static final String     JAVA_COMPILER = "jdk 1.7";
+    private static final String        HDF4_VERSION = HDFVersions.HDF4_VERSION;
+    private static final String        HDF5_VERSION = HDFVersions.HDF5_VERSION;
+    private static final String        HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
+    private static final String        HDFVIEW_USERSGUIDE_URL = "http://www.hdfgroup.org/products/java/hdfview/UsersGuide/index.html";
+    private static final String        JAVA_COMPILER = "jdk 1.7";
     private static final String        JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
     
     private static final String        aboutHDFView = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
@@ -142,43 +143,43 @@ public class HDFView implements ViewManager, DropTargetListener {
     + "All rights reserved.";
     
     /* String buffer holding the status message */
-    private StringBuffer             message;
+    private StringBuffer               message;
     
     /* String buffer holding the metadata information */
-    private StringBuffer            metadata;
+    private StringBuffer               metadata;
     
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
-    private ToolBar                 toolBar;
+    private ToolBar                    toolBar;
     
     /* GUI component: Area to hold file structure tree and data content pane */
-    private Composite                contentArea;
+    private Composite                  contentArea;
     
     /* GUI component: Area where data view windows are shown */
-    private Composite                dataArea;
+    private Composite                  dataArea;
     
     /* GUI component: The text area for showing status messages */
-    private Text                    status;
+    private Text                       status;
     
     /* GUI component: The text area for quick attribute view */
-    private Text                    attributeArea;
+    private Text                       attributeArea;
     
     /* GUI component: To add and display URLs */
-    private Combo                    url_bar;
+    private Combo                      url_bar;
     
     /* GUI component: A list of current data windows */
-    //private final Menu                windowMenu;
+    private Menu                       windowMenu;
     
     /* GUI component: File menu on the menubar */
-    //private final Menu                fileMenu;
+    //private final Menu               fileMenu;
     
     /* The offset when a new dataview is added into the main window. */
     private int                        frameOffset = 0;
     
-    private UserOptionsDialog        userOptionDialog;
+    private UserOptionsDialog          userOptionDialog;
     
-    private Constructor<?>            ctrSrbFileDialog     = null;
+    private Constructor<?>             ctrSrbFileDialog     = null;
     
-    private Dialog                    srbFileDialog         = null;
+    private Dialog                     srbFileDialog         = null;
     
     /**
      * Constructs HDFView with a given root directory, where the HDFView is
@@ -697,15 +698,14 @@ public class HDFView implements ViewManager, DropTargetListener {
         menuItem = new MenuItem(menu, SWT.CASCADE);
         menuItem.setText("&Window");
         
-        Menu windowMenu = new Menu(menuItem);
+        windowMenu = new Menu(menuItem);
         menuItem.setMenu(windowMenu);
         
         item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("&Cascade");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                //cascadeWindows();
-                notYetImplemented();
+                cascadeWindows();
             }
         });
         
@@ -713,8 +713,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         item.setText("&Tile");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                //tileWindows();
-                notYetImplemented();
+                tileWindows();
             }
         });
         
@@ -738,6 +737,8 @@ public class HDFView implements ViewManager, DropTargetListener {
                 closeAllWindows();
             }
         });
+        
+        new MenuItem(windowMenu, SWT.SEPARATOR);
         
         menuItem = new MenuItem(menu, SWT.CASCADE);
         menuItem.setText("&Tools");
@@ -866,11 +867,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         item.setText("&Java Version");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                MessageBox versionInfo = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                versionInfo.setText(shell.getText());
-                versionInfo.setMessage(JAVA_VER_INFO);
-                // Add custom HDF Icon
-                versionInfo.open();
+                new JavaVersionDialog(mainWindow).open();
             }
         });
         
@@ -880,18 +877,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         item.setText("Supported Fi&le Formats");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                Enumeration<?> formatKeys = FileFormat.getFileFormatKeys();
-                
-                String formats = "\nSupported File Formats: \n";
-                while (formatKeys.hasMoreElements()) {
-                    formats += "    " + formatKeys.nextElement() + "\n";
-                }
-                formats += "\n";
-                
-                MessageBox message = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                message.setText(shell.getText());
-                message.setMessage(formats);
-                message.open();
+                new SupportedFileFormatsDialog(mainWindow).open();
             }
         });
         
@@ -901,11 +887,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         item.setText("&About...");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(aboutHDFView);
-                // Add HDF Icon
-                info.open();
+                new AboutDialog(mainWindow).open();
             }
         });
         
@@ -1139,107 +1121,6 @@ public class HDFView implements ViewManager, DropTargetListener {
         content.setWeights(new int[] {9, 1});
         contentArea.setWeights(new int[] {1, 3});
     }
-    
-    private void registerFileFormat() {
-        String msg = "Register a new file format by \nKEY:FILE_FORMAT:FILE_EXTENSION\n"
-            + "where, KEY: the unique identifier for the file format"
-            + "\n           FILE_FORMAT: the full class name of the file format"
-            + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
-            + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
-            + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
-        
-        // Add custom HDFLarge icon to dialog
-        String str = (new InputDialog(mainWindow, SWT.ICON_INFORMATION, 
-                "Register a file format", msg)).open();
-
-        if ((str == null) || (str.length() < 1)) return;
-
-        int idx1 = str.indexOf(':');
-        int idx2 = str.lastIndexOf(':');
-
-        if ((idx1 < 0) || (idx2 <= idx1)) {
-            showError("Failed to register " + str
-                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION",
-                    "Register File Format");
-            return;
-        }
-
-        String key = str.substring(0, idx1);
-        String className = str.substring(idx1 + 1, idx2);
-        String extension = str.substring(idx2 + 1);
-
-        // Check if the file format has been registered or the key is taken.
-        String theKey = null;
-        String theClassName = null;
-        Enumeration<?> local_enum = FileFormat.getFileFormatKeys();
-        while (local_enum.hasMoreElements()) {
-            theKey = (String) local_enum.nextElement();
-            if (theKey.endsWith(key)) {
-                showError("Invalid key: " + key + " is taken.", "Register File Format");
-                return;
-            }
-
-            theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
-            if (theClassName.endsWith(className)) {
-                showError("The file format has already been registered: " + className,
-                        "Register File Format");
-                return;
-            }
-        }
-
-        // Enables use of JHDF5 in JNLP (Web Start) applications, the system
-        // class loader with reflection first.
-        Class<?> theClass = null;
-        try {
-            theClass = Class.forName(className);
-        }
-        catch (Exception ex) {
-            try {
-                theClass = ViewProperties.loadExtClass().loadClass(className);
-            }
-            catch (Exception ex2) {
-                theClass = null;
-            }
-        }
-        
-        if (theClass == null) {
-            return;
-        }
-
-        try {
-            Object theObject = theClass.newInstance();
-            if (theObject instanceof FileFormat) {
-                FileFormat.addFileFormat(key, (FileFormat) theObject);
-            }
-        }
-        catch (Throwable ex) {
-            showError("Failed to register " + str + "\n\n" + ex, "Register File Format");
-            return;
-        }
-
-        if ((extension != null) && (extension.length() > 0)) {
-            extension = extension.trim();
-            String ext = ViewProperties.getFileExtension();
-            ext += ", " + extension;
-            ViewProperties.setFileExtension(ext);
-        }
-    }
-    
-    private void unregisterFileFormat() {
-        Enumeration<?> keys = FileFormat.getFileFormatKeys();
-        ArrayList<Object> keyList = new ArrayList<Object>();
-        
-        while (keys.hasMoreElements())
-            keyList.add((Object) keys.nextElement());
-        
-        // Add custom HDFLarge icon to dialog
-        String theKey = (new InputDialog(mainWindow, "Unregister a file format", 
-                "Unregister a file format:\n\n" + keyList.toArray())).open();
-        
-        if (theKey == null) return;
-        
-        FileFormat.removeFileFormat(theKey);
-    }
 
     /**
      * Returns a list of all open DataViews
@@ -1444,11 +1325,49 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
     
     public void addDataView(DataView dataView) {
+    	if (dataView == null) {
+            return;
+        }
+
+        // Check if the data content is already displayed
+    	Shell[] shellList = mainWindow.getShells();
+        if (shellList != null) {
+            for (int i = 0; i < shellList.length; i++) {
+                if (dataView.equals((DataView) shellList[i].getData())) {
+                    showWindow(shellList[i]);   
+                    break;
+                }
+            }
+        }
         
+        HObject obj = dataView.getDataObject();
+        String fullPath = obj.getPath() + obj.getName();
+        
+        MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
+        item.setText(fullPath);
+        item.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		Shell[] sList = mainWindow.getShells();
+        		
+        		for (int i = 0; i < sList.length; i++) {
+        			HObject obj = ((DataView) sList[i].getData()).getDataObject();
+        			
+        			if (obj.getFullName().equals(((MenuItem) e.widget).getText())) {
+        				showWindow(sList[i]);
+        			}
+        		}
+        	}
+        });
     }
     
     public void removeDataView(DataView dataView) {
-        
+        HObject obj = dataView.getDataObject();
+        MenuItem[] items = windowMenu.getItems();
+        for (int i = 0; i < items.length; i++) {
+            if(items[i].getText().equals(obj.getFullName())) {
+            	items[i].dispose();
+            }
+        }
     }
     
     public DataView getDataView(HObject dataObject) {
@@ -1530,9 +1449,10 @@ public class HDFView implements ViewManager, DropTargetListener {
         
         int x = 2, y = 2;
         Shell shell = null;
-        Point p = dataArea.getSize();
-        int w = Math.max(50, p.x - 100);
-        int h = Math.max(50, p.y - 100);
+        
+        Rectangle bounds = Display.getCurrent().getPrimaryMonitor().getClientArea();
+        int w = Math.max(50, bounds.width - 100);
+        int h = Math.max(50, bounds.height - 100);
         
         for (int i = 0; i < sList.length; i++) {
             shell = sList[i];
@@ -1547,7 +1467,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      * Tile all windows.
      */
     private void tileWindows() {
-        Shell[] sList = mainWindow.getShells();
+    	Shell[] sList = mainWindow.getShells();
         
         // Return if main window (shell) is the only open shell
         if (sList.length < 1) return;
@@ -1559,9 +1479,9 @@ public class HDFView implements ViewManager, DropTargetListener {
         int cols = (int) Math.sqrt(n);
         int rows = (int) Math.ceil((double) n / (double) cols);
         
-        Point p = contentArea.getSize();
-        int w = p.x / cols;
-        int h = p.y / rows;
+        Rectangle bounds = Display.getCurrent().getPrimaryMonitor().getClientArea();
+        int w = bounds.width / cols;
+        int h = bounds.height / rows;
         
         for (int i = 0; i < rows; i++) {
             x = 0;
@@ -1803,7 +1723,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
     
     /** Open file from SRB server */
-    private void openFromSRB() throws Exception {
+    /*private void openFromSRB() throws Exception {
         if (ctrSrbFileDialog == null) {
             Class<?> theClass = null;
 
@@ -1841,7 +1761,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
 
         // currentFile = srbFileDialog.getName();
-    }
+    }*/
     
     private void closeFile(FileFormat theFile) {
         if (theFile == null) {
@@ -1854,7 +1774,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         Shell[] views = mainWindow.getShells();
         if (views != null) {
             for (int i = 0; i < views.length; i++) {
-                HObject obj = (HObject) (((DataView) views[i]).getDataObject());
+            	HObject obj = (HObject) (((DataView) views[i].getData()).getDataObject());
                 if (obj == null) {
                     continue;
                 }
@@ -1912,26 +1832,115 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
     }
     
-    private void notYetImplemented() {
-        showError("Functionality not yet implemented.", mainWindow.getText());
+    private void registerFileFormat() {
+        String msg = "Register a new file format by \nKEY:FILE_FORMAT:FILE_EXTENSION\n"
+            + "where, KEY: the unique identifier for the file format"
+            + "\n           FILE_FORMAT: the full class name of the file format"
+            + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
+            + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
+            + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
+        
+        // Add custom HDFLarge icon to dialog
+        String str = (new InputDialog(mainWindow, SWT.ICON_INFORMATION, 
+                "Register a file format", msg)).open();
+
+        if ((str == null) || (str.length() < 1)) return;
+
+        int idx1 = str.indexOf(':');
+        int idx2 = str.lastIndexOf(':');
+
+        if ((idx1 < 0) || (idx2 <= idx1)) {
+            showError("Failed to register " + str
+                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION",
+                    "Register File Format");
+            return;
+        }
+
+        String key = str.substring(0, idx1);
+        String className = str.substring(idx1 + 1, idx2);
+        String extension = str.substring(idx2 + 1);
+
+        // Check if the file format has been registered or the key is taken.
+        String theKey = null;
+        String theClassName = null;
+        Enumeration<?> local_enum = FileFormat.getFileFormatKeys();
+        while (local_enum.hasMoreElements()) {
+            theKey = (String) local_enum.nextElement();
+            if (theKey.endsWith(key)) {
+                showError("Invalid key: " + key + " is taken.", "Register File Format");
+                return;
+            }
+
+            theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
+            if (theClassName.endsWith(className)) {
+                showError("The file format has already been registered: " + className,
+                        "Register File Format");
+                return;
+            }
+        }
+
+        // Enables use of JHDF5 in JNLP (Web Start) applications, the system
+        // class loader with reflection first.
+        Class<?> theClass = null;
+        try {
+            theClass = Class.forName(className);
+        }
+        catch (Exception ex) {
+            try {
+                theClass = ViewProperties.loadExtClass().loadClass(className);
+            }
+            catch (Exception ex2) {
+                theClass = null;
+            }
+        }
+        
+        if (theClass == null) {
+            return;
+        }
+
+        try {
+            Object theObject = theClass.newInstance();
+            if (theObject instanceof FileFormat) {
+                FileFormat.addFileFormat(key, (FileFormat) theObject);
+            }
+        }
+        catch (Throwable ex) {
+            showError("Failed to register " + str + "\n\n" + ex, "Register File Format");
+            return;
+        }
+
+        if ((extension != null) && (extension.length() > 0)) {
+            extension = extension.trim();
+            String ext = ViewProperties.getFileExtension();
+            ext += ", " + extension;
+            ViewProperties.setFileExtension(ext);
+        }
+    }
+    
+    private void unregisterFileFormat() {
+        Enumeration<?> keys = FileFormat.getFileFormatKeys();
+        ArrayList<Object> keyList = new ArrayList<Object>();
+        
+        while (keys.hasMoreElements())
+            keyList.add((Object) keys.nextElement());
+        
+        String theKey = new UnregisterFileFormatDialog(mainWindow, SWT.NONE, keyList).open();
+        
+        if (theKey == null) return;
+        
+        FileFormat.removeFileFormat(theKey);
     }
     
     private class LibraryVersionDialog extends Dialog {
-        private String libType;
         private String message;
         
         public LibraryVersionDialog(Shell parent, String libType) {
             super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-            this.libType = libType;
             
             if(libType == FileFormat.FILE_TYPE_HDF4)
                 setMessage("HDF4 " + HDF4_VERSION);
             else if (libType == FileFormat.FILE_TYPE_HDF5)
                 setMessage("HDF5 " + HDF5_VERSION);
-        }
-        
-        public String getMessage() {
-            return message;
         }
         
         public void setMessage(String message) {
@@ -1942,14 +1951,17 @@ public class HDFView implements ViewManager, DropTargetListener {
             Shell dialog = new Shell(getParent(), getStyle());
             dialog.setText("HDFView");
             createContents(dialog);
+            
             dialog.pack();
+            
+            Point computedSize = dialog.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            dialog.setSize(computedSize.x + 50, computedSize.y + 50);
 
             // Center the window relative to the main HDFView window
             Point winCenter = new Point(
                     mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
                     mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
             
-            dialog.setSize(250, 200);
             dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
             
             dialog.open();
@@ -1963,24 +1975,21 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
         
         private void createContents(final Shell shell) {
-            shell.setLayout(new GridLayout(1, true));
+            shell.setLayout(new GridLayout(2, false));
+            
+            Image HDFImage = ViewProperties.getLargeHdfIcon();
+            
+            Label imageLabel = new Label(shell, SWT.CENTER);
+            imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            imageLabel.setImage(HDFImage);
+            
+            Label versionLabel = new Label(shell, SWT.CENTER);
+            versionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            versionLabel.setText(message);
             
             // Draw HDF Icon and Version string
-            Composite canvasComposite = new Composite(shell, SWT.NONE);
-            canvasComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            canvasComposite.setLayout(new FillLayout());
-            
-            Canvas canvas = new Canvas(canvasComposite, SWT.NO_REDRAW_RESIZE);
-            final Image hdfLarge = new Image(display, HDFView.class.getResourceAsStream("icons/hdf_large.gif"));
-            canvas.addPaintListener(new PaintListener() {
-                public void paintControl(PaintEvent e) {
-                    e.gc.drawImage(hdfLarge, 10, 20);
-                    e.gc.drawText(message, 100, 40);
-                }
-            });
-            
             Composite buttonComposite = new Composite(shell, SWT.NONE);
-            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
             RowLayout buttonLayout = new RowLayout();
             buttonLayout.center = true;
             buttonLayout.justify = true;
@@ -1988,7 +1997,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
             
             Button okButton = new Button(buttonComposite, SWT.PUSH);
-            okButton.setText("OK");
+            okButton.setText("   &OK   ");
             shell.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -1996,6 +2005,281 @@ public class HDFView implements ViewManager, DropTargetListener {
                 }
             });
         }
+    }
+    
+    private class JavaVersionDialog extends Dialog {
+        public JavaVersionDialog(Shell parent) {
+            super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+        }
+        
+        public void open() {
+            final Shell dialog = new Shell(getParent(), getStyle());
+            dialog.setText("HDFView");
+            dialog.setLayout(new GridLayout(2, false));
+            
+            Image HDFImage = ViewProperties.getLargeHdfIcon();
+            
+            Label imageLabel = new Label(dialog, SWT.CENTER);
+            imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            imageLabel.setImage(HDFImage);
+            
+            Label versionLabel = new Label(dialog, SWT.CENTER);
+            versionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            versionLabel.setText(JAVA_VER_INFO);
+            
+            Composite buttonComposite = new Composite(dialog, SWT.NONE);
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+            RowLayout buttonLayout = new RowLayout();
+            buttonLayout.center = true;
+            buttonLayout.justify = true;
+            buttonLayout.type = SWT.HORIZONTAL;
+            buttonComposite.setLayout(buttonLayout);
+            
+            Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setText("   &OK   ");
+            dialog.setDefaultButton(okButton);
+            okButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                	dialog.dispose();
+                }
+            });
+            
+            dialog.pack();
+            
+            Point computedSize = dialog.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            dialog.setSize(computedSize.x + 50, computedSize.y + 50);
+
+            // Center the window relative to the main HDFView window
+            Point winCenter = new Point(
+                    mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+                    mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+            
+            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+            
+            dialog.open();
+            
+            Display display = getParent().getDisplay();
+            while (!dialog.isDisposed()) {
+                if (!display.readAndDispatch()) {
+                    display.sleep();
+                }
+            }
+        }
+    }
+    
+    private class SupportedFileFormatsDialog extends Dialog {
+        public SupportedFileFormatsDialog(Shell parent) {
+            super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+        }
+        
+        public void open() {
+            final Shell dialog = new Shell(getParent(), getStyle());
+            dialog.setText("HDFView");
+            dialog.setLayout(new GridLayout(2, false));
+            
+            Enumeration<?> formatKeys = FileFormat.getFileFormatKeys();
+            
+            String formats = "\nSupported File Formats: \n";
+            while (formatKeys.hasMoreElements()) {
+                formats += "    " + formatKeys.nextElement() + "\n";
+            }
+            formats += "\n";
+            
+            Image HDFImage = ViewProperties.getLargeHdfIcon();
+            
+            Label imageLabel = new Label(dialog, SWT.CENTER);
+            imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            imageLabel.setImage(HDFImage);
+            
+            Label formatsLabel = new Label(dialog, SWT.LEFT);
+            formatsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            formatsLabel.setText(formats);
+            
+            Composite buttonComposite = new Composite(dialog, SWT.NONE);
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+            RowLayout buttonLayout = new RowLayout();
+            buttonLayout.center = true;
+            buttonLayout.justify = true;
+            buttonLayout.type = SWT.HORIZONTAL;
+            buttonComposite.setLayout(buttonLayout);
+            
+            Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setText("   &OK   ");
+            dialog.setDefaultButton(okButton);
+            okButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                	dialog.dispose();
+                }
+            });
+            
+            dialog.pack();
+            
+            Point computedSize = dialog.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            dialog.setSize(computedSize.x + 50, computedSize.y + 50);
+
+            // Center the window relative to the main HDFView window
+            Point winCenter = new Point(
+                    mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+                    mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+            
+            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+            
+            dialog.open();
+            
+            Display display = getParent().getDisplay();
+            while (!dialog.isDisposed()) {
+                if (!display.readAndDispatch()) {
+                    display.sleep();
+                }
+            }
+        }
+    }
+    
+    private class AboutDialog extends Dialog {
+        public AboutDialog(Shell parent) {
+            super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+        }
+        
+        public void open() {
+            final Shell dialog = new Shell(getParent(), getStyle());
+            dialog.setText("HDFView");
+            dialog.setLayout(new GridLayout(2, false));
+            
+            Image HDFImage = ViewProperties.getLargeHdfIcon();
+            
+            Label imageLabel = new Label(dialog, SWT.CENTER);
+            imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            imageLabel.setImage(HDFImage);
+            
+            Label aboutLabel = new Label(dialog, SWT.LEFT);
+            aboutLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            aboutLabel.setText(aboutHDFView);
+            
+            Composite buttonComposite = new Composite(dialog, SWT.NONE);
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+            RowLayout buttonLayout = new RowLayout();
+            buttonLayout.center = true;
+            buttonLayout.justify = true;
+            buttonLayout.type = SWT.HORIZONTAL;
+            buttonComposite.setLayout(buttonLayout);
+            
+            Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setText("   &OK   ");
+            dialog.setDefaultButton(okButton);
+            okButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                	dialog.dispose();
+                }
+            });
+            
+            dialog.pack();
+
+            Point computedSize = dialog.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            dialog.setSize(computedSize.x + 50, computedSize.y + 50);
+            
+            // Center the window relative to the main HDFView window
+            Point winCenter = new Point(
+                    mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+                    mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+            
+            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+            
+            dialog.open();
+            
+            Display display = getParent().getDisplay();
+            while (!dialog.isDisposed()) {
+                if (!display.readAndDispatch()) {
+                    display.sleep();
+                }
+            }
+        }
+    }
+    
+    private class UnregisterFileFormatDialog extends Dialog {
+    	
+    	private List<Object> keyList;
+    	private String formatChoice = null;
+    	
+    	public UnregisterFileFormatDialog(Shell parent, int style, List<Object> keyList) {
+    		super(parent, style);
+    		
+    		this.keyList = keyList;
+    	}
+    	
+    	public String open() {
+    		Shell parent = getParent();
+    		final Shell shell = new Shell(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+    		shell.setText("Unregister a File Format");
+    		shell.setLayout(new GridLayout(2, false));
+    		
+    		Image HDFImage = ViewProperties.getLargeHdfIcon();
+    		
+    		Label imageLabel = new Label(shell, SWT.CENTER);
+    		imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    		imageLabel.setImage(HDFImage);
+    		
+    				
+    		final Combo formatChoiceCombo = new Combo(shell, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+    		formatChoiceCombo.setItems(keyList.toArray(new String[0]));
+    		formatChoiceCombo.select(0);
+    		formatChoiceCombo.addSelectionListener(new SelectionAdapter() {
+    			public void widgetSelected(SelectionEvent e) {
+    				formatChoice = formatChoiceCombo.getItem(formatChoiceCombo.getSelectionIndex());
+    			}
+    		});
+    		
+    		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, true);
+    		data.widthHint = 100;
+    		formatChoiceCombo.setLayoutData(data);
+    		
+    		Composite buttonComposite = new Composite(shell, SWT.NONE);
+            buttonComposite.setLayout(new GridLayout(2, true));
+            buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+            
+            Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setText("   &Ok   ");
+            okButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    
+                    shell.dispose();
+                }
+            });
+            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+            gridData.widthHint = 70;
+            okButton.setLayoutData(gridData);
+            
+            Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+            cancelButton.setText("&Cancel");
+            cancelButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    shell.dispose();
+                }
+            });
+            
+            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+            gridData.widthHint = 70;
+            cancelButton.setLayoutData(gridData);
+    		
+    		shell.pack();
+    		
+    		Point computedSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            shell.setSize(computedSize.x + 50, computedSize.y + 50);
+            
+            Rectangle parentBounds = parent.getBounds();
+            Point shellSize = shell.getSize();
+            shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+    		
+    		shell.open();
+    		
+    		Display display = parent.getDisplay();
+            while(!shell.isDisposed()) {
+                if (!display.readAndDispatch())
+                    display.sleep();
+            }
+            
+            return formatChoice;
+    	}
     }
     
     /**

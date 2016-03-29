@@ -1296,10 +1296,10 @@ public class DefaultTreeView implements TreeView {
         FileFormat theFile = getSelectedFile();
         if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             shell.getDisplay().beep();
-            showError("Unsupported operation: cannot delete HDF4 object.", null);
+            showError("Unsupported operation: cannot delete HDF4 object.", shell.getText());
             return;
         }
-
+        
         TreeItem[] currentSelections = tree.getSelection();
 
         if (moveFlag == true) {
@@ -1547,7 +1547,7 @@ public class DefaultTreeView implements TreeView {
                 int n = members.size();
                 for (int i = 0; i < n; i++) {
                     HObject theObj = (HObject) members.get(i);
-                    isOpen = (viewer.getDataView(theObj) != null);
+                    isOpen = (((HDFView) viewer).getDataView(theObj) != null);
                     if (isOpen) {
                         break;
                     }
@@ -1555,7 +1555,7 @@ public class DefaultTreeView implements TreeView {
             }
         }
         else {
-            return !(viewer.getDataView(obj) == null);
+            return !(((HDFView) viewer).getDataView(obj) == null);
         }
 
         return isOpen;
@@ -2003,7 +2003,7 @@ public class DefaultTreeView implements TreeView {
             showError(ex.getMessage(), null);
         }
 
-        viewer.showStatus("Data saved to: " + filename);
+        ((HDFView) viewer).showStatus("Data saved to: " + filename);
     }
 
     /** enable/disable GUI components */
@@ -2052,7 +2052,7 @@ public class DefaultTreeView implements TreeView {
         if (isNewFile) accessID = accessID - FileFormat.OPEN_NEW;
 
         if (isFileOpen(filename)) {
-            viewer.showStatus("File is in use.");
+            ((HDFView) viewer).showStatus("File is in use.");
             return null;
         }
 
@@ -2386,7 +2386,7 @@ public class DefaultTreeView implements TreeView {
 
         log.trace("showDataContent: inited");
 
-        Shell theShell = (Shell) viewer.getDataView(d);
+        Shell theShell = (Shell) ((HDFView) viewer).getDataView(d);
 
         if (isDefaultDisplay) {
             if (theShell != null) {
@@ -2522,8 +2522,6 @@ public class DefaultTreeView implements TreeView {
             log.trace("showDataContent: Tools.newInstance");
 
             cursor.dispose();
-            
-            viewer.addDataView((DataView) theView);
         } catch (Exception ex) {}
 
         log.trace("showDataContent({}): finish", dataObject.getName());
