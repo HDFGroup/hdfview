@@ -51,7 +51,7 @@ import hdf.object.HObject;
 /**
  * NewTableDataDialog shows a message dialog requesting user input for creating
  * a new HDF4/5 compound dataset.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2015
  */
@@ -59,9 +59,9 @@ public class NewTableDataDialog extends Dialog {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewTableDataDialog.class);
 
-	private Shell shell;
-    
-    private static final String[] DATATYPE_NAMES   = { 
+    private Shell shell;
+
+    private static final String[] DATATYPE_NAMES   = {
         "byte (8-bit)", // 0
         "short (16-bit)", // 1
         "int (32-bit)", // 2
@@ -86,7 +86,7 @@ public class NewTableDataDialog extends Dialog {
 
     private HObject               newObject;
     private Group                 parentGroup;
-    
+
     private List<?>               objList;
 
     private int                   numberOfMembers;
@@ -94,15 +94,15 @@ public class NewTableDataDialog extends Dialog {
     private Table                 table;
 
     private Text                  nameField, currentSizeField, maxSizeField, chunkSizeField;
-    
+
     private Combo                 compressionLevel, rankChoice, memberTypeChoice;
     private Button                checkCompression;
     private Button                checkContiguous, checkChunked;
-	
+
     /**
      * Constructs a NewTableDataDialog with specified list of possible parent
      * groups.
-     * 
+     *
      * @param parent
      *            the parent shell of the dialog
      * @param pGroup
@@ -110,51 +110,51 @@ public class NewTableDataDialog extends Dialog {
      * @param objs
      *            the list of all objects.
      */
-	public NewTableDataDialog(Shell parent, Group pGroup, List<?> objs) {
-		super(parent, SWT.APPLICATION_MODAL);
-		
-		newObject = null;
+    public NewTableDataDialog(Shell parent, Group pGroup, List<?> objs) {
+        super(parent, SWT.APPLICATION_MODAL);
+
+        newObject = null;
         numberOfMembers = 2;
         parentGroup = pGroup;
         objList = objs;
-        
+
         groupList = new Vector<Group>(objs.size());
         compoundDSList = new Vector<Object>(objs.size());
-        
+
         fileformat = pGroup.getFileFormat();
-	}
-	
-	public void open() {
-		Shell parent = getParent();
-    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-    	shell.setText("New Compound Dataset...");
-    	shell.setImage(ViewProperties.getHdfIcon());
-    	shell.setLayout(new GridLayout(1, false));
-    	
-    	
-    	// Create Name/Parent Group/Import field region
-    	Composite fieldComposite = new Composite(shell, SWT.NONE);
-    	GridLayout layout = new GridLayout(2, false);
-    	layout.verticalSpacing = 0;
-    	fieldComposite.setLayout(layout);
-    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	new Label(fieldComposite, SWT.LEFT).setText("Dataset name: ");
-    	
-    	nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	new Label(fieldComposite, SWT.LEFT).setText("Parent group: ");
-    	
-    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	parentChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
-    		}
-    	});
-    	
-    	Object obj = null;
+    }
+
+    public void open() {
+        Shell parent = getParent();
+        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setText("New Compound Dataset...");
+        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setLayout(new GridLayout(1, false));
+
+
+        // Create Name/Parent Group/Import field region
+        Composite fieldComposite = new Composite(shell, SWT.NONE);
+        GridLayout layout = new GridLayout(2, false);
+        layout.verticalSpacing = 0;
+        fieldComposite.setLayout(layout);
+        fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        new Label(fieldComposite, SWT.LEFT).setText("Dataset name: ");
+
+        nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        new Label(fieldComposite, SWT.LEFT).setText("Parent group: ");
+
+        parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        parentChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+            }
+        });
+
+        Object obj = null;
         Iterator<?> iterator = objList.iterator();
 
         while (iterator.hasNext()) {
@@ -173,47 +173,47 @@ public class NewTableDataDialog extends Dialog {
                 compoundDSList.add(obj);
             }
         }
-        
-    	if (parentGroup.isRoot()) {
+
+        if (parentGroup.isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.separator));
         }
         else {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
-    	
-    	new Label(fieldComposite, SWT.LEFT).setText("Import template: ");
-    	
-    	templateChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	templateChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			
-    		}
-    	});
-    	
-    	Iterator<Object> it = compoundDSList.iterator();
-    	while(it.hasNext()) {
-    		templateChoice.add(((CompoundDS) it.next()).getName());
-    	}
-    	
-    	
-    	// Create Dataspace region
-    	org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	dataspaceGroup.setLayout(new GridLayout(3, true));
-    	dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	dataspaceGroup.setText("Dataspace");
-    	
-    	new Label(dataspaceGroup, SWT.LEFT).setText("No. of dimensions");
-    	
-    	new Label(dataspaceGroup, SWT.LEFT).setText("Current size");
-    	
-    	new Label(dataspaceGroup, SWT.LEFT).setText("Max size (-1 for unlimited)");
-    	
-    	rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	rankChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			int rank = (int) rankChoice.getSelectionIndex() + 1;
+
+        new Label(fieldComposite, SWT.LEFT).setText("Import template: ");
+
+        templateChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        templateChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+
+            }
+        });
+
+        Iterator<Object> it = compoundDSList.iterator();
+        while(it.hasNext()) {
+            templateChoice.add(((CompoundDS) it.next()).getName());
+        }
+
+
+        // Create Dataspace region
+        org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        dataspaceGroup.setLayout(new GridLayout(3, true));
+        dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        dataspaceGroup.setText("Dataspace");
+
+        new Label(dataspaceGroup, SWT.LEFT).setText("No. of dimensions");
+
+        new Label(dataspaceGroup, SWT.LEFT).setText("Current size");
+
+        new Label(dataspaceGroup, SWT.LEFT).setText("Max size (-1 for unlimited)");
+
+        rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        rankChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                int rank = (int) rankChoice.getSelectionIndex() + 1;
                 String currentSizeStr = "1";
                 String maxSizeStr = "0";
 
@@ -242,51 +242,51 @@ public class NewTableDataDialog extends Dialog {
                 }
 
                 chunkSizeField.setText(chunkStr);
-    		}
-    	});
-    	
-    	for (int i = 1; i < 33; i++) {
+            }
+        });
+
+        for (int i = 1; i < 33; i++) {
             rankChoice.add(String.valueOf(i));
         }
-    	
-    	currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
-    	currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	currentSizeField.setText("1");
-    	
-    	maxSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
-    	maxSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	maxSizeField.setText("0");
-    	
-    	
-    	// Create Data Layout/Compression region
-    	org.eclipse.swt.widgets.Group layoutGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	layoutGroup.setLayout(new GridLayout(7, false));
-    	layoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	layoutGroup.setText("Data Layout and Compression");
-    	
-    	new Label(layoutGroup, SWT.LEFT).setText("Storage layout: ");
-    	
-    	checkContiguous = new Button(layoutGroup, SWT.RADIO);
-    	checkContiguous.setText("Contiguous");
-    	checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	checkContiguous.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			chunkSizeField.setEnabled(false);
-    		}
-    	});
-    	
-    	// Dummy labels
-    	new Label(layoutGroup, SWT.LEFT).setText("");
-    	new Label(layoutGroup, SWT.LEFT).setText("");
-    	
-    	checkChunked = new Button(layoutGroup, SWT.RADIO);
-    	checkChunked.setText("Chunked");
-    	checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	checkChunked.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			chunkSizeField.setEnabled(true);
-                
-    			String currentStr = currentSizeField.getText();
+
+        currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
+        currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        currentSizeField.setText("1");
+
+        maxSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
+        maxSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        maxSizeField.setText("0");
+
+
+        // Create Data Layout/Compression region
+        org.eclipse.swt.widgets.Group layoutGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        layoutGroup.setLayout(new GridLayout(7, false));
+        layoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        layoutGroup.setText("Data Layout and Compression");
+
+        new Label(layoutGroup, SWT.LEFT).setText("Storage layout: ");
+
+        checkContiguous = new Button(layoutGroup, SWT.RADIO);
+        checkContiguous.setText("Contiguous");
+        checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkContiguous.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                chunkSizeField.setEnabled(false);
+            }
+        });
+
+        // Dummy labels
+        new Label(layoutGroup, SWT.LEFT).setText("");
+        new Label(layoutGroup, SWT.LEFT).setText("");
+
+        checkChunked = new Button(layoutGroup, SWT.RADIO);
+        checkChunked.setText("Chunked");
+        checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkChunked.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                chunkSizeField.setEnabled(true);
+
+                String currentStr = currentSizeField.getText();
                 int idx = currentStr.lastIndexOf("x");
                 String chunkStr = "1";
 
@@ -304,24 +304,24 @@ public class NewTableDataDialog extends Dialog {
                 }
 
                 chunkSizeField.setText(chunkStr);
-    		}
-    	});
-    	
-    	new Label(layoutGroup, SWT.LEFT).setText("Size: ");
-    	
-    	chunkSizeField = new Text(layoutGroup, SWT.SINGLE | SWT.BORDER);
-    	chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	chunkSizeField.setText("1");
-    	chunkSizeField.setEnabled(false);
-    	
-    	new Label(layoutGroup, SWT.LEFT).setText("Compression: ");
-    	
-    	checkCompression = new Button(layoutGroup, SWT.CHECK);
-    	checkCompression.setText("gzip");
-    	checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	checkCompression.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			boolean isCompressed = checkCompression.getSelection();
+            }
+        });
+
+        new Label(layoutGroup, SWT.LEFT).setText("Size: ");
+
+        chunkSizeField = new Text(layoutGroup, SWT.SINGLE | SWT.BORDER);
+        chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        chunkSizeField.setText("1");
+        chunkSizeField.setEnabled(false);
+
+        new Label(layoutGroup, SWT.LEFT).setText("Compression: ");
+
+        checkCompression = new Button(layoutGroup, SWT.CHECK);
+        checkCompression.setText("gzip");
+        checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkCompression.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                boolean isCompressed = checkCompression.getSelection();
 
                 if (isCompressed) {
                     if (!checkChunked.getSelection()) {
@@ -344,7 +344,7 @@ public class NewTableDataDialog extends Dialog {
 
                         chunkSizeField.setText(chunkStr);
                     }
-                    
+
                     compressionLevel.setEnabled(true);
                     checkContiguous.setEnabled(false);
                     checkContiguous.setSelection(false);
@@ -355,170 +355,170 @@ public class NewTableDataDialog extends Dialog {
                     compressionLevel.setEnabled(false);
                     checkContiguous.setEnabled(true);
                 }
-    		}
-    	});
-    	
-    	new Label(layoutGroup, SWT.LEFT).setText("Level: ");
-    	
-    	compressionLevel = new Combo(layoutGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	compressionLevel.setEnabled(false);
-    	
-    	for (int i = 0; i < 10; i++) {
+            }
+        });
+
+        new Label(layoutGroup, SWT.LEFT).setText("Level: ");
+
+        compressionLevel = new Combo(layoutGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        compressionLevel.setEnabled(false);
+
+        for (int i = 0; i < 10; i++) {
             compressionLevel.add(String.valueOf(i));
         }
-    	
-    	new Label(layoutGroup, SWT.LEFT).setText("");
-    	new Label(layoutGroup, SWT.LEFT).setText("");
-    	new Label(layoutGroup, SWT.LEFT).setText("");
-    	
-    	
-    	// Create Properties region
-    	org.eclipse.swt.widgets.Group propertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	propertiesGroup.setLayout(new GridLayout(2, false));
-    	propertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	propertiesGroup.setText("Compound Datatype Properties");
-    	
-    	new Label(propertiesGroup, SWT.LEFT).setText("Number of Members:");
-    	
-    	nFieldBox = new Combo(propertiesGroup, SWT.DROP_DOWN);
-    	nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	nFieldBox.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			int n = 0;
+
+        new Label(layoutGroup, SWT.LEFT).setText("");
+        new Label(layoutGroup, SWT.LEFT).setText("");
+        new Label(layoutGroup, SWT.LEFT).setText("");
+
+
+        // Create Properties region
+        org.eclipse.swt.widgets.Group propertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        propertiesGroup.setLayout(new GridLayout(2, false));
+        propertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        propertiesGroup.setText("Compound Datatype Properties");
+
+        new Label(propertiesGroup, SWT.LEFT).setText("Number of Members:");
+
+        nFieldBox = new Combo(propertiesGroup, SWT.DROP_DOWN);
+        nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        nFieldBox.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                int n = 0;
 
                 try {
                     n = Integer.valueOf((String) nFieldBox.getItem(nFieldBox.getSelectionIndex())).intValue();
                 }
                 catch (Exception ex) {
-                	log.debug("Change number of members:", ex);
+                    log.debug("Change number of members:", ex);
                 }
 
                 if (n == numberOfMembers) {
                     return;
                 }
-                
+
                 if(n > numberOfMembers) {
-                	for(int i = 0; i < n - numberOfMembers; i++) {
-                		addMemberTableItem(table);
-                	}
+                    for(int i = 0; i < n - numberOfMembers; i++) {
+                        addMemberTableItem(table);
+                    }
                 } else {
-                	for(int i = numberOfMembers - 1; i >= n; i--) {
-                		TableItem item = table.getItem(i);
-                		TableEditor editor = (TableEditor) item.getData("NameEditor");
-                		editor.getEditor().dispose();
-                		editor.dispose();
-                		
-                		editor = (TableEditor) item.getData("DatatypeEditor");
-                		editor.getEditor().dispose();
-                		editor.dispose();
-                		
-                		editor = (TableEditor) item.getData("ArraySizeEditor");
-                		editor.getEditor().dispose();
-                		editor.dispose();
-                		
-                		table.remove(table.indexOf(item));
-                	}
+                    for(int i = numberOfMembers - 1; i >= n; i--) {
+                        TableItem item = table.getItem(i);
+                        TableEditor editor = (TableEditor) item.getData("NameEditor");
+                        editor.getEditor().dispose();
+                        editor.dispose();
+
+                        editor = (TableEditor) item.getData("DatatypeEditor");
+                        editor.getEditor().dispose();
+                        editor.dispose();
+
+                        editor = (TableEditor) item.getData("ArraySizeEditor");
+                        editor.getEditor().dispose();
+                        editor.dispose();
+
+                        table.remove(table.indexOf(item));
+                    }
                 }
-                
+
                 table.setItemCount(n);
                 numberOfMembers = n;
-    		}
-    	});
-    	
-    	for (int i = 1; i <= 100; i++) {
+            }
+        });
+
+        for (int i = 1; i <= 100; i++) {
             nFieldBox.add(String.valueOf(i));
         }
-    	
-    	table = new Table(propertiesGroup, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-    	table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-    	table.setLinesVisible(false);
-    	table.setHeaderVisible(true);
-    	
-    	String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
-    	
-    	TableColumn column = new TableColumn(table, SWT.NONE);
-    	column.setText(colNames[0]);
-    	
-    	column = new TableColumn(table, SWT.NONE);
-    	column.setText(colNames[1]);
-    	
-    	column = new TableColumn(table, SWT.NONE);
-    	column.setText(colNames[2]);
-    	
-    	addMemberTableItem(table);
-    	addMemberTableItem(table);
-    	
-    	for(int i = 0; i < table.getColumnCount(); i++) {
-    		table.getColumn(i).pack();
-    	}
-    	
-    	// Create Ok/Cancel button region
-    	Composite buttonComposite = new Composite(shell, SWT.NONE);
+
+        table = new Table(propertiesGroup, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+        table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        table.setLinesVisible(false);
+        table.setHeaderVisible(true);
+
+        String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
+
+        TableColumn column = new TableColumn(table, SWT.NONE);
+        column.setText(colNames[0]);
+
+        column = new TableColumn(table, SWT.NONE);
+        column.setText(colNames[1]);
+
+        column = new TableColumn(table, SWT.NONE);
+        column.setText(colNames[2]);
+
+        addMemberTableItem(table);
+        addMemberTableItem(table);
+
+        for(int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumn(i).pack();
+        }
+
+        // Create Ok/Cancel button region
+        Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-        
+
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
         GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
         gridData.widthHint = 70;
         okButton.setLayoutData(gridData);
         okButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		try {
+            public void widgetSelected(SelectionEvent e) {
+                try {
                     newObject = createCompoundDS();
                 }
                 catch (Exception ex) {
-                	MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                	error.setText(shell.getText());
-                	error.setMessage(ex.getMessage());
-                	error.open();
+                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                    error.setText(shell.getText());
+                    error.setMessage(ex.getMessage());
+                    error.open();
                 }
 
                 if (newObject != null) {
                     shell.dispose();
                 }
-        	}
+            }
         });
-        
+
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setText("&Cancel");
         gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
         gridData.widthHint = 70;
         cancelButton.setLayoutData(gridData);
         cancelButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		newObject = null;
+            public void widgetSelected(SelectionEvent e) {
+                newObject = null;
                 shell.dispose();
                 (groupList).setSize(0);
-        	}
+            }
         });
-        
+
         templateChoice.deselectAll();
         rankChoice.select(0);
         checkContiguous.setSelection(true);
         compressionLevel.select(6);
         nFieldBox.select(nFieldBox.indexOf(String.valueOf(numberOfMembers)));
-    	
+
         shell.pack();
-        
+
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         shell.open();
-        
+
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-	}
-	
-	private HObject createCompoundDS() throws Exception {
+    }
+
+    private HObject createCompoundDS() throws Exception {
         HObject obj = null;
         long dims[], maxdims[], chunks[];
         int rank;
@@ -567,7 +567,7 @@ public class NewTableDataDialog extends Dialog {
                     order = Integer.parseInt(orderStr);
                 }
                 catch (Exception ex) {
-                	log.debug("compound order:", ex);
+                    log.debug("compound order:", ex);
                 }
             }
             mOrders[i] = order;
@@ -762,7 +762,7 @@ public class NewTableDataDialog extends Dialog {
                 confirm.setMessage("Chunk size is equal/greater than the current size. "
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
                 if(confirm.open() == SWT.NO) {
-                	return null;
+                    return null;
                 }
             }
 
@@ -773,7 +773,7 @@ public class NewTableDataDialog extends Dialog {
                 confirm.setMessage("Chunk size is one, which may cause large memory overhead for large dataset."
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
                 if(confirm.open() == SWT.NO) {
-                	return null;
+                    return null;
                 }
             }
 
@@ -795,47 +795,47 @@ public class NewTableDataDialog extends Dialog {
 
         return obj;
     }
-	
-	private TableItem addMemberTableItem(Table table) {
-		TableItem item = new TableItem(table, SWT.NONE);
-		
-		TableEditor editor = new TableEditor(table);
-		Text text = new Text(table, SWT.SINGLE | SWT.BORDER);
-		editor.grabHorizontal = true;
-		editor.grabVertical = true;
-		editor.horizontalAlignment = SWT.LEFT;
-		editor.verticalAlignment = SWT.TOP;
-		editor.setEditor(text, item, 0);
-		item.setData("NameEditor", editor);
-		
-		Combo combo = new Combo(table, SWT.DROP_DOWN);
-		combo.setItems(DATATYPE_NAMES);
-		editor = new TableEditor(table);
-		editor.grabHorizontal = true;
-		editor.grabVertical = true;
-		editor.horizontalAlignment = SWT.LEFT;
-		editor.verticalAlignment = SWT.TOP;
-		editor.setEditor(combo, item, 1);
-		item.setData("DatatypeEditor", editor);
-		
-		text = new Text(table, SWT.SINGLE | SWT.BORDER);
-		editor = new TableEditor(table);
-		editor.grabHorizontal = true;
-		editor.grabVertical = true;
-		editor.horizontalAlignment = SWT.LEFT;
-		editor.verticalAlignment = SWT.TOP;
-		editor.setEditor(text, item, 2);
-		item.setData("ArraySizeEditor", editor);
-		
-		return item;
-	}
 
-    /** Returns the new dataset created. */
+    private TableItem addMemberTableItem(Table table) {
+        TableItem item = new TableItem(table, SWT.NONE);
+
+        TableEditor editor = new TableEditor(table);
+        Text text = new Text(table, SWT.SINGLE | SWT.BORDER);
+        editor.grabHorizontal = true;
+        editor.grabVertical = true;
+        editor.horizontalAlignment = SWT.LEFT;
+        editor.verticalAlignment = SWT.TOP;
+        editor.setEditor(text, item, 0);
+        item.setData("NameEditor", editor);
+
+        Combo combo = new Combo(table, SWT.DROP_DOWN);
+        combo.setItems(DATATYPE_NAMES);
+        editor = new TableEditor(table);
+        editor.grabHorizontal = true;
+        editor.grabVertical = true;
+        editor.horizontalAlignment = SWT.LEFT;
+        editor.verticalAlignment = SWT.TOP;
+        editor.setEditor(combo, item, 1);
+        item.setData("DatatypeEditor", editor);
+
+        text = new Text(table, SWT.SINGLE | SWT.BORDER);
+        editor = new TableEditor(table);
+        editor.grabHorizontal = true;
+        editor.grabVertical = true;
+        editor.horizontalAlignment = SWT.LEFT;
+        editor.verticalAlignment = SWT.TOP;
+        editor.setEditor(text, item, 2);
+        item.setData("ArraySizeEditor", editor);
+
+        return item;
+    }
+
+    /** @return the new dataset created. */
     public DataFormat getObject() {
         return newObject;
     }
 
-    /** Returns the parent group of the new dataset. */
+    /** @return the parent group of the new dataset. */
     public Group getParentGroup() {
         return parentGroup;
     }

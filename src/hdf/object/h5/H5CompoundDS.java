@@ -47,8 +47,8 @@ import hdf.object.HObject;
  * atomic types or small arrays of such types. Each member of a compound type has a name which is unique within that
  * type, and a byte offset that determines the first byte (smallest byte address) of that member in a compound datum.
  * <p>
- * For more information on HDF5 datasets and datatypes, read the <a
- * href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>.
+ * For more information on HDF5 datasets and datatypes, read the
+ * <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>.
  * <p>
  * There are two basic types of compound datasets: simple compound data and nested compound data. Members of a simple
  * compound dataset have atomic datatypes. Members of a nested compound dataset are compound or array of compound data.
@@ -72,8 +72,6 @@ import hdf.object.HObject;
  * instead of compound structure. As for the example above, the java.util.Vector object has three elements: int[LENGTH],
  * float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of int, float and double, we will be
  * able to read/write the compound data by field.
- * <p>
- * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -102,12 +100,12 @@ public class H5CompoundDS extends CompoundDS {
      * nested structure,
      *
      * <pre>
-     * A --> m01
-     * A --> m02
-     * A --> nest1 --> m11
-     * A --> nest1 --> m12
-     * A --> nest1 --> nest2 --> m21
-     * A --> nest1 --> nest2 --> m22
+     * A --&gt; m01
+     * A --&gt; m02
+     * A --&gt; nest1 --&gt; m11
+     * A --&gt; nest1 --&gt; m12
+     * A --&gt; nest1 --&gt; nest2 --&gt; m21
+     * A --&gt; nest1 --&gt; nest2 --&gt; m22
      * i.e.
      * A = { m01, m02, nest1{m11, m12, nest2{ m21, m22}}}
      * </pre>
@@ -134,7 +132,6 @@ public class H5CompoundDS extends CompoundDS {
      * <p>
      * This object is usually constructed at FileFormat.open(), which loads the file structure and object information
      * into tree structure (TreeNode). It is rarely used elsewhere.
-     * <p>
      *
      * @param theFile
      *            the file that contains the data object.
@@ -150,6 +147,15 @@ public class H5CompoundDS extends CompoundDS {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #H5CompoundDS(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the file that contains the data object.
+     * @param theName
+     *            the name of the data object, e.g. "dset".
+     * @param thePath
+     *            the full path of the data object, e.g. "/arrays/".
+     * @param oid
+     *            the oid of the data object.
      */
     @Deprecated
     public H5CompoundDS(FileFormat theFile, String theName, String thePath, long[] oid) {
@@ -754,6 +760,9 @@ public class H5CompoundDS extends CompoundDS {
      *
      * @param buf
      *            The vector that contains the data values of compound fields.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     @Override
     public void write(Object buf) throws HDF5Exception {
@@ -926,7 +935,11 @@ public class H5CompoundDS extends CompoundDS {
      *            IN dataset ID
      * @param spaceIDs
      *            IN/OUT memory and file space IDs -- spaceIDs[0]=mspace, spaceIDs[1]=fspace
+     *
      * @return total number of data point selected
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     private long selectHyperslab(int did, int[] spaceIDs) throws HDF5Exception {
         long lsize = 1;
@@ -1313,6 +1326,25 @@ public class H5CompoundDS extends CompoundDS {
      * @deprecated Not for public use in the future. <br>
      *             Using
      *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[], long[][], Object)}
+     *
+     * @param name
+     *            the name of the dataset to create.
+     * @param pgroup
+     *            parent group where the new dataset is created.
+     * @param dims
+     *            the dimension size of the dataset.
+     * @param memberNames
+     *            the names of compound datatype
+     * @param memberDatatypes
+     *            the datatypes of the compound datatype
+     * @param memberSizes
+     *            the dim sizes of the members
+     * @param data
+     *            list of data arrays written to the new dataset, null if no data is written to the new dataset.
+     *
+     * @return the new compound dataset if successful; otherwise returns null.
+     *
+     * @throws Exception if there is a failure.
      */
     @Deprecated
     public static Dataset create(String name, Group pgroup, long[] dims, String[] memberNames,
@@ -1337,6 +1369,27 @@ public class H5CompoundDS extends CompoundDS {
      * @deprecated Not for public use in the future. <br>
      *             Using
      *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[], long[][], Object)}
+     *
+     * @param name
+     *            the name of the dataset to create.
+     * @param pgroup
+     *            parent group where the new dataset is created.
+     * @param dims
+     *            the dimension size of the dataset.
+     * @param memberNames
+     *            the names of compound datatype
+     * @param memberDatatypes
+     *            the datatypes of the compound datatype
+     * @param memberRanks
+     *            the ranks of the members
+     * @param memberDims
+     *            the dim sizes of the members
+     * @param data
+     *            list of data arrays written to the new dataset, null if no data is written to the new dataset.
+     *
+     * @return the new compound dataset if successful; otherwise returns null.
+     *
+     * @throws Exception if the dataset can not be created.
      */
     @Deprecated
     public static Dataset create(String name, Group pgroup, long[] dims, String[] memberNames,
@@ -1421,6 +1474,8 @@ public class H5CompoundDS extends CompoundDS {
      *            list of data arrays written to the new dataset, null if no data is written to the new dataset.
      *
      * @return the new compound dataset if successful; otherwise returns null.
+     *
+     * @throws Exception if there is a failure.
      */
     public static Dataset create(String name, Group pgroup, long[] dims, long[] maxdims, long[] chunks, int gzip,
             String[] memberNames, Datatype[] memberDatatypes, int[] memberRanks, long[][] memberDims, Object data)
@@ -1624,6 +1679,11 @@ public class H5CompoundDS extends CompoundDS {
      * nest.d
      * nest.e
      * </pre>
+     *
+     * @param tid   the identifier of the compound datatype
+     * @param name  the name of the compound datatype
+     * @param names  the list to store the member names of the compound datatype
+     * @param flatTypeList2  the list to store the nested member names of the compound datatype
      */
     private void extractCompoundInfo(int tid, String name, List<String> names, List<Integer> flatTypeList2) {
         int nMembers = 0, mclass = -1, mtype = -1;
@@ -1764,7 +1824,6 @@ public class H5CompoundDS extends CompoundDS {
      * Creates a datatype of a compound with one field.
      * <p>
      * This function is needed to read/write data field by field.
-     * <p>
      *
      * @param atom_tid
      *            The datatype identifier of the compound to create
@@ -1773,7 +1832,11 @@ public class H5CompoundDS extends CompoundDS {
      * @param compInfo
      *            compInfo[0]--IN: class of member datatype; compInfo[1]--IN: size of member datatype; compInfo[2]--OUT:
      *            non-zero if the base type of the compound field is unsigned; zero, otherwise.
+     *
      * @return the identifier of the compound datatype.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     private final int createCompoundFieldType(int atom_tid, String member_name, int[] compInfo) throws HDF5Exception {
         int nested_tid = -1;

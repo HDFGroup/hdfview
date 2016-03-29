@@ -44,36 +44,36 @@ import hdf.object.HObject;
 /**
  * NewDatatypeDialog shows a message dialog requesting user input for creating a
  * new HDF5 datatype.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 1/1/2016
  */
 public class NewDatatypeDialog extends Dialog {
-	
-	private Shell             shell;
 
-	private Text              nameField, stringLengthField;
+    private Shell             shell;
 
-	private Combo             parentChoice, classChoice, sizeChoice, endianChoice;
+    private Text              nameField, stringLengthField;
 
-	private Button            checkUnsigned;
+    private Combo             parentChoice, classChoice, sizeChoice, endianChoice;
 
-	private boolean           isH5;
+    private Button            checkUnsigned;
 
-	/** a list of current groups */
-	private List<Group>      groupList;
-	
-	private List<?>           objList;
+    private boolean           isH5;
 
-	private HObject           newObject;
-	private Group             parentGroup;
+    /** a list of current groups */
+    private List<Group>      groupList;
 
-	private FileFormat        fileFormat;
-	
-	/**
+    private List<?>           objList;
+
+    private HObject           newObject;
+    private Group             parentGroup;
+
+    private FileFormat        fileFormat;
+
+    /**
      * Constructs a NewDatatypeDialog with specified list of possible parent
      * groups.
-     * 
+     *
      * @param parent
      *            the parent shell of the dialog
      * @param pGroup
@@ -81,48 +81,48 @@ public class NewDatatypeDialog extends Dialog {
      * @param objs
      *            the list of all objects.
      */
-	public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) {
-		super(parent, SWT.APPLICATION_MODAL);
-		
-		newObject = null;
-		parentGroup = pGroup;
-		objList = objs;
+    public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) {
+        super(parent, SWT.APPLICATION_MODAL);
+
+        newObject = null;
+        parentGroup = pGroup;
+        objList = objs;
 
         fileFormat = pGroup.getFileFormat();
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-	}
-	
-	public void open() {
-		Shell parent = getParent();
-    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-    	shell.setText("New Datatype...");
-    	shell.setImage(ViewProperties.getHdfIcon());
-    	shell.setLayout(new GridLayout(1, false));
-    	
-    	
-    	// Create Datatype name / Parent group region
-    	Composite fieldComposite = new Composite(shell, SWT.NONE);
-    	fieldComposite.setLayout(new GridLayout(2, false));
-    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	Label label = new Label(fieldComposite, SWT.LEFT);
-    	label.setText("Datatype name: ");
-    	
-    	nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	label = new Label(fieldComposite, SWT.LEFT);
-    	label.setText("Parent Group: ");
-    	
-    	parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-    	parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	parentChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			parentGroup = groupList.get(parentChoice.getSelectionIndex());
-    		}
-    	});
-    	
-    	groupList = new Vector<Group>(objList.size());
+    }
+
+    public void open() {
+        Shell parent = getParent();
+        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setText("New Datatype...");
+        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setLayout(new GridLayout(1, false));
+
+
+        // Create Datatype name / Parent group region
+        Composite fieldComposite = new Composite(shell, SWT.NONE);
+        fieldComposite.setLayout(new GridLayout(2, false));
+        fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Label label = new Label(fieldComposite, SWT.LEFT);
+        label.setText("Datatype name: ");
+
+        nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        label = new Label(fieldComposite, SWT.LEFT);
+        label.setText("Parent Group: ");
+
+        parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+        parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        parentChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+            }
+        });
+
+        groupList = new Vector<Group>(objList.size());
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
@@ -138,39 +138,39 @@ public class NewDatatypeDialog extends Dialog {
                 }
             }
         }
-        
+
         if (parentGroup.isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.separator));
         }
         else {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
-    	
-    	
-    	// Create Datatype settings region
-    	org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	datatypeGroup.setText("Datatype");
-    	datatypeGroup.setLayout(new GridLayout(4, true));
-    	datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	label = new Label(datatypeGroup, SWT.LEFT);
-    	label.setText("Datatype class");
-    	
-    	label = new Label(datatypeGroup, SWT.LEFT);
-    	label.setText("Size (bits) ");
-    	
-    	label = new Label(datatypeGroup, SWT.LEFT);
-    	label.setText("Byte ordering");
-    	
-    	checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
-    	checkUnsigned.setText("Unsigned");
-    	checkUnsigned.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	classChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			int idx = classChoice.getSelectionIndex();
+
+
+        // Create Datatype settings region
+        org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        datatypeGroup.setText("Datatype");
+        datatypeGroup.setLayout(new GridLayout(4, true));
+        datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        label = new Label(datatypeGroup, SWT.LEFT);
+        label.setText("Datatype class");
+
+        label = new Label(datatypeGroup, SWT.LEFT);
+        label.setText("Size (bits) ");
+
+        label = new Label(datatypeGroup, SWT.LEFT);
+        label.setText("Byte ordering");
+
+        checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
+        checkUnsigned.setText("Unsigned");
+        checkUnsigned.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        classChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                int idx = classChoice.getSelectionIndex();
                 sizeChoice.select(0);
                 endianChoice.select(0);
                 stringLengthField.setEnabled(false);
@@ -223,47 +223,47 @@ public class NewDatatypeDialog extends Dialog {
                     checkUnsigned.setEnabled(false);
                     stringLengthField.setEnabled(false);
                 }
-    		}
-    	});
-    	
-    	classChoice.add("INTEGER");
+            }
+        });
+
+        classChoice.add("INTEGER");
         classChoice.add("FLOAT");
         classChoice.add("CHAR");
-    	
-    	if(isH5) {
-    		classChoice.add("STRING");
+
+        if(isH5) {
+            classChoice.add("STRING");
             classChoice.add("REFERENCE");
             classChoice.add("VLEN_INTEGER");
             classChoice.add("VLEN_FLOAT");
             classChoice.add("VLEN_STRING");
-    	}
-    	
-    	sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	sizeChoice.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			if (classChoice.getSelectionIndex() == 0) {
+        }
+
+        sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        sizeChoice.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                if (classChoice.getSelectionIndex() == 0) {
                     checkUnsigned.setEnabled(true);
                 }
-    		}
-    	});
-    	
-    	if(isH5) {
-    		sizeChoice.add("NATIVE");
-    	} else {
-    		sizeChoice.add("DEFAULT");
-    	}
-    	
-    	sizeChoice.add("8");
+            }
+        });
+
+        if(isH5) {
+            sizeChoice.add("NATIVE");
+        } else {
+            sizeChoice.add("DEFAULT");
+        }
+
+        sizeChoice.add("8");
         sizeChoice.add("16");
         sizeChoice.add("32");
         sizeChoice.add("64");
-    	
-    	endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-    	endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	endianChoice.setEnabled(isH5);
-    	
-        if (isH5) {   
+
+        endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        endianChoice.setEnabled(isH5);
+
+        if (isH5) {
             endianChoice.add("NATIVE");
             endianChoice.add("LITTLE ENDIAN");
             endianChoice.add("BIG ENDIAN");
@@ -271,68 +271,68 @@ public class NewDatatypeDialog extends Dialog {
         else {
             endianChoice.add("DEFAULT");
         }
-        
+
         stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
         stringLengthField.setText("String length");
         stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         stringLengthField.setEnabled(false);
-    	
-    	
-    	// Create Ok/Cancel button region
-    	Composite buttonComposite = new Composite(shell, SWT.NONE);
-    	buttonComposite.setLayout(new GridLayout(2, true));
-    	buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	Button okButton = new Button(buttonComposite, SWT.PUSH);
-    	okButton.setText("   &Ok   ");
-    	GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-    	gridData.widthHint = 70;
-    	okButton.setLayoutData(gridData);
-    	okButton.addSelectionListener(new SelectionAdapter() {
-    		public void widgetSelected(SelectionEvent e) {
-    			newObject = createDatatype();
+
+
+        // Create Ok/Cancel button region
+        Composite buttonComposite = new Composite(shell, SWT.NONE);
+        buttonComposite.setLayout(new GridLayout(2, true));
+        buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setText("   &Ok   ");
+        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
+        gridData.widthHint = 70;
+        okButton.setLayoutData(gridData);
+        okButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                newObject = createDatatype();
 
                 if (newObject != null) {
                     shell.dispose();
                 }
-    		}
-    	});
-        
+            }
+        });
+
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setText("&Cancel");
         gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
         gridData.widthHint = 70;
         cancelButton.setLayoutData(gridData);
         cancelButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		newObject = null;
+            public void widgetSelected(SelectionEvent e) {
+                newObject = null;
                 shell.dispose();
-        	}
+            }
         });
-        
+
         classChoice.select(0);
         sizeChoice.select(0);
         endianChoice.select(0);
-    	
+
         shell.pack();
-        
+
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         shell.open();
-        
+
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-	}
-	
-	private HObject createDatatype() {
+    }
+
+    private HObject createDatatype() {
         String name = null;
         Group pgroup = null;
         boolean isVLen = false;
@@ -420,7 +420,7 @@ public class NewDatatypeDialog extends Dialog {
                 catch (NumberFormatException ex) {
                     stringLength = -1;
                 }
-    
+
                 if (stringLength <= 0) {
                     shell.getDisplay().beep();
                     MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
@@ -429,9 +429,9 @@ public class NewDatatypeDialog extends Dialog {
                     error.open();
                     return null;
                 }
-    
+
                 tsize = stringLength;
-            }        
+            }
         }
         else if (tclass == Datatype.CLASS_REFERENCE) {
             tsize = 1;
@@ -496,12 +496,12 @@ public class NewDatatypeDialog extends Dialog {
         return obj;
     }
 
-    /** Returns the new dataset created. */
+    /** @return the new dataset created. */
     public DataFormat getObject() {
         return newObject;
     }
 
-    /** Returns the parent group of the new dataset. */
+    /** @return the parent group of the new dataset. */
     public Group getParentGroup() {
         return parentGroup;
     }

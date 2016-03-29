@@ -24,23 +24,23 @@ import hdf.object.Group;
 import hdf.object.HObject;
 
 /**
- * 
+ *
  * <p>
- * TreeView defines APIs for opening a file and displaying the file structure in 
+ * TreeView defines APIs for opening a file and displaying the file structure in
  * a tree structure.
  * </p>
- * 
+ *
  * <p>
  * TreeView uses folders and leaf nodes to represent groups and data objects in
  * the file. You can expand or collapse folders to navigate data objects in the
  * file.
  * </p>
- * 
+ *
  * <p>
- * From the TreeView, you can open the data content or metadata of the selected 
+ * From the TreeView, you can open the data content or metadata of the selected
  * object. You can select object(s) to delete or add new objects to the file.
  * </p>
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
@@ -48,12 +48,12 @@ public abstract interface TreeView {
     /**
      * Opens a file and retrieves the file structure of the file. It also can be
      * used to create a new file by setting the accessID to FileFormat.CREATE.
-     * 
+     *
      * <p>
      * Subclasses must implement this function to take appropriate steps to open
      * a file.
      * </p>
-     * 
+     *
      * @param filename
      *            the name of the file to open.
      * @param accessID
@@ -63,37 +63,43 @@ public abstract interface TreeView {
      *            <li>FileFormat.WRITE --- allow read and write access to file.</li>
      *            <li>FileFormat.CREATE --- create a new file.</li>
      *            </ul>
-     * 
+     *
      * @return the FileFormat of this file if successful; otherwise returns
      *         null.
+     *
+     * @throws Exception if a failure occurred
      */
     public abstract FileFormat openFile(String filename, int accessID) throws Exception;
     public abstract FileFormat reopenFile(FileFormat theFile) throws Exception;
 
     /**
      * close a file
-     * 
+     *
      * @param file
      *            the file to close
+     *
+     * @throws Exception if a failure occurred
      */
     public abstract void closeFile(FileFormat file) throws Exception;
 
     /**
      * save a file
-     * 
+     *
      * @param file
      *            the file to save
+     *
+     * @throws Exception if a failure occurred
      */
     public abstract void saveFile(FileFormat file) throws Exception;
 
     /**
      * Gets the selected the file. When multiple files are open, we need to know
      * which file is currently selected.
-     * 
+     *
      * @return the FileFormat of the selected file.
      */
     public abstract FileFormat getSelectedFile();
-    
+
     /**
      * @return the current selected object in the tree.
      */
@@ -101,22 +107,26 @@ public abstract interface TreeView {
 
     /**
      * Display the content of a data object.
-     * 
+     *
      * @param dataObject
      *            the data object
+     *
      * @return the dataview that displays the data content
-     * @throws Exception
+     *
+     * @throws Exception if a failure occurred
      */
     public abstract DataView showDataContent(HObject dataObject)
             throws Exception;
 
     /**
      * Displays the meta data of a data object.
-     * 
+     *
      * @param dataObject
      *            the data object
+     *
      * @return the MetaDataView that displays the MetaData of the data object
-     * @throws Exception
+     *
+     * @throws Exception if a failure occurred
      */
     public abstract MetaDataView showMetaData(HObject dataObject)
             throws Exception;
@@ -124,28 +134,30 @@ public abstract interface TreeView {
     /**
      * Adds an already created HObject to the tree under the
      * TreeItem containing the specified parent group.
-     * 
-     * @param obj
+     *
+     * @param newObject
      *            the object to add.
      * @param parentGroup
      *            the parent group to add the object to.
+     *
+     * @return the TreeItem object
      */
     public abstract TreeItem addObject(HObject newObject, Group parentGroup);
 
     /**
-     * Returns the Tree which holds the file structure.
-     * 
      * @return the Tree which holds the file structure.
      */
     public abstract Tree getTree();
 
     /**
-     * Returns the list of currently open files.
+     * @return the list of currently open files.
      */
     public abstract List<FileFormat> getCurrentFiles();
 
     /**
-     * Returns the tree item that contains the given data object.
+     * @param obj the object to find
+     *
+     * @return the tree item that contains the given data object.
      */
     public abstract TreeItem findTreeItem(HObject obj);
 

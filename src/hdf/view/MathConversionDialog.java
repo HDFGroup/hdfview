@@ -36,14 +36,14 @@ import org.eclipse.swt.widgets.Text;
 /**
  * MathConversionDialog shows a message dialog requesting user input for math
  * conversion.
- * 
- * @author Jordan T. Henderson 
+ *
+ * @author Jordan T. Henderson
  * @version 2.4 1/28/2016
  */
 public class MathConversionDialog extends Dialog {
-	private Shell shell;
-	
-	private Text aField, bField;
+    private Shell shell;
+
+    private Text aField, bField;
 
     private Text infoArea;
 
@@ -52,26 +52,26 @@ public class MathConversionDialog extends Dialog {
     private Object dataValue;
 
     private char NT;
-    
+
     private String[] functionDescription;
 
     private boolean isConverted;
 
     /**
      * Constructs MathConversionDialog.
-     * 
-     * @param owner
+     *
+     * @param parent
      *            the owner of the input
      * @param data
      *            the data array to convert.
      */
     public MathConversionDialog(Shell parent, Object data) {
-    	super(parent, SWT.APPLICATION_MODAL);
-    	
-    	isConverted = false;
+        super(parent, SWT.APPLICATION_MODAL);
+
+        isConverted = false;
         dataValue = data;
         NT = ' ';
-        
+
         String cName = data.getClass().getName();
         int cIndex = cName.lastIndexOf("[");
         if (cIndex >= 0) {
@@ -101,32 +101,32 @@ public class MathConversionDialog extends Dialog {
 
         functionDescription = tmpStrs;
     }
-    
+
     public void open() {
-    	Shell parent = getParent();
-    	shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-    	shell.setText("Convert Data...");
-    	shell.setImage(ViewProperties.getHdfIcon());
-    	shell.setLayout(new GridLayout(1, true));
-    	
-    	// Create content region
-    	org.eclipse.swt.widgets.Group contentGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-    	contentGroup.setText("Converting Data With A Mathematic Function");
-    	contentGroup.setLayout(new GridLayout(2, false));
-    	contentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	String[] functionNames = { "[a, b]", "abs (x)", "a + b * x",
+        Shell parent = getParent();
+        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setText("Convert Data...");
+        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setLayout(new GridLayout(1, true));
+
+        // Create content region
+        org.eclipse.swt.widgets.Group contentGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        contentGroup.setText("Converting Data With A Mathematic Function");
+        contentGroup.setLayout(new GridLayout(2, false));
+        contentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        String[] functionNames = { "[a, b]", "abs (x)", "a + b * x",
                 "pow (x, a)", "exp (x)", "ln (x)", "log (a, x)", "sin (x)",
                 "cos (x)", "tan (x)" };
-        
+
         functionList = new List(contentGroup, SWT.SINGLE | SWT.BORDER);
         functionList.setItems(functionNames);
         GridData functionListData = new GridData(SWT.FILL, SWT.FILL, true, false);
         functionListData.minimumWidth = 350;
         functionList.setLayoutData(functionListData);
         functionList.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		int index = functionList.getSelectionIndex();
+            public void widgetSelected(SelectionEvent e) {
+                int index = functionList.getSelectionIndex();
                 infoArea.setText(functionDescription[index]);
 
                 if ((index == 0) || (index == 2)) {
@@ -141,91 +141,91 @@ public class MathConversionDialog extends Dialog {
                     aField.setEnabled(false);
                     bField.setEnabled(false);
                 }
-        	}
+            }
         });
-    	
-    	Composite fieldComposite = new Composite(contentGroup, SWT.NONE);
-    	fieldComposite.setLayout(new GridLayout(2, false));
-    	fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	
-    	new Label(fieldComposite, SWT.RIGHT).setText("a = ");
-    	
-    	aField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	GridData aFieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
-    	aFieldData.minimumWidth = 100;
-    	aField.setLayoutData(aFieldData);
-    	aField.setText("0");
-    	aField.setEnabled(false);
-    	
-    	new Label(fieldComposite, SWT.RIGHT).setText("b = ");
-    	
-    	bField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
-    	bField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    	bField.setText("1");
-    	bField.setEnabled(false);
-    	
-    	infoArea = new Text(contentGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP);
-    	infoArea.setEditable(false);
-    	infoArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
-    	GridData infoAreaData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-    	infoAreaData.minimumHeight = 150;
-    	infoArea.setLayoutData(infoAreaData);
-    	
-    	// Create Ok/Cancel button region
-    	Composite buttonComposite = new Composite(shell, SWT.NONE);
+
+        Composite fieldComposite = new Composite(contentGroup, SWT.NONE);
+        fieldComposite.setLayout(new GridLayout(2, false));
+        fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        new Label(fieldComposite, SWT.RIGHT).setText("a = ");
+
+        aField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        GridData aFieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        aFieldData.minimumWidth = 100;
+        aField.setLayoutData(aFieldData);
+        aField.setText("0");
+        aField.setEnabled(false);
+
+        new Label(fieldComposite, SWT.RIGHT).setText("b = ");
+
+        bField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        bField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        bField.setText("1");
+        bField.setEnabled(false);
+
+        infoArea = new Text(contentGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP);
+        infoArea.setEditable(false);
+        infoArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+        GridData infoAreaData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+        infoAreaData.minimumHeight = 150;
+        infoArea.setLayoutData(infoAreaData);
+
+        // Create Ok/Cancel button region
+        Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-        
+
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setText("   &Ok   ");
         okButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		isConverted = convertData();
-                
-        		shell.dispose();
-        	}
+            public void widgetSelected(SelectionEvent e) {
+                isConverted = convertData();
+
+                shell.dispose();
+            }
         });
         GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
         gridData.widthHint = 70;
         okButton.setLayoutData(gridData);
-        
+
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setText("&Cancel");
         cancelButton.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		isConverted = false;
-        		
+            public void widgetSelected(SelectionEvent e) {
+                isConverted = false;
+
                 shell.dispose();
-        	}
+            }
         });
-        
+
         gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
         gridData.widthHint = 70;
         cancelButton.setLayoutData(gridData);
-    	
+
         shell.pack();
-        
+
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         shell.open();
-        
+
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
     }
-    
+
     private boolean convertData() {
         double a = 0, b = 1;
 
         int index = functionList.getSelectionIndex();
-        
+
         try {
             if ((index == 0) || (index == 2)) {
                 a = Double.parseDouble(aField.getText().trim());
@@ -265,7 +265,7 @@ public class MathConversionDialog extends Dialog {
                     x = bdata[i];
                     value = y(index, x, a, b);
                     if ((value > Byte.MAX_VALUE) || (value < Byte.MIN_VALUE)) {
-                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
                         error.setText(shell.getText());
                         error.setMessage("Invalid byte value: " + (long) value);
                         error.open();
@@ -281,7 +281,7 @@ public class MathConversionDialog extends Dialog {
                     x = sdata[i];
                     value = y(index, x, a, b);
                     if ((value > Short.MAX_VALUE) || (value < Short.MIN_VALUE)) {
-                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
                         error.setText(shell.getText());
                         error.setMessage("Invalid short value: " + (long) value);
                         error.open();
@@ -297,7 +297,7 @@ public class MathConversionDialog extends Dialog {
                     x = idata[i];
                     value = y(index, x, a, b);
                     if ((value > Integer.MAX_VALUE) || (value < Integer.MIN_VALUE)) {
-                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
                         error.setText(shell.getText());
                         error.setMessage("Invalid int value: " + (long) value);
                         error.open();
@@ -313,7 +313,7 @@ public class MathConversionDialog extends Dialog {
                     x = ldata[i];
                     value = y(index, x, a, b);
                     if ((value > Long.MAX_VALUE) || (value < Long.MIN_VALUE)) {
-                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
                         error.setText(shell.getText());
                         error.setMessage("Invalid long value: " + (long) value);
                         error.open();
@@ -330,7 +330,7 @@ public class MathConversionDialog extends Dialog {
                     value = y(index, x, a, b);
                     if ((value > Float.MAX_VALUE) || (value < -Float.MAX_VALUE)
                         || (value == Float.NaN)) {
-                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
                         error.setText(shell.getText());
                         error.setMessage("Invalid float value: " + value);
                         error.open();
@@ -347,7 +347,7 @@ public class MathConversionDialog extends Dialog {
                     value = y(index, x, a, b);
                     if ((value > Double.MAX_VALUE) || (value < -Double.MAX_VALUE)
                         || (value == Double.NaN)) {
-                    	MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
+                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
                         error.setText(shell.getText());
                         error.setMessage("Invalid double value: " + value);
                         error.open();
@@ -363,10 +363,10 @@ public class MathConversionDialog extends Dialog {
 
         return true;
     }
-    
+
     private double y(int index, double x, double a, double b) {
         double y = x;
-        
+
         switch (index) {
             case 0:
                 if (x < a) {
@@ -410,8 +410,8 @@ public class MathConversionDialog extends Dialog {
 
         return y;
     }
-    
-    /** Returns true if the data is successfully converted. */
+
+    /** @return true if the data is successfully converted. */
     public boolean isConverted() {
         return isConverted;
     }

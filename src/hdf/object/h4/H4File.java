@@ -129,6 +129,7 @@ public class H4File extends FileFormat {
      *            The file access flag, which determines behavior when file is
      *            opened. Acceptable values are <code> READ, WRITE, </code> and
      *            <code>CREATE</code>.
+     *
      * @throws NullPointerException
      *             If the <code>fileName</code> argument is <code>null</code>.
      */
@@ -164,10 +165,10 @@ public class H4File extends FileFormat {
 
     /**
      * Checks if the given file format is an HDF4 file.
-     * <p>
      *
      * @param fileformat
      *            the fileformat to be checked.
+     *
      * @return true if the given file is an HDF4 file; otherwise returns false.
      */
     @Override
@@ -178,10 +179,10 @@ public class H4File extends FileFormat {
     /**
      * Checks if the given file is an HDF4 file or netCDF. HDF4 library supports
      * netCDF version 2.3.2. It only supports SDS APIs.
-     * <p>
      *
      * @param filename
      *            the file to be checked.
+     *
      * @return true if the given file is an HDF4 file; otherwise returns false.
      */
     @Override
@@ -209,6 +210,7 @@ public class H4File extends FileFormat {
      * @throws HDFException
      *             If the file cannot be created or if createFlag has unexpected
      *             value.
+     *
      * @see hdf.object.FileFormat#createFile(java.lang.String, int)
      * @see #H4File(String, int)
      */
@@ -411,6 +413,8 @@ public class H4File extends FileFormat {
      *
      * @param obj
      *            the data object to delete.
+     *
+     * @throws Exception if the object can not be deleted
      */
     @Override
     public void delete(HObject obj) throws Exception {
@@ -424,8 +428,11 @@ public class H4File extends FileFormat {
      *            the object to copy.
      * @param dstGroup
      *            the destination group.
+     *
      * @return the destination group, if the copy was successful, or
      *            null otherwise.
+     *
+     * @throws Exception if the object can not be copied
      */
     @Override
     public H4Group copy(HObject srcObj, Group dstGroup, String dstName)
@@ -465,14 +472,14 @@ public class H4File extends FileFormat {
      * Creates a new attribute and attached to the object if attribute does not
      * exist. Otherwise, just update the value of the attribute.
      *
-     * <p>
-     *
      * @param obj
      *            the object which the attribute is to be attached to.
      * @param attr
      *            the attribute to attach.
      * @param isSDglobalAttr
      *            The indicator if the given attribute exists.
+     *
+     * @throws HDFException if the attribute can not be written
      */
     @Override
     public void writeAttribute(HObject obj, Attribute attr,
@@ -630,7 +637,6 @@ public class H4File extends FileFormat {
      * First gets the top level objects or objects that do not belong to any
      * groups. If a top level object is a group, call the depth_first() to
      * retrieve the sub-tree of that group, recursively.
-     *
      */
     private void loadIntoMemory() {
         if (fid < 0) return;
@@ -786,7 +792,6 @@ public class H4File extends FileFormat {
      * Retrieves the tree structure of the file by depth-first order. The
      * current implementation only retrieves groups and datasets. It does not
      * include named datatypes and soft links.
-     * <p>
      *
      * @param parentObject
      *            the parent object.
@@ -925,7 +930,6 @@ public class H4File extends FileFormat {
 
     /**
      * Retrieve an GR image for the given GR image identifier and index.
-     * <p>
      *
      * @param index
      *            the index of the image.
@@ -933,6 +937,7 @@ public class H4File extends FileFormat {
      *            the path of the image.
      * @param copyAllowed
      *            The indicator if multiple copies of an object is allowed.
+     *
      * @return the new H5GRImage if successful; otherwise returns null.
      */
     private final H4GRImage getGRImage(int tag, int index, String path,
@@ -979,7 +984,6 @@ public class H4File extends FileFormat {
 
     /**
      * Retrieve a SDS for the given sds identifier and index.
-     * <p>
      *
      * @param sdid
      *            the SDS idendifier.
@@ -989,6 +993,7 @@ public class H4File extends FileFormat {
      *            the path of the SDS.
      * @param copyAllowed
      *            The indicator if multiple copies of an object is allowed.
+     *
      * @return the new H4SDS if successful; otherwise returns null.
      */
     private final H4SDS getSDS(int tag, int index, String path,
@@ -1054,7 +1059,6 @@ public class H4File extends FileFormat {
 
     /**
      * Retrieve a Vdata for the given Vdata identifier and index.
-     * <p>
      *
      * @param ref
      *            the reference idendifier of the Vdata.
@@ -1062,6 +1066,7 @@ public class H4File extends FileFormat {
      *            the path of the Vdata.
      * @param copyAllowed
      *            The indicator if multiple copies of an object is allowed.
+     *
      * @return the new H4Vdata if successful; otherwise returns null.
      */
     private final H4Vdata getVdata(int tag, int ref, String path,
@@ -1120,7 +1125,6 @@ public class H4File extends FileFormat {
 
     /**
      * Retrieve a VGroup for the given VGroup identifier and index.
-     * <p>
      *
      * @param ref
      *            the reference idendifier of the VGroup.
@@ -1130,6 +1134,7 @@ public class H4File extends FileFormat {
      *            the parent group.
      * @param copyAllowed
      *            The indicator if multiple copies of an object is allowed.
+     *
      * @return the new H4VGroup if successful; otherwise returns null.
      */
     private final H4Group getVGroup(int tag, int ref, String path,
@@ -1229,9 +1234,8 @@ public class H4File extends FileFormat {
     }
 
     /**
-     * Reads HDF file annontation (file labels and descriptions) into memory.
-     * The file annotation is stroed as attribute of the root group.
-     * <p>
+     * Reads HDF file annotation (file labels and descriptions) into memory.
+     * The file annotation is stored as attribute of the root group.
      *
      * @param fid
      *            the file identifier.
@@ -1239,6 +1243,8 @@ public class H4File extends FileFormat {
      *            the list of attributes.
      *
      * @return the updated attribute list.
+     *
+     * @throws Exception if the annotation can not be read
      */
     private List getFileAnnotation(int fid, List attrList) throws HDFException {
         if (fid < 0) {
@@ -1347,15 +1353,17 @@ public class H4File extends FileFormat {
     }
 
     /**
-     * Reads GR globle attributes into memory. The attributes sre stroed as
+     * Reads GR global attributes into memory. The attributes are stored as
      * attributes of the root group.
-     * <p>
      *
      * @param grid
      *            the GR identifier.
      * @param attrList
      *            the list of attributes.
+     *
      * @return the updated attribute list.
+     *
+     * @throws HDFException if the GR attributes can not be read
      */
     private List getGRglobleAttribute(int grid, List attrList)
             throws HDFException {
@@ -1417,15 +1425,17 @@ public class H4File extends FileFormat {
     }
 
     /**
-     * Reads SDS globle attributes into memory. The attributes sre stroed as
+     * Reads SDS global attributes into memory. The attributes are stored as
      * attributes of the root group.
-     * <p>
      *
      * @param sdid
      *            the SD identifier.
      * @param attrList
      *            the list of attributes.
+     *
      * @return the updated attribute list.
+     *
+     * @throws HDFException if the SDS attributes can not be read
      */
     private List getSDSglobleAttribute(int sdid, List attrList)
             throws HDFException {
@@ -1563,6 +1573,10 @@ public class H4File extends FileFormat {
     /**
      * Get an individual HObject with a given path. It does not load the whole
      * file structure.
+     *
+     * @param path the path of the object
+     *
+     * @throws Exception if the object cannot be found
      */
     @Override
     public HObject get(String path) throws Exception {

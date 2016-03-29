@@ -69,7 +69,7 @@ import hdf.object.ScalarDS;
  *         theNode = (DefaultMutableTreeNode) local_enum.nextElement();
  *         theObj = (HObject) theNode.getUserObject();
  *         String fullPath = theObj.getFullName() + &quot;/&quot;;
- *         if (path.equals(fullPath) &&  theObj.getPath() != null ) {
+ *         if (path.equals(fullPath) &amp;&amp;  theObj.getPath() != null ) {
  *             break;
  *     }
  *     return theObj;
@@ -134,6 +134,7 @@ public class H5File extends FileFormat {
      *
      * @param fileName
      *            A valid file name, with a relative or absolute path.
+     *
      * @throws NullPointerException
      *             If the <code>fileName</code> argument is <code>null</code>.
      */
@@ -164,6 +165,7 @@ public class H5File extends FileFormat {
      * @param access
      *            The file access flag, which determines behavior when file is opened. Acceptable values are
      *            <code> READ, WRITE, </code> and <code>CREATE</code>.
+     *
      * @throws NullPointerException
      *             If the <code>fileName</code> argument is <code>null</code>.
      */
@@ -216,6 +218,7 @@ public class H5File extends FileFormat {
      *            The source object.
      * @param dst
      *            The destination object.
+     *
      * @see #copyAttributes(int, int)
      */
     public static final void copyAttributes(HObject src, HObject dst) {
@@ -330,10 +333,13 @@ public class H5File extends FileFormat {
      *
      * @param objID
      *            The identifier for the object whose attributes are to be returned.
+     *
      * @return The list of the object's attributes.
+     *
      * @throws HDF5Exception
      *             If an underlying HDF library routine is unable to perform a step necessary to retrieve the
      *             attributes. A variety of failures throw this exception.
+     *
      * @see #getAttribute(int,int,int)
      */
     public static final List<Attribute> getAttribute(int objID) throws HDF5Exception {
@@ -363,7 +369,9 @@ public class H5File extends FileFormat {
      *            <li>H5_ITER_INC: A top-down iteration incrementing the index position at each step. <li>H5_ITER_DEC: A
      *            bottom-up iteration decrementing the index position at each step.
      *            </ul>
+     *
      * @return The list of the object's attributes.
+     *
      * @throws HDF5Exception
      *             If an underlying HDF library routine is unable to perform a step necessary to retrieve the
      *             attributes. A variety of failures throw this exception.
@@ -588,6 +596,7 @@ public class H5File extends FileFormat {
      *            pixel are stored contiguously. <li>ScalarDS.INTERLACE_PLANE: True Color Image. Each component is
      *            stored in a separate plane.
      *            </ul>
+     *
      * @throws Exception
      *             If there is a problem creating the attributes, or if the selectionFlag is invalid.
      */
@@ -680,6 +689,7 @@ public class H5File extends FileFormat {
      *            The file that was copied.
      * @param dstFile
      *            The destination file where the object references will be updated.
+     *
      * @throws Exception
      *             If there is a problem in the update process.
      */
@@ -873,8 +883,9 @@ public class H5File extends FileFormat {
     /**
      * Creates an HDF5 file with the specified name and returns a new H5File instance associated with the file.
      *
-     * @throws HDF5Exception
+     * @throws Exception
      *             If the file cannot be created or if createFlag has unexpected value.
+     *
      * @see hdf.object.FileFormat#createFile(java.lang.String, int)
      * @see #H5File(String, int)
      */
@@ -914,10 +925,12 @@ public class H5File extends FileFormat {
 
     /**
      * Creates an H5File instance with specified file name and access.
-     * <p>
      *
      * @see hdf.object.FileFormat#createInstance(java.lang.String, int)
      * @see #H5File(String, int)
+     *
+     * @throws Exception
+     *            If there is a failure.
      */
     @Override
     public FileFormat createInstance(String filename, int access) throws Exception {
@@ -959,7 +972,9 @@ public class H5File extends FileFormat {
      *            The earliest version of the library.
      * @param high
      *            The latest version of the library.
+     *
      * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     public void setLibBounds(int low, int high) throws Exception {
         int fapl = HDF5Constants.H5P_DEFAULT;
@@ -993,7 +1008,9 @@ public class H5File extends FileFormat {
      * Gets the bounds of library versions.
      *
      * @return libver The earliest and latest version of the library.
+     *
      * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     public int[] getLibBounds() throws Exception {
         return libver;
@@ -1003,7 +1020,9 @@ public class H5File extends FileFormat {
      * Closes file associated with this H5File instance.
      *
      * @see hdf.object.FileFormat#close()
+     *
      * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     @Override
     public void close() throws HDF5Exception {
@@ -1500,7 +1519,9 @@ public class H5File extends FileFormat {
      *            The existing object the new link will reference.
      * @param lType
      *            The type of link to be created. It can be a hard link, a soft link or an external link.
+     *
      * @return The object pointed to by the new link if successful; otherwise returns null.
+     *
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
@@ -1580,7 +1601,9 @@ public class H5File extends FileFormat {
      *            The name of the object the new link will reference. The object doesn't have to exist.
      * @param lType
      *            The type of link to be created.
+     *
      * @return The H5Link object pointed to by the new link if successful; otherwise returns null.
+     *
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
@@ -1859,7 +1882,11 @@ public class H5File extends FileFormat {
      *
      * @param plist
      *            a file access property list identifier.
+     *
      * @return the file identifier if successful; otherwise returns negative value.
+     *
+     * @throws Exception
+     *            If there is a failure.
      */
     public int open(int plist) throws Exception {
         return open(true, plist);
@@ -1874,7 +1901,11 @@ public class H5File extends FileFormat {
      *
      * @param loadFullHierarchy
      *            if true, load the full hierarchy into memory; otherwise just opens the file identifier.
+     *
      * @return the file identifier if successful; otherwise returns negative value.
+     *
+     * @throws Exception
+     *            If there is a failure.
      */
     private int open(boolean loadFullHierarchy) throws Exception {
         int the_fid = -1;
@@ -1899,7 +1930,11 @@ public class H5File extends FileFormat {
      *
      * @param loadFullHierarchy
      *            if true, load the full hierarchy into memory; otherwise just opens the file identifier.
+     *
      * @return the file identifier if successful; otherwise returns negative value.
+     *
+     * @throws Exception
+     *            If there is a failure.
      */
     private int open(boolean loadFullHierarchy, int plist) throws Exception {
         if (fid > 0) {
@@ -1998,7 +2033,6 @@ public class H5File extends FileFormat {
      * <p>
      * It also detects and stops loops. A loop is detected if there exists an object with the same object ID by tracing
      * a path back up to the root.
-     * <p>
      *
      * @param parentObject
      *            the parent object.
@@ -2291,8 +2325,11 @@ public class H5File extends FileFormat {
      *            the name of the dataset
      * @param path
      *            the path of the dataset
+     *
      * @return the dataset if successful; otherwise return null.
+     *
      * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     private Dataset getDataset(int did, String name, String path) throws HDF5Exception {
         Dataset dataset = null;
@@ -2345,7 +2382,9 @@ public class H5File extends FileFormat {
      *            the group which the new datatype is copied to
      * @param dstName
      *            the name of the new dataype
+     *
      * @throws Exception
+     *            If there is a failure.
      */
     private void copyDatatype(Datatype srcType, H5Group pgroup, String dstName) throws Exception {
         Datatype datatype = null;
@@ -2402,6 +2441,9 @@ public class H5File extends FileFormat {
      *            the location where the new group is located
      * @param dstName
      *            the name of the new group
+     *
+     * @throws Exception
+     *            If there is a failure.
      */
     private void copyGroup(H5Group srcGroup, H5Group dstGroup, String dstName) throws Exception {
         H5Group group = null;
@@ -2461,8 +2503,11 @@ public class H5File extends FileFormat {
      *            The group name.
      * @param pGroup
      *            The parent group, or null for the root group.
+     *
      * @return The group if successful; otherwise returns false.
+     *
      * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     private H5Group getGroup(int gid, String name, Group pGroup) throws HDF5Exception {
         String parentPath = null;
@@ -2573,8 +2618,11 @@ public class H5File extends FileFormat {
      *
      * @param obj
      *            The current link object.
+     *
      * @return The name of the target object.
+     *
      * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     public static String getLinkTargetName(HObject obj) throws Exception {
         String[] link_value = { null, null };
@@ -2623,7 +2671,9 @@ public class H5File extends FileFormat {
      *            The name of the HDF5 file containing the dataset.
      * @param object_path
      *            The full path of the dataset to be exported.
+     *
      * @throws Exception
+     *            If there is a failure.
      */
     public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order)
             throws Exception {
@@ -2639,7 +2689,9 @@ public class H5File extends FileFormat {
      *            The current name of the attribute.
      * @param newAttrName
      *            The new name of the attribute.
+     *
      * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
      */
     public void renameAttribute(HObject obj, String oldAttrName, String newAttrName) throws Exception {
         log.trace("renameAttribute {} to {}", oldAttrName, newAttrName);
@@ -2656,7 +2708,9 @@ public class H5File extends FileFormat {
      *            the object to be renamed.
      * @param newName
      *            the new name of the object.
+     *
      * @throws Exception
+     *            If there is a failure.
      */
     public static void renameObject(HObject obj, String newName) throws Exception {
         String currentFullPath = obj.getPath() + obj.getName();

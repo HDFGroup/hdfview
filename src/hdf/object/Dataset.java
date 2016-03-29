@@ -82,6 +82,7 @@ public abstract class Dataset extends HObject {
      *     12, 13, 14
      *     22, 23, 24
      * 32, 33, 34
+     * </pre>
      */
     protected long[]          selectedDims;
 
@@ -196,6 +197,15 @@ public abstract class Dataset extends HObject {
     /**
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #Dataset(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the file that contains the dataset.
+     * @param name
+     *            the name of the Dataset, e.g. "dset1".
+     * @param path
+     *            the full group path of this Dataset, e.g. "/arrays/".
+     * @param oid
+     *            the oid of this Dataset.
      */
     @Deprecated
     public Dataset(FileFormat theFile, String name, String path, long[] oid) {

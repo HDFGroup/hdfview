@@ -32,7 +32,7 @@ import hdf.object.HObject;
  * general structure of a vgroup is similar to that of the UNIX file system in
  * that the vgroup may contain references to other vgroups or HDF data objects
  * just as the UNIX directory may contain subdirectories or files.
- * <p>
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -197,7 +197,7 @@ public class H4Group extends Group
         log.trace("updateMetadata(): disabled");
     }
 
-   // Implementing HObject
+    // Implementing HObject
     @Override
     public int open()
     {

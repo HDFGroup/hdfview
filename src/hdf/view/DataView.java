@@ -18,7 +18,7 @@ import hdf.object.HObject;
 
 /**
  * The data view interface for displaying data objects
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
@@ -35,6 +35,6 @@ public abstract interface DataView {
     /** The text view type */
     public final static int DATAVIEW_TEXT = 3;
 
-    /** Returns the data object displayed in this data viewer */
+    /** @return the data object displayed in this data viewer */
     public abstract HObject getDataObject();
 }

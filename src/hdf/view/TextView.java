@@ -15,14 +15,14 @@
 package hdf.view;
 
 /**
- * 
+ *
  * The text view interface for displaying text data
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public abstract interface TextView extends DataView {
-    /** return array of the text in this textview */
+    /** @return array of the text in this textview */
     public abstract String[] getContents();
 
     /** Write the change of a dataset into file. */

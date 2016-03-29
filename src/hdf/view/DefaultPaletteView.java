@@ -142,9 +142,9 @@ public class DefaultPaletteView extends Dialog {
         shell.setText("Image Palette for - " + dataset.getPath() + dataset.getName());
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
-       
+
         shell.setData(this);
-        
+
         // Create the content composite for the Canvas
         Composite content = new Composite(shell, SWT.BORDER);
         content.setLayout(new FillLayout());
@@ -343,7 +343,7 @@ public class DefaultPaletteView extends Dialog {
         }
     }
 
-    /** Returns the data object displayed in this data viewer */
+    /** @return the data object displayed in this data viewer */
     public HObject getDataObject() {
         return dataset;
     }

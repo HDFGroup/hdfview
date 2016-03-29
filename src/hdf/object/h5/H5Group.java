@@ -39,7 +39,7 @@ import hdf.object.HObject;
  * <p>
  * For more information on HDF5 Groups,
  *
- * @see <a href="http://hdfgroup.org/HDF5/doc/UG/">HDF5 User's Guide</a>
+ * <a href="http://hdfgroup.org/HDF5/doc/UG/">HDF5 User's Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -64,7 +64,6 @@ public class H5Group extends Group {
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
-     * <p>
      *
      * @param theFile
      *            the file which containing the group.
@@ -82,6 +81,17 @@ public class H5Group extends Group {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #H5Group(FileFormat, String, String, Group)}
+     *
+     * @param theFile
+     *            the file which containing the group.
+     * @param name
+     *            the name of this group, e.g. "grp01".
+     * @param path
+     *            the full path of this group, e.g. "/groups/".
+     * @param parent
+     *            the parent of this group.
+     * @param oid
+     *            the oid of this group.
      */
     @Deprecated
     public H5Group(FileFormat theFile, String name, String path, Group parent, long[] oid) {
@@ -356,6 +366,8 @@ public class H5Group extends Group {
      *            </ul>
      *
      * @return The new group if successful; otherwise returns null.
+     *
+     * @throws Exception if there is a failure.
      */
     public static H5Group create(String name, Group pgroup, int... gplist) throws Exception {
         H5Group group = null;

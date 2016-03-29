@@ -136,6 +136,15 @@ public abstract class ScalarDS extends Dataset {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #ScalarDS(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the file that contains the data object.
+     * @param theName
+     *            the name of the data object, e.g. "dset".
+     * @param thePath
+     *            the full path of the data object, e.g. "/arrays/".
+     * @param oid
+     *            the v of the data object.
      */
     @Deprecated
     public ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid) {

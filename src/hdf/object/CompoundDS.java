@@ -23,7 +23,7 @@ package hdf.object;
  * i.e. members of compound datatype can be some other compound datatype.
  * <p>
  * For more details on compound datatype,
- * see <b> {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>} </b>
+ * see <b> <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a> </b>
  * <p>
  * Since Java cannot handle C-structured compound data, data in compound dataset
  * is loaded in to an Java List. Each element of the list is a data array that
@@ -133,7 +133,6 @@ public abstract class CompoundDS extends Dataset {
      * This object is usually constructed at FileFormat.open(), which loads the
      * file structure and object informatoin into tree structure (TreeNode). It
      * is rarely used elsewhere.
-     * <p>
      *
      * @param theFile
      *            the file that contains the dataset.
@@ -149,6 +148,15 @@ public abstract class CompoundDS extends Dataset {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #CompoundDS(FileFormat, String, String)}
+     *
+     * @param theFile
+     *            the file that contains the dataset.
+     * @param name
+     *            the name of the CompoundDS, e.g. "compDS".
+     * @param path
+     *            the path of the CompoundDS, e.g. "/g1".
+     * @param oid
+     *            the oid of the CompoundDS.
      */
     @Deprecated
     public CompoundDS(FileFormat theFile, String name, String path, long[] oid) {
@@ -333,6 +341,8 @@ public abstract class CompoundDS extends Dataset {
      *
      * getMemberDims(2) returns an array of {2, 3}, while getMemberDims(1)
      * returns an array of {5}, getMemberDims(0) returns null.
+     *
+     * @param i  the i-th member
      *
      * @return the dimension sizes of of the i-th member, null if the compound
      *         member is not an array.

@@ -25,15 +25,15 @@ import java.util.Map;
  * object such as a dataset, group or named datatype.
  * <p>
  * Like a dataset, an attribute has a name, datatype and dataspace.
- * 
+ *
  * <p>
- * For more details on attributes, see {@link <a
- * href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+ * For more details on attributes,
+ * <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
  * <p>
- * 
+ *
  * The following code is an example of an attribute with 1D integer array of two
  * elements.
- * 
+ *
  * <pre>
  * // Example of creating a new attribute
  * // The name of the new attribute
@@ -51,18 +51,18 @@ import java.util.Map;
  * Attribute dataRange = new Attribute(name, type, dims);
  * // Set the attribute value
  * dataRange.setValue(value);
- * // See FileFormat.writeAttribute() for how to attach an attribute to an object, 
+ * // See FileFormat.writeAttribute() for how to attach an attribute to an object,
  * @see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
  * </pre>
- * 
+ *
  * @see hdf.object.Datatype
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public class Attribute implements Metadata {
     private static final long serialVersionUID = 2072473407027648309L;
-    
+
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
 
     /** The name of the attribute. */
@@ -79,7 +79,7 @@ public class Attribute implements Metadata {
 
     /** The value of the attribute. */
     private Object            value;
-    
+
     /** additional information and properties for the attribute */
     private Map<String, Object>  properties;
 
@@ -91,7 +91,7 @@ public class Attribute implements Metadata {
 
     /**
      * Create an attribute with specified name, data type and dimension sizes.
-     * 
+     *
      * For scalar attribute, the dimension size can be either an array of size
      * one or null, and the rank can be either 1 or zero. Attribute is a general
      * class and is independent of file format, e.g., the implementation of
@@ -99,7 +99,7 @@ public class Attribute implements Metadata {
      * <p>
      * The following example creates a string attribute with the name "CLASS"
      * and value "IMAGE".
-     * 
+     *
      * <pre>
      * long[] attrDims = { 1 };
      * String attrName = &quot;CLASS&quot;;
@@ -108,7 +108,7 @@ public class Attribute implements Metadata {
      * Attribute attr = new Attribute(attrName, attrType, attrDims);
      * attr.setValue(classValue);
      * </pre>
-     * 
+     *
      * @param attrName
      *            the name of the attribute.
      * @param attrType
@@ -116,7 +116,7 @@ public class Attribute implements Metadata {
      * @param attrDims
      *            the dimension sizes of the attribute, null for scalar
      *            attribute
-     * 
+     *
      * @see hdf.object.Datatype
      */
     public Attribute(String attrName, Datatype attrType, long[] attrDims) {
@@ -125,7 +125,7 @@ public class Attribute implements Metadata {
 
     /**
      * Create an attribute with specific name and value.
-     * 
+     *
      * For scalar attribute, the dimension size can be either an array of size
      * one or null, and the rank can be either 1 or zero. Attribute is a general
      * class and is independent of file format, e.g., the implementation of
@@ -133,7 +133,7 @@ public class Attribute implements Metadata {
      * <p>
      * The following example creates a string attribute with the name "CLASS"
      * and value "IMAGE".
-     * 
+     *
      * <pre>
      * long[] attrDims = { 1 };
      *                          String attrName = &quot;CLASS&quot;;
@@ -149,7 +149,7 @@ public class Attribute implements Metadata {
      *                                                                                                                                                  attrDims,
      *                                                                                                                                                  classValue);
      * </pre>
-     * 
+     *
      * @param attrName
      *            the name of the attribute.
      * @param attrType
@@ -159,7 +159,7 @@ public class Attribute implements Metadata {
      *            attribute
      * @param attrValue
      *            the value of the attribute, null if no value
-     * 
+     *
      * @see hdf.object.Datatype
      */
     public Attribute(String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
@@ -193,43 +193,52 @@ public class Attribute implements Metadata {
      * be an 1D array of strings with field members separated by comma. For
      * example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a cmpound attribute of
      * {int, float} of three data points.
-     * 
+     *
      * @return the value of the attribute, or null if failed to retrieve data
      *         from file.
      */
     public Object getValue() {
         return value;
     }
-    
+
     /**
-     * set a property for the attribute. 
+     * set a property for the attribute.
+     *
+     * @param key the attribute Map key
+     * @param value the attribute Map value
      */
-    public void setProperty(String key, Object value) 
+    public void setProperty(String key, Object value)
     {
-    	properties.put(key, value);
-    }
-    
-    /**
-     * get a property for a given key. 
-     */
-    public Object getProperty(String key) 
-    {
-    	return properties.get(key);
+        properties.put(key, value);
     }
 
     /**
-     * get all property keys. 
+     * get a property for a given key.
+     *
+     * @param key the attribute Map key
+     *
+     * @return the property
      */
-    public Collection<String> getPropertyKeys() 
+    public Object getProperty(String key)
     {
-    	return properties.keySet();
+        return properties.get(key);
     }
 
-    
+    /**
+     * get all property keys.
+     *
+     * @return the Collection of property keys
+     */
+    public Collection<String> getPropertyKeys()
+    {
+        return properties.keySet();
+    }
+
+
     /**
      * Sets the value of the attribute. It returns null if failed to retrieve
      * the name from file.
-     * 
+     *
      * @param theValue
      *            The value of the attribute to set
      */
@@ -239,7 +248,7 @@ public class Attribute implements Metadata {
 
     /**
      * Returns the name of the attribute.
-     * 
+     *
      * @return the name of the attribute.
      */
     public String getName() {
@@ -250,7 +259,7 @@ public class Attribute implements Metadata {
      * Returns the rank (number of dimensions) of the attribute. It returns a
      * negative number if failed to retrieve the dimension information from
      * file.
-     * 
+     *
      * @return the number of dimensions of the attribute.
      */
     public int getRank() {
@@ -260,7 +269,7 @@ public class Attribute implements Metadata {
     /**
      * Returns the dimension sizes of the data value of the attribute. It
      * returns null if failed to retrieve the dimension information from file.
-     * 
+     *
      * @return the dimension sizes of the attribute.
      */
     public long[] getDataDims() {
@@ -270,7 +279,7 @@ public class Attribute implements Metadata {
     /**
      * Returns the datatype of the attribute. It returns null if failed to
      * retrieve the datatype information from file.
-     * 
+     *
      * @return the datatype of the attribute.
      */
     public Datatype getType() {
@@ -287,7 +296,7 @@ public class Attribute implements Metadata {
 
     /**
      * Checks if the data type of this attribute is an unsigned integer.
-     * 
+     *
      * @return true if the data type of the attribute is an unsigned integer;
      *         otherwise returns false.
      */
@@ -297,7 +306,7 @@ public class Attribute implements Metadata {
 
     /**
      * Return the name of the attribute.
-     * 
+     *
      * @see #toString(String delimiter)
      */
     @Override
@@ -314,19 +323,19 @@ public class Attribute implements Metadata {
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
      * <p>
-     * 
+     *
      * @param delimiter
      *            The delimiter to separate individual data point. It can be
      *            comma, semicolon, tab or space. For example, to String(",")
      *            will separate data by comma.
-     * 
+     *
      * @return the string representation of the data values.
      */
     public String toString(String delimiter) {
         if (value == null) {
             return null;
         }
-    	log.trace("toString: start");
+        log.trace("toString: start");
 
         Class<? extends Object> valClass = value.getClass();
 
@@ -543,7 +552,7 @@ public class Attribute implements Metadata {
             }
         }
 
-    	log.trace("toString: finish");
+        log.trace("toString: finish");
         return sb.toString();
     }
 }

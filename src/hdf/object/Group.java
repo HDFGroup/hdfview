@@ -92,6 +92,17 @@ public abstract class Group extends HObject {
     /**
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #Group(FileFormat, String, String, Group)}
+     *
+     * @param theFile
+     *            the file which containing the group.
+     * @param name
+     *            the name of this group, e.g. "grp01".
+     * @param path
+     *            the full path of this group, e.g. "/groups/".
+     * @param parent
+     *            the parent of this group.
+     * @param oid
+     *            the oid of this group.
      */
     @Deprecated
     public Group(FileFormat theFile, String name, String path, Group parent,

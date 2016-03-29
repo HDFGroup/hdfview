@@ -26,7 +26,7 @@ import hdf.object.Datatype;
  * a datatype object, and vice versa. A datatype object is described by four basic
  * fields: datatype class, size, byte order, and sign, while an HDF5 datatype is
  * presented by a datatype identifier.
- * <p>
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -41,16 +41,16 @@ public class H4Datatype extends Datatype
      * Constructs a H4Datatype with specified class, size, byte order and sign.
      * <p>
      * The following is a list of a few example of H5Datatype.
-     * <OL>
-     * <LI>to create unsigned native integer<br>
+     * <ol>
+     * <li>to create unsigned native integer<br>
      * H4Datatype type = new H4Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
-     * <LI>to create 16-bit signed integer with big endian<br>
+     * <li>to create 16-bit signed integer with big endian<br>
      * H4Datatype type = new H4Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <LI>to create native float<br>
+     * <li>to create native float<br>
      * H4Datatype type = new H4Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <LI>to create 64-bit double<br>
+     * <li>to create 64-bit double<br>
      * H4Datatype type = new H4Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </OL>
+     * </ol>
      * @param tclass the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
      * @param torder the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
@@ -70,8 +70,9 @@ public class H4Datatype extends Datatype
      * </pre>
      * will construct a datatype equivalent to
      * new H4Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
-     * <p>
+     *
      * @see #fromNative(int nativeID)
+     *
      * @param nativeID the native datatype identifier.
      */
     public H4Datatype(int nativeID)
@@ -164,8 +165,12 @@ public class H4Datatype extends Datatype
      *
      *  @param datatype  the data type
      *  @param datasize  the size of the data array
+     *
      *  @return an array of 'datasize' numbers of datatype.
-     */
+     *
+     * @throws OutOfMemoryError
+     *             if the array cannot be allocated
+    */
     public static final Object allocateArray(int datatype, int datasize)
     throws OutOfMemoryError
     {
@@ -288,8 +293,9 @@ public class H4Datatype extends Datatype
 
     /**
      *  Checks if the datatype is an unsigned integer.
-     *  <p>
+     *
      *  @param datatype  the data type.
+     *
      *  @return True is the datatype is an unsigned integer; otherwise returns false.
      */
     public static final boolean isUnsigned(int datatype)
