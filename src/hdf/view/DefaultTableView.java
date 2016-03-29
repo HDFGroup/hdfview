@@ -56,10 +56,13 @@ import java.util.TreeSet;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -143,13 +146,13 @@ public class DefaultTableView implements TableView {
     /**
      * The value of the dataset.
      */
-    private Object                            dataValue;
-
-    private Object                           fillValue               = null;
+    private Object                          dataValue;
+    
+    private Object                          fillValue               = null;
 
     private enum ViewType { TABLE, IMAGE, TEXT };
-    private    ViewType viewType = ViewType.TABLE;
-
+    private ViewType viewType = ViewType.TABLE;
+    
     // Used for bitmask operations on data
     private BitSet                          bitmask                 = null;
     private BITMASK_OP                      bitmaskOP               = BITMASK_OP.EXTRACT;
@@ -221,14 +224,14 @@ public class DefaultTableView implements TableView {
     private Group                           group;
 
     // Text field to display the value of the current cell.
-    private Text                              cellValueField;
-
+    private Text                            cellValueField;
+    
     // Label to indicate the current cell location.
-    private Label                             cellLabel;
+    private Label                           cellLabel;
 
     // The value of the current cell value in editing.
-    private Object                           currentEditingCellValue = null;
-
+    private Object                          currentEditingCellValue = null;
+    
     // Keep track of table row selections
     private SelectionLayer                  selectionLayer;
 
@@ -266,8 +269,8 @@ public class DefaultTableView implements TableView {
 
         shell.setData(this);
         
-        shell.setLayout(new FillLayout());
-
+        shell.setLayout(new GridLayout(1, true));
+        
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
@@ -366,13 +369,32 @@ public class DefaultTableView implements TableView {
 
         log.trace("dataset isDisplayTypeChar={} isConvertEnum={}", isDisplayTypeChar, ViewProperties.isConvertEnum());
         dataset.setEnumConverted(ViewProperties.isConvertEnum());
-
+        
+        // Setup subset information
+        log.trace("DefaultTableView: Setup subset information");
+        int rank = dataset.getRank();
+        int[] selectedIndex = dataset.getSelectedIndex();
+        long[] count = dataset.getSelectedDims();
+        long[] stride = dataset.getStride();
+        long[] start = dataset.getStartDims();
+        int n = Math.min(3, rank);
+        if (rank > 2) {
+            curFrame = start[selectedIndex[2]] + indexBase;
+            maxFrame = dims[selectedIndex[2]];
+        }
+        
+        ToolBar bar = createToolbar(shell);
+        bar.setSize(shell.getSize().x, 30);
+        bar.setLocation(0, 0);
+        
         group = new Group(shell, SWT.SHADOW_ETCHED_OUT);
         group.setFont(Display.getCurrent().getSystemFont());
         group.setText(indexBase + "-based");
-        group.setLayout(new FillLayout());
-
+        group.setLayout(new GridLayout(1, true));
+        group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
         SashForm content = new SashForm(group, SWT.VERTICAL);
+        content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         content.setSashWidth(10);
 
         Composite cellValueComposite = new Composite(content, SWT.BORDER);
@@ -447,7 +469,9 @@ public class DefaultTableView implements TableView {
             shell.dispose();
             return;
         }
-
+        
+        table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
         StringBuffer sb = new StringBuffer(hObject.getName());
         sb.append("  at  ");
         sb.append(hObject.getPath());
@@ -457,19 +481,6 @@ public class DefaultTableView implements TableView {
         sb.append(dataset.getFileFormat().getParent());
         sb.append("]");
         shell.setText(sb.toString());
-
-        // Setup subset information
-        log.trace("DefaultTableView: Setup subset information");
-        int rank = dataset.getRank();
-        int[] selectedIndex = dataset.getSelectedIndex();
-        long[] count = dataset.getSelectedDims();
-        long[] stride = dataset.getStride();
-        long[] start = dataset.getStartDims();
-        int n = Math.min(3, rank);
-        if (rank > 2) {
-            curFrame = start[selectedIndex[2]] + indexBase;
-            maxFrame = dims[selectedIndex[2]];
-        }
 
         sb.append(" [ dims");
         sb.append(selectedIndex[0]);
@@ -1401,91 +1412,122 @@ public class DefaultTableView implements TableView {
         item.setText("Close");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                //viewer.removeDataView(this);
-
                 shell.dispose();
             }
         });
 
-        new MenuItem(menuBar, SWT.SEPARATOR).setText("     ");
+        return menuBar;
+    }
+    
+    private ToolBar createToolbar(final Shell shell) {
+        ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
+        toolbar.setFont(Display.getCurrent().getSystemFont());
+        toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        // Add icons to the menubar
-
-        // chart button
-        item = new MenuItem(menuBar, SWT.PUSH);
+        // Chart button
+        ToolItem item = new ToolItem(toolbar, SWT.PUSH);
         item.setImage(ViewProperties.getChartIcon());
-        //button.setToolTipText("Line Plot");
+        item.setToolTipText("Line Plot");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 showLineplot();
             }
         });
+        
+        if (dataset.getRank() > 2) {
+            new ToolItem(toolbar, SWT.SEPARATOR).setWidth(20);
 
-        if (is3D) {
-            new MenuItem(menuBar, SWT.SEPARATOR).setText("     ");
-
-            item = new MenuItem(menuBar, SWT.PUSH);
+            // First frame button
+            item = new ToolItem(toolbar, SWT.PUSH);
             item.setImage(ViewProperties.getFirstIcon());
-            //button.setToolTipText("First");
+            item.setToolTipText("First Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    firstPage();
+                	firstPage();
                 }
             });
 
-            item = new MenuItem(menuBar, SWT.PUSH);
+            // Previous frame button
+            item = new ToolItem(toolbar, SWT.PUSH);
             item.setImage(ViewProperties.getPreviousIcon());
-            //button.setToolTipText("Previous");
+            item.setToolTipText("Previous Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    previousPage();
+                	previousPage();
                 }
             });
 
-            //frameField = new Text(menuBar, SWT.SINGLE);
-            //frameField.setText(String.valueOf(curFrame));
-            //frameField.setMaximumSize(new Dimension(50, 30));
-            //frameField.setMargin(margin);
-            //frameField.addSelectionListener(new SelectionAdapter() {
-            //  public void widgetSelected(SelectionEvent e) {
-            //      int page = 0;
-            //
-            //      try {
-            //          page = Integer.parseInt(frameField.getText().trim()) - indexBase;
-            //      }
-            //      catch (Exception ex) {
-            //          page = -1;
-            //      }
-            //
-            //      gotoPage(page);
-            //  }
-            //});
+            ToolItem separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
-            item = new MenuItem(menuBar, SWT.SEPARATOR_FILL);
-            item.setText(String.valueOf(maxFrame));
-            item.setEnabled(false);
-            //tmpField.setMaximumSize(new Dimension(50, 30));
+            frameField = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            frameField.setText(String.valueOf(curFrame));
+            frameField.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent e) {
+                    if (e.keyCode == SWT.CR) {
+                        Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
 
-            item = new MenuItem(menuBar, SWT.PUSH);
+                        try {
+                            shell.setCursor(cursor);
+
+                            int page = 0;
+
+                            try {
+                                page = Integer.parseInt(frameField.getText()
+                                        .trim()) - indexBase;
+                            } catch (Exception ex) {
+                                page = -1;
+                            }
+
+                            gotoPage(page);
+                        } finally {
+                            shell.setCursor(null);
+                            cursor.dispose();
+                        }
+                    }
+                }
+            });
+
+            frameField.pack();
+
+            separator.setWidth(frameField.getSize().x + 30);
+            separator.setControl(frameField);
+
+            separator = new ToolItem(toolbar, SWT.SEPARATOR);
+
+            Text maxFrameText = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            maxFrameText.setText(String.valueOf(maxFrame - 1));
+            maxFrameText.setEditable(false);
+            maxFrameText.setEnabled(false);
+
+            maxFrameText.pack();
+
+            separator.setWidth(maxFrameText.getSize().x + 30);
+            separator.setControl(maxFrameText);
+
+            new ToolItem(toolbar, SWT.SEPARATOR).setWidth(10);
+
+            // Next frame button
+            item = new ToolItem(toolbar, SWT.PUSH);
             item.setImage(ViewProperties.getNextIcon());
-            //button.setToolTipText("Next");
+            item.setToolTipText("Next Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    nextPage();
+                	nextPage();
                 }
             });
 
-            item = new MenuItem(menuBar, SWT.PUSH);
+            // Last frame button
+            item = new ToolItem(toolbar, SWT.PUSH);
             item.setImage(ViewProperties.getLastIcon());
-            //button.setToolTipText("Last");
+            item.setToolTipText("Last Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    lastPage();
+                	lastPage();
                 }
             });
         }
 
-        return menuBar;
+        return toolbar;
     }
 
     /** Creates a popup menu for a right mouse click on a data object */
@@ -1695,6 +1737,8 @@ public class DefaultTableView implements TableView {
 
         start[selectedIndex[2]] = idx;
         curFrame = idx + indexBase;
+        frameField.setText(String.valueOf(curFrame));
+        
         dataset.clearData();
 
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
