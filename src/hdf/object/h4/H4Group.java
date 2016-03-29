@@ -39,7 +39,7 @@ import hdf.object.HObject;
 public class H4Group extends Group
 {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3785240955078867900L;
 
@@ -50,7 +50,7 @@ public class H4Group extends Group
      * instance of Attribute.
      */
     private List attributeList;
-    
+
     private int nAttributes = -1;
 
     /** The default object ID for HDF4 objects */
@@ -63,7 +63,7 @@ public class H4Group extends Group
 
     /**
      * Creates a group object with specific name, path, and parent.
-     * <p>
+     *
      * @param theFile the HDF file.
      * @param name the name of this group.
      * @param path the full path of this group.
@@ -84,29 +84,29 @@ public class H4Group extends Group
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
-    public boolean hasAttribute () 
-    { 
+    public boolean hasAttribute ()
+    {
         if (nAttributes < 0) {
             int vgid = open();
-            try {  
+            try {
                 nAttributes = HDFLibrary.Vnattrs(vgid);
                 nMembersInFile = HDFLibrary.Vntagrefs(vgid);
-            } 
+            }
             catch (Exception ex) {
-            	nAttributes = 0;
+                nAttributes = 0;
             }
             close(vgid);
         }
-        
+
         return (nAttributes > 0);
     }
-    
+
     // Implementing DataFormat
     public List getMetadata() throws HDFException
     {
         if (attributeList != null) {
             return attributeList;
-        } 
+        }
         else {
             attributeList = new Vector();
         }
@@ -120,7 +120,7 @@ public class H4Group extends Group
 
         try {
             n = HDFLibrary.Vnattrs(vgid);
-            
+
             boolean b = false;
             String[] attrName = new String[1];
             int[] attrInfo = new int[5];
@@ -130,7 +130,7 @@ public class H4Group extends Group
                     b = HDFLibrary.Vattrinfo(vgid, i, attrName, attrInfo);
                     // mask off the litend bit
                     attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
-                } 
+                }
                 catch (HDFException ex) {
                     b = false;
                 }
@@ -144,12 +144,12 @@ public class H4Group extends Group
                 attributeList.add(attr);
 
                 Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
-                
+
                 try {
                     HDFLibrary.Vgetattr(vgid, i, buf);
-                } 
+                }
                 catch (HDFException ex) {
-                	ex.printStackTrace();
+                    ex.printStackTrace();
                     buf = null;
                 }
 
@@ -162,7 +162,7 @@ public class H4Group extends Group
                     attr.setValue(buf);
                 }
             }
-        } 
+        }
         finally {
             close(vgid);
         }
@@ -206,7 +206,7 @@ public class H4Group extends Group
         // try to open with write permission
         try {
             vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
-        } 
+        }
         catch (HDFException ex) {
             vgid = -1;
         }
@@ -215,7 +215,7 @@ public class H4Group extends Group
         if (vgid < 0) {
             try {
                 vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "r");
-            } 
+            }
             catch (HDFException ex) {
                 vgid = -1;
             }
@@ -228,19 +228,23 @@ public class H4Group extends Group
     @Override
     public void close(int vgid)
     {
-        try { 
-        	HDFLibrary.Vdetach(vgid); 
+        try {
+            HDFLibrary.Vdetach(vgid);
         }
         catch (Exception ex) {
-        	log.debug("close.Vdetach:", ex);
+            log.debug("close.Vdetach:", ex);
         }
     }
 
     /**
      * Creates a new group.
+     *
      * @param name the name of the group to create.
      * @param pgroup the parent group of the new group.
+     *
      * @return the new group if successful. Otherwise returns null.
+     *
+     * @throws Exception if the group can not be created
      */
     public static H4Group create(String name, Group pgroup)
         throws Exception
@@ -287,11 +291,11 @@ public class H4Group extends Group
             pgroup.close(pid);
         }
 
-        try { 
-        	HDFLibrary.Vdetach(gid); 
+        try {
+            HDFLibrary.Vdetach(gid);
         }
         catch (Exception ex) {
-        	log.debug("create.Vdetach:", ex);
+            log.debug("create.Vdetach:", ex);
         }
 
         long[] oid = {tag, ref};

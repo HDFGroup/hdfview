@@ -28,15 +28,14 @@ import java.util.Vector;
  * members of a group and common operations on groups.
  * <p>
  * Members of a group may include other groups, datasets or links.
- * <p>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public abstract class Group extends HObject {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3913174542591568052L;
 
@@ -55,17 +54,17 @@ public abstract class Group extends HObject {
      * Total number of (Groups and Datasets) of this group in file.
      */
     protected int nMembersInFile;
-    
+
     public static final int LINK_TYPE_HARD = 0;
-    
+
     public static final int LINK_TYPE_SOFT = 1;
-    
+
     public static final int LINK_TYPE_EXTERNAL = 64;
-    
+
     public static final int CRT_ORDER_TRACKED = 1;
-    
+
     public static final int CRT_ORDER_INDEXED = 2;
-    
+
 
     /**
      * Constructs an instance of the group with specific name, path and parent
@@ -76,7 +75,7 @@ public abstract class Group extends HObject {
      * For example, in H5Group(h5file, "grp", "/groups/", pgroup), "grp" is the
      * name of the group, "/groups/" is the group path of the group, and pgroup
      * the group where "grp" is located.
-     * 
+     *
      * @param theFile
      *            the file which containing the group.
      * @param name
@@ -115,8 +114,7 @@ public abstract class Group extends HObject {
 
     /**
      * Adds an object to the member list of this group in memory.
-     * <p>
-     * 
+     *
      * @param object
      *            the HObject (Group or Dataset) to be added to the member list.
      */
@@ -134,8 +132,7 @@ public abstract class Group extends HObject {
 
     /**
      * Removes an object from the member list of this group in memory.
-     * <p>
-     * 
+     *
      * @param object
      *            the HObject (Group or Dataset) to be removed from the member
      *            list.
@@ -149,7 +146,7 @@ public abstract class Group extends HObject {
     /**
      * Returns the list of members of this group. The list is an java.awt.List
      * containing Groups and Datasets.
-     * 
+     *
      * @return the list of members of this group.
      */
     public List<HObject> getMemberList() {
@@ -202,56 +199,56 @@ public abstract class Group extends HObject {
 
         return memberList;
     }
-    
+
     /**
-     * Returns the members of this Group in breadth-first order.
+     * @return the members of this Group in breadth-first order.
      */
     public List<HObject> breadthFirstMemberList() {
-    	Vector<HObject> members = new Vector<HObject>();
-    	Queue<HObject> queue = new LinkedList<HObject>();
-    	HObject currentObj = this;
-    	
-    	queue.addAll(((Group) currentObj).getMemberList());
-    	
-    	while(!queue.isEmpty()) {
-    		currentObj = queue.remove();
-    		members.add(currentObj);
-    		
-    		if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0) {
-    			queue.addAll(((Group) currentObj).getMemberList());
-    		}
-    	}
-    	
-    	return members;
+        Vector<HObject> members = new Vector<HObject>();
+        Queue<HObject> queue = new LinkedList<HObject>();
+        HObject currentObj = this;
+
+        queue.addAll(((Group) currentObj).getMemberList());
+
+        while(!queue.isEmpty()) {
+            currentObj = queue.remove();
+            members.add(currentObj);
+
+            if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0) {
+                queue.addAll(((Group) currentObj).getMemberList());
+            }
+        }
+
+        return members;
     }
-    
+
     /**
-     * Returns the members of this Group in depth-first order.
+     * @return the members of this Group in depth-first order.
      */
     public List<HObject> depthFirstMemberList() {
-    	Vector<HObject> members = new Vector<HObject>();
-    	Stack<HObject> stack = new Stack<HObject>();
-    	HObject currentObj = this;
-    	
-    	// Push elements onto the stack in reverse order
-    	List<HObject> list = ((Group) currentObj).getMemberList();
-    	for(int i = list.size() - 1; i >= 0; i--) {
-    		stack.push(list.get(i));
-    	}
-    	
-    	while(!stack.empty()) {
-    		currentObj = stack.pop();
-    		members.add(currentObj);
+        Vector<HObject> members = new Vector<HObject>();
+        Stack<HObject> stack = new Stack<HObject>();
+        HObject currentObj = this;
 
-    		if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0) {
-    			list = ((Group) currentObj).getMemberList();
-    			for(int i = list.size() - 1; i >= 0; i--) {
-    				stack.push(list.get(i));
-    			}
-    		}
-    	}
-    	
-    	return members;
+        // Push elements onto the stack in reverse order
+        List<HObject> list = ((Group) currentObj).getMemberList();
+        for(int i = list.size() - 1; i >= 0; i--) {
+            stack.push(list.get(i));
+        }
+
+        while(!stack.empty()) {
+            currentObj = stack.pop();
+            members.add(currentObj);
+
+            if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0) {
+                list = ((Group) currentObj).getMemberList();
+                for(int i = list.size() - 1; i >= 0; i--) {
+                    stack.push(list.get(i));
+                }
+            }
+        }
+
+        return members;
     }
 
     /**
@@ -262,9 +259,11 @@ public abstract class Group extends HObject {
      * <p>
      * setName() updates the path in memory for all the objects that are under
      * the group with the new name.
-     * 
+     *
      * @param newName
      *            The new name of the group.
+     *
+     * @throws Exception if the name can not be set
      */
     @Override
     public void setName(String newName) throws Exception {
@@ -280,14 +279,14 @@ public abstract class Group extends HObject {
         }
     }
 
-    /** Returns the parent group. */
+    /** @return the parent group. */
     public final Group getParent() {
         return parent;
     }
 
     /**
      * Checks if it is a root group.
-     * 
+     *
      * @return true if the group is a root group; otherwise, returns false.
      */
     public final boolean isRoot() {
@@ -296,7 +295,7 @@ public abstract class Group extends HObject {
 
     /**
      * Returns the total number of members of this group in file.
-     * 
+     *
      * Current Java application such as HDFView cannot handle files with large
      * numbers of objects (1,000,000 or more objects) due to JVM memory
      * limitation. The max_members is used so that applications such as HDFView
@@ -306,21 +305,21 @@ public abstract class Group extends HObject {
      * <p>
      * getNumberOfMembersInFile() returns the number of objects in this group.
      * The number of objects in memory is obtained by getMemberList().size().
-     * 
+     *
      * @return Total number of members of this group in the file.
      */
     public int getNumberOfMembersInFile() {
         return nMembersInFile;
     }
-    
+
     /**
      * Get the HObject at the specified index in this Group's member list.
      * @param idx The index of the HObject to get.
      * @return The HObject at the specified index.
      */
     public HObject getMember(int idx) {
-    	if(memberList.size() <= 0 || idx >= memberList.size()) return null;
-    	
-    	return memberList.get(idx);
+        if(memberList.size() <= 0 || idx >= memberList.size()) return null;
+
+        return memberList.get(idx);
     }
 }

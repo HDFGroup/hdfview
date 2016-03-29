@@ -22,8 +22,8 @@ package hdf.object;
  * datatype of that member in a compound datum. Compound datatype can be nested,
  * i.e. members of compound datatype can be some other compound datatype.
  * <p>
- * For more details on compound datatype, see <b> {@link <a
- * href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>}
+ * For more details on compound datatype,
+ * see <b> {@link <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>} </b>
  * <p>
  * Since Java cannot handle C-structured compound data, data in compound dataset
  * is loaded in to an Java List. Each element of the list is a data array that
@@ -31,26 +31,26 @@ package hdf.object;
  * <p>
  * For example, if compound dataset "comp" has the following nested structure,
  * and memeber datatypes
- * 
+ *
  * <pre>
- * comp --> m01 (int)
- * comp --> m02 (float)
- * comp --> nest1 --> m11 (char)
- * comp --> nest1 --> m12 (String)
- * comp --> nest1 --> nest2 --> m21 (long)
- * comp --> nest1 --> nest2 --> m22 (double)
+ * comp --&gt; m01 (int)
+ * comp --&gt; m02 (float)
+ * comp --&gt; nest1 --&gt; m11 (char)
+ * comp --&gt; nest1 --&gt; m12 (String)
+ * comp --&gt; nest1 --&gt; nest2 --&gt; m21 (long)
+ * comp --&gt; nest1 --&gt; nest2 --&gt; m22 (double)
  * </pre>
- * 
+ *
  * The data object is an Java list of six arrays: {int[], float[], char[],
  * Stirng[], long[] and double[]}.
- * <p>
- * 
+ *
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public abstract class CompoundDS extends Dataset {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -4880399929644095662L;
 
@@ -78,7 +78,7 @@ public abstract class CompoundDS extends Dataset {
      * compound.
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
-     * 
+     *
      * <pre>
      *     COMP {
      *         int A;
@@ -86,7 +86,7 @@ public abstract class CompoundDS extends Dataset {
      *         double C[2][3];
      *     }
      * </pre>
-     * 
+     *
      * memberOrders is an integer array of {1, 5, 6} to indicate that member A
      * has one element, member B has 5 elements, and member C has 6 elements.
      */
@@ -112,7 +112,7 @@ public abstract class CompoundDS extends Dataset {
      * If a member is selected, the read/write will perform on the member.
      * Applications such as HDFView will only display the selected members of
      * the compound dataset.
-     * 
+     *
      * <pre>
      * For example, if a compound dataset has four members
      *     String[] memberNames = {"X", "Y", "Z", "TIME"};
@@ -134,7 +134,7 @@ public abstract class CompoundDS extends Dataset {
      * file structure and object informatoin into tree structure (TreeNode). It
      * is rarely used elsewhere.
      * <p>
-     * 
+     *
      * @param theFile
      *            the file that contains the dataset.
      * @param name
@@ -162,7 +162,7 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Returns the number of members of the compound dataset.
-     * 
+     *
      * @return the number of members of the compound dataset.
      */
     public final int getMemberCount() {
@@ -171,14 +171,14 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Returns the number of selected members of the compound dataset.
-     * 
+     *
      * Selected members are the compound fields which are selected for
      * read/write.
      * <p>
      * For example, in a compound datatype of {int A, float B, char[] C}, users
      * can choose to retrieve only {A, C} from dataset. In this case,
      * getSelectedMemberCount() returns two.
-     * 
+     *
      * @return the number of selected members.
      */
     public final int getSelectedMemberCount() {
@@ -202,7 +202,7 @@ public abstract class CompoundDS extends Dataset {
      * <p>
      * For example, for a compound datatype of {int A, float B, char[] C}
      * getMemberNames() returns ["A", "B", "C"}.
-     * 
+     *
      * @return the names of compound members.
      */
     public final String[] getMemberNames() {
@@ -211,10 +211,10 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Checks if a member of compound is selected for read/write.
-     * 
+     *
      * @param idx
      *            the index of compound member.
-     * 
+     *
      * @return true if the i-th memeber is selected; otherwise returns false.
      */
     public final boolean isMemberSelected(int idx) {
@@ -228,7 +228,7 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Selects the i-th member for read/write.
-     * 
+     *
      * @param idx
      *            the index of compound member.
      */
@@ -240,7 +240,7 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Selects/deselects all members.
-     * 
+     *
      * @param isSelected
      *            The indicator to select or deselect all members. If true, all
      *            members are selected for read/write. If false, no member is
@@ -261,7 +261,7 @@ public abstract class CompoundDS extends Dataset {
      * compound.
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
-     * 
+     *
      * <pre>
      *     COMP {
      *         int A;
@@ -269,11 +269,11 @@ public abstract class CompoundDS extends Dataset {
      *         double C[2][3];
      *     }
      * </pre>
-     * 
+     *
      * getMemberOrders() will return an integer array of {1, 5, 6} to indicate
      * that member A has one element, member B has 5 elements, and member C has
      * 6 elements.
-     * 
+     *
      * @return the array containing the total number of elements of the members
      *         of compound.
      */
@@ -284,10 +284,10 @@ public abstract class CompoundDS extends Dataset {
     /**
      * Returns array containing the total number of elements of the elected
      * members of compound.
-     * 
+     *
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
-     * 
+     *
      * <pre>
      *     COMP {
      *         int A;
@@ -295,10 +295,10 @@ public abstract class CompoundDS extends Dataset {
      *         double C[2][3];
      *     }
      * </pre>
-     * 
+     *
      * If A and B are selected, getSelectedMemberOrders() returns an array of
      * {1, 5}
-     * 
+     *
      * @return array containing the total number of elements of the selected
      *         members of compound.
      */
@@ -322,7 +322,7 @@ public abstract class CompoundDS extends Dataset {
      * Returns the dimension sizes of of the i-th member.
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
-     * 
+     *
      * <pre>
      *     COMP {
      *         int A;
@@ -330,10 +330,10 @@ public abstract class CompoundDS extends Dataset {
      *         double C[2][3];
      *     }
      * </pre>
-     * 
+     *
      * getMemberDims(2) returns an array of {2, 3}, while getMemberDims(1)
      * returns an array of {5}, getMemberDims(0) returns null.
-     * 
+     *
      * @return the dimension sizes of of the i-th member, null if the compound
      *         member is not an array.
      */
@@ -351,7 +351,7 @@ public abstract class CompoundDS extends Dataset {
      * member can be atomic or other compound datatype (nested compound).
      * Sub-classes set up the datatype objects at init().
      * <p>
-     * 
+     *
      * @return the array of datatype objects of the compound members.
      */
     public final Datatype[] getMemberTypes() {
@@ -360,7 +360,7 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Returns an array of datatype objects of selected compound members.
-     * 
+     *
      * @return an array of datatype objects of selected compound members.
      */
     public final Datatype[] getSelectedMemberTypes() {

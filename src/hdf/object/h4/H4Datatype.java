@@ -23,9 +23,9 @@ import hdf.object.Datatype;
  * This class defines HDF4 data type characteristics and APIs for a data type.
  * <p>
  * This class provides several methods to convert an HDF4 datatype identifier to
- * a datatype object, and vice versa. A datatype object is described by four basic 
- * fields: datatype class, size, byte order, and sign, while an HDF5 datatype is 
- * presented by a datatype identifier. 
+ * a datatype object, and vice versa. A datatype object is described by four basic
+ * fields: datatype class, size, byte order, and sign, while an HDF5 datatype is
+ * presented by a datatype identifier.
  * <p>
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -33,7 +33,7 @@ import hdf.object.Datatype;
 public class H4Datatype extends Datatype
 {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -1342029403385521874L;
 
@@ -221,6 +221,10 @@ public class H4Datatype extends Datatype
 
     /**
      *  Returns the short description of a given datatype.
+     *
+     *  @param datatype  the data type
+     *
+     *  @return  a description String
      */
     public static final String getDatatypeDescription(int datatype)
     {
@@ -382,7 +386,7 @@ public class H4Datatype extends Datatype
 
         return tid;
     }
-    
+
     /*
      * (non-Javadoc)
      * @see hdf.object.Datatype#close(int)
@@ -393,7 +397,7 @@ public class H4Datatype extends Datatype
     //Implementing DataFormat
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
-    }    
-    
+    }
+
 
 }

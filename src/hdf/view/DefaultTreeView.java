@@ -1298,7 +1298,7 @@ public class DefaultTreeView implements TreeView {
             showError("Unsupported operation: cannot delete HDF4 object.", shell.getText());
             return;
         }
-        
+
         TreeItem[] currentSelections = tree.getSelection();
 
         if (moveFlag == true) {
@@ -2815,13 +2815,13 @@ public class DefaultTreeView implements TreeView {
             gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
             gridData.widthHint = 70;
             cancelButton.setLayoutData(gridData);
-    		
-    		shell.pack();
-    		
-    		Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-    		
-    		shell.setMinimumSize(minimumSize);
-    		shell.setSize(minimumSize.x + 50, minimumSize.y);
+
+            shell.pack();
+
+            Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+
+            shell.setMinimumSize(minimumSize);
+            shell.setSize(minimumSize.x + 50, minimumSize.y);
 
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();

@@ -48,6 +48,8 @@ import org.eclipse.swt.widgets.Text;
 public class UserOptionsDialog extends Dialog {
     private Shell shell;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
+
     private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField;
     private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
     private Combo                 choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView, choiceImageView, choicePaletteView;
@@ -105,7 +107,7 @@ public class UserOptionsDialog extends Dialog {
         if (workDir == null) {
             workDir = rootDir;
         }
-        //log.trace("UserOptionsDialog: workDir={}", workDir);
+        log.trace("UserOptionsDialog: workDir={}", workDir);
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
         textViews = ViewProperties.getTextViewList();
@@ -123,7 +125,6 @@ public class UserOptionsDialog extends Dialog {
         shell.setText("User Options");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, false));
-
 
         // Create tabbed region
         TabFolder folder = new TabFolder(shell, SWT.TOP);
@@ -145,7 +146,6 @@ public class UserOptionsDialog extends Dialog {
             item.setControl(createSrbConnectionPanel());
         } catch (Exception ex) {;}
         */
-
 
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
@@ -208,7 +208,7 @@ public class UserOptionsDialog extends Dialog {
     }
 
     @SuppressWarnings("unchecked")
-	private void setUserOptions() {
+    private void setUserOptions() {
         String UGPath = UGField.getText();
         if ((UGPath != null) && (UGPath.length() > 0)) {
             UGPath = UGPath.trim();
@@ -246,7 +246,7 @@ public class UserOptionsDialog extends Dialog {
         // set font size
         int fsize = 12;
         try {
-        	fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
+            fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
             ViewProperties.setFontSize(fsize);
 
             if ((fontSize != ViewProperties.getFontSize())) {
@@ -468,7 +468,7 @@ public class UserOptionsDialog extends Dialog {
         fontSizeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
         fontSizeChoice.setItems(fontSizeChoices);
         fontSizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         try {
         	int selectionIndex = fontSizeChoice.indexOf(String.valueOf(ViewProperties.getFontSize()));
             fontSizeChoice.select(selectionIndex);
@@ -562,7 +562,7 @@ public class UserOptionsDialog extends Dialog {
         imageOriginChoice = new Combo(imageGroup, SWT.SINGLE | SWT.READ_ONLY);
         imageOriginChoice.setItems(imageOriginChoices);
         imageOriginChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         try {
         	int selectionIndex = imageOriginChoice.indexOf(ViewProperties.getImageOrigin());
         	imageOriginChoice.select(selectionIndex);

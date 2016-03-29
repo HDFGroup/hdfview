@@ -34,8 +34,7 @@ import ucar.nc2.Variable;
  * The library predefines a modest number of datatypes. For details, read <a
  * href="http://hdfgroup.org/HDF5/doc/Datatypes.html"> The Datatype Interface
  * (H5T)</a>
- * <p>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -52,8 +51,7 @@ public class NC2Dataset extends ScalarDS {
 
     /**
      * Constructs an NC2Dataset object with specific netcdf variable.
-     * <p>
-     * 
+     *
      * @param fileFormat
      *            the netcdf file.
      * @param ncDataset
@@ -69,7 +67,7 @@ public class NC2Dataset extends ScalarDS {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute() {
@@ -284,7 +282,7 @@ public class NC2Dataset extends ScalarDS {
 
     /**
      * read specific image palette from file.
-     * 
+     *
      * @param idx
      *            the palette index to read
      * @return the palette data into two-dimension byte array, byte[3][256]
@@ -296,7 +294,7 @@ public class NC2Dataset extends ScalarDS {
 
     /**
      * Creates a new dataset.
-     * 
+     *
      * @param name
      *            the name of the dataset to create.
      * @param pgroup
@@ -345,7 +343,7 @@ public class NC2Dataset extends ScalarDS {
     /**
      * Sets the name of the data object.
      * <p>
-     * 
+     *
      * @param newName
      *            the new name of the object.
      */

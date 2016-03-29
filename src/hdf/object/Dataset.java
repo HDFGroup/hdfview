@@ -181,7 +181,6 @@ public abstract class Dataset extends HObject {
 
     /**
      * Constructs a Dataset object with a given file, name and path.
-     * <p>
      *
      * @param theFile
      *            the file that contains the dataset.
@@ -410,6 +409,8 @@ public abstract class Dataset extends HObject {
      *     0,   3
      *     20, 23
      * </pre>
+     *
+     * @return the selectedStride of the selected dataset.
      */
     public final long[] getStride() {
         if (rank < 0) init();
@@ -538,12 +539,12 @@ public abstract class Dataset extends HObject {
      * structure, and member datatypes
      *
      * <pre>
-     * comp --> m01 (int)
-     * comp --> m02 (float)
-     * comp --> nest1 --> m11 (char)
-     * comp --> nest1 --> m12 (String)
-     * comp --> nest1 --> nest2 --> m21 (long)
-     * comp --> nest1 --> nest2 --> m22 (double)
+     * comp --&gt; m01 (int)
+     * comp --&gt; m02 (float)
+     * comp --&gt; nest1 --&gt; m11 (char)
+     * comp --&gt; nest1 --&gt; m12 (String)
+     * comp --&gt; nest1 --&gt; nest2 --&gt; m21 (long)
+     * comp --&gt; nest1 --&gt; nest2 --&gt; m22 (double)
      * </pre>
      *
      * getData() returns a list of six arrays: {int[], float[], char[],
@@ -552,6 +553,9 @@ public abstract class Dataset extends HObject {
      * @return the data read from file.
      *
      * @see #getData()
+     *
+     * @throws Exception if object can not be read
+     * @throws OutOfMemoryError if memory is exhausted
      */
     public abstract Object read() throws Exception, OutOfMemoryError;
 
@@ -568,6 +572,8 @@ public abstract class Dataset extends HObject {
      * saves memory space and CPU time.
      *
      * @return the byte array of the raw data.
+     *
+     * @throws Exception if data can not be read
      */
     public abstract byte[] readBytes() throws Exception;
 
@@ -576,11 +582,15 @@ public abstract class Dataset extends HObject {
      *
      * @param buf
      *            the data to write
+     *
+     * @throws Exception if data can not be written
      */
     public abstract void write(Object buf) throws Exception;
 
     /**
      * Writes the memory buffer of this dataset to file.
+     *
+     * @throws Exception if buffer can not be written
      */
     public final void write() throws Exception {
         if (data != null) {
@@ -608,6 +618,8 @@ public abstract class Dataset extends HObject {
      *            the data values of the subset to be copied.
      *
      * @return the new dataset.
+     *
+     * @throws Exception if dataset can not be copied
      */
     public abstract Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception;
 
@@ -624,7 +636,6 @@ public abstract class Dataset extends HObject {
      * If data is already loaded into memory, returns the data; otherwise, calls
      * read() to read data from file into a memory buffer and returns the memory
      * buffer.
-     * <p>
      * <p>
      * By default, the whole dataset is read into memory. Users can also select
      * subset to read. Subsetting is done in an implicit way.
@@ -693,18 +704,21 @@ public abstract class Dataset extends HObject {
      * structure, and memeber datatypes
      *
      * <pre>
-     * comp --> m01 (int)
-     * comp --> m02 (float)
-     * comp --> nest1 --> m11 (char)
-     * comp --> nest1 --> m12 (String)
-     * comp --> nest1 --> nest2 --> m21 (long)
-     * comp --> nest1 --> nest2 --> m22 (double)
+     * comp --&gt; m01 (int)
+     * comp --&gt; m02 (float)
+     * comp --&gt; nest1 --&gt; m11 (char)
+     * comp --&gt; nest1 --&gt; m12 (String)
+     * comp --&gt; nest1 --&gt; nest2 --&gt; m21 (long)
+     * comp --&gt; nest1 --&gt; nest2 --&gt; m22 (double)
      * </pre>
      *
      * getData() returns a list of six arrays: {int[], float[], char[],
      * String[], long[] and double[]}.
      *
      * @return the memory buffer of the dataset.
+     *
+     * @throws Exception if object can not be read
+     * @throws OutOfMemoryError if memory is exhausted
      */
     public final Object getData() throws Exception, OutOfMemoryError {
         if (!isDataLoaded) {
@@ -729,6 +743,8 @@ public abstract class Dataset extends HObject {
      *             setData() is not safe to use because it changes memory buffer
      *             of the dataset object. Dataset operation such as write/read
      *             will fail if the buffer type or size is changed.
+     *
+     * @param d  the object data
      */
     @Deprecated
     public final void setData(Object d) {
@@ -926,6 +942,10 @@ public abstract class Dataset extends HObject {
     /**
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #convertFromUnsignedC(Object, Object)}
+     *
+     * @param data_in  the object data
+     *
+     * @return the converted object
      */
     @Deprecated
     public static Object convertFromUnsignedC(Object data_in) {
@@ -1065,6 +1085,11 @@ public abstract class Dataset extends HObject {
     /**
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #convertToUnsignedC(Object, Object)}
+     *
+     * @param data_in
+     *            the input 1D array of the unsigned C-type integers.
+     *
+     * @return the upgraded 1D array of Java integers.
      */
     @Deprecated
     public static Object convertToUnsignedC(Object data_in) {

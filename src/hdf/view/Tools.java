@@ -51,13 +51,13 @@ import hdf.view.ViewProperties.BITMASK_OP;
 /**
  * The "Tools" class contains various tools for HDF files such as jpeg to HDF
  * converter.
- * 
+ *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public final class Tools {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tools.class);
-    
+
     public static final long       MAX_INT8        = 127;
     public static final long       MAX_UINT8       = 255;
     public static final long       MAX_INT16       = 32767;
@@ -92,7 +92,7 @@ public final class Tools {
 
     /**
      * Converts an image file into HDF4/5 file.
-     * 
+     *
      * @param imgFileName
      *            the input image file.
      * @param hFileName
@@ -194,7 +194,7 @@ public final class Tools {
 
     /**
      * Save a BufferedImage into an image file.
-     * 
+     *
      * @param image
      *            the BufferedImage to save.
      * @param file
@@ -217,7 +217,7 @@ public final class Tools {
      * by color components of red, green and blue. palette[][] = byte[3][256],
      * where, palette[0][], palette[1][] and palette[2][] are the red, green and
      * blue components respectively.
-     * 
+     *
      * @return the gray palette in the form of byte[3][256]
      */
     public static final byte[][] createGrayPalette() {
@@ -237,7 +237,7 @@ public final class Tools {
      * by color components of red, green and blue. palette[][] = byte[3][256],
      * where, palette[0][], palette[1][] and palette[2][] are the red, green and
      * blue components respectively.
-     * 
+     *
      * @return the gray palette in the form of byte[3][256]
      */
     public static final byte[][] createReverseGrayPalette() {
@@ -257,7 +257,7 @@ public final class Tools {
      * by color components of red, green and blue. palette[][] = byte[3][256],
      * where, palette[0][], palette[1][] and palette[2][] are the red, green and
      * blue components respectively.
-     * 
+     *
      * @return the gray palette in the form of byte[3][256]
      */
     public static final byte[][] createGrayWavePalette() {
@@ -277,7 +277,7 @@ public final class Tools {
      * by color components of red, green and blue. palette[][] = byte[3][256],
      * where, palette[0][], palette[1][] and palette[2][] are the red, green and
      * blue components respectively.
-     * 
+     *
      * @return the rainbow palette in the form of byte[3][256]
      */
     public static final byte[][] createRainbowPalette() {
@@ -329,7 +329,7 @@ public final class Tools {
      * by color components of red, green and blue. palette[][] = byte[3][256],
      * where, palette[0][], palette[1][] and palette[2][] are the red, green and
      * blue components respectively.
-     * 
+     *
      * @return the nature palette in the form of byte[3][256]
      */
     public static final byte[][] createNaturePalette() {
@@ -360,7 +360,7 @@ public final class Tools {
      * by color components of red, green and blue. palette[][] = byte[3][256],
      * where, palette[0][], palette[1][] and palette[2][] are the red, green and
      * blue components respectively.
-     * 
+     *
      * @return the wave palette in the form of byte[3][256]
      */
     public static final byte[][] createWavePalette() {
@@ -380,21 +380,21 @@ public final class Tools {
 
     /**
      * read an image palette from a file.
-     * 
+     *
      * A palette file has format of (value, red, green, blue). The color value
      * in palette file can be either unsigned char [0..255] or float [0..1].
      * Float value will be converted to [0..255].
-     * 
+     *
      * The color table in file can have any number of entries between 2 to 256.
      * It will be converted to a color table of 256 entries. Any missing index
      * will calculated by linear interpolation between the neighboring index
      * values. For example, index 11 is missing in the following table 10 200 60
      * 20 12 100 100 60 Index 11 will be calculated based on index 10 and index
      * 12, i.e. 11 150 80 40
-     * 
+     *
      * @param filename
      *            the name of the palette file.
-     * 
+     *
      * @return the wave palette in the form of byte[3][256]
      */
     public static final byte[][] readPalette(String filename) {
@@ -411,7 +411,7 @@ public final class Tools {
             in = new BufferedReader(new FileReader(filename));
         }
         catch (Exception ex) {
-        	log.debug("input file:", ex);
+            log.debug("input file:", ex);
             in = null;
         }
 
@@ -424,7 +424,7 @@ public final class Tools {
                 line = in.readLine();
             }
             catch (Exception ex) {
-            	log.debug("input file:", ex);
+                log.debug("input file:", ex);
                 line = null;
             }
 
@@ -444,7 +444,7 @@ public final class Tools {
                 b = Float.valueOf(st.nextToken());
             }
             catch (NumberFormatException ex) {
-            	log.debug("input file:", ex);
+                log.debug("input file:", ex);
                 continue;
             }
 
@@ -476,7 +476,7 @@ public final class Tools {
             in.close();
         }
         catch (Exception ex) {
-        	log.debug("input file:", ex);
+            log.debug("input file:", ex);
         }
 
         nentries = idx;
@@ -540,7 +540,7 @@ public final class Tools {
 
     /**
      * This method returns true if the specified image has transparent pixels.
-     * 
+     *
      * @param image
      *            the image to be check if has alpha.
      * @return true if the image has alpha setting.
@@ -563,7 +563,7 @@ public final class Tools {
             pg.grabPixels();
         }
         catch (InterruptedException e) {
-        	log.debug("transparent pixels:", e);
+            log.debug("transparent pixels:", e);
         }
         ColorModel cm = pg.getColorModel();
 
@@ -572,7 +572,7 @@ public final class Tools {
 
     /**
      * Creates a RGB indexed image of 256 colors.
-     * 
+     *
      * @param imageData
      *            the byte array of the image data.
      * @param palette
@@ -583,29 +583,29 @@ public final class Tools {
      *            the height of the image.
      * @return the image.
      */
-    public static Image createIndexedImage(BufferedImage bufferedImage, byte[] imageData, byte[][] palette, int w, int h) 
+    public static Image createIndexedImage(BufferedImage bufferedImage, byte[] imageData, byte[][] palette, int w, int h)
     {
-    	if (imageData==null || w<=0 || h<=0)
-    		return null;
-    	
-    	if (palette==null)
-    		palette = Tools.createGrayPalette();
-    	
+        if (imageData==null || w<=0 || h<=0)
+            return null;
+
+        if (palette==null)
+            palette = Tools.createGrayPalette();
+
         if (bufferedImage == null)
             bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        
+
         final int[] pixels = ( (DataBufferInt) bufferedImage.getRaster().getDataBuffer() ).getData();
         int len = pixels.length;
 
         for (int i=0; i<len; i++) {
-        	int idx = imageData[i] & 0xff;
-        	int r = ((int)(palette[0][idx] & 0xff))<<16;
-         	int g = ((int)(palette[1][idx] & 0xff))<<8;
-        	int b = palette[2][idx] & 0xff;
+            int idx = imageData[i] & 0xff;
+            int r = ((int)(palette[0][idx] & 0xff))<<16;
+            int g = ((int)(palette[1][idx] & 0xff))<<8;
+            int b = palette[2][idx] & 0xff;
 
-        	pixels[i] = 0xff000000 | r | g | b;
+            pixels[i] = 0xff000000 | r | g | b;
         }
-      
+
         return bufferedImage;
     }
 
@@ -615,7 +615,7 @@ public final class Tools {
      * DirectColorModel is used to construct the image from raw data. The
      * DirectColorModel model is similar to an X11 TrueColor visual, which has
      * the following parameters: <br>
-     * 
+     *
      * <pre>
      * Number of bits:        32
      *             Red mask:              0x00ff0000
@@ -633,20 +633,19 @@ public final class Tools {
      * height, width, and components.
      * <p>
      * For HDF4, the interlace modes specify orders for the dimensions as:
-     * 
+     *
      * <pre>
      * INTERLACE_PIXEL = [width][height][pixel components]
      *            INTERLACE_PLANE = [pixel components][width][height]
      * </pre>
      * <p>
      * For HDF5, the interlace modes specify orders for the dimensions as:
-     * 
+     *
      * <pre>
      * INTERLACE_PIXEL = [height][width][pixel components]
      *            INTERLACE_PLANE = [pixel components][height][width]
      * </pre>
-     * <p>
-     * 
+     *
      * @param imageData
      *            the byte array of the image data.
      * @param planeInterlace
@@ -697,8 +696,7 @@ public final class Tools {
 
     /**
      * Convert an array of raw data into array of a byte data.
-     * <p>
-     * 
+     *
      * @param rawData
      *            The input raw data.
      * @param minmax
@@ -715,14 +713,13 @@ public final class Tools {
     }
 
     public static byte[] getBytes(Object rawData, double[] minmax, int w, int h, boolean isTransposed,
-    		List<Number> invalidValues, boolean convertByteData, byte[] byteData) {
-    	return getBytes(rawData, minmax, w, h, isTransposed,invalidValues, convertByteData, byteData, null);
+            List<Number> invalidValues, boolean convertByteData, byte[] byteData) {
+        return getBytes(rawData, minmax, w, h, isTransposed,invalidValues, convertByteData, byteData, null);
     }
-    
+
     /**
      * Convert an array of raw data into array of a byte data.
-     * <p>
-     * 
+     *
      * @param rawData
      *            The input raw data.
      * @param minmax
@@ -732,10 +729,10 @@ public final class Tools {
      * @return the byte array of pixel data.
      */
     public static byte[] getBytes(Object rawData, double[] minmax, int w, int h, boolean isTransposed,
-    		List<Number> invalidValues, boolean convertByteData, byte[] byteData, List<Integer> list) 
+            List<Number> invalidValues, boolean convertByteData, byte[] byteData, List<Integer> list)
     {
-    	double fillValue[] = null;
-    	
+        double fillValue[] = null;
+
         // no input data
         if (rawData == null || w<=0 || h<=0) {
             return null;
@@ -772,11 +769,11 @@ public final class Tools {
         max = minmax[1];
 
         if (invalidValues!=null && invalidValues.size()>0) {
-        	int n = invalidValues.size();
-        	fillValue = new double[n];
-        	for (int i=0; i<n; i++) {
-        		fillValue[i] = invalidValues.get(i).doubleValue();
-        	}
+            int n = invalidValues.size();
+            fillValue = new double[n];
+            for (int i=0; i<n; i++) {
+                fillValue[i] = invalidValues.get(i).doubleValue();
+            }
         }
         ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
         int idxSrc = 0, idxDst = 0;
@@ -800,7 +797,7 @@ public final class Tools {
                         if (isTransposed) idxDst = i * w + j;
                         byteData[idxDst] = toByte(ia[idxSrc], ratio, min, max, fillValue, idxSrc, list);
                     }
-                }               
+                }
                 break;
 
             case 'J':
@@ -843,33 +840,33 @@ public final class Tools {
 
         return byteData;
     }
-    
-    private static byte toByte(double in, double ratio, double min, double max, double[] fill, int idx,  List<Integer> list) 
+
+    private static byte toByte(double in, double ratio, double min, double max, double[] fill, int idx,  List<Integer> list)
     {
-    	byte out = 0;
-    	
-    	if (in < min || in > max || isFillValue(in, fill) || isNaNINF(in)) {
-    		out = 0;
-    		if (list!=null)
-    			list.add(idx);
-    	} 
-    	else
-    		out = (byte) ((in-min)*ratio);
-    	
-    	return out;
+        byte out = 0;
+
+        if (in < min || in > max || isFillValue(in, fill) || isNaNINF(in)) {
+            out = 0;
+            if (list!=null)
+                list.add(idx);
+        }
+        else
+            out = (byte) ((in-min)*ratio);
+
+        return out;
     }
-    
+
     private static boolean isFillValue(double in, double[] fill) {
-    	
-    	if (fill==null)
-    		return false;
-    	
-    	for (int i=0; i<fill.length; i++) {
-    		if (fill[i] == in)
-    			return true;
-    	}
-    	
-    	return false;
+
+        if (fill==null)
+            return false;
+
+        for (int i=0; i<fill.length; i++) {
+            if (fill[i] == in)
+                return true;
+        }
+
+        return false;
     }
 
     private static byte[] convertByteData(byte[] rawData, double[] minmax, int w, int h, boolean isTransposed,
@@ -917,16 +914,16 @@ public final class Tools {
         min = minmax[0];
         max = minmax[1];
         ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
-        int idxSrc = 0, idxDst = 0;        
+        int idxSrc = 0, idxDst = 0;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 idxSrc = idxDst =j * h + i;
                 if (isTransposed) idxDst = i * w + j;
 
                 if (rawData[idxSrc] > max || rawData[idxSrc] < min) {
-                	byteData[idxDst] = (byte) 0;
-                	if (list!=null)
-                	    list.add(idxSrc);
+                    byteData[idxDst] = (byte) 0;
+                    if (list!=null)
+                        list.add(idxSrc);
                 }
                 else
                     byteData[idxDst] = (byte) ((rawData[idxSrc] - min) * ratio);
@@ -938,18 +935,18 @@ public final class Tools {
 
     /**
      * Create and initialize a new instance of the given class.
-     * 
+     *
      * @param initargs
      *            - array of objects to be passed as arguments
      * @return a new instance of the given class.
      */
     public static Object newInstance(Class<?> cls, Object[] initargs) throws Exception {
         log.trace("newInstance(Class = {}): start", cls);
-        
+
         if (cls == null) {
             return null;
         }
-        
+
         Object instance = null;
 
         if ((initargs == null) || (initargs.length == 0)) {
@@ -977,12 +974,12 @@ public final class Tools {
                     }
 
                     if (isConstructorMatched) {
-                    	try {
+                        try {
                             instance = constructor.newInstance(initargs);
-                    	} catch (Exception ex) {
-                    		log.debug("Error creating instance of {}: {}", cls, ex.getMessage());
-                    		ex.printStackTrace();
-                    	}
+                        } catch (Exception ex) {
+                            log.debug("Error creating instance of {}: {}", cls, ex.getMessage());
+                            ex.printStackTrace();
+                        }
                         break;
                     }
                 }
@@ -998,7 +995,7 @@ public final class Tools {
      * equates to brightness) for integers.
      * <p>
      * The computation is based on the following scaling
-     * 
+     *
      * <pre>
      *      int_8       [0, 127]
      *      uint_8      [0, 255]
@@ -1009,7 +1006,7 @@ public final class Tools {
      *      int_64      [0, 9223372036854775807]
      *      uint_64     [0, 18446744073709551615] // Not supported.
      * </pre>
-     * 
+     *
      * @param data
      *            the raw data array of signed/unsigned integers
      * @param params
@@ -1099,7 +1096,7 @@ public final class Tools {
 
     /**
      * Apply autocontrast parameters to the original data in place (destructive)
-     * 
+     *
      * @param data_in
      *            the original data array of signed/unsigned integers
      * @param data_out
@@ -1110,7 +1107,7 @@ public final class Tools {
      *            the data range. minmax[0]=min, minmax[1]=max
      * @param isUnsigned
      *            the flag to indicate if the data array is unsigned integer
-     * 
+     *
      * @return the data array with the auto contrast conversion; otherwise,
      *         returns null
      */
@@ -1227,9 +1224,9 @@ public final class Tools {
 
     /**
      * Converts image raw data to bytes.
-     * <p>
+     *
      * The integer data is converted to byte data based on the following rule
-     * 
+     *
      * <pre>
      *         uint_8       x
      *         int_8       (x & 0x7F) << 1
@@ -1240,7 +1237,7 @@ public final class Tools {
      *         uint_64     (x >> 56) & 0xFF
      *         int_64      (x >> 55) & 0xFF
      * </pre>
-     * 
+     *
      * @param src
      *            the source data array of signed integers or unsigned shorts
      * @param dst
@@ -1322,12 +1319,12 @@ public final class Tools {
 
     /**
      * Computes autocontrast parameters by
-     * 
+     *
      * <pre>
-     *    min = mean - 3 * std.dev 
+     *    min = mean - 3 * std.dev
      *    max = mean + 3 * std.dev
      * </pre>
-     * 
+     *
      * @param data
      *            the raw data array
      * @param minmax
@@ -1355,7 +1352,7 @@ public final class Tools {
 
     /**
      * Finds the min and max values of the data array
-     * 
+     *
      * @param data
      *            the raw data array
      * @param minmax
@@ -1378,7 +1375,7 @@ public final class Tools {
 
         String cname = data.getClass().getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-    	log.trace("findMinMax() cname={} : dname={}", cname, dname);
+        log.trace("findMinMax() cname={} : dname={}", cname, dname);
 
         minmax[0] = Float.MAX_VALUE;
         minmax[1] = -Float.MAX_VALUE;
@@ -1488,7 +1485,7 @@ public final class Tools {
 
     /**
      * Finds the distribution of data values
-     * 
+     *
      * @param data
      *            the raw data array
      * @param dataDist
@@ -1525,7 +1522,7 @@ public final class Tools {
 
     /**
      * Computes mean and standard deviation of a data array
-     * 
+     *
      * @param data
      *            the raw data array
      * @param avgstd
@@ -1548,7 +1545,7 @@ public final class Tools {
 
         String cname = data.getClass().getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-    	log.trace("computeStatistics() cname={} : dname={}", cname, dname);
+        log.trace("computeStatistics() cname={} : dname={}", cname, dname);
 
         npoints = 0;
         switch (dname) {
@@ -1666,7 +1663,7 @@ public final class Tools {
      * integer in base 2. This is different from Long.toBinaryString(long i).
      * This function add padding (0's) to the string based on the nbytes. For
      * example, if v=15, nbytes=1, the string will be "00001111".
-     * 
+     *
      * @param v
      *            the long value
      * @param nbytes
@@ -1746,7 +1743,7 @@ public final class Tools {
 
     /**
      * Apply bitmask to a data array.
-     * 
+     *
      * @param theData
      *            the data array which the bitmask is applied to.
      * @param theMask
@@ -1754,7 +1751,7 @@ public final class Tools {
      * @return true if bitmask is applied successfuly; otherwise, false.
      */
     public static final boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op) {
-    	if (theData == null || Array.getLength(theData) <= 0 || theMask == null) return false;
+        if (theData == null || Array.getLength(theData) <= 0 || theMask == null) return false;
 
         char nt = '0';
         String cName = theData.getClass().getName();
@@ -1767,7 +1764,7 @@ public final class Tools {
         if (!(nt == 'B' || nt == 'S' || nt == 'I' || nt == 'J')) return false;
 
         long bmask = 0, theValue = 0, packedValue = 0, bitValue = 0;
-        
+
         int nbits = theMask.length();
         int len = Array.getLength(theData);
 
@@ -1783,8 +1780,8 @@ public final class Tools {
             else if (nt == 'I')
                 theValue = ((int[]) theData)[i] & bmask;
             else if (nt == 'J')
-            	theValue = ((long[]) theData)[i] & bmask;
-            
+                theValue = ((long[]) theData)[i] & bmask;
+
             // apply bitmask only
             if (op == BITMASK_OP.AND)
                 packedValue = theValue;
@@ -1793,7 +1790,7 @@ public final class Tools {
                 packedValue = 0;
                 int bitPosition = 0;
                 bitValue = 0;
-                
+
                 for (int j = 0; j < nbits; j++) {
                     if (theMask.get(j)) {
                         bitValue = (theValue & 1);
@@ -1810,9 +1807,9 @@ public final class Tools {
             else if (nt == 'S')
                 ((short[]) theData)[i] = (short) packedValue;
             else if (nt == 'I')
-            	((int[]) theData)[i] = (int) packedValue;
+                ((int[]) theData)[i] = (int) packedValue;
             else if (nt == 'J')
-            	((long[]) theData)[i] = packedValue;
+                ((long[]) theData)[i] = packedValue;
         } /* for (int i = 0; i < len; i++) */
 
         return true;
@@ -1820,7 +1817,7 @@ public final class Tools {
 
     /**
      * Launch default browser for a given URL.
-     * 
+     *
      * @param url
      *            -- the URL to open.
      * @throws Exception
@@ -1859,18 +1856,18 @@ public final class Tools {
                 runtime.exec(new String[] { browser, url });
         }
     } /* public static final void launchBrowser(String url) */
-    
+
     /** Create a new HDF file with default file creation properties */
     public static FileFormat createNewFile(String filename, String dir,
-    		String type, List<FileFormat> openFiles) throws Exception {
-    	File f = new File(filename);
+            String type, List<FileFormat> openFiles) throws Exception {
+        File f = new File(filename);
 
         String fname = f.getAbsolutePath();
         if (fname == null) return null;
 
         fname = fname.trim();
         if ((fname == null) || (fname.length() == 0)) {
-        	throw new Exception("Invalid file name.");
+            throw new Exception("Invalid file name.");
         }
 
         String extensions = FileFormat.getFileExtensions();
@@ -1924,27 +1921,27 @@ public final class Tools {
         }
 
         if (f.exists()) {
-        	MessageBox confirm = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-        	confirm.setText(Display.getCurrent().getActiveShell().getText());
-        	confirm.setMessage("File exists. Do you want to replace it?");
-        	if (confirm.open() == SWT.NO) return null;
+            MessageBox confirm = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText(Display.getCurrent().getActiveShell().getText());
+            confirm.setMessage("File exists. Do you want to replace it?");
+            if (confirm.open() == SWT.NO) return null;
         }
-        
+
         try {
-        	int aFlag = FileFormat.FILE_CREATE_DELETE;
-        	if (ViewProperties.isEarlyLib())
-        		aFlag = FileFormat.FILE_CREATE_DELETE | FileFormat.FILE_CREATE_EARLY_LIB;
+            int aFlag = FileFormat.FILE_CREATE_DELETE;
+            if (ViewProperties.isEarlyLib())
+                aFlag = FileFormat.FILE_CREATE_DELETE | FileFormat.FILE_CREATE_EARLY_LIB;
             FileFormat theFile = FileFormat.getFileFormat(type).createFile(fname, aFlag);
             return theFile;
         }
         catch (Exception ex) {
-        	throw new Exception(ex.getMessage());
+            throw new Exception(ex.getMessage());
         }
     }
 
     /**
      * Check and find a non-exist file.
-     * 
+     *
      * @param path
      *            -- the path that the new file will be checked.
      * @param ext
@@ -1965,7 +1962,7 @@ public final class Tools {
 
     /**
      * Check if a given number if NaN or INF.
-     * 
+     *
      * @param val
      *            the nubmer to be checked
      * @return true if the number is Nan or INF; otherwise, false.

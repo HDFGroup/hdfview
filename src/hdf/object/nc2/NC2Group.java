@@ -28,8 +28,7 @@ import ucar.nc2.NetcdfFile;
  * similar to that of the UNIX file system in that the group may contain
  * references to other groups or data objects just as the UNIX directory may
  * contain subdirectories or files.
- * <p>
- * 
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -47,8 +46,7 @@ public class NC2Group extends Group {
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
-     * <p>
-     * 
+     *
      * @param fileFormat
      *            the file which containing the group.
      * @param name
@@ -68,7 +66,7 @@ public class NC2Group extends Group {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute() {
@@ -108,9 +106,9 @@ public class NC2Group extends Group {
     /**
      * Creates a new attribute and attached to this dataset if attribute does
      * not exist. Otherwise, just update the value of the attribute.
-     * 
+     *
      * <p>
-     * 
+     *
      * @param info
      *            the atribute to attach
      */
@@ -123,7 +121,7 @@ public class NC2Group extends Group {
     /**
      * Deletes an attribute from this dataset.
      * <p>
-     * 
+     *
      * @param info
      *            the attribute to delete.
      */
@@ -157,7 +155,7 @@ public class NC2Group extends Group {
 
     /**
      * Creates a new group.
-     * 
+     *
      * @param file
      *            the file which the group is added to.
      * @param name

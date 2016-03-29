@@ -38,9 +38,8 @@ import hdf.object.ScalarDS;
  * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
  * float, double and string, and operations performed on the scalar dataset.
  * <p>
- * The library predefines a modest number of datatypes. For details, read <a
- * href="http://hdfgroup.org/HDF5/doc/Datatypes.html">The Datatype Interface (H5T).</a>
- * <p>
+ * The library predefines a modest number of datatypes. For details,
+ * read <a href="http://hdfgroup.org/HDF5/doc/Datatypes.html">The Datatype Interface (H5T).</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -215,6 +214,7 @@ public class H5ScalarDS extends ScalarDS {
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 tid = H5.H5Dget_type(did);
                 tclass = H5.H5Tget_class(tid);
+                log.debug("H5Tget_class: {} is Array {}", tclass, HDF5Constants.H5T_ARRAY);
 
                 int tmptid = 0;
                 if (tclass == HDF5Constants.H5T_ARRAY) {
@@ -382,43 +382,43 @@ public class H5ScalarDS extends ScalarDS {
                 }
 
                 if(nAttributes > 0) {
-                // test if it is an image
-                // check image
-                Object avalue = getAttrValue(did, "CLASS");
-                if (avalue != null) {
-                    try {
-                        isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
-                        log.trace("hasAttribute: isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
+                    // test if it is an image
+                    // check image
+                    Object avalue = getAttrValue(did, "CLASS");
+                    if (avalue != null) {
+                        try {
+                            isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
+                            log.trace("hasAttribute: isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
+                        }
+                        catch (Throwable err) {
+                            log.debug("check image:", err);
+                        }
                     }
-                    catch (Throwable err) {
-                        log.debug("check image:", err);
-                    }
-                }
 
-                // retrieve the IMAGE_MINMAXRANGE
-                avalue = getAttrValue(did, "IMAGE_MINMAXRANGE");
-                if (avalue != null) {
-                    double x0 = 0, x1 = 0;
-                    try {
-                        x0 = Double.valueOf(java.lang.reflect.Array.get(avalue, 0).toString()).doubleValue();
-                        x1 = Double.valueOf(java.lang.reflect.Array.get(avalue, 1).toString()).doubleValue();
+                    // retrieve the IMAGE_MINMAXRANGE
+                    avalue = getAttrValue(did, "IMAGE_MINMAXRANGE");
+                    if (avalue != null) {
+                        double x0 = 0, x1 = 0;
+                        try {
+                            x0 = Double.valueOf(java.lang.reflect.Array.get(avalue, 0).toString()).doubleValue();
+                            x1 = Double.valueOf(java.lang.reflect.Array.get(avalue, 1).toString()).doubleValue();
+                        }
+                        catch (Exception ex2) {
+                            x0 = x1 = 0;
+                        }
+                        if (x1 > x0) {
+                            imageDataRange = new double[2];
+                            imageDataRange[0] = x0;
+                            imageDataRange[1] = x1;
+                        }
                     }
-                    catch (Exception ex2) {
-                        x0 = x1 = 0;
-                    }
-                    if (x1 > x0) {
-                        imageDataRange = new double[2];
-                        imageDataRange[0] = x0;
-                        imageDataRange[1] = x1;
-                    }
-                }
 
-                try {
-                    checkCFconvention(did);
-                }
-                catch (Exception ex) {
-                    log.debug("checkCFconvention({}):", did, ex);
-                }
+                    try {
+                        checkCFconvention(did);
+                    }
+                    catch (Exception ex) {
+                        log.debug("checkCFconvention({}):", did, ex);
+                    }
                 }
                 close(did);
             }

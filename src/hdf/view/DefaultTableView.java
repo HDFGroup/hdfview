@@ -146,13 +146,13 @@ public class DefaultTableView implements TableView {
     /**
      * The value of the dataset.
      */
-    private Object                          dataValue;
-    
-    private Object                          fillValue               = null;
+    private Object                            dataValue;
+
+    private Object                           fillValue               = null;
 
     private enum ViewType { TABLE, IMAGE, TEXT };
-    private ViewType viewType = ViewType.TABLE;
-    
+    private    ViewType viewType = ViewType.TABLE;
+
     // Used for bitmask operations on data
     private BitSet                          bitmask                 = null;
     private BITMASK_OP                      bitmaskOP               = BITMASK_OP.EXTRACT;
@@ -224,14 +224,14 @@ public class DefaultTableView implements TableView {
     private Group                           group;
 
     // Text field to display the value of the current cell.
-    private Text                            cellValueField;
-    
+    private Text                              cellValueField;
+
     // Label to indicate the current cell location.
-    private Label                           cellLabel;
+    private Label                             cellLabel;
 
     // The value of the current cell value in editing.
-    private Object                          currentEditingCellValue = null;
-    
+    private Object                           currentEditingCellValue = null;
+
     // Keep track of table row selections
     private SelectionLayer                  selectionLayer;
 
@@ -268,9 +268,9 @@ public class DefaultTableView implements TableView {
         display = shell.getDisplay();
 
         shell.setData(this);
-        
+
         shell.setLayout(new GridLayout(1, true));
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
@@ -469,7 +469,7 @@ public class DefaultTableView implements TableView {
             shell.dispose();
             return;
         }
-        
+
         table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         StringBuffer sb = new StringBuffer(hObject.getName());
@@ -523,7 +523,7 @@ public class DefaultTableView implements TableView {
         shell.setLocation(dataClientArea.getBounds().x, dataClientArea.getBounds().y);
 
         viewer.addDataView(this);
-        
+
         shell.open();
 
         // Workaround to prevent parent shell cursor from staying in "wait"
@@ -1443,7 +1443,7 @@ public class DefaultTableView implements TableView {
             item.setToolTipText("First Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                	firstPage();
+                    firstPage();
                 }
             });
 
@@ -1512,7 +1512,7 @@ public class DefaultTableView implements TableView {
             item.setToolTipText("Next Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                	nextPage();
+                    nextPage();
                 }
             });
 
@@ -3704,10 +3704,10 @@ public class DefaultTableView implements TableView {
 
         boolean                    isNaturalOrder   = (dataset.getRank() == 1 || (dataset.getSelectedIndex()[0] < dataset
                                                             .getSelectedIndex()[1]));
-        
+
         private int                rowCount         = dataset.getHeight();
         private int                colCount         = dataset.getWidth();
-        
+
         public ScalarDSDataProvider() {
 
         }
@@ -3920,7 +3920,7 @@ public class DefaultTableView implements TableView {
                 boolean isUINT64 = false;
                 boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
                 int typeSize = dtype.getDatatypeSize();
-                
+
                 if ((dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) || (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE)) {
                     CshowAsHex = true;
                     log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() class={} (BITFIELD or OPAQUE)", dtype.getDatatypeClass());

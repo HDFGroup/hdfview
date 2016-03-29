@@ -2140,8 +2140,8 @@ public class DefaultImageView implements ImageView {
      *            the height of the image.
      * @return the image.
      */
-    private Image createIndexedImage(byte[] imageData, byte[][] palette, int w,
-            int h) {
+    private Image createIndexedImage(byte[] imageData, byte[][] palette, int w, int h)
+    {
         bufferedImage = (BufferedImage) Tools.createIndexedImage(bufferedImage, imageData, palette, w, h);
         adjustAlpha(bufferedImage, 0, invalidValueIndex);
 
@@ -2232,7 +2232,8 @@ public class DefaultImageView implements ImageView {
     private void applyDataRange(double[] newRange) {
         if (doAutoGainContrast && gainBias != null) {
             applyAutoGain(gainBias_current, newRange);
-        } else {
+        }
+        else {
             int w = dataset.getWidth();
             int h = dataset.getHeight();
 
@@ -2546,7 +2547,7 @@ public class DefaultImageView implements ImageView {
                     	}
                     	
                         startPosition = new Point(e.x, e.y);
-                        
+
                         if (hbar.isVisible()) {
                             hbar.setSelection(startPosition.x - scrollDim.x / 2);
                         }

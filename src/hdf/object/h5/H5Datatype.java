@@ -28,7 +28,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 
 /**
- * This class defines HDF5 data type characteristics and APIs for a data type.
+ * This class defines HDF5 datatype characteristics and APIs for a data type.
  * <p>
  * This class provides several methods to convert an HDF5 datatype identifier to a datatype object, and vice versa. A
  * datatype object is described by four basic fields: datatype class, size, byte order, and sign, while an HDF5 datatype
@@ -1342,6 +1342,7 @@ public class H5Datatype extends Datatype {
         if (tid >= 0) {
             try {
                 int tclass = H5.H5Tget_class(tid);
+                log.trace("isUnsigned() tclass = {}", tclass);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
                         && tclass != HDF5Constants.H5T_OPAQUE) {

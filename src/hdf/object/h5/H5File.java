@@ -146,11 +146,11 @@ public class H5File extends FileFormat {
      * <p>
      * The access parameter values and corresponding behaviors:
      * <ul>
-     * <li>READ: Read-only access; open() will fail file doesn't exist.
+     * <li>READ: Read-only access; open() will fail file doesn't exist.</li>
      * <li>WRITE: Read/Write access; open() will fail if file doesn't exist or if file can't be opened with read/write
-     * access.
+     * access.</li>
      * <li>CREATE: Read/Write access; create a new file or truncate an existing one; open() will fail if file can't be
-     * created or if file exists but can't be opened read/write.
+     * created or if file exists but can't be opened read/write.</li>
      * </ul>
      * <p>
      * This constructor does not open the file for access, nor does it confirm that the file can later be opened
@@ -404,6 +404,7 @@ public class H5File extends FileFormat {
                 if (rank > 0) {
                     dims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, null);
+                    log.trace("getAttribute() rank={}, dims={}", rank, dims);
                     for (int j = 0; j < dims.length; j++) {
                         lsize *= dims[j];
                     }
@@ -1010,6 +1011,7 @@ public class H5File extends FileFormat {
             log.debug("file {} is not open", fullFileName);
             return;
         }
+        log.trace("H5File:close start");
         // The current working directory may be changed at Dataset.read()
         // by System.setProperty("user.dir", newdir) to make it work for external
         // datasets. We need to set it back to the original current working
@@ -1042,12 +1044,14 @@ public class H5File extends FileFormat {
         try {
             int n = 0, type = -1, oids[];
             n = H5.H5Fget_obj_count(fid, HDF5Constants.H5F_OBJ_ALL);
+            log.trace("H5File:close open objects={}", n);
 
             if (n > 0) {
                 oids = new int[n];
                 H5.H5Fget_obj_ids(fid, HDF5Constants.H5F_OBJ_ALL, n, oids);
 
                 for (int i = 0; i < n; i++) {
+                    log.trace("H5File:close object[{}] id={}", i, oids[i]);
                     type = H5.H5Iget_type(oids[i]);
 
                     if (HDF5Constants.H5I_DATASET == type) {
@@ -1105,6 +1109,7 @@ public class H5File extends FileFormat {
 
         // Set fid to -1 but don't reset rootObject
         fid = -1;
+        log.trace("H5File:close finish");
     }
 
     /**
