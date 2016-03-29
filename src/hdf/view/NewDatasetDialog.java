@@ -190,7 +190,6 @@ public class NewDatasetDialog extends Dialog {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
 
-
         // Create Datatype region
         org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         datatypeGroup.setText("Datatype");

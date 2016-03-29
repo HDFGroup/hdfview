@@ -203,7 +203,6 @@ public class DefaultTableView implements TableView {
 
     private final boolean                   startEditing[]   = { false };
 
-
     /**
      * Global variables for GUI components
      */

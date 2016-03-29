@@ -250,7 +250,8 @@ public class NewDatatypeDialog extends Dialog {
 
         if(isH5) {
             sizeChoice.add("NATIVE");
-        } else {
+        }
+        else {
             sizeChoice.add("DEFAULT");
         }
 

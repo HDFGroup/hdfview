@@ -319,7 +319,6 @@ public class NewAttributeDialog extends Dialog {
             objChoice.add(hobj.getFullName());
         }
 
-
         // Create Ok/Cancel/Help button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(3, false));

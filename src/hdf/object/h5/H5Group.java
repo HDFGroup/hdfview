@@ -458,7 +458,7 @@ public class H5Group extends Group {
      * @see hdf.object.HObject#setPath(java.lang.String)
      */
     @Override
-    public void setPath(String newPath) {
+    public void setPath(String newPath) throws Exception {
         super.setPath(newPath);
 
         List members = this.getMemberList();

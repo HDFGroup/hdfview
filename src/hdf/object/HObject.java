@@ -376,8 +376,10 @@ public abstract class HObject implements Serializable, DataFormat {
      *
      * @param newPath
      *            The new path of the object.
+     *
+     * @throws Exception if a failure occurred
      */
-    public void setPath(String newPath) {
+    public void setPath(String newPath) throws Exception {
         if (newPath == null) {
             newPath = "/";
         }
