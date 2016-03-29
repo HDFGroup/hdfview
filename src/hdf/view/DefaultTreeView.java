@@ -68,18 +68,15 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
  * <p>
  * TreeView defines APIs for opening files and displaying the file structure in
  * a tree structure.
- * </p>
  *
  * <p>
  * TreeView uses folders and leaf items to represent groups and data objects in
  * the file. You can expand or collapse folders to navigate data objects in the
  * file.
- * </p>
  *
  * <p>
  * From the TreeView, you can open data content or metadata of the selected object.
  * You can select object(s) to delete or add new objects to the file.
- * </p>
  *
  * @author Jordan T. Henderson
  * @version 2.4 12//2015
@@ -240,13 +237,16 @@ public class DefaultTreeView implements TreeView {
 
                     if(isExpanded) {
                         tree.notifyListeners(SWT.Collapse, expand);
-                    } else {
+                    }
+                    else {
                         tree.notifyListeners(SWT.Expand, expand);
                     }
-                } else {
+                }
+                else {
                     try {
                         showDataContent(obj);
-                    } catch (Throwable err) {
+                    }
+                    catch (Throwable err) {
                         shell.getDisplay().beep();
                         showError(err.getMessage(), null);
                         return;
@@ -270,8 +270,7 @@ public class DefaultTreeView implements TreeView {
                     if(!(selectedObject instanceof Group))
                         showDataContent(selectedObject);
                 }
-                catch (Exception ex) {
-                }
+                catch (Exception ex) {}
             }
 
             // When a mouse release is detected, attempt to set the selected item
@@ -320,13 +319,12 @@ public class DefaultTreeView implements TreeView {
                 // Set this file to the most recently selected file in the recent files bar
                 Combo recentFilesCombo = ((HDFView) viewer).getUrlBar();
                 String filename = selectedFile.getAbsolutePath();
-                
+
                 try {
-                	recentFilesCombo.remove(filename);
+                    recentFilesCombo.remove(filename);
                 }
-                catch (Exception ex) {
-                }
-                
+                catch (Exception ex) {}
+
                 recentFilesCombo.add(filename, 0);
                 recentFilesCombo.select(0);
 
@@ -342,11 +340,11 @@ public class DefaultTreeView implements TreeView {
                 Point pt = display.map(null, tree, new Point(e.x, e.y));
                 TreeItem item = tree.getItem(pt);
                 if(item == null) return;
-                
+
                 FileFormat theFile = null;
-                
+
                 selectedItem = item;
-                
+
                 try {
                     selectedObject = (HObject) selectedItem.getData();
                 }
@@ -531,35 +529,35 @@ public class DefaultTreeView implements TreeView {
                 String filetype = FileFormat.FILE_TYPE_HDF4;
                 if (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
                     filetype = FileFormat.FILE_TYPE_HDF5;
-                
+
                 String currentDir = selectedObject.getFileFormat().getParent();
-                
+
                 if (currentDir != null) {
                     currentDir += File.separator;
                 }
                 else {
                     currentDir = "";
                 }
-                
+
                 FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-                
+
                 if(filetype == FileFormat.FILE_TYPE_HDF4) {
                     fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
                     //setFileFilter(DefaultFileFilter.getFileFilterHDF4());
                 } else {
-                	fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
-                	//setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+                    fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
+                    //setFileFilter(DefaultFileFilter.getFileFilterHDF5());
                 }
-                
+
                 String filename = fChooser.open();
-                
+
                 if(filename == null) return;
-                
+
                 try {
-                	Tools.createNewFile(filename, currentDir, filetype, fileList);
+                    Tools.createNewFile(filename, currentDir, filetype, fileList);
                 }
                 catch (Exception ex) {
-                	showError(ex.getMessage(), shell.getText());
+                    showError(ex.getMessage(), shell.getText());
                 }
 
                 FileFormat dstFile = null;
@@ -571,14 +569,14 @@ public class DefaultTreeView implements TreeView {
                     shell.getDisplay().beep();
                     showError(ex.getMessage() + "\n" + filename, shell.getText());
                 }
-                
+
                 TreeItem[] selectedItems = tree.getSelection();
                 List<TreeItem> objList = new Vector<TreeItem>(selectedItems.length);
-                
+
                 for(int i = 0; i < selectedItems.length; i++) {
-                	objList.add(selectedItems[i]);
+                    objList.add(selectedItems[i]);
                 }
-                
+
                 pasteObject((TreeItem[]) objList.toArray(new TreeItem[0]), findTreeItem(dstFile.getRootObject()), dstFile);
             }
         });
@@ -1056,7 +1054,8 @@ public class DefaultTreeView implements TreeView {
         if(pobj != null) {
             item = new TreeItem(pobj, SWT.NONE, pobj.getItemCount());
             item.setText(obj.getName());
-        } else {
+        }
+        else {
             // Parent object was null, insert at end of tree as root object
             item = new TreeItem(tree, SWT.NONE, tree.getItemCount());
             item.setText(obj.getFileFormat().getName());
@@ -1227,18 +1226,18 @@ public class DefaultTreeView implements TreeView {
 
             try {
                 log.trace("pasteObject(...): dstFile.copy(theObj, pgroup, null)");
-                
+
                 if(dstFile.copy(theObj, pgroup, null) != null) {
-                	// Add the node to the tree
-                	TreeItem newItem = insertObject(theObj, pobj);
-                	
-                	// If this is a group, add its first level child items
-                	if(theObj instanceof Group) {
+                    // Add the node to the tree
+                    TreeItem newItem = insertObject(theObj, pobj);
+
+                    // If this is a group, add its first level child items
+                    if(theObj instanceof Group) {
                         Iterator<HObject> children = ((Group) theObj).getMemberList().iterator();
                         while(children.hasNext()) {
-                        	insertObject(children.next(), newItem);
+                            insertObject(children.next(), newItem);
                         }
-                	}
+                    }
                 }
             }
             catch (Exception ex) {
@@ -1492,10 +1491,12 @@ public class DefaultTreeView implements TreeView {
                     return h4Icon;
                 else
                     return h5Icon;
-            } else {
+            }
+            else {
                 if(hasAttribute) {
                     return folderCloseIconA;
-                } else {
+                }
+                else {
                     return folderCloseIcon;
                 }
             }
@@ -1503,7 +1504,8 @@ public class DefaultTreeView implements TreeView {
         else if(obj instanceof Datatype) {
             if(hasAttribute) {
                 return datatypeIconA;
-            } else {
+            }
+            else {
                 return datatypeIcon;
             }
         }
@@ -1732,31 +1734,31 @@ public class DefaultTreeView implements TreeView {
             showError("Select a file to save.", null);
             return;
         }
-        
+
         String currentDir = srcFile.getParent();
-        
+
         if (currentDir != null) {
             currentDir += File.separator;
         }
         else {
             currentDir = "";
         }
-        
+
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
         //setFileFilter(DefaultFileFilter.getFileFilterHDF4());
-        
+
         String filename = fChooser.open();
-        
+
         if(filename == null) return;
-        
+
         try {
-        	Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF4, fileList);
+            Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF4, fileList);
         }
         catch (Exception ex) {
-        	showError(ex.getMessage(), shell.getText());
+            showError(ex.getMessage(), shell.getText());
         }
-        
+
         // Since cannot pack hdf4, simply copy the whole physical file
         int length = 0;
         int bsize = 512;
@@ -1852,9 +1854,9 @@ public class DefaultTreeView implements TreeView {
             showError("The file is empty.", null);
             return;
         }
-        
+
         String currentDir = srcFile.getParent();
-        
+
         if (currentDir != null) {
             currentDir += File.separator;
         }
@@ -1864,17 +1866,17 @@ public class DefaultTreeView implements TreeView {
 
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
-    	//setFileFilter(DefaultFileFilter.getFileFilterHDF5());
-        
+        //setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+
         String filename = fChooser.open();
-        
+
         if(filename == null) return;
-        
+
         try {
-        	Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF5, fileList);
+            Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF5, fileList);
         }
         catch (Exception ex) {
-        	showError(ex.getMessage(), shell.getText());
+            showError(ex.getMessage(), shell.getText());
         }
 
         int n = getAllItemCount();
@@ -2168,8 +2170,8 @@ public class DefaultTreeView implements TreeView {
 
     public FileFormat reopenFile(FileFormat fileFormat) throws Exception {
         closeFile(fileFormat);
-    	
-    	if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
+
+        if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
             this.currentIndexType = fileFormat.getIndexType(null);
             this.currentIndexOrder = fileFormat.getIndexOrder(null);
         }
@@ -2516,8 +2518,8 @@ public class DefaultTreeView implements TreeView {
         Cursor cursor = new Cursor(Display.getDefault(), SWT.CURSOR_WAIT);
 
         try {
-        	shell.setCursor(cursor);
-        	
+            shell.setCursor(cursor);
+
             theView = Tools.newInstance(theClass, initargs);
             log.trace("showDataContent: Tools.newInstance");
 
@@ -2627,87 +2629,87 @@ public class DefaultTreeView implements TreeView {
         }
 
         public void open() {
-        	Shell parent = getParent();
+            Shell parent = getParent();
             final Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
             shell.setText("Indexing options");
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
-            
+
             // Create main content region
             Composite content = new Composite(shell, SWT.NONE);
             content.setLayout(new GridLayout(1, true));
             content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            
+
             org.eclipse.swt.widgets.Group indexingTypeGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
             indexingTypeGroup.setText("Indexing Type");
             indexingTypeGroup.setLayout(new GridLayout(2, true));
             indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            
+
             Button byName = new Button(indexingTypeGroup, SWT.RADIO);
             byName.setText("By Name");
             byName.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
             byName.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-            
+
             Button byOrder = new Button(indexingTypeGroup, SWT.RADIO);
             byOrder.setText("By Creation Order");
             byOrder.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
             byOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-            
+
             org.eclipse.swt.widgets.Group indexingOrderGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
             indexingOrderGroup.setText("Indexing Order");
             indexingOrderGroup.setLayout(new GridLayout(3, true));
             indexingOrderGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            
+
             Button increments = new Button(indexingOrderGroup, SWT.RADIO);
             increments.setText("Increments");
             increments.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
             increments.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-            
+
             Button decrements = new Button(indexingOrderGroup, SWT.RADIO);
             decrements.setText("Decrements");
             decrements.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_DEC"));
             decrements.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-            
+
             Button nativeButton = new Button(indexingOrderGroup, SWT.RADIO);
             nativeButton.setText("Native");
             nativeButton.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
             nativeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-            
-            
+
+
             // Create Ok/Cancel button region
             Composite buttonComposite = new Composite(shell, SWT.NONE);
             buttonComposite.setLayout(new GridLayout(2, true));
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-            
+
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setText("   &Reload File   ");
             okButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		setIndexOptions();
-            		shell.dispose();
-            	}
+                public void widgetSelected(SelectionEvent e) {
+                    setIndexOptions();
+                    shell.dispose();
+                }
             });
             GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
             gridData.widthHint = 70;
             okButton.setLayoutData(gridData);
-            
+
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
             cancelButton.setText("&Cancel");
             cancelButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		reloadFile = false;
+                public void widgetSelected(SelectionEvent e) {
+                    reloadFile = false;
                     shell.dispose();
-            	}
+                }
             });
-            
+
             gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
             gridData.widthHint = 70;
             cancelButton.setLayoutData(gridData);
 
             shell.pack();
-            
+
             Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-            
+
             shell.setMinimumSize(minimumSize);
 
             Rectangle parentBounds = parent.getBounds();
@@ -2716,24 +2718,24 @@ public class DefaultTreeView implements TreeView {
                               (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
-            
+
             Display display = parent.getDisplay();
             while (!shell.isDisposed()) {
                 if (!display.readAndDispatch()) display.sleep();
             }
         }
     }
-    
+
     private class ChangeLibVersionDialog extends Dialog {
-    	
-    	private Combo earliestCombo;
-    	
-    	public ChangeLibVersionDialog(Shell parent, int style) {
-    		super(parent, style);
-    	}
-    	
-    	public void open() {
-    		Shell parent = getParent();
+
+        private Combo earliestCombo;
+
+        public ChangeLibVersionDialog(Shell parent, int style) {
+            super(parent, style);
+        }
+
+        public void open() {
+            Shell parent = getParent();
             final Shell shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             shell.setText("Set the library version bounds: ");
             shell.setImage(ViewProperties.getHdfIcon());
@@ -2741,74 +2743,75 @@ public class DefaultTreeView implements TreeView {
 
             String[] lowValues = { "Earliest", "Latest" };
             String[] highValues = { "Latest" };
-            
+
             // Dummy label
             new Label(shell, SWT.LEFT);
-            
+
             new Label(shell, SWT.LEFT).setText("Earliest Version: ");
-            
+
             earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER);
             earliestCombo.setItems(lowValues);
             earliestCombo.select(0);
             earliestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             earliestCombo.addKeyListener(new KeyAdapter() {
-            	public void keyPressed(KeyEvent e) {
-            		e.doit = false;
-            	}
+                public void keyPressed(KeyEvent e) {
+                    e.doit = false;
+                }
             });
-            
+
             new Label(shell, SWT.LEFT).setText("Latest Version: ");
-            
+
             Combo latestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER);
             latestCombo.setItems(highValues);
             latestCombo.select(0);
             latestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-            
+
             // Dummy label to consume remain space after resizing
             new Label(shell, SWT.LEFT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    		
-            
+
+
             // Create Ok/Cancel button region
             Composite buttonComposite = new Composite(shell, SWT.NONE);
             buttonComposite.setLayout(new GridLayout(2, true));
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-            
+
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setText("   &Ok   ");
             okButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
-            		int low = -1, high = 1;
-            		
-            		if(earliestCombo.getItem(earliestCombo.getSelectionIndex()).equals("Earliest")) {
-            			low = 0;
-            		} else {
-            			low = 1;
-            		}
-            		
-            		try {
-            			selectedObject.getFileFormat().setLibBounds(low, high);
-            		}
-            		catch (Throwable err) {
-            			shell.getDisplay().beep();
+                public void widgetSelected(SelectionEvent e) {
+                    int low = -1, high = 1;
+
+                    if(earliestCombo.getItem(earliestCombo.getSelectionIndex()).equals("Earliest")) {
+                        low = 0;
+                    }
+                    else {
+                        low = 1;
+                    }
+
+                    try {
+                        selectedObject.getFileFormat().setLibBounds(low, high);
+                    }
+                    catch (Throwable err) {
+                        shell.getDisplay().beep();
                         showError("Error when setting lib version bounds", null);
                         return;
-            		}
-            		
-            		shell.dispose();
-            	}
+                    }
+
+                    shell.dispose();
+                }
             });
             GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
             gridData.widthHint = 70;
             okButton.setLayoutData(gridData);
-            
+
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
             cancelButton.setText("&Cancel");
             cancelButton.addSelectionListener(new SelectionAdapter() {
-            	public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
-            	}
+                }
             });
-            
+
             gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
             gridData.widthHint = 70;
             cancelButton.setLayoutData(gridData);
@@ -2826,11 +2829,11 @@ public class DefaultTreeView implements TreeView {
                               (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
-            
+
             Display display = parent.getDisplay();
             while (!shell.isDisposed()) {
                 if (!display.readAndDispatch()) display.sleep();
             }
-    	}
+        }
     }
 }
