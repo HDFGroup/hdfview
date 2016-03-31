@@ -58,14 +58,12 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -463,7 +461,6 @@ public class DefaultTableView implements TableView {
 
             log.trace("createTable((ScalarDS) dataset): isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
         }
-        content.setWeights(new int[] {1, 18});
 
         if (table == null) {
             viewer.showStatus("Creating table failed - " + dataset.getName());
@@ -517,6 +514,8 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView: finish");
 
         group.pack();
+        
+        content.setWeights(new int[] {1, 20});
 
         shell.pack();
 

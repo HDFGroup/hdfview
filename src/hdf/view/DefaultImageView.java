@@ -42,10 +42,12 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.PaintEvent;
 
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageObserver;
 import java.awt.image.BufferedImage;
@@ -53,6 +55,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DirectColorModel;
+import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageProducer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.PixelGrabber;
@@ -133,6 +136,8 @@ public class DefaultImageView implements ImageView {
      * The main HDFView.
      */
     private final ViewManager viewer;
+    
+    private Toolkit toolkit;
 
     /**
      * The Scalar Dataset.
@@ -304,6 +309,8 @@ public class DefaultImageView implements ImageView {
         contrastSlider = null;
         bitmask = null;
         invalidValueIndex = new ArrayList<Integer>();
+        
+        toolkit = Toolkit.getDefaultToolkit();
 
         String origStr = ViewProperties.getImageOrigin();
         if (ViewProperties.ORIGIN_LL.equalsIgnoreCase(origStr))
@@ -508,8 +515,6 @@ public class DefaultImageView implements ImageView {
                 ((Vector) rotateRelatedItems).setSize(0);
                 System.runFinalization();
                 System.gc();
-
-                // viewer.removeDataView(this);
             }
         });
 
@@ -859,7 +864,7 @@ public class DefaultImageView implements ImageView {
                 int n = rotateRelatedItems.size();
                 for (int i = 0; i < n; i++) {
                     boolean itemState = (rotateCount == 0);
-                    ((Composite) rotateRelatedItems.get(i)).setEnabled(itemState);
+                    ((MenuItem) rotateRelatedItems.get(i)).setEnabled(itemState);
                 }
             }
         });
@@ -873,7 +878,7 @@ public class DefaultImageView implements ImageView {
                 int n = rotateRelatedItems.size();
                 for (int i = 0; i < n; i++) {
                     boolean itemState = (rotateCount == 0);
-                    ((Composite) rotateRelatedItems.get(i)).setEnabled(itemState);
+                    ((MenuItem) rotateRelatedItems.get(i)).setEnabled(itemState);
                 }
             }
         });
@@ -1639,7 +1644,7 @@ public class DefaultImageView implements ImageView {
     private void flip(int direction) {
         ImageFilter filter = new FlipFilter(direction);
 
-        /*if (applyImageFilter(filter)) {
+        if (applyImageFilter(filter)) {
             // toggle flip flag
             if (direction == FLIP_HORIZONTAL) {
                 isHorizontalFlipped = !isHorizontalFlipped;
@@ -1647,7 +1652,7 @@ public class DefaultImageView implements ImageView {
             else {
                 isVerticalFlipped = !isVerticalFlipped;
             }
-        }*/
+        }
     }
 
     // implementing ImageObserver
@@ -1656,7 +1661,7 @@ public class DefaultImageView implements ImageView {
             return;
 
         Rotate90Filter filter = new Rotate90Filter(direction);
-        //applyImageFilter(filter);
+        applyImageFilter(filter);
 
         if (direction == ROTATE_CW_90) {
             rotateCount++;
@@ -1674,7 +1679,7 @@ public class DefaultImageView implements ImageView {
 
     // implementing ImageObserver
     private void contour(int level) {
-        //applyImageFilter(new ContourFilter(level));
+        applyImageFilter(new ContourFilter(level));
     }
 
     /** Apply contrast/brightness to unsigned short integer
@@ -1744,7 +1749,6 @@ public class DefaultImageView implements ImageView {
      *
      * @return buffered image for the given image.
      */
-    /*
     private BufferedImage toBufferedImage(Image image) {
         if (image == null) {
             return null;
@@ -1766,14 +1770,13 @@ public class DefaultImageView implements ImageView {
         // if the screen setting is less than 32-bit color
         int w = image.getWidth(null);
         int h = image.getHeight(null);
-        BufferedImage bimage = (BufferedImage) createImage(w, h);
+        BufferedImage bimage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics g = bimage.createGraphics();
         g.drawImage(image, 0, 0, null);
 
         g.dispose();
         return bimage;
     }
-    */
 
     /**
      * Save the image to an image file.
@@ -1822,7 +1825,7 @@ public class DefaultImageView implements ImageView {
 
         BufferedImage bi = null;
         try {
-            //bi = toBufferedImage(image);
+            bi = toBufferedImage(image);
         }
         catch (OutOfMemoryError err) {
             shell.getDisplay().beep();
@@ -2163,8 +2166,8 @@ public class DefaultImageView implements ImageView {
      *
      * @return the image.
      */
-    private Image createIndexedImage(byte[] imageData, byte[][] palette, int w, int h)
-    {
+    private Image createIndexedImage(byte[] imageData, byte[][] palette, int w,
+            int h) {
         bufferedImage = (BufferedImage) Tools.createIndexedImage(bufferedImage, imageData, palette, w, h);
         adjustAlpha(bufferedImage, 0, invalidValueIndex);
 
@@ -2239,7 +2242,7 @@ public class DefaultImageView implements ImageView {
         ImageProducer imageProducer = image.getSource();
 
         try {
-            //image = createImage(new FilteredImageSource(imageProducer, filter));
+            image = toBufferedImage(toolkit.createImage(new FilteredImageSource(imageProducer, filter)));
             imageComponent.setImage(image);
             zoomTo(zoomFactor);
         }
@@ -3577,17 +3580,8 @@ public class DefaultImageView implements ImageView {
             canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
             canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             canvas.addPaintListener(new PaintListener() {
-                public void paintControl(PaintEvent e) {
-                    GC gc = e.gc;
-
-                    //org.eclipse.swt.graphics.Color oldBackground = gc.getBackground();
-
-                    //gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-                    //gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-
-                    //gc.fillRectangle(0, 0, MAX_ANIMATION_IMAGE_SIZE,
-                            //MAX_ANIMATION_IMAGE_SIZE);
-                    //gc.setBackground(oldBackground);
+            	public void paintControl(PaintEvent e) {
+            		GC gc = e.gc;
 
                     if (frames == null) return;
 
@@ -4159,7 +4153,7 @@ public class DefaultImageView implements ImageView {
             }
             else {
                 ImageFilter filter = new BrightnessFilter(blevel, clevel);
-                //image = createImage(new FilteredImageSource(imageProducer, filter));
+                image = toolkit.createImage(new FilteredImageSource(imageProducer, filter));
                 imageComponent.setImage(image);
                 zoomTo(zoomFactor);
             }

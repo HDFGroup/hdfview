@@ -415,7 +415,6 @@ public class DataOptionDialog extends Dialog {
                 choices[2].setEnabled(true);
                 startFields[2].setEnabled(true);
                 startFields[2].setText(String.valueOf(start[selectedIndex[2]]));
-                // endFields[2].setEnabled(!isText);
                 endFields[2].setText(startFields[2].getText());
             }
         }
