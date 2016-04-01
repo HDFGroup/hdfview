@@ -14,6 +14,7 @@
 
 package hdf.view;
 
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -706,6 +707,43 @@ public final class Tools {
         packedImageData = null;
 
         return theImage;
+    }
+    
+    /**
+     * This method returns a buffered image with the contents of an image.
+     *
+     * @param image
+     *            the plain image object.
+     *
+     * @return buffered image for the given image.
+     */
+    public static BufferedImage toBufferedImage(Image image) {
+        if (image == null) {
+            return null;
+        }
+
+        if (image instanceof BufferedImage) {
+            return (BufferedImage) image;
+        }
+
+        // !!!!!!!!!!!!!!!!!! NOTICE !!!!!!!!!!!!!!!!!!!!!
+        // the following way of creating a buffered image is using
+        // Component.createImage(). This method can be used only if the
+        // component is visible on the screen. Also, this method returns
+        // buffered images that do not support transparent pixels.
+        // The buffered image created by this way works for package
+        // com.sun.image.codec.jpeg.*
+        // It does not work well with JavaTM Advanced Imaging
+        // com.sun.media.jai.codec.*;
+        // if the screen setting is less than 32-bit color
+        int w = image.getWidth(null);
+        int h = image.getHeight(null);
+        BufferedImage bimage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = bimage.createGraphics();
+        g.drawImage(image, 0, 0, null);
+
+        g.dispose();
+        return bimage;
     }
 
     /**

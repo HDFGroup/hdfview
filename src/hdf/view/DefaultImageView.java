@@ -34,6 +34,8 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -42,7 +44,6 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.PaintEvent;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -222,9 +223,7 @@ public class DefaultImageView implements ImageView {
     private long curFrame = 0, maxFrame = 1;
 
     private BufferedImage bufferedImage;
-
-    // private AutoContrastSlider autoContrastSlider;
-
+    
     private ContrastSlider contrastSlider;
 
     private int indexBase = 0;
@@ -908,7 +907,7 @@ public class DefaultImageView implements ImageView {
             item.setText(String.valueOf(i));
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    MenuItem item = (MenuItem) e.item;
+                    MenuItem item = (MenuItem) e.widget;
                     contour(Integer.parseInt(item.getText()));
                 }
             });
@@ -1565,11 +1564,11 @@ public class DefaultImageView implements ImageView {
         try {
             Class theClass = Class.forName(viewName);
             if ("hdf.view.DefaultPaletteView".equals(viewName)) {
-                Object[] initargs = { viewer, this };
+                Object[] initargs = { shell, viewer, this };
                 Tools.newInstance(theClass, initargs);
             }
             else {
-                Object[] initargs = { this };
+                Object[] initargs = { shell, this };
                 Tools.newInstance(theClass, initargs);
             }
         }
@@ -1742,43 +1741,6 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-     * This method returns a buffered image with the contents of an image.
-     *
-     * @param image
-     *            the plain image object.
-     *
-     * @return buffered image for the given image.
-     */
-    private BufferedImage toBufferedImage(Image image) {
-        if (image == null) {
-            return null;
-        }
-
-        if (image instanceof BufferedImage) {
-            return (BufferedImage) image;
-        }
-
-        // !!!!!!!!!!!!!!!!!! NOTICE !!!!!!!!!!!!!!!!!!!!!
-        // the following way of creating a buffered image is using
-        // Component.createImage(). This method can be used only if the
-        // component is visible on the screen. Also, this method returns
-        // buffered images that do not support transparent pixels.
-        // The buffered image created by this way works for package
-        // com.sun.image.codec.jpeg.*
-        // It does not work well with JavaTM Advanced Imaging
-        // com.sun.media.jai.codec.*;
-        // if the screen setting is less than 32-bit color
-        int w = image.getWidth(null);
-        int h = image.getHeight(null);
-        BufferedImage bimage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = bimage.createGraphics();
-        g.drawImage(image, 0, 0, null);
-
-        g.dispose();
-        return bimage;
-    }
-
-    /**
      * Save the image to an image file.
      *
      * @param type
@@ -1825,7 +1787,7 @@ public class DefaultImageView implements ImageView {
 
         BufferedImage bi = null;
         try {
-            bi = toBufferedImage(image);
+            bi = Tools.toBufferedImage(image);
         }
         catch (OutOfMemoryError err) {
             shell.getDisplay().beep();
@@ -2242,7 +2204,7 @@ public class DefaultImageView implements ImageView {
         ImageProducer imageProducer = image.getSource();
 
         try {
-            image = toBufferedImage(toolkit.createImage(new FilteredImageSource(imageProducer, filter)));
+            image = Tools.toBufferedImage(toolkit.createImage(new FilteredImageSource(imageProducer, filter)));
             imageComponent.setImage(image);
             zoomTo(zoomFactor);
         }
@@ -2615,7 +2577,12 @@ public class DefaultImageView implements ImageView {
                     GC gc = e.gc;
 
                     org.eclipse.swt.graphics.Image converted = convertBufferedImageToSWTImage((BufferedImage) image);
-
+                    org.eclipse.swt.graphics.Rectangle sourceBounds = converted.getBounds();
+                    
+                    
+                    gc.drawImage(converted, 0, 0, sourceBounds.width, sourceBounds.height,
+                    		0, 0, imageSize.width, imageSize.height);
+                    
                     /*if (gc instanceof Graphics2D && (zoomFactor<0.99)) {
                         Graphics2D g2 = (Graphics2D) g;
 
@@ -2624,10 +2591,7 @@ public class DefaultImageView implements ImageView {
                         Image scaledImg = multiBiliner(image, imageSize.width, imageSize.height, true);
                         g2.drawImage(scaledImg, 0, 0, imageSize.width, imageSize.height, this);
 
-                    }
-                    else {*/
-                        gc.drawImage(converted, 0, 0);
-                    //}
+                    }*/
 
                     converted.dispose();
 
@@ -3662,7 +3626,8 @@ public class DefaultImageView implements ImageView {
         double min, max, min_org, max_org;
         final double[] minmax_previous = {0, 0};
         final double[] minmax_dist = {0,0};
-
+        
+        final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
 
         public DataRangeDialog(Shell parent, int style, double[] minmaxCurrent,
                                double[] minmaxOriginal, final int[] dataDist) {
@@ -3691,7 +3656,8 @@ public class DefaultImageView implements ImageView {
 
             tickRatio = (max_org-min_org)/(double)NTICKS;
 
-            final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
+            
+            
             //NumberFormatter formatter = new NumberFormatter(numberFormat);
             //formatter.setMinimum(new Double(min));
             //formatter.setMaximum(new Double(max));
@@ -3706,7 +3672,66 @@ public class DefaultImageView implements ImageView {
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
 
+            Canvas chartCanvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
+            GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+            data.widthHint = 400;
+            data.heightHint = 150;
+            chartCanvas.setLayoutData(data);
+            
+            final int numberOfPoints = dataDist.length;
+            int gap = 5;
+            final int xgap = 2 * gap;
+            final double xmin = originalRange[0];
+            final double xmax = originalRange[1];
+            
+            chartCanvas.addPaintListener(new PaintListener() {
+            	public void paintControl(PaintEvent e) {
+            		GC gc = e.gc;
+            		
+            		int h = H/3 -50;
+                    int w = W;
+                    int xnpoints = Math.min(10, numberOfPoints - 1);
 
+                    // draw the X axis
+                    gc.drawLine(xgap, h, w + xgap, h);
+
+                    // draw x labels
+                    double xp = 0, x = xmin;
+                    double dw = (double) w / (double) xnpoints;
+                    double dx = (xmax - xmin) / xnpoints;
+                    for (int i = 0; i <= xnpoints; i++) {
+                        x = xmin + i * dx;
+                        xp = xgap + i * dw;
+                        gc.drawLine((int) xp, h, (int) xp, h - 5);
+                        gc.drawString(numberFormat.format(x), (int) xp - 5, h + 20);
+                    }
+
+                    org.eclipse.swt.graphics.Color c = gc.getBackground();
+                    double yp, ymin=minmax_dist[0], dy=minmax_dist[1]-minmax_dist[0];
+                    if (dy<=0)
+                        dy =1;
+
+                    xp = xgap;
+                    yp = 0;
+                    
+                    int barWidth = w / numberOfPoints;
+                    if (barWidth <= 0) {
+                        barWidth = 1;
+                    }
+                    dw = (double) w / (double) numberOfPoints;
+
+                    gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
+                    
+                    for (int j = 0; j < numberOfPoints; j++) {
+                        xp = xgap + j * dw;
+                        yp = (int) (h * (dataDist[j] - ymin) / dy);
+                        
+                        gc.fillRectangle((int) xp, (int) (h - yp), barWidth, (int) yp);
+                    }
+
+                    gc.setBackground(c); // set the color back to its default
+            	}
+            });
 
             org.eclipse.swt.widgets.Group lowerBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
             lowerBoundGroup.setText("Lower Bound");
@@ -3714,9 +3739,23 @@ public class DefaultImageView implements ImageView {
             lowerBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             minField = new Text(lowerBoundGroup, SWT.SINGLE | SWT.BORDER);
-            minField.setText("");
+            minField.setText(String.valueOf(min));
             minField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            minField.addModifyListener(new ModifyListener() {
+            	public void modifyText(ModifyEvent e) {
+            		if (minSlider != null && minSlider.getEnabled()) {
+            			double value = Double.valueOf(((Text) e.widget).getText()); 
+            			
+            			if (value > max_org) {
+                            value = max_org;
+                            minField.setText(String.valueOf(value));
+                        }
 
+                        minSlider.setSelection((int) ((value - min_org) / tickRatio));
+            		}
+            	}
+            });
+            
             minSlider = new Slider(lowerBoundGroup, SWT.HORIZONTAL);
             minSlider.setMinimum(0);
             minSlider.setMaximum(NTICKS);
@@ -3733,7 +3772,7 @@ public class DefaultImageView implements ImageView {
                         minSlider.setSelection((int) value);
                     }
 
-                    minField.setText(Double.toString(new Double(value*tickRatio+min_org)));
+                    minField.setText(Double.toString(new Double(value * tickRatio + min_org)));
                 }
             });
 
@@ -3744,9 +3783,23 @@ public class DefaultImageView implements ImageView {
             upperBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             maxField = new Text(upperBoundGroup, SWT.SINGLE | SWT.BORDER);
-            maxField.setText("");
+            maxField.setText(String.valueOf(max));
             maxField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
+            maxField.addModifyListener(new ModifyListener() {
+            	public void modifyText(ModifyEvent e) {
+            		if (maxSlider != null && maxSlider.getEnabled()) {
+            			double value = Double.valueOf(((Text) e.widget).getText());
+            			
+            			if (value < min_org) {
+                            value = min_org;
+                            maxField.setText(String.valueOf(value));
+                        }
+            			
+                        maxSlider.setSelection((int) ((value-min_org)/tickRatio));
+            		}
+            	}
+            });
+            
             maxSlider = new Slider(upperBoundGroup, SWT.HORIZONTAL);
             maxSlider.setMinimum(0);
             maxSlider.setMaximum(NTICKS);
@@ -3763,7 +3816,7 @@ public class DefaultImageView implements ImageView {
                         maxSlider.setSelection((int) value);
                     }
 
-                    maxField.setText(Double.toString(new Double(value*tickRatio+min_org)));
+                    maxField.setText(Double.toString(new Double(value * tickRatio + min_org)));
                 }
             });
 
@@ -3820,10 +3873,15 @@ public class DefaultImageView implements ImageView {
                     minmax_current[0] = minmax_current[1] = 0;
                 }
             });
+            
+            if (min == max) {
+            	minSlider.setEnabled(false);
+            	maxSlider.setEnabled(false);
+            }
 
 
             shell.pack();
-
+            
             shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
@@ -3844,139 +3902,7 @@ public class DefaultImageView implements ImageView {
             return minmax_current;
         }
     }
-
-    //private class DataRangeDialog
-    //{
-    /*
-        /*
-        public DataRangeDialog(JFrame theOwner, double[] minmaxCurrent,
-                double[] minmaxOriginal, final int[] dataDist)
-        {
-            minField = new JFormattedTextField(formatter);
-            minField.addPropertyChangeListener(this);
-            minField.setValue(new Double(min));
-            maxField = new JFormattedTextField(formatter);
-            maxField.addPropertyChangeListener(this);
-            maxField.setValue(new Double(max));
-
-            maxSlider = new JSlider(JSlider.HORIZONTAL, 0, NTICKS, NTICKS);
-            maxSlider.setMajorTickSpacing(1);
-            maxSlider.setPaintTicks(true);
-            maxSlider.setPaintLabels(false);
-            maxSlider.addChangeListener(this);
-            maxSlider.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-
-            JPanel contentPane = (JPanel) getContentPane();
-            contentPane.setLayout(new BorderLayout(5, 5));
-            contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            contentPane.setPreferredSize(new Dimension(W, H));
-
-            JPanel minPane = new JPanel();
-            minPane.setBorder(new TitledBorder("Lower Bound"));
-            minPane.setLayout(new BorderLayout());
-            minPane.add(minField, BorderLayout.CENTER);
-            minPane.add(minSlider, BorderLayout.SOUTH);
-
-            JPanel maxPane = new JPanel();
-            maxPane.setBorder(new TitledBorder("Upper Bound"));
-            maxPane.setLayout(new BorderLayout());
-            maxPane.add(maxField, BorderLayout.CENTER);
-            maxPane.add(maxSlider, BorderLayout.SOUTH);
-
-            JPanel chartPane = new JPanel() {
-                int numberOfPoints = dataDist.length;
-                int gap = 5;
-                int xgap = 2 * gap;
-                double xmin = originalRange[0];
-                double xmax = originalRange[1];
-
-                public void paint(Graphics g) {
-                    int h = H/3 -50;
-                    int w = W;
-                    int xnpoints = Math.min(10, numberOfPoints - 1);
-
-                    // draw the X axis
-                    g.drawLine(xgap, h, w + xgap, h);
-
-                    // draw x labels
-                    double xp = 0, x = xmin;
-                    double dw = (double) w / (double) xnpoints;
-                    double dx = (xmax - xmin) / xnpoints;
-                    for (int i = 0; i <= xnpoints; i++) {
-                        x = xmin + i * dx;
-                        xp = xgap + i * dw;
-                        g.drawLine((int) xp, h, (int) xp, h - 5);
-                        g.drawString(numberFormat.format(x), (int) xp - 5, h + 20);
-                    }
-
-                    Color c = g.getColor();
-                    double yp, ymin=minmax_dist[0], dy=minmax_dist[1]-minmax_dist[0];
-                    if (dy<=0)
-                        dy =1;
-
-                    xp = xgap;
-                    yp = 0;
-                    g.setColor(Color.blue);
-                    int barWidth = w / numberOfPoints;
-                    if (barWidth <= 0) {
-                        barWidth = 1;
-                    }
-                    dw = (double) w / (double) numberOfPoints;
-
-                    for (int j = 0; j < numberOfPoints; j++) {
-                        xp = xgap + j * dw;
-                        yp = (int) (h * (dataDist[j] - ymin) / dy);
-                        g.fillRect((int) xp, (int) (h - yp), barWidth, (int) yp);
-                    }
-
-                    g.setColor(c); // set the color back to its default
-                } // public void paint(Graphics g)
-            } ;
-
-            // add OK and CANCEL buttons
-            if (min==max) {
-                minSlider.setEnabled(false);
-                maxSlider.setEnabled(false);
-            }
-        }
-        */
-
-        /**
-        * Listen to the text field. This method detects when the value of the
-        * text field changes.
-        */
-        /*
-        public void propertyChange(PropertyChangeEvent e) {
-            Object source = e.getSource();
-            if ("value".equals(e.getPropertyName())) {
-                Number num = (Number) e.getNewValue();
-                if (num == null) {
-                    return;
-                }
-                double value = num.doubleValue();
-
-                if (source.equals(minField) && (minSlider != null) && minSlider.isEnabled()) {
-                    if (value > max_org) {
-                        value = max_org;
-                        minField.setText(String.valueOf(value));
-                    }
-
-                    minSlider.setValue((int) ((value-min_org)/tickRatio));
-                }
-                else if (source.equals(maxField) && (maxSlider != null)  && minSlider.isEnabled()) {
-                    if (value < min_org) {
-                        value = min_org;
-                        maxField.setText(String.valueOf(value));
-                    }
-                    //minmax[1] = value;
-                    maxSlider.setValue((int) ((value-min_org)/tickRatio));
-                }
-            }
-        }
-        */
-    //} // private class DataRangeDialog extends JDialog implements ActionListener
-
-    //TODO: Adjust sliders range since SWT doesnt have negative slider values
+    
     private class ContrastSlider extends Dialog {
 
         private Shell shell;
@@ -4007,9 +3933,6 @@ public class DefaultImageView implements ImageView {
                 shell.setText(bLabel + "/" + cLabel);
             }
 
-            //java.text.NumberFormat numberFormat = java.text.NumberFormat.getNumberInstance();
-            //NumberFormatter formatter = new NumberFormatter(numberFormat);
-
             org.eclipse.swt.widgets.Group brightnessGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
             brightnessGroup.setText(bLabel + " %");
             brightnessGroup.setLayout(new GridLayout(1, true));
@@ -4017,25 +3940,37 @@ public class DefaultImageView implements ImageView {
 
             brightField = new Text(brightnessGroup, SWT.SINGLE | SWT.BORDER);
             brightField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            //formatter = new NumberFormatter(numberFormat);
-            //formatter.setMinimum(new Integer(-100));
-            //formatter.setMaximum(new Integer(100));
-            //brightField = new JFormattedTextField(formatter);
-            //brightField.addPropertyChangeListener(this);
-            //brightField.setText(new Integer(0));
+            brightField.setText(String.valueOf(bLevel));
+            brightField.addListener(SWT.Traverse, new Listener() {
+            	public void handleEvent(Event e) {
+            		if (e.detail == SWT.TRAVERSE_RETURN) {
+            			if (brightSlider != null) {
+            				double value = Double.parseDouble(((Text) e.widget).getText());
+            				
+            				if (value > 100) {
+                                value = 100;
+                            }
+                            else if (value < -100) {
+                                value = -100;
+                            }
+            				
+            				brightSlider.setSelection((int) value + 100);
+            			}
+            		}
+            	}
+            });
 
 
             brightSlider = new Scale(brightnessGroup, SWT.HORIZONTAL);
-            brightSlider.setMinimum(-100);
-            brightSlider.setMaximum(100);
+            brightSlider.setMinimum(0);
+            brightSlider.setMaximum(200);
             brightSlider.setIncrement(1);
-            brightSlider.setSelection(0);
+            brightSlider.setSelection(bLevel + 100);
             brightSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             brightSlider.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     int value = ((Scale) e.widget).getSelection();
-                    brightField.setText(String.valueOf(value));
+                    brightField.setText(String.valueOf(value - 100));
                 }
             });
 
@@ -4047,24 +3982,36 @@ public class DefaultImageView implements ImageView {
 
             contrastField = new Text(contrastGroup, SWT.SINGLE | SWT.BORDER);
             contrastField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            //formatter = new NumberFormatter(numberFormat);
-            //formatter.setMinimum(new Integer(-100));
-            //formatter.setMaximum(new Integer(100));
-            //contrastField = new JFormattedTextField(formatter);
-            //contrastField.addPropertyChangeListener(this);
-            //contrastField.setValue(new Integer(0));
+            contrastField.setText(String.valueOf(cLevel));
+            contrastField.addListener(SWT.Traverse, new Listener() {
+            	public void handleEvent(Event e) {
+            		if (e.detail == SWT.TRAVERSE_RETURN) {
+            			if (contrastSlider != null) {
+            				double value = Double.parseDouble(((Text) e.widget).getText());
+            				
+            				if (value > 100) {
+                                value = 100;
+                            }
+                            else if (value < -100) {
+                                value = -100;
+                            }
+            				
+            				contrastSlider.setSelection((int) value + 100);
+            			}
+            		}
+            	}
+            });
 
             contrastSlider = new Scale(contrastGroup, SWT.HORIZONTAL);
-            contrastSlider.setMinimum(-100);
-            contrastSlider.setMaximum(100);
+            contrastSlider.setMinimum(0);
+            contrastSlider.setMaximum(200);
             contrastSlider.setIncrement(1);
-            contrastSlider.setSelection(0);
+            contrastSlider.setSelection(cLevel + 100);
             contrastSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             contrastSlider.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     int value = ((Scale) e.widget).getSelection();
-                    contrastField.setText(String.valueOf(value));
+                    contrastField.setText(String.valueOf(value - 100));
                 }
             });
 
@@ -4153,44 +4100,10 @@ public class DefaultImageView implements ImageView {
             }
             else {
                 ImageFilter filter = new BrightnessFilter(blevel, clevel);
-                image = toolkit.createImage(new FilteredImageSource(imageProducer, filter));
+                image = Tools.toBufferedImage(toolkit.createImage(new FilteredImageSource(imageProducer, filter)));
                 imageComponent.setImage(image);
                 zoomTo(zoomFactor);
             }
         }
     }
-
-    /*
-        /**
-        * Listen to the text field. This method detects when the value of the
-        * text field changes.
-        */
-        /*
-        public void propertyChange(PropertyChangeEvent e) {
-            Object source = e.getSource();
-            if ("value".equals(e.getPropertyName())) {
-                Number num = (Number) e.getNewValue();
-                if (num == null) {
-                    return;
-                }
-
-                double value = num.doubleValue();
-                if (value > 100) {
-                    value = 100;
-                }
-                else if (value < -100) {
-                    value = -100;
-                }
-
-                if (source.equals(brightField) && (brightSlider != null)) {
-                    brightSlider.setValue((int) value);
-                }
-                else if (source.equals(contrastField)
-                        && (contrastSlider != null)) {
-                    contrastSlider.setValue((int) value);
-                }
-            }
-        }
-        */
-  //}
 }
