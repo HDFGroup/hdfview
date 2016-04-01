@@ -1583,6 +1583,7 @@ public class DefaultMetaDataView implements MetaDataView {
 								switch (e.type) {
 								case SWT.FocusOut:
 									item.setText(column, text.getText());
+									updateAttributeValue(text.getText(), row, column);
 									text.dispose();
 									break;
 								case SWT.Traverse:
