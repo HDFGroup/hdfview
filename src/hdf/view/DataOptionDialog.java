@@ -654,7 +654,8 @@ public class DataOptionDialog extends Dialog {
             bitmask = new BitSet(len);
 
         for (int i = 0; i < len; i++) {
-            bitmask.set(i, bitmaskButtons[i].getSelection());
+        	/* Bitmask buttons are indexed from highest to lowest */
+            bitmask.set(i, bitmaskButtons[len - i - 1].getSelection());
         }
 
         return true;
@@ -675,9 +676,6 @@ public class DataOptionDialog extends Dialog {
      */
     public BitSet getBitmask() {
         if (bitmask == null)
-            return null;
-
-        if (!extractBitButton.isEnabled())
             return null;
 
         // do not use bitmask if it is empty (all bits are zero)

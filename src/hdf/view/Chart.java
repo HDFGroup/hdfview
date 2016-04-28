@@ -91,7 +91,7 @@ public class Chart extends Dialog {
     /** number of lines */
     private int numberOfLines;
 
-    /* the data to plot against */
+    /** the data to plot against **/
     private double[] xData = null;
 
     /**

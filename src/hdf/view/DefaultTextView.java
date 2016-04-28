@@ -167,7 +167,7 @@ public class DefaultTextView implements TextView {
             text = (String[]) dataset.getData();
         }
         catch (Exception ex) {
-            showError(ex.getMessage(), "TextView" + shell.getText());
+        	Tools.showError(shell, ex.getMessage(), "TextView" + shell.getText());
             text = null;
         }
 
@@ -410,7 +410,7 @@ public class DefaultTextView implements TextView {
                     saveAsText();
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
+                	Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -465,7 +465,7 @@ public class DefaultTextView implements TextView {
             dataset.write();
         }
         catch (Exception ex) {
-            showError(ex.getMessage(), shell.getText());
+        	Tools.showError(shell, ex.getMessage(), shell.getText());
             return;
         }
 
@@ -497,7 +497,7 @@ public class DefaultTextView implements TextView {
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(fname)) {
-                    showError("Unable to save data to file \"" + fname
+                	Tools.showError(shell, "Unable to save data to file \"" + fname
                             + "\". \nThe file is being used.", shell.getText());
                     return;
                 }
@@ -578,13 +578,6 @@ public class DefaultTextView implements TextView {
         catch (Exception ex) {
             System.out.println(ex);
         }
-    }
-
-    private void showError(String errorMsg, String title) {
-        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-        error.setText(title);
-        error.setMessage(errorMsg);
-        error.open();
     }
 
     private class TextAreaRenderer

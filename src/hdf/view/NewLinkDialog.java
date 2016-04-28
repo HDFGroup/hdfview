@@ -695,7 +695,7 @@ public class NewLinkDialog extends Dialog {
             return;
         }
 
-        //Check if the target File is open in treeView
+        // Check if the target File is open in treeView
         if (isFileOpen(filename)) {
             return;
         }

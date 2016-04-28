@@ -567,7 +567,7 @@ public class DefaultImageView implements ImageView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -586,7 +586,7 @@ public class DefaultImageView implements ImageView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -601,7 +601,7 @@ public class DefaultImageView implements ImageView {
                     saveImageAs(filetype);
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -616,7 +616,7 @@ public class DefaultImageView implements ImageView {
                     saveImageAs(filetype);
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -631,7 +631,7 @@ public class DefaultImageView implements ImageView {
                     saveImageAs(filetype);
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -992,7 +992,7 @@ public class DefaultImageView implements ImageView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -1008,7 +1008,7 @@ public class DefaultImageView implements ImageView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -1066,15 +1066,6 @@ public class DefaultImageView implements ImageView {
                 contrastSlider.open();
             }
         });
-
-        // brightness button
-        // button = new JButton(ViewProperties.getAutocontrastIcon());
-        // bar.add(button);
-        // button.setToolTipText("Calculate AutoGain");
-        // button.setMargin(margin);
-        // button.addActionListener(this);
-        // button.setActionCommand("Calculate AutoGain");
-        // button.setEnabled(ViewProperties.isAutoContrast());
 
         // Zoom in button
         item = new ToolItem(toolbar, SWT.PUSH);
@@ -1360,7 +1351,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            showError("ImageView: " + shell.getText(), shell.getText());
+            Tools.showError(shell, "ImageView: " + shell.getText(), shell.getText());
             return null;
         }
 
@@ -1582,13 +1573,13 @@ public class DefaultImageView implements ImageView {
 
         if (isTrueColor) {
             shell.getDisplay().beep();
-            showError("Unsupported operation: unable to draw histogram for true color image.", shell.getText());
+            Tools.showError(shell, "Unsupported operation: unable to draw histogram for true color image.", shell.getText());
             return;
         }
 
         if ((rec == null) || (rec.width <= 0) || (rec.height <= 0)) {
             shell.getDisplay().beep();
-            showError(
+            Tools.showError(shell,
                     "No data for histogram.\nUse Shift+Mouse_drag to select an image area.",
                     shell.getText());
             return;
@@ -1791,7 +1782,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (OutOfMemoryError err) {
             shell.getDisplay().beep();
-            showError(err.getMessage(), shell.getText());
+            Tools.showError(shell, err.getMessage(), shell.getText());
             return;
         }
 
@@ -2003,7 +1994,7 @@ public class DefaultImageView implements ImageView {
 
         if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
             shell.getDisplay().beep();
-            showError("Frame number must be between " + indexBase + " and "
+            Tools.showError(shell, "Frame number must be between " + indexBase + " and "
                     + (dims[selectedIndex[2]] - 1 + indexBase), shell.getText());
             return;
         }
@@ -2210,7 +2201,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Throwable err) {
             shell.getDisplay().beep();
-            showError(err.getMessage(), shell.getText());
+            Tools.showError(shell, err.getMessage(), shell.getText());
             status = false;
         }
 
@@ -2245,7 +2236,7 @@ public class DefaultImageView implements ImageView {
 
     private void writeSelectionToImage() {
         if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
-            showError("No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
+            Tools.showError(shell, "No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
             return;
         }
 
@@ -2280,13 +2271,6 @@ public class DefaultImageView implements ImageView {
         }
 
         list.setSize(0);
-    }
-
-    private void showError(String errorMsg, String title) {
-        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-        error.setText(title);
-        error.setMessage(errorMsg);
-        error.open();
     }
 
     /** PaletteComponent draws the palette on the side of the image. */
@@ -2442,14 +2426,6 @@ public class DefaultImageView implements ImageView {
             this.addMouseMoveListener(new MouseMoveListener() {
                 @Override
                 public void mouseMove(MouseEvent e) {
-                    // don't update too often.
-                    /*try {
-                        Thread.sleep(20);
-                    }
-                    catch (Exception ex) {
-                        log.debug("thread sleep:", ex);
-                    }*/
-
                     currentPosition = new Point(e.x, e.y);
 
                     if((e.stateMask & SWT.BUTTON1) != 0) {
@@ -2501,9 +2477,7 @@ public class DefaultImageView implements ImageView {
 
             this.addMouseListener(new MouseListener() {
                 @Override
-                public void mouseDoubleClick(MouseEvent e) {
-
-                }
+                public void mouseDoubleClick(MouseEvent e) {}
 
                 @Override
                 public void mouseDown(MouseEvent e) {

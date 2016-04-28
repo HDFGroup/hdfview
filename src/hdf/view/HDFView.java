@@ -516,7 +516,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                     currentDir = file.getParent();
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), mainWindow.getText());
+                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
                     return;
                 }
 
@@ -534,7 +534,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    showError(ex.getMessage() + "\n" + filename, null);
+                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, null);
                 }
             }
         });
@@ -566,7 +566,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                     currentDir = theFile.getParent();
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), mainWindow.getText());
+                	Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
                     return;
                 }
 
@@ -584,7 +584,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    showError(ex.getMessage() + "\n" + filename, null);
+                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, null);
                 }
             }
         });
@@ -626,12 +626,12 @@ public class HDFView implements ViewManager, DropTargetListener {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
-                    showError("No files currently open.", shell.getText());
+                	Tools.showError(mainWindow, "No files currently open.", shell.getText());
                     return;
                 }
 
                 if (treeView.getSelectedFile() == null) {
-                    showError("No files currently selected.", shell.getText());
+                	Tools.showError(mainWindow, "No files currently selected.", shell.getText());
                     return;
                 }
 
@@ -663,7 +663,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(mainWindow, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -673,12 +673,12 @@ public class HDFView implements ViewManager, DropTargetListener {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
-                    showError("No files currently open.", shell.getText());
+                	Tools.showError(mainWindow, "No files currently open.", shell.getText());
                     return;
                 }
 
                 if (treeView.getSelectedFile() == null) {
-                    showError("No files currently selected.", shell.getText());
+                	Tools.showError(mainWindow, "No files currently selected.", shell.getText());
                     return;
                 }
 
@@ -687,7 +687,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(mainWindow, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -969,7 +969,6 @@ public class HDFView implements ViewManager, DropTargetListener {
                     MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
                     error.setText(shell.getText());
                     error.setMessage(ex.getMessage());
-                    // Add HDF Icon
                     error.open();
                 }
             }
@@ -1218,13 +1217,6 @@ public class HDFView implements ViewManager, DropTargetListener {
         message.append(msg);
         message.append("\n");
         status.setText(message.toString());
-    }
-
-    private void showError(String errorMsg, String title) {
-        MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR | SWT.OK);
-        error.setText(title);
-        error.setMessage(errorMsg);
-        error.open();
     }
 
     public void showMetaData(HObject obj) {
@@ -1558,7 +1550,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         if (filename != null) {
             File file = new File(filename);
             if(!file.exists()) {
-                showError("File " + filename + " does not exist.", "Open File");
+            	Tools.showError(mainWindow, "File " + filename + " does not exist.", "Open File");
                 return;
             }
 
@@ -1588,7 +1580,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                 catch (Throwable ex2) {
                     display.beep();
                     url_bar.deselectAll();
-                    showError("Failed to open file " + filename + "\n" + ex2, mainWindow.getText());
+                    Tools.showError(mainWindow, "Failed to open file " + filename + "\n" + ex2, mainWindow.getText());
                     currentFile = null;
                 }
             }
@@ -1611,7 +1603,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                 chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
 
                 if(!chosenFiles[i].exists()) {
-                    showError("File " + chosenFiles[i].getName() + " does not exist.", "Open File");
+                	Tools.showError(mainWindow, "File " + chosenFiles[i].getName() + " does not exist.", "Open File");
                     continue;
                 }
 
@@ -1641,7 +1633,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                     catch (Throwable ex2) {
                         display.beep();
                         url_bar.deselectAll();
-                        showError("Failed to open file " + selectedFilenames[i] + "\n" + ex2, mainWindow.getText());
+                        Tools.showError(mainWindow, "Failed to open file " + selectedFilenames[i] + "\n" + ex2, mainWindow.getText());
                         currentFile = null;
                     }
                 }
@@ -1691,7 +1683,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         catch (Exception ex) {
             url = null;
             display.beep();
-            showError(ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
             return null;
         }
 
@@ -1705,7 +1697,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         catch (Exception ex) {
             in = null;
             display.beep();
-            showError(ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
 
             try {
                 out.close();
@@ -1792,7 +1784,7 @@ public class HDFView implements ViewManager, DropTargetListener {
     private void closeFile(FileFormat theFile) {
         if (theFile == null) {
             display.beep();
-            showError("Select a file to close", mainWindow.getText());
+            Tools.showError(mainWindow, "Select a file to close", mainWindow.getText());
             return;
         }
 
@@ -1877,7 +1869,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         int idx2 = str.lastIndexOf(':');
 
         if ((idx1 < 0) || (idx2 <= idx1)) {
-            showError("Failed to register " + str
+        	Tools.showError(mainWindow, "Failed to register " + str
                     + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION",
                     "Register File Format");
             return;
@@ -1894,13 +1886,13 @@ public class HDFView implements ViewManager, DropTargetListener {
         while (local_enum.hasMoreElements()) {
             theKey = (String) local_enum.nextElement();
             if (theKey.endsWith(key)) {
-                showError("Invalid key: " + key + " is taken.", "Register File Format");
+            	Tools.showError(mainWindow, "Invalid key: " + key + " is taken.", "Register File Format");
                 return;
             }
 
             theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
             if (theClassName.endsWith(className)) {
-                showError("The file format has already been registered: " + className,
+            	Tools.showError(mainWindow, "The file format has already been registered: " + className,
                         "Register File Format");
                 return;
             }
@@ -1932,7 +1924,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
         catch (Throwable ex) {
-            showError("Failed to register " + str + "\n\n" + ex, "Register File Format");
+        	Tools.showError(mainWindow, "Failed to register " + str + "\n\n" + ex, "Register File Format");
             return;
         }
 
