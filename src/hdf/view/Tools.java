@@ -24,10 +24,13 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
 import java.awt.image.PixelGrabber;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -42,6 +45,7 @@ import javax.imageio.ImageIO;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -1935,6 +1939,314 @@ public final class Tools {
 
         return true;
     } /* public static final boolean applyBitmask() */
+    
+    /**
+     * Read HDF5 user block data into byte array.
+     *
+     * @param filename the HDF5 file from which to get the user block
+     *
+     * @return a byte array of user block, or null if there is user data.
+     */
+    public static byte[] getHDF5UserBlock(String filename) {
+        byte[] userBlock = null;
+        RandomAccessFile raf = null;
+
+        try {
+            raf = new RandomAccessFile(filename, "r");
+        }
+        catch (Exception ex) {
+            try {
+                raf.close();
+            }
+            catch (Throwable err) {
+                ;
+            }
+            raf = null;
+        }
+
+        if (raf == null) {
+            return null;
+        }
+
+        byte[] header = new byte[8];
+        long fileSize = 0;
+        try {
+            fileSize = raf.length();
+        }
+        catch (Exception ex) {
+            fileSize = 0;
+        }
+        if (fileSize <= 0) {
+            try {
+                raf.close();
+            }
+            catch (Throwable err) {
+                ;
+            }
+            return null;
+        }
+
+        // The super block is located by searching for the HDF5 file signature
+        // at byte offset 0, byte offset 512 and at successive locations in the
+        // file, each a multiple of two of the previous location, i.e. 0, 512,
+        // 1024, 2048, etc
+        long offset = 0;
+        boolean ish5 = false;
+        while (offset < fileSize) {
+            try {
+                raf.seek(offset);
+                raf.read(header);
+            }
+            catch (Exception ex) {
+                header = null;
+            }
+
+            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
+                    && (header[3] == 70) && (header[4] == 13)
+                    && (header[5] == 10) && (header[6] == 26)
+                    && (header[7] == 10)) {
+                ish5 = true;
+                break; // find the end of user block
+            }
+            else {
+                ish5 = false;
+                if (offset == 0) {
+                    offset = 512;
+                }
+                else {
+                    offset *= 2;
+                }
+            }
+        }
+
+        if (!ish5 || (offset == 0)) {
+            try {
+                raf.close();
+            }
+            catch (Throwable err) {
+                ;
+            }
+            return null;
+        }
+
+        int blockSize = (int) offset;
+        userBlock = new byte[blockSize];
+        try {
+            raf.seek(0);
+            raf.read(userBlock, 0, blockSize);
+        }
+        catch (Exception ex) {
+            userBlock = null;
+        }
+
+        try {
+            raf.close();
+        }
+        catch (Exception ex) {
+        }
+
+        return userBlock;
+    }
+
+    /**
+     * Write HDF5 user block data into byte array.
+     *
+     * @param fin the input filename
+     * @param fout the output filename
+     * @param buf  the data to write into the user block
+     *
+     * @return a byte array of user block, or null if there is user data.
+     */
+    public static boolean setHDF5UserBlock(String fin, String fout, byte[] buf) {
+        boolean ish5 = false;
+
+        if ((buf == null) || (buf.length <= 0)) {
+            return false;
+        }
+
+        File tmpFile = new File(fin);
+        if (!tmpFile.exists()) {
+            return false;
+        }
+
+        // find the end of user block for the input file;
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(fin, "r");
+        }
+        catch (Exception ex) {
+            raf = null;
+        }
+
+        if (raf == null) {
+            return false;
+        }
+
+        byte[] header = new byte[8];
+        long fileSize = 0;
+        try {
+            fileSize = raf.length();
+        }
+        catch (Exception ex) {
+            fileSize = 0;
+        }
+        try {
+            fileSize = raf.length();
+        }
+        catch (Exception ex) {
+            fileSize = 0;
+        }
+        if (fileSize <= 0) {
+            try {
+                raf.close();
+            }
+            catch (Throwable err) {
+                ;
+            }
+            return false;
+        }
+
+        // The super block is located by searching for the HDF5 file signature
+        // at byte offset 0, byte offset 512 and at successive locations in the
+        // file, each a multiple of two of the previous location, i.e. 0, 512,
+        // 1024, 2048, etc
+        long offset = 0;
+        while (offset < fileSize) {
+            try {
+                raf.seek(offset);
+                raf.read(header);
+            }
+            catch (Exception ex) {
+                header = null;
+            }
+
+            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
+                    && (header[3] == 70) && (header[4] == 13)
+                    && (header[5] == 10) && (header[6] == 26)
+                    && (header[7] == 10)) {
+                ish5 = true;
+                break;
+            }
+            else {
+                ish5 = false;
+                if (offset == 0) {
+                    offset = 512;
+                }
+                else {
+                    offset *= 2;
+                }
+            }
+        }
+        try {
+            raf.close();
+        }
+        catch (Throwable err) {
+            ;
+        }
+
+        if (!ish5) {
+            return false;
+        }
+
+        int length = 0;
+        int bsize = 1024;
+        byte[] buffer;
+        BufferedInputStream bi = null;
+        BufferedOutputStream bo = null;
+
+        try {
+            bi = new BufferedInputStream(new FileInputStream(fin));
+        }
+        catch (Exception ex) {
+            try {
+                bi.close();
+            }
+            catch (Exception ex2) {
+            }
+            return false;
+        }
+
+        try {
+            bo = new BufferedOutputStream(new FileOutputStream(fout));
+        }
+        catch (Exception ex) {
+            try {
+                bo.close();
+            }
+            catch (Exception ex2) {
+            }
+            try {
+                bi.close();
+            }
+            catch (Exception ex2) {
+            }
+            return false;
+        }
+
+        // skip the header of original file
+        try {
+            bi.skip(offset);
+        }
+        catch (Exception ex) {
+        }
+
+        // write the header into the new file
+        try {
+            bo.write(buf, 0, buf.length);
+        }
+        catch (Exception ex) {
+        }
+
+        // The super block space is allocated by offset 0, 512, 1024, 2048, etc
+        offset = 512;
+        while (offset < buf.length) {
+            offset *= 2;
+        }
+        int padSize = (int) (offset - buf.length);
+        if (padSize > 0) {
+            byte[] padBuf = new byte[padSize];
+            try {
+                bo.write(padBuf, 0, padSize);
+            }
+            catch (Exception ex) {
+            }
+        }
+
+        // copy the hdf5 file content from input file to the output file
+        buffer = new byte[bsize];
+        try {
+            length = bi.read(buffer, 0, bsize);
+        }
+        catch (Exception ex) {
+            length = 0;
+        }
+        while (length > 0) {
+            try {
+                bo.write(buffer, 0, length);
+                length = bi.read(buffer, 0, bsize);
+            }
+            catch (Exception ex) {
+                length = 0;
+            }
+        }
+
+        try {
+            bo.flush();
+        }
+        catch (Exception ex) {
+        }
+        try {
+            bi.close();
+        }
+        catch (Exception ex) {
+        }
+        try {
+            bo.close();
+        }
+        catch (Exception ex) {
+        }
+        return true;
+    }
 
     /**
      * Launch default browser for a given URL.
@@ -2110,5 +2422,18 @@ public final class Tools {
                 || val == Double.NEGATIVE_INFINITY || val == Double.POSITIVE_INFINITY) return true;
 
         return false;
+    }
+    
+    /** 
+     * Show an SWT error dialog with the given error message.
+     * @param parent
+     * @param errorMsg
+     * @param title
+     */
+    public static void showError(Shell parent, String errorMsg, String title) {
+        MessageBox error = new MessageBox(parent, SWT.ICON_ERROR | SWT.OK);
+        error.setText(title);
+        error.setMessage(errorMsg);
+        error.open();
     }
 }

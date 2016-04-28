@@ -264,7 +264,6 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView start");
 
         shell = new Shell(parent, SWT.SHELL_TRIM);
-        //shell = new Shell(display, SWT.SHELL_TRIM);
         display = shell.getDisplay();
 
         shell.setData(this);
@@ -562,7 +561,7 @@ public class DefaultTableView implements TableView {
                 log.trace("createTable: dataset inited");
             }
             catch (Exception ex) {
-                showError(ex.getMessage(), "createTable:" + shell.getText());
+                Tools.showError(shell, ex.getMessage(), "createTable:" + shell.getText());
                 dataValue = null;
                 return null;
             }
@@ -586,7 +585,7 @@ public class DefaultTableView implements TableView {
         try {
             dataValue = dataset.getData();
             if (dataValue == null) {
-                showError("No data read", "ScalarDS createTable:" + shell.getText());
+                Tools.showError(shell, "No data read", "ScalarDS createTable:" + shell.getText());
                 return null;
             }
 
@@ -609,7 +608,7 @@ public class DefaultTableView implements TableView {
             if (Array.getLength(dataValue) <= rows) cols = 1;
         }
         catch (Throwable ex) {
-            showError(ex.getMessage(), "ScalarDS createTable:" + shell.getText());
+            Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
             dataValue = null;
         }
 
@@ -784,7 +783,7 @@ public class DefaultTableView implements TableView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage(), "TableView " + shell.getText());
+            Tools.showError(shell, ex.getMessage(), "TableView " + shell.getText());
             dataValue = null;
         }
 
@@ -934,7 +933,7 @@ public class DefaultTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -956,7 +955,7 @@ public class DefaultTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        showError(ex.getMessage(), shell.getText());
+                        Tools.showError(shell, ex.getMessage(), shell.getText());
                     }
                 }
             });
@@ -972,7 +971,7 @@ public class DefaultTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        showError(ex.getMessage(), shell.getText());
+                        Tools.showError(shell, ex.getMessage(), shell.getText());
                     }
                 }
             });
@@ -988,7 +987,7 @@ public class DefaultTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        showError(ex.getMessage(), shell.getText());
+                        Tools.showError(shell, ex.getMessage(), shell.getText());
                     }
                 }
             });
@@ -1016,7 +1015,7 @@ public class DefaultTableView implements TableView {
 
                 File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
                 if (!chosenFile.exists()) {
-                    showError("File " + chosenFile.getName() + " does not exist.", "Import Data from Text File");
+                	Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Text File");
                     return;
                 }
 
@@ -1080,7 +1079,7 @@ public class DefaultTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        showError(ex.getMessage(), shell.getText());
+                        Tools.showError(shell, ex.getMessage(), shell.getText());
                     }
                 }
             });
@@ -1095,7 +1094,7 @@ public class DefaultTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        showError(ex.getMessage(), shell.getText());
+                        Tools.showError(shell, ex.getMessage(), shell.getText());
                     }
                 }
             });
@@ -1110,7 +1109,7 @@ public class DefaultTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        showError(ex.getMessage(), shell.getText());
+                        Tools.showError(shell, ex.getMessage(), shell.getText());
                     }
                 }
             });
@@ -1122,22 +1121,22 @@ public class DefaultTableView implements TableView {
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Copy");
+        item.setAccelerator(SWT.CTRL | 'C');
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 copyData();
             }
         });
-        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Paste");
+        item.setAccelerator(SWT.CTRL | 'V');
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 pasteData();
             }
         });
-        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
 
         new MenuItem(menu, SWT.SEPARATOR);
 
@@ -1193,6 +1192,7 @@ public class DefaultTableView implements TableView {
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Save Changes to File");
+        item.setAccelerator(SWT.CTRL | 'U');
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -1201,16 +1201,16 @@ public class DefaultTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
-        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
 
         new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Select All");
+        item.setAccelerator(SWT.CTRL | 'A');
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 try {
@@ -1218,11 +1218,10 @@ public class DefaultTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
-        //item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), true));
 
         new MenuItem(menu, SWT.SEPARATOR);
 
@@ -1244,7 +1243,7 @@ public class DefaultTableView implements TableView {
                     if (dataset instanceof CompoundDS) {
                         int cols = selectionLayer.getFullySelectedColumnPositions().length;
                         if (cols != 1) {
-                            showError("Please select one column at a time for compound dataset.", shell.getText());
+                        	Tools.showError(shell, "Please select one column at a time for compound dataset.", shell.getText());
                             return;
                         }
                     }
@@ -1270,7 +1269,7 @@ public class DefaultTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -1287,7 +1286,7 @@ public class DefaultTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -1547,7 +1546,7 @@ public class DefaultTableView implements TableView {
                 Object theData = getSelectedData();
                 if (theData == null) {
                     shell.getDisplay().beep();
-                    showError("No data selected.", shell.getText());
+                    Tools.showError(shell, "No data selected.", shell.getText());
                     return;
                 }
 
@@ -1585,7 +1584,7 @@ public class DefaultTableView implements TableView {
                 Object theData = getSelectedData();
                 if (theData == null) {
                     shell.getDisplay().beep();
-                    showError("No data selected.", shell.getText());
+                    Tools.showError(shell, "No data selected.", shell.getText());
                     return;
                 }
 
@@ -1623,7 +1622,7 @@ public class DefaultTableView implements TableView {
                 Object theData = getSelectedData();
                 if (theData == null) {
                     shell.getDisplay().beep();
-                    showError("No data selected.", shell.getText());
+                    Tools.showError(shell, "No data selected.", shell.getText());
                     return;
                 }
 
@@ -1732,7 +1731,7 @@ public class DefaultTableView implements TableView {
 
         if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
             shell.getDisplay().beep();
-            showError("Frame number must be between " + indexBase + " and " + (dims[selectedIndex[2]] - 1 + indexBase), shell.getText());
+            Tools.showError(shell, "Frame number must be between " + indexBase + " and " + (dims[selectedIndex[2]] - 1 + indexBase), shell.getText());
             return;
         }
 
@@ -1754,13 +1753,11 @@ public class DefaultTableView implements TableView {
         catch (Exception ex) {
             shell.setCursor(null);
             dataValue = null;
-            showError(ex.getMessage(), shell.getText());
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return;
         }
 
         shell.setCursor(null);
-
-        //frameField.setText(String.valueOf(curFrame));
 
         table.doCommand(new VisualRefreshCommand());
     }
@@ -1782,7 +1779,7 @@ public class DefaultTableView implements TableView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage(), shell.getText());
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return;
         }
 
@@ -1848,7 +1845,7 @@ public class DefaultTableView implements TableView {
         }
         catch (java.lang.OutOfMemoryError err) {
             shell.getDisplay().beep();
-            showError("Copying data to system clipboard failed. \nUse \"export/import data\" for copying/pasting large data.", shell.getText());
+            Tools.showError(shell, "Copying data to system clipboard failed. \nUse \"export/import data\" for copying/pasting large data.", shell.getText());
             return;
         }
 
@@ -1925,7 +1922,7 @@ public class DefaultTableView implements TableView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage(), shell.getText());
+            Tools.showError(shell, ex.getMessage(), shell.getText());
         }
     }
 
@@ -2059,7 +2056,7 @@ public class DefaultTableView implements TableView {
 
         if (selectedData == null) {
             shell.getDisplay().beep();
-            showError("Unsupported data type.", shell.getText());
+            Tools.showError(shell, "Unsupported data type.", shell.getText());
             return null;
         }
         log.trace("DefaultTableView getSelectedScalarData: selectedData is type {}", NT);
@@ -2078,13 +2075,6 @@ public class DefaultTableView implements TableView {
                 idx_dst++;
             }
         }
-
-        // this only works for continuous cells
-        // for (int i = 0; i < rows; i++) {
-        // idx_src = (r0 + i) * w + c0;
-        // System.arraycopy(dataValue, idx_src, selectedData, idx_dst, cols);
-        // idx_dst += cols;
-        // }
 
         return selectedData;
     }
@@ -2167,7 +2157,7 @@ public class DefaultTableView implements TableView {
         int cols = selectionLayer.getSelectedColumnPositions().length;
         if ((dataset instanceof CompoundDS) && (cols > 1)) {
             shell.getDisplay().beep();
-            showError("Please select one column at a time for math conversion"
+            Tools.showError(shell, "Please select one column at a time for math conversion"
                     + "for compound dataset.", shell.getText());
             return;
         }
@@ -2175,7 +2165,7 @@ public class DefaultTableView implements TableView {
         Object theData = getSelectedData();
         if (theData == null) {
             shell.getDisplay().beep();
-            showError("No data is selected.", shell.getText());
+            Tools.showError(shell, "No data is selected.", shell.getText());
             return;
         }
 
@@ -2248,14 +2238,6 @@ public class DefaultTableView implements TableView {
         table.doCommand(new SelectAllCommand());
     }
 
-    // Show an error dialog with the given error message
-    private void showError(String errorMsg, String title) {
-        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-        error.setText(title);
-        error.setMessage(errorMsg);
-        error.open();
-    }
-
     /**
      * Display data pointed by object references. Data of each object is shown in a separate
      * spreadsheet.
@@ -2287,7 +2269,7 @@ public class DefaultTableView implements TableView {
             data = dset_copy.getData();
         }
         catch (Exception ex) {
-            showError(ex.getMessage(), "Object Reference:" + shell.getText());
+            Tools.showError(shell, ex.getMessage(), "Object Reference:" + shell.getText());
             data = null;
         }
 
@@ -2448,7 +2430,7 @@ public class DefaultTableView implements TableView {
                 dset_copy.getData();
             }
             catch (Exception ex) {
-                showError(ex.getMessage(), "Region Reference:" + shell.getText());
+                Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
             }
 
             DataView dataView = null;
@@ -2617,7 +2599,6 @@ public class DefaultTableView implements TableView {
         Datatype types[] = compDS.getSelectedMemberTypes();
         int nFields = cdata.size();
         int nSubColumns = (table.getPreferredColumnCount() - 1) / nFields;
-        //table.getRowCount();
         int column = col;
         int offset = 0;
         int morder = 1;
@@ -2671,7 +2652,7 @@ public class DefaultTableView implements TableView {
         StringTokenizer st = new StringTokenizer(cellValue, ",");
         if (st.countTokens() < morder) {
             shell.getDisplay().beep();
-            showError("Number of data points < " + morder + ".", shell.getText());
+            Tools.showError(shell, "Number of data points < " + morder + ".", shell.getText());
             return;
         }
 
@@ -2852,7 +2833,7 @@ public class DefaultTableView implements TableView {
                     } // while (tokenizer1.hasMoreTokens() && index < size)
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
 
                     try {
                         in.close();
@@ -2909,7 +2890,7 @@ public class DefaultTableView implements TableView {
 
         File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
         if (!chosenFile.exists()) {
-            showError("File " + chosenFile.getName() + " does not exist.", "Import Data from Binary File");
+        	Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Binary File");
             return;
         }
 
@@ -3196,7 +3177,7 @@ public class DefaultTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        showError("Unable to save data to file \"" + fname + "\". \nThe file is being used.", shell.getText());
+                        Tools.showError(shell, "Unable to save data to file \"" + fname + "\". \nThe file is being used.", shell.getText());
                         return;
                     }
                 }
@@ -3281,7 +3262,7 @@ public class DefaultTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        showError("Unable to save data to file \"" + fname + "\". \nThe file is being used.", shell.getText());
+                        Tools.showError(shell, "Unable to save data to file \"" + fname + "\". \nThe file is being used.", shell.getText());
                         return;
                     }
                 }
@@ -3519,7 +3500,7 @@ public class DefaultTableView implements TableView {
 
         if ((rows == null) || (cols == null) || (rows.length <= 0) || (cols.length <= 0)) {
             shell.getDisplay().beep();
-            showError("Select rows/columns to draw line plot.", shell.getText());
+            Tools.showError(shell, "Select rows/columns to draw line plot.", shell.getText());
             return;
         }
 
@@ -3660,7 +3641,7 @@ public class DefaultTableView implements TableView {
         }
         else if (yRange[0] > yRange[1]) {
             shell.getDisplay().beep();
-            showError("Cannot show line plot for the selected data. \n" + "Please check the data range: ("
+            Tools.showError(shell, "Cannot show line plot for the selected data. \n" + "Please check the data range: ("
                     + yRange[0] + ", " + yRange[1] + ").", shell.getText());
             data = null;
             return;
@@ -3852,7 +3833,7 @@ public class DefaultTableView implements TableView {
             }
             catch (Exception ex) {
                 display.beep();
-                showError(ex.getMessage(), shell.getText());
+                Tools.showError(shell, ex.getMessage(), shell.getText());
             }
         }
 
@@ -4017,7 +3998,7 @@ public class DefaultTableView implements TableView {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                showError(ex.getMessage(), shell.getText());
+                Tools.showError(shell, ex.getMessage(), shell.getText());
             }
         }
 
@@ -4049,7 +4030,7 @@ public class DefaultTableView implements TableView {
                     log.trace("createTable: dataset inited");
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), "createTable:" + shell.getText());
+                    Tools.showError(shell, ex.getMessage(), "createTable:" + shell.getText());
                     dataValue = null;
                     return;
                 }

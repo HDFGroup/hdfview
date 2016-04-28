@@ -14,7 +14,6 @@
 
 package hdf.view;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -237,7 +236,6 @@ public class DefaultMetaDataView implements MetaDataView {
         TableItem item = new TableItem(attrTable, SWT.NONE);
         item.setText(rowData);
 
-        //attrTableModel.fireTableRowsInserted(attrTableModel.getRowCount() - 1, attrTableModel.getRowCount() - 1);
         numAttributes++;
         attrContentArea.setText("");
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
@@ -289,7 +287,6 @@ public class DefaultMetaDataView implements MetaDataView {
         
         attrTable.remove(idx);
         numAttributes--;
-        //attrTableModel.fireTableRowsDeleted(idx, idx);
 
         attrContentArea.setText("");
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
@@ -763,7 +760,7 @@ public class DefaultMetaDataView implements MetaDataView {
             	log.debug("Error closing file {}", fin);
             }
 
-            if (DefaultFileFilter.setHDF5UserBlock(fin, fout, buf)) {
+            if (Tools.setHDF5UserBlock(fin, fout, buf)) {
                 if (op == SWT.NO) {
                     fin = fout; // open the new file
                 }
@@ -1465,7 +1462,7 @@ public class DefaultMetaDataView implements MetaDataView {
 	private Composite createUserBlockComposite(TabFolder folder) {
 		log.trace("createUserBlockComposite: start");
 		
-		userBlock = DefaultFileFilter.getHDF5UserBlock(hObject.getFile());
+		userBlock = Tools.getHDF5UserBlock(hObject.getFile());
 		
 		Composite composite = new Composite(folder, SWT.NONE);
 		composite.setLayout(new GridLayout(5, false));

@@ -248,7 +248,7 @@ public class DefaultTreeView implements TreeView {
                     }
                     catch (Throwable err) {
                         shell.getDisplay().beep();
-                        showError(err.getMessage(), null);
+                        Tools.showError(shell, err.getMessage(), null);
                         return;
                     }
                 }
@@ -443,7 +443,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
-                    showError(err.getMessage(), shell.getText());
+                    Tools.showError(shell, err.getMessage(), shell.getText());
                     return;
                 }
             }
@@ -461,7 +461,7 @@ public class DefaultTreeView implements TreeView {
                 catch (Throwable err) {
                     shell.getDisplay().beep();
                     err.printStackTrace();
-                    showError(err.getMessage(), shell.getText());
+                    Tools.showError(shell, err.getMessage(), shell.getText());
                     return;
                 }
             }
@@ -522,7 +522,7 @@ public class DefaultTreeView implements TreeView {
 
                 if ((selectedObject instanceof Group) && ((Group) selectedObject).isRoot()) {
                     shell.getDisplay().beep();
-                    showError("Cannot save the root group.\nUse \"Save As\" from file menu to save the whole file", shell.getText());
+                    Tools.showError(shell, "Cannot save the root group.\nUse \"Save As\" from file menu to save the whole file", shell.getText());
                     return;
                 }
 
@@ -557,7 +557,7 @@ public class DefaultTreeView implements TreeView {
                     Tools.createNewFile(filename, currentDir, filetype, fileList);
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
 
                 FileFormat dstFile = null;
@@ -567,7 +567,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage() + "\n" + filename, shell.getText());
+                    Tools.showError(shell, ex.getMessage() + "\n" + filename, shell.getText());
                 }
 
                 TreeItem[] selectedItems = tree.getSelection();
@@ -603,7 +603,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -619,7 +619,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -696,7 +696,7 @@ public class DefaultTreeView implements TreeView {
                     closeFile(getSelectedFile());
                 }
                 catch (Exception ex) {
-                    showError(ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -794,7 +794,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), "Export Dataset");
+                    Tools.showError(shell, ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -810,7 +810,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), "Export Dataset");
+                    Tools.showError(shell, ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -826,7 +826,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), "Export Dataset");
+                    Tools.showError(shell, ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -842,7 +842,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    showError(ex.getMessage(), "Export Dataset");
+                    Tools.showError(shell, ex.getMessage(), "Export Dataset");
                 }
             }
         });
@@ -1013,7 +1013,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage(), null);
+            Tools.showError(shell, ex.getMessage(), null);
             return;
         }
     }
@@ -1093,7 +1093,7 @@ public class DefaultTreeView implements TreeView {
 
                 if (isObjectOpen(theObj)) {
                     shell.getDisplay().beep();
-                    showError("Cannot move the selected object: " + theObj
+                    Tools.showError(shell, "Cannot move the selected object: " + theObj
                             + "\nThe dataset or dataset in the group is in use."
                             + "\n\nPlease close the dataset(s) and try again.\n", "Move Objects");
 
@@ -1116,29 +1116,29 @@ public class DefaultTreeView implements TreeView {
 
         if (srcFile == null) {
             shell.getDisplay().beep();
-            showError("Source file is null.", null);
+            Tools.showError(shell, "Source file is null.", null);
             return;
         }
         else if (dstFile == null) {
             shell.getDisplay().beep();
-            showError("Destination file is null.", null);
+            Tools.showError(shell, "Destination file is null.", null);
             return;
         }
         else if (srcFile.isThisType(h4file) && dstFile.isThisType(h5file)) {
             shell.getDisplay().beep();
-            showError("Unsupported operation: cannot copy HDF4 object to HDF5 file", null);
+            Tools.showError(shell, "Unsupported operation: cannot copy HDF4 object to HDF5 file", null);
             return;
         }
         else if (srcFile.isThisType(h5file) && dstFile.isThisType(h4file)) {
             shell.getDisplay().beep();
-            showError("Unsupported operation: cannot copy HDF5 object to HDF4 file", null);
+            Tools.showError(shell, "Unsupported operation: cannot copy HDF5 object to HDF4 file", null);
             return;
         }
 
         if (moveFlag == true) {
             if (srcFile != dstFile) {
                 shell.getDisplay().beep();
-                showError("Cannot move the selected object to different file", null);
+                Tools.showError(shell, "Cannot move the selected object to different file", null);
                 moveFlag = false;
                 currentSelectionsForMove = null;
                 objectsToCopy = null;
@@ -1210,7 +1210,7 @@ public class DefaultTreeView implements TreeView {
 
             if ((theObj instanceof Group) && ((Group) theObj).isRoot()) {
                 shell.getDisplay().beep();
-                showError("Unsupported operation: cannot copy the root group", null);
+                Tools.showError(shell, "Unsupported operation: cannot copy the root group", null);
                 return;
             }
 
@@ -1219,7 +1219,7 @@ public class DefaultTreeView implements TreeView {
             while (!pg.isRoot()) {
                 if (theObj.equals(pg)) {
                     shell.getDisplay().beep();
-                    showError("Unsupported operation: cannot copy a group to itself.", null);
+                    Tools.showError(shell, "Unsupported operation: cannot copy a group to itself.", null);
                     return;
                 }
                 pg = pg.getParent();
@@ -1243,7 +1243,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                showError(ex.getMessage(), null);
+                Tools.showError(shell, ex.getMessage(), null);
             }
         } // for (int i = 0; i < objList.length; i++)
 
@@ -1258,7 +1258,7 @@ public class DefaultTreeView implements TreeView {
 
         if ((selectedObject instanceof Group) && ((Group) selectedObject).isRoot()) {
             shell.getDisplay().beep();
-            showError("Cannot rename the root.", null);
+            Tools.showError(shell, "Cannot rename the root.", null);
             return;
         }
 
@@ -1266,7 +1266,7 @@ public class DefaultTreeView implements TreeView {
 
         if (isH4) {
             shell.getDisplay().beep();
-            showError("Cannot rename HDF4 object.", null);
+            Tools.showError(shell, "Cannot rename HDF4 object.", null);
             return;
         }
 
@@ -1286,7 +1286,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError("Rename Object", ex.getMessage());
+            Tools.showError(shell, "Rename Object", ex.getMessage());
         }
 
         selectedItem.setText(newName);
@@ -1296,7 +1296,7 @@ public class DefaultTreeView implements TreeView {
         FileFormat theFile = getSelectedFile();
         if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             shell.getDisplay().beep();
-            showError("Unsupported operation: cannot delete HDF4 object.", shell.getText());
+            Tools.showError(shell, "Unsupported operation: cannot delete HDF4 object.", shell.getText());
             return;
         }
 
@@ -1323,14 +1323,14 @@ public class DefaultTreeView implements TreeView {
             // Cannot delete a root object
             if (theObj instanceof Group && ((Group) theObj).isRoot()) {
                     shell.getDisplay().beep();
-                    showError("Unsupported operation: cannot delete the file root.", "Delete Objects");
+                    Tools.showError(shell, "Unsupported operation: cannot delete the file root.", "Delete Objects");
                     return;
             }
 
             if (moveFlag != true) {
                 if (isObjectOpen(theObj)) {
                     shell.getDisplay().beep();
-                    showError("Cannot delete the selected object: " + theObj
+                    Tools.showError(shell, "Cannot delete the selected object: " + theObj
                             + "\nThe dataset or dataset in the group is in use."
                             + "\n\nPlease close the dataset(s) and try again.\n", "Delete Objects");
                     continue;
@@ -1342,7 +1342,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                showError(ex.getMessage(), "Delete Objects");
+                Tools.showError(shell, ex.getMessage(), "Delete Objects");
                 continue;
             }
 
@@ -1398,7 +1398,7 @@ public class DefaultTreeView implements TreeView {
             log.trace("Error occured when populating Tree with members of file {}", theFile.getFilePath());
             if(rootItem != null) rootItem.dispose();
             shell.getDisplay().beep();
-            showError("Error opening file " + theFile.getName(), "Open File");
+            Tools.showError(shell, "Error opening file " + theFile.getName(), "Open File");
             return null;
         }
 
@@ -1739,7 +1739,7 @@ public class DefaultTreeView implements TreeView {
     private final void saveAsHDF4(FileFormat srcFile) {
         if (srcFile == null) {
             shell.getDisplay().beep();
-            showError("Select a file to save.", null);
+            Tools.showError(shell, "Select a file to save.", null);
             return;
         }
 
@@ -1764,7 +1764,7 @@ public class DefaultTreeView implements TreeView {
             Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF4, fileList);
         }
         catch (Exception ex) {
-            showError(ex.getMessage(), shell.getText());
+            Tools.showError(shell, ex.getMessage(), shell.getText());
         }
 
         // Since cannot pack hdf4, simply copy the whole physical file
@@ -1779,7 +1779,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage() + "\n" + filename, null);
+            Tools.showError(shell, ex.getMessage() + "\n" + filename, null);
             return;
         }
 
@@ -1795,7 +1795,7 @@ public class DefaultTreeView implements TreeView {
             }
 
             shell.getDisplay().beep();
-            showError(ex.getMessage(), null);
+            Tools.showError(shell, ex.getMessage(), null);
             return;
         }
 
@@ -1840,7 +1840,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage() + "\n" + filename, null);
+            Tools.showError(shell, ex.getMessage() + "\n" + filename, null);
         }
     }
 
@@ -1852,14 +1852,14 @@ public class DefaultTreeView implements TreeView {
     private void saveAsHDF5(FileFormat srcFile) {
         if (srcFile == null) {
             shell.getDisplay().beep();
-            showError("Select a file to save.", null);
+            Tools.showError(shell, "Select a file to save.", null);
             return;
         }
 
         HObject root = srcFile.getRootObject();
         if (root == null) {
             shell.getDisplay().beep();
-            showError("The file is empty.", null);
+            Tools.showError(shell, "The file is empty.", null);
             return;
         }
 
@@ -1884,7 +1884,7 @@ public class DefaultTreeView implements TreeView {
             Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF5, fileList);
         }
         catch (Exception ex) {
-            showError(ex.getMessage(), shell.getText());
+            Tools.showError(shell, ex.getMessage(), shell.getText());
         }
 
         int n = getAllItemCount();
@@ -1901,7 +1901,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage() + "\n" + filename, null);
+            Tools.showError(shell, ex.getMessage() + "\n" + filename, null);
             return;
         }
 
@@ -1930,7 +1930,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage(), null);
+            Tools.showError(shell, ex.getMessage(), null);
         }
 
         // Update reference datasets
@@ -1943,7 +1943,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage(), null);
+            Tools.showError(shell, ex.getMessage(), null);
         }
     }
 
@@ -1985,7 +1985,7 @@ public class DefaultTreeView implements TreeView {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(filename)) {
                     shell.getDisplay().beep();
-                    showError("Unable to save data to file \"" + filename + "\". \nThe file is being used.", "Export Dataset");
+                    Tools.showError(shell, "Unable to save data to file \"" + filename + "\". \nThe file is being used.", "Export Dataset");
                     return;
                 }
             }
@@ -2004,7 +2004,7 @@ public class DefaultTreeView implements TreeView {
 
         if (isH4) {
             shell.getDisplay().beep();
-            showError("Cannot export HDF4 object.", null);
+            Tools.showError(shell, "Cannot export HDF4 object.", null);
             return;
         }
 
@@ -2013,7 +2013,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            showError(ex.getMessage(), null);
+            Tools.showError(shell, ex.getMessage(), null);
         }
 
         ((HDFView) viewer).showStatus("Data saved to: " + filename);
@@ -2025,14 +2025,6 @@ public class DefaultTreeView implements TreeView {
         while (it.hasNext()) {
             it.next().setEnabled(b);
         }
-    }
-
-    /** Show an error dialog with the given error message */
-    private void showError(String errorMsg, String title) {
-        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-        error.setText(title);
-        error.setMessage(errorMsg);
-        error.open();
     }
 
     /**
@@ -2247,7 +2239,7 @@ public class DefaultTreeView implements TreeView {
     public void saveFile(FileFormat file) throws Exception {
         if (file == null) {
             shell.getDisplay().beep();
-            showError("Select a file to save.", null);
+            Tools.showError(shell, "Select a file to save.", null);
             return;
         }
 
@@ -2256,7 +2248,7 @@ public class DefaultTreeView implements TreeView {
 
         if (!(isH4 || isH5)) {
             shell.getDisplay().beep();
-            showError("Saving file is not supported for this file type", null);
+            Tools.showError(shell, "Saving file is not supported for this file type", null);
             return;
         }
 
@@ -2812,7 +2804,7 @@ public class DefaultTreeView implements TreeView {
                     }
                     catch (Throwable err) {
                         shell.getDisplay().beep();
-                        showError("Error when setting lib version bounds", null);
+                        Tools.showError(shell, "Error when setting lib version bounds", null);
                         return;
                     }
 
