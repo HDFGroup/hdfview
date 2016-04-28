@@ -14,45 +14,23 @@
 
 package hdf.view;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.RandomAccessFile;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
-
-import javax.swing.filechooser.FileFilter;
 
 /**
  * A convenience implementation of FileFilter that filters out all files except
  * for those type extensions that it knows about.
  *
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 4/27/2016
  */
-public class DefaultFileFilter extends FileFilter {
-    private static FileFilter FILE_FILTER_HDF = null;
-    private static FileFilter FILE_FILTER_HDF4 = null;
-    private static FileFilter FILE_FILTER_HDF5 = null;
-    private static FileFilter FILE_FILTER_JPEG = null;
-    private static FileFilter FILE_FILTER_TIFF = null;
-    private static FileFilter FILE_FILTER_PNG = null;
-    private static FileFilter FILE_FILTER_GIF = null;
-    private static FileFilter FILE_FILTER_BMP = null;
-    private static FileFilter FILE_FILTER_IMG = null;
-    private static FileFilter FILE_FILTER_TEXT = null;
-    private static FileFilter FILE_FILTER_BINARY = null;
-
-    private static String fileExtension = ViewProperties.getFileExtension();
-
+public class DefaultFileFilter {
     private Hashtable<String, DefaultFileFilter> filters = null;
     private String description = null;
     private String fullDescription = null;
     private boolean useExtensionsInDescription = true;
-
+    
     /**
      * Creates a file filter. If no filters are added, then all files are
      * accepted.
@@ -60,9 +38,9 @@ public class DefaultFileFilter extends FileFilter {
      * @see #addExtension
      */
     public DefaultFileFilter() {
-        this.filters = new Hashtable<String, DefaultFileFilter>();
+    	this.filters = new Hashtable<String, DefaultFileFilter>();
     }
-
+    
     /**
      * Creates a file filter that accepts files with the given extension.
      * Example: new DefaultFileFilter("jpg");
@@ -74,7 +52,7 @@ public class DefaultFileFilter extends FileFilter {
     public DefaultFileFilter(String extension) {
         this(extension, null);
     }
-
+    
     /**
      * Creates a file filter that accepts the given file type. Example: new
      * DefaultFileFilter("jpg", "JPEG Image Images");
@@ -96,12 +74,12 @@ public class DefaultFileFilter extends FileFilter {
             setDescription(description);
         }
     }
-
+    
     /**
      * Creates a file filter from the given string array. Example: new
      * DefaultFileFilter(String {"gif", "jpg"});
      *
-     * Note that the "." before the extension is not needed adn will be ignored.
+     * Note that the "." before the extension is not needed and will be ignored.
      *
      * @see #addExtension
      *
@@ -111,7 +89,7 @@ public class DefaultFileFilter extends FileFilter {
     public DefaultFileFilter(String[] filters) {
         this(filters, null);
     }
-
+    
     /**
      * Creates a file filter from the given string array and description.
      * Example: new DefaultFileFilter(String {"gif", "jpg"},
@@ -136,49 +114,19 @@ public class DefaultFileFilter extends FileFilter {
             setDescription(description);
         }
     }
-
+    
     /**
-     * @param f the file to be accepted
-     *
-     * @return true if this file should be shown in the directory pane, false if
-     * it shouldn't.
-     *
-     * Files that begin with "." are ignored.
-     *
-     * @see #getExtension
+     * @return the file extensions associated with this DefaultFileFilter
      */
-    @Override
-    public boolean accept(File f) {
-        if (f != null) {
-            if (f.isDirectory()) {
-                return true;
-            }
-            String extension = getExtension(f);
-            if ((extension != null) && (filters.get(getExtension(f)) != null)) {
-                return true;
-            }
+    public String getExtensions() {
+        Enumeration<String> extensions = filters.keys();
+        String extString = "";
+        
+        while (extensions.hasMoreElements()) {
+        	extString += "*." + extensions.nextElement() + ";";
         }
-
-        return false;
-    }
-
-    /**
-     * @param f the file under query
-     *
-     * @return the extension portion of the file's name .
-     *
-     * @see #getExtension
-     * @see FileFilter#accept
-     */
-    public String getExtension(File f) {
-        if (f != null) {
-            String filename = f.getName();
-            int i = filename.lastIndexOf('.');
-            if ((i > 0) && (i < filename.length() - 1)) {
-                return filename.substring(i + 1).toLowerCase();
-            }
-        }
-        return null;
+        
+        return extString;
     }
 
     /**
@@ -206,14 +154,14 @@ public class DefaultFileFilter extends FileFilter {
             ext = st.nextToken().trim();
             filters.put(ext.toLowerCase(), this);
         }
+        
         fullDescription = null;
     }
-
+    
     /**
      * @return the human readable description of this filter. For example:
      * "JPEG and GIF Image Files (*.jpg, *.gif)"
      */
-    @Override
     public String getDescription() {
         if (fullDescription == null) {
             if ((description == null) || isExtensionListInDescription()) {
@@ -253,7 +201,7 @@ public class DefaultFileFilter extends FileFilter {
         this.description = description;
         fullDescription = null;
     }
-
+    
     /**
      * Determines whether the extension list (.jpg, .gif, etc) should show up in
      * the human readable description.
@@ -267,7 +215,7 @@ public class DefaultFileFilter extends FileFilter {
         useExtensionsInDescription = b;
         fullDescription = null;
     }
-
+    
     /**
      * @return whether the extension list (.jpg, .gif, etc) should show up in
      * the human readable description.
@@ -278,64 +226,43 @@ public class DefaultFileFilter extends FileFilter {
     public boolean isExtensionListInDescription() {
         return useExtensionsInDescription;
     }
-
+    
     /** @return a file filter for HDF4/5 file. */
-    public static FileFilter getFileFilter() {
-        boolean extensionNotChanged = (fileExtension
-                .equalsIgnoreCase(ViewProperties.getFileExtension()));
-
-        if ((FILE_FILTER_HDF != null) && extensionNotChanged) {
-            return FILE_FILTER_HDF;
-        }
-
+    public static DefaultFileFilter getFileFilter() {
         // update extensions
-        fileExtension = ViewProperties.getFileExtension();
+        String fileExtensions = ViewProperties.getFileExtension();
 
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.setDescription("HDF & more");
 
-        filter.addExtension(fileExtension);
+        filter.addExtension(fileExtensions);
 
-        return (FILE_FILTER_HDF = filter);
+        return filter;
     }
-
+    
     /** @return a file filter for HDF4 file. */
-    public static FileFilter getFileFilterHDF4() {
-        if (FILE_FILTER_HDF4 != null) {
-            return FILE_FILTER_HDF4;
-        }
-
+    public static DefaultFileFilter getFileFilterHDF4() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("hdf");
         filter.addExtension("h4");
         filter.addExtension("hdf4");
         filter.setDescription("HDF4 files");
-        FILE_FILTER_HDF4 = filter;
 
-        return FILE_FILTER_HDF4;
+        return filter;
     }
-
+    
     /** @return a file filter for HDF5 file. */
-    public static FileFilter getFileFilterHDF5() {
-        if (FILE_FILTER_HDF5 != null) {
-            return FILE_FILTER_HDF5;
-        }
-
+    public static DefaultFileFilter getFileFilterHDF5() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("h5");
         filter.addExtension("hdf5");
         filter.setDescription("HDF5 files");
-        FILE_FILTER_HDF5 = filter;
 
-        return FILE_FILTER_HDF5;
+        return filter;
     }
-
+    
     /** @return a file filter for JPEG image files. */
-    public static FileFilter getFileFilterJPEG() {
-        if (FILE_FILTER_JPEG != null) {
-            return FILE_FILTER_JPEG;
-        }
-
+    public static DefaultFileFilter getFileFilterJPEG() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("jpg");
         filter.addExtension("jpeg");
@@ -344,75 +271,50 @@ public class DefaultFileFilter extends FileFilter {
         filter.addExtension("jfif");
         filter.addExtension("jfi");
         filter.setDescription("JPEG images");
-        FILE_FILTER_JPEG = filter;
 
-        return FILE_FILTER_JPEG;
+        return filter;
     }
-
+    
     /** @return a file filter for TIFF image files. */
-    public static FileFilter getFileFilterTIFF() {
-        if (FILE_FILTER_TIFF != null) {
-            return FILE_FILTER_TIFF;
-        }
-
+    public static DefaultFileFilter getFileFilterTIFF() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("tif");
         filter.addExtension("tiff");
         filter.setDescription("TIFF images");
-        FILE_FILTER_TIFF = filter;
 
-        return FILE_FILTER_TIFF;
+        return filter;
     }
-
+    
     /** @return a file filter for PNG image files. */
-    public static FileFilter getFileFilterPNG() {
-        if (FILE_FILTER_PNG != null) {
-            return FILE_FILTER_PNG;
-        }
-
+    public static DefaultFileFilter getFileFilterPNG() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("png");
         filter.setDescription("PNG images");
-        FILE_FILTER_PNG = filter;
 
-        return FILE_FILTER_PNG;
+        return filter;
     }
-
+    
     /** @return a file filter for BMP image files. */
-    public static FileFilter getFileFilterBMP() {
-        if (FILE_FILTER_BMP != null) {
-            return FILE_FILTER_BMP;
-        }
-
+    public static DefaultFileFilter getFileFilterBMP() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("bmp");
         filter.addExtension("dib");
         filter.setDescription("BMP images");
-        FILE_FILTER_BMP = filter;
 
-        return FILE_FILTER_BMP;
+        return filter;
     }
-
+    
     /** @return a file filter for GIF image files. */
-    public static FileFilter getFileFilterGIF() {
-        if (FILE_FILTER_GIF != null) {
-            return FILE_FILTER_GIF;
-        }
-
+    public static DefaultFileFilter getFileFilterGIF() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("gif");
         filter.setDescription("GIF images");
-        FILE_FILTER_GIF = filter;
 
-        return FILE_FILTER_GIF;
+        return filter;
     }
-
+    
     /** @return a file filter for GIF, JPEG, BMP, or PNG image files. */
-    public static FileFilter getImageFileFilter() {
-        if (FILE_FILTER_IMG != null) {
-            return FILE_FILTER_IMG;
-        }
-
+    public static DefaultFileFilter getImageFileFilter() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("jpg");
         filter.addExtension("jpeg");
@@ -425,526 +327,26 @@ public class DefaultFileFilter extends FileFilter {
         filter.addExtension("bmp");
         filter.addExtension("dib");
         filter.setDescription("GIF, JPEG, BMP, or PNG images");
-        FILE_FILTER_IMG = filter;
 
-        return FILE_FILTER_IMG;
+        return filter;
     }
-
+    
     /** @return a file filter for text file. */
-    public static FileFilter getFileFilterText() {
-        if (FILE_FILTER_TEXT != null) {
-            return FILE_FILTER_TEXT;
-        }
-
+    public static DefaultFileFilter getFileFilterText() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("txt");
         filter.addExtension("text");
         filter.setDescription("Text");
-        FILE_FILTER_TEXT = filter;
 
-        return FILE_FILTER_TEXT;
+        return filter;
     }
-
+    
     /** @return a file filter for binary file. */
-    public static FileFilter getFileFilterBinary() {
-        if (FILE_FILTER_BINARY != null) {
-            return FILE_FILTER_BINARY;
-        }
-
+    public static DefaultFileFilter getFileFilterBinary() {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("bin");
         filter.setDescription("Binary");
-        FILE_FILTER_BINARY = filter;
 
-        return FILE_FILTER_BINARY;
-    }
-
-    /**
-     * look at the first 4 bytes of the file to see if it is an HDF4 file.
-     * byte[0]=14, byte[1]=3, byte[2]=19, byte[3]=1 or if it is a netCDF file
-     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1
-     *
-     * @param filename the file to test if HDF4
-     *
-     * @return true if the file is of type HDF4
-     */
-    public static boolean isHDF4(String filename) {
-        boolean ish4 = false;
-        RandomAccessFile raf = null;
-
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
-
-        if (raf == null) {
-            return false;
-        }
-
-        byte[] header = new byte[4];
-        try {
-            raf.read(header);
-        }
-        catch (Exception ex) {
-            header = null;
-        }
-
-        if (header != null) {
-            if (
-            // HDF4
-            ((header[0] == 14) && (header[1] == 3) && (header[2] == 19) && (header[3] == 1))
-            /*
-             * // netCDF || (header[0]==67 && header[1]==68 && header[2]==70 &&
-             * header[3]==1)
-             */
-            ) {
-                ish4 = true;
-            }
-            else {
-                ish4 = false;
-            }
-        }
-
-        try {
-            raf.close();
-        }
-        catch (Exception ex) {
-        }
-
-        return ish4;
-    }
-
-    /**
-     * look at the first 8 bytes of the file to see if it is an HDF5 file.
-     * byte[0]=-199 which is 137 in unsigned byte, byte[1]=72, byte[2]=68,
-     * byte[3]=70, byte[4]=13, byte[5]=10, byte[6]=26, byte[7]=10
-     *
-     * @param filename the file to test if HDF5
-     *
-     * @return true if the file is of type HDF5
-     */
-    public static boolean isHDF5(String filename) {
-        boolean ish5 = false;
-        RandomAccessFile raf = null;
-
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
-
-        if (raf == null) {
-            return false;
-        }
-
-        byte[] header = new byte[8];
-        long fileSize = 0;
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-        }
-
-        // The super block is located by searching for the HDF5 file signature
-        // at byte offset 0, byte offset 512 and at successive locations in the
-        // file, each a multiple of two of the previous location, i.e. 0, 512,
-        // 1024, 2048, etc
-        long offset = 0;
-        while (!ish5 && (offset < fileSize)) {
-            try {
-                raf.seek(offset);
-                raf.read(header);
-            }
-            catch (Exception ex) {
-                header = null;
-            }
-
-            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
-                    && (header[3] == 70) && (header[4] == 13)
-                    && (header[5] == 10) && (header[6] == 26)
-                    && (header[7] == 10)) {
-                ish5 = true;
-            }
-            else {
-                ish5 = false;
-                if (offset == 0) {
-                    offset = 512;
-                }
-                else {
-                    offset *= 2;
-                }
-            }
-        }
-
-        try {
-            raf.close();
-        }
-        catch (Exception ex) {
-        }
-
-        return ish5;
-    }
-
-    /**
-     * look at the first 4 bytes of the file to see if it is a netCDF file
-     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1 or
-     *
-     * @param filename the file to test if netcdf
-     *
-     * @return true if the file is of type netcdf
-     */
-    public static boolean isNetcdf(String filename) {
-        boolean isnc = false;
-        RandomAccessFile raf = null;
-
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
-
-        if (raf == null) {
-            return false;
-        }
-
-        byte[] header = new byte[4];
-        try {
-            raf.read(header);
-        }
-        catch (Exception ex) {
-            header = null;
-        }
-
-        if (header != null) {
-            if (
-            // netCDF
-            (header[0] == 67) && (header[1] == 68) && (header[2] == 70)
-                    && (header[3] == 1)) {
-                isnc = true;
-            }
-            else {
-                isnc = false;
-            }
-        }
-
-        try {
-            raf.close();
-        }
-        catch (Exception ex) {
-        }
-
-        return isnc;
-    }
-
-    /**
-     * Read HDF5 user block data into byte array.
-     *
-     * @param filename the HDF5 file from which to get the user block
-     *
-     * @return a byte array of user block, or null if there is user data.
-     */
-    public static byte[] getHDF5UserBlock(String filename) {
-        byte[] userBlock = null;
-        RandomAccessFile raf = null;
-
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            try {
-                raf.close();
-            }
-            catch (Throwable err) {
-                ;
-            }
-            raf = null;
-        }
-
-        if (raf == null) {
-            return null;
-        }
-
-        byte[] header = new byte[8];
-        long fileSize = 0;
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-            fileSize = 0;
-        }
-        if (fileSize <= 0) {
-            try {
-                raf.close();
-            }
-            catch (Throwable err) {
-                ;
-            }
-            return null;
-        }
-
-        // The super block is located by searching for the HDF5 file signature
-        // at byte offset 0, byte offset 512 and at successive locations in the
-        // file, each a multiple of two of the previous location, i.e. 0, 512,
-        // 1024, 2048, etc
-        long offset = 0;
-        boolean ish5 = false;
-        while (offset < fileSize) {
-            try {
-                raf.seek(offset);
-                raf.read(header);
-            }
-            catch (Exception ex) {
-                header = null;
-            }
-
-            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
-                    && (header[3] == 70) && (header[4] == 13)
-                    && (header[5] == 10) && (header[6] == 26)
-                    && (header[7] == 10)) {
-                ish5 = true;
-                break; // find the end of user block
-            }
-            else {
-                ish5 = false;
-                if (offset == 0) {
-                    offset = 512;
-                }
-                else {
-                    offset *= 2;
-                }
-            }
-        }
-
-        if (!ish5 || (offset == 0)) {
-            try {
-                raf.close();
-            }
-            catch (Throwable err) {
-                ;
-            }
-            return null;
-        }
-
-        int blockSize = (int) offset;
-        userBlock = new byte[blockSize];
-        try {
-            raf.seek(0);
-            raf.read(userBlock, 0, blockSize);
-        }
-        catch (Exception ex) {
-            userBlock = null;
-        }
-
-        try {
-            raf.close();
-        }
-        catch (Exception ex) {
-        }
-
-        return userBlock;
-    }
-
-    /**
-     * Write HDF5 user block data into byte array.
-     *
-     * @param fin the input filename
-     * @param fout the output filename
-     * @param buf  the data to write into the user block
-     *
-     * @return a byte array of user block, or null if there is user data.
-     */
-    public static boolean setHDF5UserBlock(String fin, String fout, byte[] buf) {
-        boolean ish5 = false;
-
-        if ((buf == null) || (buf.length <= 0)) {
-            return false;
-        }
-
-        File tmpFile = new File(fin);
-        if (!tmpFile.exists()) {
-            return false;
-        }
-
-        // find the end of user block for the input file;
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(fin, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
-
-        if (raf == null) {
-            return false;
-        }
-
-        byte[] header = new byte[8];
-        long fileSize = 0;
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-            fileSize = 0;
-        }
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-            fileSize = 0;
-        }
-        if (fileSize <= 0) {
-            try {
-                raf.close();
-            }
-            catch (Throwable err) {
-                ;
-            }
-            return false;
-        }
-
-        // The super block is located by searching for the HDF5 file signature
-        // at byte offset 0, byte offset 512 and at successive locations in the
-        // file, each a multiple of two of the previous location, i.e. 0, 512,
-        // 1024, 2048, etc
-        long offset = 0;
-        while (offset < fileSize) {
-            try {
-                raf.seek(offset);
-                raf.read(header);
-            }
-            catch (Exception ex) {
-                header = null;
-            }
-
-            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
-                    && (header[3] == 70) && (header[4] == 13)
-                    && (header[5] == 10) && (header[6] == 26)
-                    && (header[7] == 10)) {
-                ish5 = true;
-                break;
-            }
-            else {
-                ish5 = false;
-                if (offset == 0) {
-                    offset = 512;
-                }
-                else {
-                    offset *= 2;
-                }
-            }
-        }
-        try {
-            raf.close();
-        }
-        catch (Throwable err) {
-            ;
-        }
-
-        if (!ish5) {
-            return false;
-        }
-
-        int length = 0;
-        int bsize = 1024;
-        byte[] buffer;
-        BufferedInputStream bi = null;
-        BufferedOutputStream bo = null;
-
-        try {
-            bi = new BufferedInputStream(new FileInputStream(fin));
-        }
-        catch (Exception ex) {
-            try {
-                bi.close();
-            }
-            catch (Exception ex2) {
-            }
-            return false;
-        }
-
-        try {
-            bo = new BufferedOutputStream(new FileOutputStream(fout));
-        }
-        catch (Exception ex) {
-            try {
-                bo.close();
-            }
-            catch (Exception ex2) {
-            }
-            try {
-                bi.close();
-            }
-            catch (Exception ex2) {
-            }
-            return false;
-        }
-
-        // skip the header of original file
-        try {
-            bi.skip(offset);
-        }
-        catch (Exception ex) {
-        }
-
-        // write the header into the new file
-        try {
-            bo.write(buf, 0, buf.length);
-        }
-        catch (Exception ex) {
-        }
-
-        // The super block space is allocated by offset 0, 512, 1024, 2048, etc
-        offset = 512;
-        while (offset < buf.length) {
-            offset *= 2;
-        }
-        int padSize = (int) (offset - buf.length);
-        if (padSize > 0) {
-            byte[] padBuf = new byte[padSize];
-            try {
-                bo.write(padBuf, 0, padSize);
-            }
-            catch (Exception ex) {
-            }
-        }
-
-        // copy the hdf5 file content from input file to the output file
-        buffer = new byte[bsize];
-        try {
-            length = bi.read(buffer, 0, bsize);
-        }
-        catch (Exception ex) {
-            length = 0;
-        }
-        while (length > 0) {
-            try {
-                bo.write(buffer, 0, length);
-                length = bi.read(buffer, 0, bsize);
-            }
-            catch (Exception ex) {
-                length = 0;
-            }
-        }
-
-        try {
-            bo.flush();
-        }
-        catch (Exception ex) {
-        }
-        try {
-            bi.close();
-        }
-        catch (Exception ex) {
-        }
-        try {
-            bo.close();
-        }
-        catch (Exception ex) {
-        }
-        return true;
+        return filter;
     }
 }

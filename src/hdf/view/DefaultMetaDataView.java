@@ -723,7 +723,11 @@ public class DefaultMetaDataView implements MetaDataView {
             if (op == SWT.NO) {
             	FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
             	fChooser.setFileName(fout);
-                // fchooser.setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+            	
+            	DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
+            	fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            	fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+            	fChooser.setFilterIndex(1);
 
             	if(fChooser.open() == null) {
             		return;

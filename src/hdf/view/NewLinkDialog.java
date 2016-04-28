@@ -568,10 +568,11 @@ public class NewLinkDialog extends Dialog {
     private String openTargetFile() {
         FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
         fchooser.setFilterPath(currentDir);
-        fchooser.setFilterExtensions(new String[] {"*.*", "*.h5;*.hdf4;*.hdf;*.h4;*.he5;*.he2;*.hdf5"});
-        fchooser.setFilterNames(new String[] {"All Files", "HDF & more"});
+        
+        DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
+        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
         fchooser.setFilterIndex(1);
-        //fchooser.setFileFilter(DefaultFileFilter.getFileFilter());
 
         if(fchooser.open() == null) return null;
 
