@@ -1006,10 +1006,11 @@ public class DefaultTableView implements TableView {
 
                 FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
                 fchooser.setFilterPath(currentDir);
-                //fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
-                fchooser.setFilterExtensions(new String[] {"*.txt", "*.*"});
-                fchooser.setFilterNames(new String[] {"Text Documents (*.txt)", "All Files (*.*)"});
-                fchooser.setFilterIndex(0);
+                
+                DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
+                fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+                fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+                fchooser.setFilterIndex(1);
 
                 if (fchooser.open() == null) return;
 
@@ -2881,10 +2882,11 @@ public class DefaultTableView implements TableView {
 
         FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
         fchooser.setFilterPath(currentDir);
-        //fchooser.setFileFilter(DefaultFileFilter.getFileFilterBinary());
-        fchooser.setFilterExtensions(new String[] {"*.bin", "*.*"});
-        fchooser.setFilterNames(new String[] {"Binary Files (*.bin)", "All Files (*.*)"});
-        fchooser.setFilterIndex(0);
+        
+        DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
+        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+        fchooser.setFilterIndex(1);
 
         if (fchooser.open() == null) return;
 
@@ -3154,7 +3156,12 @@ public class DefaultTableView implements TableView {
     private void saveAsText() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
         fchooser.setFilterPath(dataset.getFile());
-        //fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
+        
+        DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
+        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+        fchooser.setFilterIndex(1);
+        
         //fchooser.changeToParentDirectory();
         fchooser.setText("Save Current Data To Text File --- " + dataset.getName());
 
@@ -3239,7 +3246,12 @@ public class DefaultTableView implements TableView {
     private void saveAsBinary() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
         fchooser.setFilterPath(dataset.getFile());
-        //fchooser.setFileFilter(DefaultFileFilter.getFileFilterBinary());
+        
+        DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
+        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+        fchooser.setFilterIndex(1);
+
         //fchooser.changeToParentDirectory();
         fchooser.setText("Save Current Data To Binary File --- " + dataset.getName());
 

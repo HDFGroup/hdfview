@@ -130,7 +130,14 @@ public class ImageConversionDialog extends Dialog {
     			fChooser.setFilterPath(currentDir);
     			
     			if(isConvertedFromImage) {
-    			    //fChooser.setFileFilter(DefaultFileFilter.getImageFileFilter());
+    				DefaultFileFilter filter = DefaultFileFilter.getImageFileFilter();
+    				fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+    				fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+    				fChooser.setFilterIndex(1);
+    			} else {
+    				fChooser.setFilterExtensions(new String[] {"*.*"});
+    				fChooser.setFilterNames(new String[] {"All Files"});
+    				fChooser.setFilterIndex(0);
     			}
     				
     		    String filename = fChooser.open();
@@ -158,6 +165,10 @@ public class ImageConversionDialog extends Dialog {
     	browseButton.addSelectionListener(new SelectionAdapter() {
     		public void widgetSelected(SelectionEvent e) {
     			FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
+    			
+    			fChooser.setFilterExtensions(new String[] {"*.*"});
+    			fChooser.setFilterNames(new String[] {"All Files"});
+    			fChooser.setFilterIndex(0);
     			
     			String filename = fChooser.open();
     			

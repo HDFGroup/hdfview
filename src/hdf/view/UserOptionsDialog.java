@@ -353,6 +353,9 @@ public class UserOptionsDialog extends Dialog {
                 final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(workDir);
                 fChooser.setText("Select a Directory");
+                fChooser.setFilterExtensions(new String[] {"*.*"});
+                fChooser.setFilterNames(new String[] {"All Files"});
+                fChooser.setFilterIndex(0);
                 //fchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
                 if(fChooser.open() == null) {
@@ -393,6 +396,9 @@ public class UserOptionsDialog extends Dialog {
             public void widgetSelected(SelectionEvent e) {
                 final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(rootDir);
+                fChooser.setFilterExtensions(new String[] {"*.*"});
+                fChooser.setFilterNames(new String[] {"All Files"});
+                fChooser.setFilterIndex(0);
 
                 if(fChooser.open() == null) {
                     return;

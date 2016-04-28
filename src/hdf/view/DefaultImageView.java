@@ -667,6 +667,10 @@ public class DefaultImageView implements ImageView {
             public void widgetSelected(SelectionEvent e) {
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(ViewProperties.getWorkDir());
+                
+                fChooser.setFilterExtensions(new String[] {"*.*"});
+                fChooser.setFilterNames(new String[] {"All Files"});
+                fChooser.setFilterIndex(0);
 
                 if(fChooser.open() == null) {
                     return;
@@ -694,13 +698,14 @@ public class DefaultImageView implements ImageView {
                 String workDir = ViewProperties.getWorkDir() + File.separator;
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(workDir);
-
-                //FileNameExtensionFilter filter = new FileNameExtensionFilter("Color lookup table", "lut");
-
+                
+                fChooser.setFilterExtensions(new String[] {"*.*", "*.lut"});
+                fChooser.setFilterNames(new String[] {"All Files", "Color Lookup Table"});
+                fChooser.setFilterIndex(1);
+                
                 File pfile = Tools.checkNewFile(workDir, ".lut");
 
                 fChooser.setFileName(pfile.getName());
-                //fChooser.setFileFilter(filter);
 
                 if (fChooser.open() == null) {
                     return;
@@ -1750,19 +1755,31 @@ public class DefaultImageView implements ImageView {
         fChooser.setFilterPath(dataset.getFile());
         fChooser.setOverwrite(true);
 
+        DefaultFileFilter filter = null;
+        
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
-            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterJPEG());
-            // } else if (type.equals(Tools.FILE_TYPE_TIFF)) {
-            // fchooser.setFileFilter(DefaultFileFilter.getFileFilterTIFF());
+        	filter = DefaultFileFilter.getFileFilterJPEG();
+        } else if (type.equals(Tools.FILE_TYPE_TIFF)) {
+        	filter = DefaultFileFilter.getFileFilterTIFF();
         }
         else if (type.equals(Tools.FILE_TYPE_PNG)) {
-            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterPNG());
+        	filter = DefaultFileFilter.getFileFilterPNG();
         }
         else if (type.equals(Tools.FILE_TYPE_GIF)) {
-            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterGIF());
+        	filter = DefaultFileFilter.getFileFilterGIF();
         }
         else if (type.equals(Tools.FILE_TYPE_BMP)) {
-            //fChooser.setFileFilter(DefaultFileFilter.getFileFilterBMP());
+        	filter = DefaultFileFilter.getFileFilterBMP();
+        }
+        
+        if (filter == null) {
+        	fChooser.setFilterExtensions(new String[] {"*.*"});
+        	fChooser.setFilterNames(new String[] {"All Files"});
+        	fChooser.setFilterIndex(0);
+        } else {
+        	fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        	fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+        	fChooser.setFilterIndex(1);
         }
 
         fChooser.setText("Save Current Image To " + type + " File --- " + dataset.getName());

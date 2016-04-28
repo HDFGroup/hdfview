@@ -2247,6 +2247,187 @@ public final class Tools {
         }
         return true;
     }
+    
+    /**
+     * look at the first 4 bytes of the file to see if it is an HDF4 file.
+     * byte[0]=14, byte[1]=3, byte[2]=19, byte[3]=1 or if it is a netCDF file
+     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1
+     *
+     * @param filename the file to test if HDF4
+     *
+     * @return true if the file is of type HDF4
+     */
+    public static boolean isHDF4(String filename) {
+        boolean ish4 = false;
+        RandomAccessFile raf = null;
+
+        try {
+            raf = new RandomAccessFile(filename, "r");
+        }
+        catch (Exception ex) {
+            raf = null;
+        }
+
+        if (raf == null) {
+            return false;
+        }
+
+        byte[] header = new byte[4];
+        try {
+            raf.read(header);
+        }
+        catch (Exception ex) {
+            header = null;
+        }
+
+        if (header != null) {
+            if (
+            // HDF4
+            ((header[0] == 14) && (header[1] == 3) && (header[2] == 19) && (header[3] == 1))
+            /*
+             * // netCDF || (header[0]==67 && header[1]==68 && header[2]==70 &&
+             * header[3]==1)
+             */
+            ) {
+                ish4 = true;
+            }
+            else {
+                ish4 = false;
+            }
+        }
+
+        try {
+            raf.close();
+        }
+        catch (Exception ex) {
+        }
+
+        return ish4;
+    }
+
+    /**
+     * look at the first 8 bytes of the file to see if it is an HDF5 file.
+     * byte[0]=-199 which is 137 in unsigned byte, byte[1]=72, byte[2]=68,
+     * byte[3]=70, byte[4]=13, byte[5]=10, byte[6]=26, byte[7]=10
+     *
+     * @param filename the file to test if HDF5
+     *
+     * @return true if the file is of type HDF5
+     */
+    public static boolean isHDF5(String filename) {
+        boolean ish5 = false;
+        RandomAccessFile raf = null;
+
+        try {
+            raf = new RandomAccessFile(filename, "r");
+        }
+        catch (Exception ex) {
+            raf = null;
+        }
+
+        if (raf == null) {
+            return false;
+        }
+
+        byte[] header = new byte[8];
+        long fileSize = 0;
+        try {
+            fileSize = raf.length();
+        }
+        catch (Exception ex) {
+        }
+
+        // The super block is located by searching for the HDF5 file signature
+        // at byte offset 0, byte offset 512 and at successive locations in the
+        // file, each a multiple of two of the previous location, i.e. 0, 512,
+        // 1024, 2048, etc
+        long offset = 0;
+        while (!ish5 && (offset < fileSize)) {
+            try {
+                raf.seek(offset);
+                raf.read(header);
+            }
+            catch (Exception ex) {
+                header = null;
+            }
+
+            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
+                    && (header[3] == 70) && (header[4] == 13)
+                    && (header[5] == 10) && (header[6] == 26)
+                    && (header[7] == 10)) {
+                ish5 = true;
+            }
+            else {
+                ish5 = false;
+                if (offset == 0) {
+                    offset = 512;
+                }
+                else {
+                    offset *= 2;
+                }
+            }
+        }
+
+        try {
+            raf.close();
+        }
+        catch (Exception ex) {
+        }
+
+        return ish5;
+    }
+
+    /**
+     * look at the first 4 bytes of the file to see if it is a netCDF file
+     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1 or
+     *
+     * @param filename the file to test if netcdf
+     *
+     * @return true if the file is of type netcdf
+     */
+    public static boolean isNetcdf(String filename) {
+        boolean isnc = false;
+        RandomAccessFile raf = null;
+
+        try {
+            raf = new RandomAccessFile(filename, "r");
+        }
+        catch (Exception ex) {
+            raf = null;
+        }
+
+        if (raf == null) {
+            return false;
+        }
+
+        byte[] header = new byte[4];
+        try {
+            raf.read(header);
+        }
+        catch (Exception ex) {
+            header = null;
+        }
+
+        if (header != null) {
+            if (
+            // netCDF
+            (header[0] == 67) && (header[1] == 68) && (header[2] == 70)
+                    && (header[3] == 1)) {
+                isnc = true;
+            }
+            else {
+                isnc = false;
+            }
+        }
+
+        try {
+            raf.close();
+        }
+        catch (Exception ex) {
+        }
+
+        return isnc;
+    }
 
     /**
      * Launch default browser for a given URL.

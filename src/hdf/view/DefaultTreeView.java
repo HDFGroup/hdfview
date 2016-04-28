@@ -540,14 +540,20 @@ public class DefaultTreeView implements TreeView {
                 }
 
                 FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+                
+                DefaultFileFilter filter = null;
 
                 if(filetype == FileFormat.FILE_TYPE_HDF4) {
                     fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
-                    //setFileFilter(DefaultFileFilter.getFileFilterHDF4());
+                    filter = DefaultFileFilter.getFileFilterHDF4();
                 } else {
                     fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
-                    //setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+                    filter = DefaultFileFilter.getFileFilterHDF5();
                 }
+                
+                fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+                fChooser.setFilterNames(new String[] {filter.getDescription()});
+                fChooser.setFilterIndex(0);
 
                 String filename = fChooser.open();
 
@@ -1754,7 +1760,11 @@ public class DefaultTreeView implements TreeView {
 
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
-        //setFileFilter(DefaultFileFilter.getFileFilterHDF4());
+        
+        DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF4();
+        fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+        fChooser.setFilterNames(new String[] {filter.getDescription()});
+        fChooser.setFilterIndex(0);
 
         String filename = fChooser.open();
 
@@ -1874,7 +1884,11 @@ public class DefaultTreeView implements TreeView {
 
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
-        //setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+        
+        DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
+        fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+        fChooser.setFilterNames(new String[] {filter.getDescription()});
+        fChooser.setFilterIndex(0);
 
         String filename = fChooser.open();
 
@@ -1958,20 +1972,24 @@ public class DefaultTreeView implements TreeView {
         String filename = null;
         Dataset dataset = (Dataset) selectedObject;
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-        fChooser.setFilterExtensions(new String[] {"*.txt", "*.bin"});
-        fChooser.setFilterNames(new String[] {"Text File", "Binary File"});
         fChooser.setFilterPath(dataset.getFile().substring(0, dataset.getFile().lastIndexOf(File.separator)));
+        
+        DefaultFileFilter filter = null;        
 
         if(binaryOrder == 99) {
             fChooser.setText("Save Dataset Data To Text File --- " + dataset.getName());
             fChooser.setFileName(dataset.getName() + ".txt");
-            fChooser.setFilterIndex(0);
+            filter = DefaultFileFilter.getFileFilterText();
         }
         else {
             fChooser.setText("Save Current Data To Binary File --- " + dataset.getName());
             fChooser.setFileName(dataset.getName() + ".bin");
-            fChooser.setFilterIndex(1);
+            filter = DefaultFileFilter.getFileFilterBinary();
         }
+        
+        fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+        fChooser.setFilterIndex(1);
 
         filename = fChooser.open();
         if(filename == null) return;

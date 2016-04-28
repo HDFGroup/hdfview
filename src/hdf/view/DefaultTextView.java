@@ -477,7 +477,12 @@ public class DefaultTextView implements TextView {
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setText("Save Current Data To Text File --- " + dataset.getName());
         fChooser.setFilterPath(dataset.getFileFormat().getParent());
-        // fchooser.setFileFilter(DefaultFileFilter.getFileFilterText());
+        
+        DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
+        fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+        fChooser.setFilterIndex(1);
+
         // fchooser.changeToParentDirectory();
         fChooser.setFileName(dataset.getName() + ".txt");
         fChooser.setOverwrite(true);

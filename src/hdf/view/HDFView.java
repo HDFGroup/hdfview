@@ -76,7 +76,7 @@ import hdf.HDFVersions;
  * be compiled with the library package (hdf.hdflib and hdf.hdf5lib).
  *
  * @author Jordan T. Henderson
- * @version 2.4 DATE
+ * @version 2.4 //2015
  */
 public class HDFView implements ViewManager, DropTargetListener {
 
@@ -503,7 +503,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 
                 FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
                 fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
-                //setFileFilter(DefaultFileFilter.getFileFilterHDF4());
+                
+                DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF4();
+                fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+                fChooser.setFilterNames(new String[] {filter.getDescription()});
+                fChooser.setFilterIndex(0);
 
                 String filename = fChooser.open();
 
@@ -553,7 +557,11 @@ public class HDFView implements ViewManager, DropTargetListener {
 
                 FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
                 fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
-                //setFileFilter(DefaultFileFilter.getFileFilterHDF5());
+                
+                DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
+                fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+                fChooser.setFilterNames(new String[] {filter.getDescription()});
+                fChooser.setFilterIndex(0);
 
                 String filename = fChooser.open();
 
@@ -1588,10 +1596,13 @@ public class HDFView implements ViewManager, DropTargetListener {
         else {
             log.trace("openLocalFile filename is null");
             FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
-            fChooser.setFilterExtensions(new String[] {"*.*", "*.h4;*.h5;*.hdf;*.hdf4;*.hdf5;*.he2;*.he5"});
-            fChooser.setFilterNames(new String[] {"All Files", "HDF File"});
-            fChooser.setFilterIndex(0);
             fChooser.setFilterPath(null);
+            
+            DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
+            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+            fChooser.setFilterIndex(1);
+            
             fChooser.open();
 
             selectedFilenames = fChooser.getFileNames();
