@@ -208,6 +208,12 @@ public class ViewProperties extends Properties {
     public ViewProperties(String viewRoot) {
         super();
         rootDir = viewRoot;
+        log.trace("rootDir is {}", rootDir);
+        String workPath = System.getProperty("hdfview.workdir");
+        log.trace("hdfview.workdir={}", workPath);
+        if (workPath != null) {
+            workDir = workPath;
+        }
 
         recentFiles = new Vector<String>(MAX_RECENT_FILES + 5);
 
@@ -1392,12 +1398,15 @@ public class ViewProperties extends Properties {
     /** @return the default work directory, where the open file starts. */
     public static String getWorkDir() {
         String workPath = workDir;
+        log.trace("getWorkDir: workDir={}", workDir);
         if (workPath == null) {
-            if (workDir.equals("user.home")) {
+            workPath = System.getProperty("hdfview.workdir");
+            log.trace("getWorkDir: hdfview.workdir={}", workPath);
+            if (workPath == null) {
                 workPath = System.getProperty("user.home");
             }
         }
-        log.trace("getWorkDir: workPath={}", workPath);
+        log.trace("getWorkDir: final workPath={}", workPath);
         return workPath;
     }
 
