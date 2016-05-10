@@ -294,7 +294,7 @@ public class H4File extends FileFormat {
             fid = 0;
         }
         else {
-            log.trace("HDFLibrary - open({}}:", fullFileName, flag);
+            log.trace("HDFLibrary - open({},{})", fullFileName, flag);
             fid = HDFLibrary.Hopen(fullFileName, flag);
             HDFLibrary.Vstart(fid);
             grid = HDFLibrary.GRstart(fid);

@@ -44,7 +44,7 @@ public class FitsDatatype extends Datatype
      * <LI>to create 64-bit double<br>
      * FitsDatatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
      * </OL>
-     * <p>
+     *
      * @param tclass the class of the datatype.
      * @param tsize the size of the datatype in bytes.
      * @param torder the order of the datatype.
@@ -56,7 +56,7 @@ public class FitsDatatype extends Datatype
 
     /**
      * Create a Datatype with a given fits native datatype.
-     * <p>
+     *
      * @param theType the fits native datatype.
      */
     public FitsDatatype(int theType) {
@@ -75,7 +75,7 @@ public class FitsDatatype extends Datatype
      * Allocate an one-dimensional array of byte, short, int, long, float, double,
      * or String to store data retrieved from an fits file based on the given
      * fits datatype and dimension sizes.
-     * <p>
+     *
      * @param dtype the fits datatype.
      * @param size the total size of the array.
      * @return the array object if successful and null otherwise.
@@ -121,7 +121,7 @@ public class FitsDatatype extends Datatype
 
     /**
      * Translate fits datatype identifier into FitsDatatype.
-     * <p>
+     *
      * @param nativeID the fits native datatype.
      */
     @Override
@@ -182,13 +182,13 @@ public class FitsDatatype extends Datatype
             default:
                 if (datatypeClass==Datatype.CLASS_STRING) {
                     description = "String";
-                } 
+                }
                 else if (datatypeClass==Datatype.CLASS_CHAR) {
                     description = "Char";
-                } 
+                }
                 else if (datatypeClass==Datatype.CLASS_INTEGER) {
                     description = "Integer";
-                } 
+                }
                 else if (datatypeClass==Datatype.CLASS_FLOAT) {
                     description = "Float";
                 }
@@ -210,21 +210,21 @@ public class FitsDatatype extends Datatype
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = BasicHDU.BITPIX_BYTE;
-            } 
+            }
             else if (datatypeSize == 2) {
                 nativeType = BasicHDU.BITPIX_SHORT;
-            } 
+            }
             else if (datatypeSize == 4) {
                 nativeType = BasicHDU.BITPIX_INT;
-            } 
+            }
             else if (datatypeSize == 8) {
                 nativeType = BasicHDU.BITPIX_LONG;
             }
-        } 
+        }
         else if (datatypeClass == CLASS_FLOAT) {
             if (datatypeSize == 4) {
                 nativeType = BasicHDU.BITPIX_FLOAT;
-            } 
+            }
             else if (datatypeSize == 8) {
                 nativeType = BasicHDU.BITPIX_DOUBLE;
             }
@@ -243,5 +243,5 @@ public class FitsDatatype extends Datatype
   //Implementing DataFormat
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
-    }    
+    }
 }

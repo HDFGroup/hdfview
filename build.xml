@@ -553,7 +553,7 @@
     <copy todir="${release.dir}/share/doc">
       <fileset dir="${docs.dir}" excludes="UserGuide.tar.gz" />
     </copy>
-    <untar src="${docs.dir}/UserGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
+    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/share/samples">

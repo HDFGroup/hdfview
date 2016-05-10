@@ -212,12 +212,13 @@ public class ViewProperties extends Properties {
         recentFiles = new Vector<String>(MAX_RECENT_FILES + 5);
 
         // find the property file
-        String userHome, userDir, propertyFileName;
+        String userHome, userDir, propertyFileName, h5v;
 
         // look for the property file in the user's home directory
         propertyFileName = USER_PROPERTY_FILE;
         userHome = System.getProperty("user.home") + File.separator + propertyFileName;
         userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
+        h5v = viewRoot + File.separator + fn;
 
         if ((new File(userHome)).exists()) {
             propertyFile = userHome;
@@ -227,8 +228,8 @@ public class ViewProperties extends Properties {
         }
         else // create new property file at user home directory
         {
-            propertyFile = userHome;
-            File pFile = new File(userHome);
+            propertyFile = h5v;
+            File pFile = new File(h5v);
             try {
                 pFile.createNewFile();
             }
