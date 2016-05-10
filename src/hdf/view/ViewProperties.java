@@ -218,7 +218,7 @@ public class ViewProperties extends Properties {
         propertyFileName = USER_PROPERTY_FILE;
         userHome = System.getProperty("user.home") + File.separator + propertyFileName;
         userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
-        h5v = viewRoot + File.separator + fn;
+        h5v = viewRoot + File.separator + propertyFileName;
 
         if ((new File(userHome)).exists()) {
             propertyFile = userHome;
