@@ -75,7 +75,7 @@ public class H4Datatype extends Datatype
      *
      * @param nativeID the native datatype identifier.
      */
-    public H4Datatype(int nativeID)
+    public H4Datatype(long nativeID)
     {
         super(nativeID);
 
@@ -93,12 +93,12 @@ public class H4Datatype extends Datatype
      * @see hdf.object.Datatype#fromNative(int)
      */
     @Override
-    public void fromNative(int tid)
+    public void fromNative(long tid)
     {
         datatypeOrder = NATIVE;
         datatypeSign = NATIVE;
 
-        switch(tid)
+        switch((int)tid)
         {
             case HDFConstants.DFNT_CHAR:
                 datatypeClass = CLASS_CHAR;
@@ -171,7 +171,7 @@ public class H4Datatype extends Datatype
      * @throws OutOfMemoryError
      *             if the array cannot be allocated
     */
-    public static final Object allocateArray(int datatype, int datasize)
+    public static final Object allocateArray(long datatype, int datasize)
     throws OutOfMemoryError
     {
         if (datasize <= 0) {
@@ -180,7 +180,7 @@ public class H4Datatype extends Datatype
 
         Object data = null;
 
-        switch(datatype)
+        switch((int)datatype)
         {
             case HDFConstants.DFNT_CHAR:
             case HDFConstants.DFNT_UCHAR8:
@@ -231,11 +231,11 @@ public class H4Datatype extends Datatype
      *
      *  @return  a description String
      */
-    public static final String getDatatypeDescription(int datatype)
+    public static final String getDatatypeDescription(long datatype)
     {
         String description = "Unknown";
 
-        switch(datatype)
+        switch((int)datatype)
         {
             case HDFConstants.DFNT_CHAR:
                 description = "8-bit character";
@@ -298,11 +298,11 @@ public class H4Datatype extends Datatype
      *
      *  @return True is the datatype is an unsigned integer; otherwise returns false.
      */
-    public static final boolean isUnsigned(int datatype)
+    public static final boolean isUnsigned(long datatype)
     {
         boolean unsigned = false;;
 
-        switch(datatype)
+        switch((int)datatype)
         {
             case HDFConstants.DFNT_UCHAR8:
             case HDFConstants.DFNT_UINT8:
@@ -324,11 +324,11 @@ public class H4Datatype extends Datatype
      * @see hdf.object.Datatype#toNative()
      */
     @Override
-    public int toNative()
+    public long toNative()
     {
-        int tid = -1;
+        long tid = -1;
         int tclass = getDatatypeClass();
-        int tsize = getDatatypeSize();
+        int tsize = (int) getDatatypeSize();
 
         // figure the datatype
         switch (tclass)
@@ -398,7 +398,7 @@ public class H4Datatype extends Datatype
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(int id) {;}
+    public void close(long id) {;}
 
     //Implementing DataFormat
     public List getMetadata(int... attrPropList) throws Exception {

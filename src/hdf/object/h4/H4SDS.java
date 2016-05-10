@@ -122,10 +122,10 @@ public class H4SDS extends ScalarDS
     /**
      * The SDS interface identifier obtained from SDstart(filename, access)
      */
-    private int sdid;
+    private long sdid;
 
     /** the datatype identifier */
-    private int datatypeID = -1;
+    private long datatypeID = -1;
 
     private int nAttributes = -1;
 
@@ -163,7 +163,7 @@ public class H4SDS extends ScalarDS
         if (nAttributes < 0) {
             sdid = ((H4File)getFileFormat()).getSDAccessID();
 
-            int id = open();
+            long id = open();
             try { // retireve attributes of the dataset
                 String[] objName = {""};
                 int[] sdInfo = {0, 0, 0};
@@ -206,7 +206,8 @@ public class H4SDS extends ScalarDS
     throws Exception
     {
         Dataset dataset = null;
-        int srcdid=-1, dstdid=-1, tid=-1, size=1, theRank=2;
+        long srcdid=-1, dstdid=-1, tid=-1;
+        int size=1, theRank=2;
         String path=null;
         int[] count=null, start=null;
 
@@ -264,7 +265,7 @@ public class H4SDS extends ScalarDS
 
         int ref = HDFLibrary.SDidtoref(dstdid);
         if (!pgroup.isRoot()) {
-            int vgid = pgroup.open();
+            long vgid = pgroup.open();
             HDFLibrary.Vaddtagref(vgid, HDFConstants.DFTAG_NDG, ref);
             pgroup.close(vgid);
         }
@@ -311,7 +312,7 @@ public class H4SDS extends ScalarDS
             init();
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return null;
         }
@@ -357,7 +358,7 @@ public class H4SDS extends ScalarDS
             init();
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return null;
         }
@@ -424,7 +425,7 @@ public class H4SDS extends ScalarDS
         }
 
         log.trace("write(): start");
-        int id = open();
+        long id = open();
         if (id < 0) {
             return;
         }
@@ -469,7 +470,7 @@ public class H4SDS extends ScalarDS
             return attributeList;
         }
 
-        int id = open();
+        long id = open();
         String[] objName = {""};
         int[] sdInfo = {0, 0, 0};
         try {
@@ -573,9 +574,9 @@ public class H4SDS extends ScalarDS
 
     // Implementing HObject
     @Override
-    public int open()
+    public long open()
     {
-        int id=-1;
+        long id=-1;
 
         try {
             int index = 0;
@@ -599,7 +600,7 @@ public class H4SDS extends ScalarDS
 
     // Implementing HObject
     @Override
-    public void close(int id)
+    public void close(long id)
     {
         try { HDFLibrary.SDendaccess(id); }
         catch (HDFException ex) { ; }
@@ -616,7 +617,7 @@ public class H4SDS extends ScalarDS
         }
 
         log.trace("init(): start");
-        int id = open();
+        long id = open();
         String[] objName = {""};
         String[] dimName = {""};
         int[] dimInfo = {0, 0, 0};
@@ -648,7 +649,7 @@ public class H4SDS extends ScalarDS
             try {
                 dimNames = new String[rank];
                 for (int i=0; i<rank; i++) {
-                    int dimid = HDFLibrary.SDgetdimid(id, i);
+                    long dimid = HDFLibrary.SDgetdimid(id, i);
                     HDFLibrary.SDdiminfo(dimid, dimName, dimInfo);
                     dimNames[i] = dimName[0];
                 }
@@ -859,11 +860,11 @@ public class H4SDS extends ScalarDS
             throw new HDFException("Unlimted cannot be used with chunking or compression");
         }
 
-        int sdid = (file).getSDAccessID();
-        int sdsid = -1;
-        int vgid = -1;
+        long sdid = (file).getSDAccessID();
+        long sdsid = -1;
+        long vgid = -1;
         // datatype
-        int tid = type.toNative();
+        long tid = type.toNative();
 
         if(tid >= 0) {
             try {
@@ -987,7 +988,7 @@ public class H4SDS extends ScalarDS
     /**
      * copy attributes from one SDS to another SDS
      */
-    private void copyAttribute(int srcdid, int dstdid)
+    private void copyAttribute(long srcdid, long dstdid)
     {
         try {
             String[] objName = {""};

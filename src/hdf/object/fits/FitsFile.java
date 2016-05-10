@@ -75,12 +75,12 @@ public class FitsFile extends FileFormat
         isReadOnly = true;
         isFileOpen = false;
         this.fid = -1;
-        try { 
-        	fitsFile = new Fits(fullFileName); 
+        try {
+            fitsFile = new Fits(fullFileName);
         }
         catch (Exception ex) {
             if(!pathname.isEmpty())
-            	log.debug("Fits({}):", fullFileName, ex);
+                log.debug("Fits({}):", fullFileName, ex);
         }
     }
 
@@ -107,39 +107,39 @@ public class FitsFile extends FileFormat
     {
         boolean is_fits = false;
         RandomAccessFile raf = null;
-        try { 
-        	raf = new RandomAccessFile(filename, "r"); 
+        try {
+            raf = new RandomAccessFile(filename, "r");
         }
-        catch (Exception ex) { 
-        	raf = null; 
+        catch (Exception ex) {
+            raf = null;
         }
 
         if (raf == null) {
-            try { 
-            	raf.close();
-            } 
+            try {
+                raf.close();
+            }
             catch (Exception ex) {
-            	log.debug("closing RandomAccessFile({}):", filename, ex);
+                log.debug("closing RandomAccessFile({}):", filename, ex);
             }
             return false;
         }
 
         byte[] header = new byte[80];
-        try { 
-        	raf.read(header); 
+        try {
+            raf.read(header);
         }
-        catch (Exception ex) { 
-        	header = null; 
+        catch (Exception ex) {
+            header = null;
         }
 
         if (header != null) {
             String front = new String(header, 0, 9);
             if (!front.startsWith("SIMPLE  =")) {
-                try { 
-                	raf.close();
-                } 
+                try {
+                    raf.close();
+                }
                 catch (Exception ex) {
-                	log.debug("closing RandomAccessFile({}):", filename, ex);
+                    log.debug("closing RandomAccessFile({}):", filename, ex);
                 }
                 return false;
             }
@@ -147,11 +147,11 @@ public class FitsFile extends FileFormat
             String back = new String(header, 9, 70);
             back = back.trim();
             if ((back.length() < 1) || (back.charAt(0) != 'T')) {
-                try { 
-                	raf.close();
-                } 
+                try {
+                    raf.close();
+                }
                 catch (Exception ex) {
-                	log.debug("closing RandomAccessFile({}):", filename, ex);
+                    log.debug("closing RandomAccessFile({}):", filename, ex);
                 }
                 return false;
             }
@@ -159,11 +159,11 @@ public class FitsFile extends FileFormat
             is_fits = true;;
         }
 
-        try { 
-        	raf.close();
-        } 
+        try {
+            raf.close();
+        }
         catch (Exception ex) {
-        	log.debug("closing RandomAccessFile({}):", filename, ex);
+            log.debug("closing RandomAccessFile({}):", filename, ex);
         }
 
         return is_fits;
@@ -180,7 +180,7 @@ public class FitsFile extends FileFormat
      * @see hdf.object.FileFormat@createInstance(java.lang.String, int)
      */
     @Override
-    public FileFormat createInstance(String filename, int access) 
+    public FileFormat createInstance(String filename, int access)
                               throws Exception {
         return new FitsFile(filename);
     }
@@ -188,7 +188,7 @@ public class FitsFile extends FileFormat
 
     // Implementing FileFormat
     @Override
-    public int open() throws Exception {
+    public long open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
             rootObject = loadTree();
@@ -220,11 +220,11 @@ public class FitsFile extends FileFormat
 
         BasicHDU[] hdus = null;
 
-        try { 
-        	hdus = fitsFile.read(); 
+        try {
+            hdus = fitsFile.read();
         }
         catch (Exception ex) {
-        	log.debug("fitsFile.read():", ex);
+            log.debug("fitsFile.read():", ex);
         }
 
         if (hdus == null) {
@@ -242,17 +242,17 @@ public class FitsFile extends FileFormat
             // only deal with ImageHDU and TableHDU
             if (hdu instanceof ImageHDU) {
                 hduName = "ImageHDU #"+nImageHDU++;
-            } 
+            }
             else if (hdu instanceof RandomGroupsHDU) {
                 hduName = "RandomGroupsHDU #"+nImageHDU++;
-            } 
+            }
             else if (hdu instanceof TableHDU) {
                 if (hdu instanceof AsciiTableHDU) {
                     hduName = "AsciiTableHDU #"+nTableHDU++;
-                } 
+                }
                 else if (hdu instanceof BinaryTableHDU) {
                     hduName = "BinaryTableHDU #"+nTableHDU++;
-                } 
+                }
                 else {
                     hduName = "TableHDU #"+nTableHDU++;
                 }
@@ -400,7 +400,7 @@ public class FitsFile extends FileFormat
     /**
      * Copy attributes of the source object to the destination object.
      */
-    public void copyAttributes(int src_id, int dst_id) {
+    public void copyAttributes(long src_id, long dst_id) {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }

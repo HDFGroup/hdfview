@@ -2326,7 +2326,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      * @param args  the command line arguments
      */
     public static void main(String[] args) {
-        String rootDir = System.getProperty("hdfview.root");
+        String rootDir = System.getProperty("hdfview.workdir");
         if(rootDir == null) rootDir = System.getProperty("user.dir");
 
         File tmpFile = null;

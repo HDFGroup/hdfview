@@ -110,7 +110,7 @@ public class H4Vdata extends CompoundDS
     /**
      * The data types of the members of the compound dataset.
      */
-    private int[] memberTIDs;
+    private long[] memberTIDs;
 
     private int nAttributes = -1;
 
@@ -147,7 +147,7 @@ public class H4Vdata extends CompoundDS
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
-            int id = open();
+            long id = open();
             try {
                 nAttributes = HDFLibrary.VSnattrs(id);
             }
@@ -184,7 +184,7 @@ public class H4Vdata extends CompoundDS
             return null; // this Vdata does not have any filed
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return null;
         }
@@ -231,7 +231,7 @@ public class H4Vdata extends CompoundDS
             return null; // this Vdata does not have any filed
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return null;
         }
@@ -383,7 +383,7 @@ public class H4Vdata extends CompoundDS
             return attributeList;
         }
 
-        int id = open();
+        long id = open();
 
         if (id < 0) {
             return attributeList;
@@ -493,9 +493,9 @@ public class H4Vdata extends CompoundDS
 
     // Implementing DataFormat
     @Override
-    public int open()
+    public long open()
     {
-        int vsid = -1;
+        long vsid = -1;
 
         // try to open with write permission
         log.trace("open(): start");
@@ -522,7 +522,7 @@ public class H4Vdata extends CompoundDS
 
     // Implementing DataFormat
     @Override
-    public void close(int vsid)
+    public void close(long vsid)
     {
         try {
             HDFLibrary.VSdetach(vsid);
@@ -543,7 +543,7 @@ public class H4Vdata extends CompoundDS
             return; // already called. Initialize only once
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return;
         }
@@ -576,7 +576,7 @@ public class H4Vdata extends CompoundDS
         startDims[0] = 0;
 
         memberNames = new String[numberOfMembers];
-        memberTIDs = new int[numberOfMembers];
+        memberTIDs = new long[numberOfMembers];
         memberTypes = new Datatype[numberOfMembers];
         memberOrders = new int[numberOfMembers];
         isMemberSelected = new boolean[numberOfMembers];

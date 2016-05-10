@@ -58,7 +58,7 @@ public class FitsDataset extends ScalarDS
 
     /**
      * Constructs an FitsDataset object with specific netcdf variable.
-     * <p>
+     *
      * @param fileFormat the netcdf file.
      * @param ncDataset the netcdf variable.
      * @param oid the unique identifier for this dataset.
@@ -72,7 +72,7 @@ public class FitsDataset extends ScalarDS
         unsignedConverted = false;
         nativeDataset = hdu;
     }
-    
+
     /*
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
@@ -113,9 +113,9 @@ public class FitsDataset extends ScalarDS
             return null;
         }
 
-        try { 
+        try {
             fitsData = nativeDataset.getData().getData();
-        } 
+        }
         catch (Exception ex) {
             throw new UnsupportedOperationException("This implementation only supports integer and float dataset. " +
                     "It may not work for other datatypes. \n"+ex);
@@ -216,14 +216,14 @@ public class FitsDataset extends ScalarDS
      * @see hdf.object.HObject#open()
      */
     @Override
-    public int open() { return -1;}
+    public long open() { return -1;}
 
     /*
      * (non-Javadoc)
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(int did) {}
+    public void close(long did) {}
 
     /*
      * (non-Javadoc)
@@ -241,10 +241,10 @@ public class FitsDataset extends ScalarDS
 
         int[] axes= null;
         try {
-        	axes = nativeDataset.getAxes(); 
+            axes = nativeDataset.getAxes();
         }
         catch (Exception ex) {
-        	log.debug("nativeDataset.getAxes():", ex);
+            log.debug("nativeDataset.getAxes():", ex);
         }
 
         if (axes == null) {
@@ -321,6 +321,7 @@ public class FitsDataset extends ScalarDS
 
     /**
      * Creates a new dataset.
+     *
      * @param name the name of the dataset to create.
      * @param pgroup the parent group of the new dataset.
      * @param type the datatype of the dataset.
@@ -329,6 +330,7 @@ public class FitsDataset extends ScalarDS
      * @param chunk the chunk size of the dataset.
      * @param gzip the level of the gzip compression.
      * @param data the array of data values.
+     *
      * @return the new dataset if successful. Otherwise returns null.
      */
     public static FitsDataset create(
@@ -415,6 +417,6 @@ public class FitsDataset extends ScalarDS
 
     //Implementing DataFormat
     public List getMetadata(int... attrPropList) throws Exception {
-        throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");    
+        throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 }

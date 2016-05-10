@@ -87,7 +87,7 @@ public class H4Group extends Group
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
-            int vgid = open();
+            long vgid = open();
             try {
                 nAttributes = HDFLibrary.Vnattrs(vgid);
                 nMembersInFile = HDFLibrary.Vntagrefs(vgid);
@@ -111,7 +111,7 @@ public class H4Group extends Group
             attributeList = new Vector();
         }
 
-        int vgid = open();
+        long vgid = open();
         if (vgid <= 0) {
             return attributeList;
         }
@@ -199,9 +199,9 @@ public class H4Group extends Group
 
     // Implementing HObject
     @Override
-    public int open()
+    public long open()
     {
-        int vgid = -1;
+        long vgid = -1;
 
         // try to open with write permission
         try {
@@ -226,7 +226,7 @@ public class H4Group extends Group
 
     /** close group access. */
     @Override
-    public void close(int vgid)
+    public void close(long vgid)
     {
         try {
             HDFLibrary.Vdetach(vgid);
@@ -265,12 +265,12 @@ public class H4Group extends Group
         if (!pgroup.isRoot()) {
             path = pgroup.getPath()+pgroup.getName()+HObject.separator;
         }
-        int fileid = file.open();
+        long fileid = file.open();
         if (fileid < 0) {
             return null;
         }
 
-        int gid = HDFLibrary.Vattach(fileid, -1, "w");
+        long gid = HDFLibrary.Vattach(fileid, -1, "w");
         if (gid < 0) {
             return null;
         }
@@ -281,7 +281,7 @@ public class H4Group extends Group
 
         if (!pgroup.isRoot()) {
             // add the dataset to the parent group
-            int pid = pgroup.open();
+            long pid = pgroup.open();
             if (pid < 0) {
                 throw (new HDFException("Unable to open the parent group."));
             }

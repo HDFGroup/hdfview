@@ -117,7 +117,7 @@ public class H4GRImage extends ScalarDS
     /**
      * The GR interface identifier obtained from GRstart(fid)
      */
-    private int grid;
+    private long grid;
 
     /**
      * The number of components in the raster image
@@ -125,7 +125,7 @@ public class H4GRImage extends ScalarDS
     private int ncomp;
 
     /** the datatype identifier */
-    private int datatypeID = -1;
+    private long datatypeID = -1;
 
     private int nAttributes = -1;
 
@@ -165,7 +165,7 @@ public class H4GRImage extends ScalarDS
         if (nAttributes < 0) {
             grid = ((H4File)getFileFormat()).getGRAccessID();
 
-            int id = open();
+            long id = open();
             String[] objName = {""};
             int[] grInfo = new int[4]; //ncomp, data_type, interlace, and num_attrs
             int[] idims = new int[2];
@@ -187,7 +187,7 @@ public class H4GRImage extends ScalarDS
     public Dataset copy(Group pgroup, String dname, long[] dims, Object buff) throws Exception
     {
         Dataset dataset = null;
-        int srcdid=-1, dstdid=-1;
+        long srcdid=-1, dstdid=-1;
         String path=null;
         int[] count=null;
 
@@ -227,7 +227,7 @@ public class H4GRImage extends ScalarDS
         }
 
         int ncomp = grInfo[0];
-        int tid = grInfo[1];
+        long tid = (long)grInfo[1];
         int interlace = grInfo[2];
         int numberOfAttributes = grInfo[3];
         dstdid = HDFLibrary.GRcreate(
@@ -239,7 +239,7 @@ public class H4GRImage extends ScalarDS
 
         int ref = HDFLibrary.GRidtoref(dstdid);
         if (!pgroup.isRoot()) {
-            int vgid = pgroup.open();
+            long vgid = pgroup.open();
             HDFLibrary.Vaddtagref(vgid, HDFConstants.DFTAG_RIG, ref);
             pgroup.close(vgid);
         }
@@ -255,7 +255,7 @@ public class H4GRImage extends ScalarDS
         HDFLibrary.GRwriteimage(dstdid, start, null, count, buff);
 
         // copy palette
-        int pid = HDFLibrary.GRgetlutid(srcdid, 0);
+        long pid = HDFLibrary.GRgetlutid(srcdid, 0);
         int[] palInfo = new int[4];
 
         HDFLibrary.GRgetlutinfo(pid, palInfo);
@@ -314,7 +314,7 @@ public class H4GRImage extends ScalarDS
             init();
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return null;
         }
@@ -355,7 +355,7 @@ public class H4GRImage extends ScalarDS
             init();
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return null;
         }
@@ -405,7 +405,7 @@ public class H4GRImage extends ScalarDS
             return;
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return;
         }
@@ -448,7 +448,7 @@ public class H4GRImage extends ScalarDS
             return attributeList;
         }
 
-        int id = open();
+        long id = open();
         String[] objName = {""};
         int[] grInfo = new int[4]; //ncomp, data_type, interlace, and num_attrs
         int[] idims = new int[2];
@@ -537,10 +537,10 @@ public class H4GRImage extends ScalarDS
 
     // Implementing HObject.
     @Override
-    public int open()
+    public long open()
     {
 
-        int id = -1;
+        long id = -1;
         try {
             int index = HDFLibrary.GRreftoindex(grid, (short)oid[1]);
             id = HDFLibrary.GRselect(grid, index);
@@ -554,7 +554,7 @@ public class H4GRImage extends ScalarDS
 
     // Implementing HObject.
     @Override
-    public void close(int grid)
+    public void close(long grid)
     {
         try { HDFLibrary.GRendaccess(grid); }
         catch (HDFException ex) {;}
@@ -568,7 +568,7 @@ public class H4GRImage extends ScalarDS
             return; // already called. Initialize only once
         }
 
-        int id = open();
+        long id = open();
         String[] objName = {""};
         int[] grInfo = new int[4]; //ncomp, data_type, interlace and num_attrs
         int[] idims = new int[2];
@@ -667,13 +667,13 @@ public class H4GRImage extends ScalarDS
             return palette;
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
             return null;
         }
 
         // get palette info.
-        int lutid  = -1;
+        long lutid  = -1;
         int[] lutInfo = new int[4]; //ncomp, datatype, interlace, num_entries
         try {
             // find the first palette.
@@ -819,10 +819,10 @@ public class H4GRImage extends ScalarDS
             }
         }
 
-        int grid = -1;
-        int vgid = -1;
-        int gid = (file).getGRAccessID();
-        int tid = type.toNative();
+        long grid = -1;
+        long vgid = -1;
+        long gid = (file).getGRAccessID();
+        long tid = type.toNative();
 
         if(tid >= 0) {
             try {
@@ -894,7 +894,7 @@ public class H4GRImage extends ScalarDS
     /**
      * copy attributes from one GR image to another GR image
      */
-    private void copyAttribute(int srcdid, int dstdid, int numberOfAttributes)
+    private void copyAttribute(long srcdid, long dstdid, int numberOfAttributes)
     {
         if (numberOfAttributes <=0 ) {
             return;

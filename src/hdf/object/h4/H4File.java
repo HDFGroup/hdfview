@@ -69,7 +69,7 @@ public class H4File extends FileFormat {
      * parameter. GRstart(fid) is an expensive call. It should be called only
      * once. Calling GRstart(fid) in a loop should be avoided.
      */
-    private int grid;
+    private long grid;
 
     private boolean isNetCDF = false;
 
@@ -80,7 +80,7 @@ public class H4File extends FileFormat {
      * should be called only once Calling SDstart(fname, flag) in a loop should
      * be avoided.
      */
-    private int sdid;
+    private long sdid;
 
     /*
      * secret flag: show CDF0.0, etc., to help debug
@@ -229,7 +229,7 @@ public class H4File extends FileFormat {
         }
 
         if (doCreateFile) {
-            int fileid = HDFLibrary.Hopen(filename, HDFConstants.DFACC_CREATE);
+            long fileid = HDFLibrary.Hopen(filename, HDFConstants.DFACC_CREATE);
             try {
                 HDFLibrary.Hclose(fileid);
             }
@@ -255,7 +255,7 @@ public class H4File extends FileFormat {
 
     // Implementing FileFormat
     @Override
-    public int open() throws Exception {
+    public long open() throws Exception {
         if (fid >= 0) {
             return fid; // file is opened already
         }
@@ -294,7 +294,7 @@ public class H4File extends FileFormat {
             fid = 0;
         }
         else {
-            log.trace("HDFLibrary - open({}}:", fullFileName, flag);
+            log.trace("HDFLibrary - open({},{})", fullFileName, flag);
             fid = HDFLibrary.Hopen(fullFileName, flag);
             HDFLibrary.Vstart(fid);
             grid = HDFLibrary.GRstart(fid);
@@ -485,7 +485,7 @@ public class H4File extends FileFormat {
     public void writeAttribute(HObject obj, Attribute attr,
             boolean isSDglobalAttr) throws HDFException {
         String attrName = attr.getName();
-        int attrType = attr.getType().toNative();
+        long attrType = attr.getType().toNative();
         long[] dims = attr.getDataDims();
         int count = 1;
         if (dims != null) {
@@ -527,7 +527,7 @@ public class H4File extends FileFormat {
             return;
         }
 
-        int id = obj.open();
+        long id = obj.open();
         if (obj instanceof H4Group) {
             HDFLibrary.Vsetattr(id, attrName, attrType, count, attrValue);
         }
@@ -547,7 +547,7 @@ public class H4File extends FileFormat {
     private void copyGroup(H4Group srcGroup, H4Group pgroup)
             throws Exception {
         H4Group group = null;
-        int srcgid, dstgid;
+        long srcgid, dstgid;
         String gname = null, path = null;
 
         log.trace("copyGroup(): start");
@@ -569,7 +569,7 @@ public class H4File extends FileFormat {
         else {
             // add the dataset to the parent group
             path = pgroup.getPath() + pgroup.getName() + HObject.separator;
-            int pid = pgroup.open();
+            long pid = pgroup.open();
             HDFLibrary.Vinsert(pid, dstgid);
             pgroup.close(pid);
         }
@@ -807,7 +807,7 @@ public class H4File extends FileFormat {
         H4Group parentGroup = (H4Group) parentObj;
 
         String fullPath = parentGroup.getPath() + parentGroup.getName() + HObject.separator;
-        int gid = parentGroup.open();
+        long gid = parentGroup.open();
         if (gid == HDFConstants.FAIL) {
             return;
         }
@@ -942,7 +942,8 @@ public class H4File extends FileFormat {
      */
     private final H4GRImage getGRImage(int tag, int index, String path,
             boolean copyAllowed) {
-        int id = -1, ref = -1;
+        long id = -1;
+        int ref = -1;
         H4GRImage gr = null;
         String[] objName = { "" };
         int[] imgInfo = new int[4];
@@ -998,7 +999,8 @@ public class H4File extends FileFormat {
      */
     private final H4SDS getSDS(int tag, int index, String path,
             boolean copyAllowed) {
-        int id = -1, ref = -1;
+        long id = -1;
+        int ref = -1;
         H4SDS sds = null;
         String[] objName = { "" };
         int[] tmpInfo = new int[HDFConstants.MAX_VAR_DIMS];
@@ -1071,7 +1073,7 @@ public class H4File extends FileFormat {
      */
     private final H4Vdata getVdata(int tag, int ref, String path,
             boolean copyAllowed) {
-        int id = -1;
+        long id = -1;
         H4Vdata vdata = null;
         String[] objName = { "" };
         String[] vClass = { "" };
@@ -1139,7 +1141,7 @@ public class H4File extends FileFormat {
      */
     private final H4Group getVGroup(int tag, int ref, String path,
             H4Group pgroup, boolean copyAllowed) {
-        int id = -1;
+        long id = -1;
         H4Group vgroup = null;
         String[] objName = { "" };
         String[] vClass = { "" };
@@ -1220,7 +1222,7 @@ public class H4File extends FileFormat {
      *
      * @return the identifier.
      */
-    int getGRAccessID() {
+    long getGRAccessID() {
         return grid;
     }
 
@@ -1229,7 +1231,7 @@ public class H4File extends FileFormat {
      *
      * @return the identifier.
      */
-    int getSDAccessID() {
+    long getSDAccessID() {
         return sdid;
     }
 
@@ -1246,12 +1248,12 @@ public class H4File extends FileFormat {
      *
      * @throws Exception if the annotation can not be read
      */
-    private List getFileAnnotation(int fid, List attrList) throws HDFException {
+    private List getFileAnnotation(long fid, List attrList) throws HDFException {
         if (fid < 0) {
             return attrList;
         }
 
-        int anid = HDFConstants.FAIL;
+        long anid = HDFConstants.FAIL;
         try {
             anid = HDFLibrary.ANstart(fid);
             // fileInfo[0] = n_file_label, fileInfo[1] = n_file_desc,
@@ -1274,7 +1276,7 @@ public class H4File extends FileFormat {
             }
 
             // load file labels and descriptions
-            int id = -1;
+            long id = -1;
             int[] annTypes = { HDFConstants.AN_FILE_LABEL,
                     HDFConstants.AN_FILE_DESC };
             for (int j = 0; j < 2; j++) {
@@ -1365,7 +1367,7 @@ public class H4File extends FileFormat {
      *
      * @throws HDFException if the GR attributes can not be read
      */
-    private List getGRglobleAttribute(int grid, List attrList)
+    private List getGRglobleAttribute(long grid, List attrList)
             throws HDFException {
         if (grid == HDFConstants.FAIL) {
             return attrList;
@@ -1437,7 +1439,7 @@ public class H4File extends FileFormat {
      *
      * @throws HDFException if the SDS attributes can not be read
      */
-    private List getSDSglobleAttribute(int sdid, List attrList)
+    private List getSDSglobleAttribute(long sdid, List attrList)
             throws HDFException {
         if (sdid == HDFConstants.FAIL) {
             return attrList;
