@@ -17,8 +17,6 @@
     </filterchain>
   </loadfile>
 
-  <property name="hdf4.version"           value="N/A"/>
-<!--
   <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings">
     <filterchain>
       <tokenfilter>
@@ -31,9 +29,8 @@
       </tokenfilter>
     </filterchain>
   </loadfile>
- -->
 
-  <loadfile property="hdf5.version" srcFile="${hdf.lib.dir}/libhdf5.settings">
+  <loadfile property="hdf5.version" srcFile="${hdf5.lib.dir}/libhdf5.settings">
     <filterchain>
       <tokenfilter>
         <linetokenizer />
@@ -48,7 +45,11 @@
 
   <pathconvert property="hdfjava.filelist">
     <map from="${hdf.lib.dir}${file.separator}" to="" />
-    <fileset dir="${hdf.lib.dir}">
+      <fileset dir="${hdf.lib.dir}">
+        <include name="jarhdf*.jar" />
+      </fileset>
+    <map from="${hdf5.lib.dir}${file.separator}" to="" />
+    <fileset dir="${hdf5.lib.dir}">
       <include name="jarhdf5*.jar" />
     </fileset>
     <mapper type="glob" from="*.jar" to="*" />
@@ -89,14 +90,15 @@
   <property name="jre.version" value="${ant.java.version}" />
 
   <path id="obj-classpath">
-    <fileset dir="${lib.dir}" includes="netcdf.jar" excludes="*sources.jar" />
+    <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
   </path>
   <path id="swt-classpath">
     <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
     <fileset dir="${lib.dir}/ext/swt" includes="*.jar"/>
   </path>
   <path id="jni-classpath">
-    <fileset dir="${hdf.lib.dir}" includes="jarhdf5*.jar slf4j-api*.jar" />
+    <fileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
+    <fileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar slf4j-api*.jar" />
   </path>
   <path id="log-classpath">
     <fileset dir="${lib.dir}/extra" includes="slf4j-simple*.jar" excludes="*sources.jar" />
@@ -136,7 +138,7 @@
      Dist Dir:         ${dist.dir}
      Java Home:        ${java.home}
      Classpath:        ${toString:project-classpath}
-     HDF libpath:      ${hdf.lib.dir}
+     HDF libpath:      ${hdf.lib.dir},${hdf5.lib.dir}
      HDF-Java version: ${hdfjava.version}
      HDF4 version:     ${hdf4.version}
      HDF5 version:     ${hdf5.version}
@@ -182,7 +184,7 @@
 
     <javac srcdir="${src.dir}" destdir="${classes.dir}"
     classpathref="project-classpath"
-    excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java hdf/object/fits/** hdf/object/h4/**"
+    excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
     includeantruntime="false"
     />
 
@@ -223,7 +225,7 @@
         <path refid="log-classpath" />
         <path refid="application" />
       </classpath>
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
     </java>
@@ -234,11 +236,12 @@
     <mkdir dir="${jar.dir}/lib/ext" />
     <copy todir="${jar.dir}/lib">
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar" />
+        <fileset dir="${hdf.lib.dir}" includes="*.jar" />
+        <fileset dir="${hdf5.lib.dir}" includes="*.jar" />
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
     </java>
@@ -327,7 +330,7 @@
         <path refid="unit-classpath" />
         <path refid="application" />
       </classpath>
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <test name="test.object.AllH5ObjectTests" todir="${report.dir}" outfile="TEST-AllH5ObjectTests">
         <formatter type="plain" />
       </test>
@@ -345,7 +348,7 @@
         <path refid="unit-classpath" />
         <path refid="application" />
       </classpath>
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
       <formatter type="xml" />
       <formatter type="plain" />
@@ -381,7 +384,7 @@
         <pathelement location="${classes.dir}" />
         <path refid="application" />
       </classpath>
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/uitest" />
 
@@ -405,7 +408,7 @@
         <pathelement location="${classes.dir}" />
         <path refid="application" />
       </classpath>
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/uitest" />
 
@@ -430,7 +433,7 @@
         <pathelement location="${classes.dir}" />
         <path refid="application" />
       </classpath>
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/modules" />
 
@@ -499,7 +502,8 @@
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
+        <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
+        <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
     </copy>
 
     <!-- Bundle jre -->
@@ -539,7 +543,8 @@
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.so" excludes="*.a" />
+        <fileset dir="${hdf.lib.dir}" includes="*.jar *.so" excludes="*.a" />
+        <fileset dir="${hdf5.lib.dir}" includes="*.jar *.so" excludes="*.a" />
     </copy>
 
     <!-- Bundle jre -->
@@ -583,7 +588,8 @@
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
+        <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
+        <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
     </copy>
 
     <!-- Copy the documentation -->
