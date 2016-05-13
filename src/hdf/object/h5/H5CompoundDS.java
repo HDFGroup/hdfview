@@ -619,6 +619,38 @@ public class H5CompoundDS extends CompoundDS {
                         list.add(nullValues);
                         continue;
                     }
+                    else if (member_class == HDF5Constants.H5T_ARRAY) {
+                        int tmpclass = -1;
+                        int tmptid = -1;
+                        try {
+                            tmptid = H5.H5Tget_super(atom_tid);
+                            tmpclass = H5.H5Tget_class(tmptid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("Exception H5T_ARRAY id or class failure[{}]:", i, ex);
+                            continue;
+                        }
+                        finally {
+                            try {
+                                H5.H5Tclose(tmptid);
+                            }
+                            catch (Exception ex) {
+                                log.debug("finally close[{}]:", i, ex);
+                            }
+                        }
+
+                        // cannot deal with ARRAY of COMPOUND or ARRAY of ARRAY
+                        // support only ARRAY of atomic types
+                        if ((tmpclass == HDF5Constants.H5T_COMPOUND) || (tmpclass == HDF5Constants.H5T_ARRAY)) {
+                            String[] nullValues = new String[(int) lsize[0]];
+                            String errorStr = "*unsupported*";
+                            for (int j = 0; j < lsize[0]; j++) {
+                                nullValues[j] = errorStr;
+                            }
+                            list.add(nullValues);
+                            continue;
+                        }
+                    }
 
                     if (member_data != null) {
                         int comp_tid = -1;
@@ -1696,6 +1728,7 @@ public class H5CompoundDS extends CompoundDS {
         catch (Exception ex) {
             nMembers = 0;
         }
+        log.trace("extractCompoundInfo: nMembers={}", nMembers);
 
         if (nMembers <= 0) {
             log.trace("extractCompoundInfo: leave because nMembers={}", nMembers);
@@ -1704,7 +1737,7 @@ public class H5CompoundDS extends CompoundDS {
 
         int tmptid = -1;
         for (int i = 0; i < nMembers; i++) {
-
+            log.trace("extractCompoundInfo: nMembers[{}]", i);
             try {
                 mtype = H5.H5Tget_member_type(tid, i);
             }
@@ -1756,8 +1789,7 @@ public class H5CompoundDS extends CompoundDS {
                     // cannot deal with ARRAY of COMPOUND or ARRAY of ARRAY
                     // support only ARRAY of atomic types
                     if ((tmpclass == HDF5Constants.H5T_COMPOUND) || (tmpclass == HDF5Constants.H5T_ARRAY)) {
-                        log.debug("continue unsupported ARRAY of COMPOUND or ARRAY of ARRAY[{}]:", i);
-                        continue;
+                        log.debug("unsupported ARRAY of COMPOUND or ARRAY of ARRAY[{}]:", i);
                     }
                 }
                 catch (Exception ex) {
