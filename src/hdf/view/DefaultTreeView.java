@@ -504,7 +504,7 @@ public class DefaultTreeView implements TreeView {
         item.setText("&Delete");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                removeSelectedObjects();
+                cutObject();
             }
         });
         editGUIs.add(item);
@@ -540,7 +540,7 @@ public class DefaultTreeView implements TreeView {
                 }
 
                 FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-                
+
                 DefaultFileFilter filter = null;
 
                 if(filetype == FileFormat.FILE_TYPE_HDF4) {
@@ -550,7 +550,7 @@ public class DefaultTreeView implements TreeView {
                     fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
                     filter = DefaultFileFilter.getFileFilterHDF5();
                 }
-                
+
                 fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
                 fChooser.setFilterNames(new String[] {filter.getDescription()});
                 fChooser.setFilterIndex(0);
@@ -1083,8 +1083,29 @@ public class DefaultTreeView implements TreeView {
 
     /** Copy selected objects */
     private void copyObject() {
-        objectsToCopy = tree.getSelection();
+        if (moveFlag == true) {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText("Copy object");
+            confirm.setMessage("Do you want to copy all the selected object(s) instead of move?");
+            if (confirm.open() == SWT.NO) return;
+        }
         moveFlag = false;
+        currentSelectionsForMove = null;
+        objectsToCopy = tree.getSelection();
+    }
+
+    /** Delete selected objects */
+    private void cutObject() {
+        if (moveFlag == true) {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText("Delete object");
+            confirm.setMessage("Do you want to delete all the selected object(s) instead of move?");
+            if (confirm.open() == SWT.NO) return;
+        }
+        moveFlag = false;
+        currentSelectionsForMove = null;
+        objectsToCopy = tree.getSelection();
+        removeSelectedObjects();
     }
 
     /** Paste selected objects */
@@ -1260,6 +1281,15 @@ public class DefaultTreeView implements TreeView {
      * Rename the currently selected object.
      */
     private void renameObject() {
+        if (moveFlag == true) {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText("Rename object");
+            confirm.setMessage("Do you want to rename all the selected object(s) instead of move?");
+            if (confirm.open() == SWT.NO) return;
+        }
+        moveFlag = false;
+        currentSelectionsForMove = null;
+
         if (selectedObject == null) return;
 
         if ((selectedObject instanceof Group) && ((Group) selectedObject).isRoot()) {
@@ -1760,7 +1790,7 @@ public class DefaultTreeView implements TreeView {
 
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
-        
+
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF4();
         fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
         fChooser.setFilterNames(new String[] {filter.getDescription()});
@@ -1884,7 +1914,7 @@ public class DefaultTreeView implements TreeView {
 
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
-        
+
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
         fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
         fChooser.setFilterNames(new String[] {filter.getDescription()});
@@ -1973,8 +2003,8 @@ public class DefaultTreeView implements TreeView {
         Dataset dataset = (Dataset) selectedObject;
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setFilterPath(dataset.getFile().substring(0, dataset.getFile().lastIndexOf(File.separator)));
-        
-        DefaultFileFilter filter = null;        
+
+        DefaultFileFilter filter = null;
 
         if(binaryOrder == 99) {
             fChooser.setText("Save Dataset Data To Text File --- " + dataset.getName());
@@ -1986,7 +2016,7 @@ public class DefaultTreeView implements TreeView {
             fChooser.setFileName(dataset.getName() + ".bin");
             filter = DefaultFileFilter.getFileFilterBinary();
         }
-        
+
         fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
         fChooser.setFilterIndex(1);
