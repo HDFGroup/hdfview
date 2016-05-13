@@ -513,7 +513,7 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView: finish");
 
         group.pack();
-        
+
         content.setWeights(new int[] {1, 20});
 
         shell.pack();
@@ -1006,7 +1006,7 @@ public class DefaultTableView implements TableView {
 
                 FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
                 fchooser.setFilterPath(currentDir);
-                
+
                 DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
                 fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
                 fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
@@ -1016,7 +1016,7 @@ public class DefaultTableView implements TableView {
 
                 File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
                 if (!chosenFile.exists()) {
-                	Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Text File");
+                    Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Text File");
                     return;
                 }
 
@@ -1244,7 +1244,7 @@ public class DefaultTableView implements TableView {
                     if (dataset instanceof CompoundDS) {
                         int cols = selectionLayer.getFullySelectedColumnPositions().length;
                         if (cols != 1) {
-                        	Tools.showError(shell, "Please select one column at a time for compound dataset.", shell.getText());
+                            Tools.showError(shell, "Please select one column at a time for compound dataset.", shell.getText());
                             return;
                         }
                     }
@@ -2882,7 +2882,7 @@ public class DefaultTableView implements TableView {
 
         FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
         fchooser.setFilterPath(currentDir);
-        
+
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
         fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
@@ -2892,7 +2892,7 @@ public class DefaultTableView implements TableView {
 
         File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
         if (!chosenFile.exists()) {
-        	Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Binary File");
+            Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Binary File");
             return;
         }
 
@@ -3156,12 +3156,12 @@ public class DefaultTableView implements TableView {
     private void saveAsText() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
         fchooser.setFilterPath(dataset.getFile());
-        
+
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
         fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
         fchooser.setFilterIndex(1);
-        
+
         //fchooser.changeToParentDirectory();
         fchooser.setText("Save Current Data To Text File --- " + dataset.getName());
 
@@ -3246,7 +3246,7 @@ public class DefaultTableView implements TableView {
     private void saveAsBinary() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
         fchooser.setFilterPath(dataset.getFile());
-        
+
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
         fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
@@ -3883,7 +3883,7 @@ public class DefaultTableView implements TableView {
             char CNT = ' ';
             boolean CshowAsHex = false;
             boolean CshowAsBin = false;
-            log.trace("CompoundDS:CompoundDSDataProvider:getValueAt({},{}) start", row, col);
+            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue({},{}) start", row, col);
 
             if (nSubColumns > 1) { // multi-dimension compound dataset
                 int colIdx = col / nFields;
@@ -3891,13 +3891,13 @@ public class DefaultTableView implements TableView {
                 // BUG 573: rowIdx = row * orders[fieldIdx] + colIdx * nRows
                 // * orders[fieldIdx];
                 rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
-                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
+                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
             }
             else {
                 rowIdx = row * orders[fieldIdx];
-                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
+                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
             }
-            log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() rowIdx={}", rowIdx);
+            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() rowIdx={}", rowIdx);
 
             Object colValue = ((List<?>) dataValue).get(fieldIdx);
             if (colValue == null) {
@@ -3905,28 +3905,50 @@ public class DefaultTableView implements TableView {
             }
 
             stringBuffer.setLength(0); // clear the old string
+            Datatype dtype = types[fieldIdx];
             boolean isString = (types[fieldIdx].getDatatypeClass() == Datatype.CLASS_STRING);
-            if (isString && (colValue instanceof byte[])) {
+            boolean isArray = (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY);
+            if (isArray) {
+                dtype = types[fieldIdx].getBasetype();
+                isString = (dtype.getDatatypeClass() == Datatype.CLASS_STRING);
+                log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
+            }
+            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): isString={} getBasetype()={}", isString, types[fieldIdx].getDatatypeClass());
+            if (isString && ((colValue instanceof byte[]) || isArray)) {
                 // strings
-                int strlen = (int)types[fieldIdx].getDatatypeSize();
-                String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
-                int idx = str.indexOf('\0');
-                if (idx > 0) {
-                    str = str.substring(0, idx);
+                int strlen = (int)dtype.getDatatypeSize();
+                int arraylen = strlen;
+                if(isArray) {
+                    arraylen = (int)types[fieldIdx].getDatatypeSize();
                 }
+                log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} of {} isString={} of {}", isArray, arraylen, isString, strlen);
+                int arraycnt = arraylen / strlen;
+                for (int loopidx = 0; loopidx < arraycnt; loopidx++) {
+                    if(isArray && loopidx > 0) {
+                        stringBuffer.append(", ");
+                    }
+                    String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
+                    int idx = str.indexOf('\0');
+                    if (idx > 0) {
+                        str = str.substring(0, idx);
+                    }
+                    stringBuffer.append(str.trim());
+                }
+            }
+            else if (isArray) {
+                int arraylen = (int)types[fieldIdx].getDatatypeSize();
+                log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} of {} istype={}", isArray, arraylen, dtype);
+                String str = new String( "*unsupported*");
                 stringBuffer.append(str.trim());
             }
             else {
                 // numerical values
-                Datatype dtype = types[fieldIdx];
-                if (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY) dtype = types[fieldIdx].getBasetype();
-
                 String cName = colValue.getClass().getName();
                 int cIndex = cName.lastIndexOf("[");
                 if (cIndex >= 0) {
                     CNT = cName.charAt(cIndex + 1);
                 }
-                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt(): cName={} CNT={}", cName, CNT);
+                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): cName={} CNT={}", cName, CNT);
 
                 boolean isUINT64 = false;
                 boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
@@ -3941,12 +3963,12 @@ public class DefaultTableView implements TableView {
                         isUINT64 = (cName.charAt(cIndex + 1) == 'J');
                     }
                 }
-                log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() isUINT64={} isInt={} CshowAsHex={} typeSize={}", isUINT64, isInt, CshowAsHex, typeSize);
+                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() isUINT64={} isInt={} CshowAsHex={} typeSize={}", isUINT64, isInt, CshowAsHex, typeSize);
 
                 for (int i = 0; i < orders[fieldIdx]; i++) {
                     if (isUINT64) {
                         Object theValue = Array.get(colValue, rowIdx + i);
-                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
                         Long l = (Long) theValue;
                         if (l < 0) {
                             l = (l << 1) >>> 1;
@@ -3961,7 +3983,7 @@ public class DefaultTableView implements TableView {
                     else if (CshowAsHex && isInt) {
                         char[] hexArray = "0123456789ABCDEF".toCharArray();
                         Object theValue = Array.get(colValue, rowIdx * typeSize + typeSize * i);
-                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
                         // show in Hexadecimal
                         char[] hexChars = new char[2];
                         if (i > 0) stringBuffer.append(", ");
@@ -3973,12 +3995,12 @@ public class DefaultTableView implements TableView {
                             hexChars[1] = hexArray[v & 0x0F];
                             if (x > 0) stringBuffer.append(":");
                             stringBuffer.append(hexChars);
-                            log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() hexChars[{}]={}", x, hexChars);
+                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() hexChars[{}]={}", x, hexChars);
                         }
                     }
                     else if (showAsBin && isInt) {
                         Object theValue = Array.get(colValue, rowIdx + typeSize * i);
-                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
                         theValue = Tools.toBinaryString(Long.valueOf(theValue.toString()), typeSize);
                         if (i > 0) stringBuffer.append(", ");
                         stringBuffer.append(theValue);
@@ -3986,14 +4008,14 @@ public class DefaultTableView implements TableView {
                     else if (numberFormat != null) {
                         // show in scientific format
                         Object theValue = Array.get(colValue, rowIdx + i);
-                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
                         theValue = numberFormat.format(theValue);
                         if (i > 0) stringBuffer.append(", ");
                         stringBuffer.append(theValue);
                     }
                     else {
                         Object theValue = Array.get(colValue, rowIdx + i);
-                        log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() theValue[{}]={}", i, theValue.toString());
+                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
                         if (i > 0) stringBuffer.append(", ");
                         stringBuffer.append(theValue);
                     }

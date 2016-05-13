@@ -403,6 +403,7 @@ public class H5Datatype extends Datatype {
                 tsize = H5.H5Tget_size(tid);
                 torder = H5.H5Tget_order(tid);
                 isVLEN = (tclass == HDF5Constants.H5T_VLEN);
+                log.trace("fromNative: tclass={}, tsize={}, torder={}, isVLEN={}", tclass, tsize, torder, isVLEN);
             }
             catch (Exception ex) {
                 datatypeClass = CLASS_NO_CLASS;
