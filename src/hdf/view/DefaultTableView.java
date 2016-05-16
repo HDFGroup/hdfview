@@ -44,7 +44,6 @@ import java.nio.ShortBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.BitSet;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -198,8 +197,6 @@ public class DefaultTableView implements TableView {
     private boolean                         isObjRef = false;
 
     private boolean                         showAsHex = false, showAsBin = false;
-
-    private final boolean                   startEditing[]   = { false };
 
     /**
      * Global variables for GUI components
@@ -806,10 +803,12 @@ public class DefaultTableView implements TableView {
         }
 
         String[] subColumnNames = columnNames;
+        String[] columnLabels = columnNames;
         int columns = dataset.getWidth();
         if (columns > 1) {
             // multi-dimension compound dataset
             subColumnNames = new String[columns * columnNames.length];
+            columnLabels = new String[columns * columnNames.length];
             int halfIdx = columnNames.length / 2;
             for (int i = 0; i < columns; i++) {
                 for (int j = 0; j < columnNames.length; j++) {
@@ -821,11 +820,14 @@ public class DefaultTableView implements TableView {
                     else {
                         subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
                     }
+                    
+                    columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
                 }
             }
         }
 
         final String[] allColumnNames = subColumnNames;
+        final int numGroups = allColumnNames.length / cols;
 
         // Create body layer
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
@@ -835,7 +837,7 @@ public class DefaultTableView implements TableView {
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
-        IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnNames);
+        IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnLabels);
         ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
 
@@ -852,7 +854,7 @@ public class DefaultTableView implements TableView {
 
         // Create the Grid layer
         GridLayer gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
-                rowHeaderLayer, cornerLayer);
+                rowHeaderLayer, cornerLayer, false);
         gridLayer.addConfiguration(new DefaultEditConfiguration());
 
         // Change cell editing to be on double click rather than single click
@@ -3725,7 +3727,6 @@ public class DefaultTableView implements TableView {
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            if (startEditing[0]) return "";
             log.trace("ScalarDS:ScalarDSDataProvider:getValueAt({},{}) start", columnIndex, rowIndex);
             log.trace("ScalarDS:ScalarDSDataProvider:getValueAt isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray, showAsHex, showAsBin);
 
@@ -3866,9 +3867,9 @@ public class DefaultTableView implements TableView {
         Datatype                  types[]          = compound.getSelectedMemberTypes();
         StringBuffer              stringBuffer     = new StringBuffer();
         int                       nFields          = ((List<?>) dataValue).size();
-        int                       nSubColumns      = (nFields > 0) ? getColumnCount() / nFields : 0;
         int                       nRows            = compound.getHeight();
-        int                       nCols            = compound.getSelectedMemberCount();
+        int                       nCols            = compound.getWidth() * compound.getSelectedMemberCount();
+        int                       nSubColumns      = (nFields > 0) ? getColumnCount() / nFields : 0;
 
         public CompoundDSDataProvider() {
 
@@ -3876,8 +3877,6 @@ public class DefaultTableView implements TableView {
 
         @Override
         public Object getDataValue(int col, int row) {
-            if (startEditing[0]) return "";
-
             int fieldIdx = col;
             int rowIdx = row;
             char CNT = ' ';
