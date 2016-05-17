@@ -96,6 +96,7 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.group.ColumnGroupHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.group.ColumnGroupModel;
 import org.eclipse.nebula.widgets.nattable.group.ColumnGroupExpandCollapseLayer;
+import org.eclipse.nebula.widgets.nattable.group.ColumnGroupGroupHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.stack.ColumnGroupBodyLayerStack;
@@ -826,7 +827,13 @@ public class DefaultTableView implements TableView {
                         subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
                     }
                     
-                    columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
+                    // This column's name is whatever follows the last nesting character '->'
+                    int nestingPosition = columnNames[j].lastIndexOf("->");
+                    if (nestingPosition != -1) {
+                    	columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
+                    } else {
+                    	columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
+                    }
                 }
             }
         }
@@ -848,14 +855,38 @@ public class DefaultTableView implements TableView {
         IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnLabels);
         ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
-        ColumnGroupHeaderLayer columnGroupHeaderLayer =
-        	new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
         
-        // Set up first-level column grouping
+        ColumnGroupHeaderLayer columnGroupHeaderLayer = null;
+        ColumnGroupGroupHeaderLayer columnGroupGroupHeaderLayer = null;
+        
+        // Set up column grouping
         if (numGroups > 1) {
+        	columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, new ColumnGroupModel());
+        	columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
+        	
+        	// Set up first-level column grouping
         	for (int i = 0; i < numGroups; i++) {
         		for (int j = 0; j < cols; j++) {
-        			columnGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
+        			columnGroupGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
+        		}
+        	}
+            
+        	// Set up any further-nested column groups
+        	for (int i = 0; i < allColumnNames.length; i++) {
+        		int nestingPosition = allColumnNames[i].lastIndexOf("->");
+
+        		if (nestingPosition != -1) {
+        			String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
+        			int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
+        			
+        			if(groupTitleStartPosition != -1) {	
+        				columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+        						allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
+        						"{" + columnGroupName + "}", i);
+        			} else {
+        				columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+        						allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
+        			}
         		}
         	}
         }
@@ -866,14 +897,31 @@ public class DefaultTableView implements TableView {
                 rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer);
 
         // Create the Corner layer
-        ILayer cornerLayer = new CornerLayer(new DataLayer(
-                new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
-                rowHeaderLayer,
-                columnGroupHeaderLayer);
+        ILayer cornerLayer = null;
+        
+        if (numGroups > 1) {
+        	cornerLayer = new CornerLayer(new DataLayer(
+                    new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
+                    rowHeaderLayer,
+                    columnGroupGroupHeaderLayer);
+        } else {
+        	cornerLayer = new CornerLayer(new DataLayer(
+                    new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
+                    rowHeaderLayer,
+                    columnHeaderLayer);
+        }
 
         // Create the Grid layer
-        GridLayer gridLayer = new GridLayer(viewportLayer, columnGroupHeaderLayer,
-                rowHeaderLayer, cornerLayer, false);
+        GridLayer gridLayer = null;
+        
+        if (numGroups > 1) {
+        	gridLayer = new GridLayer(viewportLayer, columnGroupGroupHeaderLayer,
+                    rowHeaderLayer, cornerLayer, false);
+        } else {
+        	gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
+                    rowHeaderLayer, cornerLayer, false);
+        }
+        
         gridLayer.addConfiguration(new DefaultEditConfiguration());
 
         // Change cell editing to be on double click rather than single click
