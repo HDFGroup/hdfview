@@ -2542,6 +2542,10 @@ public class DefaultTableView implements TableView {
                 || showAsBin || showAsHex) {
             return;
         }
+        
+        if (cellValue.equals((String) table.getDataValueByPosition(col + 1, row + 1).toString())) {
+        	return;
+        }
 
         int i = 0;
         if (isDataTransposed) {
@@ -2659,6 +2663,11 @@ public class DefaultTableView implements TableView {
         if (!(dataset instanceof CompoundDS) || (cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
             return;
         }
+        
+        if (cellValue.equals((String) table.getDataValueByPosition(col + 1, row + 1).toString())) {
+        	return;
+        }
+        
         log.trace("DefaultTableView: updateCompoundData");
 
         CompoundDS compDS = (CompoundDS) dataset;
