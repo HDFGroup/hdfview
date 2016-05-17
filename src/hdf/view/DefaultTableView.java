@@ -93,8 +93,12 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.group.ColumnGroupHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.group.ColumnGroupModel;
+import org.eclipse.nebula.widgets.nattable.group.ColumnGroupExpandCollapseLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.layer.stack.ColumnGroupBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
@@ -231,6 +235,8 @@ public class DefaultTableView implements TableView {
 
     // Used to get/set column header
     private IDataProvider                   columnHeaderDataProvider;
+    
+    private final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
 
     /**
      * Constructs a TableView.
@@ -671,6 +677,7 @@ public class DefaultTableView implements TableView {
         final DataLayer dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
         ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
+        
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
@@ -700,7 +707,6 @@ public class DefaultTableView implements TableView {
             public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
                 uiBindingRegistry.registerFirstDoubleClickBinding(
                     new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
-                //uiBindingRegistry.registerFirstMouseDragMode(mouseEventMatcher, new CellEditDragMode());
             }
         });
 
@@ -719,7 +725,6 @@ public class DefaultTableView implements TableView {
 
             @Override
             public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-                //uiBindingRegistry.registerDoubleClickBinding(mouseEventMatcher, action);
             }
         });
 
@@ -832,14 +837,28 @@ public class DefaultTableView implements TableView {
         // Create body layer
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
         final DataLayer dataLayer = new DataLayer(bodyDataProvider);
-        final SelectionLayer selectionLayer = new SelectionLayer(dataLayer);
-        ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
+        final ColumnGroupExpandCollapseLayer expandCollapseLayer =
+        	new ColumnGroupExpandCollapseLayer(dataLayer, columnGroupModel);
+        final SelectionLayer selectionLayer = new SelectionLayer(expandCollapseLayer);
+        final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
+        
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
         IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnLabels);
         ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
+        ColumnGroupHeaderLayer columnGroupHeaderLayer =
+        	new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
+        
+        // Set up first-level column grouping
+        if (numGroups > 1) {
+        	for (int i = 0; i < numGroups; i++) {
+        		for (int j = 0; j < cols; j++) {
+        			columnGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
+        		}
+        	}
+        }
 
         // Create the Row Header layer
         IDataProvider rowHeaderDataProvider = new RowHeader(bodyDataProvider);
@@ -848,12 +867,12 @@ public class DefaultTableView implements TableView {
 
         // Create the Corner layer
         ILayer cornerLayer = new CornerLayer(new DataLayer(
-                new DefaultCornerDataProvider(columnHeaderDataProvider,
-                        rowHeaderDataProvider)), rowHeaderLayer,
-                columnHeaderLayer);
+                new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
+                rowHeaderLayer,
+                columnGroupHeaderLayer);
 
         // Create the Grid layer
-        GridLayer gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
+        GridLayer gridLayer = new GridLayer(viewportLayer, columnGroupHeaderLayer,
                 rowHeaderLayer, cornerLayer, false);
         gridLayer.addConfiguration(new DefaultEditConfiguration());
 
@@ -863,7 +882,6 @@ public class DefaultTableView implements TableView {
             public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
                 uiBindingRegistry.registerFirstDoubleClickBinding(
                     new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
-                //uiBindingRegistry.registerFirstMouseDragMode(mouseEventMatcher, new CellEditDragMode());
             }
         });
 
@@ -882,7 +900,6 @@ public class DefaultTableView implements TableView {
 
             @Override
             public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-                //uiBindingRegistry.registerDoubleClickBinding(mouseEventMatcher, action);
             }
         });
 
