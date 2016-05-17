@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
@@ -350,26 +351,15 @@ public class UserOptionsDialog extends Dialog {
         currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         currentDirButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
-                fChooser.setFilterPath(workDir);
-                fChooser.setText("Select a Directory");
-                fChooser.setFilterExtensions(new String[] {"*.*"});
-                fChooser.setFilterNames(new String[] {"All Files"});
-                fChooser.setFilterIndex(0);
-                //fchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            	final DirectoryDialog dChooser = new DirectoryDialog(shell);
+            	dChooser.setFilterPath(workDir);
+            	dChooser.setText("Select a Directory");
+            	
+            	String dir = dChooser.open();
+            	
+                if(dir == null) return;
 
-                if(fChooser.open() == null) {
-                    return;
-                }
-
-                File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
-
-                if(!chosenFile.exists()) {
-                    // Give an error
-                    return;
-                }
-
-                workField.setText(chosenFile.getAbsolutePath());
+                workField.setText(dir);
             }
         });
 

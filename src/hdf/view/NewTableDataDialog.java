@@ -24,6 +24,8 @@ import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -579,14 +581,14 @@ public class NewTableDataDialog extends Dialog {
         int[] mOrders = new int[n];
 
         for (int i = 0; i < n; i++) {
-            String name = (String) table.getItem(i).getText(0);
+            String name = (String) table.getItem(i).getData("MemberName");
             if ((name == null) || (name.length() <= 0)) {
                 throw new IllegalArgumentException("Member name is empty");
             }
             mNames[i] = name;
 
             int order = 1;
-            String orderStr = (String) table.getItem(i).getText(2);
+            String orderStr = (String) table.getItem(i).getData("MemberSize");
             if (orderStr != null) {
                 try {
                     order = Integer.parseInt(orderStr);
@@ -597,7 +599,7 @@ public class NewTableDataDialog extends Dialog {
             }
             mOrders[i] = order;
 
-            String typeName = (String) table.getItem(i).getText(1);
+            String typeName = (String) table.getItem(i).getData("MemberType");
             Datatype type = null;
             if (DATATYPE_NAMES[0].equals(typeName)) {
                 type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
@@ -831,6 +833,13 @@ public class NewTableDataDialog extends Dialog {
         editor.horizontalAlignment = SWT.LEFT;
         editor.verticalAlignment = SWT.TOP;
         editor.setEditor(text, item, 0);
+        
+        text.addModifyListener(new ModifyListener() {
+        	public void modifyText(ModifyEvent e) {
+        		Text text = (Text) e.widget;
+        		item.setData("MemberName", text.getText());
+        	}
+        });
 
         CCombo combo = new CCombo(table, SWT.DROP_DOWN | SWT.READ_ONLY);
         combo.setItems(DATATYPE_NAMES);
@@ -840,6 +849,13 @@ public class NewTableDataDialog extends Dialog {
         editor.horizontalAlignment = SWT.LEFT;
         editor.verticalAlignment = SWT.TOP;
         editor.setEditor(combo, item, 1);
+        
+        combo.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		CCombo combo = (CCombo) e.widget;
+        		item.setData("MemberType", combo.getItem(combo.getSelectionIndex()));
+        	}
+        });
 
         text = new Text(table, SWT.SINGLE | SWT.BORDER);
         editor = new TableEditor(table);
@@ -848,6 +864,17 @@ public class NewTableDataDialog extends Dialog {
         editor.horizontalAlignment = SWT.LEFT;
         editor.verticalAlignment = SWT.TOP;
         editor.setEditor(text, item, 2);
+        
+        text.addModifyListener(new ModifyListener() {
+        	public void modifyText(ModifyEvent e) {
+        		Text text = (Text) e.widget;
+        		item.setData("MemberSize", text.getText());
+        	}
+        });
+        
+        item.setData("MemberName", "");
+        item.setData("MemberType", "");
+        item.setData("MemberSize", "");
 
         return item;
     }
