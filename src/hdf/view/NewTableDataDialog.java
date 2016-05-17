@@ -21,6 +21,7 @@ import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -32,7 +33,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -452,6 +455,38 @@ public class NewTableDataDialog extends Dialog {
         for(int i = 0; i < table.getColumnCount(); i++) {
             table.getColumn(i).pack();
         }
+        
+        table.getColumn(0).setWidth(150);
+        table.getColumn(1).setWidth(150);
+        
+        // Last table column always expands to fill remaining table size
+        table.addListener(SWT.Resize, new Listener() {
+        	public void handleEvent(Event e) {
+        		Table table = (Table) e.widget;
+        		Rectangle area = table.getClientArea();
+        		int columnCount = table.getColumnCount();
+        		int totalGridLineWidth = (columnCount - 1) * table.getGridLineWidth();
+        		
+        		int totalColumnWidth = 0;
+        		for (TableColumn column : table.getColumns()) {
+        			totalColumnWidth += column.getWidth();
+        		}
+        		
+        		int diff = area.width - (totalColumnWidth + totalGridLineWidth);
+        		
+        		TableColumn col = table.getColumns()[columnCount - 1];
+        		col.setWidth(diff + col.getWidth());
+        	}
+        });
+        
+        // Disable table selection highlighting
+        table.addListener(SWT.EraseItem, new Listener() {
+        	public void handleEvent(Event e) {
+        		if ((e.detail & SWT.SELECTED) != 0) {
+        			e.detail &= ~SWT.SELECTED;
+        		}
+        	}
+        });
 
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
@@ -522,16 +557,6 @@ public class NewTableDataDialog extends Dialog {
         HObject obj = null;
         long dims[], maxdims[], chunks[];
         int rank;
-
-        // stop editing the last selected cell
-        //int row = table.getSelectedRow();
-        //int col = table.getSelectedColumn();
-        //if ((row >= 0) && (col > -0)) {
-        //    TableCellEditor ed = table.getCellEditor(row, col);
-        //    if (ed != null) {
-        //        ed.stopCellEditing();
-        //    }
-        //}
 
         maxdims = chunks = null;
         String dname = nameField.getText();
@@ -806,9 +831,8 @@ public class NewTableDataDialog extends Dialog {
         editor.horizontalAlignment = SWT.LEFT;
         editor.verticalAlignment = SWT.TOP;
         editor.setEditor(text, item, 0);
-        item.setData("NameEditor", editor);
 
-        Combo combo = new Combo(table, SWT.DROP_DOWN);
+        CCombo combo = new CCombo(table, SWT.DROP_DOWN | SWT.READ_ONLY);
         combo.setItems(DATATYPE_NAMES);
         editor = new TableEditor(table);
         editor.grabHorizontal = true;
@@ -816,7 +840,6 @@ public class NewTableDataDialog extends Dialog {
         editor.horizontalAlignment = SWT.LEFT;
         editor.verticalAlignment = SWT.TOP;
         editor.setEditor(combo, item, 1);
-        item.setData("DatatypeEditor", editor);
 
         text = new Text(table, SWT.SINGLE | SWT.BORDER);
         editor = new TableEditor(table);
@@ -825,7 +848,6 @@ public class NewTableDataDialog extends Dialog {
         editor.horizontalAlignment = SWT.LEFT;
         editor.verticalAlignment = SWT.TOP;
         editor.setEditor(text, item, 2);
-        item.setData("ArraySizeEditor", editor);
 
         return item;
     }
