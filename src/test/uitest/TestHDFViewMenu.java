@@ -111,7 +111,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void verifyCloseButtonEnabled() {
         try {
             boolean status = bot.toolbarButtonWithTooltip("Close").isEnabled();
@@ -153,7 +153,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void verifyHDF5ButtonEnabled() {
         try {
             boolean status = bot.toolbarButtonWithTooltip("HDF5 Library Version").isEnabled();

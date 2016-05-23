@@ -56,19 +56,19 @@ public abstract class AbstractWindowTest {
                 @Override
                 public void run() {
                     try {
+                        Vector<File> fList = new Vector<File>();
+                        String rootDir = System.getProperty("hdfview.workdir");
+                        if(rootDir == null) rootDir = System.getProperty("user.dir");
+
+                        int W = 500,
+                            H = 200,
+                            X = 0,
+                            Y = 0;
                         while (true) {
-                            Vector<File> fList = new Vector<File>();
-                            String rootDir = System.getProperty("hdfview.workdir");
-                            if(rootDir == null) rootDir = System.getProperty("user.dir");
+                           // open and layout the shell
+                           HDFView window = new HDFView(rootDir);
 
-                            int W = 500,
-                                H = 200,
-                                X = 0,
-                                Y = 0;
-
-                             // open and layout the shell
-                            HDFView window = new HDFView(rootDir);
-                            shell = window.openMainWindow(fList, W, H, X, Y);
+                           shell = window.openMainWindow(fList, W, H, X, Y);
 
                             // wait for the test setup
                             swtBarrier.await();

@@ -258,6 +258,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                 treeView = null;
             }
         }
+        log.debug("Constructor exit");
     }
 
 
@@ -276,6 +277,7 @@ public class HDFView implements ViewManager, DropTargetListener {
      *            the coord y of the app in pixels
      */
     public Shell openMainWindow(List<File> flist, int width, int height, int x, int y) {
+        log.debug("openMainWindow enter");
 
         // Initialize all GUI components
         mainWindow = createMainWindow();
@@ -370,12 +372,14 @@ public class HDFView implements ViewManager, DropTargetListener {
 
         // Display the window
         mainWindow.open();
+        log.debug("openMainWindow exit");
         return mainWindow;
     }
 
     public void runMainWindow() {
+        log.debug("runMainWindow enter");
 
-        while(!display.isDisposed()) {
+        while(!mainWindow.isDisposed()) {
             // ===================================================
             // Wrap each event dispatch in an exception handler
             // so that if any event causes an exception it does
@@ -417,7 +421,8 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
         catch (Exception ex) {}
 
-        display.dispose();
+        //display.dispose();
+        log.debug("runMainWindow exit");
     }
 
     /**
