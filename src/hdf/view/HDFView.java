@@ -29,6 +29,9 @@ import java.util.Vector;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -2059,7 +2062,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
-            okButton.setText("   &OK   ");
+            okButton.setText("   &Ok   ");
             shell.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2076,7 +2079,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
         public void open() {
             final Shell dialog = new Shell(getParent(), getStyle());
-            dialog.setText("HDFView");
+            dialog.setText("HDFView Java Version");
             dialog.setLayout(new GridLayout(2, false));
 
             Image HDFImage = ViewProperties.getLargeHdfIcon();
@@ -2098,7 +2101,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
-            okButton.setText("   &OK   ");
+            okButton.setText("   &Ok   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2166,7 +2169,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
-            okButton.setText("   &OK   ");
+            okButton.setText("   &Ok   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2226,7 +2229,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
-            okButton.setText("   &OK   ");
+            okButton.setText("   &Ok   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
