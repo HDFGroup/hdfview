@@ -192,7 +192,155 @@ public class NewTableDataDialog extends Dialog {
         templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         templateChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
+            	// TODO: get Dataset from combobox name
+            	Object obj = templateChoice.getSelection();
+                if (!(obj instanceof CompoundDS)) {
+                    return;
+                }
 
+                CompoundDS dset = (CompoundDS) obj;
+                int rank = dset.getRank();
+                if (rank < 1) {
+                    dset.init();
+                }
+
+                rank = dset.getRank();
+                rankChoice.select(rank - 1);
+                long[] dims = dset.getDims();
+                String[] mNames = dset.getMemberNames();
+                int[] mOrders = dset.getMemberOrders();
+                Datatype[] mTypes = dset.getMemberTypes();
+
+                String sizeStr = String.valueOf(dims[0]);
+                for (int i = 1; i < rank; i++) {
+                    sizeStr += "x" + dims[i];
+                }
+                currentSizeField.setText(sizeStr);
+
+                try {
+                    dset.getMetadata();
+                } // get chunking and compression info
+                catch (Exception ex) {
+                	log.debug("get chunking and compression info:", ex);
+                }
+                long[] chunks = dset.getChunkSize();
+                if (chunks != null) {
+                    checkChunked.setSelection(true);
+                    sizeStr = String.valueOf(chunks[0]);
+                    for (int i = 1; i < rank; i++) {
+                        sizeStr += "x" + chunks[i];
+                    }
+                    chunkSizeField.setText(sizeStr);
+                }
+
+                String compression = dset.getCompression();
+                if (compression != null) {
+                    int clevel = -1;
+                    int comp_pos = Dataset.compression_gzip_txt.length();
+                    int idx = compression.indexOf(Dataset.compression_gzip_txt);
+                    if (idx >= 0) {
+                        try {
+                            clevel = Integer.parseInt(compression.substring(idx + comp_pos, idx + comp_pos +1));
+                        }
+                        catch (NumberFormatException ex) {
+                            clevel = -1;
+                        }
+                    }
+                    if (clevel > 0) {
+                        checkCompression.setSelection(true);
+                        compressionLevel.select(clevel);
+                    }
+                }
+
+                numberOfMembers = dset.getMemberCount();
+                nFieldBox.select(numberOfMembers - 1);
+                table.setItemCount(numberOfMembers);
+                for (int i = 0; i < numberOfMembers; i++) {
+                    table.getItem(i).setText(0, mNames[i]);
+
+                    int typeIdx = -1;
+                    int tclass = mTypes[i].getDatatypeClass();
+                    long tsize = mTypes[i].getDatatypeSize();
+                    int tsigned = mTypes[i].getDatatypeSign();
+                    if (tclass == Datatype.CLASS_ARRAY) {
+                        tclass = mTypes[i].getBasetype().getDatatypeClass();
+                        tsize = mTypes[i].getBasetype().getDatatypeSize();
+                        tsigned = mTypes[i].getBasetype().getDatatypeSign();
+                    }
+                    if (tclass == Datatype.CLASS_CHAR) {
+                        if (tsigned == Datatype.SIGN_NONE) {
+                            if (tsize == 1) {
+                                typeIdx = 3;
+                            }
+                        }
+                        else {
+                            if (tsize == 1) {
+                                typeIdx = 0;
+                            }
+                        }
+                    }
+                    if (tclass == Datatype.CLASS_INTEGER) {
+                        if (tsigned == Datatype.SIGN_NONE) {
+                            if (tsize == 1) {
+                                typeIdx = 3;
+                            }
+                            else if (tsize == 2) {
+                                typeIdx = 4;
+                            }
+                            else if (tsize == 4) {
+                                typeIdx = 5;
+                            }
+                            else {
+                                typeIdx = 11;
+                            }
+                        }
+                        else {
+                            if (tsize == 1) {
+                                typeIdx = 0;
+                            }
+                            else if (tsize == 2) {
+                                typeIdx = 1;
+                            }
+                            else if (tsize == 4) {
+                                typeIdx = 2;
+                            }
+                            else {
+                                typeIdx = 6;
+                            }
+                        }
+                    }
+                    else if (tclass == Datatype.CLASS_FLOAT) {
+                        if (tsize == 4) {
+                            typeIdx = 7;
+                        }
+                        else {
+                            typeIdx = 8;
+                        }
+                    }
+                    else if (tclass == Datatype.CLASS_STRING) {
+                        typeIdx = 9;
+                    }
+                    else if (tclass == Datatype.CLASS_ENUM) {
+                        typeIdx = 10;
+                    }
+                    if (typeIdx < 0) {
+                        continue;
+                    }
+
+                    memberTypeChoice.select(typeIdx);
+                    table.getItem(i).setText(1, memberTypeChoice.getItem(memberTypeChoice.getSelectionIndex()));
+                    
+                    if (tclass == Datatype.CLASS_STRING) {
+                    	table.getItem(i).setText(2, String.valueOf(tsize));
+                    }
+                    else if (tclass == Datatype.CLASS_ENUM) {
+                    	table.getItem(i).setText(2, mTypes[i].getEnumMembers());
+                    }
+                    else {
+                    	table.getItem(i).setText(2, String.valueOf(mOrders[i]));
+                    }
+
+                } // for (int i=0; i<numberOfMembers; i++)
             }
         });
 
@@ -824,7 +972,7 @@ public class NewTableDataDialog extends Dialog {
     }
 
     private TableItem addMemberTableItem(Table table) {
-        TableItem item = new TableItem(table, SWT.NONE);
+        final TableItem item = new TableItem(table, SWT.NONE);
 
         TableEditor editor = new TableEditor(table);
         Text text = new Text(table, SWT.SINGLE | SWT.BORDER);
