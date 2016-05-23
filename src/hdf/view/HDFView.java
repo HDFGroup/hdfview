@@ -2000,7 +2000,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
             if(libType == FileFormat.FILE_TYPE_HDF4)
-                setMessage("HDF4 " + HDF4_VERSION);
+                setMessage("HDF " + HDF4_VERSION);
             else if (libType == FileFormat.FILE_TYPE_HDF5)
                 setMessage("HDF5 " + HDF5_VERSION);
         }

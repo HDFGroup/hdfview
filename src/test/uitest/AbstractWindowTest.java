@@ -61,7 +61,7 @@ public abstract class AbstractWindowTest {
                         if(rootDir == null) rootDir = System.getProperty("user.dir");
 
                         int W = 500,
-                            H = 200,
+                            H = 400,
                             X = 0,
                             Y = 0;
                         while (true) {

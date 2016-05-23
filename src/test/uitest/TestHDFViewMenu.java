@@ -111,7 +111,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyCloseButtonEnabled() {
         try {
             boolean status = bot.toolbarButtonWithTooltip("Close").isEnabled();
@@ -125,7 +125,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyHelpButtonEnabled() {
         try {
             boolean status = bot.toolbarButtonWithTooltip("Help").isEnabled();
@@ -153,7 +153,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyHDF5ButtonEnabled() {
         try {
             boolean status = bot.toolbarButtonWithTooltip("HDF5 Library Version").isEnabled();
@@ -167,7 +167,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyTextInLabelWhenClickingHDF4Button() {
         try {
             bot.toolbarButtonWithTooltip("HDF4 Library Version").click();
@@ -176,7 +176,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
-            assertEquals(bot.label().getText(), HDF4VERSION);
+            bot.label(HDF4VERSION);
             bot.button("   &Ok   ").click();
         }
         catch (Exception ex) {
@@ -187,17 +187,16 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyTextInLabelWhenClickingHDF5Button() {
         try {
             bot.toolbarButtonWithTooltip("HDF5 Library Version").click();
-            bot.sleep(500);
 
-            SWTBotShell shell = bot.shell("HDF5 Library Version");
+            SWTBotShell shell = bot.shell("HDF Library Version");
             shell.activate();
-            bot.waitUntil(Conditions.shellIsActive("HDF5 Library Version"));
+            bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
-            assertEquals(bot.label().getText(), HDF5VERSION);
+            bot.label(HDF5VERSION);
             bot.button("   &Ok   ").click();
         }
         catch (Exception ex) {
