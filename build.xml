@@ -104,8 +104,8 @@
   <path id="unit-classpath">
     <fileset dir="${lib.dir}" includes="extra/junit-4.11.jar extra/hamcrest-core-1.3.jar" excludes="*sources.jar" />
   </path>
-  <path id="fest-classpath">
-    <fileset dir="${lib.dir}" includes="fest*.jar" excludes="*sources.jar" />
+  <path id="swtbot-classpath">
+    <fileset dir="${lib.dir}" includes="*swtbot*.jar *log4j*.jar" excludes="*sources.jar" />
   </path>
   <path id="ui-test-sources">
     <fileset dir="${src.dir}/" includes="**/uitest/*Test*.java" excludes="**/uitest/*CLGeometry.java **/uitest/*All*.java" />
@@ -254,7 +254,7 @@
       <classpath>
         <path refid="project-classpath" />
         <path refid="unit-classpath" />
-        <path refid="fest-classpath" />
+        <path refid="swtbot-classpath" />
         <path refid="application" />
       </classpath>
     </javac>
@@ -367,7 +367,7 @@
         <path refid="project-classpath" />
         <path refid="log-classpath" />
         <path refid="unit-classpath" />
-        <path refid="fest-classpath" />
+        <path refid="swtbot-classpath" />
         <pathelement location="${classes.dir}" />
         <path refid="application" />
       </classpath>
@@ -391,7 +391,7 @@
         <path refid="project-classpath" />
         <path refid="log-classpath" />
         <path refid="unit-classpath" />
-        <path refid="fest-classpath" />
+        <path refid="swtbot-classpath" />
         <pathelement location="${classes.dir}" />
         <path refid="application" />
       </classpath>
@@ -403,7 +403,7 @@
       <formatter type="plain" />
 
       <batchtest fork="yes" todir="${report.dir}">
-        <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
+        <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/AbstractWindowTest* **/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
       </batchtest>
     </junit>
   </target>
@@ -416,7 +416,7 @@
         <path refid="project-classpath" />
         <path refid="log-classpath" />
         <path refid="unit-classpath" />
-        <path refid="fest-classpath" />
+        <path refid="swtbot-classpath" />
         <pathelement location="${classes.dir}" />
         <path refid="application" />
       </classpath>
