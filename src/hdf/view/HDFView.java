@@ -89,6 +89,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 
     private static final Display display = new Display();
     private static Shell mainWindow;
+    
+    /* Determines whether HDFView is being executed for GUI testing */
+    private boolean isTesting = false;
 
     /* The directory where HDFView is installed */
     private String                    rootDir;
@@ -535,16 +538,23 @@ public class HDFView implements ViewManager, DropTargetListener {
                 else {
                     currentDir = "";
                 }
+                
+                String filename = null;
 
-                FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-                fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
+                if (!isTesting) {
+                    FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+                    fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
 
-                DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF4();
-                fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
-                fChooser.setFilterNames(new String[] {filter.getDescription()});
-                fChooser.setFilterIndex(0);
+                    DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF4();
+                    fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+                    fChooser.setFilterNames(new String[] {filter.getDescription()});
+                    fChooser.setFilterIndex(0);
 
-                String filename = fChooser.open();
+                    filename = fChooser.open();
+                } else {
+                    // Prepend test file directory to filename
+                    filename = currentDir.concat(new InputDialog(mainWindow, "Enter a file name", "").open());
+                }
 
                 if(filename == null) return;
 
@@ -589,16 +599,23 @@ public class HDFView implements ViewManager, DropTargetListener {
                 else {
                     currentDir = "";
                 }
+                
+                String filename = null;
 
-                FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-                fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
+                if (!isTesting) {
+                    FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+                    fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
 
-                DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
-                fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
-                fChooser.setFilterNames(new String[] {filter.getDescription()});
-                fChooser.setFilterIndex(0);
+                    DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
+                    fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+                    fChooser.setFilterNames(new String[] {filter.getDescription()});
+                    fChooser.setFilterIndex(0);
 
-                String filename = fChooser.open();
+                    filename = fChooser.open();
+                } else {
+                    // Prepend test file directory to filename
+                    filename = currentDir.concat(new InputDialog(mainWindow, "Enter a file name", "").open());
+                }
 
                 if(filename == null) return;
 
@@ -1454,6 +1471,14 @@ public class HDFView implements ViewManager, DropTargetListener {
     public Composite getDataArea() {
         return dataArea;
     }
+    
+    /**
+     * Set the testing state that determines if HDFView
+     * is being executed for GUI testing.
+     */
+    public void setTestState(boolean testing) {
+        isTesting = testing;
+    }
 
     /**
      * Set default UI fonts.
@@ -1629,57 +1654,102 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
         else {
-            log.trace("openLocalFile filename is null");
-            FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
-            fChooser.setFilterPath(null);
+            if (!isTesting) {
+                log.trace("openLocalFile filename is null");
+                FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
+                fChooser.setFilterPath(null);
 
-            DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
-            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-            fChooser.setFilterIndex(1);
+                DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
+                fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+                fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+                fChooser.setFilterIndex(1);
 
-            fChooser.open();
+                fChooser.open();
 
-            selectedFilenames = fChooser.getFileNames();
-            if(selectedFilenames.length <= 0) return;
+                selectedFilenames = fChooser.getFileNames();
+                if(selectedFilenames.length <= 0) return;
 
-            chosenFiles = new File[selectedFilenames.length];
-            for(int i = 0; i < chosenFiles.length; i++) {
-                log.trace("openLocalFile selectedFilenames[{}]: {}",i,selectedFilenames[i]);
-                chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
+                chosenFiles = new File[selectedFilenames.length];
+                for(int i = 0; i < chosenFiles.length; i++) {
+                    log.trace("openLocalFile selectedFilenames[{}]: {}",i,selectedFilenames[i]);
+                    chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
 
-                if(!chosenFiles[i].exists()) {
-                    Tools.showError(mainWindow, "File " + chosenFiles[i].getName() + " does not exist.", "Open File");
-                    continue;
+                    if(!chosenFiles[i].exists()) {
+                        Tools.showError(mainWindow, "File " + chosenFiles[i].getName() + " does not exist.", "Open File");
+                        continue;
+                    }
+
+                    if (chosenFiles[i].isDirectory()) {
+                        currentDir = chosenFiles[i].getPath();
+                    }
+                    else {
+                        currentDir = chosenFiles[i].getParent();
+                    }
+
+                    try {
+                        url_bar.remove(chosenFiles[i].getAbsolutePath());
+                    }
+                    catch (Exception ex) {}
+
+                    url_bar.add(chosenFiles[i].getAbsolutePath(), 0);
+                    url_bar.select(0);
+
+                    log.trace("openLocalFile treeView.openFile(chosenFiles[{}]: {}",i,chosenFiles[i].getAbsolutePath());
+                    try {
+                        treeView.openFile(chosenFiles[i].getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
+                    }
+                    catch (Throwable ex) {
+                        try {
+                            treeView.openFile(chosenFiles[i].getAbsolutePath(), FileFormat.READ);
+                        }
+                        catch (Throwable ex2) {
+                            display.beep();
+                            url_bar.deselectAll();
+                            Tools.showError(mainWindow, "Failed to open file " + selectedFilenames[i] + "\n" + ex2, mainWindow.getText());
+                            currentFile = null;
+                        }
+                    }
                 }
 
-                if (chosenFiles[i].isDirectory()) {
-                    currentDir = chosenFiles[i].getPath();
+                currentFile = chosenFiles[0].getAbsolutePath();
+            } else {
+                // Prepend test file directory to filename
+                String fName = currentDir + File.separator + new InputDialog(mainWindow, "Enter a file name", "").open();
+                
+                File chosenFile = new File(fName);
+                
+                if(!chosenFile.exists()) {
+                    Tools.showError(mainWindow, "File " + chosenFile.getName() + " does not exist.", "Open File");
+                    return;
+                }
+
+                if (chosenFile.isDirectory()) {
+                    currentDir = chosenFile.getPath();
                 }
                 else {
-                    currentDir = chosenFiles[i].getParent();
+                    currentDir = chosenFile.getParent();
                 }
 
                 try {
-                    url_bar.remove(chosenFiles[i].getAbsolutePath());
+                    url_bar.remove(chosenFile.getAbsolutePath());
                 }
                 catch (Exception ex) {}
 
-                url_bar.add(chosenFiles[i].getAbsolutePath(), 0);
+                url_bar.add(chosenFile.getAbsolutePath(), 0);
                 url_bar.select(0);
 
-                log.trace("openLocalFile treeView.openFile(chosenFiles[{}]: {}",i,chosenFiles[i].getAbsolutePath());
+                log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}",chosenFile.getAbsolutePath());
                 try {
-                    treeView.openFile(chosenFiles[i].getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
+                    treeView.openFile(chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                 }
                 catch (Throwable ex) {
                     try {
-                        treeView.openFile(chosenFiles[i].getAbsolutePath(), FileFormat.READ);
+                        treeView.openFile(chosenFile.getAbsolutePath(), FileFormat.READ);
                     }
                     catch (Throwable ex2) {
                         display.beep();
                         url_bar.deselectAll();
-                        Tools.showError(mainWindow, "Failed to open file " + selectedFilenames[i] + "\n" + ex2, mainWindow.getText());
+                        Tools.showError(mainWindow, "Failed to open file " + chosenFile + "\n" + ex2, mainWindow.getText());
                         currentFile = null;
                     }
                 }
@@ -2466,6 +2536,10 @@ public class HDFView implements ViewManager, DropTargetListener {
         display.syncExec(new Runnable() {
             public void run() {
                 HDFView app = new HDFView(the_rootDir);
+                
+                // TODO: Look for a better solution to native dialog problem
+                app.setTestState(false);
+                
                 app.openMainWindow(the_fList, the_W, the_H, the_X, the_Y);
                 app.runMainWindow();
             }

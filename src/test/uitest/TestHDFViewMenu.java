@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
+
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -21,79 +23,14 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
 import hdf.HDFVersions;
 
 //@RunWith(SWTBotJunit4ClassRunner.class)
 public class TestHDFViewMenu extends AbstractWindowTest {
-
-    private File createFile(String name, boolean hdf4_type) {
-        String file_ext;
-        String file_type;
-        if (hdf4_type) {
-            file_ext = new String(".hdf");
-            file_type = new String("HDF4");
-        }
-        else {
-            file_ext = new String(".h5");
-            file_type = new String("HDF5");
-        }
-
-        File hdf_file = new File(workDir, name + file_ext);
-        if (hdf_file.exists())
-            hdf_file.delete();
-
-        try {
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("New").menu(file_type);
-            fileMenuItem.click();
-
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText(name + file_ext);
-//            fileChooser.approve();
-//
-//            assertTrue("File- " + hdf_file + " file created", hdf_file.exists());
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-        }
-
-        return hdf_file;
-    }
-
-    private File createHDF4File(String name) {
-        return createFile(name, true);
-    }
-
-    private File createHDF5File(String name) {
-        return createFile(name, false);
-    }
-
-    private void closeFile(File hdf_file, boolean delete_file) {
-        try {
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("Close All");
-            fileMenuItem.click();
-
-            if(delete_file) {
-                assertTrue("closeFile File " + hdf_file + " not deleted", hdf_file.delete());
-                assertFalse("closeFile File " + hdf_file + " not gone", hdf_file.exists());
-            }
-
-            SWTBotTree filetree = bot.tree();
-            //filetree.setFocus();
-            assertTrue("closeHDFFile filetree shows:"+filetree.rowCount(), filetree.rowCount() == 0);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-        }
-    }
-
     @Test
     public void verifyOpenButtonEnabled() {
         try {
@@ -213,15 +150,23 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         try {
             closeFile(hdf_file, false);
 
-            bot.toolbarButton("Open").click();
-
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testopenbutton.hdf");
-//            fileChooser.approve();
+            bot.toolbarButtonWithTooltip("Open").click();
+            
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+            
+            SWTBotText text = shell.bot().text();
+            text.setText("testopenbutton.hdf");
+            assertEquals("testopenbutton.hdf", text.getText());
+            
+            shell.bot().button("   &Ok   ").click();
+            bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            
             assertTrue("Button-Open-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Open-HDF4 filetree has file "+filetree.cell(0,0), (filetree.cell(0,0)).compareTo("testopenbutton.hdf") == 0);
+            assertTrue("Button-Open-HDF4 filetree has file testopenbutton.hdf", items[0].getText().compareTo("testopenbutton.hdf") == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -243,11 +188,14 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
         try {
             SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            
             assertTrue("Button-Close-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Close-HDF4 filetree has file "+filetree.cell(0,0), (filetree.cell(0,0)).compareTo("closebutton.hdf") == 0);
+            assertTrue("Button-Close-HDF4 filetree has file closebutton.hdf", items[0].getText().compareTo("closebutton.hdf") == 0);
 
             filetree.select(0);
-            bot.toolbarButton("Close").click();
+            
+            bot.toolbarButtonWithTooltip("Close").click();
 
             assertTrue("Button-Close-HDF4 file deleted", hdf_file.delete());
             assertFalse("Button-Close-HDF4 file gone", hdf_file.exists());
