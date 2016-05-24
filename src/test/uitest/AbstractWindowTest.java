@@ -1,5 +1,9 @@
 package test.uitest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.Vector;
 import java.util.concurrent.BrokenBarrierException;
@@ -17,6 +21,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 
 public abstract class AbstractWindowTest {
     protected static String HDF5VERSION = "HDF5 " + HDFVersions.HDF5_VERSION;
@@ -45,6 +53,77 @@ public abstract class AbstractWindowTest {
             prop_file.delete();
         }
     }
+    
+    protected File createFile(String name, boolean hdf4_type) {
+        String file_ext;
+        String file_type;
+        if (hdf4_type) {
+            file_ext = new String(".hdf");
+            file_type = new String("HDF4");
+        }
+        else {
+            file_ext = new String(".h5");
+            file_type = new String("HDF5");
+        }
+
+        File hdf_file = new File(workDir, name + file_ext);
+        if (hdf_file.exists())
+            hdf_file.delete();
+
+        try {
+            SWTBotMenu fileMenuItem = bot.menu("File").menu("New").menu(file_type);
+            fileMenuItem.click();
+            
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+            
+            SWTBotText text = shell.bot().text();
+            text.setText(name + file_ext);
+            assertEquals(name + file_ext, text.getText());
+            
+            shell.bot().button("   &Ok   ").click();
+            
+            assertTrue("File- " + hdf_file + " file created", hdf_file.exists());
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+
+        return hdf_file;
+    }
+
+    protected File createHDF4File(String name) {
+        return createFile(name, true);
+    }
+
+    protected File createHDF5File(String name) {
+        return createFile(name, false);
+    }
+
+    protected void closeFile(File hdf_file, boolean delete_file) {
+        try {
+            SWTBotMenu fileMenuItem = bot.menu("File").menu("Close All");
+            fileMenuItem.click();
+
+            if(delete_file) {
+                assertTrue("closeFile File " + hdf_file + " not deleted", hdf_file.delete());
+                assertFalse("closeFile File " + hdf_file + " not gone", hdf_file.exists());
+            }
+
+            SWTBotTree filetree = bot.tree();
+            //filetree.setFocus();
+            assertTrue("closeHDFFile filetree shows:"+filetree.rowCount(), filetree.rowCount() == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+    }
 
     @BeforeClass
     public static void setupApp() {
@@ -64,9 +143,14 @@ public abstract class AbstractWindowTest {
                             H = 400,
                             X = 0,
                             Y = 0;
+                        
                         while (true) {
                            // open and layout the shell
                            HDFView window = new HDFView(rootDir);
+                           
+                           // Set the testing state to handle the problem with testing
+                           // of native dialogs
+                           window.setTestState(true);
 
                            shell = window.openMainWindow(fList, W, H, X, Y);
 
