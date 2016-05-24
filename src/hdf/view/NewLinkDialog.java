@@ -22,6 +22,7 @@ import java.util.Queue;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -61,7 +62,9 @@ public class NewLinkDialog extends Dialog {
 
     private Text          nameField;
 
-    private Combo         parentChoice, targetObject;
+    private Combo         parentChoice;
+    
+    private CCombo        targetObject;
 
     private String        currentDir;
 
@@ -189,16 +192,9 @@ public class NewLinkDialog extends Dialog {
             public void widgetSelected(SelectionEvent e) {
                 targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
-                //targetObject.setEnabled(true);
-                targetObject.addKeyListener(new KeyListener() {
-                    public void keyPressed(KeyEvent e) {
-                        e.doit = false;
-                    }
-
-                    public void keyReleased(KeyEvent e) {
-                        e.doit = false;
-                    }
-                });
+                targetObject.setEnabled(true);
+                targetObject.setEditable(false);
+                targetObject.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 
                 targetObject.removeAll();
                 retrieveObjects(fileFormat);
@@ -214,8 +210,9 @@ public class NewLinkDialog extends Dialog {
             public void widgetSelected(SelectionEvent e) {
                 targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
-                //targetObject.setEnabled(true);
-                //targetObject.setEditable(true);
+                targetObject.setEnabled(true);
+                targetObject.setEditable(true);
+                targetObject.setBackground(null);
 
                 targetObject.removeAll();
                 retrieveObjects(fileFormat);
@@ -231,8 +228,9 @@ public class NewLinkDialog extends Dialog {
             public void widgetSelected(SelectionEvent e) {
                 targetFile.setEnabled(true);
                 targetFileButton.setEnabled(true);
-                //targetObject.setEnabled(true);
-                //targetObject.setEditable(true);
+                targetObject.setEnabled(true);
+                targetObject.setEditable(true);
+                targetObject.setBackground(null);
                 targetObject.removeAll();
             }
         });
@@ -275,9 +273,10 @@ public class NewLinkDialog extends Dialog {
         label = new Label(content, SWT.LEFT);
         label.setText("Target Object: ");
 
-        targetObject = new Combo(content, SWT.DROP_DOWN);
+        targetObject = new CCombo(content, SWT.DROP_DOWN | SWT.BORDER);
         targetObject.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        //targetObject.setEditable(false);
+        targetObject.setEditable(false);
+        targetObject.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 
         groupList = new Vector<Group>(objList.size());
         Object obj = null;
