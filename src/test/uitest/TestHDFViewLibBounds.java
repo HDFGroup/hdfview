@@ -47,7 +47,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             shell.bot().button("   &Ok   ").click();
             bot.waitUntil(shellCloses(shell));
             
-            SWTBotTree filetree = bot.tree();
+            final SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
             
             assertTrue("Button-Open-HDF5 filetree shows:", filetree.rowCount() == 1);

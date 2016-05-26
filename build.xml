@@ -7,13 +7,6 @@
   <property file="build.properties" />
   <property file="package.properties" />
 
-
-  <taskdef resource="net/sf/antcontrib/antlib.xml">
-    <classpath>
-      <pathelement location="${antextension.dir}ant-contrib.jar"/>
-    </classpath>
-  </taskdef>
-
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
     <filterchain>
@@ -130,6 +123,7 @@
   <path id="jar-classpath">
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
+    <path refid="swt-classpath" />
     <path refid="nop-classpath" />
   </path>
 
@@ -213,7 +207,18 @@
     </pathconvert>
 
     <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}" excludes="examples/** test/** *.log *.h5">
-      <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
+      <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
+      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
+      <zipgroupfileset dir="${lib.dir}/extra" includes="slf4j-nop-1.7.5.jar" />
+      <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}" includes="swt.jar" />
+      
+      <zipfileset src="${lib.dir}/ext/swt/commons-logging-1.2.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.core.commands.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.equinox.common.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.jface.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.nebula.widgets.nattable.core_1.3.0.201503261201.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.osgi.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.ui.workbench.jar" excludes="META-INF/**/*"></zipfileset>
 
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
@@ -550,8 +555,10 @@
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-        <fileset dir="${hdf.lib.dir}" includes="*.jar *.so" excludes="*.a" />
-        <fileset dir="${hdf5.lib.dir}" includes="*.jar *.so" excludes="*.a" />
+      <fileset dir="${lib.dir}/ext/swt" includes="*.jar"/>
+      <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar *.so" excludes="*.a" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.so" excludes="*.a" />
     </copy>
 
     <!-- Bundle jre -->
@@ -575,7 +582,8 @@
     <copy todir="${release.dir}/share/doc">
       <fileset dir="${docs.dir}" excludes="UserGuide.tar.gz" />
     </copy>
-    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
+  	
+    <!--<untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />-->
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/share/samples">
