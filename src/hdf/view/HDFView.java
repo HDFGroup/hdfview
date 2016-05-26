@@ -1370,6 +1370,11 @@ public class HDFView implements ViewManager, DropTargetListener {
             if(isH5) {
                 if (obj.getLinkTargetObjName() != null) {
                     new Label(generalInfoGroup, SWT.LEFT).setText("Link To Target: ");
+                    
+                    Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
+                    linkTarget.setText(((H5Link) obj).getLinkTargetObjName());
+                    
+                    //TODO: Only allow editing of linkTarget if link is not hard link
                 }
             }
 
@@ -1476,6 +1481,9 @@ public class HDFView implements ViewManager, DropTargetListener {
                     }
                     else if (theObj instanceof Dataset) {
                         rowData[i][1] = "Dataset";
+                    }
+                    else if (theObj instanceof Datatype) {
+                        rowData[i][1] = "Datatype";
                     }
                     else if (theObj instanceof H5Link) {
                         rowData[i][1] = "Link";
