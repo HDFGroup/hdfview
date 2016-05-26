@@ -176,11 +176,10 @@ public class DefaultMetaDataView implements MetaDataView {
 
 		shell.pack();
 		
-		Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		minimumSize.x += 200;
+		Point minimumSize = shell.getParent().getSize();
 
-		shell.setMinimumSize(minimumSize);
-		shell.setSize(minimumSize);
+		shell.setMinimumSize(minimumSize.x / 2, minimumSize.y / 2);
+		shell.setSize(minimumSize.x / 2, minimumSize.y / 2);
 
 		Rectangle parentBounds = parent.getBounds();
 		Point shellSize = shell.getSize();

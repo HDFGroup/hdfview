@@ -2582,7 +2582,10 @@ public class DefaultTreeView implements TreeView {
             log.trace("showDataContent: Tools.newInstance");
 
             cursor.dispose();
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+            cursor.dispose();
+            shell.setCursor(null);
+        }
 
         log.trace("showDataContent({}): finish", dataObject.getName());
         return (DataView) theView;
