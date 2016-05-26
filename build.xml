@@ -98,7 +98,7 @@
   </path>
   <path id="jni-classpath">
     <fileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
-    <fileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar slf4j-api*.jar" />
+    <fileset dir="${hdf5.lib.dir}" includes="jarhdf5*.jar slf4j-api*.jar" />
   </path>
   <path id="log-classpath">
     <fileset dir="${lib.dir}/extra" includes="slf4j-simple*.jar" excludes="*sources.jar" />
@@ -208,10 +208,11 @@
 
     <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}" excludes="examples/** test/** *.log *.h5">
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
+      <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
       <zipgroupfileset dir="${lib.dir}/extra" includes="slf4j-nop-1.7.5.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}" includes="swt.jar" />
-      
+
       <zipfileset src="${lib.dir}/ext/swt/commons-logging-1.2.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.core.commands.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.equinox.common.jar" excludes="META-INF/**/*"></zipfileset>
@@ -240,6 +241,7 @@
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
+      <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}"/>
     </java>
   </target>
 
@@ -256,6 +258,7 @@
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
+      <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}"/>
     </java>
   </target>
 
@@ -582,7 +585,7 @@
     <copy todir="${release.dir}/share/doc">
       <fileset dir="${docs.dir}" excludes="UserGuide.tar.gz" />
     </copy>
-  	
+
     <!--<untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />-->
 
     <!-- Copy the samples -->
