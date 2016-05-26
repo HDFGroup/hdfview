@@ -8,6 +8,12 @@ import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 
 import java.io.File;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
@@ -49,7 +55,22 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             
             filetree.select(0).contextMenu("Set Lib version bounds").click();
             
+            // Set selected object
+            Display.getDefault().syncExec(new Runnable() {
+                public void run() {
+                    Tree tree = filetree.widget;
+                    TreeItem item = filetree.getAllItems()[0].widget;
+                    
+                    Event event = new Event();
+                    event.x = item.getBounds().x;
+                    event.y = item.getBounds().y;
+                    
+                    tree.notifyListeners(SWT.MouseUp, event);
+                }
+            });
+            
             SWTBotShell libVersionShell = bot.shell("Set the library version bounds: ");
+            libVersionShell.activate();
             
             libVersionShell.bot().comboBox(0).setSelection("Earliest");
             
@@ -57,17 +78,17 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             
             bot.waitUntil(shellCloses(libVersionShell));
             
-            filetree.select(0).contextMenu("Show Properties").click();
+            // filetree.select(0).contextMenu("Show Properties").click();
+            
+            // Workaround to show Properties, since selected object doesn't get set
+            filetree.contextMenu("Show Properties").click();
             
             SWTBotShell propertiesWindow = bot.shell("Properties - /");
+            propertiesWindow.activate();
             
-            // assertEquals("Earliest and Latest", propertiesWindow.bot().label("").getText());
+            assertEquals("Earliest and Latest", propertiesWindow.bot().label(7).getText());
             
-            
-            
-            
-            bot.sleep(5000);
-            
+            propertiesWindow.bot().button("   &Close   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();

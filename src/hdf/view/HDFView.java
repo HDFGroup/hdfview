@@ -1753,9 +1753,9 @@ public class HDFView implements ViewManager, DropTargetListener {
                         currentFile = null;
                     }
                 }
+                
+                currentFile = chosenFile.getAbsolutePath();
             }
-
-            currentFile = chosenFiles[0].getAbsolutePath();
         }
     }
 
