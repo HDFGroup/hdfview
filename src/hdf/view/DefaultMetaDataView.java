@@ -57,6 +57,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.h5.H5Link;
 
 /**
  * DefaultMetadataView is a dialog window used to show data properties. Data
@@ -1026,6 +1027,14 @@ public class DefaultMetaDataView implements MetaDataView {
             else if (theObj instanceof Dataset) {
                 rowData[i][1] = "Dataset";
             }
+            else if (theObj instanceof Datatype) {
+                rowData[i][1] = "Datatype";
+            }
+            else if (theObj instanceof H5Link) {
+                rowData[i][1] = "Link";
+            }
+            else
+                rowData[i][1] = "Unknown";
         }
         
         String[] columnNames = { "Name", "Type" };
