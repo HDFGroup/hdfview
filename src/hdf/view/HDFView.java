@@ -62,6 +62,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.h5.H5Link;
 
 import hdf.HDFVersions;
 
@@ -1285,6 +1286,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         generalInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
         if(isRoot) {
+            log.trace("showMetaData: isRoot");
             long size = 0;
             try {
                 size = (new File(obj.getFile())).length();
@@ -1360,6 +1362,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
         else {
+            log.trace("showMetaData: is not root");
             new Label(generalInfoGroup, SWT.LEFT).setText("Name: ");
             
             new Label(generalInfoGroup, SWT.RIGHT).setText(obj.getName());
@@ -1367,6 +1370,11 @@ public class HDFView implements ViewManager, DropTargetListener {
             if(isH5) {
                 if (obj.getLinkTargetObjName() != null) {
                     new Label(generalInfoGroup, SWT.LEFT).setText("Link To Target: ");
+                    
+                    Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
+                    linkTarget.setText(((H5Link) obj).getLinkTargetObjName());
+                    
+                    //TODO: Only allow editing of linkTarget if link is not hard link
                 }
             }
             
@@ -1441,9 +1449,11 @@ public class HDFView implements ViewManager, DropTargetListener {
                 new Label(generalInfoGroup, SWT.RIGHT).setText(oidStr);
             }
         }
-        
+
+        log.trace("showMetaData: object extra info");
         // Add any extra information depending on object type
         if (obj instanceof Group) {
+            log.trace("showMetaData: group object extra info");
             Group g = (Group) obj;
             List<?> mlist = g.getMemberList();
             int n = mlist.size();
@@ -1472,6 +1482,14 @@ public class HDFView implements ViewManager, DropTargetListener {
                     else if (theObj instanceof Dataset) {
                         rowData[i][1] = "Dataset";
                     }
+                    else if (theObj instanceof Datatype) {
+                        rowData[i][1] = "Datatype";
+                    }
+                    else if (theObj instanceof H5Link) {
+                        rowData[i][1] = "Link";
+                    }
+                    else
+                        rowData[i][1] = "Unknown";
                 }
                 
                 String[] columnNames = { "Name", "Type" };
@@ -1503,6 +1521,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
         else if (obj instanceof Dataset) {
+            log.trace("showMetaData: Dataset object extra info");
             Dataset d = (Dataset) obj;
             if (d.getRank() <= 0) {
                 d.init();
@@ -1607,6 +1626,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             
             // Create composite for possible compound dataset info
             if (d instanceof CompoundDS) {
+                log.trace("showMetaData: dataset Compound object extra info");
                 CompoundDS compound = (CompoundDS) d;
 
                 int n = compound.getMemberCount();
@@ -1726,6 +1746,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             new Label(compressionComposite, SWT.RIGHT).setText(fillValueInfo);
         }
         else if (obj instanceof Datatype) {
+            log.trace("showMetaData: Datatype object extra info");
             org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
             datatypeInfoGroup.setText("Type");
             datatypeInfoGroup.setLayout(new FillLayout());
