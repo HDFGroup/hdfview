@@ -525,9 +525,9 @@ public class DefaultTableView implements TableView {
 
         shell.pack();
 
-        Composite dataClientArea = ((HDFView) viewer).getDataArea();
-        shell.setSize(dataClientArea.getClientArea().width, dataClientArea.getClientArea().height);
-        shell.setLocation(dataClientArea.getBounds().x, dataClientArea.getBounds().y);
+        Composite attributeArea = ((HDFView) viewer).getAttributeArea();
+        shell.setSize(attributeArea.getClientArea().width, attributeArea.getClientArea().height);
+        shell.setLocation(attributeArea.getBounds().x, attributeArea.getBounds().y);
 
         viewer.addDataView(this);
 

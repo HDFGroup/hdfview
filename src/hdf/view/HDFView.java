@@ -19,6 +19,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,11 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -162,14 +158,11 @@ public class HDFView implements ViewManager, DropTargetListener {
     /* GUI component: Area to hold file structure tree and data content pane */
     private Composite                  contentArea;
 
-    /* GUI component: Area where data view windows are shown */
-    private Composite                  dataArea;
-
     /* GUI component: The text area for showing status messages */
     private Text                       status;
 
-    /* GUI component: The text area for quick attribute view */
-    private Text                       attributeArea;
+    /* GUI component: The area for quick attribute view */
+    private Composite                  attributeArea;
 
     /* GUI component: To add and display URLs */
     private Combo                      url_bar;
@@ -674,7 +667,9 @@ public class HDFView implements ViewManager, DropTargetListener {
                 }
 
                 currentFile = null;
-                attributeArea.setText("");
+                
+                for (Control control : attributeArea.getChildren()) control.dispose();
+                
                 url_bar.setText("");
             }
         });
@@ -1100,11 +1095,13 @@ public class HDFView implements ViewManager, DropTargetListener {
                         return;
                     }
 
-                    if(!(filename.startsWith("http://") || filename.startsWith("ftp://"))) {
+                    if(!(filename.startsWith("http://") || filename.startsWith("https://") || filename.startsWith("ftp://"))) {
                         openLocalFile(filename, FileFormat.WRITE);
                     }
                     else {
-                        openRemoteFile(filename);
+                        String remoteFile = openRemoteFile(filename);
+                        
+                        if (remoteFile != null) openLocalFile(remoteFile, FileFormat.WRITE);
                     }
                 }
             }
@@ -1159,41 +1156,22 @@ public class HDFView implements ViewManager, DropTargetListener {
         treeArea.setExpandHorizontal(true);
         treeArea.setExpandVertical(true);
 
-        dataArea = new Composite(contentArea, SWT.BORDER);
-        dataArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        attributeArea = new Composite(contentArea, SWT.BORDER);
+        attributeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+        attributeArea.setLayout(new GridLayout(1, true));
 
         // Could not load user's treeview, use default treeview.
         if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
         treeArea.setContent(treeView.getTree());
 
         // Create status area for displaying messages and metadata
-        CTabFolder tabFolder = new CTabFolder(statusArea, SWT.BORDER | SWT.FLAT);
-        tabFolder.setTabPosition(SWT.BOTTOM);
-        tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-
-        CTabItem tbtmLogInfo = new CTabItem(tabFolder, SWT.NONE);
-        tbtmLogInfo.setText("Log Info");
-
-        status = new Text(tabFolder, SWT.V_SCROLL | SWT.MULTI);
+        status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
         status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
         status.setEditable(false);
         message = new StringBuffer();
         metadata = new StringBuffer();
         showStatus("HDFView root - " + rootDir);
         showStatus("User property file - " + ViewProperties.getPropertyFile());
-
-        tbtmLogInfo.setControl(status);
-
-        CTabItem tbtmNewItem = new CTabItem(tabFolder, SWT.NONE);
-        tbtmNewItem.setText("Metadata");
-
-        attributeArea = new Text(tabFolder, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
-        attributeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-        attributeArea.setEditable(false);
-        tbtmNewItem.setControl(attributeArea);
-
-        // Set Log Info to show first in status area
-        tabFolder.setSelection(0);
 
         content.setWeights(new int[] {9, 1});
         contentArea.setWeights(new int[] {1, 3});
@@ -1281,8 +1259,485 @@ public class HDFView implements ViewManager, DropTargetListener {
 
     public void showMetaData(HObject obj) {
         if (obj == null || currentFile == null) return;
-
+        
         log.trace("showMetaData: start");
+        
+        // Get the metadata information before adding GUI components */
+        try {
+            obj.getMetadata();
+        }
+        catch (Exception ex) {
+            log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
+        }
+        
+        for (Control control : attributeArea.getChildren()) control.dispose();
+        
+        boolean isRoot = ((obj instanceof Group) && ((Group) obj).isRoot());
+        boolean isH4 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
+        boolean isH5 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+        FileFormat theFile = obj.getFileFormat();
+        String typeStr = "Unknown";
+        String fileInfo = "";
+        
+        org.eclipse.swt.widgets.Group generalInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+        generalInfoGroup.setText("General Object Info");
+        generalInfoGroup.setLayout(new GridLayout(2, false));
+        generalInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        
+        if(isRoot) {
+            long size = 0;
+            try {
+                size = (new File(obj.getFile())).length();
+            }
+            catch (Exception ex) {
+                size = -1;
+            }
+            size /= 1024;
+            
+            int groupCount = 0, datasetCount = 0;
+            
+            HObject root = theFile.getRootObject();
+            HObject theObj = null;
+            Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
+            
+            while(it.hasNext()) {
+                theObj = it.next();
+                
+                if(theObj instanceof Group) {
+                    groupCount++;
+                } else {
+                    datasetCount++;
+                }
+            }
+            
+            fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
+            
+            new Label(generalInfoGroup, SWT.LEFT).setText("File Name: ");
+            
+            new Label(generalInfoGroup, SWT.RIGHT).setText(obj.getName());
+            
+            new Label(generalInfoGroup, SWT.LEFT).setText("File Path: ");
+            
+            new Label(generalInfoGroup, SWT.RIGHT).setText((new File(obj.getFile())).getParent());
+            
+            new Label(generalInfoGroup, SWT.LEFT).setText("File Type: ");
+            
+            if (isH5) {
+                typeStr = "HDF5,  " + fileInfo;
+            }
+            else if (isH4) {
+                typeStr = "HDF4,  " + fileInfo;
+            }
+            else {
+                typeStr = fileInfo;
+            }
+            
+            new Label(generalInfoGroup, SWT.RIGHT).setText(typeStr);
+            
+            if (isH5) {
+                int[] libver = null;
+                
+                try {
+                    libver = obj.getFileFormat().getLibBounds();
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                
+                if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
+                    new Label(generalInfoGroup, SWT.LEFT).setText("Library version: ");
+                }
+                
+                String libversion = null;
+                if ((libver[0] == 0) && (libver[1] == 1))
+                    libversion = "Earliest and Latest";
+                else if ((libver[0] == 1) && (libver[1] == 1)) libversion = "Latest and Latest";
+                else {
+                    libversion = "";
+                }
+                
+                new Label(generalInfoGroup, SWT.RIGHT).setText(libversion);
+            }
+        }
+        else {
+            new Label(generalInfoGroup, SWT.LEFT).setText("Name: ");
+            
+            new Label(generalInfoGroup, SWT.RIGHT).setText(obj.getName());
+            
+            if(isH5) {
+                if (obj.getLinkTargetObjName() != null) {
+                    new Label(generalInfoGroup, SWT.LEFT).setText("Link To Target: ");
+                }
+            }
+            
+            new Label(generalInfoGroup, SWT.LEFT).setText("Path: ");
+            
+            new Label(generalInfoGroup, SWT.RIGHT).setText(obj.getPath());
+            
+            new Label(generalInfoGroup, SWT.LEFT).setText("Type: ");
+            
+            if(isH5) {
+                if (obj instanceof Group) {
+                    typeStr = "HDF5 Group";
+                }
+                else if (obj instanceof ScalarDS) {
+                    typeStr = "HDF5 Scalar Dataset";
+                }
+                else if (obj instanceof CompoundDS) {
+                    typeStr = "HDF5 Compound Dataset";
+                }
+                else if (obj instanceof Datatype) {
+                    typeStr = "HDF5 Named Datatype";
+                }
+            } else if(isH4) {
+                if (obj instanceof Group) {
+                    typeStr = "HDF4 Group";
+                }
+                else if (obj instanceof ScalarDS) {
+                    ScalarDS ds = (ScalarDS) obj;
+                    if (ds.isImage()) {
+                        typeStr = "HDF4 Raster Image";
+                    }
+                    else {
+                        typeStr = "HDF4 SDS";
+                    }
+                }
+                else if (obj instanceof CompoundDS) {
+                    typeStr = "HDF4 Vdata";
+                }
+            } else {
+                if (obj instanceof Group) {
+                    typeStr = "Group";
+                }
+                else if (obj instanceof ScalarDS) {
+                    typeStr = "Scalar Dataset";
+                }
+                else if (obj instanceof CompoundDS) {
+                    typeStr = "Compound Dataset";
+                }
+            }
+            
+            new Label(generalInfoGroup, SWT.RIGHT).setText(typeStr);
+            
+            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+            if (isH4) {
+                new Label(generalInfoGroup, SWT.LEFT).setText("Tag, Ref:        ");
+            }
+            else {
+                new Label(generalInfoGroup, SWT.LEFT).setText("Object Ref:       ");
+            }
+            
+            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+            String oidStr = null;
+            long[] OID = obj.getOID();
+            if (OID != null) {
+                oidStr = String.valueOf(OID[0]);
+                for (int i = 1; i < OID.length; i++) {
+                    oidStr += ", " + OID[i];
+                }
+            }
+            
+            if (!isRoot) {
+                new Label(generalInfoGroup, SWT.RIGHT).setText(oidStr);
+            }
+        }
+        
+        // Add any extra information depending on object type
+        if (obj instanceof Group) {
+            Group g = (Group) obj;
+            List<?> mlist = g.getMemberList();
+            int n = mlist.size();
+            
+            if (mlist != null && n > 0) {
+                org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+                groupInfoGroup.setText("Group Members");
+                groupInfoGroup.setLayout(new GridLayout(1, true));
+                groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+                
+                if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
+                    new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n);
+                }
+                else {
+                    new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n + " (in memory),"
+                            + "" + g.getNumberOfMembersInFile() + " (in file)");
+                }
+                
+                String rowData[][] = new String[n][2];
+                for (int i = 0; i < n; i++) {
+                    HObject theObj = (HObject) mlist.get(i);
+                    rowData[i][0] = theObj.getName();
+                    if (theObj instanceof Group) {
+                        rowData[i][1] = "Group";
+                    }
+                    else if (theObj instanceof Dataset) {
+                        rowData[i][1] = "Dataset";
+                    }
+                }
+                
+                String[] columnNames = { "Name", "Type" };
+                
+                Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
+                memberTable.setLinesVisible(true);
+                memberTable.setHeaderVisible(true);
+                memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+                
+                for(int i = 0; i < columnNames.length; i++) {
+                    TableColumn column = new TableColumn(memberTable, SWT.NONE);
+                    column.setText(columnNames[i]);
+                    column.setMoveable(false);
+                }
+                
+                for(int i = 0; i < rowData.length; i++) {
+                    TableItem item = new TableItem(memberTable, SWT.NONE);
+                    item.setText(0, rowData[i][0]);
+                    item.setText(1, rowData[i][1]);
+                }
+                
+                for(int i = 0; i < columnNames.length; i++) {
+                    memberTable.getColumn(i).pack();
+                }
+                
+                // set cell height for large fonts
+                //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
+                //table.setRowHeight(cellRowHeight);
+            }
+        }
+        else if (obj instanceof Dataset) {
+            Dataset d = (Dataset) obj;
+            if (d.getRank() <= 0) {
+                d.init();
+            }
+            
+            org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+            datasetInfoGroup.setText("Dataspace and Datatype");
+            datasetInfoGroup.setLayout(new GridLayout(1, true));
+            datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            
+            // Create composite for displaying dataset dimensions, dimension size,
+            // max dimension size, and data type
+            Composite dimensionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
+            dimensionComposite.setLayout(new GridLayout(2, false));
+            dimensionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            
+            new Label(dimensionComposite, SWT.LEFT).setText("No. of Dimension(s): ");
+            
+            Text text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setText("" + d.getRank());
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            
+            new Label(dimensionComposite, SWT.LEFT).setText("Dimension Size(s): ");
+            
+            // Set Dimension Size
+            String dimStr = null;
+            String maxDimStr = null;
+            long dims[] = d.getDims();
+            long maxDims[] = d.getMaxDims();
+            if (dims != null) {
+                String[] dimNames = d.getDimNames();
+                boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
+                StringBuffer sb = new StringBuffer();
+                StringBuffer sb2 = new StringBuffer();
+
+                sb.append(dims[0]);
+                if (hasDimNames) {
+                    sb.append(" (");
+                    sb.append(dimNames[0]);
+                    sb.append(")");
+                }
+
+                if (maxDims[0] < 0)
+                    sb2.append("Unlimited");
+                else
+                    sb2.append(maxDims[0]);
+
+                for (int i = 1; i < dims.length; i++) {
+                    sb.append(" x ");
+                    sb.append(dims[i]);
+                    if (hasDimNames) {
+                        sb.append(" (");
+                        sb.append(dimNames[i]);
+                        sb.append(")");
+                    }
+
+                    sb2.append(" x ");
+                    if (maxDims[i] < 0)
+                        sb2.append("Unlimited");
+                    else
+                        sb2.append(maxDims[i]);
+
+                }
+                dimStr = sb.toString();
+                maxDimStr = sb2.toString();
+            }
+
+            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setText(dimStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            
+            new Label(dimensionComposite, SWT.LEFT).setText("Max Dimension Size(s): ");
+            
+            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setText(maxDimStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            
+            new Label(dimensionComposite, SWT.LEFT).setText("Data Type: ");
+            
+            String type = null;
+            if (d instanceof ScalarDS) {
+                ScalarDS sd = (ScalarDS) d;
+                type = sd.getDatatype().getDatatypeDescription();
+            }
+            else if (d instanceof CompoundDS) {
+                if (isH4) {
+                    type = "Vdata";
+                }
+                else {
+                    type = "Compound";
+                }
+            }
+            
+            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setText(type);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            
+            
+            // Create composite for possible compound dataset info
+            if (d instanceof CompoundDS) {
+                CompoundDS compound = (CompoundDS) d;
+
+                int n = compound.getMemberCount();
+                if (n > 0) {
+                    String rowData[][] = new String[n][3];
+                    String names[] = compound.getMemberNames();
+                    Datatype types[] = compound.getMemberTypes();
+                    int orders[] = compound.getMemberOrders();
+
+                    for (int i = 0; i < n; i++) {
+                        rowData[i][0] = names[i];
+                        int mDims[] = compound.getMemberDims(i);
+                        if (mDims == null) {
+                            rowData[i][2] = String.valueOf(orders[i]);
+
+                            if (isH4 && types[i].getDatatypeClass() == Datatype.CLASS_STRING) {
+                                rowData[i][2] = String.valueOf(types[i].getDatatypeSize());
+                            }
+                        }
+                        else {
+                            String mStr = String.valueOf(mDims[0]);
+                            int m = mDims.length;
+                            for (int j = 1; j < m; j++) {
+                                mStr += " x " + mDims[j];
+                            }
+                            rowData[i][2] = mStr;
+                        }
+                        rowData[i][1] = types[i].getDatatypeDescription();
+                    }
+
+                    String[] columnNames = { "Name", "Type", "Array Size" };
+                    
+                    Table memberTable = new Table(datasetInfoGroup, SWT.BORDER);
+                    memberTable.setLinesVisible(true);
+                    memberTable.setHeaderVisible(true);
+                    memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+                    
+                    for(int i = 0; i < columnNames.length; i++) {
+                        TableColumn column = new TableColumn(memberTable, SWT.NONE);
+                        column.setText(columnNames[i]);
+                        column.setMoveable(false);
+                    }
+                    
+                    for(int i = 0; i < rowData.length; i++) {
+                        TableItem item = new TableItem(memberTable, SWT.NONE);
+                        item.setText(0, rowData[i][0]);
+                        item.setText(1, rowData[i][1]);
+                        item.setText(2, rowData[i][2]);
+                    }
+                    
+                    for(int i = 0; i < columnNames.length; i++) {
+                        memberTable.getColumn(i).pack();
+                    }
+                    
+                    // set cell height for large fonts
+                    //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
+                    //table.setRowHeight(cellRowHeight);
+                } // if (n > 0)
+            } // if (d instanceof Compound)
+            
+            
+            // Create composite for displaying dataset chunking, compression, filters,
+            // storage type, and fill value
+            Composite compressionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
+            compressionComposite.setLayout(new GridLayout(2, false));
+            compressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            
+            // Add compression and data layout information
+            new Label(compressionComposite, SWT.LEFT).setText("Chunking: ");
+            
+            // try { d.getMetadata(); } catch (Exception ex) {}
+            String chunkInfo = "";
+            long[] chunks = d.getChunkSize();
+            if (chunks == null) {
+                chunkInfo = "NONE";
+            }
+            else {
+                int n = chunks.length;
+                chunkInfo = String.valueOf(chunks[0]);
+                for (int i = 1; i < n; i++) {
+                    chunkInfo += " X " + chunks[i];
+                }
+            }
+            
+            new Label(compressionComposite, SWT.RIGHT).setText(chunkInfo);
+            
+            new Label(compressionComposite, SWT.LEFT).setText("Compression: ");
+            
+            new Label(compressionComposite, SWT.RIGHT).setText(d.getCompression());
+            
+            new Label(compressionComposite, SWT.LEFT).setText("Filters: ");
+            
+            new Label(compressionComposite, SWT.RIGHT).setText(d.getFilters());
+            
+            new Label(compressionComposite, SWT.LEFT).setText("Storage: ");
+            
+            new Label(compressionComposite, SWT.RIGHT).setText(d.getStorage());
+            
+            new Label(compressionComposite, SWT.LEFT).setText("Fill value: ");
+            
+            Object fillValue = null;
+            String fillValueInfo = "NONE";
+            if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
+            if (fillValue != null) {
+                if (fillValue.getClass().isArray()) {
+                    int len = Array.getLength(fillValue);
+                    fillValueInfo = Array.get(fillValue, 0).toString();
+                    for (int i = 1; i < len; i++) {
+                        fillValueInfo += ", ";
+                        fillValueInfo += Array.get(fillValue, i).toString();
+                    }
+                }
+                else
+                    fillValueInfo = fillValue.toString();
+            }
+            
+            new Label(compressionComposite, SWT.RIGHT).setText(fillValueInfo);
+        }
+        else if (obj instanceof Datatype) {
+            org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+            datatypeInfoGroup.setText("Type");
+            datatypeInfoGroup.setLayout(new FillLayout());
+            datatypeInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            
+            Text infoArea = new Text(datatypeInfoGroup, SWT.MULTI);
+            
+            infoArea.setText(((Datatype) obj).getDatatypeDescription());
+            infoArea.setEditable(false);
+        }
+        
+        
         metadata.setLength(0);
         metadata.append(obj.getName());
 
@@ -1369,8 +1824,8 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
 
-        attributeArea.setText(metadata.toString());
-        attributeArea.setSelection(0);
+        attributeArea.layout();
+        
         log.trace("showMetaData: finish");
     }
 
@@ -1466,10 +1921,9 @@ public class HDFView implements ViewManager, DropTargetListener {
     public void dropAccept(DropTargetEvent evt) {
     }
 
-    // Get the data area which HDFView uses to display
-    // DataViews in
-    public Composite getDataArea() {
-        return dataArea;
+    // Get the data area which HDFView uses to display object info
+    public Composite getAttributeArea() {
+        return attributeArea;
     }
     
     /**
@@ -1769,6 +2223,9 @@ public class HDFView implements ViewManager, DropTargetListener {
         if(urlStr.startsWith("http://")) {
             localFile = urlStr.substring(7);
         }
+        else if (urlStr.startsWith("https://")) {
+            localFile = urlStr.substring(8);
+        }
         else if (urlStr.startsWith("ftp://")) {
             localFile = urlStr.substring(6);
         }
@@ -1932,7 +2389,9 @@ public class HDFView implements ViewManager, DropTargetListener {
         catch (Exception ex) {}
 
         theFile = null;
-        attributeArea.setText("");
+        
+        for (Control control : attributeArea.getChildren()) control.dispose();
+        
         System.gc();
     }
 
