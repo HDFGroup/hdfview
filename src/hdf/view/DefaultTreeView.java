@@ -185,6 +185,7 @@ public class DefaultTreeView implements TreeView {
 
         // Create the context menu for the Tree
         popupMenu = createPopupMenu();
+        tree.setMenu(popupMenu);
 
         // Handle tree key events
         tree.addKeyListener(new KeyAdapter() {
@@ -278,7 +279,7 @@ public class DefaultTreeView implements TreeView {
             public void mouseUp(MouseEvent e) {
                 // Make sure user clicked on a TreeItem
                 TreeItem theItem = tree.getItem(new Point(e.x, e.y));
-
+                
                 if (theItem == null) {
                     tree.deselectAll();
                     selectedItem = null;
@@ -339,7 +340,7 @@ public class DefaultTreeView implements TreeView {
 
                 Point pt = display.map(null, tree, new Point(e.x, e.y));
                 TreeItem item = tree.getItem(pt);
-                if(item == null) return;
+                if(item == null) { e.doit = false; return; }
 
                 FileFormat theFile = null;
 
@@ -2852,7 +2853,7 @@ public class DefaultTreeView implements TreeView {
                     }
                     catch (Throwable err) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Error when setting lib version bounds", null);
+                        Tools.showError(shell, "Error when setting lib version bounds", "HDFView");
                         return;
                     }
 
