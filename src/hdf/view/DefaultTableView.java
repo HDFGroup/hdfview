@@ -237,7 +237,7 @@ public class DefaultTableView implements TableView {
 
     // Used to get/set column header
     private IDataProvider                   columnHeaderDataProvider;
-    
+
     private final ColumnGroupModel          columnGroupModel = new ColumnGroupModel();
 
     /**
@@ -683,7 +683,7 @@ public class DefaultTableView implements TableView {
         final DataLayer dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
         ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
-        
+
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
@@ -1126,13 +1126,13 @@ public class DefaultTableView implements TableView {
                     else {
                         subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
                     }
-                    
+
                     // This column's name is whatever follows the last nesting character '->'
                     int nestingPosition = columnNames[j].lastIndexOf("->");
                     if (nestingPosition != -1) {
-                    	columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
+                        columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
                     } else {
-                    	columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
+                        columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
                     }
                 }
             }
@@ -1145,50 +1145,50 @@ public class DefaultTableView implements TableView {
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
         final DataLayer dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
-        	new ColumnGroupExpandCollapseLayer(dataLayer, columnGroupModel);
+            new ColumnGroupExpandCollapseLayer(dataLayer, columnGroupModel);
         final SelectionLayer selectionLayer = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
-        
+
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
         IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnLabels);
         ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
-        
+
         ColumnGroupHeaderLayer columnGroupHeaderLayer = null;
         ColumnGroupGroupHeaderLayer columnGroupGroupHeaderLayer = null;
-        
+
         // Set up column grouping
         if (numGroups > 1) {
-        	columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, new ColumnGroupModel());
-        	columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
-        	
-        	// Set up first-level column grouping
-        	for (int i = 0; i < numGroups; i++) {
-        		for (int j = 0; j < cols; j++) {
-        			columnGroupGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
-        		}
-        	}
-            
-        	// Set up any further-nested column groups
-        	for (int i = 0; i < allColumnNames.length; i++) {
-        		int nestingPosition = allColumnNames[i].lastIndexOf("->");
+            columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, new ColumnGroupModel());
+            columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
 
-        		if (nestingPosition != -1) {
-        			String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
-        			int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
-        			
-        			if(groupTitleStartPosition != -1) {	
-        				columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
-        						allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
-        						"{" + columnGroupName + "}", i);
-        			} else {
-        				columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
-        						allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
-        			}
-        		}
-        	}
+            // Set up first-level column grouping
+            for (int i = 0; i < numGroups; i++) {
+                for (int j = 0; j < cols; j++) {
+                    columnGroupGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
+                }
+            }
+
+            // Set up any further-nested column groups
+            for (int i = 0; i < allColumnNames.length; i++) {
+                int nestingPosition = allColumnNames[i].lastIndexOf("->");
+
+                if (nestingPosition != -1) {
+                    String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
+                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
+
+                    if(groupTitleStartPosition != -1) {
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+                                allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
+                                "{" + columnGroupName + "}", i);
+                    } else {
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+                                allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
+                    }
+                }
+            }
         }
 
         // Create the Row Header layer
@@ -1198,14 +1198,14 @@ public class DefaultTableView implements TableView {
 
         // Create the Corner layer
         ILayer cornerLayer = null;
-        
+
         if (numGroups > 1) {
-        	cornerLayer = new CornerLayer(new DataLayer(
+            cornerLayer = new CornerLayer(new DataLayer(
                     new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
                     rowHeaderLayer,
                     columnGroupGroupHeaderLayer);
         } else {
-        	cornerLayer = new CornerLayer(new DataLayer(
+            cornerLayer = new CornerLayer(new DataLayer(
                     new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
                     rowHeaderLayer,
                     columnHeaderLayer);
@@ -1213,15 +1213,15 @@ public class DefaultTableView implements TableView {
 
         // Create the Grid layer
         GridLayer gridLayer = null;
-        
+
         if (numGroups > 1) {
-        	gridLayer = new GridLayer(viewportLayer, columnGroupGroupHeaderLayer,
+            gridLayer = new GridLayer(viewportLayer, columnGroupGroupHeaderLayer,
                     rowHeaderLayer, cornerLayer, false);
         } else {
-        	gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
+            gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
                     rowHeaderLayer, cornerLayer, false);
         }
-        
+
         gridLayer.addConfiguration(new DefaultEditConfiguration());
 
         // Change cell editing to be on double click rather than single click
@@ -2863,9 +2863,9 @@ public class DefaultTableView implements TableView {
                 || showAsBin || showAsHex) {
             return;
         }
-        
+
         if (cellValue.equals((String) table.getDataValueByPosition(col + 1, row + 1).toString())) {
-        	return;
+            return;
         }
 
         int i = 0;
@@ -2984,11 +2984,11 @@ public class DefaultTableView implements TableView {
         if (!(dataset instanceof CompoundDS) || (cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
             return;
         }
-        
+
         if (cellValue.equals((String) table.getDataValueByPosition(col + 1, row + 1).toString())) {
-        	return;
+            return;
         }
-        
+
         log.trace("DefaultTableView: updateCompoundData");
 
         CompoundDS compDS = (CompoundDS) dataset;
@@ -4262,8 +4262,8 @@ public class DefaultTableView implements TableView {
         Datatype                  types[]          = compound.getSelectedMemberTypes();
         StringBuffer              stringBuffer     = new StringBuffer();
         int                       nFields          = ((List<?>) dataValue).size();
-        int                       nRows            = compound.getHeight();
-        int                       nCols            = compound.getWidth() * compound.getSelectedMemberCount();
+        int                       nRows            = (int) compound.getHeight();
+        int                       nCols            = (int) (compound.getWidth() * compound.getSelectedMemberCount());
         int                       nSubColumns      = (nFields > 0) ? getColumnCount() / nFields : 0;
 
         public CompoundDSDataProvider() {
