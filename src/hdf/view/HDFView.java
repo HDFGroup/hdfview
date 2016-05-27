@@ -1372,7 +1372,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                     new Label(generalInfoGroup, SWT.LEFT).setText("Link To Target: ");
                     
                     Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
-                    linkTarget.setText(((H5Link) obj).getLinkTargetObjName());
+                    linkTarget.setText(obj.getLinkTargetObjName());
                     
                     //TODO: Only allow editing of linkTarget if link is not hard link
                 }

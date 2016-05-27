@@ -348,7 +348,10 @@ public class DefaultTableView implements TableView {
             tsize *= dims[i];
 
         log.trace("dataset size={} Height={} Width={}", tsize, dataset.getHeight(), dataset.getWidth());
-        if (dataset.getHeight() <= 0 || dataset.getWidth() <= 0 || tsize <= 0) return;
+        if (dataset.getHeight() <= 0 || dataset.getWidth() <= 0 || tsize <= 0) {
+            Tools.showError(parent, "Could not open dataset '" + dataset.getName() + "'. Dataset has dimension of size 0.", parent.getText());
+            return;
+        }
 
         // cannot edit hdf4 vdata
         if (dataset.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))

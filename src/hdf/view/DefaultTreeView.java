@@ -2583,6 +2583,9 @@ public class DefaultTreeView implements TreeView {
 
             cursor.dispose();
         } catch (Exception ex) {
+            log.trace("showDataContent: Error instantiating class {}", theClass);
+        }
+        finally {
             cursor.dispose();
             shell.setCursor(null);
         }
