@@ -2193,11 +2193,9 @@ public class DefaultTableView implements TableView {
      */
     private void updateValueInMemory(String cellValue, int row, int col) throws Exception {
         log.trace("DefaultTableView: updateValueInMemory()");
-
-        if (currentEditingCellValue != null) {
-            // Data values are the same, no need to change the data
-            if (currentEditingCellValue.toString().equals(cellValue)) return;
-        }
+        
+        // No need to update if values are the same
+        if (cellValue.equals((String) selectionLayer.getDataValueByPosition(col, row).toString())) return;
 
         if (dataset instanceof ScalarDS) {
             updateScalarData(cellValue, row, col);
@@ -2866,10 +2864,6 @@ public class DefaultTableView implements TableView {
                 || showAsBin || showAsHex) {
             return;
         }
-        
-        if (cellValue.equals((String) table.getDataValueByPosition(col + 1, row + 1).toString())) {
-        	return;
-        }
 
         int i = 0;
         if (isDataTransposed) {
@@ -2986,10 +2980,6 @@ public class DefaultTableView implements TableView {
     private void updateCompoundData (String cellValue, int row, int col) throws Exception {
         if (!(dataset instanceof CompoundDS) || (cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
             return;
-        }
-        
-        if (cellValue.equals((String) table.getDataValueByPosition(col + 1, row + 1).toString())) {
-        	return;
         }
         
         log.trace("DefaultTableView: updateCompoundData");
@@ -4244,7 +4234,8 @@ public class DefaultTableView implements TableView {
             }
             catch (Exception ex) {
                 display.beep();
-                Tools.showError(shell, ex.getMessage(), shell.getText());
+                Tools.showError(shell, "Failed to update value at"
+                        + "(" + rowIndex + ", " + columnIndex + ") to " + newValue.toString(), shell.getText());
             }
         }
 
@@ -4429,7 +4420,8 @@ public class DefaultTableView implements TableView {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, ex.getMessage(), shell.getText());
+                Tools.showError(shell, "Failed to update value at"
+                        + "(" + rowIndex + ", " + columnIndex + ") to " + newValue.toString(), shell.getText());
             }
         }
 
