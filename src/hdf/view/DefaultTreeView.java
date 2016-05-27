@@ -700,7 +700,7 @@ public class DefaultTreeView implements TreeView {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    closeFile(getSelectedFile());
+                    ((HDFView) viewer).closeFile(getSelectedFile());
                 }
                 catch (Exception ex) {
                     Tools.showError(shell, ex.getMessage(), shell.getText());
@@ -2642,8 +2642,8 @@ public class DefaultTreeView implements TreeView {
      */
     private class ChangeIndexingDialog extends Dialog {
 
-        private Button checkIndexType;
-        private Button checkIndexOrder;
+        private Button checkIndexByName;
+        private Button checkIndexIncrements;
         private Button checkIndexNative;
 
         private boolean reloadFile;
@@ -2662,13 +2662,13 @@ public class DefaultTreeView implements TreeView {
         }
 
         private void setIndexOptions() {
-            if (checkIndexType.getSelection())
+            if (checkIndexByName.getSelection())
                 selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_NAME"));
             else
                 selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
             indexType = selectedFile.getIndexType(null);
 
-            if (checkIndexOrder.getSelection())
+            if (checkIndexIncrements.getSelection())
                 selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_INC"));
             else if (checkIndexNative.getSelection())
                 selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_NATIVE"));
@@ -2708,10 +2708,10 @@ public class DefaultTreeView implements TreeView {
             indexingTypeGroup.setLayout(new GridLayout(2, true));
             indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-            Button byName = new Button(indexingTypeGroup, SWT.RADIO);
-            byName.setText("By Name");
-            byName.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
-            byName.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+            checkIndexByName = new Button(indexingTypeGroup, SWT.RADIO);
+            checkIndexByName.setText("By Name");
+            checkIndexByName.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
+            checkIndexByName.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
             Button byOrder = new Button(indexingTypeGroup, SWT.RADIO);
             byOrder.setText("By Creation Order");
@@ -2723,20 +2723,20 @@ public class DefaultTreeView implements TreeView {
             indexingOrderGroup.setLayout(new GridLayout(3, true));
             indexingOrderGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-            Button increments = new Button(indexingOrderGroup, SWT.RADIO);
-            increments.setText("Increments");
-            increments.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
-            increments.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+            checkIndexIncrements = new Button(indexingOrderGroup, SWT.RADIO);
+            checkIndexIncrements.setText("Increments");
+            checkIndexIncrements.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
+            checkIndexIncrements.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
             Button decrements = new Button(indexingOrderGroup, SWT.RADIO);
             decrements.setText("Decrements");
             decrements.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_DEC"));
             decrements.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
-            Button nativeButton = new Button(indexingOrderGroup, SWT.RADIO);
-            nativeButton.setText("Native");
-            nativeButton.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
-            nativeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+            checkIndexNative = new Button(indexingOrderGroup, SWT.RADIO);
+            checkIndexNative.setText("Native");
+            checkIndexNative.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
+            checkIndexNative.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
 
             // Create Ok/Cancel button region

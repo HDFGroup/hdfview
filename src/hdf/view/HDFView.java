@@ -1759,95 +1759,136 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
         
         
-        metadata.setLength(0);
-        metadata.append(obj.getName());
-
-        String oidStr = null;
-        long[] OID = obj.getOID();
-        if (OID != null) {
-            oidStr = String.valueOf(OID[0]);
-            for (int i = 1; i < OID.length; i++) {
-                oidStr += ", " + OID[i];
-            }
-        }
-        metadata.append(" (");
-        metadata.append(oidStr);
-        metadata.append(")");
-
-        if (obj instanceof Group) {
-            log.trace("showMetaData: instanceof Group");
-            Group g = (Group) obj;
-            metadata.append("\n    Group size = ");
-            metadata.append(g.getMemberList().size());
-        }
-        else if (obj instanceof Dataset) {
-            log.trace("showMetaData: instanceof Dataset");
-            Dataset d = (Dataset) obj;
-            if (d.getRank() <= 0) {
-                d.init();
-            }
-            log.trace("showMetaData: inited");
-
-            metadata.append("\n    ");
-            if (d instanceof ScalarDS) {
-                Datatype dtype = d.getDatatype();
-                if (dtype != null) metadata.append(dtype.getDatatypeDescription());
-            }
-            else if (d instanceof CompoundDS) {
-                metadata.append("Compound/Vdata");
-            }
-            metadata.append(",    ");
-
-            long dims[] = d.getDims();
-
-            if (dims != null) {
-                metadata.append(dims[0]);
-                for (int i = 1; i < dims.length; i++) {
-                    metadata.append(" x ");
-                    metadata.append(dims[i]);
-                }
-            }
-        } // else if (obj instanceof Dataset)
-        else {
-            log.debug("obj not instanceof Group or Dataset");
-        }
-
-        List<?> attrList = null;
-        try {
-            log.trace("showMetaData: getMetadata");
-            attrList = obj.getMetadata();
-        }
-        catch (Exception ex) {
-            log.debug("getMetadata failure: ", ex);
-        }
-
-        if (attrList == null) {
-            metadata.append("\n    Number of attributes = 0");
-        }
-        else {
-            int n = attrList.size();
-            log.trace("showMetaData: append {} attributes", n);
-            metadata.append("\n    Number of attributes = ");
-            metadata.append(n);
-
-            for (int i = 0; i < n; i++) {
-                log.trace("showMetaData: append Object[{}]", i);
-                Object attrObj = attrList.get(i);
-                if (!(attrObj instanceof Attribute)) {
-                    continue;
-                }
-                Attribute attr = (Attribute) attrObj;
-                metadata.append("\n        ");
-                metadata.append(attr.getName());
-                metadata.append(" = ");
-                metadata.append(attr.toString(","));
-                log.trace("showMetaData: append Object[{}]={}", i, attr.getName());
-            }
-        }
+//        metadata.setLength(0);
+//        metadata.append(obj.getName());
+//
+//        String oidStr = null;
+//        long[] OID = obj.getOID();
+//        if (OID != null) {
+//            oidStr = String.valueOf(OID[0]);
+//            for (int i = 1; i < OID.length; i++) {
+//                oidStr += ", " + OID[i];
+//            }
+//        }
+//        metadata.append(" (");
+//        metadata.append(oidStr);
+//        metadata.append(")");
+//
+//        if (obj instanceof Group) {
+//            log.trace("showMetaData: instanceof Group");
+//            Group g = (Group) obj;
+//            metadata.append("\n    Group size = ");
+//            metadata.append(g.getMemberList().size());
+//        }
+//        else if (obj instanceof Dataset) {
+//            log.trace("showMetaData: instanceof Dataset");
+//            Dataset d = (Dataset) obj;
+//            if (d.getRank() <= 0) {
+//                d.init();
+//            }
+//            log.trace("showMetaData: inited");
+//
+//            metadata.append("\n    ");
+//            if (d instanceof ScalarDS) {
+//                Datatype dtype = d.getDatatype();
+//                if (dtype != null) metadata.append(dtype.getDatatypeDescription());
+//            }
+//            else if (d instanceof CompoundDS) {
+//                metadata.append("Compound/Vdata");
+//            }
+//            metadata.append(",    ");
+//
+//            long dims[] = d.getDims();
+//
+//            if (dims != null) {
+//                metadata.append(dims[0]);
+//                for (int i = 1; i < dims.length; i++) {
+//                    metadata.append(" x ");
+//                    metadata.append(dims[i]);
+//                }
+//            }
+//        } // else if (obj instanceof Dataset)
+//        else {
+//            log.debug("obj not instanceof Group or Dataset");
+//        }
+//
+//        List<?> attrList = null;
+//        try {
+//            log.trace("showMetaData: getMetadata");
+//            attrList = obj.getMetadata();
+//        }
+//        catch (Exception ex) {
+//            log.debug("getMetadata failure: ", ex);
+//        }
+//
+//        if (attrList == null) {
+//            metadata.append("\n    Number of attributes = 0");
+//        }
+//        else {
+//            int n = attrList.size();
+//            log.trace("showMetaData: append {} attributes", n);
+//            metadata.append("\n    Number of attributes = ");
+//            metadata.append(n);
+//
+//            for (int i = 0; i < n; i++) {
+//                log.trace("showMetaData: append Object[{}]", i);
+//                Object attrObj = attrList.get(i);
+//                if (!(attrObj instanceof Attribute)) {
+//                    continue;
+//                }
+//                Attribute attr = (Attribute) attrObj;
+//                metadata.append("\n        ");
+//                metadata.append(attr.getName());
+//                metadata.append(" = ");
+//                metadata.append(attr.toString(","));
+//                log.trace("showMetaData: append Object[{}]={}", i, attr.getName());
+//            }
+//        }
 
         attributeArea.layout();
         
         log.trace("showMetaData: finish");
+    }
+    
+    public void closeFile(FileFormat theFile) {
+        if (theFile == null) {
+            display.beep();
+            Tools.showError(mainWindow, "Select a file to close", mainWindow.getText());
+            return;
+        }
+
+        // Close all the data windows of this file
+        Shell[] views = mainWindow.getShells();
+        if (views != null) {
+            for (int i = 0; i < views.length; i++) {
+                HObject obj = (HObject) (((DataView) views[i].getData()).getDataObject());
+                if (obj == null) {
+                    continue;
+                }
+
+                if (obj.getFileFormat().equals(theFile)) {
+                    views[i].dispose();
+                    views[i] = null;
+                }
+            }
+        }
+
+        String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
+        if (theFile.getFilePath().equals(fName)) {
+            currentFile = null;
+            url_bar.setText("");
+        }
+
+        try {
+            treeView.closeFile(theFile);
+        }
+        catch (Exception ex) {}
+
+        theFile = null;
+        
+        for (Control control : attributeArea.getChildren()) control.dispose();
+        
+        System.gc();
     }
 
     public void reloadFile() {
@@ -1867,7 +1908,13 @@ public class HDFView implements ViewManager, DropTargetListener {
         }
 
         try {
-            treeView.reopenFile(theFile);
+            FileFormat newFile = treeView.reopenFile(theFile);
+            
+            if (newFile != null) {
+                currentFile = newFile.getAbsolutePath();
+            } else {
+                currentFile = null;
+            }
         }
         catch (Exception ex) {}
     }
@@ -2374,47 +2421,6 @@ public class HDFView implements ViewManager, DropTargetListener {
 
         // currentFile = srbFileDialog.getName();
     }*/
-
-    private void closeFile(FileFormat theFile) {
-        if (theFile == null) {
-            display.beep();
-            Tools.showError(mainWindow, "Select a file to close", mainWindow.getText());
-            return;
-        }
-
-        // Close all the data windows of this file
-        Shell[] views = mainWindow.getShells();
-        if (views != null) {
-            for (int i = 0; i < views.length; i++) {
-                HObject obj = (HObject) (((DataView) views[i].getData()).getDataObject());
-                if (obj == null) {
-                    continue;
-                }
-
-                if (obj.getFileFormat().equals(theFile)) {
-                    views[i].dispose();
-                    views[i] = null;
-                }
-            }
-        }
-
-        String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
-        if (theFile.getFilePath().equals(fName)) {
-            currentFile = null;
-            url_bar.setText("");
-        }
-
-        try {
-            treeView.closeFile(theFile);
-        }
-        catch (Exception ex) {}
-
-        theFile = null;
-        
-        for (Control control : attributeArea.getChildren()) control.dispose();
-        
-        System.gc();
-    }
 
     private void convertFile(String typeFrom, String typeTo) {
         ImageConversionDialog dialog = new ImageConversionDialog(mainWindow, typeFrom, typeTo,
