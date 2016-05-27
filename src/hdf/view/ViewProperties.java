@@ -1792,5 +1792,14 @@ public class ViewProperties extends Properties {
     public static void setIndexBase1(boolean b) {
         ViewProperties.isIndexBase1 = b;
     }
-
+    
+    /**
+     * Sets the list of most recently accessed files.
+     * 
+     * @param recentFilesList
+     *               The list of most recently accessed files.
+     */
+    public static void setRecentFiles(Vector<String> recentFilesList) {
+        recentFiles = recentFilesList;
+    }
 }

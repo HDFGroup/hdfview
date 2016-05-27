@@ -23,6 +23,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -91,16 +92,16 @@ public class HDFView implements ViewManager, DropTargetListener {
     private boolean isTesting = false;
 
     /* The directory where HDFView is installed */
-    private String                    rootDir;
+    private String                     rootDir;
 
     /* The current working directory */
-    private String                    currentDir;
+    private String                     currentDir;
 
     /* The current working file */
-    private String                    currentFile = null;
+    private String                     currentFile = null;
 
     /* The view properties */
-    private ViewProperties            props;
+    private ViewProperties             props;
 
     /* A list of tree view implementations. */
     private static List<String>        treeViews;
@@ -398,29 +399,6 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
         }
 
-        try {
-            props.save();
-        } catch (Exception ex) {}
-
-        // Close all open files
-        try {
-            List<FileFormat> filelist = treeView.getCurrentFiles();
-
-            if((filelist != null) && (filelist.size() > 0)) {
-                Object[] files = filelist.toArray();
-
-                for (int i = 0; i < files.length; i++) {
-                    try {
-                        treeView.closeFile((FileFormat) files[i]);
-                    }
-                    catch (Throwable ex) {
-                        continue;
-                    }
-                }
-            }
-        }
-        catch (Exception ex) {}
-
         //display.dispose();
         log.debug("runMainWindow exit");
     }
@@ -447,15 +425,32 @@ public class HDFView implements ViewManager, DropTargetListener {
         shell.setLayout(new GridLayout(3, false));
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
+                ViewProperties.setRecentFiles(new Vector<String>(Arrays.asList(url_bar.getItems())));
+                
+                try {
+                    props.save();
+                } catch (Exception ex) {}
+                
                 closeAllWindows();
 
-                List<FileFormat> files = treeView.getCurrentFiles();
-                while (!files.isEmpty()) {
-                    try {
-                        treeView.closeFile(files.get(0));
+                // Close all open files
+                try {
+                    List<FileFormat> filelist = treeView.getCurrentFiles();
+
+                    if((filelist != null) && (filelist.size() > 0)) {
+                        Object[] files = filelist.toArray();
+
+                        for (int i = 0; i < files.length; i++) {
+                            try {
+                                treeView.closeFile((FileFormat) files[i]);
+                            }
+                            catch (Throwable ex) {
+                                continue;
+                            }
+                        }
                     }
-                    catch (Exception ex) {}
                 }
+                catch (Exception ex) {}
             }
         });
 
@@ -755,15 +750,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         item.setAccelerator(SWT.MOD1 + 'Q');
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                List<FileFormat> files = treeView.getCurrentFiles();
-                while (!files.isEmpty()) {
-                    try {
-                        treeView.closeFile(files.get(0));
-                    }
-                    catch (Exception ex) {}
-                }
-
-                display.dispose();
+                mainWindow.dispose();
             }
         });
 
