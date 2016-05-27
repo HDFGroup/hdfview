@@ -54,8 +54,7 @@
     <string value="${hdfjava.filelist}" />
     <filterchain>
       <tokenfilter>
-        <stringtokenizer delims="-" suppressdelims="true" />
-        <containsregex pattern="[0-9]+\.[0-9]+\.[0-9]+" />
+      	<containsregex pattern="jarhdf[0-9]*-" replace="" flags="g"/>
       </tokenfilter>
     </filterchain>
   </loadresource>
