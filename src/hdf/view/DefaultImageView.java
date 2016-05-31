@@ -120,6 +120,7 @@ public class DefaultImageView implements ImageView {
 
     private final Display display;
     private final Shell shell;
+    private Font curFont;
 
     /** Horizontal direction to flip an image. */
     public static final int FLIP_HORIZONTAL = 0;
@@ -287,6 +288,9 @@ public class DefaultImageView implements ImageView {
 
         shell.setImage(ViewProperties.getImageIcon());
         shell.setLayout(new GridLayout(1, true));
+        
+        curFont = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
+        shell.setFont(curFont);
 
         viewer = theView;
         zoomFactor = 1.0f;
@@ -479,6 +483,7 @@ public class DefaultImageView implements ImageView {
         imageScroller.getHorizontalBar().setIncrement(50);
         imageScroller.getVerticalBar().setIncrement(50);
         imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        imageScroller.setFont(curFont);
 
         imageComponent = new ImageComponent(imageScroller, SWT.DOUBLE_BUFFERED, image);
         imageScroller.setContent(imageComponent);
@@ -495,6 +500,7 @@ public class DefaultImageView implements ImageView {
         valueField = new Text(group, SWT.BORDER | SWT.SINGLE);
         valueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         valueField.setEditable(false);
+        valueField.setFont(curFont);
         setValueVisible(showValues);
 
         shell.addDisposeListener(new DisposeListener() {
@@ -505,6 +511,8 @@ public class DefaultImageView implements ImageView {
                 if (!dataset.isImage()) {
                     dataset.clearData();
                 }
+                
+                curFont.dispose();
 
                 data = null;
                 image = null;
@@ -2334,7 +2342,6 @@ public class DefaultImageView implements ImageView {
 
                     GC gc = e.gc;
                     org.eclipse.swt.graphics.Color oldBackground = gc.getBackground();
-                    int fontHeight = 10;
 
                     for (int i = 0; i < 256; i++) {
                         gc.setBackground(colors[i]);
@@ -2342,7 +2349,8 @@ public class DefaultImageView implements ImageView {
                                 paintSize.height);
                     }
 
-                    FontData[] fontData = gc.getFont().getFontData();
+                    int fontHeight = 10;
+                    FontData[] fontData = curFont.getFontData();
                     Font newFont = new Font(display, fontData[0].getName(), fontHeight, fontData[0].getStyle());
                     gc.setFont(newFont);
 
@@ -3528,6 +3536,7 @@ public class DefaultImageView implements ImageView {
         public void open() {
             Shell parent = getParent();
             shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            shell.setFont(curFont);
             shell.setText("Animation - " + dataset.getName());
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
@@ -3552,6 +3561,7 @@ public class DefaultImageView implements ImageView {
             });
 
             Button closeButton = new Button(shell, SWT.PUSH);
+            closeButton.setFont(curFont);
             closeButton.setText("&Close");
             closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             closeButton.addSelectionListener(new SelectionAdapter() {
@@ -3659,6 +3669,7 @@ public class DefaultImageView implements ImageView {
         public void open() {
             Shell parent = getParent();
             shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            shell.setFont(curFont);
             shell.setText("Image Value Range");
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
@@ -3678,6 +3689,9 @@ public class DefaultImageView implements ImageView {
             chartCanvas.addPaintListener(new PaintListener() {
             	public void paintControl(PaintEvent e) {
             		GC gc = e.gc;
+            		
+            		// TODO: Update Chart to be able to handle large fonts
+            		gc.setFont(curFont);
             		
             		int h = H/3 -50;
                     int w = W;
@@ -3725,11 +3739,13 @@ public class DefaultImageView implements ImageView {
             });
 
             org.eclipse.swt.widgets.Group lowerBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            lowerBoundGroup.setFont(curFont);
             lowerBoundGroup.setText("Lower Bound");
             lowerBoundGroup.setLayout(new GridLayout(1, true));
             lowerBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             minField = new Text(lowerBoundGroup, SWT.SINGLE | SWT.BORDER);
+            minField.setFont(curFont);
             minField.setText(String.valueOf(min));
             minField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             minField.addModifyListener(new ModifyListener() {
@@ -3769,11 +3785,13 @@ public class DefaultImageView implements ImageView {
 
 
             org.eclipse.swt.widgets.Group upperBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            upperBoundGroup.setFont(curFont);
             upperBoundGroup.setText("Upper Bound");
             upperBoundGroup.setLayout(new GridLayout(1, true));
             upperBoundGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             maxField = new Text(upperBoundGroup, SWT.SINGLE | SWT.BORDER);
+            maxField.setFont(curFont);
             maxField.setText(String.valueOf(max));
             maxField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             maxField.addModifyListener(new ModifyListener() {
@@ -3818,10 +3836,9 @@ public class DefaultImageView implements ImageView {
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(curFont);
             okButton.setText("   &Ok   ");
-            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            okButton.setLayoutData(gridData);
+            okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     minmax_current[0] = Double.valueOf(minField.getText());
@@ -3832,10 +3849,9 @@ public class DefaultImageView implements ImageView {
             });
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+            cancelButton.setFont(curFont);
             cancelButton.setText("&Cancel");
-            gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
-            gridData.widthHint = 70;
-            cancelButton.setLayoutData(gridData);
+            cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     minmax_current[0] = minmax_previous[0];
@@ -3848,10 +3864,9 @@ public class DefaultImageView implements ImageView {
             });
 
             Button applyButton = new Button(buttonComposite, SWT.PUSH);
+            applyButton.setFont(curFont);
             applyButton.setText("&Apply");
-            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            applyButton.setLayoutData(gridData);
+            applyButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             applyButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     minmax_previous[0] = minmax_current[0];
@@ -3914,6 +3929,7 @@ public class DefaultImageView implements ImageView {
         public void open() {
             Shell parent = getParent();
             shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            shell.setFont(curFont);
             shell.setText("Brightness/Contrast");
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
@@ -3925,12 +3941,14 @@ public class DefaultImageView implements ImageView {
             }
 
             org.eclipse.swt.widgets.Group brightnessGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            brightnessGroup.setFont(curFont);
             brightnessGroup.setText(bLabel + " %");
             brightnessGroup.setLayout(new GridLayout(1, true));
             brightnessGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             brightField = new Text(brightnessGroup, SWT.SINGLE | SWT.BORDER);
             brightField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            brightField.setFont(curFont);
             brightField.setText(String.valueOf(bLevel));
             brightField.addListener(SWT.Traverse, new Listener() {
             	public void handleEvent(Event e) {
@@ -3967,12 +3985,14 @@ public class DefaultImageView implements ImageView {
 
 
             org.eclipse.swt.widgets.Group contrastGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            contrastGroup.setFont(curFont);
             contrastGroup.setText(cLabel + " %");
             contrastGroup.setLayout(new GridLayout(1, true));
             contrastGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             contrastField = new Text(contrastGroup, SWT.SINGLE | SWT.BORDER);
             contrastField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            contrastField.setFont(curFont);
             contrastField.setText(String.valueOf(cLevel));
             contrastField.addListener(SWT.Traverse, new Listener() {
             	public void handleEvent(Event e) {
@@ -4013,10 +4033,9 @@ public class DefaultImageView implements ImageView {
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(curFont);
             okButton.setText("   &Ok   ");
-            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            okButton.setLayoutData(gridData);
+            okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     int b = Integer.valueOf(brightField.getText());
@@ -4032,10 +4051,9 @@ public class DefaultImageView implements ImageView {
             });
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+            cancelButton.setFont(curFont);
             cancelButton.setText("&Cancel");
-            gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
-            gridData.widthHint = 70;
-            cancelButton.setLayoutData(gridData);
+            cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     applyBrightContrast(bLevel, cLevel);
@@ -4044,10 +4062,9 @@ public class DefaultImageView implements ImageView {
             });
 
             Button applyButton = new Button(buttonComposite, SWT.PUSH);
+            applyButton.setFont(curFont);
             applyButton.setText("&Apply");
-            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            applyButton.setLayoutData(gridData);
+            applyButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             applyButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     int b = Integer.valueOf(brightField.getText());

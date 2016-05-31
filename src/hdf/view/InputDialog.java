@@ -17,6 +17,7 @@ package hdf.view;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
@@ -44,6 +45,7 @@ public class InputDialog extends Dialog {
     private final String message;
     private final String initialText;
     private String result;
+    private Font curFont;
 
     public InputDialog(Shell parent) {
         super(parent, SWT.NONE);
@@ -79,6 +81,12 @@ public class InputDialog extends Dialog {
         this.message = message;
         this.initialText = initialText;
     }
+    
+    public void setFont(Font font) {
+        if (font == null) return;
+        
+        curFont = font;
+    }
 
     /**
      * Opens the InputDialog and returns the user's input
@@ -89,13 +97,16 @@ public class InputDialog extends Dialog {
     public String open() {
         Shell parent = getParent();
         final Shell shell = new Shell(parent, SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
+        shell.setFont(curFont);
         shell.setText(title);
         shell.setLayout(new GridLayout(1, true));
 
         Label label = new Label(shell, SWT.NULL);
+        label.setFont(curFont);
         label.setText(message);
 
         inputField = new Text(shell, SWT.SINGLE | SWT.BORDER);
+        inputField.setFont(curFont);
         inputField.setText(initialText);
         GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
         fieldData.minimumWidth = 300;
@@ -109,28 +120,25 @@ public class InputDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
+        okButton.setFont(curFont);
         okButton.setText("   &Ok   ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 shell.dispose();
             }
         });
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 result = null;
                 shell.dispose();
             }
         });
-
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
 
         inputField.addListener(SWT.Modify, new Listener() {
             public void handleEvent(Event event) {

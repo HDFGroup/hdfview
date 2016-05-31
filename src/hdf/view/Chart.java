@@ -17,11 +17,14 @@ package hdf.view;
 import java.lang.reflect.Array;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -44,6 +47,8 @@ import org.eclipse.swt.widgets.Shell;
 public class Chart extends Dialog {
 
     private Shell shell;
+    
+    private Font curFont;
 
     private String windowTitle;
 
@@ -126,6 +131,8 @@ public class Chart extends Dialog {
         }
 
         this.windowTitle = title;
+        
+        curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
 
         format = new java.text.DecimalFormat("0.00E0");
         this.chartStyle = style;
@@ -185,9 +192,16 @@ public class Chart extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM);
+        shell.setFont(curFont);
         shell.setText(windowTitle);
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         chartP = new ChartCanvas(shell, SWT.DOUBLE_BUFFERED);
         chartP.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
@@ -200,6 +214,7 @@ public class Chart extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         Button closeButton = new Button(buttonComposite, SWT.PUSH);
+        closeButton.setFont(curFont);
         closeButton.setText("   &Close   ");
         closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         closeButton.addSelectionListener(new SelectionAdapter() {
@@ -279,6 +294,9 @@ public class Chart extends Dialog {
                 public void paintControl(PaintEvent e) {
                     // Get the graphics context for this paint event
                     GC g = e.gc;
+                    
+                    //TODO: Update Chart to handle large fonts
+                    //g.setFont(curFont);
 
                     if (numberOfLines <= 0) {
                         return; // no data
@@ -407,7 +425,7 @@ public class Chart extends Dialog {
                         // draw histogram for selected image area
                         xp = xgap;
                         yp = 0;
-                        g.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
+                        g.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
                         int barWidth = w / numberOfPoints;
                         if (barWidth <= 0) {
                             barWidth = 1;
@@ -419,7 +437,7 @@ public class Chart extends Dialog {
                             g.fillRectangle((int) xp, (int) (h - yp), barWidth, (int) yp);
                         }
 
-                        g.setForeground(c); // set the color back to its default
+                        g.setBackground(c); // set the color back to its default
                     } // else if (chartStyle == HISTOGRAM)
                 }
             });

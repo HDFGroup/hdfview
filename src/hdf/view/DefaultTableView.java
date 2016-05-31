@@ -61,6 +61,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
@@ -100,6 +101,8 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
+import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.LineBorderDecorator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
@@ -133,18 +136,19 @@ import hdf.view.ViewProperties.DATA_VIEW_KEY;
  */
 public class DefaultTableView implements TableView {
 
-    private final static org.slf4j.Logger log       = org.slf4j.LoggerFactory.getLogger(DefaultTableView.class);
+    private final static org.slf4j.Logger   log       = org.slf4j.LoggerFactory.getLogger(DefaultTableView.class);
 
-    private final Display display;
-    private final Shell shell;
+    private final Display                   display;
+    private final Shell                     shell;
+    private Font                            curFont;
 
     // The main HDFView
-    private final ViewManager viewer;
+    private final ViewManager               viewer;
 
-    private NatTable table; // The NatTable to display data in
+    private NatTable                        table; // The NatTable to display data in
 
     // The Dataset (Scalar or Compound) to be displayed in the Table
-    private Dataset dataset;
+    private Dataset                         dataset;
 
     /**
      * The value of the dataset.
@@ -303,8 +307,12 @@ public class DefaultTableView implements TableView {
                     dataValue = null;
                     table = null;
                 }
+                
+                curFont.dispose();
             }
         });
+        
+        curFont = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
 
         viewer = theView;
         HObject hObject = null;
@@ -398,7 +406,7 @@ public class DefaultTableView implements TableView {
         bar.setLocation(0, 0);
 
         group = new Group(shell, SWT.SHADOW_ETCHED_OUT);
-        group.setFont(Display.getCurrent().getSystemFont());
+        group.setFont(curFont);
         group.setText(indexBase + "-based");
         group.setLayout(new GridLayout(1, true));
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -412,12 +420,14 @@ public class DefaultTableView implements TableView {
 
         cellLabel = new Label(cellValueComposite, SWT.RIGHT | SWT.BORDER);
         cellLabel.setAlignment(SWT.CENTER);
+        cellLabel.setFont(curFont);
 
         cellValueField = new Text(cellValueComposite, SWT.SINGLE | SWT.BORDER | SWT.WRAP);
         //cellValueField.setWrapStyleWord(true);
         cellValueField.setEditable(false);
         cellValueField.setBackground(new Color(display, 255, 255, 240));
         cellValueField.setEnabled(false);
+        cellValueField.setFont(curFont);
         
         FormData formData = new FormData();
         formData.left = new FormAttachment(0, 0);
@@ -531,9 +541,8 @@ public class DefaultTableView implements TableView {
 
         shell.pack();
 
-        Composite attributeArea = ((HDFView) viewer).getAttributeArea();
-        shell.setSize(attributeArea.getClientArea().width, attributeArea.getClientArea().height);
-        shell.setLocation(attributeArea.getBounds().x, attributeArea.getBounds().y);
+        shell.setSize(parent.getClientArea().width, parent.getClientArea().height);
+        shell.setLocation(parent.getBounds().x, parent.getBounds().y);
 
         viewer.addDataView(this);
 
@@ -723,7 +732,13 @@ public class DefaultTableView implements TableView {
         });
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
-        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+        
+        // Override cell painter to auto resize for larger fonts
+        natTable.addConfiguration(new DefaultNatTableStyleConfiguration() {
+            {
+                cellPainter = new LineBorderDecorator(new TextPainter(false, true, 5, true));
+            }
+        });
 
         // Register cell editing rules with table
         natTable.addConfiguration(new AbstractRegistryConfiguration() {
@@ -740,7 +755,7 @@ public class DefaultTableView implements TableView {
             }
         });
 
-        // Left-align cells
+        // Left-align cells and change font for rendering cell text
         natTable.addConfiguration(new AbstractRegistryConfiguration() {
             @Override
             public void configureRegistry(IConfigRegistry configRegistry) {
@@ -749,6 +764,7 @@ public class DefaultTableView implements TableView {
                 cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
                 cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
                         Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+                cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
 
                 configRegistry.registerConfigAttribute(
                         CellConfigAttributes.CELL_STYLE,
@@ -1050,10 +1066,10 @@ public class DefaultTableView implements TableView {
         		}
         	}
         });
+        
+        dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
 
         natTable.configure();
-
-        dataLayer.setDefaultRowHeight(2 * natTable.getFont().getFontData()[0].getHeight());
 
         log.trace("createTable(ScalarDS): finish");
 
@@ -1240,7 +1256,13 @@ public class DefaultTableView implements TableView {
         });
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
-        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+
+        // Override cell painter to auto resize for larger fonts
+        natTable.addConfiguration(new DefaultNatTableStyleConfiguration() {
+            {
+                cellPainter = new LineBorderDecorator(new TextPainter(false, true, 5, true));
+            }
+        });
 
         // Register cell editing rules with table
         natTable.addConfiguration(new AbstractRegistryConfiguration() {
@@ -1257,8 +1279,7 @@ public class DefaultTableView implements TableView {
             }
         });
 
-
-        // Left-align cells
+        // Left-align cells and change font for rendering cell text
         natTable.addConfiguration(new AbstractRegistryConfiguration() {
             @Override
             public void configureRegistry(IConfigRegistry configRegistry) {
@@ -1267,6 +1288,7 @@ public class DefaultTableView implements TableView {
                 cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
                 cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
                         Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+                cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
 
                 configRegistry.registerConfigAttribute(
                         CellConfigAttributes.CELL_STYLE,
@@ -1294,10 +1316,10 @@ public class DefaultTableView implements TableView {
         		}
         	}
         });
+        
+        dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
 
         natTable.configure();
-
-        dataLayer.setDefaultRowHeight(2 * natTable.getFont().getFontData()[0].getHeight());
 
         log.trace("createTable(CompoundDS): finish");
 

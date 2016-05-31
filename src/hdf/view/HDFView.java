@@ -689,24 +689,20 @@ public class HDFView implements ViewManager {
                 // Save what has been changed in memory into file
                 try {
                     FileFormat file = treeView.getSelectedFile();
-                    List<Shell> views = getDataViews();
-                    Object theView = null;
-                    TableView tableView = null;
-                    TextView textView = null;
-                    FileFormat theFile = null;
+                    Shell[] openShells = mainWindow.getShells();
 
-                    if (views != null) {
-                        for (Iterator<Shell> i = views.iterator(); i.hasNext(); ) {
-                            theView = i.next();
+                    if (openShells != null) {
+                        for (int i = 0; i < openShells.length; i++) {
+                            DataView theView = (DataView) openShells[i].getData();
 
                             if (theView instanceof TableView) {
-                                tableView = (TableView) theView;
-                                theFile = tableView.getDataObject().getFileFormat();
+                                TableView tableView = (TableView) theView;
+                                FileFormat theFile = tableView.getDataObject().getFileFormat();
                                 if (file.equals(theFile)) tableView.updateValueInFile();
                             }
                             else if (theView instanceof TextView) {
-                                textView = (TextView) theView;
-                                theFile = textView.getDataObject().getFileFormat();
+                                TextView textView = (TextView) theView;
+                                FileFormat theFile = textView.getDataObject().getFileFormat();
                                 if (file.equals(theFile)) textView.updateValueInFile();
                             }
                         }
@@ -1188,22 +1184,6 @@ public class HDFView implements ViewManager {
         contentArea.setWeights(new int[] {1, 3});
 
         log.info("Content Area created");
-    }
-
-    /**
-     * @return a list of all open DataViews
-     */
-    public List<Shell> getDataViews() {
-        Shell[] openShells = mainWindow.getShells();
-        if ((openShells == null) || (openShells.length <= 0)) return null;
-
-        Vector<Shell> views = new Vector<Shell>(openShells.length);
-        for (int i = 0; i < openShells.length; i++) {
-            if (openShells[i] instanceof DataView)
-                views.add(openShells[i]);
-        }
-
-        return views;
     }
 
     /**
@@ -1989,11 +1969,6 @@ public class HDFView implements ViewManager {
 
         return null;
     }
-
-    // Get the data area which HDFView uses to display object info
-    public Composite getAttributeArea() {
-        return attributeArea;
-    }
     
     /**
      * Set the testing state that determines if HDFView
@@ -2471,9 +2446,12 @@ public class HDFView implements ViewManager {
             + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
             + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
 
-        // Add custom HDFLarge icon to dialog
-        String str = (new InputDialog(mainWindow, SWT.ICON_INFORMATION,
-                "Register a file format", msg)).open();
+        // TODO:Add custom HDFLarge icon to dialog
+        InputDialog dialog = new InputDialog(mainWindow, SWT.ICON_INFORMATION,
+                "Register a file format", msg);
+        dialog.setFont(currentFont);
+        
+        String str = dialog.open();
 
         if ((str == null) || (str.length() < 1)) return;
 
