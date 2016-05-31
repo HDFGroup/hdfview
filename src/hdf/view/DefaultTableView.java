@@ -239,8 +239,9 @@ public class DefaultTableView implements TableView {
 
     // Used to get/set column header
     private IDataProvider                   columnHeaderDataProvider;
-    
+
     private final ColumnGroupModel          columnGroupModel = new ColumnGroupModel();
+    private final ColumnGroupModel          secondLevelGroupModel = new ColumnGroupModel();
 
     /**
      * Constructs a TableView.
@@ -688,7 +689,7 @@ public class DefaultTableView implements TableView {
         dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
         ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
-        
+
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
@@ -1150,7 +1151,7 @@ public class DefaultTableView implements TableView {
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
-        	new ColumnGroupExpandCollapseLayer(dataLayer, columnGroupModel);
+        	new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
         final SelectionLayer selectionLayer = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
         
@@ -1166,8 +1167,8 @@ public class DefaultTableView implements TableView {
         
         // Set up column grouping
         if (numGroups > 1) {
-        	columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, new ColumnGroupModel());
-        	columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
+        	columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
+        	columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
         	
         	// Set up first-level column grouping
         	for (int i = 0; i < numGroups; i++) {
@@ -1181,7 +1182,7 @@ public class DefaultTableView implements TableView {
         		int nestingPosition = allColumnNames[i].lastIndexOf("->");
 
         		if (nestingPosition != -1) {
-        			String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
+        			String columnGroupName = secondLevelGroupModel.getColumnGroupByIndex(i).getName();
         			int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
         			
         			if(groupTitleStartPosition != -1) {	
@@ -2194,6 +2195,8 @@ public class DefaultTableView implements TableView {
      * @throws Exception if a failure occurred
      */
     private void updateValueInMemory(String cellValue, int row, int col) throws Exception {
+        if (cellValue == null) return;
+        
         log.trace("DefaultTableView: updateValueInMemory()");
         
         // No need to update if values are the same
@@ -4190,24 +4193,8 @@ public class DefaultTableView implements TableView {
                     }
                 }
                 else if (showAsHex && isInt) {
-                    // show in Hexadecimal
-                    char[] hexArray = "0123456789ABCDEF".toCharArray();
-                    theValue = Array.get(dataValue, index * typeSize);
-                    log.trace("ScalarDS:ScalarDSDataProvider:getValueAt() theValue[{}]={}", index, theValue.toString());
-                    // show in Hexadecimal
-                    char[] hexChars = new char[2];
-                    stringBuffer.setLength(0); // clear the old string
-                    for (int x = 0; x < typeSize; x++) {
-                        if (x > 0)
-                            theValue = Array.get(dataValue, index * typeSize + x);
-                        int v = (int)((Byte)theValue) & 0xFF;
-                        hexChars[0] = hexArray[v >>> 4];
-                        hexChars[1] = hexArray[v & 0x0F];
-                        if (x > 0) stringBuffer.append(":");
-                        stringBuffer.append(hexChars);
-                        log.trace("ScalarDS:ScalarDSDataProvider:getValueAt() hexChars[{}]={}", x, hexChars);
-                    }
-                    theValue = stringBuffer;
+                    theValue = Array.get(dataValue, index);
+                    theValue = Tools.toHexString(Long.valueOf(theValue.toString()), typeSize);
                 }
                 else if (showAsBin && isInt) {
                     theValue = Array.get(dataValue, index);
@@ -4236,8 +4223,8 @@ public class DefaultTableView implements TableView {
             }
             catch (Exception ex) {
                 display.beep();
-                Tools.showError(shell, "Failed to update value at"
-                        + "(" + rowIndex + ", " + columnIndex + ") to " + newValue.toString(), shell.getText());
+                Tools.showError(shell, "Failed to update value at "
+                        + "(" + rowIndex + ", " + columnIndex + ") to '" + newValue.toString() + "'", shell.getText());
             }
         }
 
@@ -4422,8 +4409,8 @@ public class DefaultTableView implements TableView {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Failed to update value at"
-                        + "(" + rowIndex + ", " + columnIndex + ") to " + newValue.toString(), shell.getText());
+                Tools.showError(shell, "Failed to update value at "
+                        + "(" + rowIndex + ", " + columnIndex + ") to '" + newValue.toString() + "'", shell.getText());
             }
         }
 

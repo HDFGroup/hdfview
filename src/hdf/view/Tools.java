@@ -1830,6 +1830,38 @@ public final class Tools {
 
         return sb.toString();
     }
+    
+    final static char[] HEXCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+    /**
+     * Returns a string representation of the long argument as an unsigned integer in base 16. This
+     * is different from Long.toHexString(long i). This function add padding (0's) to the string
+     * based on the nbytes. For example, if v=42543, nbytes=4, the string will be "0000A62F".
+     *
+     * @param v
+     *            the long value
+     * @param nbytes
+     *            number of bytes in the integer
+     * @return the string representation of the unsigned long value represented by the argument in
+     *         hexadecimal (base 16).
+     */
+    public static final String toHexString (long v, int nbytes) {
+        if (nbytes <= 0) return null;
+
+        int nhex = nbytes * 2;
+        short[] hex = new short[nhex];
+
+        for (int i = 0; i < nhex; i++) {
+            hex[i] = (short) (0x0F & (v >> (i * 4)));
+        }
+
+        StringBuffer sb = new StringBuffer();
+        for (int i = nhex - 1; i >= 0; i--) {
+            sb.append(HEXCHARS[hex[i]]);
+        }
+
+        return sb.toString();
+    }
 
     /**
      * Apply bitmask to a data array.
