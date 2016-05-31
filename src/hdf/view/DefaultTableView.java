@@ -234,6 +234,8 @@ public class DefaultTableView implements TableView {
 
     // Keep track of table row selections
     private SelectionLayer                  selectionLayer;
+    
+    private DataLayer                       dataLayer;
 
     // Used to get/set column header
     private IDataProvider                   columnHeaderDataProvider;
@@ -683,7 +685,7 @@ public class DefaultTableView implements TableView {
 
         // Create body layer
         final IDataProvider bodyDataProvider = new ScalarDSDataProvider();
-        final DataLayer dataLayer = new DataLayer(bodyDataProvider);
+        dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
         ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
@@ -1146,7 +1148,7 @@ public class DefaultTableView implements TableView {
 
         // Create body layer
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
-        final DataLayer dataLayer = new DataLayer(bodyDataProvider);
+        dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
             new ColumnGroupExpandCollapseLayer(dataLayer, columnGroupModel);
         final SelectionLayer selectionLayer = new SelectionLayer(expandCollapseLayer);
@@ -2195,7 +2197,7 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView: updateValueInMemory()");
         
         // No need to update if values are the same
-        if (cellValue.equals((String) selectionLayer.getDataValueByPosition(col, row).toString())) return;
+        if (cellValue.equals((String) dataLayer.getDataValue(col, row).toString())) return;
 
         if (dataset instanceof ScalarDS) {
             updateScalarData(cellValue, row, col);
