@@ -2445,12 +2445,14 @@ public class DefaultTreeView implements TreeView {
         String dataViewName = null;
 
         log.trace("showDataContent: inited");
-
-        Shell theShell = (Shell) ((HDFView) viewer).getDataView(d);
+        
+        Shell theShell = null;
+        DataView existingView = ((HDFView) viewer).getDataView(d);
 
         if (isDefaultDisplay) {
-            if (theShell != null) {
-                theShell.setActive();
+            if (existingView != null) {
+                theShell = ((HDFView) viewer).findShell(existingView);
+                theShell.forceActive();
                 return null;
             }
 
