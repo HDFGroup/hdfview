@@ -81,7 +81,7 @@ import hdf.HDFVersions;
  * @author Jordan T. Henderson
  * @version 2.4 //2015
  */
-public class HDFView implements ViewManager, DropTargetListener {
+public class HDFView implements ViewManager {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 
@@ -174,6 +174,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 
     /* GUI component: File menu on the menubar */
     //private final Menu               fileMenu;
+    
+    /* The font to be used for display text on all Controls */
+    private Font                       currentFont;
 
     /* The offset when a new dataview is added into the main window. */
     private int                        frameOffset = 0;
@@ -296,14 +299,11 @@ public class HDFView implements ViewManager, DropTargetListener {
             }
 
             if (font != null)
-                updateFontSize(font);
-
+                updateFont(font);
         }
         catch (Exception ex) {
             log.debug("Failed to load Font properties");
         }
-
-        // new DropTarget(display, DND.DROP_COPY);
 
         // Make sure all GUI components are in place before
         // opening any files
@@ -847,6 +847,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                     Font font = null;
 
                     try {
+                        currentFont.dispose();
                         font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
                     }
                     catch (Exception ex) {
@@ -854,7 +855,7 @@ public class HDFView implements ViewManager, DropTargetListener {
                     }
 
                     if (font != null)
-                        updateFontSize(font);
+                        updateFont(font);
                 }
             }
         });
@@ -1151,6 +1152,28 @@ public class HDFView implements ViewManager, DropTargetListener {
         // Could not load user's treeview, use default treeview.
         if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
         treeArea.setContent(treeView.getTree());
+        
+        // Add drag and drop support for opening files
+        DropTarget target = new DropTarget(treeArea, DND.DROP_COPY);
+        final FileTransfer fileTransfer = FileTransfer.getInstance();
+        target.setTransfer(new Transfer[] { fileTransfer });
+        target.addDropListener(new DropTargetListener() {
+            public void dragEnter(DropTargetEvent e) {
+                e.detail = DND.DROP_COPY;
+            }
+            public void dragOver(DropTargetEvent e) {}
+            public void dragOperationChanged(DropTargetEvent e) { }
+            public void dragLeave(DropTargetEvent e) {}
+            public void dropAccept(DropTargetEvent e) {}
+            public void drop(DropTargetEvent e) {
+                if (fileTransfer.isSupportedType(e.currentDataType)) {
+                    String[] files = (String[]) e.data;
+                    for (int i = 0; i < files.length; i++) {
+                        openLocalFile(files[i], FileFormat.WRITE);
+                    }
+                }
+            }
+        });
 
         // Create status area for displaying messages and metadata
         status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
@@ -1943,6 +1966,8 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
 
     public void removeDataView(DataView dataView) {
+        if (mainWindow.isDisposed()) return;
+        
         HObject obj = dataView.getDataObject();
         MenuItem[] items = windowMenu.getItems();
         for (int i = 0; i < items.length; i++) {
@@ -1953,27 +1978,16 @@ public class HDFView implements ViewManager, DropTargetListener {
     }
 
     public DataView getDataView(HObject dataObject) {
+        Shell[] openShells = mainWindow.getShells();
+        HObject currentObj = null;
+        
+        for (int i = 0; i < openShells.length; i++) {
+            currentObj = ((DataView) openShells[i].getData()).getDataObject();
+            
+            if (currentObj.equals(dataObject)) return (DataView) openShells[i].getData();
+        }
 
         return null;
-    }
-
-    public void dragEnter(DropTargetEvent evt) {
-    }
-
-    public void dragLeave(DropTargetEvent evt) {
-    }
-
-    public void dragOperationChanged(DropTargetEvent evt) {
-    }
-
-    public void dragOver(DropTargetEvent evt) {
-    }
-
-    public void drop(DropTargetEvent evt) {
-
-    }
-
-    public void dropAccept(DropTargetEvent evt) {
     }
 
     // Get the data area which HDFView uses to display object info
@@ -1992,21 +2006,12 @@ public class HDFView implements ViewManager, DropTargetListener {
     /**
      * Set default UI fonts.
      */
-    private void updateFontSize(Font font) {
+    private void updateFont(Font font) {
         if (font == null) return;
-
-        /*
-        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
-
-        for (Iterator<?> i = defaults.keySet().iterator(); i.hasNext();) {
-            Object key = i.next();
-            if (defaults.getFont(key) != null) {
-                UIManager.put(key, new javax.swing.plaf.FontUIResource(font));
-            }
-        }
-
-        SwingUtilities.updateComponentTreeUI(this);
-        */
+        
+        currentFont = font;
+        
+        mainWindow.layout();
     }
 
     /**
@@ -2025,6 +2030,24 @@ public class HDFView implements ViewManager, DropTargetListener {
                 shell.forceActive();
             }
         });
+    }
+    
+    /**
+     * Finds the Shell containing the given DataView.
+     * 
+     * @param dataView
+     *           The DataView contained in the Shell to be found.
+     */
+    public Shell findShell(final DataView dataView) {
+        Shell[] openShells = mainWindow.getShells();
+        
+        if (openShells.length < 1) return null;
+        
+        for (int i = 0; i < openShells.length; i++) {
+            if (((DataView) openShells[i].getData()).equals(dataView)) return openShells[i];
+        }
+        
+        return null; 
     }
 
     /**
@@ -2557,7 +2580,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 
         public void open() {
             Shell dialog = new Shell(getParent(), getStyle());
+            dialog.setFont(currentFont);
             dialog.setText("HDF Library Version");
+            
             createContents(dialog);
 
             dialog.pack();
@@ -2593,6 +2618,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
             Label versionLabel = new Label(shell, SWT.CENTER);
             versionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            versionLabel.setFont(currentFont);
             versionLabel.setText(message);
 
             // Draw HDF Icon and Version string
@@ -2605,6 +2631,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(currentFont);
             okButton.setText("   &Ok   ");
             shell.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
@@ -2622,6 +2649,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
         public void open() {
             final Shell dialog = new Shell(getParent(), getStyle());
+            dialog.setFont(currentFont);
             dialog.setText("HDFView Java Version");
             dialog.setLayout(new GridLayout(2, false));
 
@@ -2633,6 +2661,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
             Label versionLabel = new Label(dialog, SWT.CENTER);
             versionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            versionLabel.setFont(currentFont);
             versionLabel.setText(JAVA_VER_INFO);
 
             Composite buttonComposite = new Composite(dialog, SWT.NONE);
@@ -2644,6 +2673,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(currentFont);
             okButton.setText("   &Ok   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
@@ -2682,6 +2712,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
         public void open() {
             final Shell dialog = new Shell(getParent(), getStyle());
+            dialog.setFont(currentFont);
             dialog.setText("Supported File Formats");
             dialog.setLayout(new GridLayout(2, false));
 
@@ -2701,6 +2732,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
             Label formatsLabel = new Label(dialog, SWT.LEFT);
             formatsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            formatsLabel.setFont(currentFont);
             formatsLabel.setText(formats);
 
             Composite buttonComposite = new Composite(dialog, SWT.NONE);
@@ -2712,6 +2744,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(currentFont);
             okButton.setText("   &Ok   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
@@ -2750,6 +2783,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
         public void open() {
             final Shell dialog = new Shell(getParent(), getStyle());
+            dialog.setFont(currentFont);
             dialog.setText("About HDFView");
             dialog.setLayout(new GridLayout(2, false));
 
@@ -2761,6 +2795,7 @@ public class HDFView implements ViewManager, DropTargetListener {
 
             Label aboutLabel = new Label(dialog, SWT.LEFT);
             aboutLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+            aboutLabel.setFont(currentFont);
             aboutLabel.setText(aboutHDFView);
 
             Composite buttonComposite = new Composite(dialog, SWT.NONE);
@@ -2772,6 +2807,7 @@ public class HDFView implements ViewManager, DropTargetListener {
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(currentFont);
             okButton.setText("   &Ok   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
@@ -2817,6 +2853,7 @@ public class HDFView implements ViewManager, DropTargetListener {
         public String open() {
             Shell parent = getParent();
             final Shell shell = new Shell(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+            shell.setFont(currentFont);
             shell.setText("Unregister a file format");
             shell.setLayout(new GridLayout(2, false));
 
@@ -2828,7 +2865,9 @@ public class HDFView implements ViewManager, DropTargetListener {
 
 
             final Combo formatChoiceCombo = new Combo(shell, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+            formatChoiceCombo.setFont(currentFont);
             formatChoiceCombo.setItems(keyList.toArray(new String[0]));
+            formatChoiceCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
             formatChoiceCombo.select(0);
             formatChoiceCombo.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2836,37 +2875,29 @@ public class HDFView implements ViewManager, DropTargetListener {
                 }
             });
 
-            GridData data = new GridData(SWT.FILL, SWT.CENTER, true, true);
-            data.widthHint = 100;
-            formatChoiceCombo.setLayoutData(data);
-
             Composite buttonComposite = new Composite(shell, SWT.NONE);
             buttonComposite.setLayout(new GridLayout(2, true));
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(currentFont);
             okButton.setText("   &Ok   ");
+            okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-
                     shell.dispose();
                 }
             });
-            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            okButton.setLayoutData(gridData);
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+            cancelButton.setFont(currentFont);
             cancelButton.setText("&Cancel");
+            cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
             });
-
-            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            cancelButton.setLayoutData(gridData);
 
             shell.pack();
 
