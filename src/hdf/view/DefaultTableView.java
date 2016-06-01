@@ -312,7 +312,16 @@ public class DefaultTableView implements TableView {
             }
         });
         
-        curFont = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
+        try {
+            curFont = new Font(
+                    display,
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         viewer = theView;
         HObject hObject = null;
@@ -732,13 +741,7 @@ public class DefaultTableView implements TableView {
         });
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
-        
-        // Override cell painter to auto resize for larger fonts
-        natTable.addConfiguration(new DefaultNatTableStyleConfiguration() {
-            {
-                cellPainter = new LineBorderDecorator(new TextPainter(false, true, 5, true));
-            }
-        });
+        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 
         // Register cell editing rules with table
         natTable.addConfiguration(new AbstractRegistryConfiguration() {
@@ -1256,13 +1259,7 @@ public class DefaultTableView implements TableView {
         });
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
-
-        // Override cell painter to auto resize for larger fonts
-        natTable.addConfiguration(new DefaultNatTableStyleConfiguration() {
-            {
-                cellPainter = new LineBorderDecorator(new TextPainter(false, true, 5, true));
-            }
-        });
+        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 
         // Register cell editing rules with table
         natTable.addConfiguration(new AbstractRegistryConfiguration() {

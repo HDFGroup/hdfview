@@ -289,7 +289,17 @@ public class DefaultImageView implements ImageView {
         shell.setImage(ViewProperties.getImageIcon());
         shell.setLayout(new GridLayout(1, true));
         
-        curFont = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
+        try {
+            curFont = new Font(
+                    display,
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
+        
         shell.setFont(curFont);
 
         viewer = theView;
