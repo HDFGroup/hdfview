@@ -2302,31 +2302,7 @@ public class DefaultTreeView implements TreeView {
         }
 
         // Write the change of the data into the file before saving the file
-        List<?> views = ((HDFView) viewer).getDataViews();
-        Object theView = null;
-        TableView tableView = null;
-        TextView textView = null;
-        FileFormat theFile = null;
-        if (views != null) {
-            int n = views.size();
-            for (int i = 0; i < n; i++) {
-                theView = views.get(i);
-                if (theView instanceof TableView) {
-                    tableView = (TableView) theView;
-                    theFile = tableView.getDataObject().getFileFormat();
-                    if (file.equals(theFile)) {
-                        tableView.updateValueInFile();
-                    }
-                }
-                else if (theView instanceof TextView) {
-                    textView = (TextView) theView;
-                    theFile = textView.getDataObject().getFileFormat();
-                    if (file.equals(theFile)) {
-                        textView.updateValueInFile();
-                    }
-                }
-            }
-        }
+        ((HDFView) viewer).writeDataToFile(file);
 
         if (isH5) {
             saveAsHDF5(file);

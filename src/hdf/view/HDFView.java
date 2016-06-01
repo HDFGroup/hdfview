@@ -687,31 +687,7 @@ public class HDFView implements ViewManager {
                 }
 
                 // Save what has been changed in memory into file
-                try {
-                    FileFormat file = treeView.getSelectedFile();
-                    Shell[] openShells = mainWindow.getShells();
-
-                    if (openShells != null) {
-                        for (int i = 0; i < openShells.length; i++) {
-                            DataView theView = (DataView) openShells[i].getData();
-
-                            if (theView instanceof TableView) {
-                                TableView tableView = (TableView) theView;
-                                FileFormat theFile = tableView.getDataObject().getFileFormat();
-                                if (file.equals(theFile)) tableView.updateValueInFile();
-                            }
-                            else if (theView instanceof TextView) {
-                                TextView textView = (TextView) theView;
-                                FileFormat theFile = textView.getDataObject().getFileFormat();
-                                if (file.equals(theFile)) textView.updateValueInFile();
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex) {
-                    display.beep();
-                    Tools.showError(mainWindow, ex.getMessage(), shell.getText());
-                }
+                writeDataToFile(treeView.getSelectedFile());
             }
         });
 
@@ -1907,6 +1883,39 @@ public class HDFView implements ViewManager {
             }
         }
         catch (Exception ex) {}
+    }
+    
+    /**
+     * Write the change of data to the given file.
+     * 
+     * @param theFile
+     *           The file to be updated.
+     */
+    public void writeDataToFile(FileFormat theFile) {
+        try {
+            Shell[] openShells = mainWindow.getShells();
+
+            if (openShells != null) {
+                for (int i = 0; i < openShells.length; i++) {
+                    DataView theView = (DataView) openShells[i].getData();
+
+                    if (theView instanceof TableView) {
+                        TableView tableView = (TableView) theView;
+                        FileFormat file = tableView.getDataObject().getFileFormat();
+                        if (file.equals(theFile)) tableView.updateValueInFile();
+                    }
+                    else if (theView instanceof TextView) {
+                        TextView textView = (TextView) theView;
+                        FileFormat file = textView.getDataObject().getFileFormat();
+                        if (file.equals(theFile)) textView.updateValueInFile();
+                    }
+                }
+            }
+        }
+        catch (Exception ex) {
+            display.beep();
+            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+        }
     }
 
     public void addDataView(DataView dataView) {
