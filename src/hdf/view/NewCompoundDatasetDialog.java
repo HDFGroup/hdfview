@@ -25,7 +25,10 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -60,11 +63,13 @@ import hdf.object.HObject;
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2015
  */
-public class NewTableDataDialog extends Dialog {
+public class NewCompoundDatasetDialog extends Dialog {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewTableDataDialog.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewCompoundDatasetDialog.class);
 
-    private Shell shell;
+    private Shell                 shell;
+    
+    private Font                  curFont;
 
     private static final String[] DATATYPE_NAMES   = {
         "byte (8-bit)", // 0
@@ -115,8 +120,19 @@ public class NewTableDataDialog extends Dialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewTableDataDialog(Shell parent, Group pGroup, List<?> objs) {
+    public NewCompoundDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         newObject = null;
         numberOfMembers = 2;
@@ -132,6 +148,7 @@ public class NewTableDataDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("New Compound Dataset...");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, false));
@@ -144,14 +161,20 @@ public class NewTableDataDialog extends Dialog {
         fieldComposite.setLayout(layout);
         fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        new Label(fieldComposite, SWT.LEFT).setText("Dataset name: ");
+        Label label = new Label(fieldComposite, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Dataset name: ");
 
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        new Label(fieldComposite, SWT.LEFT).setText("Parent group: ");
+        label = new Label(fieldComposite, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Parent group: ");
 
         parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -186,14 +209,17 @@ public class NewTableDataDialog extends Dialog {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
 
-        new Label(fieldComposite, SWT.LEFT).setText("Import template: ");
+        label = new Label(fieldComposite, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Import template: ");
 
         templateChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        templateChoice.setFont(curFont);
         templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         templateChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-            	// TODO: get Dataset from combobox name
-            	Object obj = templateChoice.getSelection();
+                // TODO: get Dataset from combobox name
+                Object obj = templateChoice.getSelection();
                 if (!(obj instanceof CompoundDS)) {
                     return;
                 }
@@ -221,7 +247,7 @@ public class NewTableDataDialog extends Dialog {
                     dset.getMetadata();
                 } // get chunking and compression info
                 catch (Exception ex) {
-                	log.debug("get chunking and compression info:", ex);
+                    log.debug("get chunking and compression info:", ex);
                 }
                 long[] chunks = dset.getChunkSize();
                 if (chunks != null) {
@@ -331,13 +357,13 @@ public class NewTableDataDialog extends Dialog {
                     table.getItem(i).setText(1, memberTypeChoice.getItem(memberTypeChoice.getSelectionIndex()));
                     
                     if (tclass == Datatype.CLASS_STRING) {
-                    	table.getItem(i).setText(2, String.valueOf(tsize));
+                        table.getItem(i).setText(2, String.valueOf(tsize));
                     }
                     else if (tclass == Datatype.CLASS_ENUM) {
-                    	table.getItem(i).setText(2, mTypes[i].getEnumMembers());
+                        table.getItem(i).setText(2, mTypes[i].getEnumMembers());
                     }
                     else {
-                    	table.getItem(i).setText(2, String.valueOf(mOrders[i]));
+                        table.getItem(i).setText(2, String.valueOf(mOrders[i]));
                     }
 
                 } // for (int i=0; i<numberOfMembers; i++)
@@ -354,15 +380,23 @@ public class NewTableDataDialog extends Dialog {
         org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         dataspaceGroup.setLayout(new GridLayout(3, true));
         dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        dataspaceGroup.setFont(curFont);
         dataspaceGroup.setText("Dataspace");
 
-        new Label(dataspaceGroup, SWT.LEFT).setText("No. of dimensions");
+        label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("No. of dimensions");
 
-        new Label(dataspaceGroup, SWT.LEFT).setText("Current size");
+        label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Current size");
 
-        new Label(dataspaceGroup, SWT.LEFT).setText("Max size (-1 for unlimited)");
+        label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Max size (-1 for unlimited)");
 
         rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        rankChoice.setFont(curFont);
         rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         rankChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -404,10 +438,12 @@ public class NewTableDataDialog extends Dialog {
 
         currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
         currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        currentSizeField.setFont(curFont);
         currentSizeField.setText("1");
 
         maxSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
         maxSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        maxSizeField.setFont(curFont);
         maxSizeField.setText("0");
 
 
@@ -415,11 +451,15 @@ public class NewTableDataDialog extends Dialog {
         org.eclipse.swt.widgets.Group layoutGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         layoutGroup.setLayout(new GridLayout(7, false));
         layoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        layoutGroup.setFont(curFont);
         layoutGroup.setText("Data Layout and Compression");
 
-        new Label(layoutGroup, SWT.LEFT).setText("Storage layout: ");
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Storage layout: ");
 
         checkContiguous = new Button(layoutGroup, SWT.RADIO);
+        checkContiguous.setFont(curFont);
         checkContiguous.setText("Contiguous");
         checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkContiguous.addSelectionListener(new SelectionAdapter() {
@@ -429,10 +469,15 @@ public class NewTableDataDialog extends Dialog {
         });
 
         // Dummy labels
-        new Label(layoutGroup, SWT.LEFT).setText("");
-        new Label(layoutGroup, SWT.LEFT).setText("");
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("");
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("");
 
         checkChunked = new Button(layoutGroup, SWT.RADIO);
+        checkChunked.setFont(curFont);
         checkChunked.setText("Chunked");
         checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkChunked.addSelectionListener(new SelectionAdapter() {
@@ -460,16 +505,22 @@ public class NewTableDataDialog extends Dialog {
             }
         });
 
-        new Label(layoutGroup, SWT.LEFT).setText("Size: ");
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Size: ");
 
         chunkSizeField = new Text(layoutGroup, SWT.SINGLE | SWT.BORDER);
         chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        chunkSizeField.setFont(curFont);
         chunkSizeField.setText("1");
         chunkSizeField.setEnabled(false);
 
-        new Label(layoutGroup, SWT.LEFT).setText("Compression: ");
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Compression: ");
 
         checkCompression = new Button(layoutGroup, SWT.CHECK);
+        checkCompression.setFont(curFont);
         checkCompression.setText("gzip");
         checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkCompression.addSelectionListener(new SelectionAdapter() {
@@ -511,9 +562,12 @@ public class NewTableDataDialog extends Dialog {
             }
         });
 
-        new Label(layoutGroup, SWT.LEFT).setText("Level: ");
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Level: ");
 
         compressionLevel = new Combo(layoutGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        compressionLevel.setFont(curFont);
         compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         compressionLevel.setEnabled(false);
 
@@ -521,20 +575,32 @@ public class NewTableDataDialog extends Dialog {
             compressionLevel.add(String.valueOf(i));
         }
 
-        new Label(layoutGroup, SWT.LEFT).setText("");
-        new Label(layoutGroup, SWT.LEFT).setText("");
-        new Label(layoutGroup, SWT.LEFT).setText("");
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("");
+        
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("");
+        
+        label = new Label(layoutGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("");
 
 
         // Create Properties region
         org.eclipse.swt.widgets.Group propertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         propertiesGroup.setLayout(new GridLayout(2, false));
         propertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        propertiesGroup.setFont(curFont);
         propertiesGroup.setText("Compound Datatype Properties");
 
-        new Label(propertiesGroup, SWT.LEFT).setText("Number of Members:");
+        label = new Label(propertiesGroup, SWT.LEFT);
+        label.setFont(curFont);
+        label.setText("Number of Members:");
 
         nFieldBox = new Combo(propertiesGroup, SWT.DROP_DOWN);
+        nFieldBox.setFont(curFont);
         nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         nFieldBox.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -587,6 +653,7 @@ public class NewTableDataDialog extends Dialog {
         table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         table.setLinesVisible(false);
         table.setHeaderVisible(true);
+        table.setFont(curFont);
 
         String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
 
@@ -611,31 +678,31 @@ public class NewTableDataDialog extends Dialog {
         
         // Last table column always expands to fill remaining table size
         table.addListener(SWT.Resize, new Listener() {
-        	public void handleEvent(Event e) {
-        		Table table = (Table) e.widget;
-        		Rectangle area = table.getClientArea();
-        		int columnCount = table.getColumnCount();
-        		int totalGridLineWidth = (columnCount - 1) * table.getGridLineWidth();
-        		
-        		int totalColumnWidth = 0;
-        		for (TableColumn column : table.getColumns()) {
-        			totalColumnWidth += column.getWidth();
-        		}
-        		
-        		int diff = area.width - (totalColumnWidth + totalGridLineWidth);
-        		
-        		TableColumn col = table.getColumns()[columnCount - 1];
-        		col.setWidth(diff + col.getWidth());
-        	}
+            public void handleEvent(Event e) {
+                Table table = (Table) e.widget;
+                Rectangle area = table.getClientArea();
+                int columnCount = table.getColumnCount();
+                int totalGridLineWidth = (columnCount - 1) * table.getGridLineWidth();
+                
+                int totalColumnWidth = 0;
+                for (TableColumn column : table.getColumns()) {
+                    totalColumnWidth += column.getWidth();
+                }
+                
+                int diff = area.width - (totalColumnWidth + totalGridLineWidth);
+                
+                TableColumn col = table.getColumns()[columnCount - 1];
+                col.setWidth(diff + col.getWidth());
+            }
         });
         
         // Disable table selection highlighting
         table.addListener(SWT.EraseItem, new Listener() {
-        	public void handleEvent(Event e) {
-        		if ((e.detail & SWT.SELECTED) != 0) {
-        			e.detail &= ~SWT.SELECTED;
-        		}
-        	}
+            public void handleEvent(Event e) {
+                if ((e.detail & SWT.SELECTED) != 0) {
+                    e.detail &= ~SWT.SELECTED;
+                }
+            }
         });
 
         // Create Ok/Cancel button region
@@ -644,10 +711,9 @@ public class NewTableDataDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 try {
@@ -667,10 +733,9 @@ public class NewTableDataDialog extends Dialog {
         });
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
@@ -686,6 +751,12 @@ public class NewTableDataDialog extends Dialog {
         nFieldBox.select(nFieldBox.indexOf(String.valueOf(numberOfMembers)));
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont = null;
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -976,6 +1047,7 @@ public class NewTableDataDialog extends Dialog {
 
         TableEditor editor = new TableEditor(table);
         Text text = new Text(table, SWT.SINGLE | SWT.BORDER);
+        text.setFont(curFont);
         editor.grabHorizontal = true;
         editor.grabVertical = true;
         editor.horizontalAlignment = SWT.LEFT;
@@ -983,13 +1055,14 @@ public class NewTableDataDialog extends Dialog {
         editor.setEditor(text, item, 0);
         
         text.addModifyListener(new ModifyListener() {
-        	public void modifyText(ModifyEvent e) {
-        		Text text = (Text) e.widget;
-        		item.setData("MemberName", text.getText());
-        	}
+            public void modifyText(ModifyEvent e) {
+                Text text = (Text) e.widget;
+                item.setData("MemberName", text.getText());
+            }
         });
 
         CCombo combo = new CCombo(table, SWT.DROP_DOWN | SWT.READ_ONLY);
+        combo.setFont(curFont);
         combo.setItems(DATATYPE_NAMES);
         editor = new TableEditor(table);
         editor.grabHorizontal = true;
@@ -999,13 +1072,14 @@ public class NewTableDataDialog extends Dialog {
         editor.setEditor(combo, item, 1);
         
         combo.addSelectionListener(new SelectionAdapter() {
-        	public void widgetSelected(SelectionEvent e) {
-        		CCombo combo = (CCombo) e.widget;
-        		item.setData("MemberType", combo.getItem(combo.getSelectionIndex()));
-        	}
+            public void widgetSelected(SelectionEvent e) {
+                CCombo combo = (CCombo) e.widget;
+                item.setData("MemberType", combo.getItem(combo.getSelectionIndex()));
+            }
         });
 
         text = new Text(table, SWT.SINGLE | SWT.BORDER);
+        text.setFont(curFont);
         editor = new TableEditor(table);
         editor.grabHorizontal = true;
         editor.grabVertical = true;
@@ -1014,10 +1088,10 @@ public class NewTableDataDialog extends Dialog {
         editor.setEditor(text, item, 2);
         
         text.addModifyListener(new ModifyListener() {
-        	public void modifyText(ModifyEvent e) {
-        		Text text = (Text) e.widget;
-        		item.setData("MemberSize", text.getText());
-        	}
+            public void modifyText(ModifyEvent e) {
+                Text text = (Text) e.widget;
+                item.setData("MemberSize", text.getText());
+            }
         });
         
         item.setData("MemberName", "");

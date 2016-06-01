@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -53,6 +56,8 @@ import hdf.object.ScalarDS;
 public class NewImageDialog extends Dialog {
 
     private Shell       shell;
+    
+    private Font        curFont;
 
     private Text        nameField, widthField, heightField;
 
@@ -85,6 +90,17 @@ public class NewImageDialog extends Dialog {
      */
     public NewImageDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         newObject = null;
         parentGroup = pGroup;
@@ -98,6 +114,7 @@ public class NewImageDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("New HDF Image...");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
@@ -109,17 +126,21 @@ public class NewImageDialog extends Dialog {
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Label label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Image name: ");
 
         nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        nameField.setFont(curFont);
         GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
         fieldData.minimumWidth = 300;
         nameField.setLayoutData(fieldData);
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Parent Group: ");
 
         parentChoice = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
+        parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -154,18 +175,23 @@ public class NewImageDialog extends Dialog {
         }
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Height: ");
 
         heightField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        heightField.setFont(curFont);
         heightField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Width: ");
 
         widthField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        widthField.setFont(curFont);
         widthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Image type: ");
 
         Composite typeComposite = new Composite(content, SWT.BORDER);
@@ -173,6 +199,7 @@ public class NewImageDialog extends Dialog {
         typeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkIndex = new Button(typeComposite, SWT.RADIO);
+        checkIndex.setFont(curFont);
         checkIndex.setText("Indexed colormap");
         checkIndex.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkIndex.addSelectionListener(new SelectionAdapter() {
@@ -185,6 +212,7 @@ public class NewImageDialog extends Dialog {
         });
 
         checkTrueColor = new Button(typeComposite, SWT.RADIO);
+        checkTrueColor.setFont(curFont);
         checkTrueColor.setText("24-bit truecolor");
         checkTrueColor.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkTrueColor.addSelectionListener(new SelectionAdapter() {
@@ -195,6 +223,7 @@ public class NewImageDialog extends Dialog {
         });
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Data layout: ");
 
         Composite layoutComposite = new Composite(content, SWT.BORDER);
@@ -202,10 +231,12 @@ public class NewImageDialog extends Dialog {
         layoutComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkInterlacePixel = new Button(layoutComposite, SWT.RADIO);
+        checkInterlacePixel.setFont(curFont);
         checkInterlacePixel.setText("Pixel interlace");
         checkInterlacePixel.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         checkInterlacePlane = new Button(layoutComposite, SWT.RADIO);
+        checkInterlacePlane.setFont(curFont);
         checkInterlacePlane.setText("Plane interlace");
         checkInterlacePlane.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
@@ -216,10 +247,9 @@ public class NewImageDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = createHDFimage();
@@ -230,10 +260,9 @@ public class NewImageDialog extends Dialog {
         });
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
@@ -248,6 +277,12 @@ public class NewImageDialog extends Dialog {
         checkInterlacePlane.setEnabled(false);
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 

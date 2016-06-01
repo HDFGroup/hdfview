@@ -19,8 +19,11 @@ import java.io.File;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -47,7 +50,9 @@ import org.eclipse.swt.widgets.Text;
  * @version 2.4 2/13/2016
  */
 public class UserOptionsDialog extends Dialog {
-    private Shell shell;
+    private Shell                 shell;
+    
+    private Font                  curFont;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
 
@@ -97,6 +102,17 @@ public class UserOptionsDialog extends Dialog {
 
     public UserOptionsDialog(Shell parent, String viewRoot) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         rootDir = viewRoot;
         isFontChanged = false;
@@ -123,6 +139,7 @@ public class UserOptionsDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("User Options");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, false));
@@ -130,6 +147,7 @@ public class UserOptionsDialog extends Dialog {
         // Create tabbed region
         TabFolder folder = new TabFolder(shell, SWT.TOP);
         folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        folder.setFont(curFont);
         folder.setSelection(0);
 
         TabItem item = new TabItem(folder, SWT.NONE);
@@ -154,19 +172,20 @@ public class UserOptionsDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 setUserOptions();
                 shell.dispose();
             }
         });
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 isFontChanged = false;
@@ -174,11 +193,13 @@ public class UserOptionsDialog extends Dialog {
             }
         });
 
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
-
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -329,9 +350,11 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group workingDirectoryGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         workingDirectoryGroup.setLayout(new GridLayout(3, false));
         workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        workingDirectoryGroup.setFont(curFont);
         workingDirectoryGroup.setText("Default Working Directory");
 
         checkCurrentUserDir = new Button(workingDirectoryGroup, SWT.CHECK);
+        checkCurrentUserDir.setFont(curFont);
         checkCurrentUserDir.setText("\"Current Working Directory\" or");
         checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkCurrentUserDir.addSelectionListener(new SelectionAdapter() {
@@ -343,10 +366,12 @@ public class UserOptionsDialog extends Dialog {
         });
 
         workField = new Text(workingDirectoryGroup, SWT.SINGLE | SWT.BORDER);
+        workField.setFont(curFont);
         workField.setText(workDir);
         workField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         currentDirButton = new Button(workingDirectoryGroup, SWT.PUSH);
+        currentDirButton.setFont(curFont);
         currentDirButton.setText("Browse...");
         currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         currentDirButton.addSelectionListener(new SelectionAdapter() {
@@ -371,15 +396,20 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group helpDocumentGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         helpDocumentGroup.setLayout(new GridLayout(3, false));
         helpDocumentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        helpDocumentGroup.setFont(curFont);
         helpDocumentGroup.setText("Help Document");
 
-        new Label(helpDocumentGroup, SWT.RIGHT).setText("User's Guide:  ");
+        Label label = new Label(helpDocumentGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("User's Guide:  ");
 
         UGField = new Text(helpDocumentGroup, SWT.SINGLE | SWT.BORDER);
+        UGField.setFont(curFont);
         UGField.setText(ViewProperties.getUsersGuide());
         UGField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button browseButton = new Button(helpDocumentGroup, SWT.PUSH);
+        browseButton.setFont(curFont);
         browseButton.setText("Browse...");
         browseButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         browseButton.addSelectionListener(new SelectionAdapter() {
@@ -412,14 +442,17 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group fileAccessModeGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
         fileAccessModeGroup.setLayout(new GridLayout(2, true));
         fileAccessModeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        fileAccessModeGroup.setFont(curFont);
         fileAccessModeGroup.setText("Default File Access Mode");
 
         checkReadOnly = new Button(fileAccessModeGroup, SWT.RADIO);
+        checkReadOnly.setFont(curFont);
         checkReadOnly.setText("Read Only");
         checkReadOnly.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkReadOnly.setSelection(ViewProperties.isReadOnly());
 
         Button rw = new Button(fileAccessModeGroup, SWT.RADIO);
+        rw.setFont(curFont);
         rw.setText("Read/Write");
         rw.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         rw.setSelection(!ViewProperties.isReadOnly());
@@ -428,26 +461,33 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group fileExtensionGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
         fileExtensionGroup.setLayout(new GridLayout(2, false));
         fileExtensionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        fileExtensionGroup.setFont(curFont);
         fileExtensionGroup.setText("File Extensions");
 
-        new Label(fileExtensionGroup, SWT.RIGHT).setText("Extensions: ");
+        label = new Label(fileExtensionGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Extensions: ");
 
         fileExtField = new Text(fileExtensionGroup, SWT.SINGLE | SWT.BORDER);
         fileExtField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        fileExtField.setFont(curFont);
         fileExtField.setText(ViewProperties.getFileExtension());
 
 
         org.eclipse.swt.widgets.Group defaultLibVersionGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
         defaultLibVersionGroup.setLayout(new GridLayout(2, true));
         defaultLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        defaultLibVersionGroup.setFont(curFont);
         defaultLibVersionGroup.setText("Default Lib Version");
 
         checkLibVersion = new Button(defaultLibVersionGroup, SWT.RADIO);
+        checkLibVersion.setFont(curFont);
         checkLibVersion.setText("Earliest");
         checkLibVersion.setSelection(ViewProperties.isEarlyLib());
         checkLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         Button libv = new Button(defaultLibVersionGroup, SWT.RADIO);
+        libv.setFont(curFont);
         libv.setText("Latest");
         libv.setSelection(!ViewProperties.isEarlyLib());
         libv.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
@@ -456,12 +496,16 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group textFontGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         textFontGroup.setLayout(new GridLayout(4, false));
         textFontGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        textFontGroup.setFont(curFont);
         textFontGroup.setText("Text Font");
 
-        new Label(textFontGroup, SWT.RIGHT).setText("Font Size: ");
+        label = new Label(textFontGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Font Size: ");
 
-        String[] fontSizeChoices = { "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "48" };
+        String[] fontSizeChoices = { "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "48" };
         fontSizeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
+        fontSizeChoice.setFont(curFont);
         fontSizeChoice.setItems(fontSizeChoices);
         fontSizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -472,12 +516,15 @@ public class UserOptionsDialog extends Dialog {
         	fontSizeChoice.select(0);
         }
         
-        new Label(textFontGroup, SWT.RIGHT).setText("Font Type: ");
+        label = new Label(textFontGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Font Type: ");
 
         String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         String fname = ViewProperties.getFontType();
 
         fontTypeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
+        fontTypeChoice.setFont(curFont);
         fontTypeChoice.setItems(fontNames);
         fontTypeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -505,6 +552,7 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group imageGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         imageGroup.setLayout(new GridLayout(5, false));
         imageGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        imageGroup.setFont(curFont);
         imageGroup.setText("Image");
 
         Button helpButton = new Button(imageGroup, SWT.PUSH);
@@ -541,21 +589,26 @@ public class UserOptionsDialog extends Dialog {
         });
 
         checkAutoContrast = new Button(imageGroup, SWT.CHECK);
+        checkAutoContrast.setFont(curFont);
         checkAutoContrast.setText("Autogain Image Contrast");
         checkAutoContrast.setSelection(ViewProperties.isAutoContrast());
         checkAutoContrast.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkShowValues = new Button(imageGroup, SWT.CHECK);
+        checkShowValues.setFont(curFont);
         checkShowValues.setText("Show Values");
         checkShowValues.setSelection(ViewProperties.showImageValues());
         checkShowValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        new Label(imageGroup, SWT.RIGHT).setText("Image Origin: ");
+        label = new Label(imageGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Image Origin: ");
 
         String[] imageOriginChoices = { ViewProperties.ORIGIN_UL, ViewProperties.ORIGIN_LL, ViewProperties.ORIGIN_UR,
                 ViewProperties.ORIGIN_LR };
 
         imageOriginChoice = new Combo(imageGroup, SWT.SINGLE | SWT.READ_ONLY);
+        imageOriginChoice.setFont(curFont);
         imageOriginChoice.setItems(imageOriginChoices);
         imageOriginChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -570,6 +623,7 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group dataGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         dataGroup.setLayout(new GridLayout(4, false));
         dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        dataGroup.setFont(curFont);
         dataGroup.setText("Data");
 
         helpButton = new Button(dataGroup, SWT.PUSH);
@@ -590,22 +644,29 @@ public class UserOptionsDialog extends Dialog {
         });
 
         checkConvertEnum = new Button(dataGroup, SWT.CHECK);
+        checkConvertEnum.setFont(curFont);
         checkConvertEnum.setText("Convert Enum");
         checkConvertEnum.setSelection(ViewProperties.isConvertEnum());
         checkConvertEnum.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
 
         checkShowRegRefValues = new Button(dataGroup, SWT.CHECK);
+        checkShowRegRefValues.setFont(curFont);
         checkShowRegRefValues.setText("Show RegRef Values");
         checkShowRegRefValues.setSelection(ViewProperties.showRegRefValues());
         checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         // Add dummy label
-        new Label(dataGroup, SWT.RIGHT).setText("");
+        label = new Label(dataGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("");
 
-        new Label(dataGroup, SWT.RIGHT).setText("Index Base: ");
+        label = new Label(dataGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Index Base: ");
 
         String[] indexBaseChoices = { "0-based", "1-based" };
         indexBaseChoice = new Combo(dataGroup, SWT.SINGLE | SWT.READ_ONLY);
+        indexBaseChoice.setFont(curFont);
         indexBaseChoice.setItems(indexBaseChoices);
         indexBaseChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -615,6 +676,7 @@ public class UserOptionsDialog extends Dialog {
             indexBaseChoice.select(0);
 
         Label delimLabel = new Label(dataGroup, SWT.RIGHT);
+        delimLabel.setFont(curFont);
         delimLabel.setText("Data Delimiter: ");
         delimLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 
@@ -622,6 +684,7 @@ public class UserOptionsDialog extends Dialog {
                 ViewProperties.DELIMITER_SPACE, ViewProperties.DELIMITER_COLON, ViewProperties.DELIMITER_SEMI_COLON };
         
         delimiterChoice = new Combo(dataGroup, SWT.SINGLE | SWT.READ_ONLY);
+        delimiterChoice.setFont(curFont);
         delimiterChoice.setItems(delimiterChoices);
         delimiterChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -636,10 +699,12 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         objectsGroup.setLayout(new GridLayout(5, false));
         objectsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        objectsGroup.setFont(curFont);
         objectsGroup.setText("Objects to Open");
 
         int nMax = ViewProperties.getMaxMembers();
         checkReadAll = new Button(objectsGroup, SWT.CHECK);
+        checkReadAll.setFont(curFont);
         checkReadAll.setText("Open All");
         checkReadAll.setSelection((nMax<=0) || (nMax==Integer.MAX_VALUE));
         checkReadAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -650,15 +715,21 @@ public class UserOptionsDialog extends Dialog {
             }
         });
 
-        new Label(objectsGroup, SWT.RIGHT).setText("Start Member: ");
+        label = new Label(objectsGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Start Member: ");
 
         startMemberField = new Text(objectsGroup, SWT.SINGLE | SWT.BORDER);
+        startMemberField.setFont(curFont);
         startMemberField.setText(String.valueOf(ViewProperties.getStartMembers()));
         startMemberField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        new Label(objectsGroup, SWT.RIGHT).setText("Member Count: ");
+        label = new Label(objectsGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Member Count: ");
 
         maxMemberField = new Text(objectsGroup, SWT.SINGLE | SWT.BORDER);
+        maxMemberField.setFont(curFont);
         maxMemberField.setText(String.valueOf(ViewProperties.getMaxMembers()));
         maxMemberField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -669,19 +740,23 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group displayIndexingGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         displayIndexingGroup.setLayout(new GridLayout(2, true));
         displayIndexingGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        displayIndexingGroup.setFont(curFont);
         displayIndexingGroup.setText("Display Indexing Options");
 
         org.eclipse.swt.widgets.Group indexingTypeGroup = new org.eclipse.swt.widgets.Group(displayIndexingGroup, SWT.NONE);
         indexingTypeGroup.setLayout(new GridLayout(2, true));
         indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        indexingTypeGroup.setFont(curFont);
         indexingTypeGroup.setText("Indexing Type");
 
         checkIndexType = new Button(indexingTypeGroup, SWT.RADIO);
+        checkIndexType.setFont(curFont);
         checkIndexType.setText("By Name");
         checkIndexType.setSelection(indexType.compareTo("H5_INDEX_NAME") == 0);
         checkIndexType.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         Button checkIndexCreateOrder = new Button(indexingTypeGroup, SWT.RADIO);
+        checkIndexCreateOrder.setFont(curFont);
         checkIndexCreateOrder.setText("By Creation Order");
         checkIndexCreateOrder.setSelection(indexType.compareTo("H5_INDEX_CRT_ORDER") == 0);
         checkIndexCreateOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
@@ -690,19 +765,23 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group indexingOrderGroup = new org.eclipse.swt.widgets.Group(displayIndexingGroup, SWT.NONE);
         indexingOrderGroup.setLayout(new GridLayout(3, true));
         indexingOrderGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        indexingOrderGroup.setFont(curFont);
         indexingOrderGroup.setText("Indexing Order");
 
         checkIndexOrder = new Button(indexingOrderGroup, SWT.RADIO);
+        checkIndexOrder.setFont(curFont);
         checkIndexOrder.setText("Increments");
         checkIndexOrder.setSelection(indexOrder.compareTo("H5_ITER_INC") == 0);
         checkIndexOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         Button decOrder = new Button(indexingOrderGroup, SWT.RADIO);
+        decOrder.setFont(curFont);
         decOrder.setText("Decrements");
         decOrder.setSelection(indexOrder.compareTo("H5_ITER_DEC") == 0);
         decOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         Button nativeOrder = new Button(indexingOrderGroup, SWT.RADIO);
+        nativeOrder.setFont(curFont);
         nativeOrder.setText("Native");
         nativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
         nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
@@ -717,54 +796,66 @@ public class UserOptionsDialog extends Dialog {
         org.eclipse.swt.widgets.Group treeViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         treeViewGroup.setLayout(new FillLayout());
         treeViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        treeViewGroup.setFont(curFont);
         treeViewGroup.setText("TreeView");
 
         choiceTreeView = new Combo(treeViewGroup, SWT.SINGLE | SWT.READ_ONLY);
+        choiceTreeView.setFont(curFont);
         choiceTreeView.setItems(treeViews.toArray(new String[0]));
         choiceTreeView.select(0);
 
         org.eclipse.swt.widgets.Group metadataViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         metadataViewGroup.setLayout(new FillLayout());
         metadataViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        metadataViewGroup.setFont(curFont);
         metadataViewGroup.setText("MetaDataView");
 
         choiceMetaDataView = new Combo(metadataViewGroup, SWT.SINGLE | SWT.READ_ONLY);
+        choiceMetaDataView.setFont(curFont);
         choiceMetaDataView.setItems(metaDataViews.toArray(new String[0]));
         choiceMetaDataView.select(0);
 
         org.eclipse.swt.widgets.Group textViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         textViewGroup.setLayout(new FillLayout());
         textViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        textViewGroup.setFont(curFont);
         textViewGroup.setText("TextView");
 
         choiceTextView = new Combo(textViewGroup, SWT.SINGLE | SWT.READ_ONLY);
+        choiceTextView.setFont(curFont);
         choiceTextView.setItems(textViews.toArray(new String[0]));
         choiceTextView.select(0);
 
         org.eclipse.swt.widgets.Group tableViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         tableViewGroup.setLayout(new FillLayout());
         tableViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        tableViewGroup.setFont(curFont);
         tableViewGroup.setText("TableView");
 
         choiceTableView = new Combo(tableViewGroup, SWT.SINGLE | SWT.READ_ONLY);
+        choiceTableView.setFont(curFont);
         choiceTableView.setItems(tableViews.toArray(new String[0]));
         choiceTableView.select(0);
 
         org.eclipse.swt.widgets.Group imageViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         imageViewGroup.setLayout(new FillLayout());
         imageViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        imageViewGroup.setFont(curFont);
         imageViewGroup.setText("ImageView");
 
         choiceImageView = new Combo(imageViewGroup, SWT.SINGLE | SWT.READ_ONLY);
+        choiceImageView.setFont(curFont);
         choiceImageView.setItems(imageViews.toArray(new String[0]));
         choiceImageView.select(0);
 
         org.eclipse.swt.widgets.Group paletteViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         paletteViewGroup.setLayout(new FillLayout());
         paletteViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        paletteViewGroup.setFont(curFont);
         paletteViewGroup.setText("PaletteView");
 
         choicePaletteView = new Combo(paletteViewGroup, SWT.SINGLE | SWT.READ_ONLY);
+        choicePaletteView.setFont(curFont);
         choicePaletteView.setItems(paletteViews.toArray(new String[0]));
         choicePaletteView.select(0);
 

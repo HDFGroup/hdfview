@@ -15,6 +15,8 @@
 package hdf.view;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -40,12 +42,12 @@ import hdf.HDFVersions;
  */
 //TODO: Add ability to have custom HDF icons
 public class InputDialog extends Dialog {
-    private Text inputField;
-    private final String title;
-    private final String message;
-    private final String initialText;
-    private String result;
-    private Font curFont;
+    private Text            inputField;
+    private final String    title;
+    private final String    message;
+    private final String    initialText;
+    private String          result;
+    private Font            curFont;
 
     public InputDialog(Shell parent) {
         super(parent, SWT.NONE);
@@ -83,8 +85,6 @@ public class InputDialog extends Dialog {
     }
     
     public void setFont(Font font) {
-        if (font == null) return;
-        
         curFont = font;
     }
 
@@ -121,7 +121,7 @@ public class InputDialog extends Dialog {
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setFont(curFont);
-        okButton.setText("   &Ok   ");
+        okButton.setText("  &Ok  ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -159,6 +159,12 @@ public class InputDialog extends Dialog {
         });
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 

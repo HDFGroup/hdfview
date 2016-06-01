@@ -26,6 +26,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -33,6 +35,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
@@ -69,7 +72,9 @@ import hdf.object.ScalarDS;
  */
 public class DataOptionDialog extends Dialog {
 
-    private Shell shell;
+    private Shell                  shell;
+    
+    private Font                   curFont;
 
     /** the rank of the dataset/image */
     private int                    rank;
@@ -128,12 +133,12 @@ public class DataOptionDialog extends Dialog {
 
     private List                   fieldList;
 
-    private PreviewNavigator navigator;
+    private PreviewNavigator       navigator;
 
     private int                    numberOfPalettes;
 
     /** the selected dataset/image */
-    private Dataset dataset;
+    private Dataset                dataset;
 
 
     /**
@@ -150,6 +155,17 @@ public class DataOptionDialog extends Dialog {
         if(theDataset == null) return;
 
         dataset = theDataset;
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         isSelectionCancelled = true;
         isTrueColorImage = false;
@@ -189,6 +205,7 @@ public class DataOptionDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("Dataset Selection - " + dataset.getPath() + dataset.getName());
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
@@ -213,7 +230,9 @@ public class DataOptionDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 // set palette for image view
@@ -240,12 +259,11 @@ public class DataOptionDialog extends Dialog {
                 shell.dispose();
             }
         });
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 shell.notifyListeners(SWT.Close, null);
@@ -253,10 +271,6 @@ public class DataOptionDialog extends Dialog {
                 shell.dispose();
             }
         });
-
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
 
         shell.pack();
 
@@ -312,8 +326,22 @@ public class DataOptionDialog extends Dialog {
                 }
             }
         });
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.open();
+        
+        // Prevent SWT from selecting TableView button by
+        // default if dataset is an image
+        if (dataset instanceof ScalarDS) {
+            if (((ScalarDS) dataset).isImageDisplay()) {
+                spreadsheetButton.setSelection(false);
+            }
+        }
 
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
@@ -654,7 +682,7 @@ public class DataOptionDialog extends Dialog {
             bitmask = new BitSet(len);
 
         for (int i = 0; i < len; i++) {
-        	/* Bitmask buttons are indexed from highest to lowest */
+            /* Bitmask buttons are indexed from highest to lowest */
             bitmask.set(i, bitmaskButtons[len - i - 1].getSelection());
         }
 
@@ -730,6 +758,7 @@ public class DataOptionDialog extends Dialog {
     private void createScalarDSContents() {
         // Create display type region
         org.eclipse.swt.widgets.Group displayAsGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        displayAsGroup.setFont(curFont);
         displayAsGroup.setText("Display As");
         displayAsGroup.setLayout(new GridLayout(1, true));
         displayAsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -741,8 +770,8 @@ public class DataOptionDialog extends Dialog {
         spreadsheetComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         spreadsheetButton = new Button(spreadsheetComposite, SWT.RADIO);
+        spreadsheetButton.setFont(curFont);
         spreadsheetButton.setText("&Spreadsheet");
-        spreadsheetButton.setSelection(true);
         spreadsheetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         spreadsheetButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -761,6 +790,7 @@ public class DataOptionDialog extends Dialog {
         });
 
         charCheckbox = new Button(spreadsheetComposite, SWT.CHECK);
+        charCheckbox.setFont(curFont);
         charCheckbox.setText("Show As &Char");
         charCheckbox.setSelection(false);
         charCheckbox.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
@@ -776,9 +806,12 @@ public class DataOptionDialog extends Dialog {
             charCheckbox.setEnabled(false);
         }
 
-        new Label(spreadsheetComposite, SWT.RIGHT).setText("TableView: ");
+        Label label = new Label(spreadsheetComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("TableView: ");
 
         choiceTableView = new Combo(spreadsheetComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+        choiceTableView.setFont(curFont);
         choiceTableView.setItems(HDFView.getListOfTableViews().toArray(new String[0]));
         choiceTableView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         choiceTableView.select(0);
@@ -789,6 +822,7 @@ public class DataOptionDialog extends Dialog {
         imageComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         imageButton = new Button(imageComposite, SWT.RADIO);
+        imageButton.setFont(curFont);
         imageButton.setText("&Image");
         imageButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         imageButton.addSelectionListener(new SelectionAdapter() {
@@ -805,6 +839,7 @@ public class DataOptionDialog extends Dialog {
         });
 
         choicePalette = new Combo(imageComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+        choicePalette.setFont(curFont);
         choicePalette.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         choicePalette.add("Select palette");
@@ -829,9 +864,12 @@ public class DataOptionDialog extends Dialog {
 
         choicePalette.select(0);
 
-        new Label(imageComposite, SWT.RIGHT).setText("Valid Range: ");
+        label = new Label(imageComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Valid Range: ");
 
         dataRangeField = new Text(imageComposite, SWT.SINGLE | SWT.BORDER);
+        dataRangeField.setFont(curFont);
         dataRangeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         String minmaxStr = "min, max";
@@ -846,16 +884,22 @@ public class DataOptionDialog extends Dialog {
 
         dataRangeField.setText(minmaxStr);
 
-        new Label(imageComposite, SWT.RIGHT).setText("ImageView: ");
+        label = new Label(imageComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("ImageView: ");
 
         choiceImageView = new Combo(imageComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+        choiceImageView.setFont(curFont);
         choiceImageView.setItems(HDFView.getListOfImageViews().toArray(new String[0]));
         choiceImageView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         choiceImageView.select(0);
 
-        new Label(imageComposite, SWT.RIGHT).setText("Invalid Values: ");
+        label = new Label(imageComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Invalid Values: ");
 
         fillValueField = new Text(imageComposite, SWT.SINGLE | SWT.BORDER);
+        fillValueField.setFont(curFont);
         fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         String fillStr = "val1, val2, ...";
@@ -873,15 +917,18 @@ public class DataOptionDialog extends Dialog {
 
         // Create Index Base region
         org.eclipse.swt.widgets.Group indexBaseGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        indexBaseGroup.setFont(curFont);
         indexBaseGroup.setText("Index Base");
         indexBaseGroup.setLayout(new GridLayout(2, true));
         indexBaseGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         base0Button = new Button(indexBaseGroup, SWT.RADIO);
+        base0Button.setFont(curFont);
         base0Button.setText("0-based");
         base0Button.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         base1Button = new Button(indexBaseGroup, SWT.RADIO);
+        base1Button.setFont(curFont);
         base1Button.setText("1-based");
         base1Button.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
@@ -897,11 +944,13 @@ public class DataOptionDialog extends Dialog {
 
         // Create Bitmask region
         org.eclipse.swt.widgets.Group bitmaskGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        bitmaskGroup.setFont(curFont);
         bitmaskGroup.setText("Bitmask");
         bitmaskGroup.setLayout(new GridLayout(2, false));
         bitmaskGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         extractBitButton = new Button(bitmaskGroup, SWT.CHECK);
+        extractBitButton.setFont(curFont);
         extractBitButton.setText("Show &Value of Selected Bits");
         extractBitButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
         extractBitButton.setSelection(false);
@@ -975,6 +1024,7 @@ public class DataOptionDialog extends Dialog {
         });
 
         applyBitmaskButton = new Button(bitmaskGroup, SWT.CHECK);
+        applyBitmaskButton.setFont(curFont);
         applyBitmaskButton.setText("&Apply Bitmask");
         applyBitmaskButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
         applyBitmaskButton.setSelection(false);
@@ -1009,6 +1059,7 @@ public class DataOptionDialog extends Dialog {
 
         for (int i = 0; i < bitmaskButtons.length; i++) {
             bitmaskButtons[i] = new Button(buttonComposite, SWT.RADIO);
+            bitmaskButtons[i].setFont(curFont);
             bitmaskButtons[i].setText(String.valueOf(bitmaskButtons.length - i - 1));
             bitmaskButtons[i].setEnabled(false);
             bitmaskButtons[i].addSelectionListener(
@@ -1053,6 +1104,7 @@ public class DataOptionDialog extends Dialog {
 
         // Create Dimension/Subset selection region
         org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        dimSubGroup.setFont(curFont);
         dimSubGroup.setText("Dimension and Subset Selection");
         dimSubGroup.setLayout(new GridLayout(2, false));
         dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1079,12 +1131,14 @@ public class DataOptionDialog extends Dialog {
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         org.eclipse.swt.widgets.Group membersGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
+        membersGroup.setFont(curFont);
         membersGroup.setText("Select Members");
         membersGroup.setLayout(new GridLayout(1, true));
         membersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
         String[] names = ((CompoundDS) dataset).getMemberNames();
         fieldList = new List(membersGroup, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+        fieldList.setFont(curFont);
         fieldList.setItems(names);
         fieldList.selectAll();
 
@@ -1094,6 +1148,7 @@ public class DataOptionDialog extends Dialog {
         fieldList.setLayoutData(data);
 
         org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
+        dimSubGroup.setFont(curFont);
         dimSubGroup.setText("Dimension and Subset Selection");
         dimSubGroup.setLayout(new GridLayout());
         dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1104,9 +1159,12 @@ public class DataOptionDialog extends Dialog {
         tableViewComposite.setLayout(new GridLayout(2, false));
         tableViewComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        new Label(tableViewComposite, SWT.RIGHT).setText("TableView: ");
+        Label label = new Label(tableViewComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("TableView: ");
 
         choiceTableView = new Combo(tableViewComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+        choiceTableView.setFont(curFont);
         choiceTableView.setItems(HDFView.getListOfTableViews().toArray(new String[0]));
         choiceTableView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         choiceTableView.select(0);
@@ -1114,6 +1172,7 @@ public class DataOptionDialog extends Dialog {
 
     private void createTextContents() {
         org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        dimSubGroup.setFont(curFont);
         dimSubGroup.setText("Dimension and Subset Selection");
         dimSubGroup.setLayout(new GridLayout(1, true));
         dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1124,9 +1183,12 @@ public class DataOptionDialog extends Dialog {
         textViewComposite.setLayout(new GridLayout(2, false));
         textViewComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        new Label(textViewComposite, SWT.RIGHT).setText("TextView: ");
+        Label label = new Label(textViewComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("TextView: ");
 
         choiceTextView = new Combo(textViewComposite, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+        choiceTextView.setFont(curFont);
         choiceTextView.setItems(HDFView.getListOfTextViews().toArray(new String[0]));
         choiceTextView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         choiceTextView.select(0);
@@ -1143,6 +1205,7 @@ public class DataOptionDialog extends Dialog {
 
         if (rank > 1) {
             transposeChoice = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+            transposeChoice.setFont(curFont);
             transposeChoice.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
 
             transposeChoice.add("Reshape");
@@ -1155,28 +1218,34 @@ public class DataOptionDialog extends Dialog {
         }
 
         Label label = new Label(selectionComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("Start: ");
         label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
 
         label = new Label(selectionComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("End: ");
         label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
 
         label = new Label(selectionComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("Stride: ");
         label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
 
         label = new Label(selectionComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("Max Size");
         label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
 
 
         // Create Height selection row
         label = new Label(selectionComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("Height: ");
         label.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, true));
 
         choices[0] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+        choices[0].setFont(curFont);
         choices[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         choices[0].addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -1198,28 +1267,34 @@ public class DataOptionDialog extends Dialog {
         choices[0].select(0);
 
         startFields[0] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        startFields[0].setFont(curFont);
         startFields[0].setText("0");
         startFields[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         endFields[0] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        endFields[0].setFont(curFont);
         endFields[0].setText("0");
         endFields[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         strideFields[0] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        strideFields[0].setFont(curFont);
         strideFields[0].setText("1");
         strideFields[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         maxLabels[0] = new Label(selectionComposite, SWT.NONE);
+        maxLabels[0].setFont(curFont);
         maxLabels[0].setText("1");
         maxLabels[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 
         // Create Width selection row
         label = new Label(selectionComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("Width: ");
         label.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, true));
 
         choices[1] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+        choices[1].setFont(curFont);
         choices[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         choices[1].addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -1241,28 +1316,34 @@ public class DataOptionDialog extends Dialog {
         choices[1].select(0);
 
         startFields[1] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        startFields[1].setFont(curFont);
         startFields[1].setText("0");
         startFields[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         endFields[1] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        endFields[1].setFont(curFont);
         endFields[1].setText("0");
         endFields[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         strideFields[1] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        strideFields[1].setFont(curFont);
         strideFields[1].setText("1");
         strideFields[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         maxLabels[1] = new Label(selectionComposite, SWT.NONE);
+        maxLabels[1].setFont(curFont);
         maxLabels[1].setText("1");
         maxLabels[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 
         // Create Depth selection row
         label = new Label(selectionComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("Depth: ");
         label.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, true));
 
         choices[2] = new Combo(selectionComposite, SWT.SINGLE | SWT.READ_ONLY);
+        choices[2].setFont(curFont);
         choices[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         choices[2].addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -1284,18 +1365,22 @@ public class DataOptionDialog extends Dialog {
         choices[2].select(0);
 
         startFields[2] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        startFields[2].setFont(curFont);
         startFields[2].setText("0");
         startFields[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         endFields[2] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        endFields[2].setFont(curFont);
         endFields[2].setText("0");
         endFields[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         strideFields[2] = new Text(selectionComposite, SWT.SINGLE | SWT.BORDER);
+        strideFields[2].setFont(curFont);
         strideFields[2].setText("1");
         strideFields[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         maxLabels[2] = new Label(selectionComposite, SWT.NONE);
+        maxLabels[2].setFont(curFont);
         maxLabels[2].setText("1");
         maxLabels[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -1304,6 +1389,7 @@ public class DataOptionDialog extends Dialog {
         new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button dimsButton = new Button(selectionComposite, SWT.PUSH);
+        dimsButton.setFont(curFont);
         dimsButton.setText("Dims...");
         dimsButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         dimsButton.setEnabled((rank > 3));
@@ -1385,6 +1471,7 @@ public class DataOptionDialog extends Dialog {
         new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button resetButton = new Button(selectionComposite, SWT.PUSH);
+        resetButton.setFont(curFont);
         resetButton.setText("Reset");
         resetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         resetButton.addSelectionListener(new SelectionAdapter() {

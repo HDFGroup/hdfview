@@ -23,8 +23,11 @@ import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -59,6 +62,8 @@ public class NewDatasetDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 
     private Shell             shell;
+    
+    private Font              curFont;
 
     private String            maxSize;
 
@@ -99,6 +104,17 @@ public class NewDatasetDialog extends Dialog {
      */
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         parentGroup = pGroup;
         newObject = null;
@@ -125,6 +141,17 @@ public class NewDatasetDialog extends Dialog {
      */
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         parentGroup = pGroup;
         newObject = null;
@@ -139,6 +166,7 @@ public class NewDatasetDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("New Dataset...");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
@@ -150,15 +178,19 @@ public class NewDatasetDialog extends Dialog {
         fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Label datasetNameLabel = new Label(fieldComposite, SWT.LEFT);
+        datasetNameLabel.setFont(curFont);
         datasetNameLabel.setText("Dataset name: ");
 
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
+        parentGroupLabel.setFont(curFont);
         parentGroupLabel.setText("Parent group: ");
 
         parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+        parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -192,23 +224,29 @@ public class NewDatasetDialog extends Dialog {
 
         // Create Datatype region
         org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        datatypeGroup.setFont(curFont);
         datatypeGroup.setText("Datatype");
         datatypeGroup.setLayout(new GridLayout(4, true));
         datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Label label = new Label(datatypeGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Datatype Class");
 
         label = new Label(datatypeGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Size (bits)");
 
         label = new Label(datatypeGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Byte Ordering");
 
         checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
+        checkUnsigned.setFont(curFont);
         checkUnsigned.setText("Unsigned");
 
         classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        classChoice.setFont(curFont);
         classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         classChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -288,6 +326,7 @@ public class NewDatasetDialog extends Dialog {
         }
 
         sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        sizeChoice.setFont(curFont);
         sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         sizeChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -309,6 +348,7 @@ public class NewDatasetDialog extends Dialog {
         sizeChoice.add("64");
 
         endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        endianChoice.setFont(curFont);
         endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         endianChoice.setEnabled(isH5);
 
@@ -322,6 +362,7 @@ public class NewDatasetDialog extends Dialog {
 
         stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
         stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        stringLengthField.setFont(curFont);
         stringLengthField.setText("String Length");
         stringLengthField.setEnabled(false);
 
@@ -332,21 +373,26 @@ public class NewDatasetDialog extends Dialog {
 
         // Create Dataspace region
         org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        dataspaceGroup.setFont(curFont);
         dataspaceGroup.setText("Dataspace");
         dataspaceGroup.setLayout(new GridLayout(3, true));
         dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("No. of dimensions");
 
         label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Current size");
 
         // Dummy label
         label = new Label(dataspaceGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("");
 
         rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        rankChoice.setFont(curFont);
         rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         rankChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -386,9 +432,11 @@ public class NewDatasetDialog extends Dialog {
 
         currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
         currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        currentSizeField.setFont(curFont);
         currentSizeField.setText("1 x 1");
 
         Button setMaxSizeButton = new Button(dataspaceGroup, SWT.PUSH);
+        setMaxSizeButton.setFont(curFont);
         setMaxSizeButton.setText("Set Max Size");
         setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
@@ -412,14 +460,17 @@ public class NewDatasetDialog extends Dialog {
 
         // Create Storage Properties region
         org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        storagePropertiesGroup.setFont(curFont);
         storagePropertiesGroup.setText("Storage Properties");
         storagePropertiesGroup.setLayout(new GridLayout(5, true));
         storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         label = new Label(storagePropertiesGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Storage layout: ");
 
         checkContiguous = new Button(storagePropertiesGroup, SWT.RADIO);
+        checkContiguous.setFont(curFont);
         checkContiguous.setText("Contiguous");
         checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkContiguous.setSelection(true);
@@ -431,10 +482,12 @@ public class NewDatasetDialog extends Dialog {
 
         // Dummy label
         label = new Label(storagePropertiesGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("");
         label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkChunked = new Button(storagePropertiesGroup, SWT.RADIO);
+        checkChunked.setFont(curFont);
         checkChunked.setText("Chunked (size) ");
         checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkChunked.addSelectionListener(new SelectionAdapter() {
@@ -453,14 +506,17 @@ public class NewDatasetDialog extends Dialog {
         });
 
         chunkSizeField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
+        chunkSizeField.setFont(curFont);
         chunkSizeField.setText("1 x 1");
         chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         chunkSizeField.setEnabled(false);
 
         label = new Label(storagePropertiesGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Compression: ");
 
         checkCompression = new Button(storagePropertiesGroup, SWT.CHECK);
+        checkCompression.setFont(curFont);
         checkCompression.setText("gzip (level) ");
         checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkCompression.addSelectionListener(new SelectionAdapter() {
@@ -502,6 +558,7 @@ public class NewDatasetDialog extends Dialog {
         });
 
         compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        compressionLevel.setFont(curFont);
         compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         for (int i = 0; i < 10; i++) {
@@ -512,6 +569,7 @@ public class NewDatasetDialog extends Dialog {
 
         if(isH5) {
             checkFillValue = new Button(storagePropertiesGroup, SWT.CHECK);
+            checkFillValue.setFont(curFont);
             checkFillValue.setText("Fill Value");
             checkFillValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             checkFillValue.setSelection(false);
@@ -522,16 +580,19 @@ public class NewDatasetDialog extends Dialog {
             });
 
             fillValueField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
+            fillValueField.setFont(curFont);
             fillValueField.setText("0");
             fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             fillValueField.setEnabled(false);
         } else {
             // Add two dummy labels
             label = new Label(storagePropertiesGroup, SWT.LEFT);
+            label.setFont(curFont);
             label.setText("");
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(storagePropertiesGroup, SWT.LEFT);
+            label.setFont(curFont);
             label.setText("");
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         }
@@ -543,10 +604,9 @@ public class NewDatasetDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (dataView instanceof TableView) {
@@ -566,10 +626,9 @@ public class NewDatasetDialog extends Dialog {
         });
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
-        gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
+        cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
@@ -579,10 +638,9 @@ public class NewDatasetDialog extends Dialog {
         });
 
         Button helpButton = new Button(buttonComposite, SWT.PUSH);
-        helpButton.setText("&Help");
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        helpButton.setLayoutData(gridData);
+        helpButton.setFont(curFont);
+        helpButton.setText(" &Help ");
+        helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         helpButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 new HelpDialog(shell).open();
@@ -590,6 +648,12 @@ public class NewDatasetDialog extends Dialog {
         });
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -1220,6 +1284,7 @@ public class NewDatasetDialog extends Dialog {
             Shell parent = getParent();
             helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
                     SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+            shell.setFont(curFont);
             helpShell.setText("Create New Dataset");
             helpShell.setImage(ViewProperties.getHdfIcon());
             helpShell.setLayout(new GridLayout(1, true));
@@ -1228,6 +1293,7 @@ public class NewDatasetDialog extends Dialog {
             Browser browser;
             try {
                 browser = new Browser(helpShell, SWT.NONE);
+                browser.setFont(curFont);
                 browser.setBounds(0, 0, 500, 500);
                 browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -1276,7 +1342,8 @@ public class NewDatasetDialog extends Dialog {
                 }
 
                 Button okButton = new Button(helpShell, SWT.PUSH);
-                okButton.setText("   Ok   ");
+                okButton.setFont(curFont);
+                okButton.setText("   &Ok   ");
                 okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
                 okButton.addSelectionListener(new SelectionAdapter() {
                     public void widgetSelected(SelectionEvent e) {

@@ -23,10 +23,13 @@ import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -59,6 +62,8 @@ public class NewLinkDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewLinkDialog.class);
 
     private Shell         shell;
+    
+    private Font          curFont;
 
     private Text          nameField;
 
@@ -75,7 +80,7 @@ public class NewLinkDialog extends Dialog {
     private Button        hardLink, softLink, externalLink;
 
     /** a list of current groups */
-    private List<Group> groupList;
+    private List<Group>   groupList;
 
     /** a list of current objects */
     private List<?>       objList;
@@ -101,6 +106,17 @@ public class NewLinkDialog extends Dialog {
      */
     public NewLinkDialog(Shell parent, Group pGroup, List<?> objs, List<FileFormat> files) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         newObject = null;
         parentGroup = pGroup;
@@ -114,6 +130,7 @@ public class NewLinkDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("New Link...");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
@@ -124,17 +141,21 @@ public class NewLinkDialog extends Dialog {
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Label label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Link name: ");
 
         nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        nameField.setFont(curFont);
         GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
         fieldData.minimumWidth = 300;
         nameField.setLayoutData(fieldData);
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Parent group: ");
 
         parentChoice = new Combo(content, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+        parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -147,6 +168,7 @@ public class NewLinkDialog extends Dialog {
         helpComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
         label = new Label(helpComposite, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Type of Link: ");
 
         Button helpButton = new Button(helpComposite, SWT.PUSH);
@@ -186,6 +208,7 @@ public class NewLinkDialog extends Dialog {
         typeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         hardLink = new Button(typeComposite, SWT.RADIO);
+        hardLink.setFont(curFont);
         hardLink.setText("Hard Link");
         hardLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         hardLink.addSelectionListener(new SelectionAdapter() {
@@ -204,6 +227,7 @@ public class NewLinkDialog extends Dialog {
         });
 
         softLink = new Button(typeComposite, SWT.RADIO);
+        softLink.setFont(curFont);
         softLink.setText("Soft Link");
         softLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         softLink.addSelectionListener(new SelectionAdapter() {
@@ -222,6 +246,7 @@ public class NewLinkDialog extends Dialog {
         });
 
         externalLink = new Button(typeComposite, SWT.RADIO);
+        externalLink.setFont(curFont);
         externalLink.setText("External Link");
         externalLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         externalLink.addSelectionListener(new SelectionAdapter() {
@@ -236,6 +261,7 @@ public class NewLinkDialog extends Dialog {
         });
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Target File: ");
 
         Composite fileComposite = new Composite(content, SWT.NONE);
@@ -247,10 +273,12 @@ public class NewLinkDialog extends Dialog {
         fileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         targetFile = new Text(fileComposite, SWT.SINGLE | SWT.BORDER);
+        targetFile.setFont(curFont);
         targetFile.setEnabled(false);
         targetFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         targetFileButton = new Button(fileComposite, SWT.PUSH);
+        targetFileButton.setFont(curFont);
         targetFileButton.setText("Browse...");
         targetFileButton.setEnabled(false);
         targetFileButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -271,9 +299,11 @@ public class NewLinkDialog extends Dialog {
         });
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Target Object: ");
 
         targetObject = new CCombo(content, SWT.DROP_DOWN | SWT.BORDER);
+        targetObject.setFont(curFont);
         targetObject.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         targetObject.setEditable(false);
         targetObject.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
@@ -324,10 +354,9 @@ public class NewLinkDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = createLink();
@@ -339,10 +368,9 @@ public class NewLinkDialog extends Dialog {
         });
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
@@ -355,6 +383,12 @@ public class NewLinkDialog extends Dialog {
         targetObject.select(0);
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 

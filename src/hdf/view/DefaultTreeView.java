@@ -36,7 +36,8 @@ import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
-
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MenuAdapter;
@@ -50,6 +51,7 @@ import org.eclipse.swt.events.SelectionEvent;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -86,6 +88,8 @@ public class DefaultTreeView implements TreeView {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
 
     private Shell                         shell;
+    
+    private Font                          curFont;
 
     /** The owner of this TreeView */
     private ViewManager                   viewer;
@@ -178,10 +182,22 @@ public class DefaultTreeView implements TreeView {
     public DefaultTreeView(ViewManager theView, Composite parent) {
         viewer = theView;
         shell = parent.getShell();
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         // Initialize the Tree
         tree = new Tree(parent, SWT.MULTI | SWT.VIRTUAL);
         tree.setSize(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        tree.setFont(curFont);
 
         // Create the context menu for the Tree
         popupMenu = createPopupMenu();
@@ -418,12 +434,19 @@ public class DefaultTreeView implements TreeView {
                 HObject obj = ((Group) parentItem.getData()).getMember(position);
 
                 item.setData(obj);
+                item.setFont(curFont);
                 item.setText(obj.getName());
                 item.setImage(getObjectTypeImage(obj));
 
                 if(obj instanceof Group) {
                     item.setItemCount(((Group) obj).getMemberList().size());
                 }
+            }
+        });
+        
+        tree.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
             }
         });
     }
@@ -994,7 +1017,7 @@ public class DefaultTreeView implements TreeView {
                 parentItem = findTreeItem(imageDialog.getParentGroup());
                 break;
             case TABLE:
-                NewTableDataDialog tableDialog = new NewTableDataDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
                 tableDialog.open();
                 obj = (HObject) tableDialog.getObject();
                 parentItem = findTreeItem(tableDialog.getParentGroup());
@@ -1061,11 +1084,13 @@ public class DefaultTreeView implements TreeView {
 
         if(pobj != null) {
             item = new TreeItem(pobj, SWT.NONE, pobj.getItemCount());
+            item.setFont(curFont);
             item.setText(obj.getName());
         }
         else {
             // Parent object was null, insert at end of tree as root object
             item = new TreeItem(tree, SWT.NONE, tree.getItemCount());
+            item.setFont(curFont);
             item.setText(obj.getFileFormat().getName());
         }
 
@@ -2617,6 +2642,12 @@ public class DefaultTreeView implements TreeView {
 
         return dataView;
     }
+    
+    public void updateFont(Font font) {
+        curFont = font;
+        
+        tree.setFont(curFont);
+    }
 
     /**
      * ChangeIndexingDialog displays file index options.
@@ -2675,6 +2706,7 @@ public class DefaultTreeView implements TreeView {
         public void open() {
             Shell parent = getParent();
             final Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+            shell.setFont(curFont);
             shell.setText("Indexing options");
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
@@ -2685,36 +2717,43 @@ public class DefaultTreeView implements TreeView {
             content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             org.eclipse.swt.widgets.Group indexingTypeGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
+            indexingTypeGroup.setFont(curFont);
             indexingTypeGroup.setText("Indexing Type");
             indexingTypeGroup.setLayout(new GridLayout(2, true));
             indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             checkIndexByName = new Button(indexingTypeGroup, SWT.RADIO);
+            checkIndexByName.setFont(curFont);
             checkIndexByName.setText("By Name");
             checkIndexByName.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
             checkIndexByName.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
             Button byOrder = new Button(indexingTypeGroup, SWT.RADIO);
+            byOrder.setFont(curFont);
             byOrder.setText("By Creation Order");
             byOrder.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
             byOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
             org.eclipse.swt.widgets.Group indexingOrderGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
+            indexingOrderGroup.setFont(curFont);
             indexingOrderGroup.setText("Indexing Order");
             indexingOrderGroup.setLayout(new GridLayout(3, true));
             indexingOrderGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
             checkIndexIncrements = new Button(indexingOrderGroup, SWT.RADIO);
+            checkIndexIncrements.setFont(curFont);
             checkIndexIncrements.setText("Increments");
             checkIndexIncrements.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
             checkIndexIncrements.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
             Button decrements = new Button(indexingOrderGroup, SWT.RADIO);
+            decrements.setFont(curFont);
             decrements.setText("Decrements");
             decrements.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_DEC"));
             decrements.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
             checkIndexNative = new Button(indexingOrderGroup, SWT.RADIO);
+            checkIndexNative.setFont(curFont);
             checkIndexNative.setText("Native");
             checkIndexNative.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
             checkIndexNative.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
@@ -2726,29 +2765,26 @@ public class DefaultTreeView implements TreeView {
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
+            okButton.setFont(curFont);
             okButton.setText("   &Reload File   ");
+            okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     setIndexOptions();
                     shell.dispose();
                 }
             });
-            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            okButton.setLayoutData(gridData);
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
-            cancelButton.setText("&Cancel");
+            cancelButton.setFont(curFont);
+            cancelButton.setText("     &Cancel     ");
+            cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     reloadFile = false;
                     shell.dispose();
                 }
             });
-
-            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            cancelButton.setLayoutData(gridData);
 
             shell.pack();
 
@@ -2781,6 +2817,7 @@ public class DefaultTreeView implements TreeView {
         public void open() {
             Shell parent = getParent();
             final Shell shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            shell.setFont(curFont);
             shell.setText("Set the library version bounds: ");
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
@@ -2791,21 +2828,22 @@ public class DefaultTreeView implements TreeView {
             // Dummy label
             new Label(shell, SWT.LEFT);
 
-            new Label(shell, SWT.LEFT).setText("Earliest Version: ");
+            Label label = new Label(shell, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Earliest Version: ");
 
-            earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER);
+            earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+            earliestCombo.setFont(curFont);
             earliestCombo.setItems(lowValues);
             earliestCombo.select(0);
             earliestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-            earliestCombo.addKeyListener(new KeyAdapter() {
-                public void keyPressed(KeyEvent e) {
-                    e.doit = false;
-                }
-            });
 
-            new Label(shell, SWT.LEFT).setText("Latest Version: ");
+            label = new Label(shell, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Latest Version: ");
 
-            Combo latestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER);
+            Combo latestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+            latestCombo.setFont(curFont);
             latestCombo.setItems(highValues);
             latestCombo.select(0);
             latestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -2820,7 +2858,9 @@ public class DefaultTreeView implements TreeView {
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
-            okButton.setText("   &Ok   ");
+            okButton.setFont(curFont);
+            okButton.setText("  &Ok  ");
+            okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     int low = -1, high = 1;
@@ -2844,21 +2884,16 @@ public class DefaultTreeView implements TreeView {
                     shell.dispose();
                 }
             });
-            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            okButton.setLayoutData(gridData);
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+            cancelButton.setFont(curFont);
             cancelButton.setText("&Cancel");
+            cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
             });
-
-            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            cancelButton.setLayoutData(gridData);
 
             shell.pack();
 

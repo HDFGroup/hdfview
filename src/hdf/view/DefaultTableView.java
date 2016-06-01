@@ -588,7 +588,7 @@ public class DefaultTableView implements TableView {
         int rank = theDataset.getRank();
         if (rank <= 0) {
             try {
-            	theDataset.init();
+                theDataset.init();
                 log.trace("createTable: dataset inited");
             }
             catch (Exception ex) {
@@ -777,19 +777,19 @@ public class DefaultTableView implements TableView {
         
         // Update cell value label and cell value field when a cell is selected
         natTable.addLayerListener(new ILayerListener() {
-        	public void handleLayerEvent(ILayerEvent e) {
-        		if (e instanceof CellSelectionEvent) {
-        			CellSelectionEvent event = (CellSelectionEvent) e;
-        			Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-        			String strVal = null;
-        			
-        			log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-        			
-        			cellLabel.setText(String.valueOf(rowStart + indexBase
-        					+ table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-        					+ ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
-        			
-        			if (isRegRef) {
+            public void handleLayerEvent(ILayerEvent e) {
+                if (e instanceof CellSelectionEvent) {
+                    CellSelectionEvent event = (CellSelectionEvent) e;
+                    Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                    String strVal = null;
+                    
+                    log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                    
+                    cellLabel.setText(String.valueOf(rowStart + indexBase
+                            + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
+                            + ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
+                    
+                    if (isRegRef) {
                         boolean displayValues = ViewProperties.showRegRefValues();
                         log.trace("NATTable CellSelected displayValues={}", displayValues);
                         if (displayValues && val != null && ((String) val).compareTo("NULL") != 0) {
@@ -893,7 +893,7 @@ public class DefaultTableView implements TableView {
                                                 dbuf = dset.getData();
                                             }
                                             catch (Exception ex) {
-                                            	Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
+                                                Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
                                             }
 
                                             // Convert dbuf to a displayable
@@ -1066,8 +1066,8 @@ public class DefaultTableView implements TableView {
                     log.trace("NATTable CellSelected finish");
                     
                     cellValueField.setText(strVal);
-        		}
-        	}
+                }
+            }
         });
         
         dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
@@ -1102,7 +1102,7 @@ public class DefaultTableView implements TableView {
 
         // use lazy convert for large number of strings
         if (theDataset.getHeight() > 10000) {
-        	theDataset.setConvertByteToString(false);
+            theDataset.setConvertByteToString(false);
         }
 
         dataValue = null;
@@ -1170,7 +1170,7 @@ public class DefaultTableView implements TableView {
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
-        	new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
+            new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
         final SelectionLayer selectionLayer = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
@@ -1295,23 +1295,23 @@ public class DefaultTableView implements TableView {
         
         // Update cell value label and cell value field when a cell is selected
         natTable.addLayerListener(new ILayerListener() {
-        	public void handleLayerEvent(ILayerEvent e) {
-        		if (e instanceof CellSelectionEvent) {
-        			CellSelectionEvent event = (CellSelectionEvent) e;
-        			Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-        			
-        			log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-        			
-        			cellLabel.setText(String.valueOf(rowStart + indexBase
-        					+ table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-        					+ ", " //+ table.getColumnName(column)
-        					+ "  =  ");
-        			
-        			cellValueField.setText(val.toString());
-        			
-        			log.trace("NATTable CellSelected finish");
-        		}
-        	}
+            public void handleLayerEvent(ILayerEvent e) {
+                if (e instanceof CellSelectionEvent) {
+                    CellSelectionEvent event = (CellSelectionEvent) e;
+                    Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                    
+                    log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                    
+                    cellLabel.setText(String.valueOf(rowStart + indexBase
+                            + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
+                            + ", " //+ table.getColumnName(column)
+                            + "  =  ");
+                    
+                    cellValueField.setText(val.toString());
+                    
+                    log.trace("NATTable CellSelected finish");
+                }
+            }
         });
         
         dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());

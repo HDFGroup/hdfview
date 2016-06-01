@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -51,6 +54,8 @@ import hdf.object.HObject;
 public class NewDatatypeDialog extends Dialog {
 
     private Shell             shell;
+    
+    private Font              curFont;
 
     private Text              nameField, stringLengthField;
 
@@ -61,7 +66,7 @@ public class NewDatatypeDialog extends Dialog {
     private boolean           isH5;
 
     /** a list of current groups */
-    private List<Group>      groupList;
+    private List<Group>       groupList;
 
     private List<?>           objList;
 
@@ -83,6 +88,17 @@ public class NewDatatypeDialog extends Dialog {
      */
     public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         newObject = null;
         parentGroup = pGroup;
@@ -95,6 +111,7 @@ public class NewDatatypeDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("New Datatype...");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, false));
@@ -106,15 +123,19 @@ public class NewDatatypeDialog extends Dialog {
         fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Label label = new Label(fieldComposite, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Datatype name: ");
 
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         label = new Label(fieldComposite, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Parent Group: ");
 
         parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+        parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -149,24 +170,30 @@ public class NewDatatypeDialog extends Dialog {
 
         // Create Datatype settings region
         org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        datatypeGroup.setFont(curFont);
         datatypeGroup.setText("Datatype");
         datatypeGroup.setLayout(new GridLayout(4, true));
         datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         label = new Label(datatypeGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Datatype class");
 
         label = new Label(datatypeGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Size (bits) ");
 
         label = new Label(datatypeGroup, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Byte ordering");
 
         checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
+        checkUnsigned.setFont(curFont);
         checkUnsigned.setText("Unsigned");
         checkUnsigned.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        classChoice.setFont(curFont);
         classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         classChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -239,6 +266,7 @@ public class NewDatatypeDialog extends Dialog {
         }
 
         sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        sizeChoice.setFont(curFont);
         sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         sizeChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -261,6 +289,7 @@ public class NewDatatypeDialog extends Dialog {
         sizeChoice.add("64");
 
         endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+        endianChoice.setFont(curFont);
         endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         endianChoice.setEnabled(isH5);
 
@@ -274,6 +303,7 @@ public class NewDatatypeDialog extends Dialog {
         }
 
         stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
+        stringLengthField.setFont(curFont);
         stringLengthField.setText("String length");
         stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         stringLengthField.setEnabled(false);
@@ -285,10 +315,9 @@ public class NewDatatypeDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = createDatatype();
@@ -300,10 +329,9 @@ public class NewDatatypeDialog extends Dialog {
         });
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
@@ -316,6 +344,12 @@ public class NewDatatypeDialog extends Dialog {
         endianChoice.select(0);
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
