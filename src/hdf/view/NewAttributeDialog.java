@@ -23,8 +23,11 @@ import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -56,6 +59,8 @@ public class NewAttributeDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 
     private Shell             shell;
+    
+    private Font              curFont;
 
     /** the default length of a string attribute */
     public static final int   DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
@@ -105,6 +110,17 @@ public class NewAttributeDialog extends Dialog {
      */
     public NewAttributeDialog(Shell parent, HObject obj, List<HObject> objs) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         hObject = obj;
         newAttribute = null;
@@ -116,6 +132,7 @@ public class NewAttributeDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("New Attribute...");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
@@ -127,12 +144,15 @@ public class NewAttributeDialog extends Dialog {
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Label label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Name: ");
 
         nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Type: ");
 
         Composite optionsComposite = new Composite(content, SWT.NONE);
@@ -143,24 +163,30 @@ public class NewAttributeDialog extends Dialog {
                 );
 
         label = new Label(optionsComposite, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Datatype class");
 
         label = new Label(optionsComposite, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Size (bits) ");
 
         // Dummy label
         label = new Label(optionsComposite, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("");
 
         if (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot()) {
             label = new Label(optionsComposite, SWT.LEFT);
+            label.setFont(curFont);
             label.setText("");
 
             label = new Label(optionsComposite, SWT.LEFT);
+            label.setFont(curFont);
             label.setText("");
         }
 
         classChoice = new Combo(optionsComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        classChoice.setFont(curFont);
         classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         classChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -233,6 +259,7 @@ public class NewAttributeDialog extends Dialog {
         }
 
         sizeChoice = new Combo(optionsComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        sizeChoice.setFont(curFont);
         sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         sizeChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -248,38 +275,48 @@ public class NewAttributeDialog extends Dialog {
         sizeChoice.add("64");
 
         checkUnsigned = new Button(optionsComposite, SWT.CHECK);
+        checkUnsigned.setFont(curFont);
         checkUnsigned.setText("Unsigned");
         checkUnsigned.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         if (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot()) {
             Button h4SdAttrRadioButton = new Button(optionsComposite, SWT.RADIO);
+            h4SdAttrRadioButton.setFont(curFont);
             h4SdAttrRadioButton.setText("SD");
             h4SdAttrRadioButton.setSelection(true);
 
             h4GrAttrRadioButton = new Button(optionsComposite, SWT.RADIO);
+            h4GrAttrRadioButton.setFont(curFont);
             h4GrAttrRadioButton.setText("GR");
         }
 
         arrayLengthLabel = new Label(content, SWT.LEFT);
+        arrayLengthLabel.setFont(curFont);
         arrayLengthLabel.setText("Array Size: ");
 
         lengthField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        lengthField.setFont(curFont);
         lengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         lengthField.setTextLimit(30);
         lengthField.setText("1");
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Value: ");
 
         valueField = new Text(content, SWT.SINGLE | SWT.BORDER);
+        valueField.setFont(curFont);
         valueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         valueField.setText("0");
 
         label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
         label.setText("Object List: ");
 
         objChoice = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
+        objChoice.setFont(curFont);
         objChoice.setEnabled(false);
+        objChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         objChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 String objName = objChoice.getItem(objChoice.getSelectionIndex());
@@ -325,10 +362,9 @@ public class NewAttributeDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (createAttribute()) {
@@ -338,10 +374,9 @@ public class NewAttributeDialog extends Dialog {
         });
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
-        gridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
+        cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newAttribute = null;
@@ -350,10 +385,9 @@ public class NewAttributeDialog extends Dialog {
         });
 
         Button helpButton = new Button(buttonComposite, SWT.PUSH);
-        helpButton.setText("&Help");
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        helpButton.setLayoutData(gridData);
+        helpButton.setFont(curFont);
+        helpButton.setText(" &Help ");
+        helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         helpButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 new HelpDialog(shell).open();
@@ -365,6 +399,12 @@ public class NewAttributeDialog extends Dialog {
         objChoice.select(0);
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -880,6 +920,7 @@ public class NewAttributeDialog extends Dialog {
             Shell parent = getParent();
             helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
                     SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+            helpShell.setFont(curFont);
             helpShell.setText("Create New Attribute");
             helpShell.setImage(ViewProperties.getHdfIcon());
             helpShell.setLayout(new GridLayout(1, true));
@@ -888,6 +929,7 @@ public class NewAttributeDialog extends Dialog {
             Browser browser;
             try {
                 browser = new Browser(helpShell, SWT.NONE);
+                browser.setFont(curFont);
                 browser.setBounds(0, 0, 500, 500);
                 browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -936,7 +978,8 @@ public class NewAttributeDialog extends Dialog {
                 }
 
                 Button okButton = new Button(helpShell, SWT.PUSH);
-                okButton.setText("   Ok   ");
+                okButton.setFont(curFont);
+                okButton.setText("  &Ok  ");
                 okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
                 okButton.addSelectionListener(new SelectionAdapter() {
                     public void widgetSelected(SelectionEvent e) {

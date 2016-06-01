@@ -19,10 +19,13 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -50,44 +53,46 @@ import hdf.object.HObject;
  */
 public class NewGroupDialog extends Dialog {
 
-    private Shell shell;
+    private Shell       shell;
+    
+    private Font        curFont;
 
     /* Used to restore original size after click "less" button */
-    private Point originalSize;
+    private Point       originalSize;
 
-    private Text nameField;
-    private Text compactField;
-    private Text indexedField;
+    private Text        nameField;
+    private Text        compactField;
+    private Text        indexedField;
 
-    private Combo parentChoice;
-    private Combo orderFlags;
+    private Combo       parentChoice;
+    private Combo       orderFlags;
 
-    private Button useCreationOrder;
-    private Button setLinkStorage;
-    private Button creationOrderHelpButton;
-    private Button storageTypeHelpButton;
-    private Button okButton;
-    private Button cancelButton;
-    private Button moreButton;
+    private Button      useCreationOrder;
+    private Button      setLinkStorage;
+    private Button      creationOrderHelpButton;
+    private Button      storageTypeHelpButton;
+    private Button      okButton;
+    private Button      cancelButton;
+    private Button      moreButton;
 
-    private Composite moreOptionsComposite;
-    private Composite creationOrderComposite;
-    private Composite storageTypeComposite;
-    private Composite dummyComposite;
-    private Composite buttonComposite;
+    private Composite   moreOptionsComposite;
+    private Composite   creationOrderComposite;
+    private Composite   storageTypeComposite;
+    private Composite   dummyComposite;
+    private Composite   buttonComposite;
 
     private List<Group> groupList;
-    private List<?> objList;
+    private List<?>     objList;
 
-    private HObject newObject;
-    private Group parentGroup;
+    private HObject     newObject;
+    private Group       parentGroup;
 
-    private FileFormat fileFormat;
+    private FileFormat  fileFormat;
 
-    private int creationOrder;
+    private int         creationOrder;
 
-    private boolean isH5;
-    private boolean moreOptionsEnabled;
+    private boolean     isH5;
+    private boolean     moreOptionsEnabled;
 
     /**
      * Constructs a NewGroupDialog with specified list of possible parent groups.
@@ -101,6 +106,17 @@ public class NewGroupDialog extends Dialog {
      */
     public NewGroupDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         newObject = null;
         parentGroup = pGroup;
@@ -115,6 +131,7 @@ public class NewGroupDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("New Group...");
         shell.setImage(ViewProperties.getHdfIcon());
         GridLayout layout = new GridLayout(1, false);
@@ -126,18 +143,22 @@ public class NewGroupDialog extends Dialog {
         fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Label groupNameLabel = new Label(fieldComposite, SWT.LEFT);
+        groupNameLabel.setFont(curFont);
         groupNameLabel.setText("Group name:");
 
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
+        nameField.setFont(curFont);
         GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
         fieldData.minimumWidth = 250;
         nameField.setLayoutData(fieldData);
 
         Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
+        parentGroupLabel.setFont(curFont);
         parentGroupLabel.setText("Parent group:");
         parentGroupLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
         parentChoice = new Combo(fieldComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+        parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -177,7 +198,9 @@ public class NewGroupDialog extends Dialog {
             moreOptionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
             moreButton = new Button(moreOptionsComposite, SWT.PUSH);
+            moreButton.setFont(curFont);
             moreButton.setText("   More   ");
+            moreButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
             moreButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     moreOptionsEnabled = !moreOptionsEnabled;
@@ -190,7 +213,6 @@ public class NewGroupDialog extends Dialog {
                     }
                 }
             });
-            moreButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 
             dummyComposite = new Composite(moreOptionsComposite, SWT.NONE);
             dummyComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -205,7 +227,9 @@ public class NewGroupDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = create();
@@ -214,12 +238,11 @@ public class NewGroupDialog extends Dialog {
                 }
             }
         });
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
 
         cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
@@ -227,11 +250,13 @@ public class NewGroupDialog extends Dialog {
             }
         });
 
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
-
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -374,11 +399,9 @@ public class NewGroupDialog extends Dialog {
                 info.open();
             }
         });
-        GridData data = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-        data.widthHint = 50;
-        creationOrderHelpButton.setLayoutData(data);
 
         useCreationOrder = new Button(creationOrderComposite, SWT.CHECK);
+        useCreationOrder.setFont(curFont);
         useCreationOrder.setText("Use Creation Order");
         useCreationOrder.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -392,10 +415,12 @@ public class NewGroupDialog extends Dialog {
         });
 
         Label label = new Label(creationOrderComposite, SWT.RIGHT);
+        label.setFont(curFont);
         label.setText("Order Flags: ");
         label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         orderFlags = new Combo(creationOrderComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        orderFlags.setFont(curFont);
         orderFlags.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         orderFlags.add("Tracked");
         orderFlags.add("Tracked+Indexed");
@@ -410,6 +435,7 @@ public class NewGroupDialog extends Dialog {
         storageTypeHelpButton = new Button(storageTypeComposite, SWT.PUSH);
         storageTypeHelpButton.setImage(ViewProperties.getHelpIcon());
         storageTypeHelpButton.setToolTipText("Help on set Link Storage");
+        storageTypeHelpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
         storageTypeHelpButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Set Link Storage allows the users to explicitly set the storage  \n"
@@ -437,11 +463,9 @@ public class NewGroupDialog extends Dialog {
                 info.open();
             }
         });
-        data = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-        data.widthHint = 50;
-        storageTypeHelpButton.setLayoutData(data);
 
         setLinkStorage = new Button(storageTypeComposite, SWT.CHECK);
+        setLinkStorage.setFont(curFont);
         setLinkStorage.setText("Set Link Storage");
         setLinkStorage.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -463,13 +487,16 @@ public class NewGroupDialog extends Dialog {
         indexedComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
         Label minLabel = new Label(indexedComposite, SWT.LEFT);
+        minLabel.setFont(curFont);
         minLabel.setText("Min Indexed: ");
 
         Label maxLabel = new Label(indexedComposite, SWT.LEFT);
+        maxLabel.setFont(curFont);
         maxLabel.setText("Max Compact: ");
 
         indexedField = new Text(indexedComposite, SWT.SINGLE | SWT.BORDER);
         indexedField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        indexedField.setFont(curFont);
         indexedField.setText("6");
         indexedField.setTextLimit(5);
         indexedField.setEnabled(false);
@@ -490,6 +517,7 @@ public class NewGroupDialog extends Dialog {
 
         compactField = new Text(indexedComposite, SWT.SINGLE | SWT.BORDER);
         compactField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        compactField.setFont(curFont);
         compactField.setText("8");
         compactField.setTextLimit(5);
         compactField.setEnabled(false);

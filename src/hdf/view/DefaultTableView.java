@@ -588,7 +588,7 @@ public class DefaultTableView implements TableView {
         int rank = theDataset.getRank();
         if (rank <= 0) {
             try {
-            	theDataset.init();
+                theDataset.init();
                 log.trace("createTable: dataset inited");
             }
             catch (Exception ex) {
@@ -777,19 +777,19 @@ public class DefaultTableView implements TableView {
         
         // Update cell value label and cell value field when a cell is selected
         natTable.addLayerListener(new ILayerListener() {
-        	public void handleLayerEvent(ILayerEvent e) {
-        		if (e instanceof CellSelectionEvent) {
-        			CellSelectionEvent event = (CellSelectionEvent) e;
-        			Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-        			String strVal = null;
-        			
-        			log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-        			
-        			cellLabel.setText(String.valueOf(rowStart + indexBase
-        					+ table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-        					+ ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
-        			
-        			if (isRegRef) {
+            public void handleLayerEvent(ILayerEvent e) {
+                if (e instanceof CellSelectionEvent) {
+                    CellSelectionEvent event = (CellSelectionEvent) e;
+                    Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                    String strVal = null;
+                    
+                    log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                    
+                    cellLabel.setText(String.valueOf(rowStart + indexBase
+                            + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
+                            + ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
+                    
+                    if (isRegRef) {
                         boolean displayValues = ViewProperties.showRegRefValues();
                         log.trace("NATTable CellSelected displayValues={}", displayValues);
                         if (displayValues && val != null && ((String) val).compareTo("NULL") != 0) {
@@ -893,7 +893,7 @@ public class DefaultTableView implements TableView {
                                                 dbuf = dset.getData();
                                             }
                                             catch (Exception ex) {
-                                            	Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
+                                                Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
                                             }
 
                                             // Convert dbuf to a displayable
@@ -1066,8 +1066,8 @@ public class DefaultTableView implements TableView {
                     log.trace("NATTable CellSelected finish");
                     
                     cellValueField.setText(strVal);
-        		}
-        	}
+                }
+            }
         });
         
         dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
@@ -1102,7 +1102,7 @@ public class DefaultTableView implements TableView {
 
         // use lazy convert for large number of strings
         if (theDataset.getHeight() > 10000) {
-        	theDataset.setConvertByteToString(false);
+            theDataset.setConvertByteToString(false);
         }
 
         dataValue = null;
@@ -1151,13 +1151,13 @@ public class DefaultTableView implements TableView {
                     else {
                         subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
                     }
-                    
+
                     // This column's name is whatever follows the last nesting character '->'
                     int nestingPosition = columnNames[j].lastIndexOf("->");
                     if (nestingPosition != -1) {
-                    	columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
+                        columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
                     } else {
-                    	columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
+                        columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
                     }
                 }
             }
@@ -1170,50 +1170,50 @@ public class DefaultTableView implements TableView {
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
-        	new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
+            new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
         final SelectionLayer selectionLayer = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
-        
+
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
         IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnLabels);
         ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
                 columnHeaderDataProvider), viewportLayer, selectionLayer);
-        
+
         ColumnGroupHeaderLayer columnGroupHeaderLayer = null;
         ColumnGroupGroupHeaderLayer columnGroupGroupHeaderLayer = null;
-        
+
         // Set up column grouping
         if (numGroups > 1) {
-        	columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
-        	columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
-        	
-        	// Set up first-level column grouping
-        	for (int i = 0; i < numGroups; i++) {
-        		for (int j = 0; j < cols; j++) {
-        			columnGroupGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
-        		}
-        	}
-            
-        	// Set up any further-nested column groups
-        	for (int i = 0; i < allColumnNames.length; i++) {
-        		int nestingPosition = allColumnNames[i].lastIndexOf("->");
+            columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
+            columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
 
-        		if (nestingPosition != -1) {
-        			String columnGroupName = secondLevelGroupModel.getColumnGroupByIndex(i).getName();
-        			int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
-        			
-        			if(groupTitleStartPosition != -1) {	
-        				columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
-        						allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
-        						"{" + columnGroupName + "}", i);
-        			} else {
-        				columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
-        						allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
-        			}
-        		}
-        	}
+            // Set up first-level column grouping
+            for (int i = 0; i < numGroups; i++) {
+                for (int j = 0; j < cols; j++) {
+                    columnGroupGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
+                }
+            }
+
+            // Set up any further-nested column groups
+            for (int i = 0; i < allColumnNames.length; i++) {
+                int nestingPosition = allColumnNames[i].lastIndexOf("->");
+
+                if (nestingPosition != -1) {
+                    String columnGroupName = secondLevelGroupModel.getColumnGroupByIndex(i).getName();
+                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
+
+                    if(groupTitleStartPosition != -1) {
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+                                allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
+                                "{" + columnGroupName + "}", i);
+                    } else {
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+                                allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
+                    }
+                }
+            }
         }
 
         // Create the Row Header layer
@@ -1223,14 +1223,14 @@ public class DefaultTableView implements TableView {
 
         // Create the Corner layer
         ILayer cornerLayer = null;
-        
+
         if (numGroups > 1) {
-        	cornerLayer = new CornerLayer(new DataLayer(
+            cornerLayer = new CornerLayer(new DataLayer(
                     new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
                     rowHeaderLayer,
                     columnGroupGroupHeaderLayer);
         } else {
-        	cornerLayer = new CornerLayer(new DataLayer(
+            cornerLayer = new CornerLayer(new DataLayer(
                     new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
                     rowHeaderLayer,
                     columnHeaderLayer);
@@ -1238,15 +1238,15 @@ public class DefaultTableView implements TableView {
 
         // Create the Grid layer
         GridLayer gridLayer = null;
-        
+
         if (numGroups > 1) {
-        	gridLayer = new GridLayer(viewportLayer, columnGroupGroupHeaderLayer,
+            gridLayer = new GridLayer(viewportLayer, columnGroupGroupHeaderLayer,
                     rowHeaderLayer, cornerLayer, false);
         } else {
-        	gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
+            gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
                     rowHeaderLayer, cornerLayer, false);
         }
-        
+
         gridLayer.addConfiguration(new DefaultEditConfiguration());
 
         // Change cell editing to be on double click rather than single click
@@ -1295,23 +1295,23 @@ public class DefaultTableView implements TableView {
         
         // Update cell value label and cell value field when a cell is selected
         natTable.addLayerListener(new ILayerListener() {
-        	public void handleLayerEvent(ILayerEvent e) {
-        		if (e instanceof CellSelectionEvent) {
-        			CellSelectionEvent event = (CellSelectionEvent) e;
-        			Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-        			
-        			log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-        			
-        			cellLabel.setText(String.valueOf(rowStart + indexBase
-        					+ table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-        					+ ", " //+ table.getColumnName(column)
-        					+ "  =  ");
-        			
-        			cellValueField.setText(val.toString());
-        			
-        			log.trace("NATTable CellSelected finish");
-        		}
-        	}
+            public void handleLayerEvent(ILayerEvent e) {
+                if (e instanceof CellSelectionEvent) {
+                    CellSelectionEvent event = (CellSelectionEvent) e;
+                    Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                    
+                    log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                    
+                    cellLabel.setText(String.valueOf(rowStart + indexBase
+                            + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
+                            + ", " //+ table.getColumnName(column)
+                            + "  =  ");
+                    
+                    cellValueField.setText(val.toString());
+                    
+                    log.trace("NATTable CellSelected finish");
+                }
+            }
         });
         
         dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());

@@ -44,6 +44,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -68,38 +69,40 @@ public class DefaultTextView implements TextView {
     /**
      * The main HDFView.
      */
-    private final ViewManager viewer;
+    private final ViewManager       viewer;
 
-    private final Display display;
+    private final Display           display;
 
-    private final Shell shell;
+    private final Shell             shell;
+    
+    private Font                    curFont;
 
     /**
      * The Scalar Dataset.
      */
-    private ScalarDS dataset;
+    private ScalarDS                dataset;
 
     /**
      * The string text.
      */
-    private String[] text;
+    private String[]                text;
 
     /** The tables to display the text content */
-    private Table fixedTable;
-    private Table table;
+    private Table                   fixedTable;
+    private Table                   table;
 
     // Text areas to hold the text.
-    private Text[] textAreas;
+    private Text[]                  textAreas;
 
-    private boolean isReadOnly = false;
+    private boolean                 isReadOnly = false;
 
-    private boolean isTextChanged = false;
+    private boolean                 isTextChanged = false;
 
-    private TextAreaEditor textEditor = null;
+    private TextAreaEditor          textEditor = null;
 
-    private RowHeader rowHeaders = null;
+    private RowHeader               rowHeaders = null;
 
-    private int indexBase = 0;
+    private int                     indexBase = 0;
 
     public DefaultTextView(Shell parent, ViewManager theView) {
         this(parent, theView, null);
@@ -128,6 +131,19 @@ public class DefaultTextView implements TextView {
         GridLayout layout = new GridLayout(2, false);
         layout.marginWidth = layout.marginHeight = layout.horizontalSpacing = 0;
         shell.setLayout(layout);
+        
+        try {
+            curFont = new Font(
+                    display,
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
+        
+        shell.setFont(curFont);
 
         viewer = theView;
         text = null;
@@ -320,6 +336,12 @@ public class DefaultTextView implements TextView {
         });
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 

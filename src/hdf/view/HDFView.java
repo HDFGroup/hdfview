@@ -44,16 +44,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
@@ -64,7 +60,6 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Link;
-
 import hdf.HDFVersions;
 
 /**
@@ -85,11 +80,11 @@ public class HDFView implements ViewManager {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 
-    private static final Display display = new Display();
-    private static Shell mainWindow;
+    private static final Display       display = new Display();
+    private static Shell               mainWindow;
     
     /* Determines whether HDFView is being executed for GUI testing */
-    private boolean isTesting = false;
+    private boolean                    isTesting = false;
 
     /* The directory where HDFView is installed */
     private String                     rootDir;
@@ -150,9 +145,6 @@ public class HDFView implements ViewManager {
 
     /* String buffer holding the status message */
     private StringBuffer               message;
-
-    /* String buffer holding the metadata information */
-    private StringBuffer               metadata;
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
     private ToolBar                    toolBar;
@@ -421,6 +413,7 @@ public class HDFView implements ViewManager {
         // Create a new display window
         final Shell shell = new Shell(display);
         shell.setImage(ViewProperties.getHdfIcon());
+        shell.setFont(currentFont);
         shell.setText("HDFView " + HDFVIEW_VERSION);
         shell.setLayout(new GridLayout(3, false));
         shell.addDisposeListener(new DisposeListener() {
@@ -807,8 +800,7 @@ public class HDFView implements ViewManager {
         item.setText("User &Options");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                if (userOptionDialog == null)
-                    userOptionDialog = new UserOptionsDialog(shell, rootDir);
+                userOptionDialog = new UserOptionsDialog(shell, rootDir);
 
                 userOptionDialog.open();
 
@@ -817,17 +809,17 @@ public class HDFView implements ViewManager {
 
                 if (userOptionDialog.isFontChanged()) {
                     Font font = null;
+                    
+                    currentFont.dispose();
 
                     try {
-                        currentFont.dispose();
                         font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
                     }
                     catch (Exception ex) {
                         font = null;
                     }
 
-                    if (font != null)
-                        updateFont(font);
+                    updateFont(font);
                 }
             }
         });
@@ -1033,6 +1025,7 @@ public class HDFView implements ViewManager {
     private void createUrlToolbar(final Shell shell) {
         // Recent Files button
         Button recentFilesButton = new Button(shell, SWT.PUSH);
+        recentFilesButton.setFont(currentFont);
         recentFilesButton.setText("Recent Files");
         recentFilesButton.setToolTipText("List of recent files");
         recentFilesButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -1044,6 +1037,7 @@ public class HDFView implements ViewManager {
 
         // Recent files combo box
         url_bar = new Combo(shell, SWT.BORDER | SWT.SINGLE);
+        url_bar.setFont(currentFont);
         url_bar.setItems(ViewProperties.getMRF().toArray(new String[0]));
         url_bar.setVisibleItemCount(ViewProperties.MAX_RECENT_FILES);
         url_bar.deselectAll();
@@ -1084,6 +1078,7 @@ public class HDFView implements ViewManager {
 
         Button clearTextButton = new Button(shell, SWT.PUSH);
         clearTextButton.setToolTipText("Clear current selection");
+        clearTextButton.setFont(currentFont);
         clearTextButton.setText("Clear Text");
         clearTextButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         clearTextButton.addSelectionListener(new SelectionAdapter() {
@@ -1151,8 +1146,8 @@ public class HDFView implements ViewManager {
         status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
         status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
         status.setEditable(false);
+        status.setFont(currentFont);
         message = new StringBuffer();
-        metadata = new StringBuffer();
         showStatus("HDFView root - " + rootDir);
         showStatus("User property file - " + ViewProperties.getPropertyFile());
 
@@ -1247,6 +1242,7 @@ public class HDFView implements ViewManager {
         String fileInfo = "";
         
         org.eclipse.swt.widgets.Group generalInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+        generalInfoGroup.setFont(currentFont);
         generalInfoGroup.setText("General Object Info");
         generalInfoGroup.setLayout(new GridLayout(2, false));
         generalInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -1280,15 +1276,25 @@ public class HDFView implements ViewManager {
             
             fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
             
-            new Label(generalInfoGroup, SWT.LEFT).setText("File Name: ");
+            Label label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("File Name: ");
             
-            new Label(generalInfoGroup, SWT.RIGHT).setText(obj.getName());
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(obj.getName());
             
-            new Label(generalInfoGroup, SWT.LEFT).setText("File Path: ");
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("File Path: ");
             
-            new Label(generalInfoGroup, SWT.RIGHT).setText((new File(obj.getFile())).getParent());
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText((new File(obj.getFile())).getParent());
             
-            new Label(generalInfoGroup, SWT.LEFT).setText("File Type: ");
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("File Type: ");
             
             if (isH5) {
                 typeStr = "HDF5,  " + fileInfo;
@@ -1300,7 +1306,9 @@ public class HDFView implements ViewManager {
                 typeStr = fileInfo;
             }
             
-            new Label(generalInfoGroup, SWT.RIGHT).setText(typeStr);
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(typeStr);
             
             if (isH5) {
                 int[] libver = null;
@@ -1313,7 +1321,9 @@ public class HDFView implements ViewManager {
                 }
                 
                 if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
-                    new Label(generalInfoGroup, SWT.LEFT).setText("Library version: ");
+                    label = new Label(generalInfoGroup, SWT.LEFT);
+                    label.setFont(currentFont);
+                    label.setText("Library version: ");
                 }
                 
                 String libversion = null;
@@ -1324,31 +1334,46 @@ public class HDFView implements ViewManager {
                     libversion = "";
                 }
                 
-                new Label(generalInfoGroup, SWT.RIGHT).setText(libversion);
+                label = new Label(generalInfoGroup, SWT.RIGHT);
+                label.setFont(currentFont);
+                label.setText(libversion);
             }
         }
         else {
             log.trace("showMetaData: is not root");
-            new Label(generalInfoGroup, SWT.LEFT).setText("Name: ");
+            Label label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Name: ");
             
-            new Label(generalInfoGroup, SWT.RIGHT).setText(obj.getName());
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(obj.getName());
             
             if(isH5) {
                 if (obj.getLinkTargetObjName() != null) {
-                    new Label(generalInfoGroup, SWT.LEFT).setText("Link To Target: ");
+                    label = new Label(generalInfoGroup, SWT.LEFT);
+                    label.setFont(currentFont);
+                    label.setText("Link To Target: ");
                     
                     Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
+                    linkTarget.setFont(currentFont);
                     linkTarget.setText(obj.getLinkTargetObjName());
                     
                     //TODO: Only allow editing of linkTarget if link is not hard link
                 }
             }
             
-            new Label(generalInfoGroup, SWT.LEFT).setText("Path: ");
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Path: ");
             
-            new Label(generalInfoGroup, SWT.RIGHT).setText(obj.getPath());
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(obj.getPath());
             
-            new Label(generalInfoGroup, SWT.LEFT).setText("Type: ");
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Type: ");
             
             if(isH5) {
                 if (obj instanceof Group) {
@@ -1391,14 +1416,20 @@ public class HDFView implements ViewManager {
                 }
             }
             
-            new Label(generalInfoGroup, SWT.RIGHT).setText(typeStr);
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(typeStr);
             
             // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
             if (isH4) {
-                new Label(generalInfoGroup, SWT.LEFT).setText("Tag, Ref:        ");
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(currentFont);
+                label.setText("Tag, Ref:        ");
             }
             else {
-                new Label(generalInfoGroup, SWT.LEFT).setText("Object Ref:       ");
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(currentFont);
+                label.setText("Object Ref:       ");
             }
             
             // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
@@ -1412,7 +1443,9 @@ public class HDFView implements ViewManager {
             }
             
             if (!isRoot) {
-                new Label(generalInfoGroup, SWT.RIGHT).setText(oidStr);
+                label = new Label(generalInfoGroup, SWT.RIGHT);
+                label.setFont(currentFont);
+                label.setText(oidStr);
             }
         }
 
@@ -1426,15 +1459,20 @@ public class HDFView implements ViewManager {
             
             if (mlist != null && n > 0) {
                 org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+                groupInfoGroup.setFont(currentFont);
                 groupInfoGroup.setText("Group Members");
                 groupInfoGroup.setLayout(new GridLayout(1, true));
                 groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
                 
                 if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
-                    new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n);
+                    Label label = new Label(groupInfoGroup, SWT.RIGHT);
+                    label.setFont(currentFont);
+                    label.setText("Number of members: " + n);
                 }
                 else {
-                    new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n + " (in memory),"
+                    Label label = new Label(groupInfoGroup, SWT.RIGHT);
+                    label.setFont(currentFont);
+                    label.setText("Number of members: " + n + " (in memory),"
                             + "" + g.getNumberOfMembersInFile() + " (in file)");
                 }
                 
@@ -1464,6 +1502,7 @@ public class HDFView implements ViewManager {
                 memberTable.setLinesVisible(true);
                 memberTable.setHeaderVisible(true);
                 memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+                memberTable.setFont(currentFont);
                 
                 for(int i = 0; i < columnNames.length; i++) {
                     TableColumn column = new TableColumn(memberTable, SWT.NONE);
@@ -1473,6 +1512,7 @@ public class HDFView implements ViewManager {
                 
                 for(int i = 0; i < rowData.length; i++) {
                     TableItem item = new TableItem(memberTable, SWT.NONE);
+                    item.setFont(currentFont);
                     item.setText(0, rowData[i][0]);
                     item.setText(1, rowData[i][1]);
                 }
@@ -1494,6 +1534,7 @@ public class HDFView implements ViewManager {
             }
             
             org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+            datasetInfoGroup.setFont(currentFont);
             datasetInfoGroup.setText("Dataspace and Datatype");
             datasetInfoGroup.setLayout(new GridLayout(1, true));
             datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1504,14 +1545,19 @@ public class HDFView implements ViewManager {
             dimensionComposite.setLayout(new GridLayout(2, false));
             dimensionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             
-            new Label(dimensionComposite, SWT.LEFT).setText("No. of Dimension(s): ");
+            Label label = new Label(dimensionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("No. of Dimension(s): ");
             
             Text text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
+            text.setFont(currentFont);
             text.setText("" + d.getRank());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             
-            new Label(dimensionComposite, SWT.LEFT).setText("Dimension Size(s): ");
+            label = new Label(dimensionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Dimension Size(s): ");
             
             // Set Dimension Size
             String dimStr = null;
@@ -1558,17 +1604,23 @@ public class HDFView implements ViewManager {
 
             text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
+            text.setFont(currentFont);
             text.setText(dimStr);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             
-            new Label(dimensionComposite, SWT.LEFT).setText("Max Dimension Size(s): ");
+            label = new Label(dimensionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Max Dimension Size(s): ");
             
             text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
+            text.setFont(currentFont);
             text.setText(maxDimStr);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             
-            new Label(dimensionComposite, SWT.LEFT).setText("Data Type: ");
+            label = new Label(dimensionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Data Type: ");
             
             String type = null;
             if (d instanceof ScalarDS) {
@@ -1586,6 +1638,7 @@ public class HDFView implements ViewManager {
             
             text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
+            text.setFont(currentFont);
             text.setText(type);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             
@@ -1629,6 +1682,7 @@ public class HDFView implements ViewManager {
                     memberTable.setLinesVisible(true);
                     memberTable.setHeaderVisible(true);
                     memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+                    memberTable.setFont(currentFont);
                     
                     for(int i = 0; i < columnNames.length; i++) {
                         TableColumn column = new TableColumn(memberTable, SWT.NONE);
@@ -1638,6 +1692,7 @@ public class HDFView implements ViewManager {
                     
                     for(int i = 0; i < rowData.length; i++) {
                         TableItem item = new TableItem(memberTable, SWT.NONE);
+                        item.setFont(currentFont);
                         item.setText(0, rowData[i][0]);
                         item.setText(1, rowData[i][1]);
                         item.setText(2, rowData[i][2]);
@@ -1661,7 +1716,9 @@ public class HDFView implements ViewManager {
             compressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             
             // Add compression and data layout information
-            new Label(compressionComposite, SWT.LEFT).setText("Chunking: ");
+            label = new Label(compressionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Chunking: ");
             
             // try { d.getMetadata(); } catch (Exception ex) {}
             String chunkInfo = "";
@@ -1677,21 +1734,37 @@ public class HDFView implements ViewManager {
                 }
             }
             
-            new Label(compressionComposite, SWT.RIGHT).setText(chunkInfo);
+            label = new Label(compressionComposite, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(chunkInfo);
             
-            new Label(compressionComposite, SWT.LEFT).setText("Compression: ");
+            label = new Label(compressionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Compression: ");
             
-            new Label(compressionComposite, SWT.RIGHT).setText(d.getCompression());
+            label = new Label(compressionComposite, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(d.getCompression());
             
-            new Label(compressionComposite, SWT.LEFT).setText("Filters: ");
+            label = new Label(compressionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Filters: ");
             
-            new Label(compressionComposite, SWT.RIGHT).setText(d.getFilters());
+            label = new Label(compressionComposite, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(d.getFilters());
             
-            new Label(compressionComposite, SWT.LEFT).setText("Storage: ");
+            label = new Label(compressionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Storage: ");
             
-            new Label(compressionComposite, SWT.RIGHT).setText(d.getStorage());
+            label = new Label(compressionComposite, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(d.getStorage());
             
-            new Label(compressionComposite, SWT.LEFT).setText("Fill value: ");
+            label = new Label(compressionComposite, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Fill value: ");
             
             Object fillValue = null;
             String fillValueInfo = "NONE";
@@ -1709,108 +1782,24 @@ public class HDFView implements ViewManager {
                     fillValueInfo = fillValue.toString();
             }
             
-            new Label(compressionComposite, SWT.RIGHT).setText(fillValueInfo);
+            label = new Label(compressionComposite, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(fillValueInfo);
         }
         else if (obj instanceof Datatype) {
             log.trace("showMetaData: Datatype object extra info");
             org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
+            datatypeInfoGroup.setFont(currentFont);
             datatypeInfoGroup.setText("Type");
             datatypeInfoGroup.setLayout(new FillLayout());
             datatypeInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             
             Text infoArea = new Text(datatypeInfoGroup, SWT.MULTI);
-            
+            infoArea.setFont(currentFont);
             infoArea.setText(((Datatype) obj).getDatatypeDescription());
             infoArea.setEditable(false);
         }
         
-        
-//        metadata.setLength(0);
-//        metadata.append(obj.getName());
-//
-//        String oidStr = null;
-//        long[] OID = obj.getOID();
-//        if (OID != null) {
-//            oidStr = String.valueOf(OID[0]);
-//            for (int i = 1; i < OID.length; i++) {
-//                oidStr += ", " + OID[i];
-//            }
-//        }
-//        metadata.append(" (");
-//        metadata.append(oidStr);
-//        metadata.append(")");
-//
-//        if (obj instanceof Group) {
-//            log.trace("showMetaData: instanceof Group");
-//            Group g = (Group) obj;
-//            metadata.append("\n    Group size = ");
-//            metadata.append(g.getMemberList().size());
-//        }
-//        else if (obj instanceof Dataset) {
-//            log.trace("showMetaData: instanceof Dataset");
-//            Dataset d = (Dataset) obj;
-//            if (d.getRank() <= 0) {
-//                d.init();
-//            }
-//            log.trace("showMetaData: inited");
-//
-//            metadata.append("\n    ");
-//            if (d instanceof ScalarDS) {
-//                Datatype dtype = d.getDatatype();
-//                if (dtype != null) metadata.append(dtype.getDatatypeDescription());
-//            }
-//            else if (d instanceof CompoundDS) {
-//                metadata.append("Compound/Vdata");
-//            }
-//            metadata.append(",    ");
-//
-//            long dims[] = d.getDims();
-//
-//            if (dims != null) {
-//                metadata.append(dims[0]);
-//                for (int i = 1; i < dims.length; i++) {
-//                    metadata.append(" x ");
-//                    metadata.append(dims[i]);
-//                }
-//            }
-//        } // else if (obj instanceof Dataset)
-//        else {
-//            log.debug("obj not instanceof Group or Dataset");
-//        }
-//
-//        List<?> attrList = null;
-//        try {
-//            log.trace("showMetaData: getMetadata");
-//            attrList = obj.getMetadata();
-//        }
-//        catch (Exception ex) {
-//            log.debug("getMetadata failure: ", ex);
-//        }
-//
-//        if (attrList == null) {
-//            metadata.append("\n    Number of attributes = 0");
-//        }
-//        else {
-//            int n = attrList.size();
-//            log.trace("showMetaData: append {} attributes", n);
-//            metadata.append("\n    Number of attributes = ");
-//            metadata.append(n);
-//
-//            for (int i = 0; i < n; i++) {
-//                log.trace("showMetaData: append Object[{}]", i);
-//                Object attrObj = attrList.get(i);
-//                if (!(attrObj instanceof Attribute)) {
-//                    continue;
-//                }
-//                Attribute attr = (Attribute) attrObj;
-//                metadata.append("\n        ");
-//                metadata.append(attr.getName());
-//                metadata.append(" = ");
-//                metadata.append(attr.toString(","));
-//                log.trace("showMetaData: append Object[{}]={}", i, attr.getName());
-//            }
-//        }
-
         attributeArea.layout();
         
         log.trace("showMetaData: finish");
@@ -1991,9 +1980,9 @@ public class HDFView implements ViewManager {
      * Set default UI fonts.
      */
     private void updateFont(Font font) {
-        if (font == null) return;
-        
         currentFont = font;
+        
+        ((DefaultTreeView) treeView).updateFont(currentFont);
         
         mainWindow.layout();
     }

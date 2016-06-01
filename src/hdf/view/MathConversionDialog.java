@@ -17,8 +17,11 @@ package hdf.view;
 import java.lang.reflect.Array;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -41,21 +44,23 @@ import org.eclipse.swt.widgets.Text;
  * @version 2.4 1/28/2016
  */
 public class MathConversionDialog extends Dialog {
-    private Shell shell;
+    private Shell       shell;
+    
+    private Font        curFont;
 
-    private Text aField, bField;
+    private Text        aField, bField;
 
-    private Text infoArea;
+    private Text        infoArea;
 
-    private List functionList;
+    private List        functionList;
 
-    private Object dataValue;
+    private Object      dataValue;
 
-    private char NT;
+    private char        NT;
 
-    private String[] functionDescription;
+    private String[]    functionDescription;
 
-    private boolean isConverted;
+    private boolean     isConverted;
 
     /**
      * Constructs MathConversionDialog.
@@ -67,6 +72,17 @@ public class MathConversionDialog extends Dialog {
      */
     public MathConversionDialog(Shell parent, Object data) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         isConverted = false;
         dataValue = data;
@@ -105,12 +121,14 @@ public class MathConversionDialog extends Dialog {
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("Convert Data...");
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
 
         // Create content region
         org.eclipse.swt.widgets.Group contentGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        contentGroup.setFont(curFont);
         contentGroup.setText("Converting Data With A Mathematic Function");
         contentGroup.setLayout(new GridLayout(2, false));
         contentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -120,6 +138,7 @@ public class MathConversionDialog extends Dialog {
                 "cos (x)", "tan (x)" };
 
         functionList = new List(contentGroup, SWT.SINGLE | SWT.BORDER);
+        functionList.setFont(curFont);
         functionList.setItems(functionNames);
         GridData functionListData = new GridData(SWT.FILL, SWT.FILL, true, false);
         functionListData.minimumWidth = 350;
@@ -148,24 +167,31 @@ public class MathConversionDialog extends Dialog {
         fieldComposite.setLayout(new GridLayout(2, false));
         fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        new Label(fieldComposite, SWT.RIGHT).setText("a = ");
+        Label label = new Label(fieldComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("a = ");
 
         aField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
         GridData aFieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
         aFieldData.minimumWidth = 100;
         aField.setLayoutData(aFieldData);
+        aField.setFont(curFont);
         aField.setText("0");
         aField.setEnabled(false);
 
-        new Label(fieldComposite, SWT.RIGHT).setText("b = ");
+        label = new Label(fieldComposite, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("b = ");
 
         bField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
         bField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        bField.setFont(curFont);
         bField.setText("1");
         bField.setEnabled(false);
 
         infoArea = new Text(contentGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP);
         infoArea.setEditable(false);
+        infoArea.setFont(curFont);
         infoArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
         GridData infoAreaData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
         infoAreaData.minimumHeight = 150;
@@ -177,7 +203,9 @@ public class MathConversionDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
+        okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 isConverted = convertData();
@@ -185,12 +213,11 @@ public class MathConversionDialog extends Dialog {
                 shell.dispose();
             }
         });
-        GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        okButton.setLayoutData(gridData);
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
+        cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 isConverted = false;
@@ -199,11 +226,13 @@ public class MathConversionDialog extends Dialog {
             }
         });
 
-        gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-        gridData.widthHint = 70;
-        cancelButton.setLayoutData(gridData);
-
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
