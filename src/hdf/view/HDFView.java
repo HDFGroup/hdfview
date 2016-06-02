@@ -823,8 +823,6 @@ public class HDFView implements ViewManager {
 
                 if (userOptionDialog.isFontChanged()) {
                     Font font = null;
-                    
-                    currentFont.dispose();
 
                     try {
                         font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
@@ -1863,10 +1861,13 @@ public class HDFView implements ViewManager {
             }
         }
 
-        String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
-        if (theFile.getFilePath().equals(fName)) {
-            currentFile = null;
-            url_bar.setText("");
+        int index = url_bar.getSelectionIndex();
+        if (index >= 0) {
+            String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
+            if (theFile.getFilePath().equals(fName)) {
+                currentFile = null;
+                url_bar.setText("");
+            }
         }
 
         try {
@@ -1881,15 +1882,15 @@ public class HDFView implements ViewManager {
         System.gc();
     }
 
-    public void reloadFile() {
+    public void reloadFile(FileFormat theFile) {
         int temp_index_type = 0;
         int temp_index_order = 0;
 
-        FileFormat theFile = treeView.getSelectedFile();
         if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
             temp_index_type = theFile.getIndexType(null);
             temp_index_order = theFile.getIndexOrder(null);
         }
+        
         closeFile(theFile);
 
         if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
@@ -2015,13 +2016,15 @@ public class HDFView implements ViewManager {
      * Set default UI fonts.
      */
     private void updateFont(Font font) {
+        currentFont.dispose();
+        
         currentFont = font;
         
-        mainWindow.setFont(currentFont);
-        recentFilesButton.setFont(currentFont);
-        url_bar.setFont(currentFont);
-        clearTextButton.setFont(currentFont);
-        status.setFont(currentFont);
+        mainWindow.setFont(font);
+        recentFilesButton.setFont(font);
+        url_bar.setFont(font);
+        clearTextButton.setFont(font);
+        status.setFont(font);
         
         // On certain platforms the url_bar items don't update their size after
         // a font change. Removing and replacing them fixes this.
@@ -2030,7 +2033,11 @@ public class HDFView implements ViewManager {
             url_bar.add(item);
         }
         
-        ((DefaultTreeView) treeView).updateFont(currentFont);
+        if (treeView.getSelectedFile() != null) {
+            url_bar.select(0);
+        }
+        
+        ((DefaultTreeView) treeView).updateFont(font);
         
         mainWindow.layout();
     }
