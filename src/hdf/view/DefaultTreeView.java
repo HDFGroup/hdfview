@@ -329,8 +329,6 @@ public class DefaultTreeView implements TreeView {
                 if ((theFile != null) && !theFile.equals(selectedFile)) {
                     // A different file is selected, handle only one file at a time
                     selectedFile = theFile;
-                    //tree.deselectAll();
-                    //tree.setSelection(selPath);
                 }
 
                 // Set this file to the most recently selected file in the recent files bar
@@ -663,7 +661,7 @@ public class DefaultTreeView implements TreeView {
                 if (dialog.isReloadFile()) {
                     selectedFile.setIndexType(dialog.getIndexType());
                     selectedFile.setIndexOrder(dialog.getIndexOrder());
-                    ((HDFView) viewer).reloadFile();
+                    ((HDFView) viewer).reloadFile(selectedFile);
                 }
             }
         });
@@ -735,7 +733,7 @@ public class DefaultTreeView implements TreeView {
         item.setText("&Reload File");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                ((HDFView) viewer).reloadFile();
+                ((HDFView) viewer).reloadFile(selectedFile);
             }
         });
 
@@ -2292,6 +2290,7 @@ public class DefaultTreeView implements TreeView {
                 fileList.remove(theFile);
                 if (theFile.equals(selectedFile)) {
                     selectedFile = null;
+                    selectedObject = null;
                     selectedItem = null;
                 }
 
@@ -2644,9 +2643,33 @@ public class DefaultTreeView implements TreeView {
     }
     
     public void updateFont(Font font) {
+        curFont.dispose();
+        
         curFont = font;
         
-        tree.setFont(curFont);
+        tree.setFont(font);
+        
+        // On certain platforms, calling tree.setFont() does not update
+        // the font of currently visible TreeItems. Since setting the
+        // font on all TreeItems causes a bug, all files must be reloaded.
+        LinkedList<FileFormat> files = new LinkedList<FileFormat>();
+        TreeItem[] items = tree.getItems();
+        
+        for (int i = 0; i < items.length; i++) {
+            FileFormat theFile = ((HObject) items[i].getData()).getFileFormat();
+            files.add(theFile);
+            
+            try {
+                closeFile(theFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        while (!files.isEmpty()) {
+            FileFormat theFile = files.remove();
+            ((HDFView) viewer).reloadFile(theFile);
+        }
     }
 
     /**
