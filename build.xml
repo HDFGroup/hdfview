@@ -172,9 +172,16 @@
     <replace file="${build.dir}/HDFVersions.java" token="@HDFJAVA_VERSION@" value='"${hdfjava.version}"' />
 
     <!-- Generate Versions file -->
-    <javac srcdir="${build.dir}" destdir="${classes.dir}" includes="HDFVersions.java" includeantruntime="false" />
+    <javac srcdir="${build.dir}" destdir="${classes.dir}"
+    includes="HDFVersions.java"
+    includeantruntime="false"
+    />
 
-    <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+    classpathref="project-classpath"
+    excludes="examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+    includeantruntime="false"
+    />
 
     <copy todir="${classes.dir}">
       <fileset dir="${src.dir}" excludes=" **/*.in **/*.java examples/** test/**" />
@@ -198,7 +205,7 @@
       <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
       <zipgroupfileset dir="${lib.dir}/extra" includes="slf4j-nop-1.7.5.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}" includes="swt.jar" />
-      
+
       <zipfileset src="${lib.dir}/ext/swt/commons-logging-1.2.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.core.commands.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.equinox.common.jar" excludes="META-INF/**/*"></zipfileset>
@@ -566,7 +573,7 @@
     <copy todir="${release.dir}/share/doc">
       <fileset dir="${docs.dir}" excludes="UserGuide.tar.gz" />
     </copy>
-  	
+
     <!--<untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />-->
 
     <!-- Copy the samples -->

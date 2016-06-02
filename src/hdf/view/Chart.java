@@ -46,65 +46,65 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class Chart extends Dialog {
 
-    private Shell shell;
+    private Shell                       shell;
     
-    private Font curFont;
+    private Font                        curFont;
 
-    private String windowTitle;
+    private String                      windowTitle;
 
     /** histogram style chart */
-    public static final int HISTOGRAM = 0;
+    public static final int             HISTOGRAM = 0;
 
     /** line style chart */
-    public static final int LINEPLOT = 1;
+    public static final int             LINEPLOT = 1;
 
     /** The default colors of lines for selected columns */
-    public static final int[] LINE_COLORS = { SWT.COLOR_BLACK, SWT.COLOR_RED,
+    public static final int[]           LINE_COLORS = { SWT.COLOR_BLACK, SWT.COLOR_RED,
             SWT.COLOR_DARK_GREEN, SWT.COLOR_BLUE, SWT.COLOR_MAGENTA, /*Pink*/
             SWT.COLOR_YELLOW, /*Orange*/ SWT.COLOR_GRAY, SWT.COLOR_CYAN };
 
     /** the data values of line points or histogram */
-    protected double data[][];
+    protected double                    data[][];
 
     /** Panel that draws plot of data values. */
-    protected ChartCanvas chartP;
+    protected ChartCanvas               chartP;
 
     /** number of data points */
-    protected int numberOfPoints;
+    protected int                       numberOfPoints;
 
     /** the style of chart: histogram or line */
-    private int chartStyle;
+    private int                         chartStyle;
 
     /** the maximum value of the Y axis */
-    private double ymax;
+    private double                      ymax;
 
     /** the minimum value of the Y axis */
-    private double ymin;
+    private double                      ymin;
 
     /** the maximum value of the X axis */
-    private double xmax;
+    private double                      xmax;
 
     /** the minimum value of the X axis */
-    private double xmin;
+    private double                      xmin;
 
     /** line labels */
-    private String lineLabels[];
+    private String                      lineLabels[];
 
     /** line colors */
-    private int lineColors[];
+    private int                         lineColors[];
 
     /** number of lines */
-    private int numberOfLines;
+    private int                         numberOfLines;
 
     /** the data to plot against **/
-    private double[] xData = null;
+    private double[]                    xData = null;
 
     /**
     * True if the original data is integer (byte, short, integer, long).
     */
-    private boolean isInteger;
+    private boolean                     isInteger;
 
-    private java.text.DecimalFormat format;
+    private java.text.DecimalFormat     format;
 
 
     /**
@@ -132,7 +132,15 @@ public class Chart extends Dialog {
 
         this.windowTitle = title;
         
-        curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        } catch (Exception ex) {
+            curFont = null;
+        }
 
         format = new java.text.DecimalFormat("0.00E0");
         this.chartStyle = style;
