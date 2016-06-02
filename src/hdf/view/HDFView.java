@@ -160,6 +160,9 @@ public class HDFView implements ViewManager {
 
     /* GUI component: To add and display URLs */
     private Combo                      url_bar;
+    
+    private Button                     recentFilesButton;
+    private Button                     clearTextButton;
 
     /* GUI component: A list of current data windows */
     private Menu                       windowMenu;
@@ -210,6 +213,17 @@ public class HDFView implements ViewManager {
         if (currentDir == null) currentDir = System.getProperty("user.home");
 
         log.info("Current directory is {}", currentDir);
+        
+        try {
+            currentFont = new Font(
+                    display,
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            currentFont = null;
+        }
 
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
@@ -1024,7 +1038,7 @@ public class HDFView implements ViewManager {
 
     private void createUrlToolbar(final Shell shell) {
         // Recent Files button
-        Button recentFilesButton = new Button(shell, SWT.PUSH);
+        recentFilesButton = new Button(shell, SWT.PUSH);
         recentFilesButton.setFont(currentFont);
         recentFilesButton.setText("Recent Files");
         recentFilesButton.setToolTipText("List of recent files");
@@ -1076,7 +1090,7 @@ public class HDFView implements ViewManager {
             }
         });
 
-        Button clearTextButton = new Button(shell, SWT.PUSH);
+        clearTextButton = new Button(shell, SWT.PUSH);
         clearTextButton.setToolTipText("Clear current selection");
         clearTextButton.setFont(currentFont);
         clearTextButton.setText("Clear Text");
@@ -1143,10 +1157,31 @@ public class HDFView implements ViewManager {
         });
 
         // Create status area for displaying messages and metadata
-        status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
+        status = new Text(statusArea, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER);
         status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
         status.setEditable(false);
         status.setFont(currentFont);
+        
+        // Only show scrollbars when necessary
+        Listener scrollBarListener = new Listener() {
+            @Override
+            public void handleEvent(Event event) {
+                Text t = (Text)event.widget;
+                Rectangle r1 = t.getClientArea();
+                Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
+                Point p = t.computeSize(SWT.DEFAULT,  SWT.DEFAULT,  true);
+                t.getHorizontalBar().setVisible(r2.width <= p.x);
+                t.getVerticalBar().setVisible(r2.height <= p.y);
+                if (event.type == SWT.Modify) {
+                  t.getParent().layout(true);
+                  t.showSelection();
+                }
+            }
+        };
+        
+        status.addListener(SWT.Resize, scrollBarListener);
+        status.addListener(SWT.Modify, scrollBarListener);
+        
         message = new StringBuffer();
         showStatus("HDFView root - " + rootDir);
         showStatus("User property file - " + ViewProperties.getPropertyFile());
@@ -1981,6 +2016,19 @@ public class HDFView implements ViewManager {
      */
     private void updateFont(Font font) {
         currentFont = font;
+        
+        mainWindow.setFont(currentFont);
+        recentFilesButton.setFont(currentFont);
+        url_bar.setFont(currentFont);
+        clearTextButton.setFont(currentFont);
+        status.setFont(currentFont);
+        
+        // On certain platforms the url_bar items don't update their size after
+        // a font change. Removing and replacing them fixes this.
+        for (String item : url_bar.getItems()) {
+            url_bar.remove(item);
+            url_bar.add(item);
+        }
         
         ((DefaultTreeView) treeView).updateFont(currentFont);
         
