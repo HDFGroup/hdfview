@@ -230,7 +230,7 @@ public class MathConversionDialog extends Dialog {
         
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                curFont.dispose();
+                if (curFont != null) curFont.dispose();
             }
         });
 

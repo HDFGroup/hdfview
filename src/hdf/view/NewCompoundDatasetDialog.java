@@ -754,7 +754,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                curFont = null;
+                if (curFont != null) curFont.dispose();
             }
         });
 

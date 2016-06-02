@@ -14,10 +14,12 @@
 
 package hdf.view;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -651,7 +653,7 @@ public class NewDatasetDialog extends Dialog {
         
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                curFont.dispose();
+                if (curFont != null) curFont.dispose();
             }
         });
 
@@ -1297,48 +1299,73 @@ public class NewDatasetDialog extends Dialog {
                 browser.setBounds(0, 0, 500, 500);
                 browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-                //TODO: Fix URLClassLoader URLs to load local html file from .jar
-                try {
-                    URL url = null, url2 = null, url3 = null;
-                    String rootPath = ViewProperties.getViewRoot();
-
+                if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
+                    // Attempt to load HTML help file from jar
                     try {
-                        url = new URL("file://" + rootPath + "/HDFView.jar");
+                        InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewDatasetHelp.html");
+                        Scanner scan = new Scanner(in);
+                        StringBuffer buffer = new StringBuffer();
+                        while(scan.hasNextLine()) {
+                            buffer.append(scan.nextLine());
+                        }
+                        
+                        browser.setText(buffer.toString());
+                        
+                        scan.close();
+                        in.close();
                     }
-                    catch (java.net.MalformedURLException mfu) {
-                        log.debug("help information:", mfu);
+                    catch (Exception e) {
+                        StringBuffer buff = new StringBuffer();
+                        buff.append("<html>");
+                        buff.append("<body>");
+                        buff.append("ERROR: cannot load help information.");
+                        buff.append("</body>");
+                        buff.append("</html>");
+                        browser.setText(buff.toString(), true);
                     }
-
+                } else {
                     try {
-                        url2 = new URL("file://" + rootPath + "/");
-                    }
-                    catch (java.net.MalformedURLException mfu) {
-                        log.debug("help information:", mfu);
-                    }
+                        URL url = null, url2 = null, url3 = null;
+                        String rootPath = ViewProperties.getViewRoot();
 
-                    try {
-                        url3 = new URL("file://" + rootPath + "/src/");
+                        try {
+                            url = new URL("file://" + rootPath + "/HDFView.jar");
+                        }
+                        catch (java.net.MalformedURLException mfu) {
+                            log.debug("help information:", mfu);
+                        }
+
+                        try {
+                            url2 = new URL("file://" + rootPath + "/");
+                        }
+                        catch (java.net.MalformedURLException mfu) {
+                            log.debug("help information:", mfu);
+                        }
+
+                        try {
+                            url3 = new URL("file://" + rootPath + "/src/");
+                        }
+                        catch (java.net.MalformedURLException mfu) {
+                            log.debug("help information:", mfu);
+                        }
+
+                        URL uu[] = { url, url2, url3 };
+                        URLClassLoader cl = new URLClassLoader(uu);
+                        URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
+
+                        browser.setUrl(u.toString());
+
+                        cl.close();
                     }
-                    catch (java.net.MalformedURLException mfu) {
-                        log.debug("help information:", mfu);
+                    catch (Exception e) {
+                        StringBuffer buff = new StringBuffer();
+                        buff.append("<html>");
+                        buff.append("<body>");
+                        buff.append("ERROR: cannot load help information.");
+                        buff.append("</body>");
+                        buff.append("</html>");
+                        browser.setText(buff.toString(), true);
                     }
-
-                    URL uu[] = { url, url2, url3 };
-                    URLClassLoader cl = new URLClassLoader(uu);
-                    URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
-
-                    browser.setUrl(u.toString());
-
-                    cl.close();
-                }
-                catch (Exception e) {
-                    StringBuffer buff = new StringBuffer();
-                    buff.append("<html>");
-                    buff.append("<body>");
-                    buff.append("ERROR: cannot load help information.");
-                    buff.append("</body>");
-                    buff.append("</html>");
-                    browser.setText(buff.toString(), true);
                 }
 
                 Button okButton = new Button(helpShell, SWT.PUSH);
@@ -1353,7 +1380,7 @@ public class NewDatasetDialog extends Dialog {
 
                 helpShell.pack();
 
-                helpShell.setSize(helpShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+                helpShell.setSize(new Point(500, 500));
 
                 Rectangle parentBounds = parent.getBounds();
                 Point shellSize = helpShell.getSize();
