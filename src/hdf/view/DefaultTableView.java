@@ -50,7 +50,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
@@ -69,7 +68,21 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
@@ -101,8 +114,6 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
-import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
-import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.LineBorderDecorator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
@@ -232,9 +243,6 @@ public class DefaultTableView implements TableView {
 
     // Label to indicate the current cell location.
     private Label                           cellLabel;
-
-    // The value of the current cell value in editing.
-    private Object                          currentEditingCellValue = null;
 
     // Keep track of table row selections
     private SelectionLayer                  selectionLayer;
@@ -1329,7 +1337,6 @@ public class DefaultTableView implements TableView {
     private Menu createMenuBar() {
         Menu menuBar = new Menu(shell, SWT.BAR);
         boolean isEditable = !isReadOnly;
-        boolean is3D = (dataset.getRank() > 2);
 
         MenuItem tableMenu = new MenuItem(menuBar, SWT.CASCADE);
         tableMenu.setText("&Table");
@@ -4449,6 +4456,12 @@ public class DefaultTableView implements TableView {
 
         private int rank;
         private long[] dims;
+        private long[] startArray;
+        private long[] strideArray;
+        private int[] selectedIndex;
+        
+        private int start;
+        private int stride;
 
         private int nrows;
 
@@ -4461,7 +4474,7 @@ public class DefaultTableView implements TableView {
                     log.trace("createTable: dataset inited");
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), "createTable:" + shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText() + ": createTable");
                     dataValue = null;
                     return;
                 }
@@ -4470,12 +4483,18 @@ public class DefaultTableView implements TableView {
             }
 
             this.dims = dataset.getSelectedDims();
+            this.startArray = dataset.getStartDims();
+            this.strideArray = dataset.getStride();
+            this.selectedIndex = dataset.getSelectedIndex();
 
             if (rank > 1) {
                 this.nrows = (int)dataset.getHeight();
             } else {
                 this.nrows = (int) dims[0];
             }
+            
+            start = (int) startArray[selectedIndex[0]];
+            stride = (int) strideArray[selectedIndex[0]];
         }
 
         @Override
@@ -4490,12 +4509,13 @@ public class DefaultTableView implements TableView {
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            return String.valueOf(indexBase + rowIndex);
+            return String.valueOf(start + indexBase + (rowIndex * stride));
         }
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
             // Should not allow user to set row header titles
+            return;
         }
     }
 
