@@ -1842,7 +1842,7 @@ public class DefaultTableView implements TableView {
 
     private ToolBar createToolbar(final Shell shell) {
         ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
-        toolbar.setFont(Display.getCurrent().getSystemFont());
+        toolbar.setFont(curFont);
         toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         // Chart button
@@ -1881,6 +1881,7 @@ public class DefaultTableView implements TableView {
             ToolItem separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
             frameField = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            frameField.setFont(curFont);
             frameField.setText(String.valueOf(curFrame));
             frameField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent e) {
@@ -1916,6 +1917,7 @@ public class DefaultTableView implements TableView {
             separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
             Text maxFrameText = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            maxFrameText.setFont(curFont);
             maxFrameText.setText(String.valueOf(maxFrame - 1));
             maxFrameText.setEditable(false);
             maxFrameText.setEnabled(false);
@@ -4561,19 +4563,25 @@ public class DefaultTableView implements TableView {
         public void open() {
             Shell parent = getParent();
             linePlotOptionShell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            linePlotOptionShell.setFont(curFont);
             linePlotOptionShell.setText("Line Plot Options -- " + dataset.getName());
             linePlotOptionShell.setImage(ViewProperties.getHdfIcon());
             linePlotOptionShell.setLayout(new GridLayout(1, true));
 
-            new Label(linePlotOptionShell, SWT.RIGHT).setText("Select Line Plot Options:");
+            Label label = new Label(linePlotOptionShell, SWT.RIGHT);
+            label.setFont(curFont);
+            label.setText("Select Line Plot Options:");
 
             Composite content = new Composite(linePlotOptionShell, SWT.BORDER);
             content.setLayout(new GridLayout(3, false));
             content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-            new Label(content, SWT.RIGHT).setText(" Series in:");
+            label = new Label(content, SWT.RIGHT);
+            label.setFont(curFont);
+            label.setText(" Series in:");
 
             colButton = new Button(content, SWT.RADIO);
+            colButton.setFont(curFont);
             colButton.setText("Column");
             colButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             colButton.addSelectionListener(new SelectionAdapter() {
@@ -4584,6 +4592,7 @@ public class DefaultTableView implements TableView {
             });
 
             rowButton = new Button(content, SWT.RADIO);
+            rowButton.setFont(curFont);
             rowButton.setText("Row");
             rowButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             rowButton.addSelectionListener(new SelectionAdapter() {
@@ -4593,7 +4602,9 @@ public class DefaultTableView implements TableView {
                 }
             });
 
-            new Label(content, SWT.RIGHT).setText(" For abscissa use:");
+            label = new Label(content, SWT.RIGHT);
+            label.setFont(curFont);
+            label.setText(" For abscissa use:");
 
             long[] startArray = dataset.getStartDims();
             long[] strideArray = dataset.getStride();
@@ -4602,6 +4613,7 @@ public class DefaultTableView implements TableView {
             int stride = (int) strideArray[selectedIndex[0]];
 
             colBox = new Combo(content, SWT.SINGLE | SWT.READ_ONLY);
+            colBox.setFont(curFont);
             GridData colBoxData = new GridData(SWT.FILL, SWT.FILL, true, false);
             colBoxData.minimumWidth = 100;
             colBox.setLayoutData(colBoxData);
@@ -4613,6 +4625,7 @@ public class DefaultTableView implements TableView {
             }
 
             rowBox = new Combo(content, SWT.SINGLE | SWT.READ_ONLY);
+            rowBox.setFont(curFont);
             GridData rowBoxData = new GridData(SWT.FILL, SWT.FILL, true, false);
             rowBoxData.minimumWidth = 100;
             rowBox.setLayoutData(rowBoxData);
@@ -4630,7 +4643,9 @@ public class DefaultTableView implements TableView {
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
-            okButton.setText("   &Ok   ");
+            okButton.setFont(curFont);
+            okButton.setText("  &Ok  ");
+            okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     if (colButton.getSelection()) {
@@ -4645,22 +4660,17 @@ public class DefaultTableView implements TableView {
                     linePlotOptionShell.dispose();
                 }
             });
-            GridData gridData = new GridData(SWT.END, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            okButton.setLayoutData(gridData);
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+            cancelButton.setFont(curFont);
             cancelButton.setText("&Cancel");
+            cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     plotType = NO_PLOT;
                     linePlotOptionShell.dispose();
                 }
             });
-
-            gridData = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-            gridData.widthHint = 70;
-            cancelButton.setLayoutData(gridData);
 
             colButton.setSelection(true);
             rowButton.setSelection(false);

@@ -208,8 +208,7 @@ public class DefaultTreeView implements TreeView {
             public void keyReleased(KeyEvent e) {
                 int key = e.keyCode;
 
-                if (key == SWT.ARROW_LEFT || key == SWT.ARROW_RIGHT || key == SWT.ARROW_DOWN || key == SWT.ARROW_UP ||
-                    key == SWT.KEYPAD_4 || key == SWT.KEYPAD_6 || key == SWT.KEYPAD_2 || key == SWT.KEYPAD_8) {
+                if (key == SWT.ARROW_DOWN || key == SWT.ARROW_UP || key == SWT.KEYPAD_2 || key == SWT.KEYPAD_8) {
 
                     TreeItem[] selectedItems = tree.getSelection();
                     TreeItem theItem = selectedItems[0];
@@ -226,6 +225,26 @@ public class DefaultTreeView implements TreeView {
                     }
 
                     ((HDFView) viewer).showMetaData(selectedObject);
+                }
+                else if (key == SWT.ARROW_LEFT || key == SWT.KEYPAD_4) {
+                    if(selectedObject instanceof Group) {
+                        selectedItem.setExpanded(false);
+
+                        Event collapse = new Event();
+                        collapse.item = selectedItem;
+                        
+                        tree.notifyListeners(SWT.Collapse, collapse);
+                    }
+                }
+                else if (key == SWT.ARROW_RIGHT || key == SWT.KEYPAD_6) {
+                    if(selectedObject instanceof Group) {
+                        selectedItem.setExpanded(true);
+
+                        Event expand = new Event();
+                        expand.item = selectedItem;
+                        
+                        tree.notifyListeners(SWT.Expand, expand);
+                    }
                 }
             }
         });
@@ -628,6 +647,27 @@ public class DefaultTreeView implements TreeView {
 
                 try {
                     showMetaData(selectedObject);
+                    
+                    // Update icon for object since an attribute may have been added/deleted
+                    if (selectedObject instanceof Group) {
+                        if (!(((Group) selectedObject).isRoot())) {
+                            if (selectedItem.getExpanded()) {
+                                if (selectedObject.hasAttribute()) {
+                                    selectedItem.setImage(folderOpenIconA);
+                                } else {
+                                    selectedItem.setImage(folderOpenIcon);
+                                }
+                            } else {
+                                if (selectedObject.hasAttribute()) {
+                                    selectedItem.setImage(folderCloseIconA);
+                                } else {
+                                    selectedItem.setImage(folderCloseIcon);
+                                }
+                            }
+                        }
+                    } else {
+                        selectedItem.setImage(getObjectTypeImage(selectedObject));
+                    }
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -644,6 +684,27 @@ public class DefaultTreeView implements TreeView {
 
                 try {
                     showMetaData(selectedObject);
+                    
+                    // Update icon for object since an attribute may have been added/deleted
+                    if (selectedObject instanceof Group) {
+                        if (!(((Group) selectedObject).isRoot())) {
+                            if (selectedItem.getExpanded()) {
+                                if (selectedObject.hasAttribute()) {
+                                    selectedItem.setImage(folderOpenIconA);
+                                } else {
+                                    selectedItem.setImage(folderOpenIcon);
+                                }
+                            } else {
+                                if (selectedObject.hasAttribute()) {
+                                    selectedItem.setImage(folderCloseIconA);
+                                } else {
+                                    selectedItem.setImage(folderCloseIcon);
+                                }
+                            }
+                        }
+                    } else {
+                        selectedItem.setImage(getObjectTypeImage(selectedObject));
+                    }
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();

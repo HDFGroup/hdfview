@@ -22,6 +22,8 @@ import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
@@ -29,6 +31,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -62,41 +65,43 @@ import hdf.object.ScalarDS;
  */
 public class DefaultPaletteView extends Dialog {
 
-    private Shell shell;
+    private Shell               shell;
+    
+    private Font                curFont;
 
-    private ScalarDS dataset;
+    private ScalarDS            dataset;
 
     /** Panel that draws plot of data values. */
-    private ChartCanvas chartP;
-    private ImageView imageView;
-    private PaletteValueTable paletteValueTable;
+    private ChartCanvas         chartP;
+    private ImageView           imageView;
+    private PaletteValueTable   paletteValueTable;
 
-    private Button checkRed, checkGreen, checkBlue;
+    private Button              checkRed, checkGreen, checkBlue;
 
-    private Combo choicePalette;
+    private Combo               choicePalette;
 
-    private Image originalImage, currentImage;
+    private Image               originalImage, currentImage;
 
-    private final int[] lineColors = { SWT.COLOR_RED, SWT.COLOR_GREEN, SWT.COLOR_BLUE };
-    private final String lineLabels[] = { "Red", "Green", "Blue" };
+    private final int[]         lineColors = { SWT.COLOR_RED, SWT.COLOR_GREEN, SWT.COLOR_BLUE };
+    private final String        lineLabels[] = { "Red", "Green", "Blue" };
 
-    private static String PALETTE_GRAY = "Gray";
-    private static String PALETTE_DEFAULT = "Default";
-    private static String PALETTE_REVERSE_GRAY = "Reverse Gray";
-    private static String PALETTE_GRAY_WAVE = "GrayWave";
-    private static String PALETTE_RAINBOW = "Rainbow";
-    private static String PALETTE_NATURE = "Nature";
-    private static String PALETTE_WAVE = "Wave";
+    private static String       PALETTE_GRAY = "Gray";
+    private static String       PALETTE_DEFAULT = "Default";
+    private static String       PALETTE_REVERSE_GRAY = "Reverse Gray";
+    private static String       PALETTE_GRAY_WAVE = "GrayWave";
+    private static String       PALETTE_RAINBOW = "Rainbow";
+    private static String       PALETTE_NATURE = "Nature";
+    private static String       PALETTE_WAVE = "Wave";
 
-    private int x0, y0; // starting point of mouse drag
+    private int                 x0, y0; // starting point of mouse drag
 
-    byte[][] palette;
-    private int numberOfPalettes;
-    private int[][] paletteData;
+    byte[][]                    palette;
+    private int                 numberOfPalettes;
+    private int[][]             paletteData;
 
-    boolean isPaletteChanged = false;
-    private boolean startEditing = false;
-    private boolean isH5 = false;
+    boolean                     isPaletteChanged = false;
+    private boolean             startEditing = false;
+    private boolean             isH5 = false;
 
 
     public DefaultPaletteView(Shell parent, ImageView theImageView) {
@@ -105,6 +110,17 @@ public class DefaultPaletteView extends Dialog {
 
     public DefaultPaletteView(Shell parent, ViewManager theViewer, ImageView theImageView) {
         super(parent, SWT.APPLICATION_MODAL);
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         imageView = theImageView;
         dataset = (ScalarDS) imageView.getDataObject();
@@ -140,6 +156,7 @@ public class DefaultPaletteView extends Dialog {
     public void createUI() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell.setFont(curFont);
         shell.setText("Image Palette for - " + dataset.getPath() + dataset.getName());
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
@@ -164,16 +181,19 @@ public class DefaultPaletteView extends Dialog {
         rgbComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         checkRed = new Button(rgbComposite, SWT.RADIO);
+        checkRed.setFont(curFont);
         checkRed.setText("Red");
         checkRed.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
         checkRed.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
         
         checkGreen = new Button(rgbComposite, SWT.RADIO);
+        checkGreen.setFont(curFont);
         checkGreen.setText("Green");
         checkGreen.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_GREEN));
         checkGreen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
         checkBlue = new Button(rgbComposite, SWT.RADIO);
+        checkBlue.setFont(curFont);
         checkBlue.setText("Blue");
         checkBlue.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
         checkBlue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -188,6 +208,7 @@ public class DefaultPaletteView extends Dialog {
         paletteComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         choicePalette = new Combo(paletteComposite, SWT.SINGLE | SWT.READ_ONLY);
+        choicePalette.setFont(curFont);
         choicePalette.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         choicePalette.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -280,6 +301,7 @@ public class DefaultPaletteView extends Dialog {
         choicePalette.select(0);
 
         Button showValueButton = new Button(paletteComposite, SWT.PUSH);
+        showValueButton.setFont(curFont);
         showValueButton.setText("Show Values");
         showValueButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         showValueButton.addSelectionListener(new SelectionAdapter() {
@@ -288,7 +310,6 @@ public class DefaultPaletteView extends Dialog {
                     paletteValueTable = new PaletteValueTable(shell, SWT.NONE);
                 }
                 
-                //paletteValueTable.refresh();
                 paletteValueTable.open();
             }
         });
@@ -299,7 +320,8 @@ public class DefaultPaletteView extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
-        okButton.setText("   &Ok   ");
+        okButton.setFont(curFont);
+        okButton.setText("  &Ok  ");
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (isPaletteChanged) {
@@ -314,6 +336,7 @@ public class DefaultPaletteView extends Dialog {
         });
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+        cancelButton.setFont(curFont);
         cancelButton.setText("&Cancel");
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -323,6 +346,7 @@ public class DefaultPaletteView extends Dialog {
         });
 
         Button previewButton = new Button(buttonComposite, SWT.PUSH);
+        previewButton.setFont(curFont);
         previewButton.setText("&Preview");
         previewButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -332,6 +356,12 @@ public class DefaultPaletteView extends Dialog {
         });
 
         shell.pack();
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                curFont.dispose();
+            }
+        });
 
         shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -473,7 +503,7 @@ public class DefaultPaletteView extends Dialog {
 
             canvas.addMouseListener(new MouseAdapter() {
                 public void mouseUp(MouseEvent e) {
-                    if ((paletteValueTable != null) /*&& paletteValueTable.isVisible()*/) {
+                    if ((paletteValueTable != null)) {
                         paletteValueTable.refresh();
                     }
                 }
@@ -506,6 +536,7 @@ public class DefaultPaletteView extends Dialog {
             display = parent.getDisplay();
             
             tableShell = new Shell(parent, SWT.SHELL_TRIM);
+            tableShell.setFont(curFont);
             tableShell.setText("");
             tableShell.setImage(ViewProperties.getHdfIcon());
             tableShell.setLayout(new GridLayout(1, true));
@@ -523,6 +554,7 @@ public class DefaultPaletteView extends Dialog {
             valueTable = new Table(content, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.NO_SCROLL);
             valueTable.setHeaderVisible(true);
             valueTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            valueTable.setFont(curFont);
 
             // Add cell editor for changing cell values in-place
             valueTable.addListener(SWT.MouseDoubleClick, valueTableCellEditor);
@@ -559,6 +591,7 @@ public class DefaultPaletteView extends Dialog {
             
             for (int i = 0; i < 256; i++) {
             	TableItem item = new TableItem(valueTable, SWT.NONE);
+            	item.setFont(curFont);
             	
             	item.setText(new String[] {String.valueOf(i), String.valueOf(paletteData[0][i]),
             			String.valueOf(paletteData[1][i]), String.valueOf(paletteData[2][i]),
@@ -573,6 +606,7 @@ public class DefaultPaletteView extends Dialog {
             //valueTable.setRowHeight(cellRowHeight);
 
             Button okButton = new Button(tableShell, SWT.PUSH);
+            okButton.setFont(curFont);
             okButton.setText("   &Ok   ");
             okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
@@ -656,6 +690,7 @@ public class DefaultPaletteView extends Dialog {
                             final int row = index;
                             
                             final Text text = new Text(valueTable, SWT.NONE);
+                            text.setFont(curFont);
 
                             Listener textListener = new Listener() {
                                 public void handleEvent(final Event e) {

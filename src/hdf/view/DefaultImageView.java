@@ -14,7 +14,6 @@
 
 package hdf.view;
 
-import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.ImageData;
@@ -26,6 +25,25 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.layout.GridData;
 
 import org.eclipse.swt.events.SelectionEvent;
@@ -118,141 +136,141 @@ import hdf.view.ViewProperties.BITMASK_OP;
 public class DefaultImageView implements ImageView {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
 
-    private final Display display;
-    private final Shell shell;
-    private Font curFont;
+    private final Display           display;
+    private final Shell             shell;
+    private Font                    curFont;
 
     /** Horizontal direction to flip an image. */
-    public static final int FLIP_HORIZONTAL = 0;
+    public static final int         FLIP_HORIZONTAL = 0;
 
     /** Vertical direction to flip an image. */
-    public static final int FLIP_VERTICAL = 1;
+    public static final int         FLIP_VERTICAL = 1;
 
     /** ROTATE IMAGE 90 DEGREE CLOCKWISE. */
-    public static final int ROTATE_CW_90 = 10;
+    public static final int         ROTATE_CW_90 = 10;
 
     /** ROTATE IMAGE COUNTER CLOCKWISE 90 DEGREE. */
-    public static final int ROTATE_CCW_90 = 11;
+    public static final int         ROTATE_CCW_90 = 11;
 
     /**
      * The main HDFView.
      */
-    private final ViewManager viewer;
+    private final ViewManager       viewer;
     
-    private Toolkit toolkit;
+    private Toolkit                 toolkit;
 
     /**
      * The Scalar Dataset.
      */
-    private ScalarDS dataset;
+    private ScalarDS                dataset;
 
     /**
      * The Component containing the image.
      */
-    private ImageComponent imageComponent;
+    private ImageComponent          imageComponent;
 
     /**
      * The image contained in the ImageView.
      */
-    private Image image;
+    private Image                   image;
 
     /**
      * The zooming factor of this image.
      */
-    private float zoomFactor;
+    private float                   zoomFactor;
 
     /**
      * The byte data array of the image.
      */
-    private byte[] imageByteData;
+    private byte[]                  imageByteData;
 
     /**
      * The color table of the image.
      */
-    private byte[][] imagePalette;
+    private byte[][]                imagePalette;
 
     /**
      * The title of this imageview.
      */
-    private String frameTitle;
+    private String                  frameTitle;
 
     /** TextField to show the image value. */
-    private Text valueField;
+    private Text                    valueField;
 
     /** Flag to indicate if the image is a true color image */
-    private boolean isTrueColor;
+    private boolean                 isTrueColor;
 
     /** Flag to indicate if the image is a 3D */
-    private boolean is3D;
+    private boolean                 is3D;
 
     /** Flag to indicate whether to show pixel values in ImageComponent */
-    private boolean showValues = false;
+    private boolean                 showValues = false;
 
     /** Flag to indicate if the image is plane interleaved */
-    private boolean isPlaneInterlace;
+    private boolean                 isPlaneInterlace;
 
-    private boolean isHorizontalFlipped = false;
+    private boolean                 isHorizontalFlipped = false;
 
-    private boolean isVerticalFlipped = false;
+    private boolean                 isVerticalFlipped = false;
 
-    private int rotateCount = 0;
+    private int                     rotateCount = 0;
 
     /** the number type of the image data */
-    private char NT;
+    private char                    NT;
 
     /** the raw data of the image */
-    private Object data;
+    private Object                  data;
 
     /** flag to indicate if the original data type is unsigned integer */
-    private boolean isUnsigned;
+    private boolean                 isUnsigned;
 
-    private boolean isUnsignedConverted = false;
+    private boolean                 isUnsignedConverted = false;
 
-    private double[] dataRange;
-    private final double[] originalRange = { 0, 0 };
+    private double[]                dataRange;
+    private final double[]          originalRange = { 0, 0 };
 
-    private PaletteComponent paletteComponent;
+    private PaletteComponent        paletteComponent;
 
-    private int animationSpeed = 2;
+    private int                     animationSpeed = 2;
 
-    private List rotateRelatedItems;
+    private List                    rotateRelatedItems;
 
-    private ScrolledComposite imageScroller;
+    private ScrolledComposite       imageScroller;
 
-    private Text frameField;
+    private Text                    frameField;
 
-    private long curFrame = 0, maxFrame = 1;
+    private long                    curFrame = 0, maxFrame = 1;
 
-    private BufferedImage bufferedImage;
+    private BufferedImage           bufferedImage;
     
-    private ContrastSlider contrastSlider;
+    private ContrastSlider          contrastSlider;
 
-    private int indexBase = 0;
-    private int[] dataDist = null;
+    private int                     indexBase = 0;
+    private int[]                   dataDist = null;
 
     /**
      * equates to brightness
      */
-    private boolean doAutoGainContrast = false;
-    private double[] gainBias, gainBias_current;
+    private boolean                 doAutoGainContrast = false;
+    private double[]                gainBias, gainBias_current;
 
     /**
      * int array to hold unsigned short or signed int data from applying the
      * autogain
      */
-    private Object autoGainData;
+    private Object                  autoGainData;
 
-    private BitSet bitmask;
-    private boolean convertByteData = false;
-    private BITMASK_OP bitmaskOP = BITMASK_OP.EXTRACT;
+    private BitSet                  bitmask;
+    private boolean                 convertByteData = false;
+    private BITMASK_OP              bitmaskOP = BITMASK_OP.EXTRACT;
 
     private enum Origin {
         UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT
     }
 
-    private Origin imageOrigin = null;
+    private Origin                  imageOrigin = null;
 
-    private List<Integer> invalidValueIndex;
+    private List<Integer>           invalidValueIndex;
 
     /**
      * Constructs an ImageView.
@@ -288,6 +306,28 @@ public class DefaultImageView implements ImageView {
 
         shell.setImage(ViewProperties.getImageIcon());
         shell.setLayout(new GridLayout(1, true));
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                // reload the data when it is displayed next time
+                // because the display type (table or image) may be
+                // different.
+                if (!dataset.isImage()) {
+                    dataset.clearData();
+                }
+                
+                curFont.dispose();
+
+                data = null;
+                image = null;
+                imageByteData = null;
+                imageComponent = null;
+                autoGainData = null;
+                ((Vector) rotateRelatedItems).setSize(0);
+                System.runFinalization();
+                System.gc();
+            }
+        });
         
         try {
             curFont = new Font(
@@ -485,6 +525,7 @@ public class DefaultImageView implements ImageView {
 
         // Create main component region
         org.eclipse.swt.widgets.Group group = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+        group.setFont(curFont);
         group.setText(originTag);
         group.setLayout(new GridLayout(2, false));
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -512,28 +553,6 @@ public class DefaultImageView implements ImageView {
         valueField.setEditable(false);
         valueField.setFont(curFont);
         setValueVisible(showValues);
-
-        shell.addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent e) {
-                // reload the data when it is displayed next time
-                // because the display type (table or image) may be
-                // different.
-                if (!dataset.isImage()) {
-                    dataset.clearData();
-                }
-                
-                curFont.dispose();
-
-                data = null;
-                image = null;
-                imageByteData = null;
-                imageComponent = null;
-                autoGainData = null;
-                ((Vector) rotateRelatedItems).setSize(0);
-                System.runFinalization();
-                System.gc();
-            }
-        });
 
         Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 
@@ -1051,7 +1070,7 @@ public class DefaultImageView implements ImageView {
 
     private ToolBar createToolbar(final Shell shell) {
         ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
-        toolbar.setFont(Display.getCurrent().getSystemFont());
+        toolbar.setFont(curFont);
         toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         // Chart button
@@ -1154,6 +1173,7 @@ public class DefaultImageView implements ImageView {
             ToolItem separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
             frameField = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            frameField.setFont(curFont);
             frameField.setText(String.valueOf(curFrame));
             frameField.addKeyListener(new KeyAdapter() {
                 public void keyPressed(KeyEvent e) {
@@ -1189,6 +1209,7 @@ public class DefaultImageView implements ImageView {
             separator = new ToolItem(toolbar, SWT.SEPARATOR);
 
             Text maxFrameText = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+            maxFrameText.setFont(curFont);
             maxFrameText.setText(String.valueOf(maxFrame - 1));
             maxFrameText.setEditable(false);
             maxFrameText.setEnabled(false);
@@ -1776,28 +1797,28 @@ public class DefaultImageView implements ImageView {
         DefaultFileFilter filter = null;
         
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
-        	filter = DefaultFileFilter.getFileFilterJPEG();
+            filter = DefaultFileFilter.getFileFilterJPEG();
         } else if (type.equals(Tools.FILE_TYPE_TIFF)) {
-        	filter = DefaultFileFilter.getFileFilterTIFF();
+            filter = DefaultFileFilter.getFileFilterTIFF();
         }
         else if (type.equals(Tools.FILE_TYPE_PNG)) {
-        	filter = DefaultFileFilter.getFileFilterPNG();
+            filter = DefaultFileFilter.getFileFilterPNG();
         }
         else if (type.equals(Tools.FILE_TYPE_GIF)) {
-        	filter = DefaultFileFilter.getFileFilterGIF();
+            filter = DefaultFileFilter.getFileFilterGIF();
         }
         else if (type.equals(Tools.FILE_TYPE_BMP)) {
-        	filter = DefaultFileFilter.getFileFilterBMP();
+            filter = DefaultFileFilter.getFileFilterBMP();
         }
         
         if (filter == null) {
-        	fChooser.setFilterExtensions(new String[] {"*.*"});
-        	fChooser.setFilterNames(new String[] {"All Files"});
-        	fChooser.setFilterIndex(0);
+            fChooser.setFilterExtensions(new String[] {"*.*"});
+            fChooser.setFilterNames(new String[] {"All Files"});
+            fChooser.setFilterIndex(0);
         } else {
-        	fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-        	fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-        	fChooser.setFilterIndex(1);
+            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+            fChooser.setFilterIndex(1);
         }
 
         fChooser.setText("Save Current Image To " + type + " File --- " + dataset.getName());
@@ -2592,7 +2613,7 @@ public class DefaultImageView implements ImageView {
                     
                     
                     gc.drawImage(converted, 0, 0, sourceBounds.width, sourceBounds.height,
-                    		0, 0, imageSize.width, imageSize.height);
+                            0, 0, imageSize.width, imageSize.height);
                     
                     /*if (gc instanceof Graphics2D && (zoomFactor<0.99)) {
                         Graphics2D g2 = (Graphics2D) g;
@@ -3556,8 +3577,8 @@ public class DefaultImageView implements ImageView {
             canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
             canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             canvas.addPaintListener(new PaintListener() {
-            	public void paintControl(PaintEvent e) {
-            		GC gc = e.gc;
+                public void paintControl(PaintEvent e) {
+                    GC gc = e.gc;
 
                     if (frames == null) return;
 
@@ -3699,13 +3720,13 @@ public class DefaultImageView implements ImageView {
             final double xmax = originalRange[1];
             
             chartCanvas.addPaintListener(new PaintListener() {
-            	public void paintControl(PaintEvent e) {
-            		GC gc = e.gc;
-            		
-            		// TODO: Update Chart to be able to handle large fonts
-            		gc.setFont(curFont);
-            		
-            		int h = H/3 -50;
+                public void paintControl(PaintEvent e) {
+                    GC gc = e.gc;
+                    
+                    // TODO: Update Chart to be able to handle large fonts
+                    gc.setFont(curFont);
+                    
+                    int h = H/3 -50;
                     int w = W;
                     int xnpoints = Math.min(10, numberOfPoints - 1);
 
@@ -3747,7 +3768,7 @@ public class DefaultImageView implements ImageView {
                     }
 
                     gc.setBackground(c); // set the color back to its default
-            	}
+                }
             });
 
             org.eclipse.swt.widgets.Group lowerBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
@@ -3761,18 +3782,18 @@ public class DefaultImageView implements ImageView {
             minField.setText(String.valueOf(min));
             minField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             minField.addModifyListener(new ModifyListener() {
-            	public void modifyText(ModifyEvent e) {
-            		if (minSlider != null && minSlider.getEnabled()) {
-            			double value = Double.valueOf(((Text) e.widget).getText()); 
-            			
-            			if (value > max_org) {
+                public void modifyText(ModifyEvent e) {
+                    if (minSlider != null && minSlider.getEnabled()) {
+                        double value = Double.valueOf(((Text) e.widget).getText()); 
+                        
+                        if (value > max_org) {
                             value = max_org;
                             minField.setText(String.valueOf(value));
                         }
 
                         minSlider.setSelection((int) ((value - min_org) / tickRatio));
-            		}
-            	}
+                    }
+                }
             });
             
             minSlider = new Slider(lowerBoundGroup, SWT.HORIZONTAL);
@@ -3807,18 +3828,18 @@ public class DefaultImageView implements ImageView {
             maxField.setText(String.valueOf(max));
             maxField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             maxField.addModifyListener(new ModifyListener() {
-            	public void modifyText(ModifyEvent e) {
-            		if (maxSlider != null && maxSlider.getEnabled()) {
-            			double value = Double.valueOf(((Text) e.widget).getText());
-            			
-            			if (value < min_org) {
+                public void modifyText(ModifyEvent e) {
+                    if (maxSlider != null && maxSlider.getEnabled()) {
+                        double value = Double.valueOf(((Text) e.widget).getText());
+                        
+                        if (value < min_org) {
                             value = min_org;
                             maxField.setText(String.valueOf(value));
                         }
-            			
+                        
                         maxSlider.setSelection((int) ((value-min_org)/tickRatio));
-            		}
-            	}
+                    }
+                }
             });
             
             maxSlider = new Slider(upperBoundGroup, SWT.HORIZONTAL);
@@ -3893,8 +3914,8 @@ public class DefaultImageView implements ImageView {
             });
             
             if (min == max) {
-            	minSlider.setEnabled(false);
-            	maxSlider.setEnabled(false);
+                minSlider.setEnabled(false);
+                maxSlider.setEnabled(false);
             }
 
 
@@ -3963,22 +3984,22 @@ public class DefaultImageView implements ImageView {
             brightField.setFont(curFont);
             brightField.setText(String.valueOf(bLevel));
             brightField.addListener(SWT.Traverse, new Listener() {
-            	public void handleEvent(Event e) {
-            		if (e.detail == SWT.TRAVERSE_RETURN) {
-            			if (brightSlider != null) {
-            				double value = Double.parseDouble(((Text) e.widget).getText());
-            				
-            				if (value > 100) {
+                public void handleEvent(Event e) {
+                    if (e.detail == SWT.TRAVERSE_RETURN) {
+                        if (brightSlider != null) {
+                            double value = Double.parseDouble(((Text) e.widget).getText());
+                            
+                            if (value > 100) {
                                 value = 100;
                             }
                             else if (value < -100) {
                                 value = -100;
                             }
-            				
-            				brightSlider.setSelection((int) value + 100);
-            			}
-            		}
-            	}
+                            
+                            brightSlider.setSelection((int) value + 100);
+                        }
+                    }
+                }
             });
 
 
@@ -4007,22 +4028,22 @@ public class DefaultImageView implements ImageView {
             contrastField.setFont(curFont);
             contrastField.setText(String.valueOf(cLevel));
             contrastField.addListener(SWT.Traverse, new Listener() {
-            	public void handleEvent(Event e) {
-            		if (e.detail == SWT.TRAVERSE_RETURN) {
-            			if (contrastSlider != null) {
-            				double value = Double.parseDouble(((Text) e.widget).getText());
-            				
-            				if (value > 100) {
+                public void handleEvent(Event e) {
+                    if (e.detail == SWT.TRAVERSE_RETURN) {
+                        if (contrastSlider != null) {
+                            double value = Double.parseDouble(((Text) e.widget).getText());
+                            
+                            if (value > 100) {
                                 value = 100;
                             }
                             else if (value < -100) {
                                 value = -100;
                             }
-            				
-            				contrastSlider.setSelection((int) value + 100);
-            			}
-            		}
-            	}
+                            
+                            contrastSlider.setSelection((int) value + 100);
+                        }
+                    }
+                }
             });
 
             contrastSlider = new Scale(contrastGroup, SWT.HORIZONTAL);

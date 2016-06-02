@@ -184,7 +184,7 @@
 
     <javac srcdir="${src.dir}" destdir="${classes.dir}"
     classpathref="project-classpath"
-    excludes="**/*Old* examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+    excludes="examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
     includeantruntime="false"
     />
 
@@ -559,8 +559,23 @@
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar"/>
       <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.so" excludes="*.a" />
-      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.so" excludes="*.a" />
+      
+      <fileset dir="${hdf.lib.dir}">
+        <include name="*.jar" />
+      	<include name="libhdf.so" />
+      	<include name="libhdf_java.so" />
+      	<include name="libmfhdf.so" />
+      	<include name="libjpeg.so" />
+      	<include name="libszip.so" />
+      	<include name="libz.so" />
+      </fileset>
+      <fileset dir="${hdf5.lib.dir}">
+        <include name="*.jar" />
+      	<include name="libhdf5.so" />
+      	<include name="libhdf5_java.so" />
+      	<include name="libszip.so" />
+      	<include name="libz.so" />
+      </fileset>
     </copy>
 
     <!-- Bundle jre -->
