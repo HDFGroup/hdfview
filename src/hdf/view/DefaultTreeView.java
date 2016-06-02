@@ -463,7 +463,7 @@ public class DefaultTreeView implements TreeView {
         
         tree.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                curFont.dispose();
+                if (curFont != null) curFont.dispose();
             }
         });
     }
@@ -2704,7 +2704,7 @@ public class DefaultTreeView implements TreeView {
     }
     
     public void updateFont(Font font) {
-        curFont.dispose();
+        if (curFont != null) curFont.dispose();
         
         curFont = font;
         

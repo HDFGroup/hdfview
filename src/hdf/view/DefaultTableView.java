@@ -316,7 +316,7 @@ public class DefaultTableView implements TableView {
                     table = null;
                 }
                 
-                curFont.dispose();
+                if (curFont != null) curFont.dispose();
             }
         });
         

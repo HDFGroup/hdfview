@@ -243,7 +243,7 @@ public class ImageConversionDialog extends Dialog {
         
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                curFont.dispose();
+                if (curFont != null) curFont.dispose();
             }
         });
         

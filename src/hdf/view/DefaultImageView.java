@@ -316,7 +316,7 @@ public class DefaultImageView implements ImageView {
                     dataset.clearData();
                 }
                 
-                curFont.dispose();
+                if (curFont != null) curFont.dispose();
 
                 data = null;
                 image = null;
