@@ -775,7 +775,12 @@ public class DefaultTableView implements TableView {
                 cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
                 cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
                         Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-                cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
+                
+                if (curFont != null) {
+                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
+                } else {
+                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, Display.getDefault().getSystemFont());
+                }
 
                 configRegistry.registerConfigAttribute(
                         CellConfigAttributes.CELL_STYLE,
@@ -1078,7 +1083,9 @@ public class DefaultTableView implements TableView {
             }
         });
         
-        dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
+        if (curFont != null) {
+            dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
+        }
 
         natTable.configure();
 
@@ -1293,7 +1300,12 @@ public class DefaultTableView implements TableView {
                 cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
                 cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
                         Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-                cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
+                
+                if (curFont != null) {
+                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
+                } else {
+                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, Display.getDefault().getSystemFont());
+                }
 
                 configRegistry.registerConfigAttribute(
                         CellConfigAttributes.CELL_STYLE,
@@ -1322,7 +1334,9 @@ public class DefaultTableView implements TableView {
             }
         });
         
-        dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
+        if (curFont != null) {
+            dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
+        }
 
         natTable.configure();
 
