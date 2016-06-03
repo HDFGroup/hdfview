@@ -92,11 +92,6 @@ public class DefaultMetaDataView implements MetaDataView {
     private Text                       userBlockArea;
     private Button                     jamButton;
 
-    private Text                       linkField = null;
-
-    private FileFormat                 fileFormat;
-    private String                     LinkTObjName;
-
     private int[]                      libver;
 
     public DefaultMetaDataView(Shell parent, ViewManager theView, HObject theObj) {
@@ -132,7 +127,6 @@ public class DefaultMetaDataView implements MetaDataView {
         viewer = theView;
 
         hObject = theObj;
-        fileFormat = hObject.getFileFormat();
         numAttributes = 0;
         userBlock = null;
         userBlockArea = null;
@@ -155,12 +149,6 @@ public class DefaultMetaDataView implements MetaDataView {
         }
         catch (Exception ex) {
             log.debug("Error retrieving metadata of object " + hObject.getName() + ":", ex);
-        }
-        
-        if (isH5) {
-            if (hObject.getLinkTargetObjName() != null) {
-                LinkTObjName = hObject.getLinkTargetObjName();
-            }
         }
 
         // Create main content
@@ -192,8 +180,6 @@ public class DefaultMetaDataView implements MetaDataView {
         closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         closeButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                if (isH5 && linkField != null) checkLinkTargetChanged();
-                
                 shell.dispose();
             }
         });
@@ -324,49 +310,6 @@ public class DefaultMetaDataView implements MetaDataView {
     /** Returns the data object displayed in this data viewer */
     public HObject getDataObject() {
         return hObject;
-    }
-    
-    private final void checkLinkTargetChanged() {
-        Group pgroup = null;
-        try {
-            pgroup = (Group) hObject.getFileFormat().get(hObject.getPath());
-        }
-        catch (Exception ex) {
-            log.debug("parent group:", ex);
-        }
-        if (pgroup == null) {
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Parent group is null.");
-            error.open();
-            return;
-        }
-
-        String target_name = linkField.getText();
-        if (target_name != null) target_name = target_name.trim();
-
-        int linkType = Group.LINK_TYPE_SOFT;
-        if (LinkTObjName.contains(FileFormat.FILE_OBJ_SEP))
-            linkType = Group.LINK_TYPE_EXTERNAL;
-        else if (target_name.equals("/")) // do not allow to link to the root
-            return;
-
-        // no change
-        if (target_name.equals(hObject.getLinkTargetObjName())) return;
-
-        // invalid name
-        if (target_name == null || target_name.length() < 1) return;
-
-        try {
-            fileFormat.createLink(pgroup, hObject.getName(), target_name, linkType);
-            hObject.setLinkTargetObjName(target_name);
-        }
-        catch (Exception ex) {
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
-        }
     }
     
     /**

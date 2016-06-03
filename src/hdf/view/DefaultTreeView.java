@@ -303,8 +303,23 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = true;
 
                 try {
-                    if(!(selectedObject instanceof Group))
+                    if(!(selectedObject instanceof Group)) {
                         showDataContent(selectedObject);
+                    } else {
+                        boolean isExpanded = selectedItem.getExpanded();
+                        
+                        selectedItem.setExpanded(!isExpanded);
+                        
+                        Event expand = new Event();
+                        expand.item = selectedItem;
+                        
+                        if(isExpanded) {
+                            tree.notifyListeners(SWT.Collapse, expand);
+                        }
+                        else {
+                            tree.notifyListeners(SWT.Expand, expand);
+                        }
+                    }
                 }
                 catch (Exception ex) {}
             }

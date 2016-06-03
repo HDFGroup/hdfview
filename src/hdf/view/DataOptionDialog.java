@@ -772,6 +772,7 @@ public class DataOptionDialog extends Dialog {
         spreadsheetButton = new Button(spreadsheetComposite, SWT.RADIO);
         spreadsheetButton.setFont(curFont);
         spreadsheetButton.setText("&Spreadsheet");
+        spreadsheetButton.setSelection(true);
         spreadsheetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         spreadsheetButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
