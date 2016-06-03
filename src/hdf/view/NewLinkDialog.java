@@ -29,6 +29,8 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -276,6 +278,43 @@ public class NewLinkDialog extends Dialog {
         targetFile.setFont(curFont);
         targetFile.setEnabled(false);
         targetFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        targetFile.addTraverseListener(new TraverseListener() {
+            public void keyTraversed(TraverseEvent e) {
+                if (e.detail == SWT.TRAVERSE_RETURN) {
+                    String filename = targetFile.getText();
+                    
+                    if (filename == null || filename.length() <= 0) return;
+                    
+                    File chosenFile = new File(filename);
+
+                    if (!chosenFile.exists()) {
+                        return;
+                    }
+
+                    if (chosenFile.isDirectory()) {
+                        currentDir = chosenFile.getPath();
+                    }
+                    else {
+                        currentDir = chosenFile.getParent();
+                    }
+                    
+                    //Check if the target File is not the current file.
+                    String currentFileName = fileFormat.getAbsolutePath();
+                    if(currentFileName.equals(chosenFile.getAbsolutePath())) {
+                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+                        error.setText(shell.getText());
+                        error.setMessage("Please select a file other than the current file for external links.");
+                        error.open();
+                        targetFile.setText("");
+                        return;
+                    }
+                    
+                    getTargetFileObjs();
+
+                    if(targetObject.getItemCount() > 0) targetObject.select(0);
+                }
+            }
+        });
 
         targetFileButton = new Button(fileComposite, SWT.PUSH);
         targetFileButton.setFont(curFont);
@@ -609,32 +648,31 @@ public class NewLinkDialog extends Dialog {
 
         if(fchooser.open() == null) return null;
 
-        File choosedFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
+        File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
 
-        if (!choosedFile.exists()) {
+        if (!chosenFile.exists()) {
             return null;
         }
 
-        if (choosedFile.isDirectory()) {
-            currentDir = choosedFile.getPath();
+        if (chosenFile.isDirectory()) {
+            currentDir = chosenFile.getPath();
         }
         else {
-            currentDir = choosedFile.getParent();
+            currentDir = chosenFile.getParent();
         }
 
         //Check if the target File is not the current file.
         String currentFileName = fileFormat.getAbsolutePath();
-        if(currentFileName.equals(choosedFile.getAbsolutePath())) {
-            //targetObject.setEnabled(false);
-
+        if(currentFileName.equals(chosenFile.getAbsolutePath())) {
             MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
             error.setText(shell.getText());
             error.setMessage("Please select a file other than the current file for external links.");
             error.open();
+            targetFile.setText("");
             return null;
         }
 
-        return choosedFile.getAbsolutePath();
+        return chosenFile.getAbsolutePath();
     }
 
     //Function to check if the target File is open in TreeView
@@ -671,10 +709,6 @@ public class NewLinkDialog extends Dialog {
         // Add all root object children to a Queue
         currentChildren.addAll(((Group) currentObject).getMemberList());
 
-        // For every item in the queue, remove it from the head of the queue,
-        // add it to the list of all items, then add all of its possible children
-        // TreeItems to the end of the queue. This produces a breadth-first
-        // ordering of the Tree's TreeItems.
         while(!currentChildren.isEmpty()) {
             currentObject = currentChildren.remove();
             breadthFirstObjects.add(currentObject);
@@ -734,9 +768,9 @@ public class NewLinkDialog extends Dialog {
             return;
         }
 
-        File choosedFile = new File(filename);
+        File chosenFile = new File(filename);
 
-        if (!choosedFile.exists()) {
+        if (!chosenFile.exists()) {
             targetObject.setEnabled(false);
             return;
         }

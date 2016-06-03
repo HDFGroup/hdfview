@@ -50,6 +50,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
@@ -555,10 +557,12 @@ public class HDFView implements ViewManager {
                 if(filename == null) return;
 
                 try {
-                    FileFormat file = Tools.createNewFile(filename, currentDir,
+                    FileFormat theFile = Tools.createNewFile(filename, currentDir,
                             FileFormat.FILE_TYPE_HDF4, getTreeView().getCurrentFiles());
+                    
+                    if (theFile == null) return;
 
-                    currentDir = file.getParent();
+                    currentDir = theFile.getParent();
                 }
                 catch (Exception ex) {
                     Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
@@ -618,6 +622,8 @@ public class HDFView implements ViewManager {
                 try {
                     FileFormat theFile = Tools.createNewFile(filename, currentDir,
                             FileFormat.FILE_TYPE_HDF5, getTreeView().getCurrentFiles());
+                    
+                    if (theFile == null) return;
 
                     currentDir = theFile.getParent();
                 }
@@ -1384,15 +1390,69 @@ public class HDFView implements ViewManager {
             
             if(isH5) {
                 if (obj.getLinkTargetObjName() != null) {
+                    final HObject theObj = obj;
+                    
                     label = new Label(generalInfoGroup, SWT.LEFT);
                     label.setFont(currentFont);
                     label.setText("Link To Target: ");
                     
-                    Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
+                    final Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
                     linkTarget.setFont(currentFont);
                     linkTarget.setText(obj.getLinkTargetObjName());
-                    
-                    //TODO: Only allow editing of linkTarget if link is not hard link
+                    linkTarget.addTraverseListener(new TraverseListener() {
+                        public void keyTraversed(TraverseEvent e) {
+                            if (e.detail == SWT.TRAVERSE_RETURN) {
+                                Group pgroup = null;
+                                try {
+                                    pgroup = (Group) theObj.getFileFormat().get(theObj.getPath());
+                                }
+                                catch (Exception ex) {
+                                    log.debug("parent group:", ex);
+                                }
+                                if (pgroup == null) {
+                                    MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+                                    error.setText(mainWindow.getText());
+                                    error.setMessage("Parent group is null.");
+                                    error.open();
+                                    return;
+                                }
+
+                                String target_name = linkTarget.getText();
+                                if (target_name != null) target_name = target_name.trim();
+
+                                int linkType = Group.LINK_TYPE_SOFT;
+                                if (theObj.getLinkTargetObjName().contains(FileFormat.FILE_OBJ_SEP))
+                                    linkType = Group.LINK_TYPE_EXTERNAL;
+                                else if (target_name.equals("/")) { // do not allow to link to the root
+                                    Tools.showError(mainWindow, "Link to root not allowed.", mainWindow.getText());
+                                    return;
+                                }
+
+                                // no change
+                                if (target_name.equals(theObj.getLinkTargetObjName())) return;
+
+                                // invalid name
+                                if (target_name == null || target_name.length() < 1) return;
+
+                                try {
+                                    theObj.getFileFormat().createLink(pgroup, theObj.getName(), target_name, linkType);
+                                    theObj.setLinkTargetObjName(target_name);
+                                }
+                                catch (Exception ex) {
+                                    MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
+                                    error.setText(mainWindow.getText());
+                                    error.setMessage(ex.getMessage());
+                                    error.open();
+                                    return;
+                                }
+                                
+                                MessageBox success = new MessageBox(mainWindow, SWT.ICON_INFORMATION);
+                                success.setText(mainWindow.getText());
+                                success.setMessage("Link target changed.");
+                                success.open();
+                            }
+                        }
+                    });
                 }
             }
             
@@ -2016,7 +2076,7 @@ public class HDFView implements ViewManager {
      * Set default UI fonts.
      */
     private void updateFont(Font font) {
-        currentFont.dispose();
+        if (currentFont != null) currentFont.dispose();
         
         currentFont = font;
         

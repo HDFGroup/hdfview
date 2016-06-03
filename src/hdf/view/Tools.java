@@ -61,6 +61,8 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * @version 2.4 9/6/2007
  */
 public final class Tools {
+    private final static Display display = Display.getDefault();
+    
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     public static final long       MAX_INT8        = 127;
@@ -2550,10 +2552,17 @@ public final class Tools {
         }
 
         if (f.exists()) {
-            MessageBox confirm = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText(Display.getCurrent().getActiveShell().getText());
+            Shell tempShell = new Shell(display);
+            
+            MessageBox confirm = new MessageBox(tempShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText("Create New File");
             confirm.setMessage("File exists. Do you want to replace it?");
-            if (confirm.open() == SWT.NO) return null;
+            if (confirm.open() == SWT.NO) {
+                tempShell.dispose();
+                return null;
+            }
+            
+            tempShell.dispose();
         }
 
         try {
