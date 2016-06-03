@@ -1508,8 +1508,13 @@ public class DefaultTreeView implements TreeView {
      */
     private TreeItem populateTree(FileFormat theFile) {
         if (theFile.getFID() < 0 || theFile.getRootObject() == null) {
-            log.trace("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
-            return null;
+            //TODO: Update FitsFile and NC2File to have a fid other than -1
+            // so this check isn't needed
+            if ((theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
+                    theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))) {
+                log.trace("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
+                return null;
+            }
         }
 
         TreeItem rootItem = null;

@@ -1161,30 +1161,10 @@ public class HDFView implements ViewManager {
         });
 
         // Create status area for displaying messages and metadata
-        status = new Text(statusArea, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER);
+        status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
         status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
         status.setEditable(false);
         status.setFont(currentFont);
-        
-        // Only show scrollbars when necessary
-        Listener scrollBarListener = new Listener() {
-            @Override
-            public void handleEvent(Event event) {
-                Text t = (Text)event.widget;
-                Rectangle r1 = t.getClientArea();
-                Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
-                Point p = t.computeSize(SWT.DEFAULT,  SWT.DEFAULT,  true);
-                t.getHorizontalBar().setVisible(r2.width <= p.x);
-                t.getVerticalBar().setVisible(r2.height <= p.y);
-                if (event.type == SWT.Modify) {
-                  t.getParent().layout(true);
-                  t.showSelection();
-                }
-            }
-        };
-        
-        status.addListener(SWT.Resize, scrollBarListener);
-        status.addListener(SWT.Modify, scrollBarListener);
         
         message = new StringBuffer();
         showStatus("HDFView root - " + rootDir);
@@ -1749,7 +1729,12 @@ public class HDFView implements ViewManager {
                     int orders[] = compound.getMemberOrders();
 
                     for (int i = 0; i < n; i++) {
+                        if (names[i].contains(CompoundDS.separator)) {
+                            names[i] = names[i].replaceAll(CompoundDS.separator, "->");
+                        }
+                        
                         rowData[i][0] = names[i];
+                        
                         int mDims[] = compound.getMemberDims(i);
                         if (mDims == null) {
                             rowData[i][2] = String.valueOf(orders[i]);
