@@ -2382,8 +2382,15 @@ public class DefaultImageView implements ImageView {
                                 paintSize.height);
                     }
 
+                    FontData[] fontData;
                     int fontHeight = 10;
-                    FontData[] fontData = curFont.getFontData();
+                    
+                    if (curFont != null) {
+                        fontData = curFont.getFontData();
+                    } else {
+                        fontData = Display.getDefault().getSystemFont().getFontData();
+                    }
+                    
                     Font newFont = new Font(display, fontData[0].getName(), fontHeight, fontData[0].getStyle());
                     gc.setFont(newFont);
 
