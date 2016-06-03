@@ -279,7 +279,7 @@ public class NewAttributeDialog extends Dialog {
         checkUnsigned = new Button(optionsComposite, SWT.CHECK);
         checkUnsigned.setFont(curFont);
         checkUnsigned.setText("Unsigned");
-        checkUnsigned.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        checkUnsigned.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
 
         if (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot()) {
             Button h4SdAttrRadioButton = new Button(optionsComposite, SWT.RADIO);

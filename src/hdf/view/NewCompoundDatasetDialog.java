@@ -24,6 +24,8 @@ import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -604,44 +606,12 @@ public class NewCompoundDatasetDialog extends Dialog {
         nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         nFieldBox.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                int n = 0;
-
-                try {
-                    n = Integer.valueOf((String) nFieldBox.getItem(nFieldBox.getSelectionIndex())).intValue();
-                }
-                catch (Exception ex) {
-                    log.debug("Change number of members:", ex);
-                }
-
-                if (n == numberOfMembers) {
-                    return;
-                }
-
-                if(n > numberOfMembers) {
-                    for(int i = 0; i < n - numberOfMembers; i++) {
-                        addMemberTableItem(table);
-                    }
-                } else {
-                    for(int i = numberOfMembers - 1; i >= n; i--) {
-                        TableItem item = table.getItem(i);
-                        TableEditor editor = (TableEditor) item.getData("NameEditor");
-                        editor.getEditor().dispose();
-                        editor.dispose();
-
-                        editor = (TableEditor) item.getData("DatatypeEditor");
-                        editor.getEditor().dispose();
-                        editor.dispose();
-
-                        editor = (TableEditor) item.getData("ArraySizeEditor");
-                        editor.getEditor().dispose();
-                        editor.dispose();
-
-                        table.remove(table.indexOf(item));
-                    }
-                }
-
-                table.setItemCount(n);
-                numberOfMembers = n;
+                updateMemberTableItems();
+            }
+        });
+        nFieldBox.addTraverseListener(new TraverseListener() {
+            public void keyTraversed(TraverseEvent e) {
+                if (e.detail == SWT.TRAVERSE_RETURN) updateMemberTableItems();
             }
         });
 
@@ -672,9 +642,6 @@ public class NewCompoundDatasetDialog extends Dialog {
         for(int i = 0; i < table.getColumnCount(); i++) {
             table.getColumn(i).pack();
         }
-        
-        table.getColumn(0).setWidth(150);
-        table.getColumn(1).setWidth(150);
         
         // Last table column always expands to fill remaining table size
         table.addListener(SWT.Resize, new Listener() {
@@ -751,6 +718,9 @@ public class NewCompoundDatasetDialog extends Dialog {
         nFieldBox.select(nFieldBox.indexOf(String.valueOf(numberOfMembers)));
 
         shell.pack();
+        
+        table.getColumn(0).setWidth(table.getClientArea().width / 3);
+        table.getColumn(1).setWidth(table.getClientArea().width / 3);
         
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
@@ -1041,53 +1011,85 @@ public class NewCompoundDatasetDialog extends Dialog {
 
         return obj;
     }
+    
+    private void updateMemberTableItems() {
+        int n = 0;
+
+        try {
+            n = Integer.valueOf((String) nFieldBox.getItem(nFieldBox.getSelectionIndex())).intValue();
+        }
+        catch (Exception ex) {
+            log.debug("Change number of members:", ex);
+            return;
+        }
+
+        if (n == numberOfMembers) {
+            return;
+        }
+
+        if(n > numberOfMembers) {
+            for(int i = 0; i < n - numberOfMembers; i++) {
+                addMemberTableItem(table);
+            }
+        } else {
+            for(int i = numberOfMembers - 1; i >= n; i--) {
+                table.remove(i);
+            }
+        }
+
+        table.setItemCount(n);
+        numberOfMembers = n;
+    }
 
     private TableItem addMemberTableItem(Table table) {
         final TableItem item = new TableItem(table, SWT.NONE);
-
-        TableEditor editor = new TableEditor(table);
-        Text text = new Text(table, SWT.SINGLE | SWT.BORDER);
-        text.setFont(curFont);
-        editor.grabHorizontal = true;
-        editor.grabVertical = true;
-        editor.horizontalAlignment = SWT.LEFT;
-        editor.verticalAlignment = SWT.TOP;
-        editor.setEditor(text, item, 0);
+        final TableEditor nameEditor = new TableEditor(table);
+        final TableEditor typeEditor = new TableEditor(table);
+        final TableEditor sizeEditor = new TableEditor(table);
         
-        text.addModifyListener(new ModifyListener() {
+        final Text nameText = new Text(table, SWT.SINGLE | SWT.BORDER);
+        nameText.setFont(curFont);
+        
+        nameEditor.grabHorizontal = true;
+        nameEditor.grabVertical = true;
+        nameEditor.horizontalAlignment = SWT.LEFT;
+        nameEditor.verticalAlignment = SWT.TOP;
+        nameEditor.setEditor(nameText, item, 0);
+        
+        nameText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
                 Text text = (Text) e.widget;
                 item.setData("MemberName", text.getText());
             }
         });
 
-        CCombo combo = new CCombo(table, SWT.DROP_DOWN | SWT.READ_ONLY);
-        combo.setFont(curFont);
-        combo.setItems(DATATYPE_NAMES);
-        editor = new TableEditor(table);
-        editor.grabHorizontal = true;
-        editor.grabVertical = true;
-        editor.horizontalAlignment = SWT.LEFT;
-        editor.verticalAlignment = SWT.TOP;
-        editor.setEditor(combo, item, 1);
+        final CCombo typeCombo = new CCombo(table, SWT.DROP_DOWN | SWT.READ_ONLY);
+        typeCombo.setFont(curFont);
+        typeCombo.setItems(DATATYPE_NAMES);
         
-        combo.addSelectionListener(new SelectionAdapter() {
+        typeEditor.grabHorizontal = true;
+        typeEditor.grabVertical = true;
+        typeEditor.horizontalAlignment = SWT.LEFT;
+        typeEditor.verticalAlignment = SWT.TOP;
+        typeEditor.setEditor(typeCombo, item, 1);
+        
+        typeCombo.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 CCombo combo = (CCombo) e.widget;
                 item.setData("MemberType", combo.getItem(combo.getSelectionIndex()));
             }
         });
 
-        text = new Text(table, SWT.SINGLE | SWT.BORDER);
-        text.setFont(curFont);
-        editor = new TableEditor(table);
-        editor.grabHorizontal = true;
-        editor.grabVertical = true;
-        editor.horizontalAlignment = SWT.LEFT;
-        editor.verticalAlignment = SWT.TOP;
-        editor.setEditor(text, item, 2);
+        final Text sizeText = new Text(table, SWT.SINGLE | SWT.BORDER);
+        sizeText.setFont(curFont);
         
-        text.addModifyListener(new ModifyListener() {
+        sizeEditor.grabHorizontal = true;
+        sizeEditor.grabVertical = true;
+        sizeEditor.horizontalAlignment = SWT.LEFT;
+        sizeEditor.verticalAlignment = SWT.TOP;
+        sizeEditor.setEditor(sizeText, item, 2);
+        
+        sizeText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
                 Text text = (Text) e.widget;
                 item.setData("MemberSize", text.getText());
@@ -1097,6 +1099,17 @@ public class NewCompoundDatasetDialog extends Dialog {
         item.setData("MemberName", "");
         item.setData("MemberType", "");
         item.setData("MemberSize", "");
+        
+        item.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                nameEditor.dispose();
+                typeEditor.dispose();
+                sizeEditor.dispose();
+                nameText.dispose();
+                typeCombo.dispose();
+                sizeText.dispose();
+            }
+        });
 
         return item;
     }

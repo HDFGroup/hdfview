@@ -203,19 +203,12 @@ public class FitsFile extends FileFormat
         FitsGroup rootGroup = new FitsGroup(
             this,
             "/",
-            null, // root node does not have a parent path
-            null, // root node does not have a parent node
+            null, // root object does not have a parent path
+            null, // root object does not have a parent node
             oid);
 
-        //DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
-        //    private static final long serialVersionUID = 5556789624491863365L;
-
-        //    @Override
-        //    public boolean isLeaf() { return false; }
-        //};
-
         if (fitsFile == null) {
-        //    return root;
+            return rootGroup;
         }
 
         BasicHDU[] hdus = null;
@@ -228,7 +221,7 @@ public class FitsFile extends FileFormat
         }
 
         if (hdus == null) {
-            //return root;
+            return rootGroup;
         }
 
         int n = hdus.length;
@@ -261,14 +254,11 @@ public class FitsFile extends FileFormat
             if (hduName != null) {
                 oid[0] = hdu.hashCode();
                 FitsDataset d =  new FitsDataset(this, hdu, hduName, oid);
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(d);
-                //root.add( node );
                 rootGroup.addToMemberList(d);
             }
         }
 
-        //return root;
-        return null; // Remove when fixed
+        return rootGroup;
     }
 
     // Implementing FileFormat

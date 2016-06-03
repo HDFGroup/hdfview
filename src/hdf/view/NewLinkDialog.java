@@ -167,7 +167,7 @@ public class NewLinkDialog extends Dialog {
 
         Composite helpComposite = new Composite(content, SWT.NONE);
         helpComposite.setLayout(new GridLayout(1, true));
-        helpComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+        helpComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         label = new Label(helpComposite, SWT.LEFT);
         label.setFont(curFont);
@@ -207,7 +207,7 @@ public class NewLinkDialog extends Dialog {
 
         Composite typeComposite = new Composite(content, SWT.BORDER);
         typeComposite.setLayout(new GridLayout(3, true));
-        typeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        typeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         hardLink = new Button(typeComposite, SWT.RADIO);
         hardLink.setFont(curFont);
@@ -385,6 +385,11 @@ public class NewLinkDialog extends Dialog {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName()
                     + HObject.separator));
         }
+        
+        // Dummy label to take up space as dialog is resized
+        label = new Label(content, SWT.LEFT);
+        label.setFont(curFont);
+        label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 
         // Create the Ok/Cancel button region

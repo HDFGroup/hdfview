@@ -195,25 +195,12 @@ public class NC2File extends FileFormat {
         NC2Group rootGroup = new NC2Group(
                 this,
                 "/",
-                null, // root node does not have a parent path
-                null, // root node does not have a parent node
+                null, // root object does not have a parent path
+                null, // root object does not have a parent node
                 oid);
 
-        //DefaultMutableTreeNode root = new DefaultMutableTreeNode(rootGroup) {
-
-        //    /**
-        //     *
-        //     */
-        //    private static final long serialVersionUID = -9190644912409119072L;
-
-        //    @Override
-        //    public boolean isLeaf() {
-        //        return false;
-        //    }
-        //};
-
         if (ncFile == null) {
-            //return root;
+            return rootGroup;
         }
 
         Iterator it = ncFile.getVariables().iterator();
@@ -224,13 +211,10 @@ public class NC2File extends FileFormat {
             ncDataset = (Variable) it.next();
             oid[0] = ncDataset.hashCode();
             d = new NC2Dataset(this, ncDataset, oid);
-            node = new DefaultMutableTreeNode(d);
-            //root.add(node);
             rootGroup.addToMemberList(d);
         }
 
-        //return root;
-        return null; // Remove when fixed
+        return rootGroup;
     }
 
     // Implementing FileFormat
