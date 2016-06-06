@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <!-- Set product upgrade code for later upgrade of HDFView -->
+	<?define ProductUpgradeCode = "75386B8B-ABB3-492A-EF6B-75A62D699B65"?>
+	
+	<!-- Set variables to determine whether target platform is 32- or 64-bit -->
+	<?if $(sys.BUILDARCH) = x64 ?>
+      <?define Win64 = "yes" ?>
+      <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+    <?else ?>
+      <?define Win64 = "no" ?>
+      <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+    <?endif ?>
+    
+    <!-- Give an error if product name and version were not
+    passed to candle.exe from within ANT -->
+    <?ifndef productName ?>
+    	<?error productName must be defined. ?>
+    <?endif?>
+	<?ifndef productVersion ?>
+    	<?error productVersion must be defined. ?>
+    <?endif?>
+    
+    <Product Name="$(var.productName) $(var.productVersion)"
+             Manufacturer="The HDF Group"
+             Language="1033"
+             Id="*"
+             UpgradeCode="$(var.ProductUpgradeCode)"
+             Codepage="1252"
+             Version="$(var.productVersion)">
+             
+        <Package Id="*"
+                 Keywords="Installer"
+                 Description="A visual tool for browsing and editing HDF files."
+                 Manufacturer="The HDF Group"
+                 Languages="1033"
+                 Compressed="yes"
+                 SummaryCodepage="1252" />
+                 
+        <Media Id="1"
+               Cabinet="media.cab"
+               EmbedCab="yes" />
+        
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="$(var.PlatformProgramFilesFolder)">
+                <Directory Id="HDFDir" Name="HDF_Group">
+                    <Directory Id="HDFViewDir" Name="$(var.productName)">
+                        <Directory Id="InstallDir" Name="$(var.productVersion).0" />
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+        
+        <!-- -->
+        <Feature Id="MainApplication" Title="Main Application" Level="1">
+            <ComponentGroupRef Id="MediaGroup" />
+        </Feature>
+        
+        <!-- Add Start Menu Shortcuts -->
+        
+        <!-- Set up UI -->
+        <Property Id="WIXUI_INSTALLDIR" Value="InstallDir" />
+        <UIRef Id="WixUI_InstallDir" />
+        
+        <!-- Add HDF icon for HDFView to Add/Remove Programs in Windows -->
+        <Icon Id="hdf.ico" SourceFile="hdf.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="hdf.ico" />
+        
+        <!-- Replace default bitmaps in installer -->
+        
+    </Product>
+</Wix>
