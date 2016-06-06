@@ -113,6 +113,10 @@ import org.eclipse.nebula.widgets.nattable.group.ColumnGroupGroupHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
+import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderLayerConfiguration;
+import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderStyleConfiguration;
+import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderLayerConfiguration;
+import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
@@ -432,8 +436,8 @@ public class DefaultTableView implements TableView {
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         content.setSashWidth(10);
 
-        Composite cellValueComposite = new Composite(content, SWT.BORDER);
-        cellValueComposite.setLayout(new FormLayout());
+        SashForm cellValueComposite = new SashForm(content, SWT.HORIZONTAL);
+        cellValueComposite.setSashWidth(8);
 
         cellLabel = new Label(cellValueComposite, SWT.RIGHT | SWT.BORDER);
         cellLabel.setAlignment(SWT.CENTER);
@@ -446,20 +450,8 @@ public class DefaultTableView implements TableView {
         cellValueField.setEnabled(false);
         cellValueField.setFont(curFont);
         
-        FormData formData = new FormData();
-        formData.left = new FormAttachment(0, 0);
-        formData.right = new FormAttachment(cellValueField, 2);
-        formData.top = new FormAttachment(0, 0);
-        formData.bottom = new FormAttachment(100, 0);
-        cellLabel.setLayoutData(formData);
+        cellValueComposite.setWeights(new int[] {1, 9});
         
-        formData = new FormData();
-        formData.top = new FormAttachment(0, 0);
-        formData.right = new FormAttachment(100, 0);
-        formData.bottom = new FormAttachment(100, 0);
-        formData.left = new FormAttachment(10, 0);
-        cellValueField.setLayoutData(formData);
-
         // Create the NatTable
         if (dataset instanceof CompoundDS) {
             log.trace("createTable((CompoundDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
@@ -720,13 +712,39 @@ public class DefaultTableView implements TableView {
 
         // Create the Column Header layer
         columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnNames);
-        ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
-                columnHeaderDataProvider), viewportLayer, selectionLayer);
+        ColumnHeaderLayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
+                columnHeaderDataProvider), viewportLayer, selectionLayer, false);
+        
+        // Customize Column Header to adapt to current font
+        columnHeaderLayer.addConfiguration(new DefaultColumnHeaderLayerConfiguration() {
+            @Override
+            public void addColumnHeaderStyleConfig() {
+                this.addConfiguration(new DefaultColumnHeaderStyleConfiguration() {
+                    {
+                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
+                    }
+                });
+            }
+        });
 
         // Create the Row Header layer
         IDataProvider rowHeaderDataProvider = new RowHeader(bodyDataProvider);
-        ILayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
-                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer);
+        RowHeaderLayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
+                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer, false);
+        
+        // Customize Row Header to adapt to current font
+        rowHeaderLayer.addConfiguration(new DefaultRowHeaderLayerConfiguration() {
+            @Override
+            public void addRowHeaderStyleConfig() {
+                this.addConfiguration(new DefaultRowHeaderStyleConfiguration() {
+                    {
+                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
+                    }
+                });
+            }
+        });
 
         // Create the Corner layer
         ILayer cornerLayer = new CornerLayer(new DataLayer(
@@ -1193,8 +1211,21 @@ public class DefaultTableView implements TableView {
 
         // Create the Column Header layer
         IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnLabels);
-        ILayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
-                columnHeaderDataProvider), viewportLayer, selectionLayer);
+        ColumnHeaderLayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
+                columnHeaderDataProvider), viewportLayer, selectionLayer, false);
+        
+        // Customize Column Header to adapt to current font
+        columnHeaderLayer.addConfiguration(new DefaultColumnHeaderLayerConfiguration() {
+            @Override
+            public void addColumnHeaderStyleConfig() {
+                this.addConfiguration(new DefaultColumnHeaderStyleConfiguration() {
+                    {
+                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
+                    }
+                });
+            }
+        });
 
         ColumnGroupHeaderLayer columnGroupHeaderLayer = null;
         ColumnGroupGroupHeaderLayer columnGroupGroupHeaderLayer = null;
@@ -1233,8 +1264,21 @@ public class DefaultTableView implements TableView {
 
         // Create the Row Header layer
         IDataProvider rowHeaderDataProvider = new RowHeader(bodyDataProvider);
-        ILayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
-                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer);
+        RowHeaderLayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
+                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer, false);
+        
+        // Customize Row Header to adapt to current font
+        rowHeaderLayer.addConfiguration(new DefaultRowHeaderLayerConfiguration() {
+            @Override
+            public void addRowHeaderStyleConfig() {
+                this.addConfiguration(new DefaultRowHeaderStyleConfiguration() {
+                    {
+                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
+                    }
+                });
+            }
+        });
 
         // Create the Corner layer
         ILayer cornerLayer = null;
