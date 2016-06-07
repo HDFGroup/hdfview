@@ -63,9 +63,6 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -100,7 +97,6 @@ import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
 import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
-import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
@@ -113,6 +109,7 @@ import org.eclipse.nebula.widgets.nattable.group.ColumnGroupGroupHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
+import org.eclipse.nebula.widgets.nattable.layer.IUniqueIndexLayer;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderLayerConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderLayerConfiguration;
@@ -175,15 +172,18 @@ public class DefaultTableView implements TableView {
     private enum ViewType { TABLE, IMAGE, TEXT };
     private    ViewType viewType = ViewType.TABLE;
 
-    // Used for bitmask operations on data
-    private BitSet                          bitmask                 = null;
-    private BITMASK_OP                      bitmaskOP               = BITMASK_OP.EXTRACT;
-
     /**
      * Numerical data type. B = byte array, S = short array, I = int array, J = long array, F =
      * float array, and D = double array.
      */
     private char                            NT               = ' ';
+
+    private static final int                FLOAT_BUFFER_SIZE       = 524288;
+    private static final int                INT_BUFFER_SIZE         = 524288;
+    private static final int                SHORT_BUFFER_SIZE       = 1048576;
+    private static final int                LONG_BUFFER_SIZE        = 262144;
+    private static final int                DOUBLE_BUFFER_SIZE      = 262144;
+    private static final int                BYTE_BUFFER_SIZE        = 2097152;
 
     // Changed to use normalized scientific notation (1 <= coefficient < 10).
     // private final DecimalFormat scientificFormat = new DecimalFormat("###.#####E0#");
@@ -192,17 +192,14 @@ public class DefaultTableView implements TableView {
     private final NumberFormat              normalFormat     = null; // NumberFormat.getInstance();
     private NumberFormat                    numberFormat     = normalFormat;
 
+    // Used for bitmask operations on data
+    private BitSet                          bitmask                 = null;
+    private BITMASK_OP                      bitmaskOP               = BITMASK_OP.EXTRACT;
+
     // Keeps track of which frame of data is being displayed
     private Text frameField;
     private long curFrame                           = 0;
     private long maxFrame                           = 1;
-
-    private static final int                FLOAT_BUFFER_SIZE       = 524288;
-    private static final int                INT_BUFFER_SIZE         = 524288;
-    private static final int                SHORT_BUFFER_SIZE       = 1048576;
-    private static final int                LONG_BUFFER_SIZE        = 262144;
-    private static final int                DOUBLE_BUFFER_SIZE      = 262144;
-    private static final int                BYTE_BUFFER_SIZE        = 2097152;
 
     private int                             indexBase = 0;
 
@@ -214,14 +211,18 @@ public class DefaultTableView implements TableView {
 
     private boolean                         isValueChanged = false;
 
-    private boolean                         isDisplayTypeChar;
+    private boolean                         isDisplayTypeChar, isDataTransposed;
 
-    private boolean                         isDataTransposed;
-
-    private boolean                         isRegRef = false;
-    private boolean                         isObjRef = false;
-
+    private boolean                         isRegRef = false, isObjRef = false;
     private boolean                         showAsHex = false, showAsBin = false;
+
+    // Keep references to the selection and data layers
+    private SelectionLayer                  selectionLayer;
+    private DataLayer                       dataLayer;
+
+    private IDataProvider                   rowHeaderDataProvider;
+    private IDataProvider                   columnHeaderDataProvider;
+
 
     /**
      * Global variables for GUI components
@@ -248,16 +249,6 @@ public class DefaultTableView implements TableView {
     // Label to indicate the current cell location.
     private Label                           cellLabel;
 
-    // Keep track of table row selections
-    private SelectionLayer                  selectionLayer;
-    
-    private DataLayer                       dataLayer;
-
-    // Used to get/set column header
-    private IDataProvider                   columnHeaderDataProvider;
-
-    private final ColumnGroupModel          columnGroupModel = new ColumnGroupModel();
-    private final ColumnGroupModel          secondLevelGroupModel = new ColumnGroupModel();
 
     /**
      * Constructs a TableView.
@@ -444,7 +435,6 @@ public class DefaultTableView implements TableView {
         cellLabel.setFont(curFont);
 
         cellValueField = new Text(cellValueComposite, SWT.SINGLE | SWT.BORDER | SWT.WRAP);
-        //cellValueField.setWrapStyleWord(true);
         cellValueField.setEditable(false);
         cellValueField.setBackground(new Color(display, 255, 255, 240));
         cellValueField.setEnabled(false);
@@ -568,7 +558,42 @@ public class DefaultTableView implements TableView {
 
         viewer.removeDataView(this);
     }
+    
+    // Implementing TableView
+    @Override
+    public NatTable getTable() {
+        return table;
+    }
+    
+    // Implementing DataView
+    @Override
+    public HObject getDataObject() {
+        return dataset;
+    }
+    
+    /**
+     * Returns the selected data values.
+     */
+    @Override
+    public Object getSelectedData() {
+        if (dataset instanceof CompoundDS) {
+            return getSelectedCompoundData();
+        }
+        else {
+            return getSelectedScalarData();
+        }
+    }
+    
+    @Override
+    public int getSelectedRowCount() {
+        return selectionLayer.getSelectedRowCount();
+    }
 
+    @Override
+    public int getSelectedColumnCount() {
+        return selectionLayer.getSelectedColumnPositions().length;
+    }
+    
     /**
      * Creates a NatTable for a Scalar dataset.
      *
@@ -580,13 +605,9 @@ public class DefaultTableView implements TableView {
      * @return The newly created NatTable
      */
     private NatTable createTable(Composite parent, ScalarDS theDataset) {
-        int rows = 0;
-        int cols = 0;
-
         log.trace("createTable(ScalarDS): start");
 
-        int rank = theDataset.getRank();
-        if (rank <= 0) {
+        if (theDataset.getRank() <= 0) {
             try {
                 theDataset.init();
                 log.trace("createTable: dataset inited");
@@ -596,21 +617,7 @@ public class DefaultTableView implements TableView {
                 dataValue = null;
                 return null;
             }
-
-            rank = theDataset.getRank();
         }
-        long[] dims = theDataset.getSelectedDims();
-
-        if (rank > 1) {
-            rows = (int)theDataset.getHeight();
-            cols = (int)theDataset.getWidth();
-        }
-        else {
-            rows = (int)dims[0];
-            cols = 1;
-        }
-
-        log.trace("createTable: rows={} : cols={}", rows, cols);
 
         dataValue = null;
         try {
@@ -636,7 +643,7 @@ public class DefaultTableView implements TableView {
             theDataset.convertFromUnsignedC();
             dataValue = theDataset.getData();
 
-            if (Array.getLength(dataValue) <= rows) cols = 1;
+            //TODO: Revise if (Array.getLength(dataValue) <= rows) cols = 1;
         }
         catch (Throwable ex) {
             Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
@@ -677,74 +684,36 @@ public class DefaultTableView implements TableView {
         else if ((NT == 'B') && theDataset.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
             Datatype baseType = theDataset.getDatatype().getBasetype();
             if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
-                dataValue = Dataset.byteToString((byte[]) dataValue, (int)baseType.getDatatypeSize());
+                dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
             }
         }
 
-        final String columnNames[] = new String[cols];
-        final long[] startArray = theDataset.getStartDims();
-        final long[] strideArray = theDataset.getStride();
-        int[] selectedIndex = theDataset.getSelectedIndex();
-        final int rowStart = (int) startArray[selectedIndex[0]];
-        final int rowStride = (int) strideArray[selectedIndex[0]];
-        int start = 0;
-        int stride = 1;
-
-        if (rank > 1) {
-            start = (int) startArray[selectedIndex[1]];
-            stride = (int) strideArray[selectedIndex[1]];
-
-            for (int i = 0; i < cols; i++) {
-                columnNames[i] = String.valueOf(start + indexBase + i * stride);
-            }
-        }
-        else {
-            columnNames[0] = "  ";
-        }
 
         // Create body layer
-        final IDataProvider bodyDataProvider = new ScalarDSDataProvider();
+        final ScalarDSDataProvider bodyDataProvider = new ScalarDSDataProvider(theDataset);
         dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
-        ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
+        final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
         dataLayer.setDefaultColumnWidth(80);
+        
+        log.trace("createTable: rows={} : cols={}", bodyDataProvider.getRowCount(), bodyDataProvider.getColumnCount());
+
 
         // Create the Column Header layer
-        columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnNames);
-        ColumnHeaderLayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
-                columnHeaderDataProvider), viewportLayer, selectionLayer, false);
-        
-        // Customize Column Header to adapt to current font
-        columnHeaderLayer.addConfiguration(new DefaultColumnHeaderLayerConfiguration() {
-            @Override
-            public void addColumnHeaderStyleConfig() {
-                this.addConfiguration(new DefaultColumnHeaderStyleConfiguration() {
-                    {
-                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
-                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
-                    }
-                });
-            }
-        });
+        columnHeaderDataProvider = new ScalarDSColumnHeaderDataProvider(theDataset);
+        ColumnHeaderLayer columnHeaderLayer = new ColumnHeader(new DataLayer(columnHeaderDataProvider), viewportLayer, selectionLayer);
+
 
         // Create the Row Header layer
-        IDataProvider rowHeaderDataProvider = new RowHeader(bodyDataProvider);
-        RowHeaderLayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
-                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer, false);
+        rowHeaderDataProvider = new RowHeaderDataProvider(theDataset);
         
-        // Customize Row Header to adapt to current font
-        rowHeaderLayer.addConfiguration(new DefaultRowHeaderLayerConfiguration() {
-            @Override
-            public void addRowHeaderStyleConfig() {
-                this.addConfiguration(new DefaultRowHeaderStyleConfiguration() {
-                    {
-                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
-                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
-                    }
-                });
-            }
-        });
+        // Try to adapt row height to current font
+        int defaultRowHeight = curFont == null ? 20 : (2 * curFont.getFontData()[0].getHeight());
+        
+        DataLayer baseLayer = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
+        RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);
+
 
         // Create the Corner layer
         ILayer cornerLayer = new CornerLayer(new DataLayer(
@@ -752,358 +721,15 @@ public class DefaultTableView implements TableView {
                         rowHeaderDataProvider)), rowHeaderLayer,
                 columnHeaderLayer);
 
-        // Create the Grid layer
-        GridLayer gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
-                rowHeaderLayer, cornerLayer, false);
-        gridLayer.addConfiguration(new DefaultEditConfiguration());
 
-        // Change cell editing to be on double click rather than single click
-        gridLayer.addConfiguration(new AbstractUiBindingConfiguration() {
-            @Override
-            public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-                uiBindingRegistry.registerFirstDoubleClickBinding(
-                    new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
-            }
-        });
+        // Create the Grid layer
+        GridLayer gridLayer = new EditingGridLayer(viewportLayer, columnHeaderLayer, rowHeaderLayer, cornerLayer);
+
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
-
-        // Register cell editing rules with table
-        natTable.addConfiguration(new AbstractRegistryConfiguration() {
-            @Override
-            public void configureRegistry(IConfigRegistry configRegistry) {
-                configRegistry.registerConfigAttribute(
-                        EditConfigAttributes.CELL_EDITABLE_RULE,
-                        getScalarDSEditRule(bodyDataProvider),
-                        DisplayMode.EDIT);
-            }
-
-            @Override
-            public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-            }
-        });
-
-        // Left-align cells and change font for rendering cell text
-        natTable.addConfiguration(new AbstractRegistryConfiguration() {
-            @Override
-            public void configureRegistry(IConfigRegistry configRegistry) {
-                Style cellStyle = new Style();
-
-                cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
-                cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
-                        Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-                
-                if (curFont != null) {
-                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
-                } else {
-                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, Display.getDefault().getSystemFont());
-                }
-
-                configRegistry.registerConfigAttribute(
-                        CellConfigAttributes.CELL_STYLE,
-                        cellStyle);
-            }
-        });
-        
-        // Update cell value label and cell value field when a cell is selected
-        natTable.addLayerListener(new ILayerListener() {
-            public void handleLayerEvent(ILayerEvent e) {
-                if (e instanceof CellSelectionEvent) {
-                    CellSelectionEvent event = (CellSelectionEvent) e;
-                    Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-                    String strVal = null;
-                    
-                    log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-                    
-                    cellLabel.setText(String.valueOf(rowStart + indexBase
-                            + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-                            + ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
-                    
-                    if (isRegRef) {
-                        boolean displayValues = ViewProperties.showRegRefValues();
-                        log.trace("NATTable CellSelected displayValues={}", displayValues);
-                        if (displayValues && val != null && ((String) val).compareTo("NULL") != 0) {
-                            String reg = (String) val;
-                            boolean isPointSelection = (reg.indexOf('-') <= 0);
-
-                            // find the object location
-                            String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf(' '));
-                            log.trace("NATTable CellSelected: isPointSelection={} oidStr={}", isPointSelection, oidStr);
-
-                            // decode the region selection
-                            String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
-                            if (regStr == null || regStr.length() <= 0) { // no
-                                                                          // selection
-                                strVal = null;
-                            }
-                            else {
-                                reg.substring(reg.indexOf('}') + 1);
-
-                                StringTokenizer st = new StringTokenizer(regStr);
-                                int nSelections = st.countTokens();
-                                if (nSelections <= 0) { // no selection
-                                    strVal = null;
-                                }
-                                else {
-                                    log.trace("NATTable CellSelected: nSelections={}", nSelections);
-
-                                    HObject obj = FileFormat.findObject(dataset.getFileFormat(), oidStr);
-                                    if (obj == null || !(obj instanceof ScalarDS)) { // no
-                                                                                     // selection
-                                        strVal = null;
-                                    }
-                                    else {
-                                        ScalarDS dset = (ScalarDS) obj;
-                                        try {
-                                            dset.init();
-                                        }
-                                        catch (Exception ex) {
-                                            log.debug("reference dset did not init()", ex);
-                                        }
-                                        StringBuffer selectionSB = new StringBuffer();
-                                        StringBuffer strvalSB = new StringBuffer();
-
-                                        int idx = 0;
-                                        while (st.hasMoreTokens()) {
-                                            log.trace("NATTable CellSelected: st.hasMoreTokens() begin");
-
-                                            int rank = dset.getRank();
-                                            long start[] = dset.getStartDims();
-                                            long count[] = dset.getSelectedDims();
-                                            // long count[] = new long[rank];
-
-                                            // set the selected dimension sizes
-                                            // based on the region selection
-                                            // info.
-                                            String sizeStr = null;
-                                            String token = st.nextToken();
-
-                                            selectionSB.setLength(0);
-                                            selectionSB.append(token);
-                                            log.trace("NATTable CellSelected: selectionSB={}", selectionSB);
-
-                                            token = token.replace('(', ' ');
-                                            token = token.replace(')', ' ');
-                                            if (isPointSelection) {
-                                                // point selection
-                                                String[] tmp = token.split(",");
-                                                for (int x = 0; x < tmp.length; x++) {
-                                                    count[x] = 1;
-                                                    sizeStr = tmp[x].trim();
-                                                    start[x] = Long.valueOf(sizeStr);
-                                                    log.trace("NATTable CellSelected: point sel={}", tmp[x]);
-                                                }
-                                            }
-                                            else {
-                                                // rectangle selection
-                                                String startStr = token.substring(0, token.indexOf('-'));
-                                                String endStr = token.substring(token.indexOf('-') + 1);
-                                                log.trace("NATTable CellSelected: rect sel with startStr={} endStr={}",
-                                                        startStr, endStr);
-                                                String[] tmp = startStr.split(",");
-                                                log.trace("NATTable CellSelected: tmp with length={} rank={}", tmp.length,
-                                                        rank);
-                                                for (int x = 0; x < tmp.length; x++) {
-                                                    sizeStr = tmp[x].trim();
-                                                    start[x] = Long.valueOf(sizeStr);
-                                                    log.trace("NATTable CellSelected: rect start={}", tmp[x]);
-                                                }
-                                                tmp = endStr.split(",");
-                                                for (int x = 0; x < tmp.length; x++) {
-                                                    sizeStr = tmp[x].trim();
-                                                    count[x] = Long.valueOf(sizeStr) - start[x] + 1;
-                                                    log.trace("NATTable CellSelected: rect end={} count={}", tmp[x],
-                                                            count[x]);
-                                                }
-                                            }
-                                            log.trace("NATTable CellSelected: selection inited");
-
-                                            Object dbuf = null;
-                                            try {
-                                                dbuf = dset.getData();
-                                            }
-                                            catch (Exception ex) {
-                                                Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
-                                            }
-
-                                            // Convert dbuf to a displayable
-                                            // string
-                                            String cName = dbuf.getClass().getName();
-                                            int cIndex = cName.lastIndexOf("[");
-                                            if (cIndex >= 0) {
-                                                NT = cName.charAt(cIndex + 1);
-                                            }
-                                            log.trace("NATTable CellSelected: cName={} NT={}", cName, NT);
-
-                                            if (idx > 0) strvalSB.append(',');
-
-                                            // convert numerical data into char
-                                            // only possible cases are byte[]
-                                            // and short[] (converted from
-                                            // unsigned
-                                            // byte)
-                                            Datatype dtype = dset.getDatatype();
-                                            Datatype baseType = dtype.getBasetype();
-                                            log.trace("NATTable CellSelected: dtype={} baseType={}",
-                                                    dtype.getDatatypeDescription(), baseType);
-                                            if (baseType == null) baseType = dtype;
-                                            if ((dtype.getDatatypeClass() == Datatype.CLASS_ARRAY && baseType.getDatatypeClass() == Datatype.CLASS_CHAR)
-                                                    && ((NT == 'B') || (NT == 'S'))) {
-                                                int n = Array.getLength(dbuf);
-                                                log.trace("NATTable CellSelected charData length = {}", n);
-                                                char[] charData = new char[n];
-                                                for (int i = 0; i < n; i++) {
-                                                    if (NT == 'B') {
-                                                        charData[i] = (char) Array.getByte(dbuf, i);
-                                                    }
-                                                    else if (NT == 'S') {
-                                                        charData[i] = (char) Array.getShort(dbuf, i);
-                                                    }
-                                                }
-
-                                                strvalSB.append(charData);
-                                                log.trace("NATTable CellSelected charData");
-                                            }
-                                            else {
-                                                // numerical values
-                                                if (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY) dtype = baseType;
-                                                boolean is_unsigned = dtype.isUnsigned();
-                                                int n = Array.getLength(dbuf);
-                                                if (is_unsigned) {
-                                                    switch (NT) {
-                                                        case 'B':
-                                                            byte[] barray = (byte[]) dbuf;
-                                                            short sValue = barray[0];
-                                                            if (sValue < 0) {
-                                                                sValue += 256;
-                                                            }
-                                                            strvalSB.append(sValue);
-                                                            for (int i = 1; i < n; i++) {
-                                                                strvalSB.append(',');
-                                                                sValue = barray[i];
-                                                                if (sValue < 0) {
-                                                                    sValue += 256;
-                                                                }
-                                                                strvalSB.append(sValue);
-                                                            }
-                                                            break;
-                                                        case 'S':
-                                                            short[] sarray = (short[]) dbuf;
-                                                            int iValue = sarray[0];
-                                                            if (iValue < 0) {
-                                                                iValue += 65536;
-                                                            }
-                                                            strvalSB.append(iValue);
-                                                            for (int i = 1; i < n; i++) {
-                                                                strvalSB.append(',');
-                                                                iValue = sarray[i];
-                                                                if (iValue < 0) {
-                                                                    iValue += 65536;
-                                                                }
-                                                                strvalSB.append(iValue);
-                                                            }
-                                                            break;
-                                                        case 'I':
-                                                            int[] iarray = (int[]) dbuf;
-                                                            long lValue = iarray[0];
-                                                            if (lValue < 0) {
-                                                                lValue += 4294967296L;
-                                                            }
-                                                            strvalSB.append(lValue);
-                                                            for (int i = 1; i < n; i++) {
-                                                                strvalSB.append(',');
-                                                                lValue = iarray[i];
-                                                                if (lValue < 0) {
-                                                                    lValue += 4294967296L;
-                                                                }
-                                                                strvalSB.append(lValue);
-                                                            }
-                                                            break;
-                                                        case 'J':
-                                                            long[] larray = (long[]) dbuf;
-                                                            Long l = (Long) larray[0];
-                                                            String theValue = Long.toString(l);
-                                                            if (l < 0) {
-                                                                l = (l << 1) >>> 1;
-                                                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                                                BigInteger big2 = new BigInteger(l.toString());
-                                                                BigInteger big = big1.add(big2);
-                                                                theValue = big.toString();
-                                                            }
-                                                            strvalSB.append(theValue);
-                                                            for (int i = 1; i < n; i++) {
-                                                                strvalSB.append(',');
-                                                                l = (Long) larray[i];
-                                                                theValue = Long.toString(l);
-                                                                if (l < 0) {
-                                                                    l = (l << 1) >>> 1;
-                                                                    BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                                                    BigInteger big2 = new BigInteger(l.toString());
-                                                                    BigInteger big = big1.add(big2);
-                                                                    theValue = big.toString();
-                                                                }
-                                                                strvalSB.append(theValue);
-                                                            }
-                                                            break;
-                                                        default:
-                                                            strvalSB.append(Array.get(dbuf, 0));
-                                                            for (int i = 1; i < n; i++) {
-                                                                strvalSB.append(',');
-                                                                strvalSB.append(Array.get(dbuf, i));
-                                                            }
-                                                            break;
-                                                    }
-                                                }
-                                                else {
-                                                    for (int x = 0; x < n; x++) {
-                                                        Object theValue = Array.get(dbuf, x);
-                                                        if (x > 0) strvalSB.append(',');
-                                                        strvalSB.append(theValue);
-                                                    }
-                                                }
-                                                log.trace("NATTable CellSelected byteString");
-                                            }
-                                            idx++;
-                                            dset.clearData();
-                                            log.trace("NATTable CellSelected: st.hasMoreTokens() end");
-                                        } // while (st.hasMoreTokens())
-                                        strVal = strvalSB.toString();
-                                        log.trace("NATTable CellSelected: st.hasMoreTokens() end");
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            strVal = null;
-                        }
-                    }
-                    else if (isObjRef) {
-                        Long ref = (Long) val;
-                        long oid[] = { ref.longValue() };
-
-                        // decode object ID
-                        try {
-                            HObject obj = FileFormat.findObject(dataset.getFileFormat(), oid);
-                            strVal = obj.getFullName();
-                        }
-                        catch (Exception ex) {
-                            strVal = null;
-                        }
-                    }
-
-                    if (strVal == null && val != null) strVal = val.toString();
-
-                    log.trace("NATTable CellSelected finish");
-                    
-                    cellValueField.setText(strVal);
-                }
-            }
-        });
-        
-        if (curFont != null) {
-            dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
-        }
+        natTable.addConfiguration(new CellConfiguration(theDataset));
+        natTable.addLayerListener(new ScalarDSCellSelectionListener());
 
         natTable.configure();
 
@@ -1111,7 +737,7 @@ public class DefaultTableView implements TableView {
 
         return natTable;
     }
-
+    
     /**
      * Creates a NatTable for a Compound dataset
      *
@@ -1126,12 +752,6 @@ public class DefaultTableView implements TableView {
         log.trace("createTable: CompoundDS start");
 
         if (theDataset.getRank() <= 0) theDataset.init();
-
-        long[] startArray = theDataset.getStartDims();
-        long[] strideArray = theDataset.getStride();
-        int[] selectedIndex = theDataset.getSelectedIndex();
-        final int rowStart = (int) startArray[selectedIndex[0]];
-        final int rowStride = (int) strideArray[selectedIndex[0]];
 
         // use lazy convert for large number of strings
         if (theDataset.getHeight() > 10000) {
@@ -1152,235 +772,82 @@ public class DefaultTableView implements TableView {
             return null;
         }
 
-        final int rows = (int)theDataset.getHeight();
-        int cols = theDataset.getSelectedMemberCount();
-        String[] columnNames = new String[cols];
-
-        int idx = 0;
-        String[] columnNamesAll = theDataset.getMemberNames();
-        for (int i = 0; i < columnNamesAll.length; i++) {
-            if (theDataset.isMemberSelected(i)) {
-                columnNames[idx] = columnNamesAll[i];
-                columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
-                idx++;
-            }
-        }
-
-        String[] subColumnNames = columnNames;
-        String[] columnLabels = columnNames;
-        int columns = (int)dataset.getWidth();
-        if (columns > 1) {
-            // multi-dimension compound dataset
-            subColumnNames = new String[columns * columnNames.length];
-            columnLabels = new String[columns * columnNames.length];
-            int halfIdx = columnNames.length / 2;
-            for (int i = 0; i < columns; i++) {
-                for (int j = 0; j < columnNames.length; j++) {
-                    // display column index only once, in the middle of the
-                    // compound fields
-                    if (j == halfIdx) {
-                        subColumnNames[i * columnNames.length + j] = (i + indexBase) + "\n " + columnNames[j];
-                    }
-                    else {
-                        subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
-                    }
-
-                    // This column's name is whatever follows the last nesting character '->'
-                    int nestingPosition = columnNames[j].lastIndexOf("->");
-                    if (nestingPosition != -1) {
-                        columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
-                    } else {
-                        columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
-                    }
-                }
-            }
-        }
-
-        final String[] allColumnNames = subColumnNames;
-        final int numGroups = allColumnNames.length / cols;
 
         // Create body layer
-        final IDataProvider bodyDataProvider = new CompoundDSDataProvider();
+        final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
+        final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
+        
+        final IDataProvider bodyDataProvider = new CompoundDSDataProvider(theDataset);
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
             new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
-        final SelectionLayer selectionLayer = new SelectionLayer(expandCollapseLayer);
+        selectionLayer = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
         dataLayer.setDefaultColumnWidth(80);
 
-        // Create the Column Header layer
-        IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(columnLabels);
-        ColumnHeaderLayer columnHeaderLayer = new ColumnHeaderLayer(new DataLayer(
-                columnHeaderDataProvider), viewportLayer, selectionLayer, false);
-        
-        // Customize Column Header to adapt to current font
-        columnHeaderLayer.addConfiguration(new DefaultColumnHeaderLayerConfiguration() {
-            @Override
-            public void addColumnHeaderStyleConfig() {
-                this.addConfiguration(new DefaultColumnHeaderStyleConfiguration() {
-                    {
-                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
-                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
-                    }
-                });
-            }
-        });
 
-        ColumnGroupHeaderLayer columnGroupHeaderLayer = null;
-        ColumnGroupGroupHeaderLayer columnGroupGroupHeaderLayer = null;
+        // Create the Column Header layer
+        columnHeaderDataProvider = new CompoundDSColumnHeaderDataProvider(theDataset);
+        ColumnHeaderLayer columnHeaderLayer = new ColumnHeader(new DataLayer(
+                columnHeaderDataProvider), viewportLayer, selectionLayer);
+
 
         // Set up column grouping
-        if (numGroups > 1) {
-            columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
-            columnGroupGroupHeaderLayer = new ColumnGroupGroupHeaderLayer(columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
-
-            // Set up first-level column grouping
-            for (int i = 0; i < numGroups; i++) {
-                for (int j = 0; j < cols; j++) {
-                    columnGroupGroupHeaderLayer.addColumnsIndexesToGroup("" + i, (i * cols) + j);
-                }
-            }
-
-            // Set up any further-nested column groups
-            for (int i = 0; i < allColumnNames.length; i++) {
-                int nestingPosition = allColumnNames[i].lastIndexOf("->");
-
-                if (nestingPosition != -1) {
-                    String columnGroupName = secondLevelGroupModel.getColumnGroupByIndex(i).getName();
-                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
-
-                    if(groupTitleStartPosition != -1) {
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
-                                allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
-                                "{" + columnGroupName + "}", i);
-                    } else {
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
-                                allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
-                    }
-                }
-            }
+        CompoundDSNestedColumnHeaderLayer nestedColumnGroupHeaderLayer = null;
+        
+        if (((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups > 1) {
+            ColumnGroupHeaderLayer columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
+            nestedColumnGroupHeaderLayer = new CompoundDSNestedColumnHeaderLayer(columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
         }
 
-        // Create the Row Header layer
-        IDataProvider rowHeaderDataProvider = new RowHeader(bodyDataProvider);
-        RowHeaderLayer rowHeaderLayer = new RowHeaderLayer(new DataLayer(
-                rowHeaderDataProvider, 40, 20), viewportLayer, selectionLayer, false);
-        
-        // Customize Row Header to adapt to current font
-        rowHeaderLayer.addConfiguration(new DefaultRowHeaderLayerConfiguration() {
-            @Override
-            public void addRowHeaderStyleConfig() {
-                this.addConfiguration(new DefaultRowHeaderStyleConfiguration() {
-                    {
-                        this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
-                        this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
-                    }
-                });
-            }
-        });
 
-        // Create the Corner layer
+        // Create the Row Header layer
+        rowHeaderDataProvider = new RowHeaderDataProvider(theDataset);
+        
+        // Try to adapt row height to current font
+        int defaultRowHeight = curFont == null ? 20 : (2 * curFont.getFontData()[0].getHeight());
+        
+        DataLayer baseLayer = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
+        RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);
+
+
+        // Create the Corner Layer
         ILayer cornerLayer = null;
 
-        if (numGroups > 1) {
+        if (nestedColumnGroupHeaderLayer != null) {
+            // Create Corner Layer using configured Column Grouping Header layer
             cornerLayer = new CornerLayer(new DataLayer(
                     new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
                     rowHeaderLayer,
-                    columnGroupGroupHeaderLayer);
-        } else {
+                    nestedColumnGroupHeaderLayer);
+        }
+        else {
+            // Create Corner Layer using default Header layer without column grouping
             cornerLayer = new CornerLayer(new DataLayer(
                     new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
                     rowHeaderLayer,
                     columnHeaderLayer);
         }
 
-        // Create the Grid layer
+
+        // Create the Grid Layer
         GridLayer gridLayer = null;
 
-        if (numGroups > 1) {
-            gridLayer = new GridLayer(viewportLayer, columnGroupGroupHeaderLayer,
-                    rowHeaderLayer, cornerLayer, false);
-        } else {
-            gridLayer = new GridLayer(viewportLayer, columnHeaderLayer,
-                    rowHeaderLayer, cornerLayer, false);
+        if (nestedColumnGroupHeaderLayer != null) {
+            // Create Grid Layer using configured Column Grouping Header layer
+            gridLayer = new EditingGridLayer(viewportLayer, nestedColumnGroupHeaderLayer, rowHeaderLayer, cornerLayer);
+        }
+        else {
+            // Create Grid Layer using default Header layer without column grouping
+            gridLayer = new EditingGridLayer(viewportLayer, columnHeaderLayer, rowHeaderLayer, cornerLayer);
         }
 
-        gridLayer.addConfiguration(new DefaultEditConfiguration());
-
-        // Change cell editing to be on double click rather than single click
-        gridLayer.addConfiguration(new AbstractUiBindingConfiguration() {
-            @Override
-            public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-                uiBindingRegistry.registerFirstDoubleClickBinding(
-                    new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
-            }
-        });
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
-
-        // Register cell editing rules with table
-        natTable.addConfiguration(new AbstractRegistryConfiguration() {
-            @Override
-            public void configureRegistry(IConfigRegistry configRegistry) {
-                configRegistry.registerConfigAttribute(
-                        EditConfigAttributes.CELL_EDITABLE_RULE,
-                        getCompoundDSEditRule(bodyDataProvider),
-                        DisplayMode.EDIT);
-            }
-
-            @Override
-            public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-            }
-        });
-
-        // Left-align cells and change font for rendering cell text
-        natTable.addConfiguration(new AbstractRegistryConfiguration() {
-            @Override
-            public void configureRegistry(IConfigRegistry configRegistry) {
-                Style cellStyle = new Style();
-
-                cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
-                cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
-                        Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-                
-                if (curFont != null) {
-                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
-                } else {
-                    cellStyle.setAttributeValue(CellStyleAttributes.FONT, Display.getDefault().getSystemFont());
-                }
-
-                configRegistry.registerConfigAttribute(
-                        CellConfigAttributes.CELL_STYLE,
-                        cellStyle);
-            }
-        });
-        
-        // Update cell value label and cell value field when a cell is selected
-        natTable.addLayerListener(new ILayerListener() {
-            public void handleLayerEvent(ILayerEvent e) {
-                if (e instanceof CellSelectionEvent) {
-                    CellSelectionEvent event = (CellSelectionEvent) e;
-                    Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-                    
-                    log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-                    
-                    cellLabel.setText(String.valueOf(rowStart + indexBase
-                            + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-                            + ", " //+ table.getColumnName(column)
-                            + "  =  ");
-                    
-                    cellValueField.setText(val.toString());
-                    
-                    log.trace("NATTable CellSelected finish");
-                }
-            }
-        });
-        
-        if (curFont != null) {
-            dataLayer.setDefaultRowHeight(2 * curFont.getFontData()[0].getHeight());
-        }
+        natTable.addConfiguration(new CellConfiguration(theDataset));
+        natTable.addLayerListener(new CompoundDSCellSelectionListener());
 
         natTable.configure();
 
@@ -1388,7 +855,7 @@ public class DefaultTableView implements TableView {
 
         return natTable;
     }
-
+    
     /**
      * Creates the menubar for the NatTable.
      */
@@ -2132,7 +1599,7 @@ public class DefaultTableView implements TableView {
 
         return menu;
     }
-
+    
     // Flip to previous page of Table
     private void previousPage() {
         // Only valid operation if dataset has 3 or more dimensions
@@ -2242,7 +1709,7 @@ public class DefaultTableView implements TableView {
 
         table.doCommand(new VisualRefreshCommand());
     }
-
+    
     /**
      * Update dataset value in file. The changes will go to the file.
      */
@@ -2450,30 +1917,7 @@ public class DefaultTableView implements TableView {
 
         return idx;
     }
-
-    /**
-     * Returns the selected data values.
-     */
-    @Override
-    public Object getSelectedData() {
-        if (dataset instanceof CompoundDS) {
-            return getSelectedCompoundData();
-        }
-        else {
-            return getSelectedScalarData();
-        }
-    }
-
-    @Override
-    public int getSelectedColumnCount() {
-        return selectionLayer.getSelectedColumnPositions().length;
-    }
-
-    @Override
-    public int getSelectedRowCount() {
-        return selectionLayer.getSelectedRowCount();
-    }
-
+    
     /**
      * Returns the selected data values of the ScalarDS
      */
@@ -2698,18 +2142,6 @@ public class DefaultTableView implements TableView {
             System.gc();
             isValueChanged = true;
         }
-    }
-
-    // Implementing DataView
-    @Override
-    public HObject getDataObject() {
-        return dataset;
-    }
-
-    // Implementing TableView
-    @Override
-    public NatTable getTable() {
-        return table;
     }
 
     /**
@@ -3107,7 +2539,7 @@ public class DefaultTableView implements TableView {
         }
         else if (types[column].getDatatypeClass() == Datatype.CLASS_STRING) {
             // it is string but not converted, still byte array
-            int strlen = (int)types[column].getDatatypeSize();
+            int strlen = (int) types[column].getDatatypeSize();
             offset *= strlen;
             byte[] bytes = cellValue.getBytes();
             byte[] bData = (byte[]) mdata;
@@ -4156,9 +3588,9 @@ public class DefaultTableView implements TableView {
 
         cv.open();
     }
-
-    // Allow a ScalarDS cell to be edited under specific conditions
-    private IEditableRule getScalarDSEditRule(final IDataProvider dataProvider) {
+    
+    // Allow editing under specific conditions
+    private IEditableRule getScalarDSEditingRule(final ScalarDS theDataset) {
         return new EditableRule() {
             @Override
             public boolean isEditable(int columnIndex, int rowIndex) {
@@ -4172,9 +3604,9 @@ public class DefaultTableView implements TableView {
             }
         };
     }
-
-    // Allow a CompoundDS cell to be edited as long as TableView is not in read-only mode
-    private IEditableRule getCompoundDSEditRule(final IDataProvider dataProvider) {
+    
+    // Only Allow editing of CompoundDS if not in read-only mode
+    private IEditableRule getCompoundDSEditingRule(final CompoundDS theDataset) {
         return new EditableRule() {
             @Override
             public boolean isEditable(int columnIndex, int rowIndex) {
@@ -4182,26 +3614,59 @@ public class DefaultTableView implements TableView {
             }
         };
     }
-
+    
+    /**
+     * Provides the NatTable with data from a Scalar Dataset for each cell.
+     */
     private class ScalarDSDataProvider implements IDataProvider {
-        private final StringBuffer stringBuffer     = new StringBuffer();
-        private final Datatype     dtype            = dataset.getDatatype();
-        private final Datatype     btype            = dtype.getBasetype();
-        private final long          typeSize         = dtype.getDatatypeSize();
-        private final boolean      isArray          = (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY);
-        private final boolean      isStr            = (NT == 'L');
-        private final boolean      isInt            = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
-        private final boolean      isUINT64         = (dtype.isUnsigned() && (NT == 'J'));
+        
+        private final StringBuffer stringBuffer;
+        
+        private final Datatype     dtype;
+        private final Datatype     btype;
+        
+        private final long         typeSize;
+        
+        private final long[]       dims;
+        
+        private final boolean      isArray;
+        private final boolean      isStr;
+        private final boolean      isInt;
+        private final boolean      isUINT64;
+        
         private Object             theValue;
 
-        boolean                    isNaturalOrder   = (dataset.getRank() == 1 || (dataset.getSelectedIndex()[0] < dataset
-                                                            .getSelectedIndex()[1]));
+        private final boolean      isNaturalOrder;
 
-        private long                rowCount         = dataset.getHeight();
-        private long                colCount         = dataset.getWidth();
+        private final long         rowCount;
+        private final long         colCount;
 
-        public ScalarDSDataProvider() {
-
+        public ScalarDSDataProvider(ScalarDS theDataset) {
+            stringBuffer = new StringBuffer();
+            
+            dtype = theDataset.getDatatype();
+            btype = dtype.getBasetype();
+            
+            dims = theDataset.getSelectedDims();
+            
+            typeSize = dtype.getDatatypeSize();
+            
+            isArray = (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY);
+            isStr = (NT == 'L');
+            isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
+            isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
+            
+            isNaturalOrder = (theDataset.getRank() == 1 || (theDataset.getSelectedIndex()[0] < theDataset
+                    .getSelectedIndex()[1]));
+            
+            if (theDataset.getRank() > 1) {
+                rowCount = theDataset.getHeight();
+                colCount = theDataset.getWidth();
+            }
+            else {
+                rowCount = (int) dims[0];
+                colCount = 1;
+            }
         }
 
         @Override
@@ -4263,12 +3728,12 @@ public class DefaultTableView implements TableView {
                 log.trace("ScalarDS:ScalarDSDataProvider:getValueAt index={} isStr={} isUINT64={}", index, isStr, isUINT64);
 
                 if (isStr) {
-                    theValue = Array.get(dataValue, (int)index);
+                    theValue = Array.get(dataValue, (int) index);
                     return theValue;
                 }
 
                 if (isUINT64) {
-                    theValue = Array.get(dataValue, (int)index);
+                    theValue = Array.get(dataValue, (int) index);
                     Long l = (Long) theValue;
                     if (l < 0) {
                         l = (l << 1) >>> 1;
@@ -4279,22 +3744,22 @@ public class DefaultTableView implements TableView {
                     }
                 }
                 else if (showAsHex && isInt) {
-                    theValue = Array.get(dataValue, (int)index);
-                    theValue = Tools.toHexString(Long.valueOf(theValue.toString()), (int)typeSize);
+                    theValue = Array.get(dataValue, (int) index);
+                    theValue = Tools.toHexString(Long.valueOf(theValue.toString()), (int) typeSize);
                 }
                 else if (showAsBin && isInt) {
-                    theValue = Array.get(dataValue, (int)index);
-                    theValue = Tools.toBinaryString(Long.valueOf(theValue.toString()), (int)typeSize);
+                    theValue = Array.get(dataValue, (int) index);
+                    theValue = Tools.toBinaryString(Long.valueOf(theValue.toString()), (int) typeSize);
                     // theValue =
                     // Long.toBinaryString(Long.valueOf(theValue.toString()));
                 }
                 else if (numberFormat != null) {
                     // show in scientific format
-                    theValue = Array.get(dataValue, (int)index);
+                    theValue = Array.get(dataValue, (int) index);
                     theValue = numberFormat.format(theValue);
                 }
                 else {
-                    theValue = Array.get(dataValue, (int)index);
+                    theValue = Array.get(dataValue, (int) index);
                 }
             }
 
@@ -4316,27 +3781,40 @@ public class DefaultTableView implements TableView {
 
         @Override
         public int getColumnCount() {
-            return (int)colCount;
+            return (int) colCount;
         }
 
         @Override
         public int getRowCount() {
-            return (int)rowCount;
+            return (int) rowCount;
         }
     }
-
+    
+    /**
+     * Provides the NatTable with data from a Compound Dataset for each cell.
+     */
     private class CompoundDSDataProvider implements IDataProvider {
-        CompoundDS                compound         = (CompoundDS) dataset;
-        int                       orders[]         = compound.getSelectedMemberOrders();
-        Datatype                  types[]          = compound.getSelectedMemberTypes();
-        StringBuffer              stringBuffer     = new StringBuffer();
-        int                       nFields          = ((List<?>) dataValue).size();
-        int                       nRows            = (int) compound.getHeight();
-        int                       nCols            = (int) (compound.getWidth() * compound.getSelectedMemberCount());
-        int                       nSubColumns      = (nFields > 0) ? getColumnCount() / nFields : 0;
+        
+        private final StringBuffer      stringBuffer;
+        
+        private final Datatype          types[];
+        
+        private final int               orders[];
+        private final int               nFields;
+        private final int               nRows;
+        private final int               nCols;
+        private final int               nSubColumns;
 
-        public CompoundDSDataProvider() {
-
+        public CompoundDSDataProvider(CompoundDS theDataset) {
+            stringBuffer = new StringBuffer();
+            
+            types = theDataset.getSelectedMemberTypes();
+            
+            orders = theDataset.getSelectedMemberOrders();
+            nFields = ((List<?>) dataValue).size();
+            nRows = (int) theDataset.getHeight();
+            nCols = (int) (theDataset.getWidth() * theDataset.getSelectedMemberCount());
+            nSubColumns = (nFields > 0) ? getColumnCount() / nFields : 0;
         }
 
         @Override
@@ -4379,10 +3857,10 @@ public class DefaultTableView implements TableView {
             log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): isString={} getBasetype()={}", isString, types[fieldIdx].getDatatypeClass());
             if (isString && ((colValue instanceof byte[]) || isArray)) {
                 // strings
-                int strlen = (int)dtype.getDatatypeSize();
+                int strlen = (int) dtype.getDatatypeSize();
                 int arraylen = strlen;
                 if(isArray) {
-                    arraylen = (int)types[fieldIdx].getDatatypeSize();
+                    arraylen = (int) types[fieldIdx].getDatatypeSize();
                 }
                 log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} of {} isString={} of {}", isArray, arraylen, isString, strlen);
                 int arraycnt = arraylen / strlen;
@@ -4399,7 +3877,7 @@ public class DefaultTableView implements TableView {
                 }
             }
             else if (isArray) {
-                int arraylen = (int)types[fieldIdx].getDatatypeSize();
+                int arraylen = (int) types[fieldIdx].getDatatypeSize();
                 log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} of {} istype={}", isArray, arraylen, dtype);
                 String str = new String( "*unsupported*");
                 stringBuffer.append(str.trim());
@@ -4415,7 +3893,7 @@ public class DefaultTableView implements TableView {
 
                 boolean isUINT64 = false;
                 boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
-                int typeSize = (int)dtype.getDatatypeSize();
+                int typeSize = (int) dtype.getDatatypeSize();
 
                 if ((dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) || (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE)) {
                     CshowAsHex = true;
@@ -4510,46 +3988,35 @@ public class DefaultTableView implements TableView {
             return nRows;
         }
     }
-
-    // Custom Row Header renderer to set Row Header based on Index Base
-    private class RowHeader implements IDataProvider {
-
-        private int rank;
-        private long[] dims;
-        private long[] startArray;
-        private long[] strideArray;
-        private int[] selectedIndex;
+    
+    /**
+     * Custom Row Header data provider to set row indices based on Index Base
+     * for both Scalar Datasets and Compound Datasets.
+     */
+    private class RowHeaderDataProvider implements IDataProvider {
         
-        private int start;
-        private int stride;
+        private final int         rank;
+        private final long[]      dims;
+        private final long[]      startArray;
+        private final long[]      strideArray;
+        private final int[]       selectedIndex;
+        
+        private final int         start;
+        private final int         stride;
 
-        private int nrows;
+        private final int         nrows;
 
-        public RowHeader(IDataProvider bodyDataProvider) {
-            this.rank = dataset.getRank();
-
-            if (rank <= 0) {
-                try {
-                    dataset.init();
-                    log.trace("createTable: dataset inited");
-                }
-                catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText() + ": createTable");
-                    dataValue = null;
-                    return;
-                }
-
-                rank = dataset.getRank();
-            }
-
-            this.dims = dataset.getSelectedDims();
-            this.startArray = dataset.getStartDims();
-            this.strideArray = dataset.getStride();
-            this.selectedIndex = dataset.getSelectedIndex();
+        public RowHeaderDataProvider(Dataset theDataset) {
+            this.rank = theDataset.getRank();
+            this.dims = theDataset.getSelectedDims();
+            this.startArray = theDataset.getStartDims();
+            this.strideArray = theDataset.getStride();
+            this.selectedIndex = theDataset.getSelectedIndex();
 
             if (rank > 1) {
-                this.nrows = (int)dataset.getHeight();
-            } else {
+                this.nrows = (int) theDataset.getHeight();
+            }
+            else {
                 this.nrows = (int) dims[0];
             }
             
@@ -4574,24 +4041,638 @@ public class DefaultTableView implements TableView {
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-            // Should not allow user to set row header titles
             return;
         }
     }
-
-    // Context-menu for dealing with region and object references
-    private class RefContextMenu extends AbstractUiBindingConfiguration {
-        private final Menu contextMenu;
-
-        public RefContextMenu(NatTable table) {
-            this.contextMenu = new PopupMenuBuilder(table).build();
+    
+    /**
+     * Custom Column Header data provider to set column indices based on Index Base
+     * for Scalar Datasets.
+     */
+    private class ScalarDSColumnHeaderDataProvider implements IDataProvider {
+        
+        private final String    columnNames[];
+        
+        private final int       rank;
+        
+        private final long[]    startArray;
+        private final long[]    strideArray;
+        private final int[]     selectedIndex;
+        
+        private final int       ncols;
+        
+        public ScalarDSColumnHeaderDataProvider(ScalarDS theDataset) {
+            rank = theDataset.getRank();
+            
+            startArray = theDataset.getStartDims();
+            strideArray = theDataset.getStride();
+            selectedIndex = theDataset.getSelectedIndex();
+            
+            if (rank > 1) {
+                ncols = (int) theDataset.getWidth();
+                
+                int start = (int) startArray[selectedIndex[1]];
+                int stride = (int) strideArray[selectedIndex[1]];
+                
+                columnNames = new String[ncols];
+                
+                for (int i = 0; i < ncols; i++) {
+                    columnNames[i] = String.valueOf(start + indexBase + i * stride);
+                }
+            }
+            else {
+                ncols = 1;
+                
+                columnNames = new String[] { "  " };
+            }
         }
-
+        
         @Override
-        public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-            uiBindingRegistry.registerMouseDownBinding(
-                    new MouseEventMatcher(SWT.NONE, GridRegion.BODY, MouseEventMatcher.RIGHT_BUTTON),
-                                          new PopupMenuAction(this.contextMenu));
+        public int getColumnCount() {
+            return ncols;
+        }
+        
+        @Override
+        public int getRowCount() {
+            return 1;
+        }
+        
+        @Override
+        public Object getDataValue(int columnIndex, int rowIndex) {
+            return columnNames[columnIndex];
+        }
+        
+        @Override
+        public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
+            return;
+        }
+    }
+    
+    /**
+     * Custom Column Header data provider to set column names based on
+     * selected members for Compound Datasets.
+     */
+    private class CompoundDSColumnHeaderDataProvider implements IDataProvider {
+        
+        private final String[]  allColumnNames;
+        private String[]        columnLabels;
+        
+        private int             ncols;
+        private final int       numGroups;
+        private final int       groupSize;
+        
+        public CompoundDSColumnHeaderDataProvider(CompoundDS theDataset) {
+            ncols = theDataset.getSelectedMemberCount();
+            
+            final String[] columnNames = new String[ncols];
+            
+            int idx = 0;
+            String[] columnNamesAll = theDataset.getMemberNames();
+            for (int i = 0; i < columnNamesAll.length; i++) {
+                if (theDataset.isMemberSelected(i)) {
+                    columnNames[idx] = columnNamesAll[i];
+                    columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
+                    idx++;
+                }
+            }
+            
+            String[] subColumnNames = columnNames;
+            columnLabels = columnNames;
+            int columns = (int) theDataset.getWidth();
+            if (columns > 1) {
+                // multi-dimension compound dataset
+                subColumnNames = new String[columns * columnNames.length];
+                columnLabels = new String[columns * columnNames.length];
+                int halfIdx = columnNames.length / 2;
+                for (int i = 0; i < columns; i++) {
+                    for (int j = 0; j < columnNames.length; j++) {
+                        // display column index only once, in the middle of the
+                        // compound fields
+                        if (j == halfIdx) {
+                            subColumnNames[i * columnNames.length + j] = (i + indexBase) + "\n " + columnNames[j];
+                        }
+                        else {
+                            subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
+                        }
+
+                        // This column's name is whatever follows the last nesting character '->'
+                        int nestingPosition = columnNames[j].lastIndexOf("->");
+                        if (nestingPosition != -1) {
+                            columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
+                        }
+                        else {
+                            columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
+                        }
+                    }
+                }
+            }
+            
+            allColumnNames = subColumnNames;
+            numGroups = allColumnNames.length / ncols;
+            
+            groupSize = theDataset.getSelectedMemberCount();
+            
+            if (numGroups > 1) {
+                ncols = (int) theDataset.getWidth() * theDataset.getSelectedMemberCount();
+            }
+        }
+        
+        @Override
+        public int getColumnCount() {
+            return ncols;
+        }
+        
+        @Override
+        public int getRowCount() {
+            return 1;
+        }
+        
+        @Override
+        public Object getDataValue(int columnIndex, int rowIndex) {
+            return columnLabels[columnIndex];
+        }
+        
+        @Override
+        public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
+            return;
+        }
+    }
+    
+    /**
+     * Implementation of Column Grouping for Compound Datasets with nested members.
+     */
+    private class CompoundDSNestedColumnHeaderLayer extends ColumnGroupGroupHeaderLayer {
+        public CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer, SelectionLayer selectionLayer, ColumnGroupModel columnGroupModel) {
+            super(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
+            
+            final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).allColumnNames;
+            final int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
+            final int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
+            
+            // Set up first-level column grouping
+            for (int i = 0; i < numGroups; i++) {
+                for (int j = 0; j < groupSize; j++) {
+                    this.addColumnsIndexesToGroup("" + i, (i * groupSize) + j);
+                }
+            }
+            
+            // Set up any further-nested column groups
+            for (int i = 0; i < allColumnNames.length; i++) {
+                int nestingPosition = allColumnNames[i].lastIndexOf("->");
+
+                if (nestingPosition != -1) {
+                    String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
+                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
+
+                    if(groupTitleStartPosition != -1) {
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+                                allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
+                                "{" + columnGroupName + "}", i);
+                    }
+                    else {
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+                                allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * An implementation of the table's Column Header which adapts to the current font.
+     */
+    private class ColumnHeader extends ColumnHeaderLayer {
+        public ColumnHeader(IUniqueIndexLayer baseLayer, ILayer horizontalLayerDependency, SelectionLayer selectionLayer) {
+            super(baseLayer, horizontalLayerDependency, selectionLayer, false);
+            
+            this.addConfiguration(new DefaultColumnHeaderLayerConfiguration() {
+                @Override
+                public void addColumnHeaderStyleConfig() {
+                    this.addConfiguration(new DefaultColumnHeaderStyleConfiguration() {
+                        {
+                            this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+                            this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
+                        }
+                    });
+                }
+            });
+        }
+    }
+    
+    /**
+     * An implementation of the table's Row Header which adapts to the current font.
+     */
+    private class RowHeader extends RowHeaderLayer {
+        public RowHeader(IUniqueIndexLayer baseLayer, ILayer verticalLayerDependency, SelectionLayer selectionLayer) {
+            super(baseLayer, verticalLayerDependency, selectionLayer);
+            
+            this.addConfiguration(new DefaultRowHeaderLayerConfiguration() {
+                @Override
+                public void addRowHeaderStyleConfig() {
+                    this.addConfiguration(new DefaultRowHeaderStyleConfiguration() {
+                        {
+                            this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+                            this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
+                        }
+                    });
+                }
+            });
+        }
+    }
+    
+    /**
+     * An implementation of a GridLayer with support for column grouping and with
+     * editing triggered by a double click instead of a single click.
+     */
+    private class EditingGridLayer extends GridLayer {
+        public EditingGridLayer(ILayer bodyLayer, ILayer columnHeaderLayer, ILayer rowHeaderLayer, ILayer cornerLayer) {
+            super(bodyLayer, columnHeaderLayer, rowHeaderLayer, cornerLayer, false);
+            
+            // Add default bindings for editing
+            this.addConfiguration(new DefaultEditConfiguration());
+            
+            // Change cell editing to be on double click rather than single click
+            this.addConfiguration(new AbstractUiBindingConfiguration() {
+                @Override
+                public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+                    uiBindingRegistry.registerFirstDoubleClickBinding(
+                        new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
+                }
+            });
+        }
+    }
+    
+    /**
+     * Custom configuration for editing and rendering cells in the table.
+     */
+    private class CellConfiguration extends AbstractRegistryConfiguration {
+        private final Dataset theDataset;
+        
+        public CellConfiguration(Dataset theDataset) {
+            this.theDataset = theDataset;
+        }
+        
+        @Override
+        public void configureRegistry(IConfigRegistry configRegistry) {
+            // Register cell editing rules with table
+            if (theDataset instanceof ScalarDS) {
+                configRegistry.registerConfigAttribute(
+                        EditConfigAttributes.CELL_EDITABLE_RULE,
+                        getScalarDSEditingRule((ScalarDS) theDataset),
+                        DisplayMode.EDIT);
+            } else {
+                configRegistry.registerConfigAttribute(
+                        EditConfigAttributes.CELL_EDITABLE_RULE,
+                        getCompoundDSEditingRule((CompoundDS) theDataset),
+                        DisplayMode.EDIT);
+            }
+            
+            // Left-align cells and change font for rendering cell text
+            Style cellStyle = new Style();
+
+            cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
+            cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
+                    Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+            
+            if (curFont != null) {
+                cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
+            }
+            else {
+                cellStyle.setAttributeValue(CellStyleAttributes.FONT, Display.getDefault().getSystemFont());
+            }
+
+            configRegistry.registerConfigAttribute(
+                    CellConfigAttributes.CELL_STYLE,
+                    cellStyle);
+        }
+    }
+    
+    /**
+     * Update cell value label and cell value field when a cell is selected
+     */
+    private class ScalarDSCellSelectionListener implements ILayerListener {
+        @Override
+        public void handleLayerEvent(ILayerEvent e) {
+            if (e instanceof CellSelectionEvent) {
+                CellSelectionEvent event = (CellSelectionEvent) e;
+                Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                String strVal = null;
+                
+                log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                
+                String[] columnNames = ((ScalarDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNames;
+                int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
+                int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
+                
+                cellLabel.setText(String.valueOf(rowStart + indexBase
+                        + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
+                        + ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
+                
+                if (isRegRef) {
+                    boolean displayValues = ViewProperties.showRegRefValues();
+                    log.trace("NATTable CellSelected displayValues={}", displayValues);
+                    if (displayValues && val != null && ((String) val).compareTo("NULL") != 0) {
+                        String reg = (String) val;
+                        boolean isPointSelection = (reg.indexOf('-') <= 0);
+
+                        // find the object location
+                        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf(' '));
+                        log.trace("NATTable CellSelected: isPointSelection={} oidStr={}", isPointSelection, oidStr);
+
+                        // decode the region selection
+                        String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
+                        if (regStr == null || regStr.length() <= 0) { // no
+                                                                      // selection
+                            strVal = null;
+                        }
+                        else {
+                            reg.substring(reg.indexOf('}') + 1);
+
+                            StringTokenizer st = new StringTokenizer(regStr);
+                            int nSelections = st.countTokens();
+                            if (nSelections <= 0) { // no selection
+                                strVal = null;
+                            }
+                            else {
+                                log.trace("NATTable CellSelected: nSelections={}", nSelections);
+
+                                HObject obj = FileFormat.findObject(dataset.getFileFormat(), oidStr);
+                                if (obj == null || !(obj instanceof ScalarDS)) { // no
+                                                                                 // selection
+                                    strVal = null;
+                                }
+                                else {
+                                    ScalarDS dset = (ScalarDS) obj;
+                                    try {
+                                        dset.init();
+                                    }
+                                    catch (Exception ex) {
+                                        log.debug("reference dset did not init()", ex);
+                                    }
+                                    StringBuffer selectionSB = new StringBuffer();
+                                    StringBuffer strvalSB = new StringBuffer();
+
+                                    int idx = 0;
+                                    while (st.hasMoreTokens()) {
+                                        log.trace("NATTable CellSelected: st.hasMoreTokens() begin");
+
+                                        int rank = dset.getRank();
+                                        long start[] = dset.getStartDims();
+                                        long count[] = dset.getSelectedDims();
+                                        // long count[] = new long[rank];
+
+                                        // set the selected dimension sizes
+                                        // based on the region selection
+                                        // info.
+                                        String sizeStr = null;
+                                        String token = st.nextToken();
+
+                                        selectionSB.setLength(0);
+                                        selectionSB.append(token);
+                                        log.trace("NATTable CellSelected: selectionSB={}", selectionSB);
+
+                                        token = token.replace('(', ' ');
+                                        token = token.replace(')', ' ');
+                                        if (isPointSelection) {
+                                            // point selection
+                                            String[] tmp = token.split(",");
+                                            for (int x = 0; x < tmp.length; x++) {
+                                                count[x] = 1;
+                                                sizeStr = tmp[x].trim();
+                                                start[x] = Long.valueOf(sizeStr);
+                                                log.trace("NATTable CellSelected: point sel={}", tmp[x]);
+                                            }
+                                        }
+                                        else {
+                                            // rectangle selection
+                                            String startStr = token.substring(0, token.indexOf('-'));
+                                            String endStr = token.substring(token.indexOf('-') + 1);
+                                            log.trace("NATTable CellSelected: rect sel with startStr={} endStr={}",
+                                                    startStr, endStr);
+                                            String[] tmp = startStr.split(",");
+                                            log.trace("NATTable CellSelected: tmp with length={} rank={}", tmp.length,
+                                                    rank);
+                                            for (int x = 0; x < tmp.length; x++) {
+                                                sizeStr = tmp[x].trim();
+                                                start[x] = Long.valueOf(sizeStr);
+                                                log.trace("NATTable CellSelected: rect start={}", tmp[x]);
+                                            }
+                                            tmp = endStr.split(",");
+                                            for (int x = 0; x < tmp.length; x++) {
+                                                sizeStr = tmp[x].trim();
+                                                count[x] = Long.valueOf(sizeStr) - start[x] + 1;
+                                                log.trace("NATTable CellSelected: rect end={} count={}", tmp[x],
+                                                        count[x]);
+                                            }
+                                        }
+                                        log.trace("NATTable CellSelected: selection inited");
+
+                                        Object dbuf = null;
+                                        try {
+                                            dbuf = dset.getData();
+                                        }
+                                        catch (Exception ex) {
+                                            Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
+                                        }
+
+                                        // Convert dbuf to a displayable
+                                        // string
+                                        String cName = dbuf.getClass().getName();
+                                        int cIndex = cName.lastIndexOf("[");
+                                        if (cIndex >= 0) {
+                                            NT = cName.charAt(cIndex + 1);
+                                        }
+                                        log.trace("NATTable CellSelected: cName={} NT={}", cName, NT);
+
+                                        if (idx > 0) strvalSB.append(',');
+
+                                        // convert numerical data into char
+                                        // only possible cases are byte[]
+                                        // and short[] (converted from
+                                        // unsigned
+                                        // byte)
+                                        Datatype dtype = dset.getDatatype();
+                                        Datatype baseType = dtype.getBasetype();
+                                        log.trace("NATTable CellSelected: dtype={} baseType={}",
+                                                dtype.getDatatypeDescription(), baseType);
+                                        if (baseType == null) baseType = dtype;
+                                        if ((dtype.getDatatypeClass() == Datatype.CLASS_ARRAY && baseType.getDatatypeClass() == Datatype.CLASS_CHAR)
+                                                && ((NT == 'B') || (NT == 'S'))) {
+                                            int n = Array.getLength(dbuf);
+                                            log.trace("NATTable CellSelected charData length = {}", n);
+                                            char[] charData = new char[n];
+                                            for (int i = 0; i < n; i++) {
+                                                if (NT == 'B') {
+                                                    charData[i] = (char) Array.getByte(dbuf, i);
+                                                }
+                                                else if (NT == 'S') {
+                                                    charData[i] = (char) Array.getShort(dbuf, i);
+                                                }
+                                            }
+
+                                            strvalSB.append(charData);
+                                            log.trace("NATTable CellSelected charData");
+                                        }
+                                        else {
+                                            // numerical values
+                                            if (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY) dtype = baseType;
+                                            boolean is_unsigned = dtype.isUnsigned();
+                                            int n = Array.getLength(dbuf);
+                                            if (is_unsigned) {
+                                                switch (NT) {
+                                                    case 'B':
+                                                        byte[] barray = (byte[]) dbuf;
+                                                        short sValue = barray[0];
+                                                        if (sValue < 0) {
+                                                            sValue += 256;
+                                                        }
+                                                        strvalSB.append(sValue);
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            sValue = barray[i];
+                                                            if (sValue < 0) {
+                                                                sValue += 256;
+                                                            }
+                                                            strvalSB.append(sValue);
+                                                        }
+                                                        break;
+                                                    case 'S':
+                                                        short[] sarray = (short[]) dbuf;
+                                                        int iValue = sarray[0];
+                                                        if (iValue < 0) {
+                                                            iValue += 65536;
+                                                        }
+                                                        strvalSB.append(iValue);
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            iValue = sarray[i];
+                                                            if (iValue < 0) {
+                                                                iValue += 65536;
+                                                            }
+                                                            strvalSB.append(iValue);
+                                                        }
+                                                        break;
+                                                    case 'I':
+                                                        int[] iarray = (int[]) dbuf;
+                                                        long lValue = iarray[0];
+                                                        if (lValue < 0) {
+                                                            lValue += 4294967296L;
+                                                        }
+                                                        strvalSB.append(lValue);
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            lValue = iarray[i];
+                                                            if (lValue < 0) {
+                                                                lValue += 4294967296L;
+                                                            }
+                                                            strvalSB.append(lValue);
+                                                        }
+                                                        break;
+                                                    case 'J':
+                                                        long[] larray = (long[]) dbuf;
+                                                        Long l = (Long) larray[0];
+                                                        String theValue = Long.toString(l);
+                                                        if (l < 0) {
+                                                            l = (l << 1) >>> 1;
+                                                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                                                            BigInteger big2 = new BigInteger(l.toString());
+                                                            BigInteger big = big1.add(big2);
+                                                            theValue = big.toString();
+                                                        }
+                                                        strvalSB.append(theValue);
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            l = (Long) larray[i];
+                                                            theValue = Long.toString(l);
+                                                            if (l < 0) {
+                                                                l = (l << 1) >>> 1;
+                                                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                                                                BigInteger big2 = new BigInteger(l.toString());
+                                                                BigInteger big = big1.add(big2);
+                                                                theValue = big.toString();
+                                                            }
+                                                            strvalSB.append(theValue);
+                                                        }
+                                                        break;
+                                                    default:
+                                                        strvalSB.append(Array.get(dbuf, 0));
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            strvalSB.append(Array.get(dbuf, i));
+                                                        }
+                                                        break;
+                                                }
+                                            }
+                                            else {
+                                                for (int x = 0; x < n; x++) {
+                                                    Object theValue = Array.get(dbuf, x);
+                                                    if (x > 0) strvalSB.append(',');
+                                                    strvalSB.append(theValue);
+                                                }
+                                            }
+                                            log.trace("NATTable CellSelected byteString");
+                                        }
+                                        idx++;
+                                        dset.clearData();
+                                        log.trace("NATTable CellSelected: st.hasMoreTokens() end");
+                                    } // while (st.hasMoreTokens())
+                                    strVal = strvalSB.toString();
+                                    log.trace("NATTable CellSelected: st.hasMoreTokens() end");
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        strVal = null;
+                    }
+                }
+                else if (isObjRef) {
+                    Long ref = (Long) val;
+                    long oid[] = { ref.longValue() };
+
+                    // decode object ID
+                    try {
+                        HObject obj = FileFormat.findObject(dataset.getFileFormat(), oid);
+                        strVal = obj.getFullName();
+                    }
+                    catch (Exception ex) {
+                        strVal = null;
+                    }
+                }
+
+                if (strVal == null && val != null) strVal = val.toString();
+
+                log.trace("NATTable CellSelected finish");
+                
+                cellValueField.setText(strVal);
+            }
+        }
+    }
+    
+    /**
+     * Update cell value label and cell value field when a cell is selected
+     */
+    private class CompoundDSCellSelectionListener implements ILayerListener {
+        @Override
+        public void handleLayerEvent(ILayerEvent e) {
+            if (e instanceof CellSelectionEvent) {
+                CellSelectionEvent event = (CellSelectionEvent) e;
+                Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                
+                log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                
+                int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
+                int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
+                
+                cellLabel.setText(String.valueOf(rowStart + indexBase
+                        + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
+                        + ", " + columnHeaderDataProvider.getDataValue(table.getColumnIndexByPosition(event.getColumnPosition()), 0)
+                        + "  =  ");
+                
+                cellValueField.setText(val.toString());
+                
+                log.trace("NATTable CellSelected finish");
+            }
         }
     }
 
@@ -4763,6 +4844,22 @@ public class DefaultTableView implements TableView {
 
         int getPlotBy ( ) {
             return plotType;
+        }
+    }
+    
+    // Context-menu for dealing with region and object references
+    private class RefContextMenu extends AbstractUiBindingConfiguration {
+        private final Menu contextMenu;
+
+        public RefContextMenu(NatTable table) {
+            this.contextMenu = new PopupMenuBuilder(table).build();
+        }
+
+        @Override
+        public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+            uiBindingRegistry.registerMouseDownBinding(
+                    new MouseEventMatcher(SWT.NONE, GridRegion.BODY, MouseEventMatcher.RIGHT_BUTTON),
+                                          new PopupMenuAction(this.contextMenu));
         }
     }
 }
