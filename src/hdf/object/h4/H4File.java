@@ -300,6 +300,7 @@ public class H4File extends FileFormat {
             grid = HDFLibrary.GRstart(fid);
         }
         sdid = HDFLibrary.SDstart(fullFileName, flag);
+        log.trace("hdf.H4File - sdid:"+sdid);
 
         // load the file hierarchy
         loadIntoMemory();
@@ -986,8 +987,8 @@ public class H4File extends FileFormat {
     /**
      * Retrieve a SDS for the given sds identifier and index.
      *
-     * @param sdid
-     *            the SDS idendifier.
+     * @param tag
+     *            the reference tag of the group (DFTAG_SD, DFTAG_SDG, DFTAG_NDG).
      * @param index
      *            the index of the SDS.
      * @param path
@@ -1011,17 +1012,21 @@ public class H4File extends FileFormat {
         boolean isCoordvar = false;
         try {
             id = HDFLibrary.SDselect(sdid, index);
+            log.trace("getSDS(): SDselect id={} with isNetCDF={}", id, isNetCDF);
             if (isNetCDF) {
                 ref = index; // HDFLibrary.SDidtoref(id) fails for netCDF
                 tag = H4SDS.DFTAG_NDG_NETCDF;
             }
             else {
                 ref = HDFLibrary.SDidtoref(id);
+                log.trace("getSDS(): SDselect id={} with ref={}", id, ref);
             }
             HDFLibrary.SDgetinfo(id, objName, tmpInfo, sdInfo);
+            log.trace("getSDS(): SDselect id={} with objName={} sdinfo:{}, {}, {}", id, objName, sdInfo[0], sdInfo[1], sdInfo[2]);
             isCoordvar = HDFLibrary.SDiscoordvar(id);
         }
         catch (HDFException ex) {
+            log.debug("getSDS(): failure: ", ex);
             id = HDFConstants.FAIL;
         }
         finally {
