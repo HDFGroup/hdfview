@@ -41,6 +41,7 @@
                Cabinet="media.cab"
                EmbedCab="yes" />
         
+        <!-- Generate folder structure for install -->
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="$(var.PlatformProgramFilesFolder)">
                 <Directory Id="HDFDir" Name="HDF_Group">
@@ -51,9 +52,50 @@
             </Directory>
         </Directory>
         
-        <!-- -->
+        <!-- Register main application and add hdf file associations -->
         <Feature Id="MainApplication" Title="Main Application" Level="1">
             <ComponentGroupRef Id="MediaGroup" />
+            <Component Id="FILE_ASSOCIATIONS" Guid="{1C4371C4-80EA-4B1C-8B1B-A634513F67DE}" Directory="InstallDir" KeyPath="yes">
+                <!-- Manually add hdfview.bat since heat file-scraping doesn't assign it an Id -->
+                <File Id="HDFViewBat" Source="$(var.releasedir)\hdfview.bat" />
+                
+                <!-- Associate HDFView with the file extensions: hdf, hdf4, h4, hdf5, h5, he2, he5 -->
+                <ProgId Id="HDF_FILE">
+                    <Extension Id="hdf" ContentType="application/hdf">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+                <ProgId Id="HDF4_FILE">
+                    <Extension Id="hdf4" ContentType="application/hdf4">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+                <ProgId Id="H4_FILE">
+                    <Extension Id="h4" ContentType="application/h4">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+                <ProgId Id="HDF5_FILE">
+                    <Extension Id="hdf5" ContentType="application/hdf5">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+                <ProgId Id="H5_FILE">
+                    <Extension Id="h5" ContentType="application/h5">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+                <ProgId Id="HE2_FILE">
+                    <Extension Id="he2" ContentType="application/he2">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+                <ProgId Id="HE5_FILE">
+                    <Extension Id="he5" ContentType="application/he5">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+            </Component>
         </Feature>
         
         <!-- Add Start Menu Shortcuts -->
@@ -63,8 +105,8 @@
         <UIRef Id="WixUI_InstallDir" />
         
         <!-- Add HDF icon for HDFView to Add/Remove Programs in Windows -->
-        <Icon Id="hdf.ico" SourceFile="hdf.ico"/>
-        <Property Id="ARPPRODUCTICON" Value="hdf.ico" />
+        <Icon Id="hdf_icon" SourceFile="src\hdf\view\icons\hdf.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="hdf_icon" />
         
         <!-- Replace default bitmaps in installer -->
         

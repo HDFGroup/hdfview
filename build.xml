@@ -485,8 +485,12 @@
       <formatter type="xml" />
       <formatter type="plain" />
 
-      <batchtest fork="yes" todir="${report.dir}">
+      <!--<batchtest fork="yes" todir="${report.dir}">
         <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/AbstractWindowTest* **/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
+      </batchtest>-->
+        
+      <batchtest fork="yes" todir="${report.dir}">
+        <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/AbstractWindowTest* **/uitest/TestHDFViewMenu* **/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
       </batchtest>
     </junit>
   </target>
@@ -999,15 +1003,17 @@
     <exec executable="${wix.dir}/heat.exe">
       <arg value="dir" />
       <arg value=".\${release.dir}" />
-        <arg value="-cg" />
+      <arg value="-cg" />
       <arg value="MediaGroup" />
-        <arg value="-platform" />
+      <arg value="-platform" />
       <arg value="${buildArch}" />
       <arg value="-gg" />
       <arg value="-srd" />
       <arg value="-dr" />
       <arg value="InstallDir" />
       <arg value="-template fragment" />
+      <arg value="-t" />
+      <arg value="transform.xsl" />
       <arg value="-out" />
       <arg value=".\${build.dir}\allfiles.wxs" />
     </exec>
@@ -1019,14 +1025,15 @@
       <arg value="-out" />
       <arg value=".\${build.dir}\allfiles.wixobj" />
       <arg value=".\${build.dir}\allfiles.wxs" />
-      </exec>
+    </exec>
 
     <!-- Compile build.wxs file into .wixobj file -->
     <exec executable="${wix.dir}/candle.exe">
-        <arg value="-arch" />
+      <arg value="-arch" />
       <arg value="${buildArch}" />
-    <arg value="-dproductName=${ant.project.name}" />
-    <arg value="-dproductVersion=${app.version}" />
+      <arg value="-dproductName=${ant.project.name}" />
+      <arg value="-dreleasedir=.\${release.dir}" />
+      <arg value="-dproductVersion=${app.version}" />
       <arg value="-out" />
       <arg value=".\${build.dir}\build.wixobj" />
       <arg value="build.wxs" />
