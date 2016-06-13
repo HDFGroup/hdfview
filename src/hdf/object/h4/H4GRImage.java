@@ -473,6 +473,7 @@ public class H4GRImage extends ScalarDS
                     attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                 }
                 catch (HDFException ex) {
+                    log.debug("getMetadata: GRattrinfo: ", ex);
                     b = false;
                 }
 
@@ -489,6 +490,7 @@ public class H4GRImage extends ScalarDS
                     HDFLibrary.GRgetattr(id, i, buf);
                 }
                 catch (HDFException ex) {
+                    log.debug("getMetadata: GRgetattr: ", ex);
                     buf = null;
                 }
 
@@ -546,6 +548,7 @@ public class H4GRImage extends ScalarDS
             id = HDFLibrary.GRselect(grid, index);
         }
         catch (HDFException ex) {
+            log.debug("open: ", ex);
             id = -1;
         }
 
@@ -557,7 +560,7 @@ public class H4GRImage extends ScalarDS
     public void close(long grid)
     {
         try { HDFLibrary.GRendaccess(grid); }
-        catch (HDFException ex) {;}
+        catch (HDFException ex) {log.debug("open: ", ex);}
     }
 
     // Implementing Dataset.
@@ -682,6 +685,7 @@ public class H4GRImage extends ScalarDS
             HDFLibrary.GRgetlutinfo(lutid, lutInfo);
         }
         catch (HDFException ex) {
+            log.debug("getPalette: ", ex);
             close(id);
             return null;
         }
@@ -703,6 +707,7 @@ public class H4GRImage extends ScalarDS
             b = HDFLibrary.GRreadlut(lutid, pal);
         }
         catch (HDFException ex) {
+            log.debug("getPalette: ", ex);
             b = false;
         }
 
@@ -829,6 +834,7 @@ public class H4GRImage extends ScalarDS
                 grid = HDFLibrary.GRcreate(gid, name, ncomp, tid, interlace, idims);
             }
             catch (Exception ex) {
+                log.debug("create: ", ex);
                 throw (ex);
             }
         }

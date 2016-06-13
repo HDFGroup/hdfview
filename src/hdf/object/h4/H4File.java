@@ -298,9 +298,10 @@ public class H4File extends FileFormat {
             fid = HDFLibrary.Hopen(fullFileName, flag);
             HDFLibrary.Vstart(fid);
             grid = HDFLibrary.GRstart(fid);
+            log.trace("hdf.H4File - fid:{} grid:{}",fid,grid);
         }
         sdid = HDFLibrary.SDstart(fullFileName, flag);
-        log.trace("hdf.H4File - sdid:"+sdid);
+        log.trace("hdf.H4File - sdid:{}",sdid);
 
         // load the file hierarchy
         loadIntoMemory();
@@ -642,29 +643,33 @@ public class H4File extends FileFormat {
     private void loadIntoMemory() {
         if (fid < 0) return;
 
-        long[] oid = { 0, 0 };
         int n = 0, ref = -1;
         int[] argv = null;
 
         log.trace("loadIntoMemory(): start");
-        rootObject = new H4Group(this, "/",
-                                        null, // root object does not have a parent path
-                                        null, // root object does not have a parent object
-                                        oid);
 
         // get top level VGroup
         int[] tmpN = new int[1];
         int[] refs = null;
+        log.trace("loadIntoMemory(): get Vlone");
         try {
             // first call to get the number of lone Vgroup
             n = HDFLibrary.Vlone(fid, tmpN, 0);
+            log.trace("loadIntoMemory(): number of lone Vgroup={}", n);
             refs = new int[n];
             // second call to get the references of all lone Vgroup
             n = HDFLibrary.Vlone(fid, refs, n);
+            log.trace("loadIntoMemory(): references of all lone Vgroup={}", n);
         }
         catch (HDFException ex) {
             n = 0;
         }
+
+        long[] oid = { 0, refs[0] };
+        rootObject = new H4Group(this, "/",
+                null, // root object does not have a parent path
+                null, // root object does not have a parent object
+                oid);
 
         int i0 = Math.max(0, getStartMembers());
         int i1 = getMaxMembers();
@@ -676,8 +681,10 @@ public class H4File extends FileFormat {
         i1 = Math.min(i1, n);
 
         // Iterate through the file to see members of the group
+        log.trace("loadIntoMemory(): start={} to last={}",i0,i1);
         for (int i = i0; i < i1; i++) {
             ref = refs[i];
+            log.trace("loadIntoMemory(): Iterate[{}] members of the group ref={}",i,ref);
             H4Group g = getVGroup(HDFConstants.DFTAG_VG, ref,
                     HObject.separator, (H4Group) rootObject, false);
 
@@ -696,6 +703,7 @@ public class H4File extends FileFormat {
             b = HDFLibrary.GRfileinfo(grid, argv);
         }
         catch (HDFException ex) {
+            log.debug("GRfileinfo failure: ",ex);
             b = false;
         }
 
@@ -717,6 +725,7 @@ public class H4File extends FileFormat {
             b = HDFLibrary.SDfileinfo(sdid, argv);
         }
         catch (HDFException ex) {
+            log.debug("SDfileinfo failure: ",ex);
             b = false;
         }
 
@@ -735,15 +744,19 @@ public class H4File extends FileFormat {
         // get top level VData
         try {
             n = HDFLibrary.VSlone(fid, tmpN, 0);
+            log.trace("loadIntoMemory(): number of lone Vgroup={}", n);
             refs = new int[n];
             n = HDFLibrary.VSlone(fid, refs, n);
+            log.trace("loadIntoMemory(): references of all lone Vgroup={}", n);
         }
         catch (HDFException ex) {
+            log.debug("VSlone failure: ",ex);
             n = 0;
         }
 
         for (int i = 0; i < n; i++) {
             ref = refs[i];
+            log.trace("loadIntoMemory(): references of Vdata[{}]={}", i, ref);
 
             // no duplicate object at top level
             H4Vdata vdata = getVdata(HDFConstants.DFTAG_VS, ref,
@@ -950,13 +963,16 @@ public class H4File extends FileFormat {
         int[] imgInfo = new int[4];
         int[] dim_sizes = { 0, 0 };
         // int tag = HDFConstants.DFTAG_RIG;
+        log.trace("getGRImage(): start");
 
         try {
             id = HDFLibrary.GRselect(grid, index);
             ref = HDFLibrary.GRidtoref(id);
+            log.trace("getGRImage(): GRselect:{} GRidtoref:{}",id,ref);
             HDFLibrary.GRgetiminfo(id, objName, imgInfo, dim_sizes);
         }
         catch (HDFException ex) {
+            log.debug("getGRImage(): failure: ", ex);
             id = HDFConstants.FAIL;
         }
         finally {
@@ -964,7 +980,7 @@ public class H4File extends FileFormat {
                 HDFLibrary.GRendaccess(id);
             }
             catch (HDFException ex) {
-                log.debug("GRendaccess failure: ", ex);
+                log.debug("getGRImage(): GRendaccess failure: ", ex);
             }
         }
 
@@ -980,6 +996,7 @@ public class H4File extends FileFormat {
 
             gr = new H4GRImage(this, objName[0], path, oid);
         }
+        log.trace("getGRImage(): finish");
 
         return gr;
     }
@@ -1153,7 +1170,7 @@ public class H4File extends FileFormat {
         // int tag = HDFConstants.DFTAG_VG;
         long oid[] = { tag, ref };
 
-        log.trace("getVGroup(): start");
+        log.trace("getVGroup(): start tag:{}, ref:{}",tag, ref);
         if (copyAllowed) {
             objList.add(oid);
         }
@@ -1163,11 +1180,13 @@ public class H4File extends FileFormat {
 
         try {
             id = HDFLibrary.Vattach(fid, ref, "r");
+            log.trace("getVGroup(): Vattach fid:{} id:{}",fid, id);
             HDFLibrary.Vgetclass(id, vClass);
             vClass[0] = vClass[0].trim();
             HDFLibrary.Vgetname(id, objName);
         }
         catch (HDFException ex) {
+            log.debug("getVGroup failure: ",ex);
             id = HDFConstants.FAIL;
         }
         finally {

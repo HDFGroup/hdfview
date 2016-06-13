@@ -104,6 +104,7 @@ public class H4Group extends Group
     // Implementing DataFormat
     public List getMetadata() throws HDFException
     {
+        log.trace("getMetadata(): start");
         if (attributeList != null) {
             return attributeList;
         }
@@ -112,6 +113,7 @@ public class H4Group extends Group
         }
 
         long vgid = open();
+        log.trace("getMetadata(): open: id={}", vgid);
         if (vgid <= 0) {
             return attributeList;
         }
@@ -120,6 +122,7 @@ public class H4Group extends Group
 
         try {
             n = HDFLibrary.Vnattrs(vgid);
+            log.trace("getMetadata(): Vnattrs: n={}", n);
 
             boolean b = false;
             String[] attrName = new String[1];
@@ -132,6 +135,7 @@ public class H4Group extends Group
                     attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                 }
                 catch (HDFException ex) {
+                    log.trace("getMetadata(): Vattrinfo failure: ", ex);
                     b = false;
                 }
 
@@ -149,7 +153,7 @@ public class H4Group extends Group
                     HDFLibrary.Vgetattr(vgid, i, buf);
                 }
                 catch (HDFException ex) {
-                    ex.printStackTrace();
+                    log.trace("getMetadata(): Vgetattr failure: ", ex);
                     buf = null;
                 }
 
@@ -167,6 +171,7 @@ public class H4Group extends Group
             close(vgid);
         }
 
+        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -202,12 +207,15 @@ public class H4Group extends Group
     public long open()
     {
         long vgid = -1;
+        log.trace("open(): start for file={} oid={}", getFID(), oid[1]);
 
         // try to open with write permission
         try {
             vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
+            log.trace("open(): Vattach write id={}", vgid);
         }
         catch (HDFException ex) {
+            log.debug("open.Vattach:", ex);
             vgid = -1;
         }
 
@@ -215,12 +223,15 @@ public class H4Group extends Group
         if (vgid < 0) {
             try {
                 vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "r");
+                log.trace("open(): Vattach readonly id={}", vgid);
             }
             catch (HDFException ex) {
+                log.debug("open.Vattach:", ex);
                 vgid = -1;
             }
         }
 
+        log.trace("open(): finish");
         return vgid;
     }
 
@@ -228,6 +239,7 @@ public class H4Group extends Group
     @Override
     public void close(long vgid)
     {
+        log.trace("closepen(): id={}", vgid);
         try {
             HDFLibrary.Vdetach(vgid);
         }
