@@ -655,17 +655,17 @@ public class H4File extends FileFormat {
         try {
             // first call to get the number of lone Vgroup
             n = HDFLibrary.Vlone(fid, tmpN, 0);
-            log.trace("loadIntoMemory(): number of lone Vgroup={}", n);
+            log.trace("loadIntoMemory(): number of lone Vgroups={}", n);
             refs = new int[n];
+            
             // second call to get the references of all lone Vgroup
             n = HDFLibrary.Vlone(fid, refs, n);
-            log.trace("loadIntoMemory(): references of all lone Vgroup={}", n);
         }
         catch (HDFException ex) {
             n = 0;
         }
 
-        long[] oid = { 0, refs[0] };
+        long[] oid = { 0, 0 };
         rootObject = new H4Group(this, "/",
                 null, // root object does not have a parent path
                 null, // root object does not have a parent object
@@ -744,10 +744,9 @@ public class H4File extends FileFormat {
         // get top level VData
         try {
             n = HDFLibrary.VSlone(fid, tmpN, 0);
-            log.trace("loadIntoMemory(): number of lone Vgroup={}", n);
+            log.trace("loadIntoMemory(): number of lone Vdatas={}", n);
             refs = new int[n];
             n = HDFLibrary.VSlone(fid, refs, n);
-            log.trace("loadIntoMemory(): references of all lone Vgroup={}", n);
         }
         catch (HDFException ex) {
             log.debug("VSlone failure: ",ex);
@@ -1039,7 +1038,7 @@ public class H4File extends FileFormat {
                 log.trace("getSDS(): SDselect id={} with ref={}", id, ref);
             }
             HDFLibrary.SDgetinfo(id, objName, tmpInfo, sdInfo);
-            log.trace("getSDS(): SDselect id={} with objName={} sdinfo:{}, {}, {}", id, objName, sdInfo[0], sdInfo[1], sdInfo[2]);
+            log.trace("getSDS(): SDselect id={} with objName={}: rank={}, numberType={}, nAttributes={}", id, objName, sdInfo[0], sdInfo[1], sdInfo[2]);
             isCoordvar = HDFLibrary.SDiscoordvar(id);
         }
         catch (HDFException ex) {

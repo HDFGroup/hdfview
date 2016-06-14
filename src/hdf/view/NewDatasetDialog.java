@@ -1099,7 +1099,10 @@ public class NewDatasetDialog extends Dialog {
                 datatype.setEnumMembers(stringLengthField.getText());
             }
             String fillValue = null;
-            if (fillValueField.isEnabled()) fillValue = fillValueField.getText();
+            
+            if (fillValueField != null) {
+                if (fillValueField.isEnabled()) fillValue = fillValueField.getText();
+            }
 
             obj = fileFormat.createScalarDS(name, pgroup, datatype, dims, maxdims, chunks, gzip, fillValue, null);
         }

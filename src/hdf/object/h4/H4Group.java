@@ -207,12 +207,12 @@ public class H4Group extends Group
     public long open()
     {
         long vgid = -1;
-        log.trace("open(): start for file={} oid={}", getFID(), oid[1]);
+        log.trace("H4Group: open(): start for file={} with ref={}", getFID(), oid[1]);
 
         // try to open with write permission
         try {
             vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
-            log.trace("open(): Vattach write id={}", vgid);
+            log.trace("H4Group: open(): Vattach write id={}", vgid);
         }
         catch (HDFException ex) {
             log.debug("open.Vattach:", ex);
@@ -223,7 +223,7 @@ public class H4Group extends Group
         if (vgid < 0) {
             try {
                 vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "r");
-                log.trace("open(): Vattach readonly id={}", vgid);
+                log.trace("H4Group: open(): Vattach readonly id={}", vgid);
             }
             catch (HDFException ex) {
                 log.debug("open.Vattach:", ex);
@@ -231,7 +231,7 @@ public class H4Group extends Group
             }
         }
 
-        log.trace("open(): finish");
+        log.trace("H4Group: open(): finish");
         return vgid;
     }
 
@@ -239,7 +239,7 @@ public class H4Group extends Group
     @Override
     public void close(long vgid)
     {
-        log.trace("closepen(): id={}", vgid);
+        log.trace("H4Group: close(): id={}", vgid);
         try {
             HDFLibrary.Vdetach(vgid);
         }

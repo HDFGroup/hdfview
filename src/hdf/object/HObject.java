@@ -50,10 +50,10 @@ import java.io.Serializable;
  * should check the OID of the data object to avoid duplicate copies of the same
  * object.</b>
  * <p>
- * HDF4 objects are uniquely identified by the OID of the (tag_id, obj_id) pair.
- * The tag_id is a pre-defined number to identify the type of object. For example,
- * DFTAG_RI is for raster image, DFTAG_SD is for scientific dataset, and DFTAG_VG
- * is for Vgroup. The obj_id is a unique ID number generated at creation time.
+ * HDF4 objects are uniquely identified by the OID of the (tag_id, ref_id) pair.
+ * The ref_id is the object reference count. The tag_id is a pre-defined number
+ * to identify the type of object. For example, DFTAG_RI is for raster image,
+ * DFTAG_SD is for scientific dataset, and DFTAG_VG is for Vgroup.
  * <p>
  * HDF5 objects are uniquely identified by the OID or object reference. The OID
  * is usually obtained by H5Rcreate(). The following example shows how to
@@ -117,8 +117,8 @@ public abstract class HObject implements Serializable, DataFormat {
     /**
      * Array of long integer storing unique identifier for the object.
      * <p>
-     * HDF4 objects are uniquely identified by a (tag_id, obj_id) pair. i.e.
-     * oid[0] = tag, oid[1] = obj_id.<br>
+     * HDF4 objects are uniquely identified by a (tag_id, ref_id) pair. i.e.
+     * oid[0] = tag, oid[1] = ref_id.<br>
      * HDF5 objects are uniquely identified by an object reference. i.e.
      * oid[0] = obj_id.
      */
@@ -533,20 +533,5 @@ public abstract class HObject implements Serializable, DataFormat {
 
         return super.toString();
     }
-
-    /**
-     * Generates a unique object identifier for this HObject.
-     */
-    private long[] generateOID() {
-        long[] oid;
-
-        if(fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
-            // HDF4 HObjects are uniquely identified by a (tag_id, obj_id) pair
-            oid = new long[2];
-        } else {
-            oid = new long[1];
-        }
-
-        return oid;
-    }
+    
 }
