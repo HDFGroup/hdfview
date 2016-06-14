@@ -1266,6 +1266,8 @@ public class HDFView implements ViewManager {
         generalInfoGroup.setLayout(new GridLayout(2, false));
         generalInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
+        Label label;
+        
         if(isRoot) {
             log.trace("showMetaData: isRoot");
             long size = 0;
@@ -1295,7 +1297,7 @@ public class HDFView implements ViewManager {
             
             fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
             
-            Label label = new Label(generalInfoGroup, SWT.LEFT);
+            label = new Label(generalInfoGroup, SWT.LEFT);
             label.setFont(currentFont);
             label.setText("File Name: ");
             
@@ -1360,7 +1362,7 @@ public class HDFView implements ViewManager {
         }
         else {
             log.trace("showMetaData: is not root");
-            Label label = new Label(generalInfoGroup, SWT.LEFT);
+            label = new Label(generalInfoGroup, SWT.LEFT);
             label.setFont(currentFont);
             label.setText("Name: ");
             
@@ -1492,35 +1494,33 @@ public class HDFView implements ViewManager {
             label = new Label(generalInfoGroup, SWT.RIGHT);
             label.setFont(currentFont);
             label.setText(typeStr);
-            
-            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
-            if (isH4) {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Tag, Ref:        ");
-            }
-            else {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Object Ref:       ");
-            }
-            
-            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
-            String oidStr = null;
-            long[] OID = obj.getOID();
-            if (OID != null) {
-                oidStr = String.valueOf(OID[0]);
-                for (int i = 1; i < OID.length; i++) {
-                    oidStr += ", " + OID[i];
-                }
-            }
-            
-            if (!isRoot) {
-                label = new Label(generalInfoGroup, SWT.RIGHT);
-                label.setFont(currentFont);
-                label.setText(oidStr);
+        }
+        
+        // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+        if (isH4) {
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Tag, Ref:        ");
+        }
+        else {
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Object Ref:       ");
+        }
+        
+        // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+        String oidStr = null;
+        long[] OID = obj.getOID();
+        if (OID != null) {
+            oidStr = String.valueOf(OID[0]);
+            for (int i = 1; i < OID.length; i++) {
+                oidStr += ", " + OID[i];
             }
         }
+        
+        label = new Label(generalInfoGroup, SWT.RIGHT);
+        label.setFont(currentFont);
+        label.setText(oidStr);
 
         log.trace("showMetaData: object extra info");
         // Add any extra information depending on object type
@@ -1538,12 +1538,12 @@ public class HDFView implements ViewManager {
                 groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
                 
                 if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
-                    Label label = new Label(groupInfoGroup, SWT.RIGHT);
+                    label = new Label(groupInfoGroup, SWT.RIGHT);
                     label.setFont(currentFont);
                     label.setText("Number of members: " + n);
                 }
                 else {
-                    Label label = new Label(groupInfoGroup, SWT.RIGHT);
+                    label = new Label(groupInfoGroup, SWT.RIGHT);
                     label.setFont(currentFont);
                     label.setText("Number of members: " + n + " (in memory),"
                             + "" + g.getNumberOfMembersInFile() + " (in file)");
@@ -1618,7 +1618,7 @@ public class HDFView implements ViewManager {
             dimensionComposite.setLayout(new GridLayout(2, false));
             dimensionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             
-            Label label = new Label(dimensionComposite, SWT.LEFT);
+            label = new Label(dimensionComposite, SWT.LEFT);
             label.setFont(currentFont);
             label.setText("No. of Dimension(s): ");
             
