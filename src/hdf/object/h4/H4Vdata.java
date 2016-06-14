@@ -94,25 +94,25 @@ public class H4Vdata extends CompoundDS
      */
     private static final long serialVersionUID = -5978700886955419959L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
+    private final static org.slf4j.Logger       log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
-    private List attributeList;
+    private List                                attributeList;
 
     /**
      * Number of records of this Vdata table.
      */
-    private int numberOfRecords;
+    private int                                 numberOfRecords;
 
     /**
      * The data types of the members of the compound dataset.
      */
-    private long[] memberTIDs;
+    private long[]                              memberTIDs;
 
-    private int nAttributes = -1;
+    private int                                 nAttributes = -1;
 
 
     public H4Vdata(FileFormat theFile, String name, String path)
@@ -148,13 +148,20 @@ public class H4Vdata extends CompoundDS
     {
         if (nAttributes < 0) {
             long id = open();
-            try {
-                nAttributes = HDFLibrary.VSnattrs(id);
+            
+            if (id >= 0) {
+                try {
+                    nAttributes = HDFLibrary.VSnattrs(id);
+                }
+                catch (Exception ex) {
+                    log.debug("hasAttribute() failure: ", ex);
+                    nAttributes = 0;
+                }
+                
+                log.trace("hasAttribute(): nAttributes={}", nAttributes);
+
+                close(id);
             }
-            catch (Exception ex ) {
-                nAttributes = 0;
-            }
-            close(id);
         }
 
         return (nAttributes>0);
@@ -175,17 +182,23 @@ public class H4Vdata extends CompoundDS
     @Override
     public byte[] readBytes() throws HDFException
     {
+        log.trace("readBytes(): start");
+        
         byte[] theData = null;
 
-        if (rank <=0 ) {
+        if (rank <= 0) {
             init();
         }
         if (numberOfMembers <= 0) {
+            log.trace("readBytes(): VData contains no members");
+            log.trace("readBytes(): finish");
             return null; // this Vdata does not have any filed
         }
 
         long id = open();
         if (id < 0) {
+            log.trace("readBytes(): VData ID < 0");
+            log.trace("readBytes(): finish");
             return null;
         }
 
@@ -194,7 +207,6 @@ public class H4Vdata extends CompoundDS
             allNames += ","+memberNames[i];
         }
 
-        log.trace("readBytes(): start");
         try {
             // moves the access pointer to the start position
             HDFLibrary.VSseek(id, (int)startDims[0]);
@@ -210,11 +222,15 @@ public class H4Vdata extends CompoundDS
                 (int)selectedDims[0],
                 HDFConstants.FULL_INTERLACE);
         }
+        catch (Exception ex) {
+            log.debug("readBytes(): failure: ", ex);
+        }
         finally {
             close(id);
         }
 
         log.trace("readBytes(): finish");
+        
         return theData;
     }
 
@@ -222,21 +238,26 @@ public class H4Vdata extends CompoundDS
     @Override
     public Object read() throws HDFException
     {
+        log.trace("read(): start");
+        
         List list = null;
 
-        if (rank <=0 ) {
+        if (rank <= 0) {
             init();
         }
         if (numberOfMembers <= 0) {
+            log.trace("read(): VData contains no members");
+            log.trace("read(): finish");
             return null; // this Vdata does not have any filed
         }
 
         long id = open();
         if (id < 0) {
+            log.trace("read(): VData ID < 0");
+            log.trace("read(): finish");
             return null;
         }
 
-        log.trace("read(): start");
         list = new Vector();
 
         // assume external data files are located in the same directory as the main file.
@@ -255,6 +276,7 @@ public class H4Vdata extends CompoundDS
                 HDFLibrary.VSsetfields(id, memberNames[i]);
             }
             catch (HDFException ex) {
+                log.debug("read(): failure: ", ex);
                 isMemberSelected[i] = false;
                 continue;
             }
@@ -307,6 +329,7 @@ public class H4Vdata extends CompoundDS
         close(id);
 
         log.trace("read(): finish");
+        
         return list;
     }
 
@@ -379,22 +402,28 @@ public class H4Vdata extends CompoundDS
     // Implementing DataFormat
     public List getMetadata() throws HDFException
     {
+        log.trace("getMetadata(): start");
+        
         if (attributeList != null) {
+            log.trace("getMetadata(): finish");
             return attributeList;
         }
 
         long id = open();
 
         if (id < 0) {
+            log.trace("getMetadata(): VData ID < 0");
+            log.trace("getMetadata(): finish");
             return attributeList;
         }
 
-        log.trace("getMetadata(): start");
         int n=0;
         try {
             n = HDFLibrary.VSnattrs(id);
 
-            if (n <=0 ) {
+            if (n <= 0) {
+                log.trace("getMetadata(): VData number of attributes <= 0");
+                log.trace("getMetadata(): finish");
                 return attributeList;
             }
 
@@ -415,6 +444,7 @@ public class H4Vdata extends CompoundDS
                         attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                     }
                     catch (HDFException ex) {
+                        log.debug("getMetadata(): VSattrinfo failure: ", ex);
                         b = false;
                         ex.printStackTrace();
                     }
@@ -434,6 +464,7 @@ public class H4Vdata extends CompoundDS
                         HDFLibrary.VSgetattr(id, j, i, buf);
                     }
                     catch (HDFException ex) {
+                        log.debug("getMetadata(): VSgetattr failure: ", ex);
                         buf = null;
                     }
 
@@ -447,8 +478,10 @@ public class H4Vdata extends CompoundDS
                         nleft--;
                     }
                 } // for (int i=0; i<n; i++)
-            } // for (int j=-1; j<numberOfMembers; j++)
-
+            } // for (int j=-1; j<numberOfMembers; j++)  
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): failure: ", ex);
         }
         finally {
             close(id);
@@ -457,26 +490,36 @@ public class H4Vdata extends CompoundDS
         // todo: We shall also load attributes of fields
 
         log.trace("getMetadata(): finish");
+        
         return attributeList;
     }
 
     // To do: Implementing DataFormat
     public void writeMetadata(Object info) throws Exception
     {
+        log.trace("writeMetadata(): start");
+        
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
+            log.trace("writeMetadata(): Object not an Attribute");
+            log.trace("writeMetadata(): finish");
             return;
         }
-        log.trace("writeMetadata(): start");
 
-        getFileFormat().writeAttribute(this, (Attribute)info, true);
+        try {
+            getFileFormat().writeAttribute(this, (Attribute)info, true);
 
-        if (attributeList == null) {
-            attributeList = new Vector();
+            if (attributeList == null) {
+                attributeList = new Vector();
+            }
+
+            attributeList.add(info);
+            nAttributes = attributeList.size();
         }
-
-        attributeList.add(info);
-        nAttributes = attributeList.size();
+        catch (Exception ex) {
+            log.trace("writeMetadata(): failure: ", ex);
+        }
+        
         log.trace("writeMetadata(): finish");
     }
 
@@ -503,6 +546,7 @@ public class H4Vdata extends CompoundDS
             vsid = HDFLibrary.VSattach(getFID(), (int)oid[1], "w");
         }
         catch (HDFException ex) {
+            log.debug("open(): VSattach failure: ", ex);
             vsid = -1;
         }
 
@@ -512,11 +556,13 @@ public class H4Vdata extends CompoundDS
                 vsid = HDFLibrary.VSattach(getFID(), (int)oid[1], "r");
             }
             catch (HDFException ex) {
+                log.debug("open(): VSattach failure: ", ex);
                 vsid = -1;
             }
         }
 
         log.trace("open(): finish");
+        
         return vsid;
     }
 
@@ -528,7 +574,7 @@ public class H4Vdata extends CompoundDS
             HDFLibrary.VSdetach(vsid);
         }
         catch (Exception ex) {
-            log.debug("close.VSdetach:", ex);
+            log.debug("close(): VSdetach failure: ", ex);
         }
     }
 
@@ -540,11 +586,15 @@ public class H4Vdata extends CompoundDS
     {
         log.trace("init(): start");
         if (rank>0) {
+            log.trace("init(): Already initialized");
+            log.trace("init(): finish");
             return; // already called. Initialize only once
         }
 
         long id = open();
         if (id < 0) {
+            log.trace("init(): VData ID < 0");
+            log.trace("init(): finish");
             return;
         }
 
