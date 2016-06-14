@@ -1029,7 +1029,7 @@ public class H4File extends FileFormat {
                 objList.add(oid);
             }
             else if (find(oid)) {
-                log.trace("getGRImage(): Image not found with OID:({}, {})", oid[0], oid[1]);
+                log.trace("getGRImage(): Image found in memory with OID:({}, {})", oid[0], oid[1]);
                 log.trace("getGRImage(): finish");
                 return null;
             }
@@ -1086,7 +1086,6 @@ public class H4File extends FileFormat {
                 isCoordvar = HDFLibrary.SDiscoordvar(id);
             }
             catch (Exception ex) {
-                System.out.println(isCoordvar);
                 isCoordvar = false;
             }
         }
@@ -1121,7 +1120,7 @@ public class H4File extends FileFormat {
                 objList.add(oid);
             }
             else if (find(oid)) {
-                log.trace("getSDS(): SDS not found with OID:({}, {})", oid[0], oid[1]);
+                log.trace("getSDS(): SDS found in memory with OID:({}, {})", oid[0], oid[1]);
                 log.trace("getSDS(): finish");
                 return null;
             }
@@ -1160,7 +1159,7 @@ public class H4File extends FileFormat {
             objList.add(oid);
         }
         else if (find(oid)) {
-            log.trace("getVdata(): VData not found with OID:({}, {})", oid[0], oid[1]);
+            log.trace("getVdata(): VData found in memory with OID:({}, {})", oid[0], oid[1]);
             log.trace("getVdata(): finish");
             return null;
         }
@@ -1229,11 +1228,18 @@ public class H4File extends FileFormat {
         long oid[] = { tag, ref };
 
         log.trace("getVGroup(): start tag:{}, ref:{}",tag, ref);
+        
+        if (ref <= 0) {
+            log.trace("getVGroup(): Skipping dummy root group with ref={}", ref);
+            log.trace("getVGroup(): finish");
+            return null;
+        }
+        
         if (copyAllowed) {
             objList.add(oid);
         }
         else if (find(oid)) {
-            log.trace("getVGroup(): VGroup not found with OID:({}, {})", oid[0], oid[1]);
+            log.trace("getVGroup(): VGroup found in memory with OID:({}, {})", oid[0], oid[1]);
             log.trace("getVGroup(): finish");
             return null;
         }
