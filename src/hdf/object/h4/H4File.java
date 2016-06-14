@@ -542,19 +542,23 @@ public class H4File extends FileFormat {
         }
 
         long id = obj.open();
-        if (obj instanceof H4Group) {
-            HDFLibrary.Vsetattr(id, attrName, attrType, count, attrValue);
+        
+        if (id >= 0) {
+            if (obj instanceof H4Group) {
+                HDFLibrary.Vsetattr(id, attrName, attrType, count, attrValue);
+            }
+            else if (obj instanceof H4SDS) {
+                HDFLibrary.SDsetattr(id, attrName, attrType, count, attrValue);
+            }
+            else if (obj instanceof H4GRImage) {
+                HDFLibrary.GRsetattr(id, attrName, attrType, count, attrValue);
+            }
+            else if (obj instanceof H4Vdata) {
+                HDFLibrary.VSsetattr(id, -1, attrName, attrType, count, attrValue);
+            }
+            
+            obj.close(id);
         }
-        else if (obj instanceof H4SDS) {
-            HDFLibrary.SDsetattr(id, attrName, attrType, count, attrValue);
-        }
-        else if (obj instanceof H4GRImage) {
-            HDFLibrary.GRsetattr(id, attrName, attrType, count, attrValue);
-        }
-        else if (obj instanceof H4Vdata) {
-            HDFLibrary.VSsetattr(id, -1, attrName, attrType, count, attrValue);
-        }
-        obj.close(id);
         
         log.trace("writeAttribute(): finish");
     }
@@ -642,12 +646,14 @@ public class H4File extends FileFormat {
 
         srcGroup.close(srcgid);
         
-        try {
-            HDFLibrary.Vdetach(dstgid);
-        }
-        catch (Exception ex) {
-            log.debug("copyGroup(): Vdetach failure: ", ex);
-        }
+        if (dstgid >= 0) {
+            try {
+                HDFLibrary.Vdetach(dstgid);
+            }
+            catch (Exception ex) {
+                log.debug("copyGroup(): Vdetach failure: ", ex);
+            }
+        }   
 
         log.trace("copyGroup(): finish");
     }
@@ -1006,11 +1012,13 @@ public class H4File extends FileFormat {
             id = HDFConstants.FAIL;
         }
         finally {
-            try {
-                HDFLibrary.GRendaccess(id);
-            }
-            catch (HDFException ex) {
-                log.debug("getGRImage(): GRendaccess failure: ", ex);
+            if (id >= 0) {
+                try {
+                    HDFLibrary.GRendaccess(id);
+                }
+                catch (HDFException ex) {
+                    log.debug("getGRImage(): GRendaccess failure: ", ex);
+                }
             }
         }
 
@@ -1073,18 +1081,27 @@ public class H4File extends FileFormat {
             }
             HDFLibrary.SDgetinfo(id, objName, tmpInfo, sdInfo);
             log.trace("getSDS(): SDselect id={} with objName={}: rank={}, numberType={}, nAttributes={}", id, objName, sdInfo[0], sdInfo[1], sdInfo[2]);
-            isCoordvar = HDFLibrary.SDiscoordvar(id);
+            
+            try {
+                isCoordvar = HDFLibrary.SDiscoordvar(id);
+            }
+            catch (Exception ex) {
+                System.out.println(isCoordvar);
+                isCoordvar = false;
+            }
         }
         catch (HDFException ex) {
             log.debug("getSDS(): failure: ", ex);
             id = HDFConstants.FAIL;
         }
         finally {
-            try {
-                HDFLibrary.SDendaccess(id);
-            }
-            catch (HDFException ex) {
-                log.debug("getSDS(): SDendaccess failure: ", ex);
+            if (id >= 0) {
+                try {
+                    HDFLibrary.SDendaccess(id);
+                }
+                catch (HDFException ex) {
+                    log.debug("getSDS(): SDendaccess failure: ", ex);
+                }
             }
         }
 
@@ -1159,11 +1176,13 @@ public class H4File extends FileFormat {
             id = HDFConstants.FAIL;
         }
         finally {
-            try {
-                HDFLibrary.VSdetach(id);
-            }
-            catch (HDFException ex) {
-                log.debug("getVData(): VSdetach failure: ", ex);
+            if (id >= 0) {
+                try {
+                    HDFLibrary.VSdetach(id);
+                }
+                catch (HDFException ex) {
+                    log.debug("getVData(): VSdetach failure: ", ex);
+                }
             }
         }
 
@@ -1231,11 +1250,13 @@ public class H4File extends FileFormat {
             id = HDFConstants.FAIL;
         }
         finally {
-            try {
-                HDFLibrary.Vdetach(id);
-            }
-            catch (HDFException ex) {
-                log.debug("getVGroup(): Vdetach failure: ", ex);
+            if (id >= 0) {
+                try {
+                    HDFLibrary.Vdetach(id);
+                }
+                catch (HDFException ex) {
+                    log.debug("getVGroup(): Vdetach failure: ", ex);
+                }
             }
         }
 
@@ -1418,11 +1439,13 @@ public class H4File extends FileFormat {
             } // for (int annType=0; annType<2; annType++)
         }
         finally {
-            try {
-                HDFLibrary.ANend(anid);
-            }
-            catch (HDFException ex) {
-                log.debug("getFileAnnotation(): ANend failure: ", ex);
+            if (anid >= 0) {
+                try {
+                    HDFLibrary.ANend(anid);
+                }
+                catch (HDFException ex) {
+                    log.debug("getFileAnnotation(): ANend failure: ", ex);
+                }
             }
         }
         
