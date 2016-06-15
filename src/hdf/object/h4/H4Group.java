@@ -41,20 +41,20 @@ public class H4Group extends Group
     /**
      *
      */
-    private static final long serialVersionUID = 3785240955078867900L;
+    private static final long               serialVersionUID = 3785240955078867900L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Group.class);
+    private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4Group.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
-    private List attributeList;
+    private List                            attributeList;
 
-    private int nAttributes = -1;
+    private int                             nAttributes = -1;
 
     /** The default object ID for HDF4 objects */
-    private final static long[] DEFAULT_OID = {0, 0};
+    private final static long[]             DEFAULT_OID = {0, 0};
 
     public H4Group(FileFormat theFile, String name, String path, Group parent)
     {
@@ -88,14 +88,21 @@ public class H4Group extends Group
     {
         if (nAttributes < 0) {
             int vgid = open();
-            try {
-                nAttributes = HDFLibrary.Vnattrs(vgid);
-                nMembersInFile = HDFLibrary.Vntagrefs(vgid);
+            
+            if (vgid > 0) {
+                try {
+                    nAttributes = HDFLibrary.Vnattrs(vgid);
+                    nMembersInFile = HDFLibrary.Vntagrefs(vgid);
+                }
+                catch (Exception ex) {
+                    log.debug("hasAttribute() failure: ", ex);
+                    nAttributes = 0;
+                }
+                
+                log.trace("hasAttribute(): nAttributes={}", nAttributes);
+
+                close(vgid);
             }
-            catch (Exception ex) {
-                nAttributes = 0;
-            }
-            close(vgid);
         }
 
         return (nAttributes > 0);
@@ -104,88 +111,114 @@ public class H4Group extends Group
     // Implementing DataFormat
     public List getMetadata() throws HDFException
     {
+        log.trace("getMetadata(): start");
+        
         if (attributeList != null) {
+            log.trace("getMetadata(): finish");
             return attributeList;
         }
         else {
             attributeList = new Vector();
         }
+        
+        // Library methods cannot be called on HDF4 dummy root group since it has a ref of 0
+        if (oid[1] > 0) {
+            int vgid = open();
+            log.trace("getMetadata(): open: id={}", vgid);
+            if (vgid < 0) {
+                log.trace("getMetadata(): VG id < 0");
+                log.trace("getMetadata(): finish");
+                return attributeList;
+            }
 
-        int vgid = open();
-        if (vgid <= 0) {
-            return attributeList;
-        }
+            int n = -1;
 
-        int n = -1;
+            try {
+                n = HDFLibrary.Vnattrs(vgid);
+                log.trace("getMetadata(): Vnattrs: n={}", n);
 
-        try {
-            n = HDFLibrary.Vnattrs(vgid);
-
-            boolean b = false;
-            String[] attrName = new String[1];
-            int[] attrInfo = new int[5];
-            for (int i=0; i<n; i++) {
-                attrName[0] = "";
-                try {
-                    b = HDFLibrary.Vattrinfo(vgid, i, attrName, attrInfo);
-                    // mask off the litend bit
-                    attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
-                }
-                catch (HDFException ex) {
-                    b = false;
-                }
-
-                if (!b) {
-                    continue;
-                }
-
-                long[] attrDims = {attrInfo[1]};
-                Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);;
-                attributeList.add(attr);
-
-                Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
-
-                try {
-                    HDFLibrary.Vgetattr(vgid, i, buf);
-                }
-                catch (HDFException ex) {
-                    ex.printStackTrace();
-                    buf = null;
-                }
-
-                if (buf != null) {
-                    if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
-                        (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
-                        buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
+                boolean b = false;
+                String[] attrName = new String[1];
+                int[] attrInfo = new int[5];
+                for (int i=0; i<n; i++) {
+                    attrName[0] = "";
+                    try {
+                        b = HDFLibrary.Vattrinfo(vgid, i, attrName, attrInfo);
+                        // mask off the litend bit
+                        attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
+                    }
+                    catch (HDFException ex) {
+                        log.trace("getMetadata(): Vattrinfo failure: ", ex);
+                        b = false;
                     }
 
-                    attr.setValue(buf);
+                    if (!b) {
+                        continue;
+                    }
+
+                    long[] attrDims = {attrInfo[1]};
+                    Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    attributeList.add(attr);
+
+                    Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+
+                    try {
+                        HDFLibrary.Vgetattr(vgid, i, buf);
+                    }
+                    catch (HDFException ex) {
+                        log.trace("getMetadata(): Vgetattr failure: ", ex);
+                        buf = null;
+                    }
+
+                    if (buf != null) {
+                        if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
+                                (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
+                            buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
+                        }
+
+                        attr.setValue(buf);
+                    }
                 }
             }
-        }
-        finally {
-            close(vgid);
+            catch (Exception ex) {
+                log.trace("getMetadata() failure: ", ex);
+            }
+            finally {
+                close(vgid);
+            }
         }
 
+        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
     // To do: implementing DataFormat
     public void writeMetadata(Object info) throws Exception
     {
+        log.trace("writeMetadata(): start");
+        
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
+            log.trace("writeMetadata(): Object not an Attribute");
+            log.trace("writeMetadata(): finish");
             return;
         }
 
-        getFileFormat().writeAttribute(this, (Attribute)info, true);
+        try {
+            getFileFormat().writeAttribute(this, (Attribute)info, true);
+            
+            if (attributeList == null) {
+                attributeList = new Vector();
+            }
 
-        if (attributeList == null) {
-            attributeList = new Vector();
+            attributeList.add(info);
+            nAttributes = attributeList.size();
         }
-
-        attributeList.add(info);
-        nAttributes = attributeList.size();
+        catch (Exception ex) {
+            log.debug("writeMetadata() failure: ", ex);
+        }
+        
+        log.trace("writeMetadata(): finish");
     }
 
 
@@ -201,13 +234,22 @@ public class H4Group extends Group
     @Override
     public int open()
     {
+        log.trace("open(): start for file={} with ref={}", getFID(), oid[1]);
+        
+        if (oid[1] <= 0) {
+            log.trace("open(): finish");
+            return -1; // Library methods cannot be called on HDF4 dummy group with ref 0
+        }
+        
         int vgid = -1;
 
         // try to open with write permission
         try {
             vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
+            log.trace("open(): Vattach write id={}", vgid);
         }
         catch (HDFException ex) {
+            log.debug("open(): Vattach failure: ", ex);
             vgid = -1;
         }
 
@@ -215,12 +257,16 @@ public class H4Group extends Group
         if (vgid < 0) {
             try {
                 vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "r");
+                log.trace("open(): Vattach readonly id={}", vgid);
             }
             catch (HDFException ex) {
+                log.debug("open(): Vattach failure: ", ex);
                 vgid = -1;
             }
         }
 
+        log.trace("open(): finish");
+        
         return vgid;
     }
 
@@ -228,11 +274,15 @@ public class H4Group extends Group
     @Override
     public void close(int vgid)
     {
-        try {
-            HDFLibrary.Vdetach(vgid);
-        }
-        catch (Exception ex) {
-            log.debug("close.Vdetach:", ex);
+        log.trace("close(): id={}", vgid);
+        
+        if (vgid >= 0) {
+            try {
+                HDFLibrary.Vdetach(vgid);
+            }
+            catch (Exception ex) {
+                log.debug("close() Vdetach failure: ", ex);
+            }
         }
     }
 
@@ -249,6 +299,8 @@ public class H4Group extends Group
     public static H4Group create(String name, Group pgroup)
         throws Exception
     {
+        log.trace("create(): name={} parentGroup={}", name, pgroup);
+        
         H4Group group = null;
         if ((pgroup == null) ||
             (name == null)) {
@@ -258,6 +310,8 @@ public class H4Group extends Group
         H4File file = (H4File)pgroup.getFileFormat();
 
         if (file == null) {
+            log.trace("create(): Parent group FileFormat was null");
+            log.trace("create(): finish");
             return null;
         }
 
@@ -267,11 +321,15 @@ public class H4Group extends Group
         }
         int fileid = file.open();
         if (fileid < 0) {
+            log.trace("create(): File ID < 0");
+            log.trace("create(): finish");
             return null;
         }
 
         int gid = HDFLibrary.Vattach(fileid, -1, "w");
         if (gid < 0) {
+            log.trace("create(): Group ID < 0");
+            log.trace("create(): finish");
             return null;
         }
 
@@ -295,7 +353,7 @@ public class H4Group extends Group
             HDFLibrary.Vdetach(gid);
         }
         catch (Exception ex) {
-            log.debug("create.Vdetach:", ex);
+            log.debug("create(): Vdetach failure: ", ex);
         }
 
         long[] oid = {tag, ref};
@@ -304,6 +362,8 @@ public class H4Group extends Group
         if (group != null) {
             pgroup.addToMemberList(group);
         }
+        
+        log.trace("create(): finish");
 
         return group;
     }
@@ -312,5 +372,4 @@ public class H4Group extends Group
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
-
 }

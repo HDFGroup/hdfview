@@ -224,7 +224,7 @@ public class ViewProperties extends Properties {
         propertyFileName = USER_PROPERTY_FILE;
         userHome = System.getProperty("user.home") + File.separator + propertyFileName;
         userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
-        h5v = viewRoot + File.separator + propertyFileName;
+        h5v = workDir + File.separator + propertyFileName;
 
         if ((new File(userHome)).exists()) {
             propertyFile = userHome;
@@ -232,7 +232,7 @@ public class ViewProperties extends Properties {
         else if ((new File(userDir)).exists()) {
             propertyFile = userDir;
         }
-        else // create new property file at user home directory
+        else
         {
             propertyFile = h5v;
             File pFile = new File(h5v);
@@ -240,7 +240,15 @@ public class ViewProperties extends Properties {
                 pFile.createNewFile();
             }
             catch (Exception ex) {
-                propertyFile = null;
+                // Last resort: create new property file at user home directory
+                propertyFile = userHome;
+                try {
+                    pFile = new File(userHome);
+                    pFile.createNewFile();
+                }
+                catch (Exception ex2) {
+                    propertyFile = null;
+                }
             }
         }
     }
