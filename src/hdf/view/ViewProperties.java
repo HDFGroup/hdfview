@@ -232,7 +232,7 @@ public class ViewProperties extends Properties {
         else if ((new File(userDir)).exists()) {
             propertyFile = userDir;
         }
-        else // create new property file at user home directory
+        else
         {
             propertyFile = h5v;
             File pFile = new File(h5v);
@@ -240,7 +240,15 @@ public class ViewProperties extends Properties {
                 pFile.createNewFile();
             }
             catch (Exception ex) {
-                propertyFile = null;
+                // Last resort: create new property file at user home directory
+                propertyFile = userHome;
+                try {
+                    pFile = new File(userHome);
+                    pFile.createNewFile();
+                }
+                catch (Exception ex2) {
+                    propertyFile = null;
+                }
             }
         }
     }
