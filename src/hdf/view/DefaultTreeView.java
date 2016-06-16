@@ -1243,29 +1243,29 @@ public class DefaultTreeView implements TreeView {
 
         if (srcFile == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Source file is null.", null);
+            Tools.showError(shell, "Source file is null.", shell.getText());
             return;
         }
         else if (dstFile == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Destination file is null.", null);
+            Tools.showError(shell, "Destination file is null.", shell.getText());
             return;
         }
         else if (srcFile.isThisType(h4file) && dstFile.isThisType(h5file)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Unsupported operation: cannot copy HDF4 object to HDF5 file", null);
+            Tools.showError(shell, "Unsupported operation: cannot copy HDF4 object to HDF5 file", shell.getText());
             return;
         }
         else if (srcFile.isThisType(h5file) && dstFile.isThisType(h4file)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Unsupported operation: cannot copy HDF5 object to HDF4 file", null);
+            Tools.showError(shell, "Unsupported operation: cannot copy HDF5 object to HDF4 file", shell.getText());
             return;
         }
 
         if (moveFlag == true) {
             if (srcFile != dstFile) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Cannot move the selected object to different file", null);
+                Tools.showError(shell, "Cannot move the selected object to different file", shell.getText());
                 moveFlag = false;
                 currentSelectionsForMove = null;
                 objectsToCopy = null;
@@ -1337,7 +1337,7 @@ public class DefaultTreeView implements TreeView {
 
             if ((theObj instanceof Group) && ((Group) theObj).isRoot()) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Unsupported operation: cannot copy the root group", null);
+                Tools.showError(shell, "Unsupported operation: cannot copy the root group", shell.getText());
                 return;
             }
 
@@ -1346,7 +1346,7 @@ public class DefaultTreeView implements TreeView {
             while (!pg.isRoot()) {
                 if (theObj.equals(pg)) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Unsupported operation: cannot copy a group to itself.", null);
+                    Tools.showError(shell, "Unsupported operation: cannot copy a group to itself.", shell.getText());
                     return;
                 }
                 pg = pg.getParent();
@@ -1370,7 +1370,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, ex.getMessage(), null);
+                Tools.showError(shell, ex.getMessage(), shell.getText());
             }
         } // for (int i = 0; i < objList.length; i++)
 
@@ -2535,9 +2535,13 @@ public class DefaultTreeView implements TreeView {
                 
                 if (shells.length >= 1) {
                     for (int i = 0; i < shells.length; i++) {
-                        if (((DataView) shells[i].getData()).equals(existingView)) {
-                            shells[i].forceActive();
-                            break;
+                        DataView view = (DataView) shells[i].getData();
+
+                        if (view != null) {
+                            if (view.equals(existingView)) {
+                                shells[i].forceActive();
+                                return view;
+                            }
                         }
                     }
                 }

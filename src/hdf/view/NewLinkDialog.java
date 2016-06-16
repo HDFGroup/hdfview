@@ -198,7 +198,7 @@ public class NewLinkDialog extends Dialog {
                         + "Soft links and external links are also known as symbolic links as they use "
                         + "a name to point to an object; hard links employ an object's address in the file.  \n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
                 info.setText(shell.getText());
                 info.setMessage(msg);
                 info.open();
@@ -301,10 +301,9 @@ public class NewLinkDialog extends Dialog {
                     //Check if the target File is not the current file.
                     String currentFileName = fileFormat.getAbsolutePath();
                     if(currentFileName.equals(chosenFile.getAbsolutePath())) {
-                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                        error.setText(shell.getText());
-                        error.setMessage("Please select a file other than the current file for external links.");
-                        error.open();
+                        Tools.showError(shell,
+                                "Please select a file other than the current file for external links.",
+                                shell.getText());
                         targetFile.setText("");
                         return;
                     }
@@ -458,19 +457,13 @@ public class NewLinkDialog extends Dialog {
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Link name is not specified.");
-            error.open();
+            Tools.showError(shell, "Link name is not specified.", shell.getText());
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Link name cannot contain path.");
-            error.open();
+            Tools.showError(shell, "Link name cannot contain path.", shell.getText());
             return null;
         }
 
@@ -478,10 +471,7 @@ public class NewLinkDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Parent group is null.");
-            error.open();
+            Tools.showError(shell, "Parent group is null.", shell.getText());
             return null;
         }
 
@@ -491,19 +481,13 @@ public class NewLinkDialog extends Dialog {
 
             if (targetObj == null) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Target object is null.");
-                error.open();
+                Tools.showError(shell, "Target object is null.", shell.getText());
                 return null;
             }
 
             if ((targetObj instanceof Group) && ((Group) targetObj).isRoot()) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Cannot make a link to the root group.");
-                error.open();
+                Tools.showError(shell, "Cannot make a link to the root group.", shell.getText());
                 return null;
             }
 
@@ -512,10 +496,7 @@ public class NewLinkDialog extends Dialog {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage(ex.getMessage());
-                error.open();
+                Tools.showError(shell, ex.getMessage(), shell.getText());
                 return null;
             }
         }
@@ -523,10 +504,7 @@ public class NewLinkDialog extends Dialog {
             String target_name = targetObject.getText();
             if (target_name.length() < 1)  {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Target object name is not specified.");
-                error.open();
+                Tools.showError(shell, "Target object name is not specified.", shell.getText());
                 return null;
             }
 
@@ -549,10 +527,7 @@ public class NewLinkDialog extends Dialog {
 
             if ((targetObj instanceof Group) && ((Group) targetObj).isRoot()) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Cannot make a link to the root group.");
-                error.open();
+                Tools.showError(shell, "Cannot make a link to the root group.", shell.getText());
                 return null;
             }
 
@@ -565,10 +540,7 @@ public class NewLinkDialog extends Dialog {
             catch (Exception ex) {
                 ex.printStackTrace();
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage(ex.getMessage());
-                error.open();
+                Tools.showError(shell, ex.getMessage(), shell.getText());
                 return null;
             }
         }
@@ -613,10 +585,7 @@ public class NewLinkDialog extends Dialog {
                 tObj = targetObject.getText();
                 if (tObj.length() < 1)  {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Target object name not specified.");
-                    error.open();
+                    Tools.showError(shell, "Target object name not specified.", shell.getText());
                     return null;
                 }
                 tFileObj = TargetFileName + FileFormat.FILE_OBJ_SEP + tObj;
@@ -631,10 +600,7 @@ public class NewLinkDialog extends Dialog {
             catch (Exception ex) {
                 ex.printStackTrace();
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage(ex.getMessage());
-                error.open();
+                Tools.showError(shell, ex.getMessage(), shell.getText());
                 return null;
             }
         }
@@ -669,10 +635,7 @@ public class NewLinkDialog extends Dialog {
         //Check if the target File is not the current file.
         String currentFileName = fileFormat.getAbsolutePath();
         if(currentFileName.equals(chosenFile.getAbsolutePath())) {
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage("Please select a file other than the current file for external links.");
-            error.open();
+            Tools.showError(shell, "Please select a file other than the current file for external links.", shell.getText());
             targetFile.setText("");
             return null;
         }
@@ -787,10 +750,7 @@ public class NewLinkDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage("Invalid File Format");
-            error.open();
+            Tools.showError(shell, "Invalid File Format", shell.getText());
             targetFile.setText("");
             return;
         }

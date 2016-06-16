@@ -284,18 +284,12 @@ public class ImageConversionDialog extends Dialog {
         File f = new File(srcFile);
         if (!f.exists()) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage("Source file does not exist.");
-            error.open();
+            Tools.showError(shell, "Source file does not exist.", shell.getText());
             return false;
         }
         else if (f.isDirectory()) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage("Source file is a directory.");
-            error.open();
+            Tools.showError(shell, "Source file is a directory.", shell.getText());
             return false;
         }
 
@@ -309,11 +303,8 @@ public class ImageConversionDialog extends Dialog {
         }
         else if (!pfile.exists()) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage("Destination file path does not exist at\n"
-                    + pfile.getPath());
-            error.open();
+            Tools.showError(shell, "Destination file path does not exist at\n"
+                    + pfile.getPath(), shell.getText());
             return false;
         }
 
@@ -325,17 +316,14 @@ public class ImageConversionDialog extends Dialog {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(dstFile)) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                    error.setText(shell.getText());
-                    error.setMessage("The destination file is being used.");
-                    error.open();
+                    Tools.showError(shell, "The destination file is being used.", shell.getText());
                     return false;
                 }
             }
         }
 
         if (f.exists()) {
-            MessageBox confirm = new MessageBox(shell, SWT.YES | SWT.NO);
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
             confirm.setText(shell.getText());
             confirm.setMessage("Destination file exists. Do you want to replace it ?");
             if(confirm.open() == SWT.NO) {
@@ -352,10 +340,7 @@ public class ImageConversionDialog extends Dialog {
             convertedFile = null;
             converted = false;
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return false;
         }
 

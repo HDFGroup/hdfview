@@ -687,10 +687,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                     newObject = createCompoundDS();
                 }
                 catch (Exception ex) {
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText(shell.getText());
-                    error.setMessage(ex.getMessage());
-                    error.open();
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
 
                 if (newObject != null) {
@@ -824,10 +821,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 type = fileformat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
                 if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText(shell.getText());
-                    error.setMessage("Invalid member values: " + orderStr);
-                    error.open();
+                    Tools.showError(shell, "Invalid member values: " + orderStr, shell.getText());
                     return null;
                 }
                 else {
@@ -847,10 +841,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage("Number of values in the current dimension size is less than " + rank);
-            error.open();
+            Tools.showError(shell, "Number of values in the current dimension size is less than " + rank, shell.getText());
             return null;
         }
 
@@ -864,19 +855,13 @@ public class NewCompoundDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                error.setText(shell.getText());
-                error.setMessage("Invalid dimension size: " + currentSizeField.getText());
-                error.open();
+                Tools.showError(shell, "Invalid dimension size: " + currentSizeField.getText(), shell.getText());
                 return null;
             }
 
             if (l <= 0) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                error.setText(shell.getText());
-                error.setMessage("Dimension size must be greater than zero.");
-                error.open();
+                Tools.showError(shell, "Dimension size must be greater than zero.", shell.getText());
                 return null;
             }
 
@@ -886,10 +871,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         st = new StringTokenizer(maxSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage("Number of values in the max dimension size is less than " + rank);
-            error.open();
+            Tools.showError(shell, "Number of values in the max dimension size is less than " + rank, shell.getText());
             return null;
         }
 
@@ -902,19 +884,13 @@ public class NewCompoundDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                error.setText(shell.getText());
-                error.setMessage("Invalid max dimension size: " + maxSizeField.getText());
-                error.open();
+                Tools.showError(shell, "Invalid max dimension size: " + maxSizeField.getText(), shell.getText());
                 return null;
             }
 
             if (l < -1) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                error.setText(shell.getText());
-                error.setMessage("Dimension size cannot be less than -1.");
-                error.open();
+                Tools.showError(shell, "Dimension size cannot be less than -1.", shell.getText());
                 return null;
             }
             else if (l == 0) {
@@ -929,10 +905,7 @@ public class NewCompoundDatasetDialog extends Dialog {
             st = new StringTokenizer(chunkSizeField.getText(), "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                error.setText(shell.getText());
-                error.setMessage("Number of values in the chunk size is less than " + rank);
-                error.open();
+                Tools.showError(shell, "Number of values in the chunk size is less than " + rank, shell.getText());
                 return null;
             }
 
@@ -946,19 +919,13 @@ public class NewCompoundDatasetDialog extends Dialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText(shell.getText());
-                    error.setMessage("Invalid chunk dimension size: " + chunkSizeField.getText());
-                    error.open();
+                    Tools.showError(shell, "Invalid chunk dimension size: " + chunkSizeField.getText(), shell.getText());
                     return null;
                 }
 
                 if (l < 1) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText(shell.getText());
-                    error.setMessage("Chunk size cannot be less than 1.");
-                    error.open();
+                    Tools.showError(shell, "Chunk size cannot be less than 1.", shell.getText());
                     return null;
                 }
 
@@ -973,7 +940,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
             if (tchunksize >= tdimsize) {
                 shell.getDisplay().beep();
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
                 confirm.setText(shell.getText());
                 confirm.setMessage("Chunk size is equal/greater than the current size. "
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
@@ -984,7 +951,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
             if (tchunksize == 1) {
                 shell.getDisplay().beep();
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
                 confirm.setText(shell.getText());
                 confirm.setMessage("Chunk size is one, which may cause large memory overhead for large dataset."
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");

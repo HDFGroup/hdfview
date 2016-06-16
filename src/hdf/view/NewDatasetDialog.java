@@ -683,10 +683,7 @@ public class NewDatasetDialog extends Dialog {
 
         if (stMax.countTokens() != stDim.countTokens()) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Wrong number of values in the max dimension size " + maxSize);
-            error.open();
+            Tools.showError(shell, "Wrong number of values in the max dimension size " + maxSize, shell.getText());
             maxSize = null;
             return;
         }
@@ -708,10 +705,7 @@ public class NewDatasetDialog extends Dialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Invalid max dimension size: " + maxSize);
-                    error.open();
+                    Tools.showError(shell, "Invalid max dimension size: " + maxSize, shell.getText());
                     maxSize = null;
                     return;
                 }
@@ -723,19 +717,13 @@ public class NewDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Invalid dimension size: " + dimStr);
-                error.open();
+                Tools.showError(shell, "Invalid dimension size: " + dimStr, shell.getText());
                 return;
             }
 
             if (max != -1 && max < dim) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Invalid max dimension size: " + maxSize);
-                error.open();
+                Tools.showError(shell, "Invalid max dimension size: " + maxSize, shell.getText());
                 maxSize = null;
                 return;
             }
@@ -749,10 +737,7 @@ public class NewDatasetDialog extends Dialog {
         if (isH5) {
             if (isChunkNeeded && !checkChunked.getSelection()) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Chunking is required for the max dimensions of " + maxSize);
-                error.open();
+                Tools.showError(shell, "Chunking is required for the max dimensions of " + maxSize, shell.getText());
                 checkChunked.setSelection(true);
             }
         }
@@ -761,10 +746,7 @@ public class NewDatasetDialog extends Dialog {
                 if (maxdims[i] <= 0) {
                     maxSize = currentSizeField.getText();
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Only dim[0] can be unlimited." + maxSize);
-                    error.open();
+                    Tools.showError(shell, "Only dim[0] can be unlimited." + maxSize, shell.getText());
                     return;
                 }
             }
@@ -781,19 +763,13 @@ public class NewDatasetDialog extends Dialog {
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Dataset name is not specified.");
-            error.open();
+            Tools.showError(shell, "Dataset name is not specified.", shell.getText());
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Dataset name cannot contain path.");
-            error.open();
+            Tools.showError(shell, "Dataset name cannot contain path.", shell.getText());
             return null;
         }
 
@@ -801,10 +777,7 @@ public class NewDatasetDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Parent group is null.");
-            error.open();
+            Tools.showError(shell, "Parent group is null.", shell.getText());
             return null;
         }
 
@@ -867,10 +840,7 @@ public class NewDatasetDialog extends Dialog {
 
                 if (stringLength <= 0) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Invalid string length: " + stringLengthField.getText());
-                    error.open();
+                    Tools.showError(shell, "Invalid string length: " + stringLengthField.getText(), shell.getText());
                     return null;
                 }
                 tsize = stringLength;
@@ -880,10 +850,7 @@ public class NewDatasetDialog extends Dialog {
             String enumStr = stringLengthField.getText();
             if ((enumStr == null) || (enumStr.length() < 1) || enumStr.endsWith("...")) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Invalid member values: " + stringLengthField.getText());
-                error.open();
+                Tools.showError(shell, "Invalid member values: " + stringLengthField.getText(), shell.getText());
                 return null;
             }
         }
@@ -902,10 +869,7 @@ public class NewDatasetDialog extends Dialog {
 
         if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("HDF4 does not support 64-bit integer.");
-            error.open();
+            Tools.showError(shell, "HDF4 does not support 64-bit integer.", shell.getText());
             return null;
         }
 
@@ -925,10 +889,7 @@ public class NewDatasetDialog extends Dialog {
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Number of values in the current dimension size is less than " + rank);
-            error.open();
+            Tools.showError(shell, "Number of values in the current dimension size is less than " + rank, shell.getText());
             return null;
         }
 
@@ -942,19 +903,13 @@ public class NewDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Invalid dimension size: " + currentSizeField.getText());
-                error.open();
+                Tools.showError(shell, "Invalid dimension size: " + currentSizeField.getText(), shell.getText());
                 return null;
             }
 
             if (l <= 0) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Dimension size must be greater than zero.");
-                error.open();
+                Tools.showError(shell, "Dimension size must be greater than zero.", shell.getText());
                 return null;
             }
 
@@ -966,10 +921,7 @@ public class NewDatasetDialog extends Dialog {
             st = new StringTokenizer(maxSizeStr, "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Number of values in the max dimension size is less than " + rank);
-                error.open();
+                Tools.showError(shell, "Number of values in the max dimension size is less than " + rank, shell.getText());
                 return null;
             }
 
@@ -987,20 +939,14 @@ public class NewDatasetDialog extends Dialog {
                     }
                     catch (NumberFormatException ex) {
                         shell.getDisplay().beep();
-                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                        error.setText(shell.getText());
-                        error.setMessage("Invalid max dimension size: " + maxSize);
-                        error.open();
+                        Tools.showError(shell, "Invalid max dimension size: " + maxSize, shell.getText());
                         return null;
                     }
                 }
 
                 if (l < -1) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Dimension size cannot be less than -1.");
-                    error.open();
+                    Tools.showError(shell, "Dimension size cannot be less than -1.", shell.getText());
                     return null;
                 }
                 else if (l == 0) {
@@ -1016,10 +962,7 @@ public class NewDatasetDialog extends Dialog {
             st = new StringTokenizer(chunkSizeField.getText(), "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Number of values in the chunk size is less than " + rank);
-                error.open();
+                Tools.showError(shell, "Number of values in the chunk size is less than " + rank, shell.getText());
                 return null;
             }
 
@@ -1032,19 +975,13 @@ public class NewDatasetDialog extends Dialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Invalid chunk dimension size: " + chunkSizeField.getText());
-                    error.open();
+                    Tools.showError(shell, "Invalid chunk dimension size: " + chunkSizeField.getText(), shell.getText());
                     return null;
                 }
 
                 if (l < 1) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Chunk size cannot be less than 1.");
-                    error.open();
+                    Tools.showError(shell, "Chunk size cannot be less than 1.", shell.getText());
                     return null;
                 }
 
@@ -1108,10 +1045,7 @@ public class NewDatasetDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return null;
         }
 
@@ -1127,29 +1061,20 @@ public class NewDatasetDialog extends Dialog {
         name = nameField.getText();
         if (name == null || name.length() == 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Dataset name is not specified.");
-            error.open();
+            Tools.showError(shell, "Dataset name is not specified.", shell.getText());
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Dataset name cannot contain path.");
-            error.open();
+            Tools.showError(shell, "Dataset name cannot contain path.", shell.getText());
             return null;
         }
 
         pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Parent group is null.");
-            error.open();
+            Tools.showError(shell, "Parent group is null.", shell.getText());
             return null;
         }
 
@@ -1175,10 +1100,7 @@ public class NewDatasetDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return null;
         }
 
@@ -1193,29 +1115,20 @@ public class NewDatasetDialog extends Dialog {
         name = nameField.getText();
         if (name == null || name.length() == 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Dataset name is not specified.");
-            error.open();
+            Tools.showError(shell, "Dataset name is not specified.", shell.getText());
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Dataset name cannot contain path.");
-            error.open();
+            Tools.showError(shell, "Dataset name cannot contain path.", shell.getText());
             return null;
         }
 
         pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Parent group is null.");
-            error.open();
+            Tools.showError(shell, "Parent group is null.", shell.getText());
             return null;
         }
 
@@ -1268,10 +1181,7 @@ public class NewDatasetDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return null;
         }
 
@@ -1401,12 +1311,11 @@ public class NewDatasetDialog extends Dialog {
                 // Try opening help link in external browser if platform
                 // doesn't support SWT browser
                 browser = null;
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setMessage("Platform doesn't support Browser. Opening external link in web browser...");
-                error.setText("Browser support");
-                error.open();
-                helpShell.dispose();
-
+                
+                Tools.showError(shell,
+                        "Platform doesn't support Browser. Opening external link in web browser...",
+                        "Browser support");
+                
                 //TODO: Add support for launching in external browser
             }
         }

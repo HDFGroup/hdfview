@@ -281,6 +281,9 @@ public class HDFView implements ViewManager {
      *            the coord x of the app in pixels
      * @param y
      *            the coord y of the app in pixels
+     *
+     * @return
+     *            the newly-created HDFView Shell
      */
     public Shell openMainWindow(List<File> flist, int width, int height, int x, int y) {
         log.debug("openMainWindow enter");
@@ -973,10 +976,7 @@ public class HDFView implements ViewManager {
                     org.eclipse.swt.program.Program.launch(ugPath);
                 }
                 catch (Exception ex) {
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText(shell.getText());
-                    error.setMessage(ex.getMessage());
-                    error.open();
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -1371,10 +1371,7 @@ public class HDFView implements ViewManager {
                                     log.debug("parent group:", ex);
                                 }
                                 if (pgroup == null) {
-                                    MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
-                                    error.setText(mainWindow.getText());
-                                    error.setMessage("Parent group is null.");
-                                    error.open();
+                                    Tools.showError(mainWindow, "Parent group is null.", mainWindow.getText());
                                     return;
                                 }
 
@@ -1400,14 +1397,11 @@ public class HDFView implements ViewManager {
                                     theObj.setLinkTargetObjName(target_name);
                                 }
                                 catch (Exception ex) {
-                                    MessageBox error = new MessageBox(mainWindow, SWT.ICON_ERROR);
-                                    error.setText(mainWindow.getText());
-                                    error.setMessage(ex.getMessage());
-                                    error.open();
+                                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
                                     return;
                                 }
                                 
-                                MessageBox success = new MessageBox(mainWindow, SWT.ICON_INFORMATION);
+                                MessageBox success = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
                                 success.setText(mainWindow.getText());
                                 success.setMessage("Link target changed.");
                                 success.open();
@@ -2027,13 +2021,17 @@ public class HDFView implements ViewManager {
         Shell[] openShells = display.getShells();
         DataView view = null;
         HObject currentObj = null;
+        FileFormat currentFile = null;
         
         for (int i = 0; i < openShells.length; i++) {
             view = (DataView) openShells[i].getData();
             
             if (view != null) {
                 currentObj = view.getDataObject();
-                if (currentObj.equals(dataObject)) return view;
+                currentFile = currentObj.getFileFormat();
+                
+                if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))
+                    return view;
             }
         }
 
@@ -2043,6 +2041,10 @@ public class HDFView implements ViewManager {
     /**
      * Set the testing state that determines if HDFView
      * is being executed for GUI testing.
+     * 
+     * @param testing
+     *           Provides SWTBot native dialog compatibility
+     *           workarounds if set to true.
      */
     public void setTestState(boolean testing) {
         isTesting = testing;

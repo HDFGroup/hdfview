@@ -284,19 +284,13 @@ public class NewGroupDialog extends Dialog {
         name = nameField.getText();
         if (name == null || name.length() == 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Group name is not specified.");
-            error.open();
+            Tools.showError(shell, "Group name is not specified.", shell.getText());
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Group name cannot contain path.");
-            error.open();
+            Tools.showError(shell, "Group name cannot contain path.", shell.getText());
             return null;
         }
 
@@ -304,10 +298,7 @@ public class NewGroupDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Parent group is null.");
-            error.open();
+            Tools.showError(shell, "Parent group is null.", shell.getText());
             return null;
         }
 
@@ -329,19 +320,13 @@ public class NewGroupDialog extends Dialog {
 
             if ((maxCompact <= 0) || (maxCompact > 65536) || (minDense > 65536)) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Max Compact and Min Indexed should be > 0 and < 65536.");
-                error.open();
+                Tools.showError(shell, "Max Compact and Min Indexed should be > 0 and < 65536.", shell.getText());
                 return null;
             }
 
             if (maxCompact < minDense) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Min Indexed should be <= Max Compact");
-                error.open();
+                Tools.showError(shell, "Min Indexed should be <= Max Compact", shell.getText());
                 return null;
             }
 
@@ -361,10 +346,7 @@ public class NewGroupDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return null;
         }
 
@@ -393,7 +375,7 @@ public class NewGroupDialog extends Dialog {
                         + "now be explicitly tracked and indexed in the order that they were created. \n\n"
                         + "The default order in which links in a group are listed is alphanumeric-by-name. \n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
                 info.setText(shell.getText());
                 info.setMessage(msg);
                 info.open();
@@ -457,7 +439,7 @@ public class NewGroupDialog extends Dialog {
                         + "Groups which are in indexed format and in which the number of links falls    \n"
                         + "below this threshold are automatically converted to compact format. \n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
                 info.setText(shell.getText());
                 info.setMessage(msg);
                 info.open();
