@@ -136,7 +136,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
 public class DefaultImageView implements ImageView {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
 
-    private final Display           display;
+    private final Display           display = Display.getDefault();
     private final Shell             shell;
     private Font                    curFont;
 
@@ -280,8 +280,8 @@ public class DefaultImageView implements ImageView {
      * @param theView
      *            the main HDFView.
      */
-    public DefaultImageView(Shell parent, ViewManager theView) {
-        this(parent, theView, null);
+    public DefaultImageView(ViewManager theView) {
+        this(theView, null);
     }
 
     /**
@@ -298,9 +298,8 @@ public class DefaultImageView implements ImageView {
      *            applying bitmask, and etc. Predefined keys are listed at
      *            ViewProperties.DATA_VIEW_KEY.
      */
-    public DefaultImageView(Shell parent, ViewManager theView, HashMap map) {
-        shell = new Shell(parent, SWT.SHELL_TRIM);
-        display = shell.getDisplay();
+    public DefaultImageView(ViewManager theView, HashMap map) {
+        shell = new Shell(display, SWT.SHELL_TRIM);
 
         shell.setData(this);
 
@@ -324,6 +323,9 @@ public class DefaultImageView implements ImageView {
                 imageComponent = null;
                 autoGainData = null;
                 ((Vector) rotateRelatedItems).setSize(0);
+                
+                viewer.removeDataView(DefaultImageView.this);
+                
                 System.runFinalization();
                 System.gc();
             }
@@ -504,21 +506,6 @@ public class DefaultImageView implements ImageView {
         bar.setSize(shell.getSize().x, 30);
         bar.setLocation(0, 0);
 
-        String origin = ViewProperties.getImageOrigin();
-        int titlePosition = SWT.TOP;
-        int titleJustification = SWT.LEFT;
-
-        if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_UR)) {
-            titleJustification = SWT.RIGHT;
-        }
-        else if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_LL)) {
-            titlePosition = SWT.BOTTOM;
-        }
-        else if (origin.equalsIgnoreCase(ViewProperties.ORIGIN_LR)) {
-            titleJustification = SWT.RIGHT;
-            titlePosition = SWT.BOTTOM;
-        }
-
         String originTag = "(0,0)";
         if (ViewProperties.isIndexBase1())
             originTag = "(1,1)";
@@ -554,28 +541,22 @@ public class DefaultImageView implements ImageView {
         valueField.setFont(curFont);
         setValueVisible(showValues);
 
-        Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 
-        shell.setSize(minimumSize);
+//        shell.setMinimumSize(new Point(500, 500));
+        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-        org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
-        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (minimumSize.x / 2),
-                          (parentBounds.y + (parentBounds.height / 2)) - (minimumSize.y / 2));
+//        org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
+//        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (minimumSize.x / 2),
+//                          (parentBounds.y + (parentBounds.height / 2)) - (minimumSize.y / 2));
 
         viewer.addDataView(this);
-
+        
         shell.open();
-
-        // Workaround to prevent parent shell cursor from staying in "wait"
-        // mode while TableView is open
-        parent.setCursor(null);
 
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-
-        viewer.removeDataView(this);
     }
 
     private Menu createMenuBar() {

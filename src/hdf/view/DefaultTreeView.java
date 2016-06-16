@@ -2527,14 +2527,20 @@ public class DefaultTreeView implements TreeView {
 
         log.trace("showDataContent: inited");
         
-        Shell theShell = null;
         DataView existingView = ((HDFView) viewer).getDataView(d);
 
         if (isDefaultDisplay) {
             if (existingView != null) {
-                theShell = ((HDFView) viewer).findShell(existingView);
-                theShell.forceActive();
-                return null;
+                Shell[] shells = Display.getDefault().getShells();
+                
+                if (shells.length >= 1) {
+                    for (int i = 0; i < shells.length; i++) {
+                        if (((DataView) shells[i].getData()).equals(existingView)) {
+                            shells[i].forceActive();
+                            break;
+                        }
+                    }
+                }
             }
 
             if (isText) {
@@ -2599,7 +2605,7 @@ public class DefaultTreeView implements TreeView {
         }
 
         Object theView = null;
-        Object[] initargs = { shell, viewer };
+        Object[] initargs = { viewer };
         HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<DATA_VIEW_KEY, Serializable>(8);
         map.put(ViewProperties.DATA_VIEW_KEY.INDEXBASE1, new Boolean(isIndexBase1));
         if (bitmask != null) {
@@ -2647,12 +2653,12 @@ public class DefaultTreeView implements TreeView {
         if (dataViewName.startsWith("hdf.view.DefaultTableView")) {
             map.put(ViewProperties.DATA_VIEW_KEY.CHAR, new Boolean(isDisplayTypeChar));
             map.put(ViewProperties.DATA_VIEW_KEY.TRANSPOSED, new Boolean(isTransposed));
-            Object[] tmpargs = { shell, viewer, map };
+            Object[] tmpargs = { viewer, map };
             initargs = tmpargs;
         }
         else if (dataViewName.startsWith("hdf.view.DefaultImageView")) {
             map.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, new Boolean((bitmask != null)));
-            Object[] tmpargs = { shell, viewer, map };
+            Object[] tmpargs = { viewer, map };
             initargs = tmpargs;
         }
 
@@ -2717,7 +2723,7 @@ public class DefaultTreeView implements TreeView {
             theClass = ViewProperties.loadExtClass().loadClass(className);
         }
 
-        Object[] initargs = { shell, viewer, dataObject };
+        Object[] initargs = { viewer, dataObject };
         MetaDataView dataView = (MetaDataView) Tools.newInstance(theClass, initargs);
 
         return dataView;

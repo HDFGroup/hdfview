@@ -151,9 +151,6 @@ public class HDFView implements ViewManager {
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
     private ToolBar                    toolBar;
 
-    /* GUI component: Area to hold file structure tree and data content pane */
-    private Composite                  contentArea;
-
     /* GUI component: The text area for showing status messages */
     private Text                       status;
 
@@ -175,14 +172,11 @@ public class HDFView implements ViewManager {
     /* The font to be used for display text on all Controls */
     private Font                       currentFont;
 
-    /* The offset when a new dataview is added into the main window. */
-    private int                        frameOffset = 0;
-
     private UserOptionsDialog          userOptionDialog;
 
-    private Constructor<?>             ctrSrbFileDialog     = null;
-
-    private Dialog                     srbFileDialog         = null;
+//    private Constructor<?>             ctrSrbFileDialog     = null;
+//
+//    private Dialog                     srbFileDialog         = null;
 
     /**
      * Constructs HDFView with a given root directory, where the HDFView is
@@ -764,17 +758,6 @@ public class HDFView implements ViewManager {
         new MenuItem(windowMenu, SWT.SEPARATOR);
 
         item = new MenuItem(windowMenu, SWT.PUSH);
-        item.setText("Close &Window");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                if (shell.getShells().length <= 0 || (display.getActiveShell().equals(shell)))
-                    return;
-
-                display.getActiveShell().dispose();
-            }
-        });
-
-        item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("Close &All");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -891,8 +874,7 @@ public class HDFView implements ViewManager {
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4);
-                dialog.open();
+                new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
         });
 
@@ -901,8 +883,7 @@ public class HDFView implements ViewManager {
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5);
-                dialog.open();
+                new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
         });
 
@@ -1007,8 +988,7 @@ public class HDFView implements ViewManager {
         hdf4Item.setToolTipText("HDF4 Library Version");
         hdf4Item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4);
-                dialog.open();
+                new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
         });
 
@@ -1023,8 +1003,7 @@ public class HDFView implements ViewManager {
         hdf5Item.setToolTipText("HDF5 Library Version");
         hdf5Item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                LibraryVersionDialog dialog = new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5);
-                dialog.open();
+                new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
         });
 
@@ -1891,17 +1870,20 @@ public class HDFView implements ViewManager {
         }
 
         // Close all the data windows of this file
-        Shell[] views = mainWindow.getShells();
+        Shell[] views = display.getShells();
         if (views != null) {
             for (int i = 0; i < views.length; i++) {
-                HObject obj = (HObject) (((DataView) views[i].getData()).getDataObject());
-                if (obj == null) {
-                    continue;
-                }
-
-                if (obj.getFileFormat().equals(theFile)) {
-                    views[i].dispose();
-                    views[i] = null;
+                DataView view = (DataView) views[i].getData();
+                
+                if (view != null) {
+                    HObject obj = view.getDataObject();
+                    
+                    if (obj == null) continue;
+                    
+                    if (obj.getFileFormat().equals(theFile)) {
+                        views[i].dispose();
+                        views[i] = null;
+                    }
                 }
             }
         }
@@ -1963,7 +1945,7 @@ public class HDFView implements ViewManager {
      */
     public void writeDataToFile(FileFormat theFile) {
         try {
-            Shell[] openShells = mainWindow.getShells();
+            Shell[] openShells = display.getShells();
 
             if (openShells != null) {
                 for (int i = 0; i < openShells.length; i++) {
@@ -1994,12 +1976,13 @@ public class HDFView implements ViewManager {
         }
 
         // Check if the data content is already displayed
-        Shell[] shellList = mainWindow.getShells();
+        Shell[] shellList = display.getShells();
         if (shellList != null) {
             for (int i = 0; i < shellList.length; i++) {
-                if (dataView.equals((DataView) shellList[i].getData())) {
+                if (dataView.equals((DataView) shellList[i].getData())
+                        && shellList[i].isVisible()) {
                     showWindow(shellList[i]);
-                    break;
+                    return;
                 }
             }
         }
@@ -2011,13 +1994,17 @@ public class HDFView implements ViewManager {
         item.setText(fullPath);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                Shell[] sList = mainWindow.getShells();
+                Shell[] sList = display.getShells();
 
                 for (int i = 0; i < sList.length; i++) {
-                    HObject obj = ((DataView) sList[i].getData()).getDataObject();
+                    DataView view = (DataView) sList[i].getData();
+                    
+                    if (view != null) {
+                        HObject obj = view.getDataObject();
 
-                    if (obj.getFullName().equals(((MenuItem) e.widget).getText())) {
-                        showWindow(sList[i]);
+                        if (obj.getFullName().equals(((MenuItem) e.widget).getText())) {
+                            showWindow(sList[i]);
+                        }
                     }
                 }
             }
@@ -2037,13 +2024,17 @@ public class HDFView implements ViewManager {
     }
 
     public DataView getDataView(HObject dataObject) {
-        Shell[] openShells = mainWindow.getShells();
+        Shell[] openShells = display.getShells();
+        DataView view = null;
         HObject currentObj = null;
         
         for (int i = 0; i < openShells.length; i++) {
-            currentObj = ((DataView) openShells[i].getData()).getDataObject();
+            view = (DataView) openShells[i].getData();
             
-            if (currentObj.equals(dataObject)) return (DataView) openShells[i].getData();
+            if (view != null) {
+                currentObj = view.getDataObject();
+                if (currentObj.equals(dataObject)) return view;
+            }
         }
 
         return null;
@@ -2095,42 +2086,21 @@ public class HDFView implements ViewManager {
      *               the name of the window to show.
      */
     private void showWindow(final Shell shell) {
-        // Return if main window (shell) is the only open shell
-        if (mainWindow.getShells().length < 1) return;
-
         shell.getDisplay().asyncExec(new Runnable() {
             public void run() {
                 shell.forceActive();
             }
         });
     }
-    
-    /**
-     * Finds the Shell containing the given DataView.
-     * 
-     * @param dataView
-     *           The DataView contained in the Shell to be found.
-     */
-    public Shell findShell(final DataView dataView) {
-        Shell[] openShells = mainWindow.getShells();
-        
-        if (openShells.length < 1) return null;
-        
-        for (int i = 0; i < openShells.length; i++) {
-            if (((DataView) openShells[i].getData()).equals(dataView)) return openShells[i];
-        }
-        
-        return null; 
-    }
 
     /**
      * Cascade all windows.
      */
     private void cascadeWindows() {
-        Shell[] sList = mainWindow.getShells();
+        Shell[] sList = display.getShells();
 
         // Return if main window (shell) is the only open shell
-        if (sList.length < 1) return;
+        if (sList.length <= 1) return;
 
         int x = 2, y = 2;
         Shell shell = null;
@@ -2152,10 +2122,10 @@ public class HDFView implements ViewManager {
      * Tile all windows.
      */
     private void tileWindows() {
-        Shell[] sList = mainWindow.getShells();
+        Shell[] sList = display.getShells();
 
         // Return if main window (shell) is the only open shell
-        if (sList.length < 1) return;
+        if (sList.length <= 1) return;
 
         int x = 0, y = 0, idx = 0;
         Shell shell = null;
@@ -2189,18 +2159,12 @@ public class HDFView implements ViewManager {
      * Closes all windows.
      */
     private void closeAllWindows() {
-        Shell[] sList = mainWindow.getShells();
+        Shell[] sList = display.getShells();
 
-        // Return if main window (shell) is the only open shell
-        if (sList.length < 1) return;
-
-        Shell shell = null;
         for (int i = 0; i < sList.length; i++) {
-            shell = sList[i];
-            shell.dispose();
+            if (sList[i].equals(mainWindow)) continue;
+            sList[i].dispose();
         }
-
-        shell = null;
     }
 
     /* Enable and disable GUI components */

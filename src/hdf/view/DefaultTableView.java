@@ -150,7 +150,7 @@ public class DefaultTableView implements TableView {
 
     private final static org.slf4j.Logger   log       = org.slf4j.LoggerFactory.getLogger(DefaultTableView.class);
 
-    private final Display                   display;
+    private final Display                   display = Display.getDefault();
     private final Shell                     shell;
     private Font                            curFont;
 
@@ -197,9 +197,9 @@ public class DefaultTableView implements TableView {
     private BITMASK_OP                      bitmaskOP               = BITMASK_OP.EXTRACT;
 
     // Keeps track of which frame of data is being displayed
-    private Text frameField;
-    private long curFrame                           = 0;
-    private long maxFrame                           = 1;
+    private Text                            frameField;
+    private long                            curFrame = 0;
+    private long                            maxFrame = 1;
 
     private int                             indexBase = 0;
 
@@ -258,8 +258,8 @@ public class DefaultTableView implements TableView {
      * @param theView
      *             the main HDFView.
      */
-    public DefaultTableView(Shell parent, ViewManager theView) {
-        this(parent, theView, null);
+    public DefaultTableView(ViewManager theView) {
+        this(theView, null);
     }
 
     /**
@@ -275,11 +275,10 @@ public class DefaultTableView implements TableView {
      *          data as character, applying bitmask, and etc. Predefined keys are listed at
      *          ViewProperties.DATA_VIEW_KEY.
      */
-    public DefaultTableView(Shell parent, ViewManager theView, HashMap map) {
+    public DefaultTableView(ViewManager theView, HashMap map) {
         log.trace("DefaultTableView start");
-
-        shell = new Shell(parent, SWT.SHELL_TRIM);
-        display = shell.getDisplay();
+        
+        shell = new Shell(display, SWT.SHELL_TRIM);
 
         shell.setData(this);
 
@@ -312,6 +311,8 @@ public class DefaultTableView implements TableView {
                 }
                 
                 if (curFont != null) curFont.dispose();
+                
+                viewer.removeDataView(DefaultTableView.this);
             }
         });
         
@@ -325,8 +326,9 @@ public class DefaultTableView implements TableView {
         catch (Exception ex) {
             curFont = null;
         }
-
+        
         viewer = theView;
+
         HObject hObject = null;
 
         if (ViewProperties.isIndexBase1()) indexBase = 1;
@@ -372,7 +374,7 @@ public class DefaultTableView implements TableView {
 
         log.trace("dataset size={} Height={} Width={}", tsize, dataset.getHeight(), dataset.getWidth());
         if (dataset.getHeight() <= 0 || dataset.getWidth() <= 0 || tsize <= 0) {
-            Tools.showError(parent, "Could not open dataset '" + dataset.getName() + "'. Dataset has dimension of size 0.", parent.getText());
+            Tools.showError(shell, "Could not open dataset '" + dataset.getName() + "'. Dataset has dimension of size 0.", shell.getText());
             return;
         }
 
@@ -540,23 +542,19 @@ public class DefaultTableView implements TableView {
 
         shell.pack();
 
-        shell.setSize(parent.getClientArea().width, parent.getClientArea().height);
-        shell.setLocation(parent.getBounds().x, parent.getBounds().y);
+//        shell.setMinimumSize(new Point(500, 500));
+//        shell.setSize(parent.getClientArea().width, parent.getClientArea().height);
+        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//        shell.setLocation(parent.getBounds().x, parent.getBounds().y);
 
         viewer.addDataView(this);
-
+        
         shell.open();
-
-        // Workaround to prevent parent shell cursor from staying in "wait"
-        // mode while TableView is open
-        parent.setCursor(null);
 
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-
-        viewer.removeDataView(this);
     }
     
     // Implementing TableView
@@ -2193,13 +2191,13 @@ public class DefaultTableView implements TableView {
         map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
         switch (viewType) {
             case TEXT:
-                dataView = new DefaultTextView(shell, viewer, map);
+                dataView = new DefaultTextView(viewer, map);
                 break;
             case IMAGE:
-                dataView = new DefaultImageView(shell, viewer, map);
+                dataView = new DefaultImageView(viewer, map);
                 break;
             default:
-                dataView = new DefaultTableView(shell, viewer, map);
+                dataView = new DefaultTableView(viewer, map);
                 break;
         }
 
@@ -2351,13 +2349,13 @@ public class DefaultTableView implements TableView {
             map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
             switch (viewType) {
                 case TEXT:
-                    dataView = new DefaultTextView(shell, viewer, map);
+                    dataView = new DefaultTextView(viewer, map);
                     break;
                 case IMAGE:
-                    dataView = new DefaultImageView(shell, viewer, map);
+                    dataView = new DefaultImageView(viewer, map);
                     break;
                 default:
-                    dataView = new DefaultTableView(shell, viewer, map);
+                    dataView = new DefaultTableView(viewer, map);
                     break;
             }
 
