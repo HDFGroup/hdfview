@@ -2027,13 +2027,17 @@ public class HDFView implements ViewManager {
         Shell[] openShells = display.getShells();
         DataView view = null;
         HObject currentObj = null;
+        FileFormat currentFile = null;
         
         for (int i = 0; i < openShells.length; i++) {
             view = (DataView) openShells[i].getData();
             
             if (view != null) {
                 currentObj = view.getDataObject();
-                if (currentObj.equals(dataObject)) return view;
+                currentFile = currentObj.getFileFormat();
+                
+                if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))
+                    return view;
             }
         }
 

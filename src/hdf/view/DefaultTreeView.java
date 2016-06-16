@@ -2535,9 +2535,13 @@ public class DefaultTreeView implements TreeView {
                 
                 if (shells.length >= 1) {
                     for (int i = 0; i < shells.length; i++) {
-                        if (((DataView) shells[i].getData()).equals(existingView)) {
-                            shells[i].forceActive();
-                            break;
+                        DataView view = (DataView) shells[i].getData();
+
+                        if (view != null) {
+                            if (view.equals(existingView)) {
+                                shells[i].forceActive();
+                                return view;
+                            }
                         }
                     }
                 }
