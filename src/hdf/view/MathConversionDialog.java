@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -267,20 +266,14 @@ public class MathConversionDialog extends Dialog {
                 a = Integer.parseInt(aField.getText().trim());
                 if (a <= 0) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                    error.setText(shell.getText());
-                    error.setMessage("a must be an integer greater than zero.");
-                    error.open();
+                    Tools.showError(shell, "a must be an integer greater than zero.", shell.getText());
                     return false;
                 }
             }
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return false;
         }
 
@@ -294,10 +287,7 @@ public class MathConversionDialog extends Dialog {
                     x = bdata[i];
                     value = y(index, x, a, b);
                     if ((value > Byte.MAX_VALUE) || (value < Byte.MIN_VALUE)) {
-                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                        error.setText(shell.getText());
-                        error.setMessage("Invalid byte value: " + (long) value);
-                        error.open();
+                        Tools.showError(shell, "Invalid byte value: " + (long) value, shell.getText());
                         return false;
                     }
 
@@ -310,10 +300,7 @@ public class MathConversionDialog extends Dialog {
                     x = sdata[i];
                     value = y(index, x, a, b);
                     if ((value > Short.MAX_VALUE) || (value < Short.MIN_VALUE)) {
-                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                        error.setText(shell.getText());
-                        error.setMessage("Invalid short value: " + (long) value);
-                        error.open();
+                        Tools.showError(shell, "Invalid short value: " + (long) value, shell.getText());
                         return false;
                     }
 
@@ -326,10 +313,7 @@ public class MathConversionDialog extends Dialog {
                     x = idata[i];
                     value = y(index, x, a, b);
                     if ((value > Integer.MAX_VALUE) || (value < Integer.MIN_VALUE)) {
-                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                        error.setText(shell.getText());
-                        error.setMessage("Invalid int value: " + (long) value);
-                        error.open();
+                        Tools.showError(shell, "Invalid int value: " + (long) value, shell.getText());
                         return false;
                     }
 
@@ -342,10 +326,7 @@ public class MathConversionDialog extends Dialog {
                     x = ldata[i];
                     value = y(index, x, a, b);
                     if ((value > Long.MAX_VALUE) || (value < Long.MIN_VALUE)) {
-                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                        error.setText(shell.getText());
-                        error.setMessage("Invalid long value: " + (long) value);
-                        error.open();
+                        Tools.showError(shell, "Invalid long value: " + (long) value, shell.getText());
                         return false;
                     }
 
@@ -359,10 +340,7 @@ public class MathConversionDialog extends Dialog {
                     value = y(index, x, a, b);
                     if ((value > Float.MAX_VALUE) || (value < -Float.MAX_VALUE)
                         || (value == Float.NaN)) {
-                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                        error.setText(shell.getText());
-                        error.setMessage("Invalid float value: " + value);
-                        error.open();
+                        Tools.showError(shell, "Invalid float value: " + value, shell.getText());
                         return false;
                     }
 
@@ -376,10 +354,7 @@ public class MathConversionDialog extends Dialog {
                     value = y(index, x, a, b);
                     if ((value > Double.MAX_VALUE) || (value < -Double.MAX_VALUE)
                         || (value == Double.NaN)) {
-                        MessageBox error = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                        error.setText(shell.getText());
-                        error.setMessage("Invalid double value: " + value);
-                        error.open();
+                        Tools.showError(shell, "Invalid double value: " + value, shell.getText());
                         return false;
                     }
 

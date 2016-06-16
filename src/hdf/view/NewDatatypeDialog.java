@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -375,19 +374,13 @@ public class NewDatatypeDialog extends Dialog {
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Datatype name is not specified.");
-            error.open();
+            Tools.showError(shell, "Datatype name is not specified.", shell.getText());
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Datatype name cannot contain path.");
-            error.open();
+            Tools.showError(shell, "Datatype name cannot contain path.", shell.getText());
             return null;
         }
 
@@ -395,10 +388,7 @@ public class NewDatatypeDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Parent group is null.");
-            error.open();
+            Tools.showError(shell, "Parent group is null.", shell.getText());
             return null;
         }
 
@@ -458,10 +448,7 @@ public class NewDatatypeDialog extends Dialog {
 
                 if (stringLength <= 0) {
                     shell.getDisplay().beep();
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Invalid string length: " + stringLengthField.getText());
-                    error.open();
+                    Tools.showError(shell, "Invalid string length: " + stringLengthField.getText(), shell.getText());
                     return null;
                 }
 
@@ -483,10 +470,7 @@ public class NewDatatypeDialog extends Dialog {
 
         if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("HDF4 does not support 64-bit integer.");
-            error.open();
+            Tools.showError(shell, "HDF4 does not support 64-bit integer.", shell.getText());
             return null;
         }
 
@@ -521,10 +505,7 @@ public class NewDatatypeDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return null;
         }
 

@@ -111,8 +111,6 @@ public class DefaultTextView implements TextView {
     /**
      * Constructs an TextView.
      *
-     * @param parent
-     *             the parent of this dialog
      * @param theView
      *            the main HDFView.
      * @param map
@@ -130,7 +128,7 @@ public class DefaultTextView implements TextView {
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (isTextChanged && !isReadOnly) {
-                    MessageBox confirm = new MessageBox(shell, SWT.YES | SWT.NO);
+                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
                     confirm.setMessage("\""
                             + dataset.getName() + "\" has changed.\n"
                             + "Do you want to save the changes?");

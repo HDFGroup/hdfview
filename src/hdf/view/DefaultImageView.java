@@ -275,8 +275,6 @@ public class DefaultImageView implements ImageView {
     /**
      * Constructs an ImageView.
      *
-     * @param parent
-     *            the parent of this dialog
      * @param theView
      *            the main HDFView.
      */
@@ -287,8 +285,6 @@ public class DefaultImageView implements ImageView {
     /**
      * Constructs an ImageView.
      *
-     * @param parent
-     *            the parent of this dialog
      * @param theView
      *            the main HDFView.
      * @param map

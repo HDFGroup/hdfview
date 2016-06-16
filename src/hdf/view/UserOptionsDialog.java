@@ -581,7 +581,7 @@ public class UserOptionsDialog extends Dialog {
                         // + "bias_max = fabs(bias) * 3.0 \n"
                         + "\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
                 info.setText(shell.getText());
                 info.setMessage(msg);
                 info.open();
@@ -636,7 +636,7 @@ public class UserOptionsDialog extends Dialog {
                         + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
                         + "shown as (R, B, B, B, G, G).\n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
                 info.setText(shell.getText());
                 info.setMessage(msg);
                 info.open();

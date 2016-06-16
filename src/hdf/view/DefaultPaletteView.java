@@ -46,7 +46,6 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -100,7 +99,6 @@ public class DefaultPaletteView extends Dialog {
     private int[][]             paletteData;
 
     boolean                     isPaletteChanged = false;
-    private boolean             startEditing = false;
     private boolean             isH5 = false;
 
 
@@ -651,10 +649,7 @@ public class DefaultPaletteView extends Dialog {
             }
 
             if (value < 0 || value > 255) {
-            	MessageBox error = new MessageBox(tableShell, SWT.ICON_ERROR | SWT.OK);
-            	error.setText(tableShell.getText());
-            	error.setMessage("Value is out of range [0, 255]\n");
-            	error.open();
+                Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
             	return;
             }
 
@@ -702,10 +697,7 @@ public class DefaultPaletteView extends Dialog {
                                     		item.setText(column, text.getText());
                                     		updatePaletteValue(item.getText(column), row, column - 1);
                                     	} else {
-                                    		MessageBox error = new MessageBox(tableShell, SWT.ICON_ERROR | SWT.OK);
-                                        	error.setText(tableShell.getText());
-                                        	error.setMessage("Value is out of range [0, 255]\n");
-                                        	error.open();
+                                    	    Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
                                     	}
                                         
                                         text.dispose();
@@ -717,10 +709,7 @@ public class DefaultPaletteView extends Dialog {
                                         		item.setText(column, text.getText());
                                         		updatePaletteValue(item.getText(column), row, column - 1);
                                         	} else {
-                                        		MessageBox error = new MessageBox(tableShell, SWT.ICON_ERROR | SWT.OK);
-                                            	error.setText(tableShell.getText());
-                                            	error.setMessage("Value is out of range [0, 255]\n");
-                                            	error.open();
+                                        	    Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
                                         	}
                                         case SWT.TRAVERSE_ESCAPE:
                                             text.dispose();

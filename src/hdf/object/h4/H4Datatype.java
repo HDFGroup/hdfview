@@ -71,7 +71,7 @@ public class H4Datatype extends Datatype
      * will construct a datatype equivalent to
      * new H4Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
      *
-     * @see #fromNative(int nativeID)
+     * @see #fromNative(long nativeID)
      *
      * @param nativeID the native datatype identifier.
      */

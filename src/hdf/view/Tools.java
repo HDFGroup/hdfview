@@ -2617,8 +2617,11 @@ public final class Tools {
     /** 
      * Show an SWT error dialog with the given error message.
      * @param parent
+     *           The parent Shell of the MessageBox
      * @param errorMsg
+     *           The error message to display in the MessageBox
      * @param title
+     *           The title to set for the MessageBox
      */
     public static void showError(Shell parent, String errorMsg, String title) {
         MessageBox error = new MessageBox(parent, SWT.ICON_ERROR | SWT.OK);

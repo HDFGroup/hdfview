@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -309,19 +308,13 @@ public class NewImageDialog extends Dialog {
         }
         if ((name == null) || (name.length() <= 0)) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Image name is not specified.");
-            error.open();
+            Tools.showError(shell, "Image name is not specified.", shell.getText());
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Image name cannot contain path.");
-            error.open();
+            Tools.showError(shell, "Image name cannot contain path.", shell.getText());
             return null;
         }
 
@@ -329,10 +322,7 @@ public class NewImageDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("Select a parent group.");
-            error.open();
+            Tools.showError(shell, "Select a parent group.", shell.getText());
             return null;
         }
 
@@ -343,10 +333,7 @@ public class NewImageDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return null;
         }
 
@@ -403,10 +390,7 @@ public class NewImageDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return null;
         }
 

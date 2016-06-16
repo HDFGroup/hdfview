@@ -253,8 +253,6 @@ public class DefaultTableView implements TableView {
     /**
      * Constructs a TableView.
      *
-     * @param parent
-     *             the parent of this dialog
      * @param theView
      *             the main HDFView.
      */
@@ -265,8 +263,6 @@ public class DefaultTableView implements TableView {
     /**
      * Constructs a TableView.
      *
-     * @param parent
-     *             the parent of this dialog
      * @param theView
      *             the main HDFView.
      * @param map
@@ -1090,7 +1086,7 @@ public class DefaultTableView implements TableView {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if ((selectionLayer.getSelectedColumnPositions().length <= 0) || (selectionLayer.getSelectedRowCount() <= 0)) {
-                    MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION);
+                    MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
                     info.setText(shell.getText());
                     info.setMessage("Select table cells to write.");
                     info.open();
@@ -3458,7 +3454,7 @@ public class DefaultTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                MessageBox warning = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
                 warning.setText(shell.getText());
                 warning.setMessage("More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
                 warning.open();
@@ -3503,7 +3499,7 @@ public class DefaultTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                MessageBox warning = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
                 warning.setText(shell.getText());
                 warning.setMessage("More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
                 warning.open();

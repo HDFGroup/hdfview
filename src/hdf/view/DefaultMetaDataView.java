@@ -254,10 +254,7 @@ public class DefaultMetaDataView implements MetaDataView {
         
         int idx = attrTable.getSelectionIndex();
         if (idx < 0) {
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage("No attribute is selected.");
-            error.open();
+            Tools.showError(shell, "No attribute is selected.", shell.getText());
             return null;
         }
         
@@ -321,10 +318,7 @@ public class DefaultMetaDataView implements MetaDataView {
             attrList = hObject.getMetadata();
         }
         catch (Exception ex) {
-            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-            error.setText(shell.getText());
-            error.setMessage(ex.getMessage());
-            error.open();
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return;
         }
 
@@ -340,10 +334,7 @@ public class DefaultMetaDataView implements MetaDataView {
             int array_length = Array.getLength(data);
             StringTokenizer st = new StringTokenizer(newValue, ",");
             if (st.countTokens() < array_length) {
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("More data values needed: " + newValue);
-                error.open();
+                Tools.showError(shell, "More data values needed: " + newValue, shell.getText());
                 return;
             }
 
@@ -368,18 +359,12 @@ public class DefaultMetaDataView implements MetaDataView {
                     }
                 }
                 catch (NumberFormatException ex) {
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage(ex.getMessage());
-                    error.open();
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                     return;
                 }
 
                 if (isUnsigned && (d < 0)) {
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Negative value for unsigned integer: " + theToken);
-                    error.open();
+                    Tools.showError(shell, "Negative value for unsigned integer: " + theToken, shell.getText());
                     return;
                 }
 
@@ -395,11 +380,8 @@ public class DefaultMetaDataView implements MetaDataView {
                         }
 
                         if ((d > max) || (d < min)) {
-                            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                            error.setText(shell.getText());
-                            error.setMessage("Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken);
-                            error.open();
+                            Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                    + "]: " + theToken, shell.getText());
                         }
                         else {
                             Array.setByte(data, i, (byte) d);
@@ -417,11 +399,8 @@ public class DefaultMetaDataView implements MetaDataView {
                         }
 
                         if ((d > max) || (d < min)) {
-                            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                            error.setText(shell.getText());
-                            error.setMessage("Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken);
-                            error.open();
+                            Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                    + "]: " + theToken, shell.getText());
                         }
                         else {
                             Array.setShort(data, i, (short) d);
@@ -439,11 +418,8 @@ public class DefaultMetaDataView implements MetaDataView {
                         }
 
                         if ((d > max) || (d < min)) {
-                            MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                            error.setText(shell.getText());
-                            error.setMessage("Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken);
-                            error.open();
+                            Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                    + "]: " + theToken, shell.getText());
                         }
                         else {
                             Array.setInt(data, i, (int) d);
@@ -458,11 +434,8 @@ public class DefaultMetaDataView implements MetaDataView {
                                 BigInteger Jmax = new BigInteger("18446744073709551615");
                                 BigInteger big = new BigInteger(theValue); 
                                 if ((big.compareTo(Jmax)>0) || (big.compareTo(BigInteger.ZERO)<0)) {
-                                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                                    error.setText(shell.getText());
-                                    error.setMessage("Data is out of range[" + min + ", " + max
-                                            + "]: " + theToken);
-                                    error.open();
+                                    Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                            + "]: " + theToken, shell.getText());
                                 }
                                 lvalue = big.longValue();
                                 log.trace("updateAttributeValue: big.longValue={}", lvalue);
@@ -475,11 +448,8 @@ public class DefaultMetaDataView implements MetaDataView {
                             min = Long.MIN_VALUE;
                             max = Long.MAX_VALUE;
                             if ((d > max) || (d < min)) {
-                                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                                error.setText(shell.getText());
-                                error.setMessage("Data is out of range[" + min + ", " + max
-                                        + "]: " + theToken);
-                                error.open();
+                                Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                        + "]: " + theToken, shell.getText());
                             }
                             lvalue = (long)d;
                             log.trace("updateAttributeValue: longValue={}", lvalue);
@@ -502,10 +472,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 hObject.getFileFormat().writeAttribute(hObject, attr, true);
             }
             catch (Exception ex) {
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage(ex.getMessage());
-                error.open();
+                Tools.showError(shell, ex.getMessage(), shell.getText());
                 return;
             }
 
@@ -519,10 +486,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 hObject.getFileFormat().renameAttribute(hObject, attrName, newValue);
             }
             catch (Exception ex) {
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage(ex.getMessage());
-                error.open();
+                Tools.showError(shell, ex.getMessage(), shell.getText());
                 return;
             }
 
@@ -536,10 +500,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 ds.updateMetadata(attr);
             }
             catch (Exception ex) {
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage(ex.getMessage());
-                error.open();
+                Tools.showError(shell, ex.getMessage(), shell.getText());
             }
         }
         else {
@@ -620,10 +581,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 raf = new java.io.RandomAccessFile(hObject.getFile(), "rw");
             }
             catch (Exception ex) {
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Can't open output file: " + hObject.getFile());
-                error.open();
+                Tools.showError(shell, "Can't open output file: " + hObject.getFile(), shell.getText());
                 return;
             }
 
@@ -646,7 +604,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 log.debug("raf close:", ex);
             }
 
-            MessageBox success = new MessageBox(shell, SWT.ICON_INFORMATION);
+            MessageBox success = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
             success.setText(shell.getText());
             success.setMessage("Saving user block is successful.");
             success.open();
@@ -707,10 +665,7 @@ public class DefaultMetaDataView implements MetaDataView {
                     outFile.createNewFile();
                 }
                 catch (Exception ex) {
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                    error.setText(shell.getText());
-                    error.setMessage("Failed to write user block into file.");
-                    error.open();
+                    Tools.showError(shell, "Failed to write user block into file.", shell.getText());
                     return;
                 }
             }
@@ -735,19 +690,13 @@ public class DefaultMetaDataView implements MetaDataView {
                         outFile.renameTo(oldFile);
                     }
                     else {
-                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                        error.setText(shell.getText());
-                        error.setMessage("Cannot replace the current file.\nPlease save to a different file.");
-                        error.open();
+                        Tools.showError(shell, "Cannot replace the current file.\nPlease save to a different file.", shell.getText());
                         outFile.delete();
                     }
                 }
             }
             else {
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR);
-                error.setText(shell.getText());
-                error.setMessage("Failed to write user block into file.");
-                error.open();
+                Tools.showError(shell, "Failed to write user block into file.", shell.getText());
                 outFile.delete();
             }
 

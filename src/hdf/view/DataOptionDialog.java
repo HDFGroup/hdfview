@@ -543,10 +543,7 @@ public class DataOptionDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                error.setText(shell.getText());
-                error.setMessage(ex.getMessage());
-                error.open();
+                Tools.showError(shell, ex.getMessage(), shell.getText());
                 return false;
             }
 
@@ -580,10 +577,7 @@ public class DataOptionDialog extends Dialog {
             if ((selectedFieldIndices == null)
                     || (selectedFieldIndices.length < 1)) {
                 shell.getDisplay().beep();
-                MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                error.setText(shell.getText());
-                error.setMessage("No member/field is selected.");
-                error.open();
+                Tools.showError(shell, "No member/field is selected.", shell.getText());
                 return false;
             }
 
@@ -984,10 +978,9 @@ public class DataOptionDialog extends Dialog {
                         extractBitButton.setSelection(false);
                         applyBitmaskButton.setSelection(true);
 
-                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                        error.setText("Select Bitmask");
-                        error.setMessage("Selecting non-adjacent bits is only allowed \nfor the \"Apply Bitmask\" option.");
-                        error.open();
+                        Tools.showError(shell,
+                                "Selecting non-adjacent bits is only allowed \nfor the \"Apply Bitmask\" option.",
+                                "Select Bitmask");
                         return;
                     }
                 }
@@ -1081,11 +1074,10 @@ public class DataOptionDialog extends Dialog {
                                 }
 
                                 if(n > 1) {
-                                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                                    error.setText("Select Bitmask");
-                                    error.setMessage("Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
-                                    error.open();
-
+                                    Tools.showError(shell,
+                                            "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.",
+                                            "Select Bitmask");
+                                    
                                     source.setSelection(false);
                                     return;
                                 }
@@ -1430,10 +1422,7 @@ public class DataOptionDialog extends Dialog {
 
                 StringTokenizer st = new StringTokenizer(result, "x");
                 if (st.countTokens() < n) {
-                    MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                    error.setText("Select Slice Location");
-                    error.setMessage("Number of dimension(s) is less than " + n + "\n" + result);
-                    error.open();
+                    Tools.showError(shell, "Number of dimension(s) is less than " + n + "\n" + result, "Select Slice Location");
                     return;
                 }
 
@@ -1443,19 +1432,16 @@ public class DataOptionDialog extends Dialog {
                         start4[i] = Long.parseLong(st.nextToken().trim());
                     }
                     catch (Exception ex) {
-                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                        error.setText("Select Slice Location");
-                        error.setMessage(ex.getMessage());
-                        error.open();
+                        Tools.showError(shell, ex.getMessage(), "Select Slice Location");
                         return;
                     }
 
                     if ((start4[i] < 0) || (start4[i] >= dims[choice4Index[i]])) {
-                        MessageBox error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-                        error.setText("Select Slice Location");
-                        error.setMessage("Slice location is out of range.\n" + start4[i]
-                                + " >= " + dims[choice4Index[i]]);
-                        error.open();
+                        Tools.showError(shell,
+                                "Slice location is out of range.\n" + start4[i]
+                                + " >= " + dims[choice4Index[i]],
+                                "Select Slice Location");
+                        
                         return;
                     }
 
