@@ -653,7 +653,7 @@ public class H4File extends FileFormat {
             catch (Exception ex) {
                 log.debug("copyGroup(): Vdetach failure: ", ex);
             }
-        }   
+        }
 
         log.trace("copyGroup(): finish");
     }

@@ -157,7 +157,7 @@ public class H4Group extends Group
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);;
+                    Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     attributeList.add(attr);
 
                     Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);

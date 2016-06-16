@@ -71,14 +71,14 @@ import hdf.object.h5.H5Link;
  * @version 2.4 2/21/2016
  */
 public class DefaultMetaDataView implements MetaDataView {
-    private final Display              display;
+    private final Display              display = Display.getDefault();
     private Shell                      shell;
     
     private Font                       curFont;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
 
-    private ViewManager                viewer;
+    private final ViewManager                viewer;
     
     /** The HDF data object */
     private HObject                    hObject;
@@ -94,11 +94,10 @@ public class DefaultMetaDataView implements MetaDataView {
 
     private int[]                      libver;
 
-    public DefaultMetaDataView(Shell parent, ViewManager theView, HObject theObj) {
+    public DefaultMetaDataView(ViewManager theView, HObject theObj) {
         log.trace("DefaultMetaDataView: start");
-
-        shell = new Shell(parent, SWT.SHELL_TRIM);
-        display = shell.getDisplay();
+        
+        shell = new Shell(display, SWT.SHELL_TRIM);
         
         shell.setData(this);
         
@@ -121,11 +120,12 @@ public class DefaultMetaDataView implements MetaDataView {
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
+                
+                viewer.removeDataView(DefaultMetaDataView.this);
             }
         });
-        
-        viewer = theView;
 
+        viewer = theView;
         hObject = theObj;
         numAttributes = 0;
         userBlock = null;
@@ -189,31 +189,21 @@ public class DefaultMetaDataView implements MetaDataView {
 
         shell.pack();
         
-        Point minimumSize = shell.getParent().getSize();
+//        shell.setMinimumSize(new Point(500, 500));
+//        shell.setSize(minimumSize.x / 2, minimumSize.y / 2);
 
-        shell.setMinimumSize(minimumSize.x / 2, minimumSize.y / 2);
-        shell.setSize(minimumSize.x / 2, minimumSize.y / 2);
-
-        Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
-        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-
-
+//        Point shellSize = shell.getSize();
+//        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+//                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+        
         viewer.addDataView(this);
         
         shell.open();
-        
-        // Workaround to prevent parent shell cursor from staying in "wait"
-        // mode while TableView is open
-        parent.setCursor(null);
 
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-        
-        viewer.removeDataView(this);
     }
 
     /** Add an attribute to a data object. */
@@ -1310,7 +1300,7 @@ public class DefaultMetaDataView implements MetaDataView {
         log.trace("createAttributesComposite:  isH5={} numAttributes={}", isH5, numAttributes);
         
         Composite composite = new Composite(folder, SWT.NONE);
-        composite.setLayout(new GridLayout(5, false));
+        composite.setLayout(new GridLayout(4, false));
         
         attrNumberLabel = new Label(composite, SWT.RIGHT);
         attrNumberLabel.setFont(curFont);
@@ -1320,7 +1310,10 @@ public class DefaultMetaDataView implements MetaDataView {
         Label dummyLabel = new Label(composite, SWT.RIGHT);
         dummyLabel.setFont(curFont);
         dummyLabel.setText("");
-        dummyLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        
+        GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+        if (isH4) data.horizontalSpan = 2; // Delete button doesn't show for HDF4 files
+        dummyLabel.setLayoutData(data);
         
         Button addButton = new Button(composite, SWT.PUSH);
         addButton.setFont(curFont);
@@ -1349,7 +1342,7 @@ public class DefaultMetaDataView implements MetaDataView {
         
         
         SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
-        sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 2));
+        sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
         
         String[] columnNames = { "Name", "Value", "Type", "Array Size" };
         
@@ -1438,7 +1431,7 @@ public class DefaultMetaDataView implements MetaDataView {
         attrContentArea.setFont(curFont);
         
         
-        sashForm.setWeights(new int[] {1, 3});
+        sashForm.setWeights(new int[] {1, 2});
         
         log.trace("createAttributesComposite: finish");
         

@@ -478,7 +478,7 @@ public class H4Vdata extends CompoundDS
                         nleft--;
                     }
                 } // for (int i=0; i<n; i++)
-            } // for (int j=-1; j<numberOfMembers; j++)  
+            } // for (int j=-1; j<numberOfMembers; j++)
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);

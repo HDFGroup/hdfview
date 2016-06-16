@@ -71,7 +71,7 @@ public class DefaultTextView implements TextView {
      */
     private final ViewManager       viewer;
 
-    private final Display           display;
+    private final Display           display = Display.getDefault();
 
     private final Shell             shell;
     
@@ -104,8 +104,8 @@ public class DefaultTextView implements TextView {
 
     private int                     indexBase = 0;
 
-    public DefaultTextView(Shell parent, ViewManager theView) {
-        this(parent, theView, null);
+    public DefaultTextView(ViewManager theView) {
+        this(theView, null);
     }
 
     /**
@@ -122,11 +122,28 @@ public class DefaultTextView implements TextView {
      *            applying bitmask, and etc. Predefined keys are listed at
      *            ViewProperties.DATA_VIEW_KEY.
      */
-    public DefaultTextView(Shell parent, ViewManager theView, HashMap map) {
-        shell = new Shell(parent, SWT.SHELL_TRIM);
-        display = shell.getDisplay();
+    public DefaultTextView(ViewManager theView, HashMap map) {
+        shell = new Shell(display, SWT.SHELL_TRIM);
 
         shell.setData(this);
+        
+        shell.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                if (isTextChanged && !isReadOnly) {
+                    MessageBox confirm = new MessageBox(shell, SWT.YES | SWT.NO);
+                    confirm.setMessage("\""
+                            + dataset.getName() + "\" has changed.\n"
+                            + "Do you want to save the changes?");
+                    confirm.setText(shell.getText());
+
+                    if (confirm.open() == SWT.YES) {
+                        updateValueInFile();
+                    }
+                }
+                
+                viewer.removeDataView(DefaultTextView.this);
+            }
+        });
 
         GridLayout layout = new GridLayout(2, false);
         layout.marginWidth = layout.marginHeight = layout.horizontalSpacing = 0;
@@ -146,6 +163,7 @@ public class DefaultTextView implements TextView {
         shell.setFont(curFont);
 
         viewer = theView;
+        
         text = null;
         table = null;
         dataset = null;
@@ -317,24 +335,6 @@ public class DefaultTextView implements TextView {
 
         shell.setMenuBar(createMenuBar());
 
-        shell.addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent e) {
-                if (isTextChanged && !isReadOnly) {
-                    MessageBox confirm = new MessageBox(shell, SWT.YES | SWT.NO);
-                    confirm.setMessage("\""
-                            + dataset.getName() + "\" has changed.\n"
-                            + "Do you want to save the changes?");
-                    confirm.setText(shell.getText());
-
-                    if (confirm.open() == SWT.YES) {
-                        updateValueInFile();
-                    }
-                }
-
-                //viewer.removeDataView();
-            }
-        });
-
         shell.pack();
         
         shell.addDisposeListener(new DisposeListener() {
@@ -343,22 +343,17 @@ public class DefaultTextView implements TextView {
             }
         });
 
-        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//        shell.setMinimumSize(new Point(500, 500));
+        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         viewer.addDataView(this);
 
         shell.open();
 
-        // Workaround to prevent parent shell cursor from staying in "wait"
-        // mode while TableView is open
-        parent.setCursor(null);
-
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
-
-        viewer.removeDataView(this);
     }
 
     /**
