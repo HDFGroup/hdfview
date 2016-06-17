@@ -1799,6 +1799,7 @@ public class H5CompoundDS extends CompoundDS {
                     // cannot deal with ARRAY of ARRAY, support only ARRAY of atomic types
                     if ((tmpclass == HDF5Constants.H5T_ARRAY)) {
                         log.debug("unsupported ARRAY of COMPOUND or ARRAY of ARRAY[{}]:", i);
+                        continue;
                     }
                 }
                 catch (Exception ex) {
