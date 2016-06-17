@@ -3842,10 +3842,9 @@ public class DefaultTableView implements TableView {
             boolean isString = (dtype.getDatatypeClass() == Datatype.CLASS_STRING);
             boolean isArray = (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY);
             if (isArray) {
-                log.trace("CompoundDS:CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} Basetype={}", isArray, dtype.getBasetype().getDatatypeClass());
                 dtype = types[fieldIdx].getBasetype();
                 isString = (dtype.getDatatypeClass() == Datatype.CLASS_STRING);
-                log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isString={}", isString);
+                log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
                 
                 if (dtype.getDatatypeClass() == Datatype.CLASS_VLEN) {
                     // Only support variable length strings
