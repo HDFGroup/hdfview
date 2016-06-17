@@ -644,9 +644,8 @@ public class H5CompoundDS extends CompoundDS {
                             }
                         }
 
-                        // cannot deal with ARRAY of COMPOUND or ARRAY of ARRAY
-                        // support only ARRAY of atomic types
-                        if ((tmpclass == HDF5Constants.H5T_COMPOUND) || (tmpclass == HDF5Constants.H5T_ARRAY)) {
+                        // cannot deal with ARRAY of ARRAY, support only ARRAY of atomic types
+                        if ((tmpclass == HDF5Constants.H5T_ARRAY)) {
                             String[] nullValues = new String[(int) lsize[0]];
                             String errorStr = "*unsupported*";
                             for (int j = 0; j < lsize[0]; j++) {
@@ -1797,9 +1796,8 @@ public class H5CompoundDS extends CompoundDS {
                     tmptid = H5.H5Tget_super(mtype);
                     int tmpclass = H5.H5Tget_class(tmptid);
 
-                    // cannot deal with ARRAY of COMPOUND or ARRAY of ARRAY
-                    // support only ARRAY of atomic types
-                    if ((tmpclass == HDF5Constants.H5T_COMPOUND) || (tmpclass == HDF5Constants.H5T_ARRAY)) {
+                    // cannot deal with ARRAY of ARRAY, support only ARRAY of atomic types
+                    if ((tmpclass == HDF5Constants.H5T_ARRAY)) {
                         log.debug("unsupported ARRAY of COMPOUND or ARRAY of ARRAY[{}]:", i);
                     }
                 }
