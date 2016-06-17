@@ -442,6 +442,9 @@ public class H5Datatype extends Datatype {
                     }
                 }
             }
+            else if (tclass == HDF5Constants.H5T_COMPOUND) {
+                datatypeClass = CLASS_COMPOUND;
+            }
             else if (isChar) {
                 datatypeClass = CLASS_CHAR;
                 if (isUchar)
@@ -628,6 +631,9 @@ public class H5Datatype extends Datatype {
                 else {
                     log.debug("CLASS_ARRAY base type is NULL");
                 }
+                break;
+            case CLASS_COMPOUND:
+                tid = H5.H5Tcopy(HDF5Constants.H5T_COMPOUND);
                 break;
             case CLASS_INTEGER:
             case CLASS_ENUM:

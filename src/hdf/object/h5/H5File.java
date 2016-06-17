@@ -2161,10 +2161,7 @@ public class H5File extends FileFormat {
                             int btid = H5.H5Tget_super(tid);
                             int tmpclass = H5.H5Tget_class(btid);
 
-                            // cannot deal with ARRAY of COMPOUND in compound table
-                            // viewer
-                            if (tmpclass != HDF5Constants.H5T_COMPOUND)
-                                tclass = H5.H5Tget_class(btid);
+                            tclass = H5.H5Tget_class(btid);
 
                             try {
                                 H5.H5Tclose(btid);
