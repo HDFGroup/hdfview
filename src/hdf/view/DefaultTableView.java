@@ -434,7 +434,7 @@ public class DefaultTableView implements TableView {
         cellLabel.setAlignment(SWT.CENTER);
         cellLabel.setFont(curFont);
 
-        cellValueField = new Text(cellValueComposite, SWT.SINGLE | SWT.BORDER | SWT.WRAP);
+        cellValueField = new Text(cellValueComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
         cellValueField.setEditable(false);
         cellValueField.setBackground(new Color(display, 255, 255, 240));
         cellValueField.setEnabled(false);
