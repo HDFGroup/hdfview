@@ -95,7 +95,7 @@ public class H5Datatype extends Datatype {
     public H5Datatype(FileFormat theFile, String name, String path, long[] oid) {
         super(theFile, name, path, oid);
         obj_info = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
-
+        
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID
             try {
@@ -636,7 +636,12 @@ public class H5Datatype extends Datatype {
                 }
                 break;
             case CLASS_COMPOUND:
-                tid = H5.H5Tcopy(HDF5Constants.H5T_COMPOUND);
+                try {
+                    tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
+                }
+                catch (Exception ex) {
+                    log.trace("toNative() failure: ", ex);
+                }
                 break;
             case CLASS_INTEGER:
             case CLASS_ENUM:
@@ -768,7 +773,7 @@ public class H5Datatype extends Datatype {
             } // switch (tclass)
         }
         catch (Exception ex) {
-            log.debug("toNative figure the datatype", ex);
+            log.debug("toNative(): Error figuring the datatype: ", ex);
             tid = -1;
         }
 
@@ -905,7 +910,7 @@ public class H5Datatype extends Datatype {
      * For example,
      *
      * <pre>
-     * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
+     * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
      * int[] data = (int[]) allocateArray(tid, 100);
      * </pre>
      *
@@ -1005,6 +1010,37 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("H5T_ENUM class finally close:", ex);
                 }
+            }
+        }
+        else if (tclass == HDF5Constants.H5T_COMPOUND) {
+            log.trace("allocateArray(): class.H5T_COMPOUND={}", tclass);
+            
+            try {
+                int nMembers = H5.H5Tget_nmembers(tid);
+                
+                for (int i = 0; i < nMembers; i++) {
+                    String memberName = "null";
+                    long memberType = -1;
+                    
+                    try {
+                        memberName = H5.H5Tget_member_name(tid, i);
+                    }
+                    catch (Exception ex) {
+                        
+                    }
+                    
+                    try {
+                        memberType = H5.H5Tget_member_type(tid, i);
+                    }
+                    catch (Exception ex) {
+                        
+                    }
+                    
+                    data = allocateArray(memberType, size);
+                }
+            }
+            catch (Exception ex) {
+                log.debug("H5T_COMPOUND error retrieving number of members: ", ex);
             }
         }
         else if (tclass == HDF5Constants.H5T_FLOAT) {
@@ -1336,6 +1372,29 @@ public class H5Datatype extends Datatype {
 
         return description;
     }
+    
+    /**
+     * Gets the number of fields in a Compound datatype
+     * 
+     * @return The number of fields in this Compound datatype
+     */
+    public int getCompoundNumberOfMembers() {
+        if (!(datatypeClass == Datatype.CLASS_COMPOUND)) return 0;
+        
+        long tid;
+        int numMembers = 0;
+        
+        try {
+            tid = toNative();
+            numMembers = H5.H5Tget_nmembers(tid);
+        }
+        catch (Exception ex) {
+            log.debug("getCompoundNumberOfMembers() failure: ", ex);
+            numMembers = 0;
+        }
+        
+        return numMembers;
+    }
 
     /*
      * (non-Javadoc)
@@ -1345,13 +1404,19 @@ public class H5Datatype extends Datatype {
     @Override
     public boolean isUnsigned() {
         boolean unsigned = false;
-        long tid = toNative();
+        long tid = -1;
+        
+        if (datatypeClass == Datatype.CLASS_COMPOUND) return false;
+        
+        tid = toNative();
 
-        unsigned = isUnsigned(tid);
-        try {
-            H5.H5Tclose(tid);
-        }
-        catch (final Exception ex) {
+        if (tid >= 0) {
+            unsigned = isUnsigned(tid);
+            try {
+                H5.H5Tclose(tid);
+            }
+            catch (final Exception ex) {
+            }
         }
 
         return unsigned;
@@ -1371,10 +1436,12 @@ public class H5Datatype extends Datatype {
         if (tid >= 0) {
             try {
                 int tclass = H5.H5Tget_class(tid);
+
                 log.trace("isUnsigned() tclass = {}", tclass);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
-                        && tclass != HDF5Constants.H5T_OPAQUE) {
+                        && tclass != HDF5Constants.H5T_OPAQUE
+                        && tclass != HDF5Constants.H5T_COMPOUND) {
                     int tsign = H5.H5Tget_sign(tid);
                     if (tsign == HDF5Constants.H5T_SGN_NONE) {
                         unsigned = true;

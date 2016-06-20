@@ -614,7 +614,7 @@ public class H5CompoundDS extends CompoundDS {
                         member_data = null;
                     }
                     log.trace("H5CompoundDS read: {} Member[{}] is class {} of size={}", member_name, i, member_class, member_size);
-
+                    
                     if (member_data == null || H5.H5Tequal(atom_tid, HDF5Constants.H5T_STD_REF_DSETREG)) {
                         String[] nullValues = new String[(int) lsize[0]];
                         String errorStr = "*unsupported*";
@@ -622,6 +622,8 @@ public class H5CompoundDS extends CompoundDS {
                             nullValues[j] = errorStr;
                         }
                         list.add(nullValues);
+                        
+                        log.trace("read(): {} Member[{}] of class {} is unsupported.", member_name, i, member_class);
                         continue;
                     }
                     else if (member_class == HDF5Constants.H5T_ARRAY) {
@@ -713,7 +715,7 @@ public class H5CompoundDS extends CompoundDS {
                             String cname = member_data.getClass().getName();
                             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
                             log.trace("H5CompoundDS read(!isVL): {} Member[{}] is cname {} of dname={} convert={}", member_name, i, cname, dname, convertByteToString);
-
+                            
                             if ((member_class == HDF5Constants.H5T_STRING) && convertByteToString) {
                                 if (dname == 'B') {
                                     member_data = byteToString((byte[]) member_data, member_size / memberOrders[i]);

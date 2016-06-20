@@ -16,6 +16,9 @@ package hdf.object;
 
 import java.util.List;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs
  * for a data type.

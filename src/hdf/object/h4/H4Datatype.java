@@ -40,7 +40,7 @@ public class H4Datatype extends Datatype
     /**
      * Constructs a H4Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few example of H4Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
      * H4Datatype type = new H4Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
