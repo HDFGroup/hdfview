@@ -182,6 +182,21 @@ public abstract class Datatype extends HObject {
      * The (name, value) pairs of enum members
      */
     protected String enumMembers;
+    
+    /**
+     * The list of names of members of a compound Datatype
+     */
+    protected List<String> compoundMemberNames;
+    
+    /**
+     * The list of offsets of members of a compound Datatype
+     */
+    protected List<Long> compoundMemberOffsets;
+    
+    /**
+     * The list of field IDs of members of a compound Datatype
+     */
+    protected List<Long> compoundMemberFieldIDs;
 
     /**
      * The base datatype of every element of the array (for CLASS_ARRAY

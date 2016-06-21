@@ -17,11 +17,13 @@ package hdf.object.h5;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
+import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.object.Attribute;
 import hdf.object.Datatype;
@@ -446,6 +448,25 @@ public class H5Datatype extends Datatype {
             }
             else if (tclass == HDF5Constants.H5T_COMPOUND) {
                 datatypeClass = CLASS_COMPOUND;
+                
+                try {
+                    int nMembers = H5.H5Tget_nmembers(tid);
+                    compoundMemberNames = new Vector<String>(nMembers);
+                    compoundMemberOffsets = new Vector<Long>(nMembers);
+                    compoundMemberFieldIDs = new Vector<Long>(nMembers);
+                    
+                    for (int i = 0; i < nMembers; i++) {
+                        String memberName = H5.H5Tget_member_name(tid, i);
+                        long memberOffset = H5.H5Tget_member_offset(tid, i);
+                        long memberID = H5.H5Tget_member_type(tid, i);
+                        
+                        compoundMemberNames.add(i, memberName);
+                        compoundMemberOffsets.add(i, memberOffset);
+                        compoundMemberFieldIDs.add(i, memberID);
+                    }
+                } catch (HDF5LibraryException ex) {
+                    log.debug("compound type: ", ex);
+                }
             }
             else if (isChar) {
                 datatypeClass = CLASS_CHAR;
@@ -556,7 +577,7 @@ public class H5Datatype extends Datatype {
                 datatypeSize = tsize;
         }
         log.trace("fromNative datatypeClass={} baseType={} datatypeSize={}", datatypeClass, baseType, datatypeSize);
-        log.trace("fromNative start");
+        log.trace("fromNative finish");
     }
 
     /**
@@ -638,6 +659,14 @@ public class H5Datatype extends Datatype {
             case CLASS_COMPOUND:
                 try {
                     tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
+                    
+                    for (int i = 0; i < compoundMemberNames.size(); i++) {
+                        String memberName = compoundMemberNames.get(i);
+                        long memberOffset = compoundMemberOffsets.get(i);
+                        long memberID = compoundMemberFieldIDs.get(i);
+                        
+                        H5.H5Tinsert(tid, memberName, memberOffset, memberID);
+                    }
                 }
                 catch (Exception ex) {
                     log.trace("toNative() failure: ", ex);
@@ -1371,29 +1400,6 @@ public class H5Datatype extends Datatype {
         }
 
         return description;
-    }
-    
-    /**
-     * Gets the number of fields in a Compound datatype
-     * 
-     * @return The number of fields in this Compound datatype
-     */
-    public int getCompoundNumberOfMembers() {
-        if (!(datatypeClass == Datatype.CLASS_COMPOUND)) return 0;
-        
-        long tid;
-        int numMembers = 0;
-        
-        try {
-            tid = toNative();
-            numMembers = H5.H5Tget_nmembers(tid);
-        }
-        catch (Exception ex) {
-            log.debug("getCompoundNumberOfMembers() failure: ", ex);
-            numMembers = 0;
-        }
-        
-        return numMembers;
     }
 
     /*

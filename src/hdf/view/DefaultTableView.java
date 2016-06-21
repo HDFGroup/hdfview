@@ -131,6 +131,7 @@ import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 
 import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -3891,12 +3892,24 @@ public class DefaultTableView implements TableView {
             else if (dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND && isArray) {
                 for (int i = 0; i < orders[fieldIdx]; i++) {
                     try {
-                        int numberOfMembers = ((H5Datatype) dtype).getCompoundNumberOfMembers();
+                        long tid = dtype.toNative();
+                        int numberOfMembers = H5.H5Tget_nmembers(tid);
 
                         stringBuffer.append("[ ");
 
-                        for (int j = 0; i < numberOfMembers; j++) {
-                            stringBuffer.append(Array.get(colValue, j));
+                        for (int j = 0; j < numberOfMembers; j++) {
+                            Object theValue = null;
+                            
+                            try {
+                                theValue = Array.get(colValue, rowIdx + j);
+                                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", j, theValue.toString());
+                            }
+                            catch (Exception ex) {
+                                theValue = "null";
+                            }
+                            
+                            if (j > 0) stringBuffer.append(", ");
+                            stringBuffer.append(theValue);
                         }
 
                         stringBuffer.append(" ]");
