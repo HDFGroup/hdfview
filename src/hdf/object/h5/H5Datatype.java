@@ -1046,26 +1046,19 @@ public class H5Datatype extends Datatype {
             
             try {
                 int nMembers = H5.H5Tget_nmembers(tid);
+                data = new Object[nMembers];
                 
                 for (int i = 0; i < nMembers; i++) {
-                    String memberName = "null";
                     long memberType = -1;
-                    
-                    try {
-                        memberName = H5.H5Tget_member_name(tid, i);
-                    }
-                    catch (Exception ex) {
-                        
-                    }
                     
                     try {
                         memberType = H5.H5Tget_member_type(tid, i);
                     }
                     catch (Exception ex) {
-                        
+                        log.debug("allocateArray() failure: ", ex);
                     }
                     
-                    data = allocateArray(memberType, size);
+                    ((Object[]) data)[i] = allocateArray(memberType, size);
                 }
             }
             catch (Exception ex) {

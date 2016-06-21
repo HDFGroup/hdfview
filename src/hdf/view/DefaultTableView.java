@@ -3889,11 +3889,19 @@ public class DefaultTableView implements TableView {
                     stringBuffer.append(str.trim());
                 }
             }
-            else if (dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND && isArray) {
+            else if (isArray && dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
                 for (int i = 0; i < orders[fieldIdx]; i++) {
                     try {
+                        Object memberData = null;
                         long tid = dtype.toNative();
                         int numberOfMembers = H5.H5Tget_nmembers(tid);
+                        
+                        try {
+                            memberData = Array.get(colValue, rowIdx + i);
+                        }
+                        catch (Exception ex) {
+                            log.debug("CompoundDS:CompoundDSDataProvider:getDataValue() failure: ", ex);
+                        }
 
                         stringBuffer.append("[ ");
 
@@ -3901,7 +3909,7 @@ public class DefaultTableView implements TableView {
                             Object theValue = null;
                             
                             try {
-                                theValue = Array.get(colValue, rowIdx + j);
+                                theValue = Array.get(memberData, j);
                                 log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", j, theValue.toString());
                             }
                             catch (Exception ex) {
