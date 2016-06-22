@@ -2008,6 +2008,8 @@ public class HDFView implements ViewManager {
         if (mainWindow.isDisposed()) return;
         
         HObject obj = dataView.getDataObject();
+        if (obj == null) return;
+        
         MenuItem[] items = windowMenu.getItems();
         for (int i = 0; i < items.length; i++) {
             if(items[i].getText().equals(obj.getFullName())) {

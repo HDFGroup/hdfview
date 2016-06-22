@@ -130,6 +130,8 @@ import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -3859,11 +3861,6 @@ public class DefaultTableView implements TableView {
                         return stringBuffer;
                     }
                 }
-                else if (dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
-                    String str = new String( "*unsupported*");
-                    stringBuffer.append(str.trim());
-                    return stringBuffer;
-                }
             }
             log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): isString={} getBasetype()={}", isString, types[fieldIdx].getDatatypeClass());
             if (isString && ((colValue instanceof byte[]) || isArray)) {
@@ -3887,6 +3884,47 @@ public class DefaultTableView implements TableView {
                     stringBuffer.append(str.trim());
                 }
             }
+            else if (isArray && dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
+                for (int i = 0; i < orders[fieldIdx]; i++) {
+                    try {
+                        int tid = dtype.toNative();
+                        int numberOfMembers = H5.H5Tget_nmembers(tid);
+                        Object field_data = null;
+                        
+                        try {
+                            field_data = Array.get(colValue, rowIdx + i);
+                        }
+                        catch (Exception ex) {
+                            log.debug("CompoundDS:CompoundDSDataProvider:getDataValue(): could not retrieve field_data: ", ex);
+                        }
+
+                        if (i > 0) stringBuffer.append(", ");
+                        stringBuffer.append("[ ");
+
+                        for (int j = 0; j < numberOfMembers; j++) {
+                            Object theValue = null;
+                            
+                            try {
+                                theValue = Array.get(field_data, j);
+                                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", j, theValue.toString());
+                            }
+                            catch (Exception ex) {
+                                theValue = "*unsupported*";
+                            }
+                            
+                            if (j > 0) stringBuffer.append(", ");
+                            stringBuffer.append(theValue);
+                        }
+
+                        stringBuffer.append(" ]");
+                    }
+                    catch (Exception ex) {
+                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): ", ex);
+                    }
+                }
+
+                return stringBuffer;
+            }
             else {
                 // numerical values
                 String cName = colValue.getClass().getName();
@@ -3900,8 +3938,9 @@ public class DefaultTableView implements TableView {
                 boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
                 boolean isEnum = dtype.getDatatypeClass() == Datatype.CLASS_ENUM;
                 int typeSize = dtype.getDatatypeSize();
+                int classType = dtype.getDatatypeClass();
 
-                if ((dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) || (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE)) {
+                if ((classType == Datatype.CLASS_BITFIELD) || (classType == Datatype.CLASS_OPAQUE)) {
                     CshowAsHex = true;
                     log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() class={} (BITFIELD or OPAQUE)", dtype.getDatatypeClass());
                 }

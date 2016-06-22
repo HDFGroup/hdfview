@@ -17,11 +17,13 @@ package hdf.object.h5;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
+import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.object.Attribute;
 import hdf.object.Datatype;
@@ -444,6 +446,25 @@ public class H5Datatype extends Datatype {
             }
             else if (tclass == HDF5Constants.H5T_COMPOUND) {
                 datatypeClass = CLASS_COMPOUND;
+
+                try {
+                    int nMembers = H5.H5Tget_nmembers(tid);
+                    compoundMemberNames = new Vector<String>(nMembers);
+                    compoundMemberOffsets = new Vector<Long>(nMembers);
+                    compoundMemberFieldIDs = new Vector<Integer>(nMembers);
+                    
+                    for (int i = 0; i < nMembers; i++) {
+                        String memberName = H5.H5Tget_member_name(tid, i);
+                        long memberOffset = H5.H5Tget_member_offset(tid, i);
+                        int memberID = H5.H5Tget_member_type(tid, i);
+                        
+                        compoundMemberNames.add(i, memberName);
+                        compoundMemberOffsets.add(i, memberOffset);
+                        compoundMemberFieldIDs.add(i, memberID);
+                    }
+                } catch (HDF5LibraryException ex) {
+                    log.debug("compound type: ", ex);
+                }
             }
             else if (isChar) {
                 datatypeClass = CLASS_CHAR;
@@ -554,7 +575,7 @@ public class H5Datatype extends Datatype {
                 datatypeSize = tsize;
         }
         log.trace("fromNative datatypeClass={} baseType={} datatypeSize={}", datatypeClass, baseType, datatypeSize);
-        log.trace("fromNative start");
+        log.trace("fromNative finish");
     }
 
     /**
@@ -633,7 +654,20 @@ public class H5Datatype extends Datatype {
                 }
                 break;
             case CLASS_COMPOUND:
-                tid = H5.H5Tcopy(HDF5Constants.H5T_COMPOUND);
+                try {
+                    tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
+                    
+                    for (int i = 0; i < compoundMemberNames.size(); i++) {
+                        String memberName = compoundMemberNames.get(i);
+                        long memberOffset = compoundMemberOffsets.get(i);
+                        int memberID = compoundMemberFieldIDs.get(i);
+                        
+                        H5.H5Tinsert(tid, memberName, memberOffset, memberID);
+                    }
+                }
+                catch (Exception ex) {
+                    log.trace("toNative() failure: ", ex);
+                }
                 break;
             case CLASS_INTEGER:
             case CLASS_ENUM:
@@ -1003,6 +1037,10 @@ public class H5Datatype extends Datatype {
                 }
             }
         }
+        else if (tclass == HDF5Constants.H5T_COMPOUND) {
+            log.trace("allocateArray(): class.H5T_COMPOUND={}", tclass);
+            return new byte[size];
+        }
         else if (tclass == HDF5Constants.H5T_FLOAT) {
             log.trace("allocateArray class.H5T_FLOAT={}", tclass);
             if (tsize == 4) {
@@ -1339,13 +1377,19 @@ public class H5Datatype extends Datatype {
     @Override
     public boolean isUnsigned() {
         boolean unsigned = false;
-        int tid = toNative();
+        int tid = -1;
+        
+        if (datatypeClass == Datatype.CLASS_COMPOUND) return false;
+        
+        tid = toNative();
 
-        unsigned = isUnsigned(tid);
-        try {
-            H5.H5Tclose(tid);
-        }
-        catch (final Exception ex) {
+        if (tid >= 0) {
+            unsigned = isUnsigned(tid);
+            try {
+                H5.H5Tclose(tid);
+            }
+            catch (final Exception ex) {
+            }
         }
 
         return unsigned;
@@ -1368,7 +1412,8 @@ public class H5Datatype extends Datatype {
                 log.trace("isUnsigned() tclass = {}", tclass);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
-                        && tclass != HDF5Constants.H5T_OPAQUE) {
+                        && tclass != HDF5Constants.H5T_OPAQUE
+                        && tclass != HDF5Constants.H5T_COMPOUND) {
                     int tsign = H5.H5Tget_sign(tid);
                     if (tsign == HDF5Constants.H5T_SGN_NONE) {
                         unsigned = true;
