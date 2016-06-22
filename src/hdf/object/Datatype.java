@@ -331,7 +331,7 @@ public abstract class Datatype extends HObject {
      * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4,
      * NATIVE, SIGN_NONE);
      *
-     * @see #fromNative(long nativeID)
+     * @see #fromNative(long tid)
      * @param tid
      *            the native datatype identifier.
      */

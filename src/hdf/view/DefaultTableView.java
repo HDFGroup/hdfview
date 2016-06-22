@@ -3861,11 +3861,6 @@ public class DefaultTableView implements TableView {
                         return stringBuffer;
                     }
                 }
-//                else if (dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
-//                    String str = new String( "*unsupported*");
-//                    stringBuffer.append(str.trim());
-//                    return stringBuffer;
-//                }
             }
             log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): isString={} getBasetype()={}", isString, types[fieldIdx].getDatatypeClass());
             if (isString && ((colValue instanceof byte[]) || isArray)) {
@@ -3894,14 +3889,23 @@ public class DefaultTableView implements TableView {
                     try {
                         long tid = dtype.toNative();
                         int numberOfMembers = H5.H5Tget_nmembers(tid);
+                        Object field_data = null;
 
+                        try {
+                            field_data = Array.get(colValue, rowIdx + i);
+                        }
+                        catch (Exception ex) {
+                            log.debug("CompoundDS:CompoundDSDataProvider:getDataValue(): could not retrieve field_data: ", ex);
+                        }
+
+                        if (i > 0) stringBuffer.append(", ");
                         stringBuffer.append("[ ");
 
                         for (int j = 0; j < numberOfMembers; j++) {
                             Object theValue = null;
                             
                             try {
-                                theValue = Array.get(colValue, rowIdx + j);
+                                theValue = Array.get(field_data, j);
                                 log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", j, theValue.toString());
                             }
                             catch (Exception ex) {

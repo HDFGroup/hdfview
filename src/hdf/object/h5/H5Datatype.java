@@ -97,7 +97,7 @@ public class H5Datatype extends Datatype {
     public H5Datatype(FileFormat theFile, String name, String path, long[] oid) {
         super(theFile, name, path, oid);
         obj_info = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
-        
+
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID
             try {
@@ -1043,27 +1043,7 @@ public class H5Datatype extends Datatype {
         }
         else if (tclass == HDF5Constants.H5T_COMPOUND) {
             log.trace("allocateArray(): class.H5T_COMPOUND={}", tclass);
-            
-            try {
-                int nMembers = H5.H5Tget_nmembers(tid);
-                data = new Object[nMembers];
-                
-                for (int i = 0; i < nMembers; i++) {
-                    long memberType = -1;
-                    
-                    try {
-                        memberType = H5.H5Tget_member_type(tid, i);
-                    }
-                    catch (Exception ex) {
-                        log.debug("allocateArray() failure: ", ex);
-                    }
-                    
-                    ((Object[]) data)[i] = allocateArray(memberType, size);
-                }
-            }
-            catch (Exception ex) {
-                log.debug("H5T_COMPOUND error retrieving number of members: ", ex);
-            }
+            return new byte[size];
         }
         else if (tclass == HDF5Constants.H5T_FLOAT) {
             log.trace("allocateArray class.H5T_FLOAT={}", tclass);
