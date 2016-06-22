@@ -341,8 +341,9 @@ public class DefaultTextView implements TextView {
             }
         });
 
-//        shell.setMinimumSize(new Point(500, 500));
-        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        int width = 700 + (ViewProperties.getFontSize() - 12) * 15;
+        int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
+        shell.setSize(width, height);
 
         viewer.addDataView(this);
 
