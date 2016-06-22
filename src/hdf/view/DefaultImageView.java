@@ -536,14 +536,12 @@ public class DefaultImageView implements ImageView {
         valueField.setEditable(false);
         valueField.setFont(curFont);
         setValueVisible(showValues);
+        
+        shell.pack();
 
-
-//        shell.setMinimumSize(new Point(500, 500));
-        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-//        org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
-//        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (minimumSize.x / 2),
-//                          (parentBounds.y + (parentBounds.height / 2)) - (minimumSize.y / 2));
+        int width = 700 + (ViewProperties.getFontSize() - 12) * 15;
+        int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
+        shell.setSize(width, height);
 
         viewer.addDataView(this);
         

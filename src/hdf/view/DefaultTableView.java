@@ -115,6 +115,9 @@ import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderStyle
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderLayerConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
+import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.BeveledBorderDecorator;
+import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.LineBorderDecorator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
@@ -131,7 +134,6 @@ import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 
 import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -442,7 +444,7 @@ public class DefaultTableView implements TableView {
         cellValueField.setEnabled(false);
         cellValueField.setFont(curFont);
         
-        cellValueComposite.setWeights(new int[] {1, 9});
+        cellValueComposite.setWeights(new int[] {1, 5});
         
         // Create the NatTable
         if (dataset instanceof CompoundDS) {
@@ -538,14 +540,13 @@ public class DefaultTableView implements TableView {
 
         group.pack();
 
-        content.setWeights(new int[] {1, 20});
+        content.setWeights(new int[] {1, 12});
 
         shell.pack();
 
-//        shell.setMinimumSize(new Point(500, 500));
-//        shell.setSize(parent.getClientArea().width, parent.getClientArea().height);
-        shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-//        shell.setLocation(parent.getBounds().x, parent.getBounds().y);
+        int width = 700 + (ViewProperties.getFontSize() - 12) * 15;
+        int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
+        shell.setSize(width, height);
 
         viewer.addDataView(this);
         
@@ -792,12 +793,9 @@ public class DefaultTableView implements TableView {
 
 
         // Set up column grouping
-        CompoundDSNestedColumnHeaderLayer nestedColumnGroupHeaderLayer = null;
-        
-        if (((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups > 1) {
-            ColumnGroupHeaderLayer columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
-            nestedColumnGroupHeaderLayer = new CompoundDSNestedColumnHeaderLayer(columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
-        }
+        ColumnGroupHeaderLayer columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
+        CompoundDSNestedColumnHeaderLayer nestedColumnGroupHeaderLayer =
+                new CompoundDSNestedColumnHeaderLayer(columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
 
 
         // Create the Row Header layer
@@ -811,35 +809,14 @@ public class DefaultTableView implements TableView {
 
 
         // Create the Corner Layer
-        ILayer cornerLayer = null;
-
-        if (nestedColumnGroupHeaderLayer != null) {
-            // Create Corner Layer using configured Column Grouping Header layer
-            cornerLayer = new CornerLayer(new DataLayer(
-                    new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
-                    rowHeaderLayer,
-                    nestedColumnGroupHeaderLayer);
-        }
-        else {
-            // Create Corner Layer using default Header layer without column grouping
-            cornerLayer = new CornerLayer(new DataLayer(
-                    new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
-                    rowHeaderLayer,
-                    columnHeaderLayer);
-        }
+        ILayer cornerLayer = new CornerLayer(new DataLayer(
+                new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
+                rowHeaderLayer,
+                nestedColumnGroupHeaderLayer);
 
 
         // Create the Grid Layer
-        GridLayer gridLayer = null;
-
-        if (nestedColumnGroupHeaderLayer != null) {
-            // Create Grid Layer using configured Column Grouping Header layer
-            gridLayer = new EditingGridLayer(viewportLayer, nestedColumnGroupHeaderLayer, rowHeaderLayer, cornerLayer);
-        }
-        else {
-            // Create Grid Layer using default Header layer without column grouping
-            gridLayer = new EditingGridLayer(viewportLayer, columnHeaderLayer, rowHeaderLayer, cornerLayer);
-        }
+        GridLayer gridLayer = new EditingGridLayer(viewportLayer, nestedColumnGroupHeaderLayer, rowHeaderLayer, cornerLayer);
 
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
@@ -4184,9 +4161,12 @@ public class DefaultTableView implements TableView {
         private final int       groupSize;
         
         public CompoundDSColumnHeaderDataProvider(CompoundDS theDataset) {
-            ncols = theDataset.getSelectedMemberCount();
+            int datasetWidth = (int) theDataset.getWidth();
+            groupSize = theDataset.getSelectedMemberCount();
+            numGroups = (datasetWidth * groupSize) / groupSize;
+            ncols = groupSize * numGroups;
             
-            final String[] columnNames = new String[ncols];
+            final String[] columnNames = new String[groupSize];
             
             int idx = 0;
             String[] columnNamesAll = theDataset.getMemberNames();
@@ -4200,13 +4180,12 @@ public class DefaultTableView implements TableView {
             
             String[] subColumnNames = columnNames;
             columnLabels = columnNames;
-            int columns = (int) theDataset.getWidth();
-            if (columns > 1) {
+            if (datasetWidth > 1) {
                 // multi-dimension compound dataset
-                subColumnNames = new String[columns * columnNames.length];
-                columnLabels = new String[columns * columnNames.length];
+                subColumnNames = new String[datasetWidth * columnNames.length];
+                columnLabels = new String[datasetWidth * columnNames.length];
                 int halfIdx = columnNames.length / 2;
-                for (int i = 0; i < columns; i++) {
+                for (int i = 0; i < datasetWidth; i++) {
                     for (int j = 0; j < columnNames.length; j++) {
                         // display column index only once, in the middle of the
                         // compound fields
@@ -4230,13 +4209,6 @@ public class DefaultTableView implements TableView {
             }
             
             allColumnNames = subColumnNames;
-            numGroups = allColumnNames.length / ncols;
-            
-            groupSize = theDataset.getSelectedMemberCount();
-            
-            if (numGroups > 1) {
-                ncols = (int) theDataset.getWidth() * theDataset.getSelectedMemberCount();
-            }
         }
         
         @Override
@@ -4282,11 +4254,11 @@ public class DefaultTableView implements TableView {
             for (int i = 0; i < allColumnNames.length; i++) {
                 int nestingPosition = allColumnNames[i].lastIndexOf("->");
 
-                if (nestingPosition != -1) {
+                if (nestingPosition >= 0) {
                     String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
                     int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
 
-                    if(groupTitleStartPosition != -1) {
+                    if(groupTitleStartPosition >= 0) {
                         columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
                                 allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
                                 "{" + columnGroupName + "}", i);
@@ -4305,13 +4277,14 @@ public class DefaultTableView implements TableView {
      */
     private class ColumnHeader extends ColumnHeaderLayer {
         public ColumnHeader(IUniqueIndexLayer baseLayer, ILayer horizontalLayerDependency, SelectionLayer selectionLayer) {
-            super(baseLayer, horizontalLayerDependency, selectionLayer, false);
+            super(baseLayer, horizontalLayerDependency, selectionLayer);
             
             this.addConfiguration(new DefaultColumnHeaderLayerConfiguration() {
                 @Override
                 public void addColumnHeaderStyleConfig() {
                     this.addConfiguration(new DefaultColumnHeaderStyleConfiguration() {
                         {
+                            this.cellPainter = new BeveledBorderDecorator(new TextPainter(false, true, 2, true));
                             this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
                             this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
                         }
@@ -4333,7 +4306,8 @@ public class DefaultTableView implements TableView {
                 public void addRowHeaderStyleConfig() {
                     this.addConfiguration(new DefaultRowHeaderStyleConfiguration() {
                         {
-                            this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+                            this.cellPainter = new LineBorderDecorator(new TextPainter(false, true, 2, true));
+                            this.bgColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
                             this.font = (curFont == null) ? Display.getDefault().getSystemFont() : curFont;
                         }
                     });
@@ -4721,15 +4695,25 @@ public class DefaultTableView implements TableView {
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
                 
+                if (val == null) return;
+                
                 log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
                 
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
                 
-                cellLabel.setText(String.valueOf(rowStart + indexBase
-                        + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-                        + ", " + columnHeaderDataProvider.getDataValue(table.getColumnIndexByPosition(event.getColumnPosition()), 0)
-                        + "  =  ");
+                int rowIndex = rowStart + indexBase + table.getRowIndexByPosition(event.getRowPosition()) * rowStride;
+                Object fieldName = columnHeaderDataProvider.getDataValue(table.getColumnIndexByPosition(event.getColumnPosition()), 0);
+                
+                int colIndex = 0;
+                int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
+                
+                if (numGroups > 1) {
+                    int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
+                    colIndex = (table.getColumnIndexByPosition(event.getColumnPosition())) / groupSize;
+                }
+                
+                cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + "[" + colIndex + "] =  ");
                 
                 cellValueField.setText(val.toString());
                 

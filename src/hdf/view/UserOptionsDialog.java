@@ -201,8 +201,6 @@ public class UserOptionsDialog extends Dialog {
             }
         });
 
-        shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
