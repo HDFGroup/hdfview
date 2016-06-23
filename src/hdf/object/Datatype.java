@@ -16,9 +16,6 @@ package hdf.object;
 
 import java.util.List;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs
  * for a data type.
@@ -179,22 +176,27 @@ public abstract class Datatype extends HObject {
     protected int datatypeSign;
 
     /**
-     * The (name, value) pairs of enum members
+     * The (name, value) pairs of enum members.
      */
     protected String enumMembers;
     
     /**
-     * The list of names of members of a compound Datatype
+     * The list of names of members of a compound Datatype.
      */
     protected List<String> compoundMemberNames;
     
     /**
-     * The list of offsets of members of a compound Datatype
+     * The list of types of members of a compound Datatype.
+     */
+    protected List<Datatype> compoundMemberTypes;
+    
+    /**
+     * The list of offsets of members of a compound Datatype.
      */
     protected List<Long> compoundMemberOffsets;
     
     /**
-     * The list of field IDs of members of a compound Datatype
+     * The list of field IDs of members of a compound Datatype.
      */
     protected List<Long> compoundMemberFieldIDs;
 
@@ -445,6 +447,23 @@ public abstract class Datatype extends HObject {
      */
     public final String getEnumMembers() {
         return enumMembers;
+    }
+    
+    /**
+     * Returns the dimensions of an Array Datatype.
+     * 
+     * @return dims the dimensions of the Array Datatype
+     */
+    public final long[] getArrayDims() {
+        return dims;
+    }
+    
+    public final List<String> getCompoundMemberNames() {
+        return compoundMemberNames;
+    }
+    
+    public final List<Datatype> getCompoundMemberTypes() {
+        return compoundMemberTypes;
     }
 
     /**

@@ -448,10 +448,11 @@ public class H5Datatype extends Datatype {
             }
             else if (tclass == HDF5Constants.H5T_COMPOUND) {
                 datatypeClass = CLASS_COMPOUND;
-                
+
                 try {
                     int nMembers = H5.H5Tget_nmembers(tid);
                     compoundMemberNames = new Vector<String>(nMembers);
+                    compoundMemberTypes = new Vector<Datatype>(nMembers);
                     compoundMemberOffsets = new Vector<Long>(nMembers);
                     compoundMemberFieldIDs = new Vector<Long>(nMembers);
                     
@@ -463,6 +464,9 @@ public class H5Datatype extends Datatype {
                         compoundMemberNames.add(i, memberName);
                         compoundMemberOffsets.add(i, memberOffset);
                         compoundMemberFieldIDs.add(i, memberID);
+                        
+                        H5Datatype t = new H5Datatype(memberID);
+                        compoundMemberTypes.add(i, t);
                     }
                 } catch (HDF5LibraryException ex) {
                     log.debug("compound type: ", ex);
@@ -1415,7 +1419,6 @@ public class H5Datatype extends Datatype {
         if (tid >= 0) {
             try {
                 int tclass = H5.H5Tget_class(tid);
-
                 log.trace("isUnsigned() tclass = {}", tclass);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
