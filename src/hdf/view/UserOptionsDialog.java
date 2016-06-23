@@ -173,7 +173,7 @@ public class UserOptionsDialog extends Dialog {
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setFont(curFont);
-        okButton.setText("  &Ok  ");
+        okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -184,7 +184,7 @@ public class UserOptionsDialog extends Dialog {
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setFont(curFont);
-        cancelButton.setText("&Cancel");
+        cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {

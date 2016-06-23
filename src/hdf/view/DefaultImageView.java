@@ -3850,7 +3850,7 @@ public class DefaultImageView implements ImageView {
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setFont(curFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -3863,7 +3863,7 @@ public class DefaultImageView implements ImageView {
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
             cancelButton.setFont(curFont);
-            cancelButton.setText("&Cancel");
+            cancelButton.setText(" &Cancel ");
             cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -4047,7 +4047,7 @@ public class DefaultImageView implements ImageView {
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setFont(curFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -4065,7 +4065,7 @@ public class DefaultImageView implements ImageView {
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
             cancelButton.setFont(curFont);
-            cancelButton.setText("&Cancel");
+            cancelButton.setText(" &Cancel ");
             cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {

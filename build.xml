@@ -485,12 +485,8 @@
       <formatter type="xml" />
       <formatter type="plain" />
 
-      <!--<batchtest fork="yes" todir="${report.dir}">
-        <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/AbstractWindowTest* **/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
-      </batchtest>-->
-        
       <batchtest fork="yes" todir="${report.dir}">
-        <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/AbstractWindowTest* **/uitest/TestHDFViewMenu* **/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
+        <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/AbstractWindowTest* **/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
       </batchtest>
     </junit>
   </target>
@@ -548,7 +544,7 @@
       </doctitle>
 
       <bottom>
-        <![CDATA[Copyright © 2015. All Rights Reserved.]]>
+        <![CDATA[Copyright © 2016. All Rights Reserved.]]>
       </bottom>
 
       <group title="object packages" packages="hdf.object.*" />
@@ -831,7 +827,7 @@
       copyright="Copyright © 2006-2016 by The HDF Group. All rights reserved."
       applicationCategory="public.app-category.developer-tools"
       mainclassname="${main-class}">
-      
+
       <runtime dir="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home" />
       <classpath dir="${release.dir}" includes="**/lib/*.jar" />
       <librarypath dir="${release.dir}/lib" includes="*.dylib" />
@@ -854,7 +850,7 @@
       <option value="-Dapple.awt.application.name=${ant.project.name}" />
       <option value="-Dcom.apple.smallTabs=true" />
     </bundleapp>
-    
+
     <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS/libjli.dylib" />
     <copy file="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS" />
 
