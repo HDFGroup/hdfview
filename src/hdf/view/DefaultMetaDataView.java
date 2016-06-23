@@ -78,7 +78,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
 
-    private final ViewManager                viewer;
+    private final ViewManager          viewer;
     
     /** The HDF data object */
     private HObject                    hObject;

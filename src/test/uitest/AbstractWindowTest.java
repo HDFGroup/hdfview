@@ -1,5 +1,6 @@
 package test.uitest;
 
+import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -81,7 +82,8 @@ public abstract class AbstractWindowTest {
             text.setText(name + file_ext);
             assertEquals(name + file_ext, text.getText());
             
-            shell.bot().button("   &Ok   ").click();
+            shell.bot().button("   &OK   ").click();
+            shell.bot().waitUntil(shellCloses(shell));
             
             assertTrue("File- " + hdf_file + " file created", hdf_file.exists());
         }

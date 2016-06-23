@@ -319,7 +319,7 @@ public class DefaultPaletteView extends Dialog {
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setFont(curFont);
-        okButton.setText("  &Ok  ");
+        okButton.setText("   &OK   ");
         okButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (isPaletteChanged) {
@@ -335,7 +335,7 @@ public class DefaultPaletteView extends Dialog {
 
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setFont(curFont);
-        cancelButton.setText("&Cancel");
+        cancelButton.setText(" &Cancel ");
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 imageView.setImage(originalImage);
@@ -605,7 +605,7 @@ public class DefaultPaletteView extends Dialog {
 
             Button okButton = new Button(tableShell, SWT.PUSH);
             okButton.setFont(curFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {

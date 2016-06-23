@@ -615,7 +615,7 @@ public class H5CompoundDS extends CompoundDS {
                         member_data = null;
                     }
                     log.trace("H5CompoundDS read: {} Member[{}] is class {} of size={}", member_name, i, member_class, member_size);
-                    
+
                     if (member_data == null || H5.H5Tequal(atom_tid, HDF5Constants.H5T_STD_REF_DSETREG)) {
                         String[] nullValues = new String[(int) lsize[0]];
                         String errorStr = "*unsupported*";

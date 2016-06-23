@@ -111,7 +111,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
             assertEquals(botshell.bot().label(1).getText(), HDF4VERSION);
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -133,7 +133,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             assertEquals(botshell.bot().label(1).getText(), HDF5VERSION);
 
             botshell.bot().label(HDF5VERSION);
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -159,7 +159,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             text.setText("testopenbutton.hdf");
             assertEquals("testopenbutton.hdf", text.getText());
 
-            shell.bot().button("   &Ok   ").click();
+            shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
@@ -424,7 +424,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             groupMenuItem.click();
 
             bot.text("groupname").setText("grouptestname");
-            bot.button("OK").click();
+            bot.button("   &OK   ").click();
 
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Save");
             fileMenuItem.click();
@@ -470,7 +470,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             groupMenuItem.click();
 
             bot.text("groupname").setText("grouptestname");
-            bot.button("OK").click();
+            bot.button("   &OK   ").click();
 
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Save As");
             fileMenuItem.click();
@@ -520,7 +520,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
             assertEquals(botshell.bot().label(1).getText(), HDF4VERSION);
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -543,7 +543,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             assertEquals(botshell.bot().label(1).getText(), HDF5VERSION);
 
             botshell.bot().label(HDF5VERSION);
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -564,7 +564,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("HDFView Java Version"));
 
                     //("Compiled at jdk 1.7.*\\sRunning at.*");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -585,7 +585,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("About HDFView"));
 
                     //("HDF Viewer, Version " + VERSION + "\\sFor.*\\s\\sCopyright.*2006-2016 The HDF Group.\\sAll rights reserved.");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -605,7 +605,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
                     //("\\sSupported File Formats: \\s.*Fits\\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -626,7 +626,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("Unregister a file format"));
 
             botshell.bot().comboBox().setSelection("Fits");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
 
             fileMenuItem = bot.menu("Help").menu("Supported File Formats");
             fileMenuItem.click();
@@ -635,7 +635,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
                     //("\\sSupported File Formats: \\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s"));
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
 
             fileMenuItem = bot.menu("Tools").menu("Register File Format");
             fileMenuItem.click();
@@ -645,7 +645,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("Register a file format"));
 
             botshell.bot().text().setText("FITS:hdf.object.fits.FitsFile:fits");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
 
             fileMenuItem = bot.menu("Help").menu("Supported File Formats");
             fileMenuItem.click();
@@ -654,7 +654,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
                     //("\\sSupported File Formats: \\s.*Fits\\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -675,7 +675,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("Unregister a file format"));
 
             botshell.bot().comboBox().setSelection("FITS");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
 
             fileMenuItem = bot.menu("Help").menu("Supported File Formats");
             fileMenuItem.click();
@@ -684,7 +684,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
                     //("\\sSupported File Formats: \\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
-            botshell.bot().button("   &Ok   ").click();
+            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();

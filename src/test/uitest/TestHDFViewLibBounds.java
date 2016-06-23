@@ -44,7 +44,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             text.setText("test_libversion.h5");
             assertEquals("test_libversion.h5", text.getText());
             
-            shell.bot().button("   &Ok   ").click();
+            shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
             
             final SWTBotTree filetree = bot.tree();
@@ -74,7 +74,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             
             libVersionShell.bot().comboBox(0).setSelection("Earliest");
             
-            libVersionShell.bot().button("   &Ok   ").click();
+            libVersionShell.bot().button("   &OK   ").click();
             
             bot.waitUntil(shellCloses(libVersionShell));
             
@@ -98,7 +98,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
         }
         finally {
             try {
-                closeFile(hdf_file, false);
+                closeFile(hdf_file, true);
             }
             catch (Exception ex) {}
         }

@@ -2049,6 +2049,7 @@ public class HDFView implements ViewManager {
      */
     public void setTestState(boolean testing) {
         isTesting = testing;
+        currentDir = rootDir;
     }
 
     /**
@@ -2680,7 +2681,7 @@ public class HDFView implements ViewManager {
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setFont(currentFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             shell.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2722,7 +2723,7 @@ public class HDFView implements ViewManager {
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setFont(currentFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2793,7 +2794,7 @@ public class HDFView implements ViewManager {
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setFont(currentFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2856,7 +2857,7 @@ public class HDFView implements ViewManager {
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setFont(currentFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2929,7 +2930,7 @@ public class HDFView implements ViewManager {
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
             okButton.setFont(currentFont);
-            okButton.setText("   &Ok   ");
+            okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
@@ -2939,7 +2940,7 @@ public class HDFView implements ViewManager {
 
             Button cancelButton = new Button(buttonComposite, SWT.PUSH);
             cancelButton.setFont(currentFont);
-            cancelButton.setText("&Cancel");
+            cancelButton.setText(" &Cancel ");
             cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
