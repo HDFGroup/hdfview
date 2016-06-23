@@ -90,7 +90,7 @@ public class H4Datatype extends Datatype
 
     /*
      * (non-Javadoc)
-     * @see hdf.object.Datatype#fromNative(int)
+     * @see hdf.object.Datatype#fromNative(long)
      */
     @Override
     public void fromNative(long tid)

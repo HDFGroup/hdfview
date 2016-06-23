@@ -65,7 +65,7 @@
     <string value="${hdfjava.filelist}" />
     <filterchain>
       <tokenfilter>
-      	<containsregex pattern="jarhdf[0-9]*-" replace="" flags="g" />
+        <containsregex pattern="jarhdf[0-9]*-" replace="" flags="g" />
       </tokenfilter>
     </filterchain>
   </loadresource>
@@ -550,7 +550,7 @@
       </doctitle>
 
       <bottom>
-        <![CDATA[Copyright © 2015. All Rights Reserved.]]>
+        <![CDATA[Copyright © 2016. All Rights Reserved.]]>
       </bottom>
 
       <group title="object packages" packages="hdf.object.*" />
@@ -626,22 +626,22 @@
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
-      
+
       <fileset dir="${hdf.lib.dir}">
         <include name="*.jar" />
-      	<include name="libhdf.so" />
-      	<include name="libhdf_java.so" />
-      	<include name="libmfhdf.so" />
-      	<include name="libjpeg.so" />
-      	<include name="libszip.so" />
-      	<include name="libz.so" />
+        <include name="libhdf.so" />
+        <include name="libhdf_java.so" />
+        <include name="libmfhdf.so" />
+        <include name="libjpeg.so" />
+        <include name="libszip.so" />
+        <include name="libz.so" />
       </fileset>
       <fileset dir="${hdf5.lib.dir}">
         <include name="*.jar" />
-      	<include name="libhdf5.so" />
-      	<include name="libhdf5_java.so" />
-      	<include name="libszip.so" />
-      	<include name="libz.so" />
+        <include name="libhdf5.so" />
+        <include name="libhdf5_java.so" />
+        <include name="libszip.so" />
+        <include name="libz.so" />
       </fileset>
     </copy>
 
@@ -851,7 +851,7 @@
       copyright="Copyright © 2006-2016 by The HDF Group. All rights reserved."
       applicationCategory="public.app-category.developer-tools"
       mainclassname="${main-class}">
-      
+
       <runtime dir="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home" />
       <classpath dir="${release.dir}" includes="**/lib/*.jar" />
       <librarypath dir="${release.dir}/lib" includes="*.dylib" />
@@ -874,7 +874,7 @@
       <option value="-Dapple.awt.application.name=${ant.project.name}" />
       <option value="-Dcom.apple.smallTabs=true" />
     </bundleapp>
-    
+
     <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS/libjli.dylib" />
     <copy file="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS" />
 

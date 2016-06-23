@@ -151,20 +151,20 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             closeFile(hdf_file, false);
 
             bot.toolbarButtonWithTooltip("Open").click();
-            
+
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
-            
+
             SWTBotText text = shell.bot().text();
             text.setText("testopenbutton.hdf");
             assertEquals("testopenbutton.hdf", text.getText());
-            
+
             shell.bot().button("   &Ok   ").click();
             bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
-            
+
             assertTrue("Button-Open-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
             assertTrue("Button-Open-HDF4 filetree has file testopenbutton.hdf", items[0].getText().compareTo("testopenbutton.hdf") == 0);
         }
@@ -189,12 +189,12 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
-            
+
             assertTrue("Button-Close-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
             assertTrue("Button-Close-HDF4 filetree has file closebutton.hdf", items[0].getText().compareTo("closebutton.hdf") == 0);
 
             filetree.select(0);
-            
+
             bot.toolbarButtonWithTooltip("Close").click();
 
             assertTrue("Button-Close-HDF4 file deleted", hdf_file.delete());
@@ -584,7 +584,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("About HDFView"));
 
-                    //("HDF Viewer, Version " + VERSION + "\\sFor.*\\s\\sCopyright.*2006-2015 The HDF Group.\\sAll rights reserved.");
+                    //("HDF Viewer, Version " + VERSION + "\\sFor.*\\s\\sCopyright.*2006-2016 The HDF Group.\\sAll rights reserved.");
             botshell.bot().button("   &Ok   ").click();
         }
         catch (Exception ex) {
