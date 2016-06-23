@@ -3827,10 +3827,7 @@ public class DefaultTableView implements TableView {
                 
                 if (dtype.getDatatypeClass() == Datatype.CLASS_VLEN) {
                     // Only support variable length strings
-                    if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
-                        
-                    }
-                    else {
+                    if (!(dtype.getDatatypeClass() == Datatype.CLASS_STRING)) {
                         int arraylen = (int) types[fieldIdx].getDatatypeSize();
                         log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} of {} istype={}", isArray, arraylen, dtype);
                         String str = new String( "*unsupported*");
@@ -3864,8 +3861,7 @@ public class DefaultTableView implements TableView {
             else if (isArray && dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
                 for (int i = 0; i < orders[fieldIdx]; i++) {
                     try {
-                        int tid = dtype.toNative();
-                        int numberOfMembers = H5.H5Tget_nmembers(tid);
+                        int numberOfMembers = dtype.getCompoundMemberNames().size();
                         Object field_data = null;
 
                         try {
@@ -3919,7 +3915,7 @@ public class DefaultTableView implements TableView {
 
                 if ((classType == Datatype.CLASS_BITFIELD) || (classType == Datatype.CLASS_OPAQUE)) {
                     CshowAsHex = true;
-                    log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() class={} (BITFIELD or OPAQUE)", dtype.getDatatypeClass());
+                    log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() class={} (BITFIELD or OPAQUE)", classType);
                 }
                 if (dtype.isUnsigned()) {
                     if (cIndex >= 0) {
@@ -4161,7 +4157,8 @@ public class DefaultTableView implements TableView {
         private final int       groupSize;
         
         public CompoundDSColumnHeaderDataProvider(CompoundDS theDataset) {
-            int datasetWidth = theDataset.getWidth();
+            int datasetWidth = (int) theDataset.getWidth();
+            Datatype[] types = theDataset.getSelectedMemberTypes();
             groupSize = theDataset.getSelectedMemberCount();
             numGroups = (datasetWidth * groupSize) / groupSize;
             ncols = groupSize * numGroups;
@@ -4172,6 +4169,29 @@ public class DefaultTableView implements TableView {
             String[] columnNamesAll = theDataset.getMemberNames();
             for (int i = 0; i < columnNamesAll.length; i++) {
                 if (theDataset.isMemberSelected(i)) {
+                    if (types[i].getDatatypeClass() == Datatype.CLASS_ARRAY) {
+                        Datatype baseType = types[i].getBasetype();
+                        
+                        if (baseType.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
+                            List<String> memberNames = baseType.getCompoundMemberNames();
+                            
+                            columnNames[idx] = columnNamesAll[i];
+                            columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
+                            
+                            columnNames[idx] += "\n\n[ ";
+                            
+                            for (int j = 0; j < memberNames.size(); j++) {
+                                columnNames[idx] += memberNames.get(j);
+                                if (j < memberNames.size() - 1) columnNames[idx] += ", ";
+                            }
+                            
+                            columnNames[idx] += " ]";
+                            
+                            idx++;
+                            continue;
+                        }
+                    }
+                    
                     columnNames[idx] = columnNamesAll[i];
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
                     idx++;
@@ -4705,15 +4725,15 @@ public class DefaultTableView implements TableView {
                 int rowIndex = rowStart + indexBase + table.getRowIndexByPosition(event.getRowPosition()) * rowStride;
                 Object fieldName = columnHeaderDataProvider.getDataValue(table.getColumnIndexByPosition(event.getColumnPosition()), 0);
                 
-                int colIndex = 0;
+                String colIndex = "";
                 int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
                 
                 if (numGroups > 1) {
                     int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
-                    colIndex = (table.getColumnIndexByPosition(event.getColumnPosition())) / groupSize;
+                    colIndex = "[" + String.valueOf((table.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
                 }
                 
-                cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + "[" + colIndex + "] =  ");
+                cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
                 
                 cellValueField.setText(val.toString());
                 

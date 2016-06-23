@@ -450,6 +450,7 @@ public class H5Datatype extends Datatype {
                 try {
                     int nMembers = H5.H5Tget_nmembers(tid);
                     compoundMemberNames = new Vector<String>(nMembers);
+                    compoundMemberTypes = new Vector<Datatype>(nMembers);
                     compoundMemberOffsets = new Vector<Long>(nMembers);
                     compoundMemberFieldIDs = new Vector<Integer>(nMembers);
                     
@@ -461,6 +462,9 @@ public class H5Datatype extends Datatype {
                         compoundMemberNames.add(i, memberName);
                         compoundMemberOffsets.add(i, memberOffset);
                         compoundMemberFieldIDs.add(i, memberID);
+                        
+                        H5Datatype t = new H5Datatype(memberID);
+                        compoundMemberTypes.add(i, t);
                     }
                 } catch (HDF5LibraryException ex) {
                     log.debug("compound type: ", ex);
