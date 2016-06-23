@@ -142,7 +142,7 @@ public class HDFView implements ViewManager {
 
     private static final String        aboutHDFView = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
     + "For " + System.getProperty("os.name") + "\n\n"
-    + "Copyright " + '\u00a9' + " 2006-2015 The HDF Group.\n"
+    + "Copyright " + '\u00a9' + " 2006-2016 The HDF Group.\n"
     + "All rights reserved.";
 
     /* String buffer holding the status message */
@@ -2112,6 +2112,9 @@ public class HDFView implements ViewManager {
         int w = Math.max(50, bounds.width - 100);
         int h = Math.max(50, bounds.height - 100);
 
+        x = bounds.x;
+        y = bounds.y;
+        
         for (int i = 0; i < sList.length; i++) {
             shell = sList[i];
             shell.setBounds(x, y, w, h);
@@ -2141,8 +2144,9 @@ public class HDFView implements ViewManager {
         int w = bounds.width / cols;
         int h = bounds.height / rows;
 
+        y = bounds.y;
         for (int i = 0; i < rows; i++) {
-            x = 0;
+            x = bounds.x;
 
             for (int j = 0; j < cols; j++) {
                 idx = i * cols + j;
@@ -2151,6 +2155,7 @@ public class HDFView implements ViewManager {
 
                 shell = sList[idx];
                 shell.setBounds(x, y, w, h);
+                shell.setActive();
                 x += w;
             }
 
