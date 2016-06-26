@@ -54,6 +54,17 @@ public class InputDialog extends Dialog {
         this.title = "HDFView " + HDFVersions.HDFVIEW_VERSION;
         this.message = null;
         this.initialText = "";
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
     }
 
     public InputDialog(Shell parent, String title, String message) {
@@ -61,6 +72,17 @@ public class InputDialog extends Dialog {
         this.title = title;
         this.message = message;
         this.initialText = "";
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
     }
 
     public InputDialog(Shell parent, String title, String message, String initialText) {
@@ -68,6 +90,17 @@ public class InputDialog extends Dialog {
         this.title = title;
         this.message = message;
         this.initialText = initialText;
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
     }
 
     public InputDialog(Shell parent, int style, String title, String message) {
@@ -75,6 +108,17 @@ public class InputDialog extends Dialog {
         this.title = title;
         this.message = message;
         this.initialText = "";
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
     }
 
     public InputDialog(Shell parent, int style, String title, String message, String initialText) {
@@ -82,10 +126,17 @@ public class InputDialog extends Dialog {
         this.title = title;
         this.message = message;
         this.initialText = initialText;
-    }
-    
-    public void setFont(Font font) {
-        curFont = font;
+        
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
     }
 
     /**
