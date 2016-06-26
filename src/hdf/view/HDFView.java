@@ -82,7 +82,7 @@ public class HDFView implements ViewManager {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 
-    private static final Display       display = new Display();
+    private static Display             display;
     private static Shell               mainWindow;
 
     /* Determines whether HDFView is being executed for GUI testing */
@@ -187,6 +187,8 @@ public class HDFView implements ViewManager {
      */
     public HDFView(String root) {
         log.debug("Root is {}", root);
+        
+        if (display == null || display.isDisposed()) display = new Display();
 
         rootDir = root;
         //userOptionsDialog = null;
@@ -403,7 +405,7 @@ public class HDFView implements ViewManager {
             }
         }
 
-        //display.dispose();
+        display.dispose();
         log.debug("runMainWindow exit");
     }
 
@@ -456,6 +458,8 @@ public class HDFView implements ViewManager {
                     }
                 }
                 catch (Exception ex) {}
+                
+                if (currentFont != null) currentFont.dispose();
             }
         });
 
@@ -2520,7 +2524,6 @@ public class HDFView implements ViewManager {
         // TODO:Add custom HDFLarge icon to dialog
         InputDialog dialog = new InputDialog(mainWindow, SWT.ICON_INFORMATION,
                 "Register a file format", msg);
-        dialog.setFont(currentFont);
 
         String str = dialog.open();
 
@@ -2984,6 +2987,8 @@ public class HDFView implements ViewManager {
      * @param args  the command line arguments
      */
     public static void main(String[] args) {
+        if (display == null || display.isDisposed()) display = new Display();
+        
         String rootDir = System.getProperty("hdfview.workdir");
         log.trace("main: rootDir = {} ", rootDir);
         if(rootDir == null) rootDir = System.getProperty("user.dir");
