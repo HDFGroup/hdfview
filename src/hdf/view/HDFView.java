@@ -405,7 +405,7 @@ public class HDFView implements ViewManager {
             }
         }
 
-        display.dispose();
+        if (!isTesting) display.dispose();
         log.debug("runMainWindow exit");
     }
 
@@ -2522,8 +2522,7 @@ public class HDFView implements ViewManager {
             + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
 
         // TODO:Add custom HDFLarge icon to dialog
-        InputDialog dialog = new InputDialog(mainWindow, SWT.ICON_INFORMATION,
-                "Register a file format", msg);
+        InputDialog dialog = new InputDialog(mainWindow, "Register a file format", msg, SWT.ICON_INFORMATION);
 
         String str = dialog.open();
 

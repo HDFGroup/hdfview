@@ -190,14 +190,14 @@ public abstract class AbstractWindowTest {
                             Y = 0;
                         
                         while (true) {
-                           // open and layout the shell
-                           HDFView window = new HDFView(rootDir);
-                           
-                           // Set the testing state to handle the problem with testing
-                           // of native dialogs
-                           window.setTestState(true);
+                            // open and layout the shell
+                            HDFView window = new HDFView(rootDir);
 
-                           shell = window.openMainWindow(fList, W, H, X, Y);
+                            // Set the testing state to handle the problem with testing
+                            // of native dialogs
+                            window.setTestState(true);
+
+                            shell = window.openMainWindow(fList, W, H, X, Y);
 
                             // wait for the test setup
                             swtBarrier.await();
@@ -209,6 +209,12 @@ public abstract class AbstractWindowTest {
                     catch (Exception e) {
                         e.printStackTrace();
                     }
+                    
+                    Display.getDefault().syncExec(new Runnable() {
+                        public void run() {
+                            shell.getDisplay().dispose();
+                        }
+                    });
                 }
             });
             uiThread.setDaemon(true);

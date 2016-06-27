@@ -4,12 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.SWT;
@@ -39,6 +37,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     
     @Test
     public void testNextFrame() {
+        SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, false);
         
         try {
@@ -52,7 +51,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             items[0].getNode(0).click();
             filetree.contextMenu("Open").click();
             
-            SWTBotShell tableShell = bot.shells()[1];
+            tableShell = bot.shells()[1];
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
             
@@ -60,8 +59,9 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             
             try {
                 assertEquals(tableShell.bot().text(0).getText(), "0");
-            } catch (Exception e) {
-                SWTBotText text = tableShell.bot().text(0);
+            }
+            catch (AssertionError e) {
+                final SWTBotText text = tableShell.bot().text(0);
                 
                 text.setText("0");
                 
@@ -92,12 +92,8 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            try {
-                SWTBotShell[] shells = bot.shells();
-                if (shells.length > 1)
-                    for (int i = 1; i < shells.length; i++) shells[i].close();
-            }
-            catch (Exception ex) {}
+            if(tableShell != null) tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
             
             try {
                 closeFile(hdf_file, false);
@@ -108,6 +104,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     
     @Test
     public void testPreviousFrame() {
+        SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, false);
         
         try {
@@ -121,7 +118,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             items[0].getNode(0).click();
             filetree.contextMenu("Open").click();
             
-            SWTBotShell tableShell = bot.shells()[1];
+            tableShell = bot.shells()[1];
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
             
@@ -129,8 +126,9 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             
             try {
                 assertEquals(tableShell.bot().text(0).getText(), "1");
-            } catch (Exception e) {
-                SWTBotText text = tableShell.bot().text(0);
+            }
+            catch (AssertionError e) {
+                final SWTBotText text = tableShell.bot().text(0);
                 
                 text.setText("1");
                 
@@ -161,12 +159,8 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            try {
-                SWTBotShell[] shells = bot.shells();
-                if (shells.length > 1)
-                    for (int i = 1; i < shells.length; i++) shells[i].close();
-            }
-            catch (Exception ex) {}
+            if(tableShell != null) tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
             
             try {
                 closeFile(hdf_file, false);
@@ -177,6 +171,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     
     @Test
     public void testFirstFrame() {
+        SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, false);
         
         try {
@@ -190,7 +185,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             items[0].getNode(0).click();
             filetree.contextMenu("Open").click();
             
-            SWTBotShell tableShell = bot.shells()[1];
+            tableShell = bot.shells()[1];
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
             
@@ -198,8 +193,9 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             
             try {
                 assertEquals(tableShell.bot().text(0).getText(), "0");
-            } catch (Exception e) {
-                SWTBotText text = tableShell.bot().text(0);
+            }
+            catch (AssertionError e) {
+                final SWTBotText text = tableShell.bot().text(0);
                 
                 text.setText("0");
                 
@@ -235,12 +231,8 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            try {
-                SWTBotShell[] shells = bot.shells();
-                if (shells.length > 1)
-                    for (int i = 1; i < shells.length; i++) shells[i].close();
-            }
-            catch (Exception ex) {}
+            if(tableShell != null) tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
             
             try {
                 closeFile(hdf_file, false);
@@ -251,6 +243,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     
     @Test
     public void testLastFrame() {
+        SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, false);
         
         try {
@@ -264,7 +257,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             items[0].getNode(0).click();
             filetree.contextMenu("Open").click();
             
-            SWTBotShell tableShell = bot.shells()[1];
+            tableShell = bot.shells()[1];
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
             
@@ -272,8 +265,9 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             
             try {
                 assertEquals(tableShell.bot().text(0).getText(), "0");
-            } catch (Exception e) {
-                SWTBotText text = tableShell.bot().text(0);
+            }
+            catch (AssertionError e) {
+                final SWTBotText text = tableShell.bot().text(0);
                 
                 text.setText("0");
                 
@@ -304,12 +298,8 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            try {
-                SWTBotShell[] shells = bot.shells();
-                if (shells.length > 1)
-                    for (int i = 1; i < shells.length; i++) shells[i].close();
-            }
-            catch (Exception ex) {}
+            if(tableShell != null) tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
             
             try {
                 closeFile(hdf_file, false);
@@ -320,6 +310,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     
     @Test
     public void testEnterFrame() {
+        SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, false);
         
         try {
@@ -333,7 +324,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             items[0].getNode(0).click();
             filetree.contextMenu("Open").click();
             
-            SWTBotShell tableShell = bot.shells()[1];
+            tableShell = bot.shells()[1];
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
             
@@ -341,8 +332,9 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             
             try {
                 assertEquals(tableShell.bot().text(0).getText(), "0");
-            } catch (Exception e) {
-                SWTBotText text = tableShell.bot().text(0);
+            }
+            catch (AssertionError e) {
+                final SWTBotText text = tableShell.bot().text(0);
                 
                 text.setText("0");
                 
@@ -360,7 +352,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             assertEquals(table.getCellDataValueByPosition(4, 3), "99");
             assertEquals(table.getCellDataValueByPosition(5, 4), "86");
             
-            SWTBotText text = tableShell.bot().text(0);
+            final SWTBotText text = tableShell.bot().text(0);
             text.setText("3");
             
             Display.getDefault().syncExec(new Runnable() {
@@ -372,8 +364,6 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                     });
                 }
             });
-            
-            System.out.println("Cell value is " + table.getCellDataValueByPosition(3, 2));
             
             assertEquals(table.getCellDataValueByPosition(3, 2), "63");
             assertEquals(table.getCellDataValueByPosition(1, 3), "7");
@@ -400,12 +390,8 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            try {
-                SWTBotShell[] shells = bot.shells();
-                if (shells.length > 1)
-                    for (int i = 1; i < shells.length; i++) shells[i].close();
-            }
-            catch (Exception ex) {}
+            if(tableShell != null) tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
             
             try {
                 closeFile(hdf_file, false);
