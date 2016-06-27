@@ -246,10 +246,16 @@
   </target>
   <path id="application" location="${jar.dir}/${ant.project.name}.jar" />
 
+  <!-- SWT on Mac requires the -XstartOnFirstThreadFlag. -->
+  <condition property="XstartOnFirstThreadFlag" value="-XstartOnFirstThread" else="-Dgwt.dummy.arg1=">
+     <os family="mac"/>
+  </condition>
+
   <target name="run" depends="jar">
     <mkdir dir="${jar.dir}/lib/ext" />
     <java fork="true" classname="${main-class}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -271,6 +277,7 @@
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
       <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
@@ -310,7 +317,8 @@
     <property name="exdir.rel" value="${exclasses.dir}" relative="yes" />
     <basename property="exdirrel.name" file="${exdir.rel}" />
     <java fork="true" classname="${exdirrel.name}/${exdir.name}/${exfile.name}" dir="${classes.dir}">
-         <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+        <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+        <jvmarg value="${XstartOnFirstThreadFlag}" />
         <classpath>
           <path refid="project-classpath" />
           <path refid="log-classpath" />
@@ -392,6 +400,7 @@
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -410,6 +419,7 @@
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -446,6 +456,7 @@
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -470,6 +481,7 @@
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -495,6 +507,7 @@
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />

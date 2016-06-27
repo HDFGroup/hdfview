@@ -22,10 +22,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
 public abstract class AbstractWindowTest {
     protected static String HDF5VERSION = "HDF5 " + HDFVersions.HDF5_VERSION;
@@ -42,6 +44,8 @@ public abstract class AbstractWindowTest {
     protected static Shell shell;
 
     private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
+    
+    private static int TEST_DELAY = 0;
 
 
     private static void clearRemovePropertyFile() {
@@ -53,6 +57,46 @@ public abstract class AbstractWindowTest {
         if (prop_file.exists()) {
             prop_file.delete();
         }
+    }
+    
+    protected File openFile(String name, boolean hdf4_type) {
+        String file_ext;
+        if (hdf4_type) {
+            file_ext = new String(".hdf");
+        }
+        else {
+            file_ext = new String(".h5");
+        }
+        
+        File hdf_file = new File(workDir, name + file_ext);
+        
+        try {
+            bot.toolbarButtonWithTooltip("Open").click();
+
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+
+            SWTBotText text = shell.bot().text();
+            text.setText(hdf_file.getName());
+            assertEquals(hdf_file.getName(), text.getText());
+
+            shell.bot().button("   &OK   ").click();
+            bot.waitUntil(shellCloses(shell));
+
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            assertTrue("Button-Open filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("Button-Open filetree is missing file " + hdf_file.getName(), items[0].getText().compareTo(hdf_file.getName()) == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+
+        return hdf_file;
     }
     
     protected File createFile(String name, boolean hdf4_type) {
@@ -116,7 +160,6 @@ public abstract class AbstractWindowTest {
             }
 
             SWTBotTree filetree = bot.tree();
-            //filetree.setFocus();
             assertTrue("closeHDFFile filetree shows:"+filetree.rowCount(), filetree.rowCount() == 0);
         }
         catch (Exception ex) {
@@ -178,6 +221,8 @@ public abstract class AbstractWindowTest {
         // synchronize with the thread opening the shell
         swtBarrier.await();
         bot = new SWTBot(shell);
+        
+        SWTBotPreferences.PLAYBACK_DELAY = TEST_DELAY;
     }
 
     @After

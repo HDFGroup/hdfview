@@ -54,10 +54,10 @@ import java.util.StringTokenizer;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
@@ -1383,9 +1383,9 @@ public class DefaultTableView implements TableView {
             frameField = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
             frameField.setFont(curFont);
             frameField.setText(String.valueOf(curFrame));
-            frameField.addKeyListener(new KeyAdapter() {
-                public void keyPressed(KeyEvent e) {
-                    if (e.keyCode == SWT.CR) {
+            frameField.addTraverseListener(new TraverseListener() {
+                public void keyTraversed(TraverseEvent e) {
+                    if (e.detail == SWT.TRAVERSE_RETURN) {
                         Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
 
                         try {

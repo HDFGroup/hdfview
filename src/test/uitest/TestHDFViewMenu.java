@@ -9,12 +9,7 @@ import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -26,8 +21,6 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-
-import hdf.HDFVersions;
 
 //@RunWith(SWTBotJunit4ClassRunner.class)
 public class TestHDFViewMenu extends AbstractWindowTest {
@@ -143,7 +136,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyButtonOpen() {
         File hdf_file = createHDF4File("testopenbutton");
 
@@ -166,7 +159,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue("Button-Open-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Open-HDF4 filetree has file testopenbutton.hdf", items[0].getText().compareTo("testopenbutton.hdf") == 0);
+            assertTrue("Button-Open-HDF4 filetree is missing file testopenbutton.hdf", items[0].getText().compareTo("testopenbutton.hdf") == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -182,7 +175,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyButtonClose() {
         File hdf_file = createHDF4File("closebutton");
 
@@ -191,14 +184,14 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue("Button-Close-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Close-HDF4 filetree has file closebutton.hdf", items[0].getText().compareTo("closebutton.hdf") == 0);
+            assertTrue("Button-Close-HDF4 filetree is missing file closebutton.hdf", items[0].getText().compareTo("closebutton.hdf") == 0);
 
             filetree.select(0);
 
             bot.toolbarButtonWithTooltip("Close").click();
 
-            assertTrue("Button-Close-HDF4 file deleted", hdf_file.delete());
-            assertFalse("Button-Close-HDF4 file gone", hdf_file.exists());
+            assertTrue("Button-Close-HDF4 file not deleted", hdf_file.delete());
+            assertFalse("Button-Close-HDF4 file wasn't gone", hdf_file.exists());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -456,7 +449,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuSaveAs() {
         File hdf_file = createHDF5File("testsaveasfile");
         File hdf_save_file = new File(workDir, "testsaveasfile2.h5");
@@ -508,14 +501,31 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             catch (Exception ex) {}
         }
     }
+    
+    @Test
+    public void verifyMenuWindowCloseAll() {
+        
+    }
 
     @Test
     public void verifyTextInLabelWhenClickingHDF4Help() {
         try {
+            // Test that the Help->HDF4 Library Version MenuItem works correctly
             SWTBotMenu fileMenuItem = bot.menu("Help").menu("HDF4 Library Version");
             fileMenuItem.click();
 
             SWTBotShell botshell = bot.shell("HDF Library Version");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
+
+            assertEquals(botshell.bot().label(1).getText(), HDF4VERSION);
+            botshell.bot().button("   &OK   ").click();
+            
+            // Test that the HDF4 Library Version button works correctly
+            SWTBotButton hdf4Button = botshell.bot().buttonWithTooltip("HDF4 Library Version");
+            hdf4Button.click();
+            
+            botshell = bot.shell("HDF Library Version");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
@@ -533,10 +543,24 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     @Test
     public void verifyTextInLabelWhenClickingHDF5Help() {
         try {
+            // Test that the Help->HDF5 Library Version MenuItem works correctly
             SWTBotMenu fileMenuItem = bot.menu("Help").menu("HDF5 Library Version");
             fileMenuItem.click();
 
             SWTBotShell botshell = bot.shell("HDF Library Version");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
+
+            assertEquals(botshell.bot().label(1).getText(), HDF5VERSION);
+
+            botshell.bot().label(HDF5VERSION);
+            botshell.bot().button("   &OK   ").click();
+            
+            // Test that the HDF5 Library Version button works correctly
+            SWTBotButton hdf5Button = botshell.bot().buttonWithTooltip("HDF5 Library Version");
+            hdf5Button.click();
+            
+            botshell = bot.shell("HDF Library Version");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
