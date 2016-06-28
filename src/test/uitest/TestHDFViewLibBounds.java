@@ -8,29 +8,18 @@ import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 
 import java.io.File;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Test;
 
-import hdf.HDFVersions;
-
 public class TestHDFViewLibBounds extends AbstractWindowTest {
-    // the version of the HDFViewer
-    private static String VERSION = HDFVersions.HDFVIEW_VERSION;
-    private static String workDir = System.getProperty("hdfview.workdir");
-    
     @Test
     public void testLibVersion() {
-        File hdf_file = createHDF5File("test_libversion");
+        String filename = "test_libversion";
+        String file_ext = ".h5";
+        File hdf_file = createHDF5File(filename);
         
         try {
             closeFile(hdf_file, false);
@@ -41,8 +30,8 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             shell.activate();
             
             SWTBotText text = shell.bot().text();
-            text.setText("test_libversion.h5");
-            assertEquals("test_libversion.h5", text.getText());
+            text.setText(filename + file_ext);
+            assertEquals(filename + file_ext, text.getText());
             
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
@@ -50,24 +39,12 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             final SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
             
-            assertTrue("Button-Open-HDF5 filetree shows:", filetree.rowCount() == 1);
-            assertTrue("Button-Open-HDF5 filetree has file test_libversion.h5", items[0].getText().compareTo("test_libversion.h5") == 0);
+            assertTrue("testLibVersion filetree row count: ", filetree.rowCount() == 1);
+            assertTrue("testLibVersion filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext) == 0);
             
-            filetree.select(0).contextMenu("Set Lib version bounds").click();
+            items[0].click();
             
-            // Set selected object
-            Display.getDefault().syncExec(new Runnable() {
-                public void run() {
-                    Tree tree = filetree.widget;
-                    TreeItem item = filetree.getAllItems()[0].widget;
-                    
-                    Event event = new Event();
-                    event.x = item.getBounds().x;
-                    event.y = item.getBounds().y;
-                    
-                    tree.notifyListeners(SWT.MouseUp, event);
-                }
-            });
+            filetree.contextMenu("Set Lib version bounds").click();
             
             SWTBotShell libVersionShell = bot.shell("Set the library version bounds: ");
             libVersionShell.activate();
@@ -78,15 +55,38 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             
             bot.waitUntil(shellCloses(libVersionShell));
             
-            // filetree.select(0).contextMenu("Show Properties").click();
+            items[0].click();
             
-            // Workaround to show Properties, since selected object doesn't get set
             filetree.contextMenu("Show Properties").click();
             
             SWTBotShell propertiesWindow = bot.shell("Properties - /");
             propertiesWindow.activate();
             
             assertEquals("Earliest and Latest", propertiesWindow.bot().label(7).getText());
+            
+            propertiesWindow.bot().button("   &Close   ").click();
+            
+            items[0].click();
+            
+            filetree.contextMenu("Set Lib version bounds").click();
+            
+            libVersionShell = bot.shell("Set the library version bounds: ");
+            libVersionShell.activate();
+            
+            libVersionShell.bot().comboBox(0).setSelection("Latest");
+            
+            libVersionShell.bot().button("   &OK   ").click();
+            
+            bot.waitUntil(shellCloses(libVersionShell));
+            
+            items[0].click();
+            
+            filetree.contextMenu("Show Properties").click();
+            
+            propertiesWindow = bot.shell("Properties - /");
+            propertiesWindow.activate();
+            
+            assertEquals("Latest and Latest", propertiesWindow.bot().label(7).getText());
             
             propertiesWindow.bot().button("   &Close   ").click();
         }
@@ -104,38 +104,3 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
         }
     }
 }
-
-//@Test
-//public void testLibVersion() {
-//    try {
-//        mainFrameFixture.dialog().label("libverbound").requireText();
-//
-//        mainFrameFixture.dialog().button("Close").click();
-//        mainFrameFixture.robot.waitForIdle();
-//
-//        filetree.showPopupMenuAt(0).menuItemWithPath("Set Lib version bounds").click();
-//        mainFrameFixture.robot.waitForIdle();
-//
-//        // Test Latest and Latest
-//        mainFrameFixture.dialog().comboBox("earliestversion").selectItem("Latest");
-//        mainFrameFixture.robot.waitForIdle();
-//
-//        mainFrameFixture.dialog().optionPane().component().setValue("Ok");
-//        mainFrameFixture.robot.waitForIdle();
-//
-//        filetree.showPopupMenuAt(0).menuItemWithPath("Show Properties").click();
-//        mainFrameFixture.robot.waitForIdle();
-//
-//        mainFrameFixture.dialog().label("libverbound").requireText("Latest and Latest");
-//
-//        mainFrameFixture.dialog().button("Close").click();
-//        mainFrameFixture.robot.waitForIdle();
-//    }
-//    catch (Exception ex) {
-//        ex.printStackTrace();
-//    }
-//    catch(AssertionError ae) {
-//        ae.printStackTrace();
-//    }
-//    
-//}

@@ -12,8 +12,9 @@ import java.io.File;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
+import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
@@ -139,30 +140,12 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     @Test
     public void verifyButtonOpen() {
         String filename = "testopenbutton";
-        String file_ext = ".hdf";
         File hdf_file = createHDF4File(filename);
 
         try {
             closeFile(hdf_file, false);
-
-            bot.toolbarButtonWithTooltip("Open").click();
-
-            SWTBotShell shell = bot.shell("Enter a file name");
-            shell.activate();
-            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
-
-            SWTBotText text = shell.bot().text();
-            text.setText(filename + file_ext);
-            assertEquals(filename + file_ext, text.getText());
-
-            shell.bot().button("   &OK   ").click();
-            bot.waitUntil(shellCloses(shell));
-
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue("Button-Open-HDF4 filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Open-HDF4 filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext) == 0);
+            
+            openFile(filename, true);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -565,9 +548,54 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
     
-    @Test
+    @Ignore
     public void verifyMenuWindowCloseAll() {
-        
+        String filename = "hdf5_test";
+        File hdf_file = null;
+
+        try {
+            hdf_file = openFile(filename, false);
+
+            SWTBotTree filetree = bot.tree();
+            
+            assertTrue("Window-Close All filetree row count: " + filetree.visibleRowCount(), filetree.visibleRowCount() == 5);
+            assertTrue("Window-Close All too many shells open", bot.shells().length == 1);
+            
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D float array").doubleClick();
+            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D int array").doubleClick();
+            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("3D int array").doubleClick();
+            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("4D int").doubleClick();
+            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("ArrayOfStructures").doubleClick();
+            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("Iceberg").doubleClick();
+            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("pixel interlace").doubleClick();
+            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+
+            assertTrue("Window-Close All too many or missing shells: " + bot.shells().length + " shells shown", bot.shells().length == 8);
+            
+            shell.forceActive();
+            
+            bot.menu("Window").menu("Close All").click();
+            
+            assertTrue("Window-Close All too many or missing shells: " + bot.shells().length + " shells shown", bot.shells().length == 1);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+        finally {
+            try {
+                closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {}
+        }
     }
 
     @Test

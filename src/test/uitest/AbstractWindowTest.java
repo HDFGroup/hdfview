@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
+import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
@@ -45,7 +46,7 @@ public abstract class AbstractWindowTest {
 
     private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
     
-    private static int TEST_DELAY = 10;
+    private static int TEST_DELAY = 0;
 
 
     private static void clearRemovePropertyFile() {
@@ -86,7 +87,7 @@ public abstract class AbstractWindowTest {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("Button-Open filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("Button-Open filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
             assertTrue("Button-Open filetree is missing file " + hdf_file.getName(), items[0].getText().compareTo(hdf_file.getName()) == 0);
         }
         catch (Exception ex) {
@@ -151,6 +152,9 @@ public abstract class AbstractWindowTest {
 
     protected void closeFile(File hdf_file, boolean delete_file) {
         try {
+            bot.shells()[0].activate();
+            bot.waitUntil(Conditions.shellIsActive(bot.shells()[0].getText()));
+            
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Close All");
             fileMenuItem.click();
 
