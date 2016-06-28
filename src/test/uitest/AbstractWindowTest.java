@@ -45,7 +45,7 @@ public abstract class AbstractWindowTest {
 
     private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
     
-    private static int TEST_DELAY = 0;
+    private static int TEST_DELAY = 10;
 
 
     private static void clearRemovePropertyFile() {
