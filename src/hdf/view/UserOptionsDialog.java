@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -341,13 +342,19 @@ public class UserOptionsDialog extends Dialog {
             ViewProperties.setIndexBase1(true);
     }
 
-    private Composite createGeneralSettingsRegion(TabFolder folder) {
-        Composite composite = new Composite(folder, SWT.NONE);
+    private Composite createGeneralSettingsRegion(Composite parent) {
+        ScrolledComposite scroller = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+        scroller.setExpandHorizontal(true);
+        scroller.setExpandVertical(true);
+        scroller.setMinSize(shell.getSize());
+        
+        Composite composite = new Composite(scroller, SWT.NONE);
         composite.setLayout(new GridLayout(1, true));
+        scroller.setContent(composite);
 
         org.eclipse.swt.widgets.Group workingDirectoryGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         workingDirectoryGroup.setLayout(new GridLayout(3, false));
-        workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         workingDirectoryGroup.setFont(curFont);
         workingDirectoryGroup.setText("Default Working Directory");
 
@@ -784,11 +791,11 @@ public class UserOptionsDialog extends Dialog {
         nativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
         nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
-        return composite;
+        return scroller;
     }
 
-    private Composite createDefaultModulesRegion(TabFolder folder) {
-        Composite composite = new Composite(folder, SWT.NONE);
+    private Composite createDefaultModulesRegion(Composite parent) {
+        Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout(1, true));
 
         org.eclipse.swt.widgets.Group treeViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
