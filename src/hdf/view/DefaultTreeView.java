@@ -2666,21 +2666,29 @@ public class DefaultTreeView implements TreeView {
             initargs = tmpargs;
         }
 
-        Cursor cursor = new Cursor(Display.getDefault(), SWT.CURSOR_WAIT);
-
         try {
-            shell.setCursor(cursor);
+            final HObject obj = dataObject;
+            
+            shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
+            
+            // Run background task to reset busy cursor since Tools.newInstance does not return
+            // until the DataView instance closes
+            Display.getCurrent().asyncExec(new Runnable() {
+                public void run() {
+                    while (true) {
+                        if (((HDFView) viewer).getDataView(obj) != null) {
+                            shell.setCursor(null);
+                            break;
+                        }
+                        System.out.println("Here");
+                    }
+                }
+            });
 
             theView = Tools.newInstance(theClass, initargs);
             log.trace("showDataContent: Tools.newInstance");
-
-            cursor.dispose();
         } catch (Exception ex) {
             log.trace("showDataContent: Error instantiating class {}", theClass);
-        }
-        finally {
-            cursor.dispose();
-            shell.setCursor(null);
         }
 
         log.trace("showDataContent({}): finish", dataObject.getName());
