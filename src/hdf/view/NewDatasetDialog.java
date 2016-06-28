@@ -1205,9 +1205,8 @@ public class NewDatasetDialog extends Dialog {
             helpShell.setLayout(new GridLayout(1, true));
 
             // Try to create a Browser on platforms that support it
-            Browser browser;
             try {
-                browser = new Browser(helpShell, SWT.NONE);
+                Browser browser = new Browser(helpShell, SWT.NONE);
                 browser.setFont(curFont);
                 browser.setBounds(0, 0, 500, 500);
                 browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1307,16 +1306,18 @@ public class NewDatasetDialog extends Dialog {
                     if (!display.readAndDispatch())
                         display.sleep();
                 }
-            } catch (Exception ex) {
+            }
+            catch (Error er) {
                 // Try opening help link in external browser if platform
                 // doesn't support SWT browser
-                browser = null;
-                
                 Tools.showError(shell,
                         "Platform doesn't support Browser. Opening external link in web browser...",
                         "Browser support");
                 
                 //TODO: Add support for launching in external browser
+            }
+            catch (Exception ex) {
+                log.debug("Open New Dataset Help failure: ", ex);
             }
         }
     }
