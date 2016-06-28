@@ -2410,7 +2410,7 @@ public class HDFView implements ViewManager {
             return null;
         }
 
-        mainWindow.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
+        mainWindow.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
         byte[] buff = new byte[512]; // set default buffer size to 512
         try {
             int n = 0;

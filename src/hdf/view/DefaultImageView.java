@@ -47,11 +47,11 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.layout.GridData;
 
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseListener;
@@ -937,14 +937,11 @@ public class DefaultImageView implements ImageView {
         item.setEnabled(is3D);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
+                shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
-                shell.setCursor(cursor);
-
-                new Animation(shell, SWT.NONE, dataset).open();
+                new Animation(shell, SWT.DOUBLE_BUFFERED, dataset).open();
 
                 shell.setCursor(null);
-                cursor.dispose();
             }
         });
 
@@ -1113,15 +1110,12 @@ public class DefaultImageView implements ImageView {
             item.setToolTipText("First Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
-
                     try {
-                        shell.setCursor(cursor);
+                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         firstPage();
                     } finally {
                         shell.setCursor(null);
-                        cursor.dispose();
                     }
                 }
             });
@@ -1132,15 +1126,12 @@ public class DefaultImageView implements ImageView {
             item.setToolTipText("Previous Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
-
                     try {
-                        shell.setCursor(cursor);
+                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         previousPage();
                     } finally {
                         shell.setCursor(null);
-                        cursor.dispose();
                     }
                 }
             });
@@ -1150,13 +1141,11 @@ public class DefaultImageView implements ImageView {
             frameField = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
             frameField.setFont(curFont);
             frameField.setText(String.valueOf(curFrame));
-            frameField.addKeyListener(new KeyAdapter() {
-                public void keyPressed(KeyEvent e) {
-                    if (e.keyCode == SWT.CR) {
-                        Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
-
+            frameField.addTraverseListener(new TraverseListener() {
+                public void keyTraversed(TraverseEvent e) {
+                    if (e.detail == SWT.TRAVERSE_RETURN) {
                         try {
-                            shell.setCursor(cursor);
+                            shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                             int page = 0;
 
@@ -1170,7 +1159,6 @@ public class DefaultImageView implements ImageView {
                             gotoPage(page);
                         } finally {
                             shell.setCursor(null);
-                            cursor.dispose();
                         }
                     }
                 }
@@ -1202,15 +1190,12 @@ public class DefaultImageView implements ImageView {
             item.setToolTipText("Next Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
-
                     try {
-                        shell.setCursor(cursor);
+                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         nextPage();
                     } finally {
                         shell.setCursor(null);
-                        cursor.dispose();
                     }
                 }
             });
@@ -1221,15 +1206,12 @@ public class DefaultImageView implements ImageView {
             item.setToolTipText("Last Page");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
-
                     try {
-                        shell.setCursor(cursor);
+                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         lastPage();
                     } finally {
                         shell.setCursor(null);
-                        cursor.dispose();
                     }
                 }
             });
@@ -1240,7 +1222,7 @@ public class DefaultImageView implements ImageView {
             item.setToolTipText("View Animation");
             item.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
+                    shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
                     new Animation(shell, SWT.DOUBLE_BUFFERED, dataset).open();
                     shell.setCursor(null);
                 }
@@ -2531,9 +2513,9 @@ public class DefaultImageView implements ImageView {
                     vbar = imageScroller.getVerticalBar();
 
                     if((e.stateMask & SWT.SHIFT) != 0) {
-                        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_CROSS));
+                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_CROSS));
                     } else {
-                        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_HAND));
+                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_HAND));
                     }
                 }
 

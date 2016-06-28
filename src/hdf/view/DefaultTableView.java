@@ -1386,11 +1386,7 @@ public class DefaultTableView implements TableView {
             frameField.addTraverseListener(new TraverseListener() {
                 public void keyTraversed(TraverseEvent e) {
                     if (e.detail == SWT.TRAVERSE_RETURN) {
-                        Cursor cursor = new Cursor(display, SWT.CURSOR_WAIT);
-
                         try {
-                            shell.setCursor(cursor);
-
                             int page = 0;
 
                             try {
@@ -1401,9 +1397,9 @@ public class DefaultTableView implements TableView {
                             }
 
                             gotoPage(page);
-                        } finally {
-                            shell.setCursor(null);
-                            cursor.dispose();
+                        }
+                        catch (Exception ex) {
+                            log.debug("Page change failure: ", ex);
                         }
                     }
                 }
@@ -1664,7 +1660,7 @@ public class DefaultTableView implements TableView {
 
         dataset.clearData();
 
-        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
+        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
         try {
             dataValue = dataset.getData();
@@ -1674,13 +1670,13 @@ public class DefaultTableView implements TableView {
             }
         }
         catch (Exception ex) {
-            shell.setCursor(null);
             dataValue = null;
             Tools.showError(shell, ex.getMessage(), shell.getText());
             return;
         }
-
-        shell.setCursor(null);
+        finally {
+            shell.setCursor(null);
+        }
 
         table.doCommand(new VisualRefreshCommand());
     }
