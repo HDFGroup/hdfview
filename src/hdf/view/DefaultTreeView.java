@@ -88,7 +88,7 @@ public class DefaultTreeView implements TreeView {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
 
     private Shell                         shell;
-    
+
     private Font                          curFont;
 
     /** The owner of this TreeView */
@@ -143,7 +143,9 @@ public class DefaultTreeView implements TreeView {
 
     /** Keep Image instances to prevent many calls to ViewProperties.getTypeIcon() */
     private Image h4Icon = ViewProperties.getH4Icon();
+    private Image h4IconR = ViewProperties.getH4IconR();
     private Image h5Icon = ViewProperties.getH5Icon();
+    private Image h5IconR = ViewProperties.getH5IconR();
     private Image imageIcon = ViewProperties.getImageIcon();
     private Image imageIconA = ViewProperties.getImageIconA();
     private Image textIcon = ViewProperties.getTextIcon();
@@ -182,7 +184,7 @@ public class DefaultTreeView implements TreeView {
     public DefaultTreeView(ViewManager theView, Composite parent) {
         viewer = theView;
         shell = parent.getShell();
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -232,7 +234,7 @@ public class DefaultTreeView implements TreeView {
 
                         Event collapse = new Event();
                         collapse.item = selectedItem;
-                        
+
                         tree.notifyListeners(SWT.Collapse, collapse);
                     }
                 }
@@ -242,7 +244,7 @@ public class DefaultTreeView implements TreeView {
 
                         Event expand = new Event();
                         expand.item = selectedItem;
-                        
+
                         tree.notifyListeners(SWT.Expand, expand);
                     }
                 }
@@ -307,12 +309,12 @@ public class DefaultTreeView implements TreeView {
                         showDataContent(selectedObject);
                     } else {
                         boolean isExpanded = selectedItem.getExpanded();
-                        
+
                         selectedItem.setExpanded(!isExpanded);
-                        
+
                         Event expand = new Event();
                         expand.item = selectedItem;
-                        
+
                         if(isExpanded) {
                             tree.notifyListeners(SWT.Collapse, expand);
                         }
@@ -329,7 +331,7 @@ public class DefaultTreeView implements TreeView {
             public void mouseUp(MouseEvent e) {
                 // Make sure user clicked on a TreeItem
                 TreeItem theItem = tree.getItem(new Point(e.x, e.y));
-                
+
                 if (theItem == null) {
                     tree.deselectAll();
                     selectedItem = null;
@@ -475,7 +477,7 @@ public class DefaultTreeView implements TreeView {
                 }
             }
         });
-        
+
         tree.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -662,7 +664,7 @@ public class DefaultTreeView implements TreeView {
 
                 try {
                     showMetaData(selectedObject);
-                    
+
                     // Update icon for object since an attribute may have been added/deleted
                     if (selectedObject instanceof Group) {
                         if (!(((Group) selectedObject).isRoot())) {
@@ -699,7 +701,7 @@ public class DefaultTreeView implements TreeView {
 
                 try {
                     showMetaData(selectedObject);
-                    
+
                     // Update icon for object since an attribute may have been added/deleted
                     if (selectedObject instanceof Group) {
                         if (!(((Group) selectedObject).isRoot())) {
@@ -1632,10 +1634,18 @@ public class DefaultTreeView implements TreeView {
             if(((Group) obj).isRoot()) {
                 FileFormat theFile = obj.getFileFormat();
 
-                if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)))
-                    return h4Icon;
-                else
-                    return h5Icon;
+                if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+                    if(theFile.isReadOnly())
+                        return h4IconR;
+                    else
+                        return h4IconR;
+                }
+                else {
+                    if(theFile.isReadOnly())
+                        return h5Icon;
+                    else
+                        return h5Icon;
+                }
             }
             else {
                 if(hasAttribute) {
@@ -2526,13 +2536,13 @@ public class DefaultTreeView implements TreeView {
         String dataViewName = null;
 
         log.trace("showDataContent: inited");
-        
+
         DataView existingView = ((HDFView) viewer).getDataView(d);
 
         if (isDefaultDisplay) {
             if (existingView != null) {
                 Shell[] shells = Display.getDefault().getShells();
-                
+
                 if (shells.length >= 1) {
                     for (int i = 0; i < shells.length; i++) {
                         DataView view = (DataView) shells[i].getData();
@@ -2668,9 +2678,9 @@ public class DefaultTreeView implements TreeView {
 
         try {
             final HObject obj = dataObject;
-            
+
             shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
-            
+
             // Run background task to reset busy cursor since Tools.newInstance does not return
             // until the DataView instance closes
             Display.getCurrent().asyncExec(new Runnable() {
@@ -2742,31 +2752,31 @@ public class DefaultTreeView implements TreeView {
 
         return dataView;
     }
-    
+
     public void updateFont(Font font) {
         if (curFont != null) curFont.dispose();
-        
+
         curFont = font;
-        
+
         tree.setFont(font);
-        
+
         // On certain platforms, calling tree.setFont() does not update
         // the font of currently visible TreeItems. Since setting the
         // font on all TreeItems causes a bug, all files must be reloaded.
         LinkedList<FileFormat> files = new LinkedList<FileFormat>();
         TreeItem[] items = tree.getItems();
-        
+
         for (int i = 0; i < items.length; i++) {
             FileFormat theFile = ((HObject) items[i].getData()).getFileFormat();
             files.add(theFile);
-            
+
             try {
                 closeFile(theFile);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        
+
         while (!files.isEmpty()) {
             FileFormat theFile = files.remove();
             ((HDFView) viewer).reloadFile(theFile);

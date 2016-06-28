@@ -169,7 +169,7 @@ public class ViewProperties extends Properties {
      */
     private static int              start_members          = 0;
 
-    private static Image        hdfIcon, h4Icon, h5Icon, largeHdfIcon, blankIcon, helpIcon, fileopenIcon,
+    private static Image        hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, largeHdfIcon, blankIcon, helpIcon, fileopenIcon,
     filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon, folderopenIcon, foldercloseIconA,
     folderopenIconA, datasetIcon, imageIcon, tableIcon, textIcon, datasetIconA, imageIconA, tableIconA,
     textIconA, zoominIcon, zoomoutIcon, paletteIcon, chartIcon, brightIcon, autocontrastIcon, copyIcon,
@@ -463,8 +463,16 @@ public class ViewProperties extends Properties {
         return h4Icon;
     }
 
+    public static Image getH4IconR() {
+        return h4IconR;
+    }
+
     public static Image getH5Icon() {
         return h5Icon;
+    }
+
+    public static Image getH5IconR() {
+        return h5IconR;
     }
 
     public static Image getDatasetIcon() {
@@ -641,10 +649,24 @@ public class ViewProperties extends Properties {
             }
         }
 
+        if (h4IconR == null) {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf4R.gif");
+            if (s != null) {
+                h4IconR = new Image(null, s);
+            }
+        }
+
         if (h5Icon == null) {
             s = ViewProperties.class.getResourceAsStream("icons/hdf5.gif");
             if (s != null) {
                 h5Icon = new Image(null, s);
+            }
+        }
+
+        if (h5IconR == null) {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf5R.gif");
+            if (s != null) {
+                h5IconR = new Image(null, s);
             }
         }
 
@@ -1800,10 +1822,10 @@ public class ViewProperties extends Properties {
     public static void setIndexBase1(boolean b) {
         ViewProperties.isIndexBase1 = b;
     }
-    
+
     /**
      * Sets the list of most recently accessed files.
-     * 
+     *
      * @param recentFilesList
      *               The list of most recently accessed files.
      */
