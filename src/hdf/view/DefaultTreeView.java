@@ -2680,7 +2680,6 @@ public class DefaultTreeView implements TreeView {
                             shell.setCursor(null);
                             break;
                         }
-                        System.out.println("Here");
                     }
                 }
             });
@@ -2689,6 +2688,9 @@ public class DefaultTreeView implements TreeView {
             log.trace("showDataContent: Tools.newInstance");
         } catch (Exception ex) {
             log.trace("showDataContent: Error instantiating class {}", theClass);
+        }
+        finally {
+            shell.setCursor(null);
         }
 
         log.trace("showDataContent({}): finish", dataObject.getName());
