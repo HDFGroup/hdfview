@@ -138,7 +138,9 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
     @Test
     public void verifyButtonOpen() {
-        File hdf_file = createHDF4File("testopenbutton");
+        String filename = "testopenbutton";
+        String file_ext = ".hdf";
+        File hdf_file = createHDF4File(filename);
 
         try {
             closeFile(hdf_file, false);
@@ -147,10 +149,11 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
 
             SWTBotText text = shell.bot().text();
-            text.setText("testopenbutton.hdf");
-            assertEquals("testopenbutton.hdf", text.getText());
+            text.setText(filename + file_ext);
+            assertEquals(filename + file_ext, text.getText());
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
@@ -158,8 +161,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("Button-Open-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Open-HDF4 filetree is missing file testopenbutton.hdf", items[0].getText().compareTo("testopenbutton.hdf") == 0);
+            assertTrue("Button-Open-HDF4 filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("Button-Open-HDF4 filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -177,16 +180,18 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
     @Test
     public void verifyButtonClose() {
-        File hdf_file = createHDF4File("closebutton");
+        String filename = "closebutton";
+        String file_ext = ".hdf";
+        File hdf_file = createHDF4File(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("Button-Close-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Close-HDF4 filetree is missing file closebutton.hdf", items[0].getText().compareTo("closebutton.hdf") == 0);
+            assertTrue("Button-Close-HDF4 filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("Button-Close-HDF4 filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext) == 0);
 
-            filetree.select(0);
+            items[0].click();
 
             bot.toolbarButtonWithTooltip("Close").click();
 
@@ -210,21 +215,30 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
     @Ignore
     public void verifyMenuOpen() {
-        File hdf_file = createHDF4File("testopenfile");
+        String filename = "testopenfile";
+        String file_ext = ".hdf";
+        File hdf_file = createHDF4File(filename);
 
         try {
             closeFile(hdf_file, false);
 
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("Open");
+            SWTBotMenu fileMenuItem = bot.menu("File").menu("&Open 	Ctrl-O");
             fileMenuItem.click();
 
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testopenfile.hdf");
-//            fileChooser.approve();
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
+
+            SWTBotText text = shell.bot().text();
+            text.setText(filename + file_ext);
+            assertEquals(filename + file_ext, text.getText());
+
+            shell.bot().button("   &OK   ").click();
+            bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
-            assertTrue("File-Open-HDF4 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("File-Open-HDF4 filetree has file "+filetree.cell(0,0),(filetree.cell(0,0)).compareTo("testopenfile.hdf") == 0);
+            assertTrue("File-Open-HDF4 filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("File-Open-HDF4 filetree is missing file " + filename + file_ext, filetree.getAllItems()[0].getText().compareTo(filename + file_ext) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -240,27 +254,42 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuOpenReadOnly() {
-        File hdf_file = createHDF5File("testopenrofile");
+        String filename = "testopenrofile";
+        String file_ext = ".h5";
+        File hdf_file = createHDF5File(filename);
 
         try {
             closeFile(hdf_file, false);
 
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Open Read-Only");
             fileMenuItem.click();
+            
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
 
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testopenrofile.h5");
-//            fileChooser.approve();
+            SWTBotText text = shell.bot().text();
+            text.setText(filename + file_ext);
+            assertEquals(filename + file_ext, text.getText());
+
+            shell.bot().button("   &OK   ").click();
+            bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
-            assertTrue("File-OpenRO-HDF5 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("File-OpenRO-HDF5 filetree has file "+filetree.cell(0,0), (filetree.cell(0,0)).compareTo("testopenrofile.h5") == 0);
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue("File-OpenRO-HDF5 filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("File-OpenRO-HDF5 filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext) == 0);
 
-            filetree.select(0);
-            SWTBotMenu deleteMenuItem = filetree.contextMenu("Delete");
-            deleteMenuItem.isEnabled();
+            items[0].click();
+            
+            assertFalse("Error: New Menu Item is enabled.", filetree.contextMenu("New").isEnabled());
+            assertFalse("Error: Cut Menu Item is enabled.", filetree.contextMenu("Cut").isEnabled());
+            assertFalse("Error: Paste Menu Item is enabled.", filetree.contextMenu("Paste").isEnabled());
+            assertFalse("Error: Delete Menu Item is enabled.", filetree.contextMenu("Delete").isEnabled());
+            assertFalse("Error: Rename Menu Item is enabled.", filetree.contextMenu("Rename").isEnabled());
+            assertFalse("Error: Set Lib Version Bounds Menu Item is enabled.", filetree.contextMenu("Set Lib version bounds").isEnabled());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -276,22 +305,35 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuNewHDF4() {
+        String filename = "testfile";
+        String file_ext = ".hdf";
         File hdf_file = null;
+        
         try {
             SWTBotMenu fileMenuItem = bot.menu("File").menu("New").menu("HDF4");
             fileMenuItem.click();
 
-            hdf_file = new File(workDir, "testfile.hdf");
+            hdf_file = new File(workDir, filename + file_ext);
             if (hdf_file.exists())
                 hdf_file.delete();
+            
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
 
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testfile.hdf");
-//            fileChooser.approve();
+            SWTBotText text = shell.bot().text();
+            text.setText(filename + file_ext);
+            assertEquals(filename + file_ext, text.getText());
 
-            assertTrue("File-New-HDF4 file created", hdf_file.exists());
+            shell.bot().button("   &OK   ").click();
+            bot.waitUntil(shellCloses(shell));
+            
+            SWTBotTree filetree = bot.tree();
+            assertTrue("File-New-HDF4 filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("File-New-HDF4 filetree is missing file " + filename + file_ext, filetree.getAllItems()[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("File-New-HDF4 file not created", hdf_file.exists());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -307,22 +349,35 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuNewHDF5() {
+        String filename = "testfile";
+        String file_ext = ".h5";
         File hdf_file = null;
+        
         try {
             SWTBotMenu fileMenuItem = bot.menu("File").menu("New").menu("HDF5");
             fileMenuItem.click();
 
-            hdf_file = new File(workDir, "testfile.h5");
+            hdf_file = new File(workDir, filename + file_ext);
             if (hdf_file.exists())
                 hdf_file.delete();
+            
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
 
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testfile.h5");
-//            fileChooser.approve();
+            SWTBotText text = shell.bot().text();
+            text.setText(filename + file_ext);
+            assertEquals(filename + file_ext, text.getText());
 
-            assertTrue("File-New-HDF5 file created", hdf_file.exists());
+            shell.bot().button("   &OK   ").click();
+            bot.waitUntil(shellCloses(shell));
+            
+            SWTBotTree filetree = bot.tree();
+            assertTrue("File-New-HDF5 filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("File-New-HDF5 filetree is missing file " + filename + file_ext, filetree.getAllItems()[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("File-New-HDF5 file not created", hdf_file.exists());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -338,16 +393,20 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuClose() {
-        File hdf_file = createHDF4File("closefile");
+        String filename = "closefile";
+        String file_ext = ".hdf";
+        File hdf_file = createHDF4File(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            assertTrue("verifyMenuClose filetree shows: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("verifyMenuClose filetree has file "+filetree.cell(0,0), (filetree.cell(0,0)).compareTo("closefile.hdf") == 0);
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue("verifyMenuClose filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
+            assertTrue("verifyMenuClose filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext) == 0);
 
-            filetree.select(0);
+            items[0].click();
+            
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Close");
             fileMenuItem.click();
 
@@ -369,16 +428,20 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuCloseAll() {
-        File hdf4_file = createHDF4File("closeallfile");
-        File hdf5_file = createHDF5File("closeallfile");
+        String filename = "closeallfiles";
+        String hdf4_file_ext = ".hdf";
+        String hdf5_file_ext = ".h5";
+        File hdf4_file = createHDF4File(filename);
+        File hdf5_file = createHDF5File(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            assertTrue("verifyMenuCloseAll HDF filetree shows: "+filetree.rowCount(), filetree.rowCount() == 2);
-            assertTrue("verifyMenuCloseAll HDF filetree has file "+filetree.cell(0,0), (filetree.cell(0,0)).compareTo("closeallfile.hdf") == 0);
-            assertTrue("verifyMenuCloseAll HDF5 filetree has file "+filetree.cell(1,0), (filetree.cell(1,0)).compareTo("closeallfile.h5") == 0);
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue("verifyMenuCloseAll HDF filetree row count: "+filetree.rowCount(), filetree.rowCount() == 2);
+            assertTrue("verifyMenuCloseAll HDF filetree is missing file " + filename + hdf4_file_ext, items[0].getText().compareTo(filename + hdf4_file_ext) == 0);
+            assertTrue("verifyMenuCloseAll HDF5 filetree is missing file " + filename + hdf5_file_ext, items[1].getText().compareTo(filename + hdf5_file_ext) == 0);
 
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Close All");
             fileMenuItem.click();
@@ -449,7 +512,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void verifyMenuSaveAs() {
         File hdf_file = createHDF5File("testsaveasfile");
         File hdf_save_file = new File(workDir, "testsaveasfile2.h5");
@@ -520,17 +583,6 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             assertEquals(botshell.bot().label(1).getText(), HDF4VERSION);
             botshell.bot().button("   &OK   ").click();
-            
-            // Test that the HDF4 Library Version button works correctly
-            SWTBotButton hdf4Button = botshell.bot().buttonWithTooltip("HDF4 Library Version");
-            hdf4Button.click();
-            
-            botshell = bot.shell("HDF Library Version");
-            botshell.activate();
-            bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
-
-            assertEquals(botshell.bot().label(1).getText(), HDF4VERSION);
-            botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -548,19 +600,6 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             fileMenuItem.click();
 
             SWTBotShell botshell = bot.shell("HDF Library Version");
-            botshell.activate();
-            bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
-
-            assertEquals(botshell.bot().label(1).getText(), HDF5VERSION);
-
-            botshell.bot().label(HDF5VERSION);
-            botshell.bot().button("   &OK   ").click();
-            
-            // Test that the HDF5 Library Version button works correctly
-            SWTBotButton hdf5Button = botshell.bot().buttonWithTooltip("HDF5 Library Version");
-            hdf5Button.click();
-            
-            botshell = bot.shell("HDF Library Version");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
