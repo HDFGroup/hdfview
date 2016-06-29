@@ -1638,11 +1638,11 @@ public class DefaultTreeView implements TreeView {
                     if(theFile.isReadOnly())
                         return h4IconR;
                     else
-                        return h4IconR;
+                        return h4Icon;
                 }
                 else {
                     if(theFile.isReadOnly())
-                        return h5Icon;
+                        return h5IconR;
                     else
                         return h5Icon;
                 }
