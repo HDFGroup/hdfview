@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
+import static org.eclipse.swtbot.swt.finder.matchers.WithRegex.withRegex;
 
 import org.junit.runner.RunWith;
 
@@ -13,8 +14,11 @@ import java.io.File;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
+import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
@@ -22,6 +26,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.hamcrest.Matcher;
 
 //@RunWith(SWTBotJunit4ClassRunner.class)
 public class TestHDFViewMenu extends AbstractWindowTest {
@@ -452,34 +457,44 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuSave() {
-        File hdf_file = createHDF5File("testsavefile");
+        String filename = "testsavefile";
+        String groupname = "grouptestname";
+        File hdf_file = createHDF5File(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            filetree.select(0);
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            items[0].click();
+
             SWTBotMenu groupMenuItem = filetree.contextMenu("New").menu("Group");
             groupMenuItem.click();
 
-            bot.text("groupname").setText("grouptestname");
-            bot.button("   &OK   ").click();
+            SWTBotShell botshell = bot.shell("New Group...");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive(botshell.getText()));
+
+            botshell.bot().text(0).setText(groupname);
+            botshell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(botshell));
+
+            Display.getDefault().syncExec(new Runnable() {
+                public void run() {
+                    shell.forceActive();
+                }
+            });
 
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Save");
             fileMenuItem.click();
 
             closeFile(hdf_file, false);
 
-            fileMenuItem = bot.menu("File").menu("Open");
-            fileMenuItem.click();
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testsavefile.h5");
-//            fileChooser.approve();
+            openFile(filename, false);
 
-            filetree = bot.tree();
-            assertTrue("File-Save-HDF5 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 2);
-            assertTrue("File-Save-HDF5 filetree has file "+filetree.cell(0,0), (filetree.cell(0,0)).compareTo("testsavefile.h5") == 0);
-            assertTrue("File-Save-HDF5 filetree has group "+filetree.cell(1,0), (filetree.cell(1,0)).compareTo("grouptestname") == 0);
+            SWTBotTreeItem group = bot.tree().getAllItems()[0].getNode(0);
+            assertTrue("File-Save-HDF5 filetree is missing group '" + groupname + "'", group.getText().compareTo(groupname) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -495,42 +510,61 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuSaveAs() {
-        File hdf_file = createHDF5File("testsaveasfile");
-        File hdf_save_file = new File(workDir, "testsaveasfile2.h5");
+        String filename = "testsaveasfile";
+        String save_to_filename = "testsaveasfile2";
+        String file_ext = ".h5";
+        String groupname = "grouptestname";
+        
+        File hdf_file = createHDF5File(filename);
+        File hdf_save_file = new File(workDir, save_to_filename + file_ext);
         if (hdf_save_file.exists())
             hdf_save_file.delete();
 
         try {
             SWTBotTree filetree = bot.tree();
-            filetree.select(0);
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            items[0].click();
+
             SWTBotMenu groupMenuItem = filetree.contextMenu("New").menu("Group");
             groupMenuItem.click();
 
-            bot.text("groupname").setText("grouptestname");
-            bot.button("   &OK   ").click();
+            SWTBotShell botshell = bot.shell("New Group...");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive(botshell.getText()));
+
+            botshell.bot().text(0).setText(groupname);
+            botshell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(botshell));
+
+            Display.getDefault().syncExec(new Runnable() {
+                public void run() {
+                    shell.forceActive();
+                }
+            });
 
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Save As");
             fileMenuItem.click();
+            
+            SWTBotShell shell = bot.shell("Enter a file name");
+            shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
 
-//            JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testsaveasfile2.h5");
-//            fileChooser.approve();
+            SWTBotText text = shell.bot().text();
+            text.setText(save_to_filename + file_ext);
+            assertEquals(save_to_filename + file_ext, text.getText());
+
+            shell.bot().button("   &OK   ").click();
+            bot.waitUntil(shellCloses(shell));
 
             closeFile(hdf_file, true);
 
-            SWTBotMenu fileOpenMenuItem = bot.menu("File").menu("Open");
-            fileOpenMenuItem.click();
+            openFile(save_to_filename, false);
 
-//            fileChooser = JFileChooserFinder.findFileChooser().using(bot.robot);
-//            fileChooser.fileNameTextBox().setText("testsaveasfile2.h5");
-//            fileChooser.approve();
-
-            filetree = bot.tree();
-            assertTrue("File-SaveAs-HDF5 filetree shows: "+filetree.rowCount(), filetree.rowCount() == 2);
-            assertTrue("File-SaveAs-HDF5 filetree has file "+filetree.cell(0,0), (filetree.cell(0,0)).compareTo("testsaveasfile2.h5") == 0);
-            assertTrue("File-SaveAs-HDF5 filetree has group "+filetree.cell(1,0), (filetree.cell(1,0)).compareTo("grouptestname") == 0);
+            SWTBotTreeItem group = bot.tree().getAllItems()[0].getNode(0);
+            assertTrue("File-SaveAs-HDF5 filetree is missing group '" + groupname + "'", group.getText().compareTo(groupname) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -548,7 +582,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
     
-    @Ignore
+    @Test
     public void verifyMenuWindowCloseAll() {
         String filename = "hdf5_test";
         File hdf_file = null;
@@ -561,24 +595,41 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             assertTrue("Window-Close All filetree row count: " + filetree.visibleRowCount(), filetree.visibleRowCount() == 5);
             assertTrue("Window-Close All too many shells open", bot.shells().length == 1);
             
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D float array").click();
             filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D float array").doubleClick();
-            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D int array").click();
             filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D int array").doubleClick();
-            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("3D int array").click();
             filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("3D int array").doubleClick();
-            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("4D int").click();
             filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("4D int").doubleClick();
-            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            
+            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("ArrayOfStructures").click();
             filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("ArrayOfStructures").doubleClick();
-            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            
+            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("Iceberg").click();
             filetree.getTreeItem(filename + ".h5").getNode("images").getNode("Iceberg").doubleClick();
-            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            
+            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("pixel interlace").click();
             filetree.getTreeItem(filename + ".h5").getNode("images").getNode("pixel interlace").doubleClick();
-            bot.waitUntilWidgetAppears(Conditions.waitForWidget(WidgetMatcherFactory.widgetOfType(NatTable.class)));
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
             assertTrue("Window-Close All too many or missing shells: " + bot.shells().length + " shells shown", bot.shells().length == 8);
             
-            shell.forceActive();
+            Display.getDefault().syncExec(new Runnable() {
+                public void run() {
+                    shell.forceActive();
+                }
+            });
             
             bot.menu("Window").menu("Close All").click();
             

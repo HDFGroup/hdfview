@@ -61,7 +61,7 @@
     <string value="${hdfjava.filelist}" />
     <filterchain>
       <tokenfilter>
-      	<containsregex pattern="jarhdf[0-9]*-" replace="" flags="g" />
+        <containsregex pattern="jarhdf[0-9]*-" replace="" flags="g" />
       </tokenfilter>
     </filterchain>
   </loadresource>
@@ -227,7 +227,6 @@
       excludes="examples/** test/** *.log *.h5">
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
-      <zipgroupfileset dir="${lib.dir}/extra" includes="slf4j-nop-1.7.5.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}" includes="swt.jar" />
 
       <zipfileset src="${lib.dir}/ext/swt/commons-logging-1.2.jar" excludes="META-INF/**/*"></zipfileset>

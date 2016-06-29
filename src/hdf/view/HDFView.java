@@ -2056,6 +2056,10 @@ public class HDFView implements ViewManager {
         isTesting = testing;
         currentDir = rootDir;
     }
+    
+    public boolean getTestState() {
+        return isTesting;
+    }
 
     /**
      * Set default UI fonts.

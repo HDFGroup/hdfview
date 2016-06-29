@@ -1893,6 +1893,13 @@ public class DefaultTreeView implements TreeView {
             Tools.showError(shell, "Select a file to save.", null);
             return;
         }
+        
+        HObject root = srcFile.getRootObject();
+        if (root == null) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "The file is empty.", null);
+            return;
+        }
 
         String currentDir = srcFile.getParent();
 
@@ -1903,15 +1910,22 @@ public class DefaultTreeView implements TreeView {
             currentDir = "";
         }
 
-        FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-        fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
+        String filename;
 
-        DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF4();
-        fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
-        fChooser.setFilterNames(new String[] {filter.getDescription()});
-        fChooser.setFilterIndex(0);
+        if (((HDFView) viewer).getTestState()) {
+            filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
+        }
+        else {
+            FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
 
-        String filename = fChooser.open();
+            DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF4();
+            fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {filter.getDescription()});
+            fChooser.setFilterIndex(0);
+
+            filename = fChooser.open();
+        }
 
         if(filename == null) return;
 
@@ -2027,15 +2041,22 @@ public class DefaultTreeView implements TreeView {
             currentDir = "";
         }
 
-        FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-        fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
+        String filename;
 
-        DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
-        fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
-        fChooser.setFilterNames(new String[] {filter.getDescription()});
-        fChooser.setFilterIndex(0);
+        if (((HDFView) viewer).getTestState()) {
+            filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
+        }
+        else {
+            FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
 
-        String filename = fChooser.open();
+            DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
+            fChooser.setFilterExtensions(new String[] {filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {filter.getDescription()});
+            fChooser.setFilterIndex(0);
+
+            filename = fChooser.open();
+        }
 
         if(filename == null) return;
 
@@ -2046,12 +2067,14 @@ public class DefaultTreeView implements TreeView {
             Tools.showError(shell, ex.getMessage(), shell.getText());
         }
 
-        int n = getAllItemCount();
-        Vector<Object> objList = new Vector<Object>(n);
-        TreeItem item = null;
-        for (int i = 0; i < n; i++) {
-            item = tree.getItem(i);
-            objList.add(item.getData());
+        TreeItem rootItem = findTreeItem(root);
+        int n = rootItem.getItemCount();
+        Vector<TreeItem> objList = new Vector<TreeItem>(n);
+        
+        try {
+            for (int i = 0; i < n; i++) objList.add(rootItem.getItem(i));
+        } catch (Exception ex) {
+            log.debug("saveAsHDF5() objList add failure: ", ex);
         }
 
         FileFormat newFile = null;
@@ -2068,7 +2091,7 @@ public class DefaultTreeView implements TreeView {
 
         HObject pitem = newFile.getRootObject();
 
-        pasteObject((TreeItem[]) objList.toArray(), findTreeItem(pitem), newFile);
+        pasteObject(objList.toArray(new TreeItem[0]), findTreeItem(pitem), newFile);
         objList.setSize(0);
 
         Group srcGroup = (Group) root;
