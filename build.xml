@@ -52,9 +52,9 @@
 
   <pathconvert property="hdfjava.filelist">
     <map from="${hdf.lib.dir}${file.separator}" to="" />
-      <fileset dir="${hdf.lib.dir}">
-        <include name="jarhdf*.jar" />
-      </fileset>
+    <fileset dir="${hdf.lib.dir}">
+      <include name="jarhdf*.jar" />
+    </fileset>
     <map from="${hdf5.lib.dir}${file.separator}" to="" />
     <fileset dir="${hdf5.lib.dir}">
       <include name="jarhdf5*.jar" />
@@ -232,7 +232,6 @@
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
-      <zipgroupfileset dir="${lib.dir}/extra" includes="slf4j-nop-1.7.5.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}" includes="swt.jar" />
 
       <zipfileset src="${lib.dir}/ext/swt/commons-logging-1.2.jar" excludes="META-INF/**/*"></zipfileset>
@@ -251,7 +250,7 @@
   </target>
   <path id="application" location="${jar.dir}/${ant.project.name}.jar" />
 
-  <!-- SWT on Mac requires the -XstartOFirstThreadFlag. -->
+  <!-- SWT on Mac requires the -XstartOnFirstThreadFlag. -->
   <condition property="XstartOnFirstThreadFlag" value="-XstartOnFirstThread" else="-Dgwt.dummy.arg1=">
      <os family="mac"/>
   </condition>
@@ -278,8 +277,8 @@
     <mkdir dir="${jar.dir}/lib/ext" />
     <copy todir="${jar.dir}/lib">
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-        <fileset dir="${hdf.lib.dir}" includes="*.jar" />
-        <fileset dir="${hdf5.lib.dir}" includes="*.jar" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar" />
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -596,8 +595,8 @@
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-        <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
-        <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
     </copy>
 
     <!-- Bundle jre -->
@@ -699,10 +698,10 @@
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-        <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
-        <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
-        <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
-        <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
+      <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
+      <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
     </copy>
 
     <!-- Copy the documentation -->
