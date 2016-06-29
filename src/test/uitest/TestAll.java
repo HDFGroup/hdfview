@@ -7,7 +7,9 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses( {
     TestHDFViewMenu.class,
     TestHDFViewLibBounds.class,
-    TestHDFViewDatasetFrameSelection.class
+    TestHDFViewDatasetFrameSelection.class,
+    TestHDFViewImageConversion.class,
+    TestTreeViewNewMenu.class,
 })
 
 public class TestAll {
