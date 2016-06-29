@@ -16,14 +16,15 @@ import hdf.view.HDFView;
 import org.junit.BeforeClass;
 import org.junit.Before;
 import org.junit.After;
-import org.junit.AfterClass;
-
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCanvas;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
@@ -165,6 +166,39 @@ public abstract class AbstractWindowTest {
 
             SWTBotTree filetree = bot.tree();
             assertTrue("closeHDFFile filetree shows:"+filetree.rowCount(), filetree.rowCount() == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+    }
+
+    protected void testSamplePixel(int theX, int theY, String requiredValue) {
+        try {
+            SWTBotShell botshell = bot.activeShell();
+            SWTBot thisbot = botshell.bot();
+            SWTBotCanvas imageCanvas = thisbot.canvas(1);
+
+            // Make sure Show Values is selected
+            SWTBotMenu showValuesMenuItem = thisbot.menu("Image").menu("Show Values"); 
+            if(!showValuesMenuItem.isChecked()) {
+                showValuesMenuItem.click();
+            }
+
+            Display.getDefault().syncExec(new Runnable() {
+                public void run() {
+                    imageCanvas.widget.notifyListeners(SWT.MouseMove, new Event() {
+                        {
+                            x = theX;
+                            y = theY;
+                        }
+                    });
+                }
+            });
+
+            assertEquals(thisbot.text().getText(), requiredValue);
         }
         catch (Exception ex) {
             ex.printStackTrace();

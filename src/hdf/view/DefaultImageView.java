@@ -966,7 +966,7 @@ public class DefaultImageView implements ImageView {
         new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.CHECK);
-        item.setText("Show Value");
+        item.setText("Show Values");
         item.setSelection(showValues);
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -2451,7 +2451,7 @@ public class DefaultImageView implements ImageView {
                     currentPosition = new Point(e.x, e.y);
 
                     if((e.stateMask & SWT.BUTTON1) != 0) {
-                        // If a drag event has occured, draw a selection Rectangle
+                        // If a drag event has occurred, draw a selection Rectangle
                         if((e.stateMask & SWT.SHIFT) != 0) {
                             int x0 = Math.max(0, Math.min(startPosition.x,
                                     currentPosition.x));
