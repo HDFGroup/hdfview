@@ -102,7 +102,12 @@
   </path>
   <path id="jni-classpath">
     <fileset dir="${hdf.lib.dir}"
-      includes="jarhdf*.jar slf4j-api*.jar" />
+      includes="jarhdf*.jar" />
+  </path>
+  <path id="slf4j-classpath">
+  	<fileset dir="${lib.dir}"
+      includes="slf4j-api*.jar"
+      excludes="*sources.jar" />
   </path>
   <path id="log-classpath">
     <fileset dir="${lib.dir}/extra"
@@ -110,7 +115,7 @@
       excludes="*sources.jar" />
   </path>
   <path id="nop-classpath">
-    <fileset dir="${lib.dir}/extra"
+  	<fileset dir="${lib.dir}/extra"
       includes="slf4j-nop*.jar"
       excludes="*sources.jar" />
   </path>
@@ -131,12 +136,13 @@
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
+  	<path refid="slf4j-classpath" />
   </path>
   <path id="jar-classpath">
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
-    <path refid="nop-classpath" />
+  	<path refid="slf4j-classpath" />
   </path>
 
   <property name="main-class" value="hdf.view.HDFView" />
