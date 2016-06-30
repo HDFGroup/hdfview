@@ -630,7 +630,7 @@ public class H5CompoundDS extends CompoundDS {
                             
                             if (member_base_class == HDF5Constants.H5T_COMPOUND) {
                                 try {
-                                    member_data = H5Datatype.allocateArray(tmptid, member_size);
+                                    member_data = H5Datatype.allocateArray(tmptid, member_size * (int) lsize[0]);
                                 }
                                 catch (OutOfMemoryError err) {
                                     member_data = null;
@@ -640,8 +640,9 @@ public class H5CompoundDS extends CompoundDS {
                                     log.trace("read(): Error allocating array for Compound: ", ex);
                                     member_data = null;
                                 }
-                                log.trace("H5CompoundDS read: {} Member[{}] is class {} of size={}", member_name, i, member_base_class, member_size);
                             }
+                            
+                            log.trace("H5CompoundDS read: {} Member[{}] is class {} of size={}", member_name, i, member_base_class, member_size);
                         }
                         catch (Exception ex) {
                             log.debug("Exception H5T_ARRAY id or class failure[{}]:", i, ex);
@@ -764,10 +765,11 @@ public class H5CompoundDS extends CompoundDS {
                                 // type and size and convert the byte array to the correct type before adding
                                 // it to the list
                                 
-                                long[] dims = new long[1];
+                                int numDims = H5.H5Tget_array_ndims(atom_tid);
+                                long[] dims = new long[numDims];
                                 H5.H5Tget_array_dims(atom_tid, dims);
-                                int numberOfCompounds = (int) dims[0];
-                                int compoundSize = member_size / numberOfCompounds;
+                                int numberOfCompounds = (int) dims[0] * (int) lsize[0];
+                                int compoundSize = (member_size * (int) lsize[0]) / numberOfCompounds;
                                 
                                 Object current_data = new Object[numberOfCompounds];
                                 

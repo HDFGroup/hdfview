@@ -258,11 +258,16 @@ public class H5Datatype extends Datatype {
 
         if ((inValues == null) || ((inSize = Array.getLength(inValues)) <= 0)
                 || ((outNames != null) && (inSize != Array.getLength(outNames)))) {
+            log.debug("convertEnumValueToName() failure: in/out values null or inSize not equal to outNames length");
+            log.debug("convertEnumValueToName(): inValues={} inSize={} outNames length={}", inValues, inSize, outNames.length);
+            log.trace("convertEnumValueToName finish");
             return null;
         }
 
         int nMembers = H5.H5Tget_nmembers(tid);
         if (nMembers <= 0) {
+            log.debug("convertEnumValueToName() failure: no members");
+            log.trace("convertEnumValueToName finish");
             return null;
         }
 
