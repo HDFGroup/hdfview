@@ -446,6 +446,8 @@ public class DefaultTableView implements TableView {
         
         cellValueComposite.setWeights(new int[] {1, 5});
         
+        shell.setMenuBar(menuBar = createMenuBar());
+        
         // Create the NatTable
         if (dataset instanceof CompoundDS) {
             log.trace("createTable((CompoundDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
@@ -533,7 +535,6 @@ public class DefaultTableView implements TableView {
         sb.append(" ] ");
         log.trace("DefaultTableView: subset={}", sb.toString());
 
-        shell.setMenuBar(menuBar = createMenuBar());
         viewer.showStatus(sb.toString());
 
         log.trace("DefaultTableView: finish");
@@ -1283,9 +1284,10 @@ public class DefaultTableView implements TableView {
             }
         });
 
+        int type = dataset.getDatatype().getDatatypeClass();
         boolean isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
 
-        if ((dataset instanceof ScalarDS) && isInt) {
+        if ((dataset instanceof ScalarDS) && (isInt || type == Datatype.CLASS_BITFIELD || type == Datatype.CLASS_OPAQUE)) {
             checkHex = new MenuItem(menu, SWT.CHECK);
             checkHex.setText("Show Hexadecimal");
             checkHex.addSelectionListener(new SelectionAdapter() {
