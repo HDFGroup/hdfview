@@ -4216,12 +4216,25 @@ public class DefaultTableView implements TableView {
 
                         // This column's name is whatever follows the last nesting character '->'
                         int nestingPosition = columnNames[j].lastIndexOf("->");
-                        if (nestingPosition != -1) {
+                        if (nestingPosition >= 0) {
                             columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
                         }
                         else {
                             columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
                         }
+                    }
+                }
+            }
+            else {
+                columnLabels = subColumnNames.clone();
+                for (int j = 0; j < columnLabels.length; j++) {
+                    // This column's name is whatever follows the last nesting character '->'
+                    int nestingPosition = columnNames[j].lastIndexOf("->");
+                    if (nestingPosition >= 0) {
+                        columnLabels[j] = " \n " + columnNames[j].substring(nestingPosition + 2);
+                    }
+                    else {
+                        columnLabels[j] = " \n " + columnNames[j];
                     }
                 }
             }
@@ -4276,9 +4289,16 @@ public class DefaultTableView implements TableView {
                     String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
                     int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
 
-                    if(groupTitleStartPosition >= 0) {
+                    if (groupTitleStartPosition == 0) {
+                        /* Singly nested member */
                         columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
                                 allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) +
+                                "{" + columnGroupName + "}", i);
+                    }
+                    else if (groupTitleStartPosition > 0) {
+                        /* Member nested at second level or beyond, skip past leading '->' */
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup("" +
+                                allColumnNames[i].substring(groupTitleStartPosition + 2, nestingPosition) +
                                 "{" + columnGroupName + "}", i);
                     }
                     else {
