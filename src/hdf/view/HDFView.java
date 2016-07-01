@@ -1221,7 +1221,7 @@ public class HDFView implements ViewManager {
     }
 
     public void showMetaData(HObject obj) {
-        if (obj == null || currentFile == null) return;
+        if (obj == null) return;
 
         log.trace("showMetaData: start");
 
