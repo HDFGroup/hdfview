@@ -623,7 +623,7 @@ public class H5CompoundDS extends CompoundDS {
                             nullValues[j] = errorStr;
                         }
                         list.add(nullValues);
-                        
+
                         log.trace("read(): {} Member[{}] of class {} is unsupported.", member_name, i, member_class);
                         continue;
                     }
@@ -632,7 +632,7 @@ public class H5CompoundDS extends CompoundDS {
                         try {
                             tmptid = H5.H5Tget_super(atom_tid);
                             member_base_class = H5.H5Tget_class(tmptid);
-                            
+
                             if (member_base_class == HDF5Constants.H5T_COMPOUND) {
                                 try {
                                     member_data = H5Datatype.allocateArray(tmptid, member_size * (int) lsize[0]);
@@ -646,7 +646,7 @@ public class H5CompoundDS extends CompoundDS {
                                     member_data = null;
                                 }
                             }
-                            
+
                             log.trace("H5CompoundDS read: {} Member[{}] is class {} of size={}", member_name, i, member_base_class, member_size);
                         }
                         catch (Exception ex) {
@@ -700,7 +700,7 @@ public class H5CompoundDS extends CompoundDS {
                             isVL = false;
                         }
                         try {
-                            log.trace("H5CompoundDS read: H5Dread did={} spaceIDs[0]={} spaceIDs[1]={}", did, spaceIDs[0], spaceIDs[1]);
+                            log.trace("H5CompoundDS read: H5Dread({}) did={} spaceIDs[0]={} spaceIDs[1]={}", comp_tid, did, spaceIDs[0], spaceIDs[1]);
                             if (isVL) {
                                 H5.H5Dread_VLStrings(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
                                         (Object[]) member_data);
@@ -712,6 +712,7 @@ public class H5CompoundDS extends CompoundDS {
                             else {
                                 H5.H5Dread(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, member_data);
                             }
+                            log.trace("member_data={},{},{},{},{},{}...",Array.get(member_data, 0),Array.get(member_data, 1),Array.get(member_data, 2),Array.get(member_data, 3),Array.get(member_data, 4),Array.get(member_data, 5));
                         }
                         catch (HDF5DataFiltersException exfltr) {
                             log.debug("H5CompoundDS read: {} Member[{}] read failure:", member_name, i, exfltr);
@@ -769,33 +770,33 @@ public class H5CompoundDS extends CompoundDS {
                                 // Since compounds are read into memory as a byte array, discover each member
                                 // type and size and convert the byte array to the correct type before adding
                                 // it to the list
-                                
+
                                 int numDims = H5.H5Tget_array_ndims(atom_tid);
                                 long[] dims = new long[numDims];
                                 H5.H5Tget_array_dims(atom_tid, dims);
                                 int numberOfCompounds = (int) dims[0] * (int) lsize[0];
                                 int compoundSize = (member_size * (int) lsize[0]) / numberOfCompounds;
-                                
+
                                 Object current_data = new Object[numberOfCompounds];
-                                
+
                                 long base_tid = -1;
                                 long memberOffsets[] = null;
                                 long memberLengths[] = null;
                                 long memberTypes[] = null;
                                 int numberOfMembers;
-                                
+
                                 try {
                                     base_tid = H5.H5Tget_super(atom_tid);
                                     numberOfMembers = H5.H5Tget_nmembers(base_tid);
                                     memberOffsets = new long[numberOfMembers];
                                     memberLengths = new long[numberOfMembers];
                                     memberTypes = new long[numberOfMembers];
-                                    
+
                                     for (int j = 0; j < numberOfMembers; j++) {
                                         memberOffsets[j] = H5.H5Tget_member_offset(base_tid, j);
                                         memberTypes[j] = H5.H5Tget_member_type(base_tid, j);
                                     }
-                                    
+
                                     for (int j = 0; j < numberOfMembers; j++) {
                                         if (j < numberOfMembers - 1) {
                                             memberLengths[j] = (memberOffsets[j + 1] - memberOffsets[j]);
@@ -804,16 +805,16 @@ public class H5CompoundDS extends CompoundDS {
                                             memberLengths[j] = (compoundSize - memberOffsets[j]);
                                         }
                                     }
-                                    
+
                                     for (int j = 0; j < numberOfCompounds; j++) {
                                         Object field_data = new Object[numberOfMembers];
-                                        
+
                                         for (int k = 0; k < numberOfMembers; k++) {
                                             Object converted = convertCompoundByteMember((byte[]) member_data, memberTypes[k], memberOffsets[k] + (compoundSize * j), memberLengths[k]);
-                                            
+
                                             ((Object[]) field_data)[k] = Array.get(converted, 0);
                                         }
-                                        
+
                                         ((Object[]) current_data)[j] = field_data;
                                     }
                                 }
@@ -837,7 +838,7 @@ public class H5CompoundDS extends CompoundDS {
                                         log.debug("finally close[{}]:", i, ex);
                                     }
                                 }
-                                
+
                                 list.add(current_data);
                                 continue;
                             }
@@ -1985,6 +1986,7 @@ public class H5CompoundDS extends CompoundDS {
         long baseType = -1;
         long tmp_tid1 = -1;
         long tmp_tid4 = -1;
+        log.trace("createCompoundFieldType start");
 
         try {
             int member_class = compInfo[0];
@@ -2027,6 +2029,7 @@ public class H5CompoundDS extends CompoundDS {
             }
 
             member_size = (int)H5.H5Tget_size(atom_tid);
+            log.trace("createCompoundFieldType member_size={}",member_size);
 
             // construct nested compound structure with a single field
             String theName = member_name;
@@ -2044,12 +2047,15 @@ public class H5CompoundDS extends CompoundDS {
                 log.debug("finally close:", ex4);
             }
             int sep = member_name.lastIndexOf(CompoundDS.separator);
+            log.trace("createCompoundFieldType sep={}",sep);
 
             while (sep > 0) {
                 theName = member_name.substring(sep + 1);
+                log.trace("createCompoundFieldType sep={} with name={}",sep,theName);
                 nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, member_size);
                 H5.H5Tinsert(nested_tid, theName, 0, tmp_tid1);
                 try {
+                    log.trace("createCompoundFieldType(sep) H5.H5Tclose:tmp_tid1={}",tmp_tid1);
                     H5.H5Tclose(tmp_tid1);
                 }
                 catch (Exception ex) {
@@ -2066,24 +2072,28 @@ public class H5CompoundDS extends CompoundDS {
         }
         finally {
             try {
+                log.trace("createCompoundFieldType finally H5.H5Tclose:tmp_tid1={}",tmp_tid1);
                 H5.H5Tclose(tmp_tid1);
             }
             catch (HDF5Exception ex3) {
                 log.debug("finally close:", ex3);
             }
             try {
+                log.trace("createCompoundFieldType finally H5.H5Tclose:tmp_tid4={}",tmp_tid4);
                 H5.H5Tclose(tmp_tid4);
             }
             catch (HDF5Exception ex3) {
                 log.debug("finally close:", ex3);
             }
             try {
+                log.trace("createCompoundFieldType finally H5.H5Tclose:baseType={}",baseType);
                 H5.H5Tclose(baseType);
             }
             catch (HDF5Exception ex4) {
                 log.debug("finally close:", ex4);
             }
             try {
+                log.trace("createCompoundFieldType finally H5.H5Tclose:arrayType={}",arrayType);
                 H5.H5Tclose(arrayType);
             }
             catch (HDF5Exception ex4) {
@@ -2091,14 +2101,15 @@ public class H5CompoundDS extends CompoundDS {
             }
         }
 
+        log.trace("createCompoundFieldType finish");
         return nested_tid;
     }
-    
+
     /**
      * Given an array of bytes representing a compound Datatype and a start
      * index and length, converts len number of bytes into the correct
      * Object type and returns it.
-     * 
+     *
      * @param data The byte array representing the data of the compound Datatype
      * @param data_type The type of data to convert the bytes to
      * @param start The start index of the bytes to get
@@ -2107,13 +2118,13 @@ public class H5CompoundDS extends CompoundDS {
      */
     private Object convertCompoundByteMember(byte[] data, long data_type, long start, long len) {
         Object currentData = null;
-        
+
         try {
             long typeClass = H5.H5Tget_class(data_type);
-            
+
             if (typeClass == HDF5Constants.H5T_INTEGER) {
                 long size = H5.H5Tget_size(data_type);
-                
+
                 currentData = HDFNativeData.byteToInt((int) start, (int) (len / size), data);
             }
             else if (typeClass == HDF5Constants.H5T_FLOAT) {
@@ -2123,7 +2134,7 @@ public class H5CompoundDS extends CompoundDS {
         catch (Exception ex) {
             log.debug("convertCompoundByteMember() conversion failure: ", ex);
         }
-        
+
         return currentData;
     }
 }

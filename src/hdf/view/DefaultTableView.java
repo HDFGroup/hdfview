@@ -279,7 +279,7 @@ public class DefaultTableView implements TableView {
      */
     public DefaultTableView(ViewManager theView, HashMap map) {
         log.trace("DefaultTableView start");
-        
+
         shell = new Shell(display, SWT.SHELL_TRIM);
 
         shell.setData(this);
@@ -311,13 +311,13 @@ public class DefaultTableView implements TableView {
                     dataValue = null;
                     table = null;
                 }
-                
+
                 if (curFont != null) curFont.dispose();
-                
+
                 viewer.removeDataView(DefaultTableView.this);
             }
         });
-        
+
         try {
             curFont = new Font(
                     display,
@@ -328,7 +328,7 @@ public class DefaultTableView implements TableView {
         catch (Exception ex) {
             curFont = null;
         }
-        
+
         viewer = theView;
 
         HObject hObject = null;
@@ -443,11 +443,11 @@ public class DefaultTableView implements TableView {
         cellValueField.setBackground(new Color(display, 255, 255, 240));
         cellValueField.setEnabled(false);
         cellValueField.setFont(curFont);
-        
+
         cellValueComposite.setWeights(new int[] {1, 5});
-        
+
         shell.setMenuBar(menuBar = createMenuBar());
-        
+
         // Create the NatTable
         if (dataset instanceof CompoundDS) {
             log.trace("createTable((CompoundDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
@@ -550,7 +550,7 @@ public class DefaultTableView implements TableView {
         shell.setSize(width, height);
 
         viewer.addDataView(this);
-        
+
         shell.open();
 
         while (!shell.isDisposed()) {
@@ -558,19 +558,19 @@ public class DefaultTableView implements TableView {
                 display.sleep();
         }
     }
-    
+
     // Implementing TableView
     @Override
     public NatTable getTable() {
         return table;
     }
-    
+
     // Implementing DataView
     @Override
     public HObject getDataObject() {
         return dataset;
     }
-    
+
     /**
      * Returns the selected data values.
      */
@@ -583,7 +583,7 @@ public class DefaultTableView implements TableView {
             return getSelectedScalarData();
         }
     }
-    
+
     @Override
     public int getSelectedRowCount() {
         return selectionLayer.getSelectedRowCount();
@@ -593,7 +593,7 @@ public class DefaultTableView implements TableView {
     public int getSelectedColumnCount() {
         return selectionLayer.getSelectedColumnPositions().length;
     }
-    
+
     /**
      * Creates a NatTable for a Scalar dataset.
      *
@@ -696,7 +696,7 @@ public class DefaultTableView implements TableView {
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
         dataLayer.setDefaultColumnWidth(80);
-        
+
         log.trace("createTable: rows={} : cols={}", bodyDataProvider.getRowCount(), bodyDataProvider.getColumnCount());
 
 
@@ -707,10 +707,10 @@ public class DefaultTableView implements TableView {
 
         // Create the Row Header layer
         rowHeaderDataProvider = new RowHeaderDataProvider(theDataset);
-        
+
         // Try to adapt row height to current font
         int defaultRowHeight = curFont == null ? 20 : (2 * curFont.getFontData()[0].getHeight());
-        
+
         DataLayer baseLayer = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
         RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);
 
@@ -737,7 +737,7 @@ public class DefaultTableView implements TableView {
 
         return natTable;
     }
-    
+
     /**
      * Creates a NatTable for a Compound dataset
      *
@@ -776,7 +776,7 @@ public class DefaultTableView implements TableView {
         // Create body layer
         final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
         final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
-        
+
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider(theDataset);
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
@@ -801,10 +801,10 @@ public class DefaultTableView implements TableView {
 
         // Create the Row Header layer
         rowHeaderDataProvider = new RowHeaderDataProvider(theDataset);
-        
+
         // Try to adapt row height to current font
         int defaultRowHeight = curFont == null ? 20 : (2 * curFont.getFontData()[0].getHeight());
-        
+
         DataLayer baseLayer = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
         RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);
 
@@ -831,7 +831,7 @@ public class DefaultTableView implements TableView {
 
         return natTable;
     }
-    
+
     /**
      * Creates the menubar for the NatTable.
      */
@@ -1572,7 +1572,7 @@ public class DefaultTableView implements TableView {
 
         return menu;
     }
-    
+
     // Flip to previous page of Table
     private void previousPage() {
         // Only valid operation if dataset has 3 or more dimensions
@@ -1682,7 +1682,7 @@ public class DefaultTableView implements TableView {
 
         table.doCommand(new VisualRefreshCommand());
     }
-    
+
     /**
      * Update dataset value in file. The changes will go to the file.
      */
@@ -1722,9 +1722,9 @@ public class DefaultTableView implements TableView {
      */
     private void updateValueInMemory(String cellValue, int row, int col) throws Exception {
         if (cellValue == null) return;
-        
+
         log.trace("DefaultTableView: updateValueInMemory()");
-        
+
         // No need to update if values are the same
         if (cellValue.equals((String) dataLayer.getDataValue(col, row).toString())) return;
 
@@ -1890,7 +1890,7 @@ public class DefaultTableView implements TableView {
 
         return idx;
     }
-    
+
     /**
      * Returns the selected data values of the ScalarDS
      */
@@ -1991,7 +1991,7 @@ public class DefaultTableView implements TableView {
             Tools.showError(shell, "No data is selected.", shell.getText());
             return null;
         }
-        
+
         Object colData = null;
         try {
             colData = ((List<?>) dataset.getData()).get(selectionLayer.getSelectedColumnPositions()[0]);
@@ -2473,7 +2473,7 @@ public class DefaultTableView implements TableView {
         if (!(dataset instanceof CompoundDS) || (cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
             return;
         }
-        
+
         log.trace("DefaultTableView: updateCompoundData");
 
         CompoundDS compDS = (CompoundDS) dataset;
@@ -3557,7 +3557,7 @@ public class DefaultTableView implements TableView {
 
         cv.open();
     }
-    
+
     // Allow editing under specific conditions
     private IEditableRule getScalarDSEditingRule(final ScalarDS theDataset) {
         return new EditableRule() {
@@ -3573,7 +3573,7 @@ public class DefaultTableView implements TableView {
             }
         };
     }
-    
+
     // Only Allow editing of CompoundDS if not in read-only mode
     private IEditableRule getCompoundDSEditingRule(final CompoundDS theDataset) {
         return new EditableRule() {
@@ -3583,26 +3583,26 @@ public class DefaultTableView implements TableView {
             }
         };
     }
-    
+
     /**
      * Provides the NatTable with data from a Scalar Dataset for each cell.
      */
     private class ScalarDSDataProvider implements IDataProvider {
-        
+
         private final StringBuffer stringBuffer;
-        
+
         private final Datatype     dtype;
         private final Datatype     btype;
-        
+
         private final long         typeSize;
-        
+
         private final long[]       dims;
-        
+
         private final boolean      isArray;
         private final boolean      isStr;
         private final boolean      isInt;
         private final boolean      isUINT64;
-        
+
         private Object             theValue;
 
         private final boolean      isNaturalOrder;
@@ -3612,22 +3612,22 @@ public class DefaultTableView implements TableView {
 
         public ScalarDSDataProvider(ScalarDS theDataset) {
             stringBuffer = new StringBuffer();
-            
+
             dtype = theDataset.getDatatype();
             btype = dtype.getBasetype();
-            
+
             dims = theDataset.getSelectedDims();
-            
+
             typeSize = dtype.getDatatypeSize();
-            
+
             isArray = (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY);
             isStr = (NT == 'L');
             isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
             isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
-            
+
             isNaturalOrder = (theDataset.getRank() == 1 || (theDataset.getSelectedIndex()[0] < theDataset
                     .getSelectedIndex()[1]));
-            
+
             if (theDataset.getRank() > 1) {
                 rowCount = theDataset.getHeight();
                 colCount = theDataset.getWidth();
@@ -3758,16 +3758,16 @@ public class DefaultTableView implements TableView {
             return (int) rowCount;
         }
     }
-    
+
     /**
      * Provides the NatTable with data from a Compound Dataset for each cell.
      */
     private class CompoundDSDataProvider implements IDataProvider {
-        
+
         private final StringBuffer      stringBuffer;
-        
+
         private final Datatype          types[];
-        
+
         private final int               orders[];
         private final int               nFields;
         private final int               nRows;
@@ -3776,9 +3776,9 @@ public class DefaultTableView implements TableView {
 
         public CompoundDSDataProvider(CompoundDS theDataset) {
             stringBuffer = new StringBuffer();
-            
+
             types = theDataset.getSelectedMemberTypes();
-            
+
             orders = theDataset.getSelectedMemberOrders();
             nFields = ((List<?>) dataValue).size();
             nRows = (int) theDataset.getHeight();
@@ -3822,7 +3822,7 @@ public class DefaultTableView implements TableView {
                 dtype = types[fieldIdx].getBasetype();
                 isString = (dtype.getDatatypeClass() == Datatype.CLASS_STRING);
                 log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
-                
+
                 if (dtype.getDatatypeClass() == Datatype.CLASS_VLEN) {
                     // Only support variable length strings
                     if (!(dtype.getDatatypeClass() == Datatype.CLASS_STRING)) {
@@ -3874,7 +3874,7 @@ public class DefaultTableView implements TableView {
 
                         for (int j = 0; j < numberOfMembers; j++) {
                             Object theValue = null;
-                            
+
                             try {
                                 theValue = Array.get(field_data, j);
                                 log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", j, theValue.toString());
@@ -3882,7 +3882,7 @@ public class DefaultTableView implements TableView {
                             catch (Exception ex) {
                                 theValue = "*unsupported*";
                             }
-                            
+
                             if (j > 0) stringBuffer.append(", ");
                             stringBuffer.append(theValue);
                         }
@@ -4021,19 +4021,19 @@ public class DefaultTableView implements TableView {
             return nRows;
         }
     }
-    
+
     /**
      * Custom Row Header data provider to set row indices based on Index Base
      * for both Scalar Datasets and Compound Datasets.
      */
     private class RowHeaderDataProvider implements IDataProvider {
-        
+
         private final int         rank;
         private final long[]      dims;
         private final long[]      startArray;
         private final long[]      strideArray;
         private final int[]       selectedIndex;
-        
+
         private final int         start;
         private final int         stride;
 
@@ -4052,7 +4052,7 @@ public class DefaultTableView implements TableView {
             else {
                 this.nrows = (int) dims[0];
             }
-            
+
             start = (int) startArray[selectedIndex[0]];
             stride = (int) strideArray[selectedIndex[0]];
         }
@@ -4077,125 +4077,125 @@ public class DefaultTableView implements TableView {
             return;
         }
     }
-    
+
     /**
      * Custom Column Header data provider to set column indices based on Index Base
      * for Scalar Datasets.
      */
     private class ScalarDSColumnHeaderDataProvider implements IDataProvider {
-        
+
         private final String    columnNames[];
-        
+
         private final int       rank;
-        
+
         private final long[]    startArray;
         private final long[]    strideArray;
         private final int[]     selectedIndex;
-        
+
         private final int       ncols;
-        
+
         public ScalarDSColumnHeaderDataProvider(ScalarDS theDataset) {
             rank = theDataset.getRank();
-            
+
             startArray = theDataset.getStartDims();
             strideArray = theDataset.getStride();
             selectedIndex = theDataset.getSelectedIndex();
-            
+
             if (rank > 1) {
                 ncols = (int) theDataset.getWidth();
-                
+
                 int start = (int) startArray[selectedIndex[1]];
                 int stride = (int) strideArray[selectedIndex[1]];
-                
+
                 columnNames = new String[ncols];
-                
+
                 for (int i = 0; i < ncols; i++) {
                     columnNames[i] = String.valueOf(start + indexBase + i * stride);
                 }
             }
             else {
                 ncols = 1;
-                
+
                 columnNames = new String[] { "  " };
             }
         }
-        
+
         @Override
         public int getColumnCount() {
             return ncols;
         }
-        
+
         @Override
         public int getRowCount() {
             return 1;
         }
-        
+
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
             return columnNames[columnIndex];
         }
-        
+
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
             return;
         }
     }
-    
+
     /**
      * Custom Column Header data provider to set column names based on
      * selected members for Compound Datasets.
      */
     private class CompoundDSColumnHeaderDataProvider implements IDataProvider {
-        
+
         private final String[]  allColumnNames;
         private String[]        columnLabels;
-        
+
         private int             ncols;
         private final int       numGroups;
         private final int       groupSize;
-        
+
         public CompoundDSColumnHeaderDataProvider(CompoundDS theDataset) {
             int datasetWidth = (int) theDataset.getWidth();
             Datatype[] types = theDataset.getSelectedMemberTypes();
             groupSize = theDataset.getSelectedMemberCount();
             numGroups = (datasetWidth * groupSize) / groupSize;
             ncols = groupSize * numGroups;
-            
+
             final String[] columnNames = new String[groupSize];
-            
+
             int idx = 0;
             String[] columnNamesAll = theDataset.getMemberNames();
             for (int i = 0; i < columnNamesAll.length; i++) {
                 if (theDataset.isMemberSelected(i)) {
                     if (types[i].getDatatypeClass() == Datatype.CLASS_ARRAY) {
                         Datatype baseType = types[i].getBasetype();
-                        
+
                         if (baseType.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
                             List<String> memberNames = baseType.getCompoundMemberNames();
-                            
-                            columnNames[idx] = columnNamesAll[i];
+
+                            columnNames[idx] = new String(columnNamesAll[i]);
                             columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
-                            
+
                             columnNames[idx] += "\n\n[ ";
-                            
+
                             for (int j = 0; j < memberNames.size(); j++) {
                                 columnNames[idx] += memberNames.get(j);
                                 if (j < memberNames.size() - 1) columnNames[idx] += ", ";
                             }
-                            
+
                             columnNames[idx] += " ]";
-                            
+
                             idx++;
                             continue;
                         }
                     }
-                    
-                    columnNames[idx] = columnNamesAll[i];
+
+                    columnNames[idx] = new String(columnNamesAll[i]);
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
                     idx++;
                 }
             }
-            
+
             String[] subColumnNames = columnNames;
             columnLabels = columnNames;
             if (datasetWidth > 1) {
@@ -4238,49 +4238,49 @@ public class DefaultTableView implements TableView {
                     }
                 }
             }
-            
+
             allColumnNames = subColumnNames;
         }
-        
+
         @Override
         public int getColumnCount() {
             return ncols;
         }
-        
+
         @Override
         public int getRowCount() {
             return 1;
         }
-        
+
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
             return columnLabels[columnIndex];
         }
-        
+
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
             return;
         }
     }
-    
+
     /**
      * Implementation of Column Grouping for Compound Datasets with nested members.
      */
     private class CompoundDSNestedColumnHeaderLayer extends ColumnGroupGroupHeaderLayer {
         public CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer, SelectionLayer selectionLayer, ColumnGroupModel columnGroupModel) {
             super(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
-            
+
             final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).allColumnNames;
             final int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
             final int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
-            
+
             // Set up first-level column grouping
             for (int i = 0; i < numGroups; i++) {
                 for (int j = 0; j < groupSize; j++) {
                     this.addColumnsIndexesToGroup("" + i, (i * groupSize) + j);
                 }
             }
-            
+
             // Set up any further-nested column groups
             for (int i = 0; i < allColumnNames.length; i++) {
                 int nestingPosition = allColumnNames[i].lastIndexOf("->");
@@ -4309,14 +4309,14 @@ public class DefaultTableView implements TableView {
             }
         }
     }
-    
+
     /**
      * An implementation of the table's Column Header which adapts to the current font.
      */
     private class ColumnHeader extends ColumnHeaderLayer {
         public ColumnHeader(IUniqueIndexLayer baseLayer, ILayer horizontalLayerDependency, SelectionLayer selectionLayer) {
             super(baseLayer, horizontalLayerDependency, selectionLayer);
-            
+
             this.addConfiguration(new DefaultColumnHeaderLayerConfiguration() {
                 @Override
                 public void addColumnHeaderStyleConfig() {
@@ -4331,14 +4331,14 @@ public class DefaultTableView implements TableView {
             });
         }
     }
-    
+
     /**
      * An implementation of the table's Row Header which adapts to the current font.
      */
     private class RowHeader extends RowHeaderLayer {
         public RowHeader(IUniqueIndexLayer baseLayer, ILayer verticalLayerDependency, SelectionLayer selectionLayer) {
             super(baseLayer, verticalLayerDependency, selectionLayer);
-            
+
             this.addConfiguration(new DefaultRowHeaderLayerConfiguration() {
                 @Override
                 public void addRowHeaderStyleConfig() {
@@ -4353,7 +4353,7 @@ public class DefaultTableView implements TableView {
             });
         }
     }
-    
+
     /**
      * An implementation of a GridLayer with support for column grouping and with
      * editing triggered by a double click instead of a single click.
@@ -4361,10 +4361,10 @@ public class DefaultTableView implements TableView {
     private class EditingGridLayer extends GridLayer {
         public EditingGridLayer(ILayer bodyLayer, ILayer columnHeaderLayer, ILayer rowHeaderLayer, ILayer cornerLayer) {
             super(bodyLayer, columnHeaderLayer, rowHeaderLayer, cornerLayer, false);
-            
+
             // Add default bindings for editing
             this.addConfiguration(new DefaultEditConfiguration());
-            
+
             // Change cell editing to be on double click rather than single click
             this.addConfiguration(new AbstractUiBindingConfiguration() {
                 @Override
@@ -4375,17 +4375,17 @@ public class DefaultTableView implements TableView {
             });
         }
     }
-    
+
     /**
      * Custom configuration for editing and rendering cells in the table.
      */
     private class CellConfiguration extends AbstractRegistryConfiguration {
         private final Dataset theDataset;
-        
+
         public CellConfiguration(Dataset theDataset) {
             this.theDataset = theDataset;
         }
-        
+
         @Override
         public void configureRegistry(IConfigRegistry configRegistry) {
             // Register cell editing rules with table
@@ -4400,14 +4400,14 @@ public class DefaultTableView implements TableView {
                         getCompoundDSEditingRule((CompoundDS) theDataset),
                         DisplayMode.EDIT);
             }
-            
+
             // Left-align cells and change font for rendering cell text
             Style cellStyle = new Style();
 
             cellStyle.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
             cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
                     Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-            
+
             if (curFont != null) {
                 cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
             }
@@ -4420,7 +4420,7 @@ public class DefaultTableView implements TableView {
                     cellStyle);
         }
     }
-    
+
     /**
      * Update cell value label and cell value field when a cell is selected
      */
@@ -4431,17 +4431,17 @@ public class DefaultTableView implements TableView {
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
                 String strVal = null;
-                
+
                 log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-                
+
                 String[] columnNames = ((ScalarDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNames;
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
-                
+
                 cellLabel.setText(String.valueOf(rowStart + indexBase
                         + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
                         + ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
-                
+
                 if (isRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
                     log.trace("NATTable CellSelected displayValues={}", displayValues);
@@ -4717,12 +4717,12 @@ public class DefaultTableView implements TableView {
                 if (strVal == null && val != null) strVal = val.toString();
 
                 log.trace("NATTable CellSelected finish");
-                
+
                 cellValueField.setText(strVal);
             }
         }
     }
-    
+
     /**
      * Update cell value label and cell value field when a cell is selected
      */
@@ -4732,29 +4732,29 @@ public class DefaultTableView implements TableView {
             if (e instanceof CellSelectionEvent) {
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-                
+
                 if (val == null) return;
-                
+
                 log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
-                
+
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
-                
+
                 int rowIndex = rowStart + indexBase + table.getRowIndexByPosition(event.getRowPosition()) * rowStride;
                 Object fieldName = columnHeaderDataProvider.getDataValue(table.getColumnIndexByPosition(event.getColumnPosition()), 0);
-                
+
                 String colIndex = "";
                 int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
-                
+
                 if (numGroups > 1) {
                     int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
                     colIndex = "[" + String.valueOf((table.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
                 }
-                
+
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
-                
+
                 cellValueField.setText(val.toString());
-                
+
                 log.trace("NATTable CellSelected finish");
             }
         }
@@ -4930,7 +4930,7 @@ public class DefaultTableView implements TableView {
             return plotType;
         }
     }
-    
+
     // Context-menu for dealing with region and object references
     private class RefContextMenu extends AbstractUiBindingConfiguration {
         private final Menu contextMenu;

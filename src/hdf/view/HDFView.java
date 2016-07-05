@@ -187,7 +187,7 @@ public class HDFView implements ViewManager {
      */
     public HDFView(String root) {
         log.debug("Root is {}", root);
-        
+
         if (display == null || display.isDisposed()) display = new Display();
 
         rootDir = root;
@@ -458,7 +458,7 @@ public class HDFView implements ViewManager {
                     }
                 }
                 catch (Exception ex) {}
-                
+
                 if (currentFont != null) currentFont.dispose();
             }
         });
@@ -1312,7 +1312,7 @@ public class HDFView implements ViewManager {
             label = new Label(generalInfoGroup, SWT.RIGHT);
             label.setFont(currentFont);
             label.setText(typeStr);
-            
+
             if (isH5) {
                 label = new Label(generalInfoGroup, SWT.LEFT);
                 label.setFont(currentFont);
@@ -1323,7 +1323,7 @@ public class HDFView implements ViewManager {
                 label.setFont(currentFont);
                 label.setText("Tag, Ref:        ");
             }
-            
+
             // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
             String oidStr = null;
             long[] OID = obj.getOID();
@@ -1706,11 +1706,11 @@ public class HDFView implements ViewManager {
                     int orders[] = compound.getMemberOrders();
 
                     for (int i = 0; i < n; i++) {
-                        if (names[i].contains(CompoundDS.separator)) {
-                            names[i] = names[i].replaceAll(CompoundDS.separator, "->");
-                        }
+                        rowData[i][0] = new String(names[i]);
 
-                        rowData[i][0] = names[i];
+                        if (rowData[i][0].contains(CompoundDS.separator)) {
+                            rowData[i][0] = rowData[i][0].replaceAll(CompoundDS.separator, "->");
+                        }
 
                         int mDims[] = compound.getMemberDims(i);
                         if (mDims == null) {
@@ -2056,7 +2056,7 @@ public class HDFView implements ViewManager {
         isTesting = testing;
         currentDir = rootDir;
     }
-    
+
     public boolean getTestState() {
         return isTesting;
     }
@@ -2124,7 +2124,7 @@ public class HDFView implements ViewManager {
 
         x = bounds.x;
         y = bounds.y;
-        
+
         for (int i = 0; i < sList.length; i++) {
             shell = sList[i];
             shell.setBounds(x, y, w, h);
@@ -2992,7 +2992,7 @@ public class HDFView implements ViewManager {
      */
     public static void main(String[] args) {
         if (display == null || display.isDisposed()) display = new Display();
-        
+
         String rootDir = System.getProperty("hdfview.workdir");
         log.trace("main: rootDir = {} ", rootDir);
         if(rootDir == null) rootDir = System.getProperty("user.dir");
