@@ -3923,14 +3923,20 @@ public class DefaultTableView implements TableView {
                 log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() isUINT64={} isInt={} CshowAsHex={} typeSize={}", isUINT64, isInt, CshowAsHex, typeSize);
 
                 if (isEnum) {
-                    String[] outValues = new String[selectionLayer.getPreferredRowCount() * orders[fieldIdx]];
+                    String[] outValues;
+                    
+                    if (!dataset.isEnumConverted()) {
+                        outValues = new String[selectionLayer.getPreferredRowCount() * orders[fieldIdx]];
 
-                    try {
-                        H5Datatype.convertEnumValueToName(dtype.toNative(), colValue, outValues);
-                    } catch (HDF5Exception ex) {
-                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): Could not convert enum values to names: ex");
-                        return stringBuffer;
+                        try {
+                            H5Datatype.convertEnumValueToName(dtype.toNative(), colValue, outValues);
+                        } catch (HDF5Exception ex) {
+                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): Could not convert enum values to names: ex");
+                            return stringBuffer;
+                        }
                     }
+                    else
+                        outValues = (String[]) colValue;
 
                     for (int i = rowIdx; i < (rowIdx + orders[fieldIdx]); i++) {
                         if (i > rowIdx) stringBuffer.append(", ");
