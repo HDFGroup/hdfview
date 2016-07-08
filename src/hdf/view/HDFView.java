@@ -2211,7 +2211,7 @@ public class HDFView implements ViewManager {
 
             if(file.isDirectory()) {
                 currentDir = filename;
-                openLocalFile(null, FileFormat.WRITE); // needs to be edited
+                openLocalFile(null, FileFormat.WRITE); //TODO: needs to be edited
             }
             else {
                 currentFile = filename;
@@ -2244,7 +2244,7 @@ public class HDFView implements ViewManager {
             if (!isTesting) {
                 log.trace("openLocalFile filename is null");
                 FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
-                fChooser.setFilterPath(null);
+                fChooser.setFilterPath(currentDir);
 
                 DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
                 fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});

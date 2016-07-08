@@ -653,6 +653,9 @@ public class H5CompoundDS extends CompoundDS {
                         try {
                             tmptid = H5.H5Tget_super(atom_tid);
                             member_base_class = H5.H5Tget_class(tmptid);
+                            
+                            isVL = isVL || H5.H5Tis_variable_str(tmptid);
+                            isVL = isVL || H5.H5Tdetect_class(tmptid, HDF5Constants.H5T_VLEN);
 
                             if (member_base_class == HDF5Constants.H5T_COMPOUND) {
                                 try {
@@ -776,9 +779,34 @@ public class H5CompoundDS extends CompoundDS {
                                 member_data = Dataset.convertFromUnsignedC(member_data, null);
                                 log.trace("read(!isVL): convertFromUnsignedC: {} Member[{}]", member_name, i);
                             }
-                            else if (member_class == HDF5Constants.H5T_ENUM && enumConverted) {
+                            else if ((member_class == HDF5Constants.H5T_ENUM || member_base_class == HDF5Constants.H5T_ENUM)
+                                    && enumConverted) {
                                 try {
-                                    String[] strs = H5Datatype.convertEnumValueToName(atom_tid, member_data, null);
+                                    String[] strs = null;
+                                    
+                                    if (member_class == HDF5Constants.H5T_ARRAY) {
+                                        long base_tid = -1;
+                                        
+                                        try {
+                                            base_tid = H5.H5Tget_super(atom_tid);
+                                            strs = H5Datatype.convertEnumValueToName(base_tid, member_data, null);
+                                        }
+                                        catch (Exception ex) {
+                                            log.debug("read(): convertEnumValueToName failure: ", ex);
+                                        }
+                                        finally {
+                                            try {
+                                                H5.H5Tclose(base_tid);
+                                            }
+                                            catch (Exception ex) {
+                                                log.debug("read(): H5Tclose(base_tid {}) failure: ", base_tid, ex);
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        strs = H5Datatype.convertEnumValueToName(atom_tid, member_data, null);
+                                    }
+
                                     if (strs != null) {
                                         member_data = strs;
                                         log.trace("read(!isVL): convertEnumValueToName: {} Member[{}]", member_name, i);
@@ -849,7 +877,8 @@ public class H5CompoundDS extends CompoundDS {
                                     for (int j = 0; j < memberTypes.length; j++) {
                                         try {
                                             H5.H5Tclose(memberTypes[j]);
-                                        } catch (Exception ex) {
+                                        }
+                                        catch (Exception ex) {
                                             log.debug("read(): Member[{}]: H5Tclose(memberTypes[{}] {}) failure: ", i, j, memberTypes[j], ex);
                                         }
                                     }
