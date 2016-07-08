@@ -240,7 +240,7 @@ public class H4SDS extends ScalarDS
 
         srcdid = open();
         if (srcdid < 0) {
-            log.trace("copy(): Source SDID < 0");
+            log.trace("copy(): Invalid source SDID");
             log.trace("copy(): finish");
             return null;
         }
@@ -273,7 +273,7 @@ public class H4SDS extends ScalarDS
             ((H4File)pgroup.getFileFormat()).getSDAccessID(),
             dname, tid, theRank, count);
         if (dstdid < 0) {
-            log.trace("copy(): Dest SDID < 0");
+            log.trace("copy(): Invalid dest SDID");
             log.trace("copy(): finish");
             return null;
         }
@@ -332,7 +332,7 @@ public class H4SDS extends ScalarDS
 
         long id = open();
         if (id < 0) {
-            log.trace("readBytes(): SDID < 0");
+            log.trace("readBytes(): Invalid SDID");
             log.trace("readBytes(): finish");
             return null;
         }
@@ -384,7 +384,7 @@ public class H4SDS extends ScalarDS
 
         long id = open();
         if (id < 0) {
-            log.trace("read(): SDID < 0");
+            log.trace("read(): Invalid SDID");
             log.trace("read(): finish");
             return null;
         }
@@ -460,7 +460,7 @@ public class H4SDS extends ScalarDS
 
         long id = open();
         if (id < 0) {
-            log.trace("write(): SDID < 0");
+            log.trace("write(): Invalid SDID");
             log.trace("write(): finish");
             return;
         }

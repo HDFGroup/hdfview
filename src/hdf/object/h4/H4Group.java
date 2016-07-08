@@ -126,7 +126,7 @@ public class H4Group extends Group
             long vgid = open();
             log.trace("getMetadata(): open: id={}", vgid);
             if (vgid < 0) {
-                log.trace("getMetadata(): VG id < 0");
+                log.trace("getMetadata(): Invalid VG Id");
                 log.trace("getMetadata(): finish");
                 return attributeList;
             }
@@ -321,14 +321,14 @@ public class H4Group extends Group
         }
         long fileid = file.open();
         if (fileid < 0) {
-            log.trace("create(): File ID < 0");
+            log.trace("create(): Invalid File ID");
             log.trace("create(): finish");
             return null;
         }
 
         long gid = HDFLibrary.Vattach(fileid, -1, "w");
         if (gid < 0) {
-            log.trace("create(): Group ID < 0");
+            log.trace("create(): Invalid Group ID");
             log.trace("create(): finish");
             return null;
         }

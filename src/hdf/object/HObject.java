@@ -18,9 +18,8 @@ import java.io.Serializable;
 
 /**
  * The HObject class is the root class of all the HDF data objects. Every data
- * class has HObject as a superclass. All objects (Groups and Datasets)
- * implement the methods of this class. The following is the inherited structure
- * of HDF Objects.
+ * class has HObject as a superclass. All objects implement the methods of this
+ * class. The following is the inherited structure of HDF Objects.
  *
  * <pre>
  *                                 HObject
@@ -50,14 +49,14 @@ import java.io.Serializable;
  * should check the OID of the data object to avoid duplicate copies of the same
  * object.</b>
  * <p>
- * HDF4 objects are uniquely identified by the OID of the (tag_id, ref_id) pair.
+ * HDF4 objects are uniquely identified by the OID (tag_id, ref_id) pair.
  * The ref_id is the object reference count. The tag_id is a pre-defined number
  * to identify the type of object. For example, DFTAG_RI is for raster image,
  * DFTAG_SD is for scientific dataset, and DFTAG_VG is for Vgroup.
  * <p>
- * HDF5 objects are uniquely identified by the OID or object reference. The OID
- * is usually obtained by H5Rcreate(). The following example shows how to
- * retrieve an object ID from a file.
+ * HDF5 objects are uniquely identified by the OID containing just the object
+ * reference. The OID is usually obtained by H5Rcreate(). The following example
+ * shows how to retrieve an object ID from a file:
  *
  * <pre>
  * // retrieve the object ID
@@ -72,6 +71,7 @@ import java.io.Serializable;
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
+ * @author Jordan T. Henderson (updated 7/6/2016)
  * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
  */
 public abstract class HObject implements Serializable, DataFormat {
@@ -106,7 +106,7 @@ public abstract class HObject implements Serializable, DataFormat {
 
     /**
      * The full path of the data object. The full path always starts with the
-     * root, a slash. The path cannot be changed. Also, a path must ended with a
+     * root, a slash. The path cannot be changed. Also, a path must be ended with a
      * slash. For example, /arrays/ints/
      */
     private String             path;
@@ -370,7 +370,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * Sets the path of the object.
      * <p>
      * setPath() is needed to change the path for an object when the name of a
-     * group conatining the object is changed by setName(). The path of the
+     * group containing the object is changed by setName(). The path of the
      * object in memory under this group should be updated to the new path to
      * the group. Unlike setName(), setPath() does not change anything in file.
      *
@@ -388,7 +388,7 @@ public abstract class HObject implements Serializable, DataFormat {
     }
 
     /**
-     * Opens an existing object such as dataset or group for access.
+     * Opens an existing object such as a dataset or group for access.
      *
      * The return value is an object identifier obtained by implementing classes
      * such as H5.H5Dopen(). This function is needed to allow other objects to
@@ -484,7 +484,7 @@ public abstract class HObject implements Serializable, DataFormat {
     /**
      * Returns a cloned copy of the object identifier.
      * <p>
-     * The object OID cannot be modified once it is created. getIOD() clones the
+     * The object OID cannot be modified once it is created. getOID() clones the
      * object OID to ensure the object OID cannot be modified outside of this
      * class.
      *

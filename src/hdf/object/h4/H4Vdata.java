@@ -197,7 +197,7 @@ public class H4Vdata extends CompoundDS
 
         long id = open();
         if (id < 0) {
-            log.trace("readBytes(): VData ID < 0");
+            log.trace("readBytes(): Invalid VData ID");
             log.trace("readBytes(): finish");
             return null;
         }
@@ -253,7 +253,7 @@ public class H4Vdata extends CompoundDS
 
         long id = open();
         if (id < 0) {
-            log.trace("read(): VData ID < 0");
+            log.trace("read(): Invalid VData ID");
             log.trace("read(): finish");
             return null;
         }
@@ -412,7 +412,7 @@ public class H4Vdata extends CompoundDS
         long id = open();
 
         if (id < 0) {
-            log.trace("getMetadata(): VData ID < 0");
+            log.trace("getMetadata(): Invalid VData ID");
             log.trace("getMetadata(): finish");
             return attributeList;
         }
@@ -593,7 +593,7 @@ public class H4Vdata extends CompoundDS
 
         long id = open();
         if (id < 0) {
-            log.trace("init(): VData ID < 0");
+            log.trace("init(): Invalid VData ID");
             log.trace("init(): finish");
             return;
         }

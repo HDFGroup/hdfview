@@ -21,10 +21,10 @@ import java.util.List;
  * for a data type.
  * <p>
  * A datatype has four basic characteristics: class, size, byte order and sign.
- * These charactertics are defeined in the
- * <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>.
+ * These characteristics are defined in the
+ * <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>.
  * <p>
- * These charactertics apply to all the sub-classes. The sub-classes may have
+ * These characteristics apply to all the sub-classes. The sub-classes may have
  * different ways to describe a datatype. We here define the <strong> native
  * datatype</strong> to the datatype used by the sub-class. For example,
  * H5Datatype uses a datatype identifier (hid_t) to specify a datatype.
@@ -32,18 +32,16 @@ import java.util.List;
  * here is different from the "native" definition in the HDF5 library.
  * <p>
  * Two functions, toNative() and fromNative(), are defined to convert the
- * general charactertics to/form the native datatype. Sub-classes must implement
+ * general characteristics to/from the native datatype. Sub-classes must implement
  * these functions so that the conversion will be done correctly.
- * The values of the CLASS member are not identical to HDF5 values for a datatype class
+ * The values of the CLASS member are not identical to HDF5 values for a datatype class.
  * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
+ * @author Jordan T. Henderson (updated 7/6/2016)
  */
 public abstract class Datatype extends HObject {
-    /**
-     *
-     */
     private static final long serialVersionUID = -581324710549963177L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
@@ -54,103 +52,102 @@ public abstract class Datatype extends HObject {
     public static final int NATIVE = -1;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_NO_CLASS = -1;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_INTEGER = 0;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_FLOAT = 1;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_CHAR = 2;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_STRING = 3;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_BITFIELD = 4;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_OPAQUE = 5;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_COMPOUND = 6;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_REFERENCE = 7;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_ENUM = 8;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_VLEN = 9;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_ARRAY = 10;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int CLASS_TIME = 11;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_LE = 0;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_BE = 1;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_VAX = 2;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int ORDER_NONE = 3;
 
-    // sign
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int SIGN_NONE = 0;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int SIGN_2 = 1;
 
     /**
-     * See <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+     * See <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
     public static final int NSGN = 2;
 
@@ -206,8 +203,8 @@ public abstract class Datatype extends HObject {
      */
     protected Datatype baseType;
 
-    /*
-     * The dimension of the ARRAY element. For ARRAY datatype only
+    /**
+     * The dimensions of the ARRAY element of an ARRAY datatype.
      */
     protected long[] dims;
 
@@ -399,12 +396,12 @@ public abstract class Datatype extends HObject {
     }
 
     /**
-     * Returns the datatype of array element for ARRAY datatype.
+     * Returns the datatype of array elements for an ARRAY datatype.
      * <p>
-     * For example, a dataset set of ARRAY of integer, The datatype of the
+     * For example, in a dataset of type ARRAY of integer, the datatype of the
      * dataset is ARRAY. The datatype of the base type is integer.
      *
-     * @return the the datatype of array element for ARRAY datatype.
+     * @return the datatype of array elements for an ARRAY datatype.
      */
     public Datatype getBasetype() {
         return baseType;
@@ -493,7 +490,7 @@ public abstract class Datatype extends HObject {
 
     /**
      * Set datatype characteristics (class, size, byte order and sign) from a
-     * given datatye identifier.
+     * given datatype identifier.
      * <p>
      * Sub-classes must implement it so that this datatype will be converted
      * accordingly.
@@ -520,6 +517,8 @@ public abstract class Datatype extends HObject {
      * @return a short text description of this datatype
      */
     public String getDatatypeDescription() {
+        log.trace("getDatatypeDescription(): start");
+        
         String description = "Unknown";
 
         switch (datatypeClass) {
@@ -563,6 +562,7 @@ public abstract class Datatype extends HObject {
         }
 
         log.trace("description={}", description);
+        log.trace("getDatatypeDescription(): finish");
         return description;
     }
 
@@ -575,7 +575,7 @@ public abstract class Datatype extends HObject {
     public abstract boolean isUnsigned();
 
     /**
-     * Opens access to this named datatype. Sub-clases must replace this default
+     * Opens access to this named datatype. Sub-classes must replace this default
      * implementation. For example, in H5Datatype, open() function
      * H5.H5Topen(loc_id, name) to get the datatype identifier.
      *
@@ -590,7 +590,7 @@ public abstract class Datatype extends HObject {
     /**
      * Closes a datatype identifier.
      * <p>
-     * Sub-clases must replace this default implementation.
+     * Sub-classes must replace this default implementation.
      *
      * @param id
      *            the datatype identifier to close.

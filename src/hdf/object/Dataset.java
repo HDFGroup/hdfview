@@ -19,23 +19,25 @@ import java.util.Vector;
 
 /**
  * The abstract class provides general APIs to create and manipulate dataset
- * objects, and retrieve dataset properties datatype and dimension sizes.
+ * objects, and retrieve dataset properties, datatype and dimension sizes.
  * <p>
  * This class provides two convenient functions, read()/write(), to read/write
  * data values. Reading/writing data may take many library calls if we use the
  * library APIs directly. The read() and write functions hide all the details of
  * these calls from users.
+ * <p>
+ * For more details on dataset,
+ * see <b> <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
+ * <p>
  *
  * @see hdf.object.ScalarDS
  * @see hdf.object.CompoundDS
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
+ * @author Jordan T. Henderson (updated 7/6/2016)
  */
 public abstract class Dataset extends HObject {
-    /**
-     *
-     */
     private static final long serialVersionUID    = -3360885430038261178L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
@@ -64,11 +66,11 @@ public abstract class Dataset extends HObject {
      * Array that contains the number of data points selected (for read/write)
      * in each dimension.
      * <p>
-     * The select size must be less than or equal to the current dimension size.
+     * The selected size must be less than or equal to the current dimension size.
      * A subset of a rectangle selection is defined by the starting position and
      * selected sizes.
      * <p>
-     * For example, a 4 X 5 dataset
+     * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
      *     0,  1,  2,  3,  4
@@ -78,10 +80,10 @@ public abstract class Dataset extends HObject {
      * long[] dims = {4, 5};
      * long[] startDims = {1, 2};
      * long[] selectedDims = {3, 3};
-     * then the following subset is selected by the startDims and selectedDims above
+     * then the following subset is selected by the startDims and selectedDims above:
      *     12, 13, 14
      *     22, 23, 24
-     * 32, 33, 34
+     *     32, 33, 34
      * </pre>
      */
     protected long[]          selectedDims;
@@ -96,7 +98,7 @@ public abstract class Dataset extends HObject {
     /**
      * Array that contains the indices of the dimensions selected for display.
      * <p>
-     * <B>selectedIndex[] is provided for two purpose:</B>
+     * <B>selectedIndex[] is provided for two purposes:</B>
      * <OL>
      * <LI>
      * selectedIndex[] is used to indicate the order of dimensions for display,
@@ -109,7 +111,7 @@ public abstract class Dataset extends HObject {
      * datasets with three or more dimensions. We assume that applications such
      * as HDFView can only display data up to three dimensions (a 2D
      * spreadsheet/image with a third dimension that the 2D spreadsheet/image is
-     * cut from). For dataset with more than three dimensions, we need
+     * cut from). For datasets with more than three dimensions, we need
      * selectedIndex[] to store which three dimensions are chosen for display.
      * For example, for a four dimension dataset, if selectedIndex[] = {1, 2, 3},
      * then dim[1] is selected as row index, dim[2] is selected as column index
@@ -231,8 +233,9 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Clears memory held by the dataset, such as data buffer.
+     * Clears memory held by the dataset, such as the data buffer.
      */
+    @SuppressWarnings("rawtypes")
     public void clear() {
         if (data != null) {
             if (data instanceof Vector) {
@@ -249,17 +252,17 @@ public abstract class Dataset extends HObject {
      * Retrieves datatype and dataspace information from file and sets the
      * dataset in memory.
      * <p>
-     * The init() is designed to support lazy operation in dataset object. When
+     * The init() is designed to support lazy operation in a dataset object. When
      * a data object is retrieved from file, the datatype, dataspace and raw
      * data are not loaded into memory. When it is asked to read the raw data
      * from file, init() is first called to get the datatype and dataspace
      * information, then load the raw data from file.
      * <p>
-     * init() is also used to reset selection of a dataset (start, stride and
+     * init() is also used to reset the selection of a dataset (start, stride and
      * count) to the default, which is the entire dataset for 1D or 2D datasets.
-     * In the following example, init() at step 1) retrieve datatype and
-     * dataspace information from file. getData() at step 3) read only one data
-     * point. init() at step 4) reset the selection to the whole dataset.
+     * In the following example, init() at step 1) retrieves datatype and
+     * dataspace information from file. getData() at step 3) reads only one data
+     * point. init() at step 4) resets the selection to the whole dataset.
      * getData() at step 4) reads the values of whole dataset into memory.
      *
      * <pre>
@@ -281,7 +284,7 @@ public abstract class Dataset extends HObject {
      * // 3) read one data point
      * data = dset.getData();
      *
-     * // 4) reset to select the whole dataset
+     * // 4) reset selection to the whole dataset
      * dset.init();
      *
      * // 5) clean the memory data buffer
@@ -334,11 +337,11 @@ public abstract class Dataset extends HObject {
      * The SelectedDims is the number of data points of the selected subset.
      * Applications can use this array to change the size of selected subset.
      *
-     * The select size must be less than or equal to the current dimension size.
+     * The selected size must be less than or equal to the current dimension size.
      * Combined with the starting position, selected sizes and stride, the
      * subset of a rectangle selection is fully defined.
      * <p>
-     * For example, a 4 X 5 dataset
+     * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
      *     0,  1,  2,  3,  4
@@ -370,7 +373,7 @@ public abstract class Dataset extends HObject {
      * selection. Combined with the selected dimensions, selected sizes and
      * stride, the subset of a rectangle selection is fully defined.
      * <p>
-     * For example, a 4 X 5 dataset
+     * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
      *     0,  1,  2,  3,  4
@@ -404,7 +407,7 @@ public abstract class Dataset extends HObject {
      * Combined with the starting position and selected sizes, the subset of a
      * rectangle selection is defined.
      * <p>
-     * For example, a 4 X 5 dataset
+     * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
      *     0,  1,  2,  3,  4
@@ -445,15 +448,15 @@ public abstract class Dataset extends HObject {
      * <p>
      * In a string dataset, the raw data from file is stored in a byte array. By
      * default, this byte array is converted to an array of strings. For a large
-     * dataset (e.g. more than one million strings), the converson takes a long
-     * time and requires a lot of memory space to store the strings. At some
+     * dataset (e.g. more than one million strings), the conversion takes a long
+     * time and requires a lot of memory space to store the strings. In some
      * applications, such a conversion can be delayed. For example, A GUI
-     * application may convert only part of the strings that are visible to the
+     * application may convert only the part of the strings that is visible to the
      * users, not the entire data array.
      * <p>
      * setConvertByteToString(boolean b) allows users to set the flag so that
      * applications can choose to perform the byte-to-string conversion or not.
-     * If the flag is set to false, the getData() returns a array of byte
+     * If the flag is set to false, the getData() returns an array of byte
      * instead of an array of strings.
      *
      * @param b
@@ -466,7 +469,7 @@ public abstract class Dataset extends HObject {
 
     /**
      * Returns the flag that indicates if a byte array is converted to a string
-     * array..
+     * array.
      *
      * @return true if byte array is converted to string; otherwise, returns
      *         false if there is no conversion.
@@ -483,17 +486,17 @@ public abstract class Dataset extends HObject {
      * memory buffer in the dataset object, one must call getData().
      * <p>
      * By default, the whole dataset is read into memory. Users can also select
-     * subset to read. Subsetting is done in an implicit way.
+     * a subset to read. Subsetting is done in an implicit way.
      * <p>
      * <b>How to Select a Subset</b>
      * <p>
      * A selection is specified by three arrays: start, stride and count.
      * <ol>
      * <li>start: offset of a selection
-     * <li>stride: determining how many elements to move in each dimension
+     * <li>stride: determines how many elements to move in each dimension
      * <li>count: number of elements to select in each dimension
      * </ol>
-     * getStartDims(), getStartDims() and getSelectedDims() returns the start,
+     * getStartDims(), getStride() and getSelectedDims() returns the start,
      * stride and count arrays respectively. Applications can make a selection
      * by changing the values of the arrays.
      * <p>
@@ -503,15 +506,14 @@ public abstract class Dataset extends HObject {
      * We want to select every other data point in dims[1] and dims[2]
      *
      * <pre>
-     * int rank = dataset.getRank(); // number of dimension of the dataset
+     * int rank = dataset.getRank(); // number of dimensions of the dataset
      * long[] dims = dataset.getDims(); // the dimension sizes of the dataset
      * long[] selected = dataset.getSelectedDims(); // the selected size of the dataset
-     * long[] start = dataset.getStartDims(); // the off set of the selection
+     * long[] start = dataset.getStartDims(); // the offset of the selection
      * long[] stride = dataset.getStride(); // the stride of the dataset
-     * int[] selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for
-     *                                                   // display
+     * int[] selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for display
      *
-     * // select dim1 and dim2 as 2D data for display,and slice through dim0
+     * // select dim1 and dim2 as 2D data for display, and slice through dim0
      * selectedIndex[0] = 1;
      * selectedIndex[1] = 2;
      * selectedIndex[1] = 0;
@@ -523,7 +525,7 @@ public abstract class Dataset extends HObject {
      *     stride[i] = 1;
      * }
      *
-     * // set stride to 2 on dim1 and dim2 so that every other data points are
+     * // set stride to 2 on dim1 and dim2 so that every other data point is
      * // selected.
      * stride[1] = 2;
      * stride[2] = 2;
@@ -538,7 +540,7 @@ public abstract class Dataset extends HObject {
      * // in the dataset object.
      * </pre>
      * <p>
-     * For ScalarDS, the memory data buffer is an one-dimensional array of byte,
+     * For ScalarDS, the memory data buffer is a one-dimensional array of byte,
      * short, int, float, double or String type based on the datatype of the
      * dataset.
      * <p>
@@ -573,8 +575,8 @@ public abstract class Dataset extends HObject {
      * Reads the raw data of the dataset from file to a byte array.
      * <p>
      * readBytes() reads raw data to an array of bytes instead of array of its
-     * datatype. For example, for an one-dimension 32-bit integer dataset of
-     * size 5, the readBytes() returns of a byte array of size 20 instead of an
+     * datatype. For example, for a one-dimension 32-bit integer dataset of
+     * size 5, readBytes() returns a byte array of size 20 instead of an
      * int array of 5.
      * <p>
      * readBytes() can be used to copy data from one dataset to another
@@ -648,17 +650,17 @@ public abstract class Dataset extends HObject {
      * buffer.
      * <p>
      * By default, the whole dataset is read into memory. Users can also select
-     * subset to read. Subsetting is done in an implicit way.
+     * a subset to read. Subsetting is done in an implicit way.
      * <p>
      * <b>How to Select a Subset</b>
      * <p>
      * A selection is specified by three arrays: start, stride and count.
      * <ol>
      * <li>start: offset of a selection
-     * <li>stride: determining how many elements to move in each dimension
+     * <li>stride: determines how many elements to move in each dimension
      * <li>count: number of elements to select in each dimension
      * </ol>
-     * getStartDims(), getStartDims() and getSelectedDims() returns the start,
+     * getStartDims(), getStride() and getSelectedDims() returns the start,
      * stride and count arrays respectively. Applications can make a selection
      * by changing the values of the arrays.
      * <p>
@@ -668,13 +670,12 @@ public abstract class Dataset extends HObject {
      * We want to select every other data point in dims[1] and dims[2]
      *
      * <pre>
-     * int rank = dataset.getRank(); // number of dimension of the dataset
+     * int rank = dataset.getRank(); // number of dimensions of the dataset
      * long[] dims = dataset.getDims(); // the dimension sizes of the dataset
      * long[] selected = dataset.getSelectedDims(); // the selected size of the dataet
-     * long[] start = dataset.getStartDims(); // the off set of the selection
+     * long[] start = dataset.getStartDims(); // the offset of the selection
      * long[] stride = dataset.getStride(); // the stride of the dataset
-     * int[] selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for
-     *                                                   // display
+     * int[] selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for display
      *
      * // select dim1 and dim2 as 2D data for display,and slice through dim0
      * selectedIndex[0] = 1;
@@ -688,7 +689,7 @@ public abstract class Dataset extends HObject {
      *     stride[i] = 1;
      * }
      *
-     * // set stride to 2 on dim1 and dim2 so that every other data points are
+     * // set stride to 2 on dim1 and dim2 so that every other data point is
      * // selected.
      * stride[1] = 2;
      * stride[2] = 2;
@@ -697,13 +698,13 @@ public abstract class Dataset extends HObject {
      * selected[1] = dims[1] / stride[1];
      * selected[2] = dims[1] / stride[2];
      *
-     * // when dataset.getData() is called, the slection above will be used since
+     * // when dataset.getData() is called, the selection above will be used since
      * // the dimension arrays are passed by reference. Changes of these arrays
      * // outside the dataset object directly change the values of these array
      * // in the dataset object.
      * </pre>
      * <p>
-     * For ScalarDS, the memory data buffer is an one-dimensional array of byte,
+     * For ScalarDS, the memory data buffer is a one-dimensional array of byte,
      * short, int, float, double or String type based on the datatype of the
      * dataset.
      * <p>
@@ -711,7 +712,7 @@ public abstract class Dataset extends HObject {
      * element of the list is a data array that corresponds to a compound field.
      * <p>
      * For example, if compound dataset "comp" has the following nested
-     * structure, and memeber datatypes
+     * structure, and member datatypes
      *
      * <pre>
      * comp --&gt; m01 (int)
@@ -751,7 +752,7 @@ public abstract class Dataset extends HObject {
      * @deprecated Not for public use in the future.
      *             <p>
      *             setData() is not safe to use because it changes memory buffer
-     *             of the dataset object. Dataset operation such as write/read
+     *             of the dataset object. Dataset operations such as write/read
      *             will fail if the buffer type or size is changed.
      *
      * @param d  the object data
@@ -762,16 +763,13 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Clears the data buffer in memory and to force the next read() to load
-     * data from file.
+     * Clears the current data buffer in memory and forces the next read() to load
+     * the data from file.
      * <p>
      * The function read() loads data from file into memory only if the data is
      * not read. If data is already in memory, read() just returns the memory
      * buffer. Sometimes we want to force read() to re-read data from file. For
      * example, when the selection is changed, we need to re-read the data.
-     *
-     * clearData() clears the current memory buffer and force the read() to load
-     * the data from file.
      *
      * @see #getData()
      * @see #read()
@@ -821,11 +819,11 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Returns the size of dimension of the horizontal axis.
+     * Returns the dimension size of the horizontal axis.
      *
      * <p>
      * This function is used by GUI applications such as HDFView. GUI
-     * applications display dataset a 2D Table or 2D Image. The display order is
+     * applications display a dataset in 2D Table or 2D Image. The display order is
      * specified by the index array of selectedIndex as follow:
      * <dl>
      * <dt>selectedIndex[0] -- height</dt>
@@ -868,25 +866,25 @@ public abstract class Dataset extends HObject {
      * Returns the indices of display order.
      * <p>
      *
-     * selectedIndex[] is provided for two purpose:
+     * selectedIndex[] is provided for two purposes:
      * <OL>
      * <LI>
      * selectedIndex[] is used to indicate the order of dimensions for display.
      * selectedIndex[0] is for the row, selectedIndex[1] is for the column and
      * selectedIndex[2] for the depth.
      * <p>
-     * For example, for a four dimesion dataset, if selectedIndex[] = {1, 2, 3},
+     * For example, for a four dimension dataset, if selectedIndex[] = {1, 2, 3},
      * then dim[1] is selected as row index, dim[2] is selected as column index
      * and dim[3] is selected as depth index.
      * <LI>
      * selectedIndex[] is also used to select dimensions for display for
      * datasets with three or more dimensions. We assume that applications such
-     * as HDFView can only display data values up to three dimension (2D
+     * as HDFView can only display data values up to three dimensions (2D
      * spreadsheet/image with a third dimension which the 2D spreadsheet/image
-     * is selected from). For dataset with more than three dimensions, we need
+     * is selected from). For datasets with more than three dimensions, we need
      * selectedIndex[] to tell applications which three dimensions are chosen
      * for display. <br>
-     * For example, for a four dimesion dataset, if selectedIndex[] = {1, 2, 3},
+     * For example, for a four dimension dataset, if selectedIndex[] = {1, 2, 3},
      * then dim[1] is selected as row index, dim[2] is selected as column index
      * and dim[3] is selected as depth index. dim[0] is not selected. Its
      * location is fixed at 0 by default.
@@ -998,8 +996,8 @@ public abstract class Dataset extends HObject {
      * </TR>
      * </TABLE>
      * <strong>NOTE: this conversion cannot deal with unsigned 64-bit integers.
-     * Therefore, the values of unsigned 64-bit dataset may be wrong in Java
-     * application</strong>.
+     * Therefore, the values of unsigned 64-bit datasets may be wrong in Java
+     * applications</strong>.
      * <p>
      * If memory data of unsigned integers is converted by
      * convertFromUnsignedC(), convertToUnsignedC() must be called to convert
@@ -1014,19 +1012,27 @@ public abstract class Dataset extends HObject {
      *
      * @return the upgraded 1D array of Java integers.
      */
+    @SuppressWarnings("rawtypes")
     public static Object convertFromUnsignedC(Object data_in, Object data_out) {
+        log.trace("convertFromUnsignedC(): start");
+        
         if (data_in == null) {
+            log.debug("convertFromUnsignedC(): data_in is null");
+            log.trace("convertFromUnsignedC(): finish");
             return null;
         }
 
         Class data_class = data_in.getClass();
         if (!data_class.isArray()) {
+            log.debug("convertFromUnsignedC(): data_in not an array");
+            log.trace("convertFromUnsignedC(): finish");
             return null;
         }
 
         if (data_out != null) {
             Class data_class_out = data_out.getClass();
             if (!data_class_out.isArray() || (Array.getLength(data_in) != Array.getLength(data_out))) {
+                log.debug("convertFromUnsignedC(): data_out not an array or does not match data_in size");
                 data_out = null;
             }
         }
@@ -1034,7 +1040,7 @@ public abstract class Dataset extends HObject {
         String cname = data_class.getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         int size = Array.getLength(data_in);
-        log.trace("convertFromUnsignedC: cname={} dname={} size={}", cname, dname, size);
+        log.trace("convertFromUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'B') {
             short[] sdata = null;
@@ -1086,7 +1092,7 @@ public abstract class Dataset extends HObject {
         }
         else {
             data_out = data_in;
-            log.debug("convertFromUnsignedC: Java does not support unsigned long");
+            log.debug("convertFromUnsignedC(): Java does not support unsigned long");
         }
 
         return data_out;
@@ -1107,7 +1113,7 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Converts the array of converted unsigned integer back to unsigned C-type
+     * Converts the array of converted unsigned integers back to unsigned C-type
      * integer data in memory.
      * <p>
      * If memory data of unsigned integers is converted by
@@ -1123,19 +1129,27 @@ public abstract class Dataset extends HObject {
      *
      * @return the converted data of unsigned C-type integer array.
      */
+    @SuppressWarnings("rawtypes")
     public static Object convertToUnsignedC(Object data_in, Object data_out) {
+        log.trace("convertToUnsignedC(): start");
+        
         if (data_in == null) {
+            log.debug("convertToUnsignedC(): data_in is null");
+            log.trace("convertToUnsignedC(): finish");
             return null;
         }
 
         Class data_class = data_in.getClass();
         if (!data_class.isArray()) {
+            log.debug("convertToUnsignedC(): data_in not an array");
+            log.trace("convertToUnsignedC(): finish");
             return null;
         }
 
         if (data_out != null) {
             Class data_class_out = data_out.getClass();
             if (!data_class_out.isArray() || (Array.getLength(data_in) != Array.getLength(data_out))) {
+                log.debug("convertToUnsignedC(): data_out not an array or does not match data_in size");
                 data_out = null;
             }
         }
@@ -1143,7 +1157,7 @@ public abstract class Dataset extends HObject {
         String cname = data_class.getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         int size = Array.getLength(data_in);
-        log.trace("convertToUnsignedC: cname={} dname={} size={}", cname, dname, size);
+        log.trace("convertToUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'S') {
             byte[] bdata = null;
@@ -1189,7 +1203,7 @@ public abstract class Dataset extends HObject {
         }
         else {
             data_out = data_in;
-            log.debug("convertToUnsignedC: Java does not support unsigned long");
+            log.debug("convertToUnsignedC(): Java does not support unsigned long");
         }
 
         return data_out;
@@ -1200,13 +1214,13 @@ public abstract class Dataset extends HObject {
      * dataset.
      * <p>
      * A C-string is an array of chars while an Java String is an object. When a
-     * string dataset is read into Java application, the data is stored in an
+     * string dataset is read into a Java application, the data is stored in an
      * array of Java bytes. byteToString() is used to convert the array of bytes
-     * into array of Java strings so that applications can display and modify
+     * into an array of Java strings so that applications can display and modify
      * the data content.
      * <p>
      * For example, the content of a two element C string dataset is {"ABC",
-     * "abc"}. Java applications will read the data into an byte array of {65,
+     * "abc"}. Java applications will read the data into a byte array of {65,
      * 66, 67, 97, 98, 99). byteToString(bytes, 3) returns an array of Java
      * String of strs[0]="ABC", and strs[1]="abc".
      * <p>
@@ -1224,12 +1238,16 @@ public abstract class Dataset extends HObject {
      * @return the array of Java String.
      */
     public static final String[] byteToString(byte[] bytes, int length) {
+        log.trace("byteToString(): start");
+        
         if (bytes == null) {
+            log.debug("byteToString(): input is null");
+            log.trace("byteToString(): finish");
             return null;
         }
 
         int n = bytes.length / length;
-        log.trace("byteToString: n={} from length of {}", n, length);
+        log.trace("byteToString(): n={} from length of {}", n, length);
         // String bigstr = new String(bytes);
         String[] strArray = new String[n];
         String str = null;
@@ -1258,6 +1276,7 @@ public abstract class Dataset extends HObject {
             // strArray[i] = str.trim();
         }
 
+        log.trace("byteToString(): finish");
         return strArray;
     }
 
@@ -1279,13 +1298,17 @@ public abstract class Dataset extends HObject {
      * @return the array of bytes.
      */
     public static final byte[] stringToByte(String[] strings, int length) {
+        log.trace("stringToByte(): start");
+        
         if (strings == null) {
+            log.debug("stringToByte(): input is null");
+            log.trace("stringToByte(): finish");
             return null;
         }
 
         int size = strings.length;
         byte[] bytes = new byte[size * length];
-        log.trace("stringToByte: size={} length={}", size, length);
+        log.trace("stringToByte(): size={} length={}", size, length);
         StringBuffer strBuff = new StringBuffer(length);
         for (int i = 0; i < size; i++) {
             // initialize the string with spaces
@@ -1301,6 +1324,8 @@ public abstract class Dataset extends HObject {
             strBuff.setLength(length);
             System.arraycopy(strBuff.toString().getBytes(), 0, bytes, length * i, length);
         }
+        
+        log.trace("stringToByte(): finish");
 
         return bytes;
     }
@@ -1348,7 +1373,7 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Get flag that indicate if enum data is converted to strings.
+     * Get flag that indicates if enum data is converted to strings.
      *
      * @return the enumConverted
      */
@@ -1357,7 +1382,7 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Set flag that indicate if enum data is converted to strings.
+     * Set flag that indicates if enum data is converted to strings.
      *
      * @param b
      *            the enumConverted to set
@@ -1376,6 +1401,7 @@ public abstract class Dataset extends HObject {
      *
      * @return the Class of originalBuf
      */
+    @SuppressWarnings("rawtypes")
     public final Class getOriginalClass() {
         return originalBuf.getClass();
     }
