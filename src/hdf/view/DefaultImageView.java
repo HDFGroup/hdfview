@@ -62,6 +62,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.PaintEvent;
 
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -1748,7 +1749,7 @@ public class DefaultImageView implements ImageView {
         }
 
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-        fChooser.setFilterPath(dataset.getFile());
+        fChooser.setFilterPath(dataset.getFileFormat().getParent());
         fChooser.setOverwrite(true);
 
         DefaultFileFilter filter = null;
@@ -1794,6 +1795,16 @@ public class DefaultImageView implements ImageView {
         BufferedImage bi = null;
         try {
             bi = Tools.toBufferedImage(image);
+
+            // Convert JPG and BMP images to TYPE_INT_RGB so ImageIO.write succeeds
+            if (bi.getType() == BufferedImage.TYPE_INT_ARGB &&
+                    (type.equals("JPEG") || type.equals("BMP"))) {
+                BufferedImage newImage = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics g = newImage.createGraphics();
+                g.drawImage(bi, 0, 0, Color.BLACK, null);
+                g.dispose();
+                bi = newImage;
+            }
         }
         catch (OutOfMemoryError err) {
             shell.getDisplay().beep();
