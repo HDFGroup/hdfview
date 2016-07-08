@@ -2375,7 +2375,7 @@ public class HDFView implements ViewManager {
         File tmpFile = new File(tmpDir);
         if (!tmpFile.canWrite()) tmpDir = System.getProperty("user.home");
 
-        localFile = tmpDir + localFile;
+        localFile = tmpDir + File.separator + localFile;
 
         tmpFile = new File(localFile);
         if (tmpFile.exists())
