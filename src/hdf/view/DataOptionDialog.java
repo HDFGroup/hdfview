@@ -1049,7 +1049,7 @@ public class DataOptionDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         int tsize = (int)dataset.getDatatype().getDatatypeSize();
-        bitmaskButtons = new Button[8 * tsize];
+        bitmaskButtons = (tsize >= 0) ? new Button[8 * tsize] : new Button[0];
 
         for (int i = 0; i < bitmaskButtons.length; i++) {
             bitmaskButtons[i] = new Button(buttonComposite, SWT.RADIO);
