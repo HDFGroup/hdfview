@@ -3689,7 +3689,13 @@ public class DefaultTableView implements TableView {
 
                 if (dataset.getRank() > 1) {
                     log.trace("ScalarDS:ScalarDSDataProvider:getValueAt rank={} isDataTransposed={} isNaturalOrder={}", dataset.getRank(), isDataTransposed, isNaturalOrder);
-                    if ((isDataTransposed && isNaturalOrder) || (!isDataTransposed && !isNaturalOrder))
+                    if (isDataTransposed && isNaturalOrder)
+                        index = columnIndex * rowCount + rowIndex;
+                    else if (!isDataTransposed && !isNaturalOrder)
+                        // Reshape Data
+                        index = rowIndex * colCount + columnIndex;
+                    else if (isDataTransposed && !isNaturalOrder)
+                        // Transpose Data
                         index = columnIndex * rowCount + rowIndex;
                     else
                         index = rowIndex * colCount + columnIndex;
