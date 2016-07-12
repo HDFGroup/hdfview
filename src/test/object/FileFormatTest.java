@@ -135,7 +135,7 @@ public class FileFormatTest {
     public void testGetNumberOfMembers() {
         log.debug("testGetNumberOfMembers");
         assertEquals(testFile.getNumberOfMembers(), 21);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -157,7 +157,7 @@ public class FileFormatTest {
         log.debug("testGetFileFormat");
         FileFormat f = FileFormat.getFileFormat("HDF5");
         assertNotNull(f);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -183,7 +183,7 @@ public class FileFormatTest {
         while (e.hasMoreElements())
             assertNotNull(FileFormat.getFileFormat((String) e.nextElement()));
 
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -204,7 +204,7 @@ public class FileFormatTest {
     public void testGetFID() {
         log.debug("testGetFID");
         assertTrue((testFile.getFID() != -1));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -241,7 +241,7 @@ public class FileFormatTest {
             fail("getInstance() failed" + ex.getMessage());
         }
         assertNotNull(f);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -265,7 +265,7 @@ public class FileFormatTest {
         assertNotNull(f);
         FileFormat f1 = FileFormat.getFileFormat("ALL");
         assertNull(f1);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

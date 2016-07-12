@@ -178,7 +178,7 @@ public class DatasetTest {
                 assertEquals(dSets[i].getWidth(), H5TestFile.DIM2);
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -221,7 +221,7 @@ public class DatasetTest {
 
         long[] expected32 = (long[]) Dataset.convertFromUnsignedC(int32, null);
         assertTrue(Arrays.equals(expected32, uint32));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

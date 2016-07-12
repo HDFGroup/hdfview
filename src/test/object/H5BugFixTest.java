@@ -202,7 +202,7 @@ public class H5BugFixTest {
                 start[i] = 0;
                 count[i] = 1;
             }
-            final int nrows = dset.getHeight();
+            final long nrows = dset.getHeight();
             for (int i = 0; i < nrows; i++) {
                 dset.clearData();
                 dset.init();
@@ -301,7 +301,7 @@ public class H5BugFixTest {
     @Test
     public void testBug863() throws Exception {
         log.debug("testBug863");
-        int nObjs = 0; // number of object left open
+        long nObjs = 0; // number of object left open
         Dataset dset = null;
         final String dnames[] = { H5TestFile.NAME_DATASET_CHAR, H5TestFile.NAME_DATASET_COMPOUND,
                 H5TestFile.NAME_DATASET_COMPOUND_SUB, H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_FLOAT,

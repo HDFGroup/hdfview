@@ -118,7 +118,7 @@ public class GroupTest {
         log.debug("testClear");
         testGroup.clear();
         assertEquals(testGroup.getMemberList().size(), 0);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -168,7 +168,7 @@ public class GroupTest {
         if (testGroup.getMemberList().size() != previous_size + 1) {
             fail("Add to member list not working.");
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -221,7 +221,7 @@ public class GroupTest {
         if (memberList.size() != previous_size - 1) {
             fail("The Number of members in list should be " + (previous_size - 1));
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -250,7 +250,7 @@ public class GroupTest {
             HObject obj = (HObject) it.next();
             assertEquals(objs[position++], obj.getName());
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -271,7 +271,7 @@ public class GroupTest {
     public void testGetParent() {
         log.debug("testGetParent");
         assertEquals(testGroup.getParent().getName(), "/");
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -292,7 +292,7 @@ public class GroupTest {
     public void testIsRoot() {
         log.debug("testIsRoot");
         assertFalse(testGroup.isRoot());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -313,7 +313,7 @@ public class GroupTest {
     public void testGetNumberOfMembersInFile() {
         log.debug("testGetNumberOfMembersInFile");
         assertEquals(testGroup.getNumberOfMembersInFile(), 8);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

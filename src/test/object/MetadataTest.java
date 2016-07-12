@@ -84,9 +84,9 @@ public class MetadataTest {
     @After
     public void removeFiles() throws Exception {
         // make sure all objects are closed
-        final int fid = testFile.getFID();
+        final long fid = testFile.getFID();
         if (fid > 0) {
-            int nObjs = 0;
+            long nObjs = 0;
             try {
                 nObjs = H5.H5Fget_obj_count(fid, HDF5Constants.H5F_OBJ_ALL);
             }

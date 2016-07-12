@@ -141,7 +141,7 @@ public class CompoundDSTest {
         for (int i = 0; i < correctMemberCount; i++) {
             assertNull(testDS.getMemberDims(i)); // all scalar data
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -202,7 +202,7 @@ public class CompoundDSTest {
                 }
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(),
                     HDF5Constants.H5F_OBJ_ALL);

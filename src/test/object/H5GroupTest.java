@@ -215,7 +215,7 @@ public class H5GroupTest {
             fail("setName() failed. " + ex);
         }
         assertNotNull(testGroup);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -239,7 +239,7 @@ public class H5GroupTest {
         catch (final Exception ex) {
             fail("setPath() failed. " + ex);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -263,7 +263,7 @@ public class H5GroupTest {
     @Test
     public void testOpen() {
         log.debug("testOpen");
-        int gid = -1;
+        long gid = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             gid = -1;
@@ -278,7 +278,7 @@ public class H5GroupTest {
 
             testGroup.close(gid);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -303,7 +303,7 @@ public class H5GroupTest {
     public void testClose() {
         log.debug("testClose");
         testOpen();
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -346,7 +346,7 @@ public class H5GroupTest {
             fail("clear() failed. " + ex);
         }
         assertTrue(attrs.size() <= 0);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -392,15 +392,15 @@ public class H5GroupTest {
 
         for (int idx = 0; idx < names.length; idx++) {
             final H5Group grp = new H5Group(file, names[idx], paths[idx], pgroup);
-            final int gid = grp.open();
+            final long gid = grp.open();
             assertTrue(gid > 0);
             grp.close(gid);
         }
 
         final H5Group grp = new H5Group(file, "NO_SUCH_DATASET", "NO_SUCH_PATH", pgroup);
-        final int gid = grp.open();
+        final long gid = grp.open();
         assertTrue(gid <= 0);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -468,16 +468,16 @@ public class H5GroupTest {
             assertNotNull(oid);
 
             final H5Group grp = new H5Group(file, names[idx], paths[idx], pgroup, oid);
-            final int gid = grp.open();
+            final long gid = grp.open();
             assertTrue(gid > 0);
             grp.close(gid);
         }
 
         // test a non-existing dataset
         final H5Group grp = new H5Group(file, "NO_SUCH_DATASET", "NO_SUCH_PATH", pgroup, null);
-        final int gid = grp.open();
+        final long gid = grp.open();
         assertTrue(gid <= 0);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -529,7 +529,7 @@ public class H5GroupTest {
                 }
             }
         } // for (int i=0; i<n; i++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -675,7 +675,7 @@ public class H5GroupTest {
                 fail("writeMetadata() failed. " + ex);
             }
         } // for (int i=0; i<n; i++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -749,7 +749,7 @@ public class H5GroupTest {
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -823,7 +823,7 @@ public class H5GroupTest {
             fail("testFile.get(deleted_newname) failed. " + ex);
         }
         assertNull(grp);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -854,8 +854,8 @@ public class H5GroupTest {
         log.debug("testCreateWithGroupplist");
         Group grp = null;
         final String nameNew = "/Group1";
-        int gcpl = -1;
-        int gid = -1;
+        long gcpl = -1;
+        long gid = -1;
         H5G_info_t ginfo;
         Group grp2 = null, grp3 = null;
 
@@ -967,7 +967,7 @@ public class H5GroupTest {
         }
         assertNull(grp);
 
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1036,7 +1036,7 @@ public class H5GroupTest {
             fail("Exception thrown during test: " + ex.toString());
         }
 
-        int gid = -1;
+        long gid = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             gid = -1;
@@ -1051,7 +1051,7 @@ public class H5GroupTest {
 
             test.close(gid);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

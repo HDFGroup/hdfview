@@ -13,14 +13,13 @@
 package test.object.misc;
 
 import java.lang.reflect.Array;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
+import hdf.object.HObject;
+import hdf.object.Group;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
@@ -60,7 +59,7 @@ public class TestH5File
         long t = System.currentTimeMillis()-t0;
         System.out.println("Time of retrieving the tree is "+t);
 
-        TreeNode root = h5file.getRootNode();
+        HObject root = h5file.getRootObject();
         if (root != null)
         {
             printNode(root, "    ");
@@ -74,14 +73,14 @@ public class TestH5File
         }
     }
 
-    private static void printNode(TreeNode node, String indent)
+    private static void printNode(HObject node, String indent)
     {
         System.out.println(indent+node);
 
-        int n = node.getChildCount();
+        int n = ((Group) node).breadthFirstMemberList().size();
         for (int i=0; i<n; i++)
         {
-            printNode(node.getChildAt(i), indent+"    ");
+            printNode(((Group) node).getMember(i), indent+"    ");
         }
     }
 
@@ -99,19 +98,18 @@ public class TestH5File
             System.out.println(ex);
         }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)h5file.getRootNode();
+        HObject root = h5file.getRootObject();
         H5CompoundDS h5DS = null;
-        DefaultMutableTreeNode node = null;
+        HObject node = null;
         if (root != null)
         {
-            Enumeration nodes = root.depthFirstEnumeration();
-            while (nodes.hasMoreElements())
+            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            while (nodes.hasNext())
             {
-                node = (DefaultMutableTreeNode)nodes.nextElement();
-                Object obj = node.getUserObject();
-                if (obj instanceof H5CompoundDS)
+                node = nodes.next();
+                if (node instanceof H5CompoundDS)
                 {
-                    h5DS = (H5CompoundDS)obj;
+                    h5DS = (H5CompoundDS) node;
                     System.out.println(h5DS);
 
                     // test H5CompoundDS attributes
@@ -197,19 +195,18 @@ public class TestH5File
             System.out.println(ex);
         }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)h5file.getRootNode();
+        HObject root = h5file.getRootObject();
         H5ScalarDS h5DS = null;
-        DefaultMutableTreeNode node = null;
+        HObject node = null;
         if (root != null)
         {
-            Enumeration nodes = root.depthFirstEnumeration();
-            while (nodes.hasMoreElements())
+            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            while (nodes.hasNext())
             {
-                node = (DefaultMutableTreeNode)nodes.nextElement();
-                Object obj = node.getUserObject();
-                if (obj instanceof H5ScalarDS)
+                node = nodes.next();
+                if (node instanceof H5ScalarDS)
                 {
-                    h5DS = (H5ScalarDS)obj;
+                    h5DS = (H5ScalarDS) node;
                     System.out.println(h5DS);
 
                     // test H5CompoundDS attributes
@@ -275,19 +272,18 @@ public class TestH5File
             System.out.println(ex);
         }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)h5file.getRootNode();
+        HObject root = h5file.getRootObject();
         H5Group g = null;
-        DefaultMutableTreeNode node = null;
+        HObject node = null;
         if (root != null)
         {
-            Enumeration nodes = root.depthFirstEnumeration();
-            while (nodes.hasMoreElements())
+            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            while (nodes.hasNext())
             {
-                node = (DefaultMutableTreeNode)nodes.nextElement();
-                Object obj = node.getUserObject();
-                if (obj instanceof H5Group)
+                node = nodes.next();
+                if (node instanceof H5Group)
                 {
-                    g = (H5Group)obj;
+                    g = (H5Group) node;
                     System.out.println(g);
 
                     // test H5CompoundDS attributes

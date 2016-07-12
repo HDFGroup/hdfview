@@ -263,7 +263,7 @@ public class H5ScalarDSTest {
             fail("setName() failed. " + ex);
         }
         assertNotNull(testDataset);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -286,7 +286,7 @@ public class H5ScalarDSTest {
     @Test
     public void testOpen() {
         log.debug("testOpen");
-        int did = -1, tid = -1, sid = -1;
+        long did = -1, tid = -1, sid = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             did = tid = sid = -1;
@@ -321,7 +321,7 @@ public class H5ScalarDSTest {
             catch (final Exception ex) {
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -346,7 +346,7 @@ public class H5ScalarDSTest {
     @Test
     public void testClose() {
         log.debug("testClose");
-        int did = -1, tid = -1, sid = -1;
+        long did = -1, tid = -1, sid = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             did = tid = sid = -1;
@@ -400,7 +400,7 @@ public class H5ScalarDSTest {
             }
             assertTrue(sid < 0);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -454,7 +454,7 @@ public class H5ScalarDSTest {
             fail("clear() failed. " + ex);
         }
         assertTrue(attrs.size() <= 0);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -537,7 +537,7 @@ public class H5ScalarDSTest {
                 assertEquals(dims[rank - 2], selectedDims[rank - 2]);
             }
 
-            int nObjs = 0;
+            long nObjs = 0;
             try {
                 nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
             }
@@ -615,7 +615,7 @@ public class H5ScalarDSTest {
                 fail("file.get() failed. " + ex);
             }
 
-            int nObjs = 0;
+            long nObjs = 0;
             try {
                 nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
             }
@@ -693,7 +693,7 @@ public class H5ScalarDSTest {
             testDataset.init();
 
             // read data row by row
-            final int nrows = testDataset.getHeight();
+            final long nrows = testDataset.getHeight();
             for (int i = 0; i < nrows; i++) {
                 testDataset.clearData();
                 testDataset.init();
@@ -722,7 +722,7 @@ public class H5ScalarDSTest {
                 assertEquals(H5TestFile.DATA_INT[idx], data[0]);
             } // for (int i=0; i<nrows; i++) {
         } // for (int loop=0; loop<NLOOPS; loop++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -758,7 +758,7 @@ public class H5ScalarDSTest {
         final int expected = H5TestFile.DIM_SIZE * 4;
 
         assertEquals(expected, n);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -845,7 +845,7 @@ public class H5ScalarDSTest {
                 fail("write() failed. " + ex);
             }
         } // for (int loop=0; loop<NLOOPS; loop++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -944,7 +944,7 @@ public class H5ScalarDSTest {
                 fail("write() failed. " + ex);
             }
         } // for (int loop=0; loop<NLOOPS; loop++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1039,7 +1039,7 @@ public class H5ScalarDSTest {
         assertNotNull(nullStrs);
         for (int i = 0; i < data.length; i++)
             assertTrue(data[i].equals(nullStrs[i]));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1063,7 +1063,7 @@ public class H5ScalarDSTest {
     @Test
     public void testCopy() {
         log.debug("testCopy");
-        int nObjs = 0;
+        long nObjs = 0;
         Dataset dset = null, dsetNew = null;
         H5File tmpFile = null;
 
@@ -1182,7 +1182,7 @@ public class H5ScalarDSTest {
         assertNotNull(dtype);
         assertEquals(Datatype.CLASS_INTEGER, dtype.getDatatypeClass());
         assertEquals(H5TestFile.DATATYPE_SIZE, dtype.getDatatypeSize());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1222,7 +1222,7 @@ public class H5ScalarDSTest {
             assertEquals(H5TestFile.DATA_PALETTE[i * 3 + 1], pal[1][i]);
             assertEquals(H5TestFile.DATA_PALETTE[i * 3 + 2], pal[2][i]);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1262,7 +1262,7 @@ public class H5ScalarDSTest {
             assertEquals(H5TestFile.DATA_PALETTE[i * 3 + 1], pal[1][i]);
             assertEquals(H5TestFile.DATA_PALETTE[i * 3 + 2], pal[2][i]);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1296,7 +1296,7 @@ public class H5ScalarDSTest {
 
         final byte[] refs = img.getPaletteRefs();
         assertNotNull(refs);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1370,7 +1370,7 @@ public class H5ScalarDSTest {
             data = null; // Expected - intentional
         }
         assertNull(data);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1457,7 +1457,7 @@ public class H5ScalarDSTest {
             data = null; // Expected - intentional
         }
         assertNull(data);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1509,7 +1509,7 @@ public class H5ScalarDSTest {
                 }
             }
         } // for (int i=0; i<n; i++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1655,7 +1655,7 @@ public class H5ScalarDSTest {
                 fail("writeMetadata() failed. " + ex);
             }
         } // for (int i=0; i<n; i++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1729,7 +1729,7 @@ public class H5ScalarDSTest {
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1788,7 +1788,7 @@ public class H5ScalarDSTest {
         catch (final Exception ex) {
             fail("testFile.delete failed. " + ex);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1856,7 +1856,7 @@ public class H5ScalarDSTest {
             fail("Exception thrown during test: " + ex.toString());
         }
 
-        int did = -1, tid = -1, sid = -1;
+        long did = -1, tid = -1, sid = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             did = tid = sid = -1;
@@ -1891,7 +1891,7 @@ public class H5ScalarDSTest {
             catch (final Exception ex) {
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

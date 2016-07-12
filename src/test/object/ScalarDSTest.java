@@ -175,7 +175,7 @@ public class ScalarDSTest {
         assertTrue(intDset.isImageDisplay());
         intDset.setIsImageDisplay(false);
         assertFalse(intDset.isImageDisplay());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -205,7 +205,7 @@ public class ScalarDSTest {
         assertFalse(enumDset.isText());
         assertFalse(ORDset.isText());
         assertFalse(imagePalete.isText());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

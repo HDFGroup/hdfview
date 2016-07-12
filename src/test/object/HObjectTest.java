@@ -115,7 +115,7 @@ public class HObjectTest {
         if (!fullFileName.endsWith(H5TestFile.NAME_FILE_H5)) {
             fail("Wrong File");
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -139,7 +139,7 @@ public class HObjectTest {
         if (!testObj.getName().equals(GNAME.substring(1))) {
             fail("GetName returns wrong name");
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -163,7 +163,7 @@ public class HObjectTest {
         if (!testObj.getFullName().equals(GNAME)) {
             fail("GetFullName returns wrong name");
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -187,7 +187,7 @@ public class HObjectTest {
         if (!testObj.getPath().equals("/")) {
             fail("GetPath returns wrong path");
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -271,7 +271,7 @@ public class HObjectTest {
             fail("setName() failed. " + ex);
         }
         assertNotNull(testObj);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -321,7 +321,7 @@ public class HObjectTest {
         catch (Exception e) {
             fail("testPath failed when trying to reset the path to " + path);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -342,7 +342,7 @@ public class HObjectTest {
     @Test
     public void testOpen() {
         log.debug("testOpen");
-        int gid = -1;
+        long gid = -1;
 
         for (int loop = 0; loop < 15; loop++) {
             gid = -1;
@@ -355,7 +355,7 @@ public class HObjectTest {
             assertTrue(gid > 0);
             testObj.close(gid);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -377,7 +377,7 @@ public class HObjectTest {
     public void testClose() {
         log.debug("testClose");
         testOpen();
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -399,7 +399,7 @@ public class HObjectTest {
     public void testGetFID() {
         log.debug("testGetFID");
         assertEquals(testObj.getFID(), testFile.getFID());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -423,7 +423,7 @@ public class HObjectTest {
         log.debug("testEqualsOID");
         assertNotNull(testObj);
         assertTrue(testObj.equalsOID(new long[] { testOID }));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -447,7 +447,7 @@ public class HObjectTest {
         log.debug("testGetFileFormat");
         assertNotNull(testObj.getFileFormat());
         assertEquals(testObj.getFileFormat(), testFile);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -471,7 +471,7 @@ public class HObjectTest {
         log.debug("testGetOID");
         assertNotNull(testObj.getOID());
         assertEquals(testObj.getOID()[0], testOID);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -500,7 +500,7 @@ public class HObjectTest {
             fail("get() fails.");
         }
         assertFalse(testObj.hasAttribute());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -522,7 +522,7 @@ public class HObjectTest {
     public void testToString() {
         log.debug("testToString");
         assertEquals(testObj.toString(), GNAME.substring(1));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

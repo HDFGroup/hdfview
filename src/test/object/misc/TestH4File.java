@@ -13,14 +13,13 @@
 package test.object.misc;
 
 import java.lang.reflect.Array;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 import hdf.hdflib.HDFConstants;
 import hdf.object.Attribute;
+import hdf.object.HObject;
+import hdf.object.Group;
 import hdf.object.h4.H4File;
 import hdf.object.h4.H4GRImage;
 import hdf.object.h4.H4Group;
@@ -62,7 +61,7 @@ public class TestH4File
         long t = System.currentTimeMillis()-t0;
         System.out.println("Time of retrieving the tree is "+t);
 
-        TreeNode root = h4file.getRootNode();
+        HObject root = h4file.getRootObject();
         if (root != null)
         {
             printNode(root, "    ");
@@ -76,14 +75,14 @@ public class TestH4File
         }
     }
 
-    private static void printNode(TreeNode node, String indent)
+    private static void printNode(HObject node, String indent)
     {
         System.out.println(indent+node);
 
-        int n = node.getChildCount();
+        int n = ((Group) node).breadthFirstMemberList().size();
         for (int i=0; i<n; i++)
         {
-            printNode(node.getChildAt(i), indent+"    ");
+            printNode(((Group) node).getMember(i), indent+"    ");
         }
     }
 
@@ -101,19 +100,18 @@ public class TestH4File
             System.out.println(ex);
         }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)h4file.getRootNode();
+        HObject root = h4file.getRootObject();
         H4Group g = null;
-        DefaultMutableTreeNode node = null;
+        HObject node = null;
         if (root != null)
         {
-            Enumeration nodes = root.depthFirstEnumeration();
-            while (nodes.hasMoreElements())
+            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            while (nodes.hasNext())
             {
-                node = (DefaultMutableTreeNode)nodes.nextElement();
-                Object obj = node.getUserObject();
-                if (obj instanceof H4Group)
+                node = nodes.next();
+                if (node instanceof H4Group)
                 {
-                    g = (H4Group)obj;
+                    g = (H4Group) node;
                     System.out.println(g);
 
                     // test H4CompoundDS attributes
@@ -158,19 +156,18 @@ public class TestH4File
             System.out.println(ex);
         }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)h4file.getRootNode();
+        HObject root = h4file.getRootObject();
         H4SDS sds = null;
-        DefaultMutableTreeNode node = null;
+        HObject node = null;
         if (root != null)
         {
-            Enumeration nodes = root.depthFirstEnumeration();
-            while (nodes.hasMoreElements())
+            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            while (nodes.hasNext())
             {
-                node = (DefaultMutableTreeNode)nodes.nextElement();
-                Object obj = node.getUserObject();
-                if (obj instanceof H4SDS)
+                node = nodes.next();
+                if (node instanceof H4SDS)
                 {
-                    sds = (H4SDS)obj;
+                    sds = (H4SDS) node;
                     System.out.println(sds);
 
                     // test H4CompoundDS attributes
@@ -237,19 +234,18 @@ public class TestH4File
             System.out.println(ex);
         }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)h4file.getRootNode();
+        HObject root = h4file.getRootObject();
         H4Vdata  vdata = null;
-        DefaultMutableTreeNode node = null;
+        HObject node = null;
         if (root != null)
         {
-            Enumeration nodes = root.depthFirstEnumeration();
-            while (nodes.hasMoreElements())
+            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            while (nodes.hasNext())
             {
-                node = (DefaultMutableTreeNode)nodes.nextElement();
-                Object obj = node.getUserObject();
-                if (obj instanceof H4Vdata)
+                node = nodes.next();
+                if (node instanceof H4Vdata)
                 {
-                    vdata = (H4Vdata)obj;
+                    vdata = (H4Vdata) node;
                     System.out.println(vdata);
 
                     // test H4CompoundDS attributes
@@ -337,19 +333,18 @@ public class TestH4File
             System.out.println(ex);
         }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)h4file.getRootNode();
+        HObject root = h4file.getRootObject();
         H4GRImage sds = null;
-        DefaultMutableTreeNode node = null;
+        HObject node = null;
         if (root != null)
         {
-            Enumeration nodes = root.depthFirstEnumeration();
-            while (nodes.hasMoreElements())
+            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            while (nodes.hasNext())
             {
-                node = (DefaultMutableTreeNode)nodes.nextElement();
-                Object obj = node.getUserObject();
-                if (obj instanceof H4GRImage)
+                node = nodes.next();
+                if (node instanceof H4GRImage)
                 {
-                    sds = (H4GRImage)obj;
+                    sds = (H4GRImage) node;
                     System.out.println(sds);
 
                     // test H4CompoundDS attributes

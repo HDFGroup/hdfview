@@ -203,8 +203,8 @@ public class H5FileTest {
         }
 
         for (int i = 0; i < NLOOPS; i++) {
-            int nObjs = 0;
-            int fid = -1;
+            long nObjs = 0;
+            long fid = -1;
             final H5File file = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
 
             try {
@@ -248,7 +248,7 @@ public class H5FileTest {
         }
         catch (final Exception ex) {
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -281,7 +281,7 @@ public class H5FileTest {
             fail("file.create() failed. " + ex);
         }
 
-        int fid = -1;
+        long fid = -1;
         try {
             fid = file.open();
         }
@@ -308,12 +308,12 @@ public class H5FileTest {
      * </ul>
      */
     @Test
-    public void testGetRootNode() {
-        log.debug("testGetRootNode");
-        final javax.swing.tree.TreeNode root = testFile.getRootNode();
+    public void testGetRootObject() {
+        log.debug("testGetRootObject");
+        final HObject root = testFile.getRootObject();
         assertNotNull(root);
-        assertTrue(root.getChildCount() > 0);
-        int nObjs = 0;
+        assertTrue(((Group) root).breadthFirstMemberList().size() > 0);
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -330,7 +330,7 @@ public class H5FileTest {
     public void testIsReadOnly() {
         log.debug("testIsReadOnly");
         assertFalse(testFile.isReadOnly());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -364,7 +364,7 @@ public class H5FileTest {
             fail("file.create() failed. " + ex);
         }
 
-        int fid = -1;
+        long fid = -1;
         try {
             fid = file.open();
         }
@@ -382,7 +382,7 @@ public class H5FileTest {
         }
         assertNotNull(grp);
 
-        int gid = -1;
+        long gid = -1;
         try {
             gid = grp.open();
         }
@@ -421,10 +421,10 @@ public class H5FileTest {
         log.debug("testCreateGroupWithGroupplist");
         final String nameNew = "testH5File2.h5";
         H5File file = null;
-        int fid = -1;
-        int gcpl = -1;
-        int gid = -1;
-        int lcpl = -1;
+        long fid = -1;
+        long gcpl = -1;
+        long gid = -1;
+        long lcpl = -1;
         Group grp = null;
         Group grp2 = null, grp3 = null;
         H5G_info_t ginfo;
@@ -540,9 +540,9 @@ public class H5FileTest {
         log.debug("testcreateGcpl");
         final String nameNew = "test8.h5";
         H5File file = null;
-        int fid = -1;
-        int gcpl = -1;
-        int gid = -1;
+        long fid = -1;
+        long gcpl = -1;
+        long gid = -1;
 
         Group grp = null;
         Group grp2 = null, grp3 = null;
@@ -664,7 +664,7 @@ public class H5FileTest {
             fail("file.get() failed. " + ex);
         }
 
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -697,7 +697,7 @@ public class H5FileTest {
         log.debug("testIsThisTypeString");
         assertTrue(H5FILE.isThisType(H5TestFile.NAME_FILE_H5));
         assertFalse(H5FILE.isThisType("No such file"));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -720,7 +720,7 @@ public class H5FileTest {
     public void testIsThisTypeFileFormat() {
         log.debug("testIsThisTypeFileFormat");
         assertTrue(H5FILE.isThisType(testFile));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -786,7 +786,7 @@ public class H5FileTest {
             srcObj = (HObject) members.get(i);
 
             try {
-                dstObj = (HObject) ((DefaultMutableTreeNode) testFile.copy(srcObj, root)).getUserObject();
+                dstObj = testFile.copy(srcObj, root);
             }
             catch (final Exception ex) {
                 // image palette probably is copied already
@@ -922,7 +922,7 @@ public class H5FileTest {
     @Test
     public void testGet() {
         log.debug("testGet");
-        int nObjs = 0; // number of object left open
+        long nObjs = 0; // number of object left open
         HObject obj = null;
 
         final String nameNewFile = "testH5File.h5";
@@ -990,7 +990,7 @@ public class H5FileTest {
     @Test
     public void testGetFromOpen() {
         log.debug("testGetFromOpen");
-        int nObjs = 0; // number of object left open
+        long nObjs = 0; // number of object left open
         HObject obj = null;
 
         final String nameNewFile = "testH5File.h5";
@@ -1195,8 +1195,8 @@ public class H5FileTest {
         catch (final Exception ex) {
         }
 
-        int nObjs = 0;
-        int plist = -1;
+        long nObjs = 0;
+        long plist = -1;
         ;
 
         final H5File file = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
@@ -1319,7 +1319,7 @@ public class H5FileTest {
             srcObj = (HObject) members.get(i);
 
             try {
-                dstObj = (HObject) ((DefaultMutableTreeNode) testFile.copy(srcObj, root)).getUserObject();
+                dstObj = testFile.copy(srcObj, root);
             }
             catch (final Exception ex) {
                 // image palette probably is copied already
@@ -1358,8 +1358,8 @@ public class H5FileTest {
         }
 
         int[] otype = { 1 };
-        int obj_type = -1;
-        int did = -1;
+        long obj_type = -1;
+        long did = -1;
         byte[] read_data = new byte[3920];
         HObject obj = null;
 
@@ -1418,7 +1418,7 @@ public class H5FileTest {
         assertNotNull(img);
         assertTrue(img.hasAttribute());
         assertTrue(img.isImage());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -1496,7 +1496,7 @@ public class H5FileTest {
         log.debug("testCreateLink");
         final String nameNew = "testH5FileLinks1.h5";
         H5File file = null;
-        int fid = -1;
+        long fid = -1;
         Group grp1 = null, grp2 = null;
         Group subgrp1 = null;
         Dataset d1 = null;
@@ -1606,7 +1606,7 @@ public class H5FileTest {
         }
         assertNotNull(obj);
 
-        int gid = -1;
+        long gid = -1;
         try {
             gid = grp1.open();
         }
@@ -1666,7 +1666,7 @@ public class H5FileTest {
         final String nameNew = "TESTFILE1.h5";
         H5File file1 = null;
         H5File file2 = null;
-        int fid = -1;
+        long fid = -1;
         Group grp1 = null;
         Group fgrp1 = null;
         Group subgrp1 = null;
@@ -1777,7 +1777,7 @@ public class H5FileTest {
         assertNotNull(grplink);
 
         // Retrieve Link information
-        int gid = -1;
+        long gid = -1;
         try {
             gid = fgrp1.open();
         }
@@ -1838,7 +1838,7 @@ public class H5FileTest {
         log.debug("testCreateAttribute");
         final String nameNew = "TESTFILEAttr1.h5";
         H5File file = null;
-        int fid = -1;
+        long fid = -1;
         Group g1 = null;
         Dataset d1 = null;
 
@@ -1881,7 +1881,7 @@ public class H5FileTest {
             fail("g1.writeMetadata() failed. " + ex);
         }
 
-        int gid = -1;
+        long gid = -1;
         try {
             gid = g1.open();
         }
@@ -1944,7 +1944,7 @@ public class H5FileTest {
         log.debug("testDatatypehasAttribute");
         final String nameNew = "testH5FileDatatype.h5";
         H5File file = null;
-        int fid = -1;
+        long fid = -1;
         Datatype d1 = null;
 
         try {
@@ -2009,7 +2009,7 @@ public class H5FileTest {
         log.debug("testrenameAttribute");
         final String nameNew = "testAttrName.h5";
         H5File file = null;
-        int fid = -1;
+        long fid = -1;
         Group g1 = null;
         Datatype d1 = null;
 
@@ -2154,7 +2154,7 @@ public class H5FileTest {
         catch (final Exception ex) {
             fail("test.get() failed. " + ex);
         }
-        int nObjs = 0;
+        long nObjs = 0;
 
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

@@ -767,7 +767,7 @@ public class TestH5Object
             file = new H5File(fname);
             final Dataset dset = (Dataset)file.get(NAME_DATASET_ATTR);
 
-            final int did = dset.open();
+            final long did = dset.open();
             List<Attribute> attrs = H5File.getAttribute(did);
             try { dset.close(did); } catch (final Exception ex2) {}
             if ((attrs == null) || (attrs.size() < 1)) {
@@ -777,7 +777,7 @@ public class TestH5Object
 
             attrs.clear();
             final Group grp = (Group)file.get(NAME_GROUP_ATTR);
-            final int gid = grp.open();
+            final long gid = grp.open();
             attrs = H5File.getAttribute(gid);
             try { grp.close(gid); } catch (final Exception ex2) {}
             if ((attrs == null) || (attrs.size() < 1)) {
@@ -867,7 +867,7 @@ public class TestH5Object
         H5File file = null;
         String message = "";
 
-        int fid = 0;
+        long fid = 0;
         Group pgroup = null;
         message = "Get file identifier -- Group.getFID(), Dataset.getFID()";
 
@@ -910,7 +910,7 @@ public class TestH5Object
         H5File file = null;
         String message = "";
 
-        int fid = 0;
+        long fid = 0;
         Group pgroup = null;
         message = "Get object name and path -- Group.getName(), Group.getPath()";
 
@@ -1136,7 +1136,7 @@ public class TestH5Object
 
         Group pgroup = null;
         Datatype dtype = null;
-        int tid=-1, tid2=-1;
+        long tid=-1, tid2=-1;
 
         try {
             file = (H5File)H5FILE.createInstance(fname, H5File.CREATE);

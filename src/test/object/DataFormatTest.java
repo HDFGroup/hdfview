@@ -115,7 +115,7 @@ public class DataFormatTest {
         if (!testGroup.getFile().equals(H5TestFile.NAME_FILE_H5)) {
             fail("getFile() fails.");
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -159,7 +159,7 @@ public class DataFormatTest {
                 fail("getValue() failed");
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -228,7 +228,7 @@ public class DataFormatTest {
         if (!value[0].equals("IMAGE")) {
             fail("writeMetadata() failed.");
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -263,7 +263,7 @@ public class DataFormatTest {
             fail("removeMetadata() failed " + e.getMessage());
         }
         assertEquals(2, mdataList.size());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

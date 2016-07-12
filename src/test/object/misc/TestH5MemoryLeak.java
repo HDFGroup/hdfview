@@ -173,7 +173,7 @@ public class TestH5MemoryLeak
 
             testFile = new H5File(fname, FileFormat.READ);
             testFile.open();
-            testFile.getRootNode();
+            testFile.getRootObject();
             try { Thread.sleep(10); } catch (Exception ex) {;}
             testFile.close();
         }
@@ -183,7 +183,7 @@ public class TestH5MemoryLeak
 
     private static final long test_default_file()
     {
-        int nObjs = 0; // number of object left open
+        long nObjs = 0; // number of object left open
         Dataset dset =null;
         File tmpFile = null;
         MemoryUsage memuse = null;
@@ -406,7 +406,7 @@ public class TestH5MemoryLeak
         file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_FLOAT);
         file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1, NAME_DATATYPE_STR);
  
-        int nObjs = 0;
+        long nObjs = 0;
         try { nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL); }
         catch (final Exception ex) { ; }
         if (nObjs > 1) {

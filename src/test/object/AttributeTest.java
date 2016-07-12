@@ -132,7 +132,7 @@ public class AttributeTest {
         attr.setValue(classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -162,7 +162,7 @@ public class AttributeTest {
         Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -185,7 +185,7 @@ public class AttributeTest {
         log.debug("testGetValue");
         assertEquals(((String[]) strAttr.getValue())[0], "String attribute.");
         assertTrue(Arrays.equals((int[]) arrayIntAttr.getValue(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -215,7 +215,7 @@ public class AttributeTest {
         arrayIntAttr.setValue(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
         assertTrue(Arrays.equals((int[]) arrayIntAttr.getValue(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
         arrayIntAttr.setValue(intPrevValue);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -238,7 +238,7 @@ public class AttributeTest {
         log.debug("testGetName");
         assertTrue(strAttr.getName().equals("strAttr"));
         assertTrue(arrayIntAttr.getName().equals("arrayInt"));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -261,7 +261,7 @@ public class AttributeTest {
         log.debug("testGetRank");
         assertEquals(strAttr.getRank(), 1);
         assertEquals(arrayIntAttr.getRank(), 1);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -284,7 +284,7 @@ public class AttributeTest {
         log.debug("testGetDataDims");
         assertEquals(strAttr.getDataDims()[0], 1);
         assertEquals(arrayIntAttr.getDataDims()[0], 10);
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -307,7 +307,7 @@ public class AttributeTest {
         log.debug("testGetType");
         assertTrue(strAttr.getType().getDatatypeDescription().equals("String, length = 20"));
         assertTrue(arrayIntAttr.getType().getDatatypeDescription().equals("32-bit integer"));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -330,7 +330,7 @@ public class AttributeTest {
         log.debug("testIsUnsigned");
         assertFalse(strAttr.isUnsigned());
         assertFalse(arrayIntAttr.isUnsigned());
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -353,7 +353,7 @@ public class AttributeTest {
         log.debug("testToStringString");
         assertTrue(strAttr.toString(",").equals("String attribute."));
         assertTrue(arrayIntAttr.toString(",").equals("1,2,3,4,5,6,7,8,9,10"));
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

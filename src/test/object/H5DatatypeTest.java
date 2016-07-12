@@ -183,7 +183,7 @@ public class H5DatatypeTest {
     @Test
     public void testOpen() {
         log.debug("testOpen");
-        int tid = -1, tclass = -1, tsize = -1;
+        long tid = -1, tclass = -1, tsize = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             tid = tclass = tsize = -1;
@@ -213,7 +213,7 @@ public class H5DatatypeTest {
             catch (final Exception ex) {
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -238,7 +238,7 @@ public class H5DatatypeTest {
     @Test
     public void testClose() {
         log.debug("testClose");
-        int tid = -1, tclass = -1, tsize = -1;
+        long tid = -1, tclass = -1, tsize = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             tid = tclass = tsize = -1;
@@ -275,7 +275,7 @@ public class H5DatatypeTest {
                 ; // Expected - intentional
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -298,7 +298,7 @@ public class H5DatatypeTest {
     @Test
     public void testToNative() {
         log.debug("testToNative");
-        int tid = -1, tclass = -1, tsize = -1;
+        long tid = -1, tclass = -1, tsize = -1;
 
         // test integer datatype
         try {
@@ -366,7 +366,7 @@ public class H5DatatypeTest {
         }
         catch (final Exception ex) {
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -391,7 +391,7 @@ public class H5DatatypeTest {
     @Test
     public void testFromNative() {
         log.debug("testFromNative");
-        int tid = -1;
+        long tid = -1;
         H5Datatype type = new H5Datatype(-1);
 
         assertFalse(Datatype.CLASS_INTEGER == type.getDatatypeClass());
@@ -415,7 +415,7 @@ public class H5DatatypeTest {
         }
         catch (final Exception ex) {
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -424,7 +424,7 @@ public class H5DatatypeTest {
         }
         assertEquals(1, nObjs); // file id should be the only one left open
 
-        int tids[] = { HDF5Constants.H5T_STD_I32LE, HDF5Constants.H5T_STD_U16LE, HDF5Constants.H5T_STD_I32BE };
+        long tids[] = { HDF5Constants.H5T_STD_I32LE, HDF5Constants.H5T_STD_U16LE, HDF5Constants.H5T_STD_I32BE };
         int sizes[] = { 4, 2, 4 };
         int signs[] = { Datatype.SIGN_2, Datatype.SIGN_NONE, Datatype.SIGN_2 };
         int orders[] = { Datatype.ORDER_LE, Datatype.ORDER_LE, Datatype.ORDER_BE };
@@ -497,7 +497,7 @@ public class H5DatatypeTest {
                 }
             }
         } // for (int i=0; i<n; i++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -642,7 +642,7 @@ public class H5DatatypeTest {
                 fail("writeMetadata() failed. " + ex);
             }
         } // for (int i=0; i<n; i++) {
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -715,7 +715,7 @@ public class H5DatatypeTest {
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }
@@ -784,7 +784,7 @@ public class H5DatatypeTest {
             fail("Exception thrown during test: " + ex.toString());
         }
 
-        int tid = -1, tclass = -1, tsize = -1;
+        long tid = -1, tclass = -1, tsize = -1;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             tid = tclass = tsize = -1;
@@ -814,7 +814,7 @@ public class H5DatatypeTest {
             catch (final Exception ex) {
             }
         }
-        int nObjs = 0;
+        long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
         }

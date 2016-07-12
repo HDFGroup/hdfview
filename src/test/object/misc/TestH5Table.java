@@ -39,7 +39,7 @@ public class TestH5Table {
      */
     public static final void testTable(final long dim1, final long dim2) throws Exception 
     {
-        int nObjs = 0; // number of object left open
+        long nObjs = 0; // number of object left open
         Dataset dset =null;
         long t0=0, t1=0, time=0, nbytes=0, readKBS=0, writeKBS=0;
         final String dname = "/table";

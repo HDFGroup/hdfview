@@ -243,7 +243,7 @@ public class DebugHDF {
         }
 
         testFile.open();
-        Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        Group root = (Group) testFile.getRootObject();
 
         String[] data = {"abc de fghi jk lmn op qrst uvw xyz\n0 12 345 6 789"};
         long[] data_dims = {1};
@@ -274,7 +274,7 @@ public class DebugHDF {
             return;
         }
         testFile.open();
-        root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        root = (Group)testFile.getRootObject();
         dataset = (Dataset)root.getMemberList().get(0);
         List attrList = dataset.getMetadata();
         attr = (Attribute)attrList.get(0);
@@ -294,7 +294,7 @@ public class DebugHDF {
         int DIM1 = 50;
         long[] dims = {DIM1};
         int cmpSize = 20;
-        int fid=-1, did=-1, tid = -1, tid_nested=-1, sid=-1;
+        long fid=-1, did=-1, tid = -1, tid_nested=-1, sid=-1;
         int indexData[] = new int[DIM1];
         double lonData[] = new double[DIM1];
         double latData[] = new double[DIM1];
@@ -320,7 +320,7 @@ public class DebugHDF {
     	did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
     	// write the first field "index"
-    	int tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 4);
+    	long tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 4);
     	H5.H5Tinsert(tid_tmp, "index", 0, HDF5Constants.H5T_NATIVE_INT32);
         H5.H5Dwrite(did, tid_tmp, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, indexData);
         H5.H5Tclose(tid_tmp);
@@ -328,7 +328,7 @@ public class DebugHDF {
         // write the first field of the nested compound, "location"->"Lon"
     	tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
     	H5.H5Tinsert(tid_tmp, "Lon", 0, HDF5Constants.H5T_NATIVE_DOUBLE);
-    	int tid_tmp_nested = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
+    	long tid_tmp_nested = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
     	H5.H5Tinsert(tid_tmp_nested, "location", 0, tid_tmp);
         H5.H5Dwrite(did, tid_tmp_nested, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, lonData);
         H5.H5Tclose(tid_tmp_nested);
@@ -393,7 +393,8 @@ public class DebugHDF {
     private static final void testH5DeleteDS(String fname) throws Exception
     {
         String dname = "strs";
-        int nloops=1000, rank=1, strLen=1, fid=-1, tid=-1, sid=-1, did=-1;
+        int nloops=1000, rank=1, strLen=1;
+        long fid=-1, tid=-1, sid=-1, did=-1;
         String[] strData = { "1", "2", "3", "4" };
         long[] dims = { strData.length };
         byte[] byteData = new byte[strData.length*strLen];
@@ -445,7 +446,8 @@ public class DebugHDF {
     private static final void testH5TconvertStr() throws Exception
     {
         String[] strs = {"a1234","b1234"};
-        int srcLen=5, dstLen=10, srcId=-1, dstId=-1, dimSize=strs.length;
+        int srcLen=5, dstLen=10, dimSize=strs.length;
+        long srcId=-1, dstId=-1;
         byte[]   buf = new byte[dimSize*dstLen];
         
         for (int i=0; i<dimSize; i++)
@@ -475,7 +477,7 @@ public class DebugHDF {
     private static final void testCreateVlenStr(String fname) throws Exception
     {
     	String dname = "DS1";
-    	int file_id=-1, type_id=-1, dataspace_id =-1, dataset_id = -1;
+    	long file_id=-1, type_id=-1, dataspace_id =-1, dataset_id = -1;
     	String[] strData = { "Parting", "is such", "sweet", "sorrow." };
     	int rank = 1;
     	long[] dims = { strData.length };
@@ -519,7 +521,7 @@ public class DebugHDF {
     	// Write the data to the dataset.
     	try {
     		if ((dataset_id >= 0) && (type_id >= 0))
-    			H5.H5DwriteString(dataset_id, type_id, HDF5Constants.H5S_ALL,
+    			H5.H5Dwrite_string(dataset_id, type_id, HDF5Constants.H5S_ALL,
     					HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, strData);
     	}
     	catch (Exception e) {
@@ -636,7 +638,7 @@ public class DebugHDF {
 		
 		//create my file
 		File file = new File("fname");
-		int fileId = H5.H5Fcreate(file.getAbsolutePath(),
+		long fileId = H5.H5Fcreate(file.getAbsolutePath(),
 				HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
 				HDF5Constants.H5P_DEFAULT);
 		
@@ -645,16 +647,16 @@ public class DebugHDF {
 		long[] max_dims = { HDF5Constants.H5S_UNLIMITED };
 		long[] chunk_dims = { rowCount };
 		
-		int strtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+		long strtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
 		H5.H5Tset_size(strtypeId, maxStringLength);
 		
-		int memtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+		long memtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
 		H5.H5Tset_size(memtypeId, maxStringLength);
 		
-		int dataspaceId = H5.H5Screate_simple(RANK, dataset_dims, max_dims);
-		int memspaceId = H5.H5Screate_simple(RANK, chunk_dims, chunk_dims);
+		long dataspaceId = H5.H5Screate_simple(RANK, dataset_dims, max_dims);
+		long memspaceId = H5.H5Screate_simple(RANK, chunk_dims, chunk_dims);
 
-		int dcplId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+		long dcplId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
 		H5.H5Pset_deflate(dcplId, 9);
 		H5.H5Pset_chunk(dcplId, 1, chunk_dims);
 
@@ -682,16 +684,13 @@ public class DebugHDF {
 
 
     private static void testH5Core(final String filename) throws Exception {
-    	
-    	int fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+        long fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
     	H5.H5Pset_fapl_core(fapl_id, 1024, true);
-    	
-    	
     }
     
     private static void testH5IO(final String filename) throws Exception {
     	int SIZE = 10*1024*1024;
-    	int fid = -1, did = -1, sid = -1, rank = 1;
+    	long fid = -1, did = -1, sid = -1, rank = 1;
     	long[] dims = { SIZE };
     	float[] buf = new float[SIZE];
 
@@ -929,82 +928,42 @@ public class DebugHDF {
         long[] dims0D = {1};
 
         // retrieve an instance of H5File
-
         FileFormat fileFormat = FileFormat
-
-                    .getFileFormat(FileFormat.FILE_TYPE_HDF5);
-
-
+                .getFileFormat(FileFormat.FILE_TYPE_HDF5);
 
         if (fileFormat == null) {
-
-              System.err.println("Cannot find HDF5 FileFormat.");
-
-              return;
-
+            System.err.println("Cannot find HDF5 FileFormat.");
+            return;
         }
-
-
 
         // create a new file with a given file name.
-
         H5File testFile = (H5File) fileFormat.create(fname);
 
-
-
         if (testFile == null) {
-
-              System.err.println("Failed to create file:" + fname);
-
-              return;
-
+            System.err.println("Failed to create file:" + fname);
+            return;
         }
 
-
-
         // open the file and retrieve the root group
-
         testFile.open();
 
-        H5Group root = (H5Group)
-((javax.swing.tree.DefaultMutableTreeNode) testFile
-
-                    .getRootNode()).getUserObject();
-
-
+        H5Group root = (H5Group) testFile.getRootObject();
 
         /** add an Attribute */
-
         Datatype attrType = testFile.createDatatype(
+                Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
+                Datatype.NATIVE);
 
-                    Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
+        Attribute attr = new Attribute("attribut int", attrType, dims0D);
 
-                    Datatype.NATIVE);
-
-
-
-  
-
-        
-
-        Attribute attr = new Attribute("attribut int", attrType,dims0D);
-
-        int[] attrValue = {15}; // attribute value
-
-        
+        int[] attrValue = { 15 }; // attribute value
 
         attr.setValue(attrValue); // set the attribute value
 
         root.writeMetadata(attr);
 
-
-
-        
-
         // close file resource
-
         testFile.close();
-
   }
 
   
@@ -1012,71 +971,43 @@ public class DebugHDF {
     private static void readDatatype() throws Exception {
     	String fname = "g:\\temp\\t1.h5";
 
-    	// retrieve an instance of H5File
+        // retrieve an instance of H5File
+        FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
 
-    	FileFormat fileFormat =
-    		FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
+        if (fileFormat == null)
+        {
+            System.err.println("Cannot find HDF5 FileFormat.");
+            return;
+        }
 
+        // open the file with read and write access
+        FileFormat testFile = fileFormat.open(fname, FileFormat.READ);
 
+        if (testFile == null)
+        {
+            System.err.println("Failed to open file: " + fname);
+            return;
+        }
 
-    	if (fileFormat == null)
+        // open the file and retrieve the file structure
+        testFile.open();
 
-    	{
+        Group root = (Group) testFile.getRootObject();
 
-    		System.err.println("Cannot find HDF5 FileFormat.");
+        /** read Attribute */
+        Attribute attr = (Attribute) root.getMetadata().get(0);
+        // System.out.println(attr);
 
-    		return;
+        attr.getName(); // -> attribute int
 
-    	}
+        // System.out.println(attr.getName());
 
+        attr.getValue(); // -> [15]
+        // System.out.println(attr.getValue());
 
+        attr.getType(); // -> null...
 
-    	// open the file with read and write access
-
-    	FileFormat testFile = fileFormat.open(fname, FileFormat.READ);
-
-
-
-    	if (testFile == null)
-
-    	{
-
-    		System.err.println("Failed to open file: "+fname);
-
-    		return;
-
-    	}
-
-
-
-    	// open the file and retrieve the file structure
-
-    	testFile.open();
-
-
-
-    	Group root =
-    		(Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
-
-
-
-    	/** read Attribute */
-
-    	Attribute attr = (Attribute)root.getMetadata().get(0);
-    	//System.out.println(attr);
-
-    	attr.getName(); // -> attribute int
-
-    	//System.out.println(attr.getName());
-
-    	attr.getValue(); // -> [15]
-    	//System.out.println(attr.getValue());
-
-    	attr.getType(); // -> null...
-
-    	// System.out.println(attr.getType());
-
-
+        // System.out.println(attr.getType());
     }
   
 
@@ -1111,7 +1042,7 @@ public class DebugHDF {
 
         // open the file and retrieve the root group
         testFile.open();
-        final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        final Group root = (Group) testFile.getRootObject();
 
         Datatype dtype = testFile.createDatatype( Datatype.CLASS_STRING, 64, Datatype.NATIVE, Datatype.NATIVE);
         Dataset dataset = testFile.createScalarDS ("dset", root, dtype, dims, null, null, 0, data);
@@ -1163,7 +1094,7 @@ public class DebugHDF {
 
         // open the file and retrieve the root group
         testFile.open();
-        final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        final Group root = (Group) testFile.getRootObject();
 
         Datatype dtype = testFile.createDatatype(
             Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
@@ -1203,7 +1134,7 @@ public class DebugHDF {
         
         // open the file and retrieve the root group
         testFile.open();
-        final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        final Group root = (Group) testFile.getRootObject();
 
         Datatype dtype = testFile.createDatatype( Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS ("INF", root, dtype, dims, null, null, 0, dataINF);
@@ -1423,7 +1354,7 @@ public class DebugHDF {
 		
 		Dataset dataset = (Dataset)h5File.get("/Dataset1");
 		dataset.init();
-		int dsId = dataset.open();
+		long dsId = dataset.open();
 		
 		long[] dims = dataset.getDims();
 
@@ -1494,13 +1425,13 @@ public class DebugHDF {
   			
   				// can also use H5.H5Dread() directly, bypassing the Java object layer and use own memory space			
 
-    			int did = ds.open();
-    			int tid = H5.H5Dget_type(did);
+    		    long did = ds.open();
+    		    long tid = H5.H5Dget_type(did);
 
-    			int nativeDatatype = H5Datatype.toNative(tid);
+    		    long nativeDatatype = H5Datatype.toNative(tid);
 
-    			int msid = H5.H5Screate_simple(ds.getRank(),selectionCount, null);
-    			int fsid = H5.H5Dget_space(did);
+    		    long msid = H5.H5Screate_simple(ds.getRank(),selectionCount, null);
+    		    long fsid = H5.H5Dget_space(did);
     			long[] lsize = {selectionCount[0]*(selectionCount.length > 1 ? selectionCount[1] : 1)};
     			Object theData = H5Datatype.allocateArray(nativeDatatype, (int)lsize[0]);
     			H5.H5Sselect_hyperslab(fsid,
@@ -1544,7 +1475,7 @@ public class DebugHDF {
             return;
         }
         testFile.open();
-        Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        Group root = (Group) testFile.getRootObject();
         int[] dataIn = new int[20*10];
         for (int i=0; i<20; i++)
         {
@@ -1569,7 +1500,7 @@ public class DebugHDF {
 
         // open the file and retrieve the file structure
         testFile.open();
-        root = (H5Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        root = (H5Group) testFile.getRootObject();
 
         // retrieve athe dataset "2D 32-bit integer 20x10"
         dataset = (Dataset)root.getMemberList().get(0);
@@ -1648,7 +1579,7 @@ public class DebugHDF {
             }
            
             // open the file and retrieve the file structure
-            Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)h5File.getRootNode()).getUserObject();
+            Group root = (Group) h5File.getRootObject();
             java.util.List rootMembers = root.getMemberList();
             java.util.List rootAttributes =root.getMetadata();
             
@@ -1703,7 +1634,7 @@ public class DebugHDF {
         while(true) {
             testFile = new H5File(fname, H5File.READ);
             testFile.open();
-            testFile.getRootNode();
+            testFile.getRootObject();
             try { Thread.sleep(100); } catch (Exception ex) {;}
             testFile.close();
         }
@@ -1715,7 +1646,7 @@ public class DebugHDF {
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         H5File file = (H5File) fileFormat.create(filename);
         file.open();
-        Group root = (Group) ((javax.swing.tree.DefaultMutableTreeNode) file.getRootNode()).getUserObject();
+        Group root = (Group) file.getRootObject();
         
         int[] memRanks = new int[ncols];
         int[][] memDims = new int[ncols][1];
@@ -1790,12 +1721,12 @@ public class DebugHDF {
     private static void testH5Array(final String filename) throws Exception 
     {
         int array_dims[] = {20};
-        int fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-        int sid = H5.H5Screate_simple(2, new long[] {3,2}, null);
+        long fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        long sid = H5.H5Screate_simple(2, new long[] {3,2}, null);
 
-        int tid = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_UCHAR, 1, array_dims, null); 
-        int did = H5.H5Dcreate(fid, "/ArrayOfChar", tid, sid, HDF5Constants.H5P_DEFAULT);
-        byte buf[] = "this is a test. random charecters: jflda;jfkl;dsajfiewqptfidsjfvkcnvjkhgqjreojfdkla;jfsdatuieqkdkalfjdptueqfjdla;vndasjf".getBytes();
+        long tid = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_UCHAR, 1, array_dims, null); 
+        long did = H5.H5Dcreate(fid, "/ArrayOfChar", tid, sid, HDF5Constants.H5P_DEFAULT);
+        byte buf[] = "this is a test. random characters: jflda;jfkl;dsajfiewqptfidsjfvkcnvjkhgqjreojfdkla;jfsdatuieqkdkalfjdptueqfjdla;vndasjf".getBytes();
         H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
         H5.H5Tclose(tid);
         H5.H5Dclose(did);
@@ -1832,12 +1763,12 @@ public class DebugHDF {
         // int tid = H5.H5Tvlen_create(HDF5Constants.H5T_C_S1);
          
         // Case 2, differnt failure on differnt platforms
-        int tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        long tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
         H5.H5Tset_size(tid, HDF5Constants.H5T_VARIABLE);
         
-        int fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-        int sid = H5.H5Screate_simple(2, new long[] {2,2}, null);
-        int did = H5.H5Dcreate(fid, "/str", tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        long fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        long sid = H5.H5Screate_simple(2, new long[] {2,2}, null);
+        long did = H5.H5Dcreate(fid, "/str", tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         
         // write() fails on both case 1 and 2
         H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
@@ -1852,14 +1783,14 @@ public class DebugHDF {
     private static void testH5DataType(final String filename) throws Exception 
     {
         int buf[] = {1,2,3,4,5,6,7,8,9,10};
-        int tids[] = {HDF5Constants.H5T_NATIVE_INT32, HDF5Constants.H5T_NATIVE_UINT16, HDF5Constants.H5T_STD_I32BE};
+        long tids[] = {HDF5Constants.H5T_NATIVE_INT32, HDF5Constants.H5T_NATIVE_UINT16, HDF5Constants.H5T_STD_I32BE};
         String names[] = {"/int32", "/uint16", "/i32be"};
 
-        int fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-        int sid = H5.H5Screate_simple(1, new long[] {10}, null);
+        long fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        long sid = H5.H5Screate_simple(1, new long[] {10}, null);
         
         for (int i=0; i<tids.length; i++) {
-            int did = H5.H5Dcreate(fid, names[i], tids[i], sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            long did = H5.H5Dcreate(fid, names[i], tids[i], sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             H5.H5Dwrite(did, tids[i], HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
             H5.H5Dclose(did);
         }
@@ -1896,7 +1827,7 @@ public class DebugHDF {
         H5File testFile = new H5File(fname, H5File.CREATE);
 
         testFile.open();
-        Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        Group root = (Group) testFile.getRootObject();
         Datatype dtype = testFile.createDatatype(Datatype.CLASS_STRING, strLen, Datatype.NATIVE, Datatype.NATIVE);
         Dataset dataset = testFile.createScalarDS ("/str", root, dtype, dims, null, null, 0, buf);
 
@@ -1908,7 +1839,7 @@ public class DebugHDF {
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         H5File file = (H5File) fileFormat.create(filename);
         file.open();
-        Group root = (Group) ((javax.swing.tree.DefaultMutableTreeNode) file.getRootNode()).getUserObject();
+        Group root = (Group) file.getRootObject();
         Group group1 = file.createGroup("a", root);
         Group group2 = file.createGroup("b", group1);
         Datatype dtype = file.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
@@ -2098,7 +2029,7 @@ public class DebugHDF {
             final Dataset dset = (Dataset)file.get("/Table0");
             dset.init();
 
-            final int n = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
+            final long n = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
             if (n>1) {
                 System.out.println("*** Possible memory leak!!!");
             }
@@ -2244,7 +2175,7 @@ public class DebugHDF {
                 gzip, mnames, mdtypes, null, comp_data);
         file.createCompoundDS(dset_name, parent, dims, null, chunks, 
                 gzip, mnames, mdtypes, null, comp_data);
-        H5.H5Glink(parent.open(), HDF5Constants.H5G_LINK_SOFT, dset_name, "/soft_link");
+        H5.H5Glink(parent.open(), HDF5Constants.H5L_TYPE_SOFT, dset_name, "/soft_link");
 
         try { file.close(); } catch (final Exception ex) {}
      }
@@ -2275,12 +2206,12 @@ public class DebugHDF {
         comp_data.add(strs);
         
         // create 1D string compound dataset using hdf-java 2.3
-        final int mtid = strType.toNative();
-        final int tsize = H5.H5Tget_size(mtid);
-        final int tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, tsize);
+        final long mtid = strType.toNative();
+        final long tsize = H5.H5Tget_size(mtid);
+        final long tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, tsize);
         H5.H5Tinsert(tid, mnames[0], 0, mtid);
-        final int sid = H5.H5Screate_simple(1, dims, null);
-        int plist = HDF5Constants.H5P_DEFAULT;
+        final long sid = H5.H5Screate_simple(1, dims, null);
+        long plist = HDF5Constants.H5P_DEFAULT;
         if (chunks != null)
         {
             plist = H5.H5Pcreate (HDF5Constants.H5P_DATASET_CREATE);
@@ -2418,12 +2349,12 @@ public class DebugHDF {
     	final float[] fill_float = {9999.99f};
     	final long[] dims = {20, 10};
 
-    	int fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-    	final int sid = H5.H5Screate_simple(2, dims, null);
+    	long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+    	final long sid = H5.H5Screate_simple(2, dims, null);
     	
-    	int plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+    	long plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
     	H5.H5Pset_fill_value(plist, HDF5Constants.H5T_NATIVE_INT, fill_int);
-    	int did = H5.H5Dcreate(fid, "/int", HDF5Constants.H5T_NATIVE_INT, sid, plist );
+    	long did = H5.H5Dcreate(fid, "/int", HDF5Constants.H5T_NATIVE_INT, sid, plist );
     	H5.H5Dclose(did);
     	H5.H5Pclose(plist);
 
@@ -2482,7 +2413,7 @@ public class DebugHDF {
 
 
         // get number of open objects
-        final int numDatatypes = H5.H5Fget_obj_count(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE);
+        final long numDatatypes = H5.H5Fget_obj_count(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE);
         System.out.println("The num of datatypes open: " + numDatatypes);
 
         // get open object handles
@@ -2700,7 +2631,7 @@ public class DebugHDF {
 
     private static void testEnum(final String fileName) throws Exception
     {
-        final int booleanEnum = H5.H5Tenum_create(HDF5Constants.H5T_STD_I8LE);
+        final long booleanEnum = H5.H5Tenum_create(HDF5Constants.H5T_STD_I8LE);
         int status = H5.H5Tenum_insert(booleanEnum, "true", new int[] {1});
         status = H5.H5Tenum_insert(booleanEnum, "false", new int[] {0});
 
@@ -2727,7 +2658,7 @@ public class DebugHDF {
 //
 //        // retrieve the file structure
 //        testFile.open();
-//        final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+//        final Group root = (Group) testFile.getRootObject();
 //        final Dataset d = (Dataset)root.getMemberList().get(1);
 //        if (d != null) {
 //            System.out.println(d.getName());
@@ -2876,7 +2807,7 @@ public class DebugHDF {
           return;
      }
      testFile.open();
-     final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+     final Group root = (Group) testFile.getRootObject();
 
     Vector v = new Vector();
     v.addElement(new Float(1.2));
@@ -2930,7 +2861,7 @@ public class DebugHDF {
 
        } else{
            final Dataset dset = (Dataset)root.getMemberList().get(0);
-           final int did = dset.open();
+           final long did = dset.open();
            final int status = H5.H5Dextend(did, extended_dims);
            dset.close(did);
            dset.write(dataFl);
@@ -2972,7 +2903,7 @@ public class DebugHDF {
         }
 
         testFile.open();
-        final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        final Group root = (Group) testFile.getRootObject();
 
         final long[] dims = {52636};
         final String[] memberNames = {
@@ -3223,7 +3154,7 @@ public class DebugHDF {
         }
 
         testFile.open();
-        Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        Group root = (Group) testFile.getRootObject();
 
         // create 2 dataset at the root
         final long[] dims2D = {20, 10};
@@ -3238,7 +3169,7 @@ public class DebugHDF {
 
         // open the file and retrieve the file structure
         testFile.open();
-        root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        root = (Group) testFile.getRootObject();
 
         dataset = (Dataset)root.getMemberList().get(1);
 
@@ -3267,7 +3198,7 @@ public class DebugHDF {
         }
 
         testFile.open();
-        Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        Group root = (Group) testFile.getRootObject();
 
         // create 2 dataset at the root
         final long[] dims2D = {20, 10};
@@ -3282,7 +3213,7 @@ public class DebugHDF {
 
         // open the file and retrieve the file structure
         testFile.open();
-        root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        root = (Group) testFile.getRootObject();
 
         dataset = (Dataset)root.getMemberList().get(1);
         testFile.delete(dataset);
@@ -3291,10 +3222,10 @@ public class DebugHDF {
     }
 
     private static void testchunkchche() throws Exception {
-        final int pid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+        final long pid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
         final int[] mdcNumElements = new int[1];
         final int[] rdccNumElements = new int[1];
-        final int[] rdccNumBytes = new int[1];
+        final long[] rdccNumBytes = new long[1];
         final double[] rdccW0 = new double[1];
 
         H5.H5Pget_cache(pid,
@@ -3309,17 +3240,17 @@ public class DebugHDF {
                       1024*1024*4,
                       rdccW0[0]);
 
-        final int fid = H5.H5Fopen("H:\\java\\java8\\xcao\\test\\bigdata.h5",
+        final long fid = H5.H5Fopen("H:\\java\\java8\\xcao\\test\\bigdata.h5",
             HDF5Constants.H5F_ACC_RDWR, pid);
-        final int did = H5.H5Dopen(fid, "/PI");
-        final int tid = H5.H5Dget_type(did);
-        final int mtid = H5.H5Tget_native_type(tid);
+        final long did = H5.H5Dopen(fid, "/PI");
+        final long tid = H5.H5Dget_type(did);
+        final long mtid = H5.H5Tget_native_type(tid);
         H5.H5Tclose(tid);
 
         final float[] allData = new float[125*130*39];
 
         final long dim1d[] = {125*130*39};
-        final int msid = H5.H5Screate_simple(1, dim1d, null);
+        final long msid = H5.H5Screate_simple(1, dim1d, null);
         if (H5.H5Dread_float(did, mtid, msid, HDF5Constants.H5S_ALL,
             HDF5Constants.H5P_DEFAULT, allData)<0) {
             System.err.println("##### Read data failed\n");
@@ -3403,7 +3334,7 @@ public class DebugHDF {
         final FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         final H5File h5File = (H5File) fileFormat.create(FNAME);
         h5File.open();
-        final Group root = (Group) ((javax.swing.tree.DefaultMutableTreeNode) h5File.getRootNode()).getUserObject();
+        final Group root = (Group) h5File.getRootObject();
         final long[] dims = {DIM1, DIM2, DIM3};
         final String[] memberNames = {"x", "y"};
         final Datatype[] memberDatatypes = {
@@ -3464,7 +3395,7 @@ public class DebugHDF {
 
         // open the file and retrieve the root group
         testFile.open();
-        final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        final Group root = (Group) testFile.getRootObject();
 
         // create groups at the root
         final Group g1 = testFile.createGroup("integer arrays", root);
@@ -3533,7 +3464,7 @@ public class DebugHDF {
 
         // Open the file and retrieve the root group
         testFile.open();
-        final Group root = (Group)((javax.swing.tree.DefaultMutableTreeNode)testFile.getRootNode()).getUserObject();
+        final Group root = (Group) testFile.getRootObject();
 
         // Create groups at the root
         final Group g1 = testFile.createGroup("integer arrays", root);
@@ -3750,13 +3681,13 @@ public class DebugHDF {
     static private void testGroupMemoryLeak(String fname) throws Exception 
     {
        	final int NGROUPS = 20;
-     	int _pid_ = HDF5Constants.H5P_DEFAULT;
+       	long _pid_ = HDF5Constants.H5P_DEFAULT;
     	boolean TEST_MEM_LEAK = true;
 
     	for (int N=1; N<=NGROUPS; N++) {
         	
-    		int fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
-        	int gid = H5.H5Gcreate(fid, "/levelOneGroup", _pid_, _pid_, _pid_);
+    	    long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
+    	    long gid = H5.H5Gcreate(fid, "/levelOneGroup", _pid_, _pid_, _pid_);
 
     		H5.H5Gclose(gid);
     		H5.H5Fclose(fid);
@@ -3785,13 +3716,13 @@ public class DebugHDF {
     
     static private int testH5OflushCrash(String fname) throws Exception 
     {
-    	final int _pid_ = HDF5Constants.H5P_DEFAULT;
-    	int fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
+    	final long _pid_ = HDF5Constants.H5P_DEFAULT;
+    	long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
 
     	try {
-    		int sid = H5.H5Screate_simple(1, new long[] {1}, null);
-    		int did = H5.H5Dcreate(fid, "dset", HDF5Constants.H5T_NATIVE_INT, sid, _pid_, _pid_, _pid_);
-    		int aid = H5.H5Acreate(did, "ref", HDF5Constants.H5T_STD_REF_OBJ, sid, _pid_, _pid_);
+    	    long sid = H5.H5Screate_simple(1, new long[] {1}, null);
+    	    long did = H5.H5Dcreate(fid, "dset", HDF5Constants.H5T_NATIVE_INT, sid, _pid_, _pid_, _pid_);
+    	    long aid = H5.H5Acreate(did, "ref", HDF5Constants.H5T_STD_REF_OBJ, sid, _pid_, _pid_);
     		H5.H5Awrite(aid, HDF5Constants.H5T_STD_REF_OBJ, new long[]{-1});
     		H5.H5Dclose(did);
     		H5.H5Aclose(aid);
@@ -3799,7 +3730,7 @@ public class DebugHDF {
     	} catch (Exception ex) {}			
 
     	try {
-    		int ocp_plist_id = H5.H5Pcreate(HDF5Constants.H5P_OBJECT_COPY);
+    	    long ocp_plist_id = H5.H5Pcreate(HDF5Constants.H5P_OBJECT_COPY);
     		H5.H5Pset_copy_object(ocp_plist_id, HDF5Constants.H5O_COPY_EXPAND_REFERENCE_FLAG);
     		try {
     			H5.H5Ocopy(fid, "/dset", fid, "dset2", ocp_plist_id, _pid_);
@@ -3940,8 +3871,8 @@ public class DebugHDF {
     	// Create an instance obj H4File with read access
     	try {
     		H4File myfile = (H4File) h4file.createInstance(filename,FileFormat.READ);
-    		int fid = myfile.open();
-    		Group g=(Group)((javax.swing.tree.DefaultMutableTreeNode)myfile.getRootNode()).getUserObject();
+    		long fid = myfile.open();
+    		Group g=(Group) myfile.getRootObject();
     		List list=g.getMemberList();
     		int n=list.size();
     		System.out.println("--->"+n);
@@ -3964,7 +3895,7 @@ public class DebugHDF {
     	
         file.open();
         
-        Group g = (Group) ((DefaultMutableTreeNode)file.getRootNode()).getUserObject();
+        Group g = (Group) file.getRootObject();
         H4SDS sds = (H4SDS) g.getMemberList().get(0);
 
     	if (sds==null){
