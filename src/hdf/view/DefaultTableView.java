@@ -3829,7 +3829,18 @@ public class DefaultTableView implements TableView {
                 isString = (dtype.getDatatypeClass() == Datatype.CLASS_STRING);
                 log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
 
-                if (dtype.getDatatypeClass() == Datatype.CLASS_VLEN) {
+                if (dtype instanceof H5Datatype) {
+                    // Since variable-length strings are of type CLASS_STRING, not CLASS_VLEN,
+                    // the check below cannot determine if the datatype is a variable-length string
+                    if (((H5Datatype) dtype).isVLEN() && isString) {
+                        for (int i = 0; i < orders[fieldIdx]; i++) {
+                            if (i > 0) stringBuffer.append(", ");
+                            stringBuffer.append(((String[]) colValue)[i]);
+                        }
+                        return stringBuffer;
+                    }
+                }
+                else if (dtype.getDatatypeClass() == Datatype.CLASS_VLEN) {
                     // Only support variable length strings
                     if (!(dtype.getDatatypeClass() == Datatype.CLASS_STRING)) {
                         int arraylen = (int) types[fieldIdx].getDatatypeSize();

@@ -413,7 +413,7 @@ public class H5Datatype extends Datatype {
                 tclass = H5.H5Tget_class(tid);
                 tsize = H5.H5Tget_size(tid);
                 torder = H5.H5Tget_order(tid);
-                isVLEN = (tclass == HDF5Constants.H5T_VLEN);
+                isVLEN = (tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid);
                 log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", tclass, tsize, torder, isVLEN);
             }
             catch (Exception ex) {
@@ -443,6 +443,7 @@ public class H5Datatype extends Datatype {
                     H5.H5Tget_array_dims(tid, dims);
                     tmptid = H5.H5Tget_super(tid);
                     baseType = new H5Datatype(tmptid);
+                    isVLEN = (baseType.getDatatypeClass() == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tmptid);
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): array type failure: ", ex);
@@ -1474,6 +1475,15 @@ public class H5Datatype extends Datatype {
         }
 
         return unsigned;
+    }
+
+    /**
+     * Checks if a datatype is variable-length.
+     * 
+     * @return if the datatype is variable-length.
+     */
+    public boolean isVLEN() {
+        return isVLEN;
     }
 
     /**
