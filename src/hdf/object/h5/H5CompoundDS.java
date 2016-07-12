@@ -1713,7 +1713,7 @@ public class H5CompoundDS extends CompoundDS {
 
         H5File file = (H5File) pgroup.getFileFormat();
         if (file == null) {
-            log.debug("create(): parent group fileformat is null");
+            log.debug("create(): parent group FileFormat is null");
             log.trace("create(): finish");
             return null;
         }

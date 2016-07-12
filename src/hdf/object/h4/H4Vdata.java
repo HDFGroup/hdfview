@@ -37,8 +37,8 @@ import hdf.object.Group;
  * <p>
  * <b>How to Select a Subset</b>
  * <p>
- * Dataset defines APIs for read, write and subset a dataset. No function is defined
- * to select a subset of a data array. The selection is done in an implicit way.
+ * Dataset defines APIs for reading, writing and subsetting a dataset. No function is
+ * defined to select a subset of a data array. The selection is done in an implicit way.
  * Function calls to dimension information such as getSelectedDims() return an array
  * of dimension values, which is a reference to the array in the dataset object.
  * Changes of the array outside the dataset object directly change the values of
@@ -48,16 +48,16 @@ import hdf.object.Group;
  * The following is an example of how to make a subset. In the example, the dataset
  * is a 4-dimension with size of [200][100][50][10], i.e.
  * dims[0]=200; dims[1]=100; dims[2]=50; dims[3]=10; <br>
- * We want to select every other data points in dims[1] and dims[2]
+ * We want to select every other data point in dims[1] and dims[2]
  * <pre>
-     int rank = dataset.getRank();   // number of dimension of the dataset
+     int rank = dataset.getRank();   // number of dimensions of the dataset
      long[] dims = dataset.getDims(); // the dimension sizes of the dataset
      long[] selected = dataset.getSelectedDims(); // the selected size of the dataet
-     long[] start = dataset.getStartDims(); // the off set of the selection
+     long[] start = dataset.getStartDims(); // the offset of the selection
      long[] stride = dataset.getStride(); // the stride of the dataset
      int[]  selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for display
 
-     // select dim1 and dim2 as 2D data for display,and slice through dim0
+     // select dim1 and dim2 as 2D data for display, and slice through dim0
      selectedIndex[0] = 1;
      selectedIndex[1] = 2;
      selectedIndex[1] = 0;
@@ -69,7 +69,7 @@ import hdf.object.Group;
          stride[i] = 1;
     }
 
-    // set stride to 2 on dim1 and dim2 so that every other data points are selected.
+    // set stride to 2 on dim1 and dim2 so that every other data point is selected.
     stride[1] = 2;
     stride[2] = 2;
 
@@ -89,9 +89,6 @@ import hdf.object.Group;
  */
 public class H4Vdata extends CompoundDS
 {
-    /**
-     *
-     */
     private static final long serialVersionUID = -5978700886955419959L;
 
     private final static org.slf4j.Logger       log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
@@ -100,6 +97,7 @@ public class H4Vdata extends CompoundDS
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
+    @SuppressWarnings("rawtypes")
     private List                                attributeList;
 
     /**
@@ -157,7 +155,7 @@ public class H4Vdata extends CompoundDS
                     log.debug("hasAttribute() failure: ", ex);
                     nAttributes = 0;
                 }
-                
+
                 log.trace("hasAttribute(): nAttributes={}", nAttributes);
 
                 close(id);
@@ -183,21 +181,21 @@ public class H4Vdata extends CompoundDS
     public byte[] readBytes() throws HDFException
     {
         log.trace("readBytes(): start");
-        
+
         byte[] theData = null;
 
         if (rank <= 0) {
             init();
         }
         if (numberOfMembers <= 0) {
-            log.trace("readBytes(): VData contains no members");
+            log.debug("readBytes(): VData contains no members");
             log.trace("readBytes(): finish");
             return null; // this Vdata does not have any filed
         }
 
         long id = open();
         if (id < 0) {
-            log.trace("readBytes(): Invalid VData ID");
+            log.debug("readBytes(): Invalid VData ID");
             log.trace("readBytes(): finish");
             return null;
         }
@@ -216,7 +214,7 @@ public class H4Vdata extends CompoundDS
             HDFLibrary.VSQueryvsize(id, recordSize);
             int size =recordSize[0] * (int)selectedDims[0];
             theData = new byte[size];
-            int read_num = HDFLibrary.VSread(
+            HDFLibrary.VSread(
                 id,
                 theData,
                 (int)selectedDims[0],
@@ -230,30 +228,30 @@ public class H4Vdata extends CompoundDS
         }
 
         log.trace("readBytes(): finish");
-        
         return theData;
     }
 
     // Implementing DataFormat
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Object read() throws HDFException
     {
         log.trace("read(): start");
-        
+
         List list = null;
 
         if (rank <= 0) {
             init();
         }
         if (numberOfMembers <= 0) {
-            log.trace("read(): VData contains no members");
+            log.debug("read(): VData contains no members");
             log.trace("read(): finish");
             return null; // this Vdata does not have any filed
         }
 
         long id = open();
         if (id < 0) {
-            log.trace("read(): Invalid VData ID");
+            log.debug("read(): Invalid VData ID");
             log.trace("read(): finish");
             return null;
         }
@@ -295,7 +293,7 @@ public class H4Vdata extends CompoundDS
             }
 
             try {
-                int read_num = HDFLibrary.VSread(
+                HDFLibrary.VSread(
                     id,
                     member_data,
                     (int)selectedDims[0],
@@ -329,7 +327,6 @@ public class H4Vdata extends CompoundDS
         close(id);
 
         log.trace("read(): finish");
-        
         return list;
     }
 
@@ -400,11 +397,13 @@ public class H4Vdata extends CompoundDS
     }
 
     // Implementing DataFormat
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
         log.trace("getMetadata(): start");
-        
+
         if (attributeList != null) {
+            log.trace("getMetdata(): attributeList != null");
             log.trace("getMetadata(): finish");
             return attributeList;
         }
@@ -412,7 +411,7 @@ public class H4Vdata extends CompoundDS
         long id = open();
 
         if (id < 0) {
-            log.trace("getMetadata(): Invalid VData ID");
+            log.debug("getMetadata(): Invalid VData ID");
             log.trace("getMetadata(): finish");
             return attributeList;
         }
@@ -422,7 +421,7 @@ public class H4Vdata extends CompoundDS
             n = HDFLibrary.VSnattrs(id);
 
             if (n <= 0) {
-                log.trace("getMetadata(): VData number of attributes <= 0");
+                log.debug("getMetadata(): VData number of attributes <= 0");
                 log.trace("getMetadata(): finish");
                 return attributeList;
             }
@@ -444,7 +443,7 @@ public class H4Vdata extends CompoundDS
                         attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                     }
                     catch (HDFException ex) {
-                        log.debug("getMetadata(): VSattrinfo failure: ", ex);
+                        log.debug("getMetadata(): attribute[{}] VSattrinfo failure: ", i, ex);
                         b = false;
                         ex.printStackTrace();
                     }
@@ -464,7 +463,7 @@ public class H4Vdata extends CompoundDS
                         HDFLibrary.VSgetattr(id, j, i, buf);
                     }
                     catch (HDFException ex) {
-                        log.debug("getMetadata(): VSgetattr failure: ", ex);
+                        log.debug("getMetadata(): attribute[{}] VSgetattr failure: ", i, ex);
                         buf = null;
                     }
 
@@ -490,18 +489,18 @@ public class H4Vdata extends CompoundDS
         // todo: We shall also load attributes of fields
 
         log.trace("getMetadata(): finish");
-        
         return attributeList;
     }
 
     // To do: Implementing DataFormat
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
         log.trace("writeMetadata(): start");
-        
+
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
-            log.trace("writeMetadata(): Object not an Attribute");
+            log.debug("writeMetadata(): Object not an Attribute");
             log.trace("writeMetadata(): finish");
             return;
         }
@@ -519,7 +518,7 @@ public class H4Vdata extends CompoundDS
         catch (Exception ex) {
             log.trace("writeMetadata(): failure: ", ex);
         }
-        
+
         log.trace("writeMetadata(): finish");
     }
 
@@ -538,10 +537,10 @@ public class H4Vdata extends CompoundDS
     @Override
     public long open()
     {
-        long vsid = -1;
+        log.trace("open(): start");
 
         // try to open with write permission
-        log.trace("open(): start");
+        long vsid = -1;
         try {
             vsid = HDFLibrary.VSattach(getFID(), (int)oid[1], "w");
         }
@@ -562,7 +561,6 @@ public class H4Vdata extends CompoundDS
         }
 
         log.trace("open(): finish");
-        
         return vsid;
     }
 
@@ -593,7 +591,7 @@ public class H4Vdata extends CompoundDS
 
         long id = open();
         if (id < 0) {
-            log.trace("init(): Invalid VData ID");
+            log.debug("init(): Invalid VData ID");
             log.trace("init(): finish");
             return;
         }
@@ -643,6 +641,8 @@ public class H4Vdata extends CompoundDS
                 log.trace("init():{}> isMemberSelected[i]={} memberNames[i]={} memberTIDs[i]={} memberOrders[i]={}", i, isMemberSelected[i], memberNames[i], memberTIDs[i], memberOrders[i]);
             }
             catch (HDFException ex) {
+                log.debug("init(): member[{}]: ", i, ex);
+                log.trace("init(): continue");
                 continue;
             }
         } // for (int i=0; i<numberOfMembers; i++)
@@ -682,6 +682,7 @@ public class H4Vdata extends CompoundDS
     }
 
     //Implementing DataFormat
+    @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

@@ -35,7 +35,6 @@ import java.util.Vector;
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
- * @author Jordan T. Henderson (updated 7/6/2016)
  */
 public abstract class Dataset extends HObject {
     private static final long serialVersionUID    = -3360885430038261178L;

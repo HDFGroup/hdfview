@@ -46,7 +46,6 @@ import java.util.Vector;
  * access is read-write) of the file structure and objects.
  *
  * @author Peter X. Cao
- * @author Jordan T. Henderson (updated 7/6/2016)
  * @version 2.4 9/4/2007
  */
 public abstract class FileFormat extends File {

@@ -39,7 +39,6 @@ import java.util.List;
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
- * @author Jordan T. Henderson (updated 7/6/2016)
  */
 public abstract class Datatype extends HObject {
     private static final long serialVersionUID = -581324710549963177L;
@@ -603,6 +602,7 @@ public abstract class Datatype extends HObject {
      *
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
         return null;
     }
@@ -613,7 +613,7 @@ public abstract class Datatype extends HObject {
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
     public void writeMetadata(Object info) throws Exception {
-        ;
+        log.trace("writeMetadata(): disabled");
     }
 
     /*
@@ -622,7 +622,7 @@ public abstract class Datatype extends HObject {
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
     public void removeMetadata(Object info) throws Exception {
-        ;
+        log.trace("removeMetadata(): disabled");
     }
 
     /*
@@ -631,6 +631,6 @@ public abstract class Datatype extends HObject {
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
     public void updateMetadata(Object info) throws Exception {
-        ;
+        log.trace("updateMetadata(): disabled");
     }
 }

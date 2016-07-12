@@ -38,7 +38,6 @@ import hdf.object.HObject;
  *
  * @version 2.4 9/4/2007
  * @author Peter X. Cao
- * @author Jordan T. Henderson (updated 7/6/2016)
  */
 public class H4File extends FileFormat {
     private static final long serialVersionUID = 8985533001471224030L;
@@ -461,7 +460,7 @@ public class H4File extends FileFormat {
         log.trace("copy(): start: srcObj={} dstGroup={} dstName={}", srcObj, dstGroup, dstName);
 
         if ((srcObj == null) || (dstGroup == null)) {
-            log.trace("copy(): source or destination is null");
+            log.debug("copy(): source or destination is null");
             log.trace("copy(): finish");
             return null;
         }
@@ -688,7 +687,7 @@ public class H4File extends FileFormat {
         log.trace("loadIntoMemory(): start");
         
         if (fid < 0) {
-            log.trace("loadIntoMemory(): Invalid File Id");
+            log.debug("loadIntoMemory(): Invalid File Id");
             log.trace("loadIntoMemory(): finish");
             return;
         }
@@ -863,7 +862,7 @@ public class H4File extends FileFormat {
         log.trace("depth_first(pobj = " + parentObj + ")");
 
         if (parentObj == null) {
-            log.trace("depth_first(): Parent object is null");
+            log.debug("depth_first(): Parent object is null");
             log.trace("depth_first(): finish");
             return;
         }
@@ -877,7 +876,7 @@ public class H4File extends FileFormat {
         String fullPath = parentGroup.getPath() + parentGroup.getName() + HObject.separator;
         long gid = parentGroup.open();
         if (gid == HDFConstants.FAIL) {
-            log.trace("depth_first(): Invalid Parent group ID");
+            log.debug("depth_first(): Invalid Parent group ID");
             log.trace("depth_first(): finish");
             return;
         }
@@ -1386,7 +1385,7 @@ public class H4File extends FileFormat {
         log.trace("getFileAnnotation(): start: FID={}", fid);
         
         if (fid < 0) {
-            log.trace("getFileAnnotation(): Invalid FID");
+            log.debug("getFileAnnotation(): Invalid FID");
             log.trace("getFileAnnotation(): finish");
             return attrList;
         }
@@ -1521,7 +1520,7 @@ public class H4File extends FileFormat {
         log.trace("getGRglobalAttribute(): start: GRID={}", grid);
         
         if (grid == HDFConstants.FAIL) {
-            log.trace("getGRglobalAttribute(): Invalid GRID");
+            log.debug("getGRglobalAttribute(): Invalid GRID");
             log.trace("getGRglobalAttribute(): finish");
             return attrList;
         }
@@ -1579,7 +1578,6 @@ public class H4File extends FileFormat {
         } // if (b && numberOfAttributes>0)
         
         log.trace("getGRglobalAttribute(): finish");
-
         return attrList;
     }
 
@@ -1602,7 +1600,7 @@ public class H4File extends FileFormat {
         log.trace("getSDSglobalAttribute(): start: SDID:{}", sdid);
         
         if (sdid == HDFConstants.FAIL) {
-            log.trace("getSDSglobalAttribute(): Invalid SDID");
+            log.debug("getSDSglobalAttribute(): Invalid SDID");
             log.trace("getSDSglobalAttribute(): finish");
             return attrList;
         }
@@ -1989,7 +1987,9 @@ public class H4File extends FileFormat {
         }
 
         if (idx >= 0) {
-            return getGRImage(HDFConstants.DFTAG_RIG, idx, HObject.separator, false);
+            H4GRImage img = getGRImage(HDFConstants.DFTAG_RIG, idx, HObject.separator, false);
+            log.trace("getAttachedObject(): finish");
+            return img;
         }
 
         // get top level SDS
@@ -2002,7 +2002,9 @@ public class H4File extends FileFormat {
         }
 
         if (idx >= 0) {
-            return getSDS(HDFConstants.DFTAG_NDG, idx, HObject.separator, false);
+            H4SDS sds = getSDS(HDFConstants.DFTAG_NDG, idx, HObject.separator, false);
+            log.trace("getAttachedObject(): finish");
+            return sds;
         } // if (sdid != HDFConstants.FAIL && HDFLibrary.SDfileinfo(sdid, argv))
 
         int ref = 0;
@@ -2018,6 +2020,7 @@ public class H4File extends FileFormat {
             long oid[] = { HDFConstants.DFTAG_VG, ref };
             H4Group g = new H4Group(this, objName[0], path, null, oid);
             depth_first(g);
+            log.trace("getAttachedObject(): finish");
             return g;
         }
 
@@ -2031,7 +2034,9 @@ public class H4File extends FileFormat {
         }
 
         if (ref > 0) {
-            return getVdata(HDFConstants.DFTAG_VS, ref, HObject.separator, false);
+            H4Vdata vdata = getVdata(HDFConstants.DFTAG_VS, ref, HObject.separator, false);
+            log.trace("getAttachedObject(): finish");
+            return vdata;
         } // for (int i=0; i<n; i++)
 
         log.debug("getAttachedObject(): Object not found");

@@ -71,7 +71,6 @@ import java.io.Serializable;
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
- * @author Jordan T. Henderson (updated 7/6/2016)
  * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
  */
 public abstract class HObject implements Serializable, DataFormat {

@@ -59,7 +59,6 @@ import java.util.Map;
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
- * @author Jordan T. Henderson (updated 7/6/2016)
  */
 public class Attribute implements Metadata {
     private static final long serialVersionUID = 2072473407027648309L;

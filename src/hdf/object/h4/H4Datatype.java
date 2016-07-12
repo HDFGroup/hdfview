@@ -29,7 +29,6 @@ import hdf.object.Datatype;
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
- * @author Jordan T. Henderson (updated 7/6/2016)
  */
 public class H4Datatype extends Datatype
 {
