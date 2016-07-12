@@ -2862,7 +2862,7 @@ public class DebugHDF {
        } else{
            final Dataset dset = (Dataset)root.getMemberList().get(0);
            final long did = dset.open();
-           final int status = H5.H5Dextend(did, extended_dims);
+           H5.H5Dset_extent(did, extended_dims);
            dset.close(did);
            dset.write(dataFl);
        }
