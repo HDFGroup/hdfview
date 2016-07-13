@@ -43,6 +43,7 @@ import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,7 +60,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -3814,7 +3814,6 @@ public class DefaultTableView implements TableView {
             int rowIdx = row;
             char CNT = ' ';
             boolean CshowAsHex = false;
-            boolean CshowAsBin = false;
             log.trace("CompoundDS:CompoundDSDataProvider:getDataValue({},{}) start", row, col);
 
             if (nSubColumns > 1) { // multi-dimension compound dataset
@@ -4185,9 +4184,13 @@ public class DefaultTableView implements TableView {
      * selected members for Compound Datasets.
      */
     private class CompoundDSColumnHeaderDataProvider implements IDataProvider {
+        // Column names with CompoundDS separator character '->' left intact.
+        // Used in CompoundDSNestedColumnHeader to provide correct nesting structure
+        private final String[]  columnNamesFull;
 
-        private final String[]  allColumnNames;
-        private String[]        columnLabels;
+        // Simplified base column names without separator character. Used to
+        // actually label the columns
+        private String[]        columnNames;
 
         private int             ncols;
         private final int       numGroups;
@@ -4200,20 +4203,24 @@ public class DefaultTableView implements TableView {
             numGroups = (datasetWidth * groupSize) / groupSize;
             ncols = groupSize * numGroups;
 
-            final String[] columnNames = new String[groupSize];
+            String[] datasetMemberNames = theDataset.getMemberNames();
+            columnNames = new String[groupSize];
 
+            // Copy selected dataset member names
             int idx = 0;
-            String[] columnNamesAll = theDataset.getMemberNames();
-            for (int i = 0; i < columnNamesAll.length; i++) {
+            for (int i = 0; i < datasetMemberNames.length; i++) {
                 if (theDataset.isMemberSelected(i)) {
+                    // Copy the dataset member name reference, so changes to the column name
+                    // don't affect the dataset's internal member names
+                    columnNames[idx] = new String(datasetMemberNames[i]);
+                    columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
+
                     if (types[i].getDatatypeClass() == Datatype.CLASS_ARRAY) {
                         Datatype baseType = types[i].getBasetype();
 
                         if (baseType.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
+                            // If member is type array of compound, list member names in column header
                             List<String> memberNames = baseType.getCompoundMemberNames();
-
-                            columnNames[idx] = new String(columnNamesAll[i]);
-                            columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
 
                             columnNames[idx] += "\n\n[ ";
 
@@ -4223,62 +4230,41 @@ public class DefaultTableView implements TableView {
                             }
 
                             columnNames[idx] += " ]";
-
-                            idx++;
-                            continue;
                         }
                     }
 
-                    columnNames[idx] = new String(columnNamesAll[i]);
-                    columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
                     idx++;
                 }
             }
 
-            String[] subColumnNames = columnNames;
-            columnLabels = columnNames;
             if (datasetWidth > 1) {
-                // multi-dimension compound dataset
-                subColumnNames = new String[datasetWidth * columnNames.length];
-                columnLabels = new String[datasetWidth * columnNames.length];
-                int halfIdx = columnNames.length / 2;
+                // Multi-dimension compound dataset, copy column names into new arrays
+                // of size (dataset width * count of selected dataset members)
+                String[] newColumnNames = new String[datasetWidth * columnNames.length];
+                String[] newColumnNamesFull = new String[datasetWidth * columnNames.length];
                 for (int i = 0; i < datasetWidth; i++) {
                     for (int j = 0; j < columnNames.length; j++) {
-                        // display column index only once, in the middle of the
-                        // compound fields
-                        if (j == halfIdx) {
-                            subColumnNames[i * columnNames.length + j] = (i + indexBase) + "\n " + columnNames[j];
-                        }
-                        else {
-                            subColumnNames[i * columnNames.length + j] = " \n " + columnNames[j];
-                        }
-
-                        // This column's name is whatever follows the last nesting character '->'
-                        int nestingPosition = columnNames[j].lastIndexOf("->");
-                        if (nestingPosition >= 0) {
-                            columnLabels[i * columnNames.length + j] = " \n " + columnNames[j].substring(nestingPosition + 2);
-                        }
-                        else {
-                            columnLabels[i * columnNames.length + j] = " \n " + columnNames[j];
-                        }
+                        newColumnNames[i * columnNames.length + j] = columnNames[j];
+                        newColumnNamesFull[i * columnNames.length + j] = columnNames[j];
                     }
                 }
+
+                columnNames = newColumnNames;
+                columnNamesFull = newColumnNamesFull;
             }
             else {
-                columnLabels = subColumnNames.clone();
-                for (int j = 0; j < columnLabels.length; j++) {
-                    // This column's name is whatever follows the last nesting character '->'
-                    int nestingPosition = columnNames[j].lastIndexOf("->");
-                    if (nestingPosition >= 0) {
-                        columnLabels[j] = " \n " + columnNames[j].substring(nestingPosition + 2);
-                    }
-                    else {
-                        columnLabels[j] = " \n " + columnNames[j];
-                    }
-                }
+                // Make a copy of column names so changes to column names don't affect the full column names
+                columnNamesFull = Arrays.copyOf(columnNames, columnNames.length);
             }
 
-            allColumnNames = subColumnNames;
+            // Simplify any nested field column names down to their base names. E.g., a nested field
+            // with the full name 'nested_name->a_name' has a simplified column name of 'a_name'
+            for (int j = 0; j < columnNames.length; j++) {
+                int nestingPosition = columnNames[j].lastIndexOf("->");
+
+                // If this is a nested field, this column's name is whatever follows the last nesting character '->'
+                if (nestingPosition >= 0) columnNames[j] = columnNames[j].substring(nestingPosition + 2);
+            }
         }
 
         @Override
@@ -4293,7 +4279,7 @@ public class DefaultTableView implements TableView {
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            return columnLabels[columnIndex];
+            return columnNames[columnIndex];
         }
 
         @Override
@@ -4309,7 +4295,7 @@ public class DefaultTableView implements TableView {
         public CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer, SelectionLayer selectionLayer, ColumnGroupModel columnGroupModel) {
             super(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
 
-            final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).allColumnNames;
+            final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNamesFull;
             final int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
             final int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
 
