@@ -1452,7 +1452,8 @@ public class H5Datatype extends Datatype {
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
                         && tclass != HDF5Constants.H5T_OPAQUE
-                        && tclass != HDF5Constants.H5T_COMPOUND) {
+                        && tclass != HDF5Constants.H5T_COMPOUND
+                        && tclass != HDF5Constants.H5T_ARRAY) {
                     int tsign = H5.H5Tget_sign(tid);
                     if (tsign == HDF5Constants.H5T_SGN_NONE) {
                         unsigned = true;

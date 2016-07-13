@@ -3645,6 +3645,22 @@ public class DefaultTableView implements TableView {
 
             if (isArray) {
                 // ARRAY dataset
+
+                stringBuffer.setLength(0); // clear the old string
+
+                if (dtype instanceof H5Datatype) {
+                    // Since variable-length strings have no datatype size,
+                    // just directly append the data to the string buffer
+                    if (((H5Datatype) dtype).isVLEN() && dtype.getBasetype().getDatatypeClass() == Datatype.CLASS_STRING) {
+                        stringBuffer.append(Array.get(dataValue, 0));
+                        for (int i = 0; i < dtype.getArrayDims()[0]; i++) {
+                            if (i > 0) stringBuffer.append(", ");
+                            stringBuffer.append(Array.get(dataValue, i));
+                        }
+                        return stringBuffer;
+                    }
+                }
+
                 long arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
                 log.trace("ScalarDS:ScalarDSDataProvider:getValueAt ARRAY dataset size={} isDisplayTypeChar={} isUINT64={}",
                         arraySize, isDisplayTypeChar, isUINT64);

@@ -237,10 +237,12 @@ public class H5ScalarDS extends ScalarDS {
                     int baseclass = H5.H5Tget_class(basetid);
                     isArrayOfCompound = (baseclass == HDF5Constants.H5T_COMPOUND);
                     isArrayOfVLEN = (baseclass == HDF5Constants.H5T_VLEN);
+                    isVLEN = isVLEN || ((baseclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(basetid));
+                    isVLEN = isVLEN || H5.H5Tdetect_class(basetid, HDF5Constants.H5T_VLEN);
                 }
 
                 isText = (tclass == HDF5Constants.H5T_STRING);
-                isVLEN = ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
+                isVLEN = isVLEN || ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
                 isEnum = (tclass == HDF5Constants.H5T_ENUM);
                 isUnsigned = H5Datatype.isUnsigned(tid);
                 isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
