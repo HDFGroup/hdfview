@@ -588,21 +588,21 @@ public class DefaultImageView implements ImageView {
         /*
          * ImageIO does not support tiff by default
          */
-        item = new MenuItem(saveAsMenu, SWT.PUSH);
-        item.setText("TIFF");
-        item.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                String filetype = Tools.FILE_TYPE_TIFF;
-
-                try {
-                    saveImageAs(filetype);
-                }
-                catch (Exception ex) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
-                }
-            }
-        });
+//        item = new MenuItem(saveAsMenu, SWT.PUSH);
+//        item.setText("TIFF");
+//        item.addSelectionListener(new SelectionAdapter() {
+//            public void widgetSelected(SelectionEvent e) {
+//                String filetype = Tools.FILE_TYPE_TIFF;
+//
+//                try {
+//                    saveImageAs(filetype);
+//                }
+//                catch (Exception ex) {
+//                    shell.getDisplay().beep();
+//                    Tools.showError(shell, ex.getMessage(), shell.getText());
+//                }
+//            }
+//        });
 
         item = new MenuItem(saveAsMenu, SWT.PUSH);
         item.setText("PNG");
@@ -1756,9 +1756,9 @@ public class DefaultImageView implements ImageView {
         
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
             filter = DefaultFileFilter.getFileFilterJPEG();
-        } else if (type.equals(Tools.FILE_TYPE_TIFF)) {
+        } /* else if (type.equals(Tools.FILE_TYPE_TIFF)) {
             filter = DefaultFileFilter.getFileFilterTIFF();
-        }
+        } */
         else if (type.equals(Tools.FILE_TYPE_PNG)) {
             filter = DefaultFileFilter.getFileFilterPNG();
         }

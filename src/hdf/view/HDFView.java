@@ -145,9 +145,6 @@ public class HDFView implements ViewManager {
     + "Copyright " + '\u00a9' + " 2006-2016 The HDF Group.\n"
     + "All rights reserved.";
 
-    /* String buffer holding the status message */
-    private StringBuffer               message;
-
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
     private ToolBar                    toolBar;
 
@@ -1148,7 +1145,6 @@ public class HDFView implements ViewManager {
         status.setEditable(false);
         status.setFont(currentFont);
 
-        message = new StringBuffer();
         showStatus("HDFView root - " + rootDir);
         showStatus("User property file - " + ViewProperties.getPropertyFile());
 
@@ -1215,9 +1211,8 @@ public class HDFView implements ViewManager {
      *            the message to display.
      */
     public void showStatus(String msg) {
-        message.append(msg);
-        message.append("\n");
-        status.setText(message.toString());
+        status.append(msg);
+        status.append("\n");
     }
 
     public void showMetaData(HObject obj) {
