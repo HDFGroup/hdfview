@@ -388,8 +388,8 @@ public class DefaultTreeView implements TreeView {
             public void menuDetected(MenuDetectEvent e) {
                 Display display = Display.getDefault();
 
-                Point pt = display.map(null, tree, new Point(e.x, e.y));
-                TreeItem item = tree.getItem(pt);
+//                Point pt = display.map(null, tree, new Point(e.x, e.y));
+                TreeItem item = tree.getItem(new Point(e.x, e.y));
                 if(item == null) { e.doit = false; return; }
 
                 FileFormat theFile = null;

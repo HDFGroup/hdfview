@@ -9,7 +9,8 @@ import org.junit.runners.Suite;
     TestHDFViewLibBounds.class,
     TestHDFViewDatasetFrameSelection.class,
     TestHDFViewImageConversion.class,
-    TestTreeViewNewMenu.class,
+    TestTreeViewFiles.class,
+    TestTreeViewNewMenu.class
 })
 
 public class TestAll {

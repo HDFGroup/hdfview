@@ -175,11 +175,11 @@ public abstract class AbstractWindowTest {
         }
     }
 
-    protected void testSamplePixel(int theX, int theY, String requiredValue) {
+    protected void testSamplePixel(final int theX, final int theY, String requiredValue) {
         try {
             SWTBotShell botshell = bot.activeShell();
             SWTBot thisbot = botshell.bot();
-            SWTBotCanvas imageCanvas = thisbot.canvas(1);
+            final SWTBotCanvas imageCanvas = thisbot.canvas(1);
 
             // Make sure Show Values is selected
             SWTBotMenu showValuesMenuItem = thisbot.menu("Image").menu("Show Values"); 
