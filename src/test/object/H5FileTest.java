@@ -1357,7 +1357,6 @@ public class H5FileTest {
             fail("H5File.updateReferenceDataset() failed. " + ex);
         }
 
-        int[] otype = { 1 };
         long obj_type = -1;
         long did = -1;
         byte[] read_data = new byte[3920];
@@ -1376,7 +1375,7 @@ public class H5FileTest {
             for (int i = 0; i < 17; i++) {
                 System.arraycopy(read_data, srcPos, rbuf0, 0, 8);
                 srcPos = srcPos + 8;
-                obj_type = H5.H5Rget_obj_type(file.getFID(), HDF5Constants.H5R_OBJECT, rbuf0, otype);
+                obj_type = H5.H5Rget_obj_type(file.getFID(), HDF5Constants.H5R_OBJECT, rbuf0);
                 assertTrue(obj_type == H5TestFile.OBJ_TYPES[i]);
             }
         }

@@ -398,7 +398,7 @@ public class H5DatatypeTest {
         assertFalse(type.getDatatypeSize() == 4);
 
         try {
-            tid = H5.H5Topen(testFile.getFID(), TNAME);
+            tid = H5.H5Topen(testFile.getFID(), TNAME, HDF5Constants.H5P_DEFAULT);
         }
         catch (final Exception ex) {
             fail("H5Topen() failed. " + ex);

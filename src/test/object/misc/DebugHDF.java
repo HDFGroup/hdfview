@@ -406,7 +406,7 @@ public class DebugHDF {
         tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
         H5.H5Tset_size(tid, 1);
         sid = H5.H5Screate_simple(rank, dims, null);
-        did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT);
+        did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byteData);
 
         H5.H5Dclose(did);
@@ -432,7 +432,7 @@ public class DebugHDF {
              	System.arraycopy(strData[i].getBytes(), 0, byteData, i*strLen, strLen);
             }
 
-            did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT);
+            did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byteData);
 
             H5.H5Dclose(did);
@@ -512,7 +512,7 @@ public class DebugHDF {
     	try {
     		if ((file_id >= 0) && (type_id >= 0) && (dataspace_id >= 0))
     			dataset_id = H5.H5Dcreate(file_id, dname, type_id,
-    					dataspace_id, HDF5Constants.H5P_DEFAULT);
+    					dataspace_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
     	}
     	catch (Exception e) {
     		e.printStackTrace();
@@ -660,8 +660,8 @@ public class DebugHDF {
 		H5.H5Pset_deflate(dcplId, 9);
 		H5.H5Pset_chunk(dcplId, 1, chunk_dims);
 
-		int datasetId = H5.H5Dcreate(fileId, "/ds0",
-				strtypeId, dataspaceId, dcplId);
+		long datasetId = H5.H5Dcreate(fileId, "/ds0",
+				strtypeId, dataspaceId, HDF5Constants.H5P_DEFAULT, dcplId, HDF5Constants.H5P_DEFAULT);
 		
 		long[] hyperslab_dims = { rowCount};
 		memspaceId = H5.H5Screate_simple(1, hyperslab_dims, hyperslab_dims);
@@ -752,7 +752,7 @@ public class DebugHDF {
 
     		fid = H5.H5Fopen(filename, HDF5Constants.H5F_ACC_RDWR,
     				HDF5Constants.H5P_DEFAULT);
-    		did = H5.H5Dopen(fid, "test");
+    		did = H5.H5Dopen(fid, "test", HDF5Constants.H5P_DEFAULT);
 
     		long t0 = System.currentTimeMillis();
     		H5.H5Dread_float(did, HDF5Constants.H5T_NATIVE_FLOAT,
@@ -1720,31 +1720,31 @@ public class DebugHDF {
     // see bug#1042
     private static void testH5Array(final String filename) throws Exception 
     {
-        int array_dims[] = {20};
+        long array_dims[] = {20};
         long fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         long sid = H5.H5Screate_simple(2, new long[] {3,2}, null);
 
-        long tid = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_UCHAR, 1, array_dims, null); 
-        long did = H5.H5Dcreate(fid, "/ArrayOfChar", tid, sid, HDF5Constants.H5P_DEFAULT);
+        long tid = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_UCHAR, 1, array_dims); 
+        long did = H5.H5Dcreate(fid, "/ArrayOfChar", tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         byte buf[] = "this is a test. random characters: jflda;jfkl;dsajfiewqptfidsjfvkcnvjkhgqjreojfdkla;jfsdatuieqkdkalfjdptueqfjdla;vndasjf".getBytes();
         H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
         H5.H5Tclose(tid);
         H5.H5Dclose(did);
 
-        int array_dims2[] = {2, 5};
-        tid = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_INT, 2, array_dims2, null); 
-        did = H5.H5Dcreate(fid, "/ArrayOfInt", tid, sid, HDF5Constants.H5P_DEFAULT);
+        long array_dims2[] = {2, 5};
+        tid = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_INT, 2, array_dims2); 
+        did = H5.H5Dcreate(fid, "/ArrayOfInt", tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         int buf2[] = {0,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,20,1,2,3,4,5,6,7,8,9,30,1,2,3,4,5,6,7,8,9,40,1,2,3,4,5,6,7,8,9,50,1,2,3,4,5,6,7,8,9};
         H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf2);
         H5.H5Tclose(tid);
         H5.H5Dclose(did);
         
         array_dims[0] = 2;
-        tid = H5.H5Tarray_create(HDF5Constants.H5T_C_S1, 1, array_dims, null); 
+        tid = H5.H5Tarray_create(HDF5Constants.H5T_C_S1, 1, array_dims); 
         H5.H5Tset_size(tid, 50);
-        did = H5.H5Dcreate(fid, "/ArrayOfStr", tid, sid, HDF5Constants.H5P_DEFAULT);
-        int totalSize = array_dims[0]*50*3*2;
-        buf = new byte[totalSize];
+        did = H5.H5Dcreate(fid, "/ArrayOfStr", tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        long totalSize = array_dims[0]*50*3*2;
+        buf = new byte[(int) totalSize];
         byte tmp[] = "HDF5 is a completely new Hierarchical Data Format product consisting of a data format specification and a supporting library implementation. HDF5 is designed to address some of the limitations of the older HDF product and to address current and anticipated requirements of modern systems and applications".getBytes();
         System.arraycopy(tmp, 0, buf, 0, tmp.length);
         H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
@@ -2175,7 +2175,7 @@ public class DebugHDF {
                 gzip, mnames, mdtypes, null, comp_data);
         file.createCompoundDS(dset_name, parent, dims, null, chunks, 
                 gzip, mnames, mdtypes, null, comp_data);
-        H5.H5Glink(parent.open(), HDF5Constants.H5L_TYPE_SOFT, dset_name, "/soft_link");
+        H5.H5Lcreate_soft(dset_name, parent.open(), "/soft_link", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
         try { file.close(); } catch (final Exception ex) {}
      }
@@ -2221,7 +2221,7 @@ public class DebugHDF {
                 H5.H5Pset_deflate(plist, gzip);
             }
         }
-        final int did = H5.H5Dcreate(file.getFID(), "/1D compound Strings", tid, sid, plist);
+        final long did = H5.H5Dcreate(file.getFID(), "/1D compound Strings", tid, sid, plist, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         try {H5.H5Pclose(plist);} catch (final Exception ex) {};
         try {H5.H5Tclose(tid);} catch (final Exception ex) {};
         try {H5.H5Sclose(sid);} catch (final Exception ex) {};
@@ -2354,13 +2354,13 @@ public class DebugHDF {
     	
     	long plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
     	H5.H5Pset_fill_value(plist, HDF5Constants.H5T_NATIVE_INT, fill_int);
-    	long did = H5.H5Dcreate(fid, "/int", HDF5Constants.H5T_NATIVE_INT, sid, plist );
+    	long did = H5.H5Dcreate(fid, "/int", HDF5Constants.H5T_NATIVE_INT, sid, plist, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
     	H5.H5Dclose(did);
     	H5.H5Pclose(plist);
 
     	plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
     	H5.H5Pset_fill_value(plist, HDF5Constants.H5T_NATIVE_FLOAT, fill_float);
-    	did = H5.H5Dcreate(fid, "/float", HDF5Constants.H5T_NATIVE_FLOAT, sid, plist );
+    	did = H5.H5Dcreate(fid, "/float", HDF5Constants.H5T_NATIVE_FLOAT, sid, plist, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
     	H5.H5Dclose(did);
     	H5.H5Pclose(plist);
     	
@@ -2371,7 +2371,7 @@ public class DebugHDF {
     	final float[] fill_float_read = {0f};
     	
     	fid = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
-    	did = H5.H5Dopen(fid,"/int");
+    	did = H5.H5Dopen(fid,"/int", HDF5Constants.H5P_DEFAULT);
     	plist = H5.H5Dget_create_plist(did);
     	H5.H5Pget_fill_value(plist, HDF5Constants.H5T_NATIVE_INT, fill_int_read);
     	if (fill_int_read[0] == fill_int[0]) {
@@ -2382,7 +2382,7 @@ public class DebugHDF {
     	H5.H5Dclose(did);
     	H5.H5Pclose(plist);
     	
-    	did = H5.H5Dopen(fid,"/float");
+    	did = H5.H5Dopen(fid,"/float", HDF5Constants.H5P_DEFAULT);
     	plist = H5.H5Dget_create_plist(did);
     	H5.H5Pget_fill_value(plist, HDF5Constants.H5T_NATIVE_FLOAT, fill_float_read);
     	if (fill_float_read[0] == fill_float[0]) {
@@ -2417,7 +2417,7 @@ public class DebugHDF {
         System.out.println("The num of datatypes open: " + numDatatypes);
 
         // get open object handles
-        final int[] objIds = new int[numDatatypes];
+        final long[] objIds = new long[(int) numDatatypes];
         H5.H5Fget_obj_ids(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE, numDatatypes, objIds);
 
 
@@ -3224,7 +3224,7 @@ public class DebugHDF {
     private static void testchunkchche() throws Exception {
         final long pid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
         final int[] mdcNumElements = new int[1];
-        final int[] rdccNumElements = new int[1];
+        final long[] rdccNumElements = new long[1];
         final long[] rdccNumBytes = new long[1];
         final double[] rdccW0 = new double[1];
 
@@ -3242,7 +3242,7 @@ public class DebugHDF {
 
         final long fid = H5.H5Fopen("H:\\java\\java8\\xcao\\test\\bigdata.h5",
             HDF5Constants.H5F_ACC_RDWR, pid);
-        final long did = H5.H5Dopen(fid, "/PI");
+        final long did = H5.H5Dopen(fid, "/PI", HDF5Constants.H5P_DEFAULT);
         final long tid = H5.H5Dget_type(did);
         final long mtid = H5.H5Tget_native_type(tid);
         H5.H5Tclose(tid);
