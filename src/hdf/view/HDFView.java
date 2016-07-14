@@ -1221,8 +1221,9 @@ public class HDFView implements ViewManager {
         log.trace("showMetaData: start");
 
         // Get the metadata information before adding GUI components */
+        int numAttributes = 0;
         try {
-            obj.getMetadata();
+            numAttributes = obj.getMetadata().size();
         }
         catch (Exception ex) {
             log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
@@ -1307,6 +1308,14 @@ public class HDFView implements ViewManager {
             label = new Label(generalInfoGroup, SWT.RIGHT);
             label.setFont(currentFont);
             label.setText(typeStr);
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Number of Attributes: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(String.valueOf(numAttributes));
 
             if (isH5) {
                 label = new Label(generalInfoGroup, SWT.LEFT);
@@ -1492,6 +1501,14 @@ public class HDFView implements ViewManager {
             label = new Label(generalInfoGroup, SWT.RIGHT);
             label.setFont(currentFont);
             label.setText(typeStr);
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Number of Attributes: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(String.valueOf(numAttributes));
         }
 
         log.trace("showMetaData: object extra info");
