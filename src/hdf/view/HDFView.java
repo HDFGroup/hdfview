@@ -1318,31 +1318,6 @@ public class HDFView implements ViewManager {
             label.setText(String.valueOf(numAttributes));
 
             if (isH5) {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Object Ref:       ");
-            }
-            else {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Tag, Ref:        ");
-            }
-
-            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
-            String oidStr = null;
-            long[] OID = obj.getOID();
-            if (OID != null) {
-                oidStr = String.valueOf(OID[0]);
-                for (int i = 1; i < OID.length; i++) {
-                    oidStr += ", " + OID[i];
-                }
-            }
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(oidStr);
-
-            if (isH5) {
                 int[] libver = null;
 
                 try {
@@ -1509,6 +1484,31 @@ public class HDFView implements ViewManager {
             label = new Label(generalInfoGroup, SWT.RIGHT);
             label.setFont(currentFont);
             label.setText(String.valueOf(numAttributes));
+
+            if (isH5) {
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(currentFont);
+                label.setText("Object Ref:       ");
+            }
+            else {
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(currentFont);
+                label.setText("Tag, Ref:        ");
+            }
+
+            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+            String oidStr = null;
+            long[] OID = obj.getOID();
+            if (OID != null) {
+                oidStr = String.valueOf(OID[0]);
+                for (int i = 1; i < OID.length; i++) {
+                    oidStr += ", " + OID[i];
+                }
+            }
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(oidStr);
         }
 
         log.trace("showMetaData: object extra info");
