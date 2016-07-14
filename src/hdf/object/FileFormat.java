@@ -923,7 +923,8 @@ public abstract class FileFormat extends File {
     public final int getNumberOfMembers() {
         HObject rootObject = getRootObject();
 
-        if (rootObject != null) return ((Group) rootObject).depthFirstMemberList().size();
+        // Account for root object
+        if (rootObject != null) return ((Group) rootObject).depthFirstMemberList().size() + 1;
 
         return 0;
     }
