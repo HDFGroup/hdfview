@@ -143,6 +143,8 @@ public class H5TestFile {
         DATA_COMP.add(1, DATA_FLOAT);
         DATA_COMP.add(2, DATA_STR);
         DATA_COMP.add(3, DATA_LONG);
+        
+        log.debug("filename: " + fileName);
 
         file = new H5File(fileName, FileFormat.CREATE);
         file.open();

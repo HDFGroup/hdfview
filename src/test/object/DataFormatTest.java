@@ -111,8 +111,8 @@ public class DataFormatTest {
      */
     @Test
     public void testGetFile() {
-        log.debug("testGetFile");
-        if (!testGroup.getFile().equals(H5TestFile.NAME_FILE_H5)) {
+        log.debug("testGetFile: {}",testGroup.getFile());
+        if (!testGroup.getFile().endsWith(H5TestFile.NAME_FILE_H5)) {
             fail("getFile() fails.");
         }
         long nObjs = 0;
@@ -134,9 +134,10 @@ public class DataFormatTest {
      */
     @Test
     public void testGetMetadata() {
-        log.debug("testGetMetadata");
+        log.debug("testGetMetadata start");
         Attribute strAttr = null;
         Attribute arrayIntAttr = null;
+        Attribute imgAttr = null;
         List mdataList = null;
         try {
             mdataList = testGroup.getMetadata();
@@ -144,9 +145,20 @@ public class DataFormatTest {
         catch (final Exception ex) {
             fail("getMetadata() failed. " + ex);
         }
-        strAttr = (Attribute) mdataList.get(0);
-        arrayIntAttr = (Attribute) mdataList.get(1);
+        for (int ndx=0; ndx < mdataList.size(); ndx++){
+            Attribute attrobj = (Attribute) mdataList.get(ndx);
+            if(attrobj.getType().getDatatypeClass()==Datatype.CLASS_STRING) {
+                String[] value = (String[]) attrobj.getValue();
+                if (value[0].equals("IMAGE"))
+                    imgAttr = attrobj;
+                else
+                    strAttr = attrobj;
+            }
+            else
+                arrayIntAttr = attrobj;
+        }
         String[] value = (String[]) strAttr.getValue();
+        log.debug("testGetMetadata-strAttr:{}", value[0]);
         if (!value[0].equals("String attribute.")) {
             fail("getMdata() failed.");
         }
@@ -206,10 +218,22 @@ public class DataFormatTest {
 
         Attribute strAttr = null;
         Attribute arrayIntAttr = null;
+        Attribute imgAttr = null;
 
-        strAttr = (Attribute) mdataList.get(0);
-        arrayIntAttr = (Attribute) mdataList.get(1);
+        for (int ndx=0; ndx < mdataList.size(); ndx++){
+            Attribute attrobj = (Attribute) mdataList.get(ndx);
+            if(attrobj.getType().getDatatypeClass()==Datatype.CLASS_STRING) {
+                String[] value = (String[]) attrobj.getValue();
+                if (value[0].equals("IMAGE"))
+                    imgAttr = attrobj;
+                else
+                    strAttr = attrobj;
+            }
+            else
+                arrayIntAttr = attrobj;
+        }
         String[] value = (String[]) strAttr.getValue();
+        log.debug("testWriteMetadata-strAttr:{}",value[0]);
 
         if (!value[0].equals("String attribute.")) {
             fail("writeMdata() failed.");
@@ -223,10 +247,11 @@ public class DataFormatTest {
                 fail("writeValue() failed");
             }
         }
-        strAttr = (Attribute) mdataList.get(2);
-        value = (String[]) strAttr.getValue();
+
+        value = (String[]) imgAttr.getValue();
+        log.debug("testWriteMetadata-imgAttr:{}",value[0]);
         if (!value[0].equals("IMAGE")) {
-            fail("writeMetadata() failed.");
+            fail("writeIMGMetadata() failed.");
         }
         long nObjs = 0;
         try {
@@ -255,9 +280,9 @@ public class DataFormatTest {
             fail("getMetadata() failed. " + ex.getMessage());
         }
 
-        Attribute strAttr = (Attribute) mdataList.get(2);
+        Attribute theAttr = (Attribute) mdataList.get(2);
         try {
-            testGroup.removeMetadata(strAttr);
+            testGroup.removeMetadata(theAttr);
         }
         catch (Exception e) {
             fail("removeMetadata() failed " + e.getMessage());

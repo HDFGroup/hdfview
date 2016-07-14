@@ -35,6 +35,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -43,10 +44,10 @@ import org.junit.Test;
  * This class tests all the public methods in H5ScalarDS class.
  * <p>
  * The test file contains the following objects.
- * 
+ *
  * <pre>
- * 
- * 
+ *
+ *
  *         /dataset_byte            Dataset {50, 10}
  *         /dataset_comp            Dataset {50, 10}
  *         /dataset_enum            Dataset {50, 10}
@@ -82,7 +83,7 @@ import org.junit.Test;
  * <li>
  * </ul>
  * </ul>
- * 
+ *
  * @author Peter Cao, The HDF Group
  */
 public class H5ScalarDSTest {
@@ -135,6 +136,7 @@ public class H5ScalarDSTest {
 
     @Before
     public void openFiles() throws Exception {
+        log.trace("Before: openFiles start");
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -143,26 +145,40 @@ public class H5ScalarDSTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, -1, -1);
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, -1, -1);
+            typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, -1, -1);
+            typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, -1, -1);
 
-        testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+            testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testFile);
 
-        testFile.open();
+        try {
+            log.trace("Before: openFiles open");
+            testFile.open();
 
-        testDataset = (H5ScalarDS) testFile.get(DNAME);
+            testDataset = (H5ScalarDS) testFile.get(DNAME);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testDataset);
+        log.trace("Before: openFiles finish");
     }
 
     @After
     public void removeFiles() throws Exception {
+        log.trace("After: removeFiles start");
         if (testFile != null) {
             try {
                 testFile.close();
             }
             catch (final Exception ex) {
+                ex.printStackTrace();
             }
             testFile = null;
         }
@@ -174,6 +190,7 @@ public class H5ScalarDSTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
+        log.trace("After: removeFiles finish");
     }
 
     /**
@@ -564,7 +581,7 @@ public class H5ScalarDSTest {
      * <li>read a subset of the test dataset
      * <li>Repeat all above
      * <li>Read all types scalar datasets
-     * 
+     *
      * </ul>
      */
     @Test
@@ -641,7 +658,7 @@ public class H5ScalarDSTest {
      * <li>Read an external dataset
      * </ul>
      */
-    @Test
+    @Ignore
     public void testReadExt() {
         log.debug("testReadExt");
 
@@ -650,29 +667,31 @@ public class H5ScalarDSTest {
 
         try {
             file = new H5File("test/object/h5ex_d_extern.hdf5");
-            dset = (Dataset) file.get("/DS1");
+            try {
+                dset = (Dataset) file.get("/DS1");
+            }
+            catch (Exception ex) {
+                fail("Failed to get datset.");
+            }
+
+            assertNotNull(dset);
+
+            try {
+                dset.read();
+            }
+            catch (Exception ex) {
+                fail("Failed to read data from an external dataset.");
+            }
         }
         catch (Exception ex) {
-            ;
+            fail("Failed to open an external file.");
         }
-
-        assertNotNull(dset);
-
-        try {
-            dset.read();
+        finally {
+            if (file != null) {
+                try {file.close();} catch(Exception ex){ex.printStackTrace();}
+            }
         }
-        catch (Exception ex) {
-            fail("Failed to read data form an external dataset.");
-        }
-
-        try {
-            if (file != null)
-                file.close();
-        }
-        catch (Exception ex) {
-            ;
-        }
-
+        log.debug("testReadExt finish");
     }
 
     /**
