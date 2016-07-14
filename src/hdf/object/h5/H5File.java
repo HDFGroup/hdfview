@@ -472,7 +472,7 @@ public class H5File extends FileFormat {
                 }
 
                 Object value = null;
-                if (isVLEN || is_variable_str || isCompound || (isScalar && tclass == HDF5Constants.H5T_ARRAY)) {
+                if (isVLEN || is_variable_str) {
                     String[] strs = new String[(int) lsize];
                     for (int j = 0; j < lsize; j++) {
                         strs[j] = "";
@@ -483,6 +483,20 @@ public class H5File extends FileFormat {
                     }
                     catch (Exception ex) {
                         log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
+                        ex.printStackTrace();
+                    }
+                    value = strs;
+                }
+                else if (isCompound || (isScalar && tclass == HDF5Constants.H5T_ARRAY)) {
+                    String[] strs = new String[(int) lsize];
+                    for (int j = 0; j < lsize; j++) {
+                        strs[j] = "";
+                    }
+                    try {
+                        log.trace("getAttribute: attribute[{}] H5AreadComplex", i);
+                        H5.H5AreadComplex(aid, tid, strs);
+                    }
+                    catch (Exception ex) {
                         ex.printStackTrace();
                     }
                     value = strs;
