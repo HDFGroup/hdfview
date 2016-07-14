@@ -21,11 +21,9 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.print.Doc;
 import javax.print.DocFlavor;
@@ -43,11 +41,9 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 
@@ -87,18 +83,12 @@ public class DefaultTextView implements TextView {
      */
     private String[]                text;
 
-    /** The tables to display the text content */
-    private Table                   fixedTable;
+    /** The table to display the text content */
     private Table                   table;
-
-    // Text areas to hold the text.
-    private Text[]                  textAreas;
 
     private boolean                 isReadOnly = false;
 
     private boolean                 isTextChanged = false;
-
-    private TextAreaEditor          textEditor = null;
 
     private RowHeader               rowHeaders = null;
 
@@ -109,7 +99,7 @@ public class DefaultTextView implements TextView {
     }
 
     /**
-     * Constructs an TextView.
+     * Constructs a TextView.
      *
      * @param theView
      *            the main HDFView.
@@ -124,7 +114,7 @@ public class DefaultTextView implements TextView {
         shell = new Shell(display, SWT.SHELL_TRIM);
 
         shell.setData(this);
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (isTextChanged && !isReadOnly) {
@@ -138,7 +128,7 @@ public class DefaultTextView implements TextView {
                         updateValueInFile();
                     }
                 }
-                
+
                 viewer.removeDataView(DefaultTextView.this);
             }
         });
@@ -146,7 +136,7 @@ public class DefaultTextView implements TextView {
         GridLayout layout = new GridLayout(2, false);
         layout.marginWidth = layout.marginHeight = layout.horizontalSpacing = 0;
         shell.setLayout(layout);
-        
+
         try {
             curFont = new Font(
                     display,
@@ -157,15 +147,14 @@ public class DefaultTextView implements TextView {
         catch (Exception ex) {
             curFont = null;
         }
-        
+
         shell.setFont(curFont);
 
         viewer = theView;
-        
+
         text = null;
         table = null;
         dataset = null;
-        //textEditor = new TextAreaEditor(this);
 
         if (ViewProperties.isIndexBase1())
             indexBase = 1;
@@ -210,131 +199,19 @@ public class DefaultTextView implements TextView {
             return;
         }
 
-        int rank = dataset.getRank();
-        long start[] = dataset.getStartDims();
-        long count[] = dataset.getSelectedDims();
-
-        String colName = "Data selection:   ["+start[0];
-        for (int i=1; i<rank; i++) {
-            colName += ", "+start[i];
-        }
-        colName += "] ~ ["+(start[0]+count[0]-1);
-        for (int i=1; i<rank; i++) {
-            colName += ", "+(start[i]+count[i]-1);
-        }
-        colName += "]";
-
-        //JTableHeader colHeader = table.getTableHeader();
-        //colHeader.setReorderingAllowed(false);
-        //colHeader.setBackground(Color.black);
-
-        //rowHeaders = new RowHeader(table, dataset);
-
-        //scrollingTable.getVerticalBar().setIncrement(100);
-        //scrollingTable.getHorizontalBar().setIncrement(100);
-
-        long[] startArray = dataset.getStartDims();
-        long[] strideArray = dataset.getStride();
-        int[] selectedIndex = dataset.getSelectedIndex();
-        int startIndex = (int) startArray[selectedIndex[0]];
-        int stride = (int) strideArray[selectedIndex[0]];
-
-        ScrolledComposite fixedTableScroller = new ScrolledComposite(shell, SWT.V_SCROLL);
-        fixedTableScroller.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-        fixedTableScroller.setExpandHorizontal(true);
-        fixedTableScroller.setExpandVertical(true);
-        fixedTableScroller.setAlwaysShowScrollBars(true);
-
-        fixedTableScroller.getVerticalBar().addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event e) {
-                table.setTopIndex(fixedTable.getTopIndex());
-            }
-        });
-
-        fixedTable = new Table(fixedTableScroller, SWT.FULL_SELECTION | SWT.MULTI | SWT.NO_SCROLL);
-        fixedTable.setHeaderVisible(true);
-        fixedTable.addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event e) {
-                table.setSelection(fixedTable.getSelectionIndices());
-            }
-        });
-
-        fixedTableScroller.setContent(fixedTable);
-
-        TableColumn fixedColumn = new TableColumn(fixedTable, SWT.NONE);
-        fixedColumn.setText("");
-        fixedColumn.setAlignment(SWT.CENTER);
-        fixedColumn.setWidth(70);
-        fixedColumn.setMoveable(false);
-        fixedColumn.setResizable(false);
-
-        ScrolledComposite tableScroller = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
+        ScrolledComposite tableScroller = new ScrolledComposite(shell, SWT.V_SCROLL);
         tableScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         tableScroller.setExpandHorizontal(true);
         tableScroller.setExpandVertical(true);
         tableScroller.setAlwaysShowScrollBars(true);
 
-        tableScroller.getVerticalBar().addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event e) {
-                fixedTable.setTopIndex(table.getTopIndex());
-            }
-        });
-
-        table = new Table(tableScroller, SWT.FULL_SELECTION | SWT.MULTI | SWT.NO_SCROLL);
-        table.setHeaderVisible(true);
-        table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 2));
-        table.addListener(SWT.MouseDoubleClick, CellEditor);
-        table.addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event e) {
-                fixedTable.setSelection(table.getSelectionIndices());
-            }
-        });
-
-        table.addListener(SWT.Resize, new Listener() {
-            public void handleEvent(Event e) {
-                table.getColumn(0).setWidth(table.getBounds().width);
-            }
-        });
-
+        table = createTable(tableScroller);
         tableScroller.setContent(table);
-
-        TableColumn column = new TableColumn(table, SWT.NONE);
-        column.setText(colName);
-        column.setMoveable(false);
-        column.setResizable(false);
-        column.setWidth(400);
-
-        for (int i = 0; i < start[0] + count[0]; i++) {
-            TableItem item = new TableItem(fixedTable, SWT.NONE);
-            item.setText(String.valueOf(startIndex + indexBase + i * stride));
-
-            item = new TableItem(table, SWT.NONE);
-            item.setText(text[i]);
-        }
-
-        //ScrollBar contentTableBar = table.getHorizontalBar();
-        //Label spacer = new Label(fixedTableScroller, SWT.NONE);
-        //GridData data = new GridData();
-        //data.heightHint = contentTableBar.getSize().y;
-        //spacer.setLayoutData(data);
-        //spacer.setVisible(false);
-
-
-        //JViewport viewp = new JViewport();
-        //viewp.add(rowHeaders);
-        //viewp.setPreferredSize(rowHeaders.getPreferredSize());
-        //scrollingTable.setRowHeader(viewp);
-
-        //TableColumnModel cmodel = table.getColumnModel();
-        TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
-
-        //cmodel.getColumn(0).setCellRenderer(textAreaRenderer);
-        //cmodel.getColumn(0).setCellEditor(textEditor);
 
         shell.setMenuBar(createMenuBar());
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -356,58 +233,64 @@ public class DefaultTextView implements TextView {
     }
 
     /**
-     * Creates a Table to hold a compound dataset.
-     *
-     * @param colName the name of the column
+     * Creates a Table to hold text data.
      */
-    private void createTable(final String colName) {
-        /*
-        AbstractTableModel tm =  new AbstractTableModel()
-        {
-            public int getColumnCount() {
-                return 1;
-            }
+    private Table createTable(Composite parent) {
+        int rank = dataset.getRank();
+        long start[] = dataset.getStartDims();
+        long count[] = dataset.getSelectedDims();
 
-            public int getRowCount() {
-                return text.length;
-            }
+        long[] startArray = dataset.getStartDims();
+        long[] strideArray = dataset.getStride();
+        int[] selectedIndex = dataset.getSelectedIndex();
+        int startIndex = (int) startArray[selectedIndex[0]];
+        int stride = (int) strideArray[selectedIndex[0]];
 
-            public String getColumnName(int col) {
-                return colName;
-            }
+        String colName = "Data selection:   ["+start[0];
+        for (int i=1; i<rank; i++) {
+            colName += ", "+start[i];
+        }
+        colName += "] ~ ["+(start[0]+count[0]-1);
+        for (int i=1; i<rank; i++) {
+            colName += ", "+(start[i]+count[i]-1);
+        }
+        colName += "]";
 
-            public Object getValueAt(int row, int column)
-            {
-                return text[row];
-            }
-        };
-        */
+        final Table theTable = new Table(parent, SWT.FULL_SELECTION | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+        theTable.setHeaderVisible(true);
+        theTable.setLinesVisible(true);
+        theTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 2));
+        theTable.addListener(SWT.MouseDoubleClick, CellEditor);
+        theTable.setFont(curFont);
 
-        /*
-        theTable = new Table(tm) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return !isReadOnly;
+        theTable.addListener(SWT.Resize, new Listener() {
+            public void handleEvent(Event e) {
+                theTable.getColumn(1).setWidth(table.getBounds().width);
             }
+        });
 
-            @Override
-            public void editingStopped(ChangeEvent e) {
+        TableColumn indexColumn = new TableColumn(theTable, SWT.NONE);
+        indexColumn.setAlignment(SWT.CENTER);
+        indexColumn.setWidth(70);
+        indexColumn.setMoveable(false);
+        indexColumn.setResizable(true);
 
-                if (source instanceof CellEditor) {
-                    CellEditor editor = (CellEditor) source;
-                    String cellValue = (String) editor.getCellEditorValue();
-                    text[row] = cellValue;
-                } // if (source instanceof CellEditor)
-            }
-        };
-        */
+        TableColumn column = new TableColumn(theTable, SWT.NONE);
+        column.setText(colName);
+        column.setMoveable(false);
+        column.setResizable(true);
+        column.setWidth(400);
+
+        for (int i = 0; i < startIndex + count[selectedIndex[0]]; i++) {
+            TableItem item = new TableItem(theTable, SWT.BORDER);
+            item.setFont(curFont);
+            item.setText(0, String.valueOf(startIndex + indexBase + i * stride));
+            item.setText(1, text[i]);
+            item.setBackground(0, display.getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
+        }
+
+        return theTable;
     }
-
-    /*
-    public void keyTyped(KeyEvent e) {
-        isTextChanged = true;
-    }
-    */
 
     private Menu createMenuBar() {
         Menu menuBar = new Menu(shell, SWT.BAR);
@@ -441,6 +324,14 @@ public class DefaultTextView implements TextView {
             }
         });
 
+        item = new MenuItem(menu, SWT.PUSH);
+        item.setText("Print");
+        item.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                print();
+            }
+        });
+
         new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.PUSH);
@@ -458,17 +349,7 @@ public class DefaultTextView implements TextView {
      * Update dataset value in file. The change will go to file.
      */
     public void updateValueInFile() {
-        if (isReadOnly) {
-            return;
-        }
-
-        if (!(dataset instanceof ScalarDS)) {
-            return;
-        }
-
-        if (!isTextChanged) {
-            return;
-        }
+        if (!(dataset instanceof ScalarDS) || isReadOnly || !isTextChanged) return;
 
         int row = table.getSelectionIndex();
         if (row >= 0) {
@@ -493,7 +374,7 @@ public class DefaultTextView implements TextView {
         FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
         fChooser.setText("Save Current Data To Text File --- " + dataset.getName());
         fChooser.setFilterPath(dataset.getFileFormat().getParent());
-        
+
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
         fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
@@ -564,13 +445,13 @@ public class DefaultTextView implements TextView {
     private void print() {
         StreamPrintServiceFactory[] spsf = StreamPrintServiceFactory
                 .lookupStreamPrintServiceFactories(null, null);
-        for (int i = 0; i < spsf.length; i++) {
-            System.out.println(spsf[i]);
-        }
+//        for (int i = 0; i < spsf.length; i++) {
+//            System.out.println(spsf[i]);
+//        }
         DocFlavor[] docFlavors = spsf[0].getSupportedDocFlavors();
-        for (int i = 0; i < docFlavors.length; i++) {
-            System.out.println(docFlavors[i]);
-        }
+//        for (int i = 0; i < docFlavors.length; i++) {
+//            System.out.println(docFlavors[i]);
+//        }
 
         // TODO: windows url
         // Get a text DocFlavor
@@ -588,115 +469,17 @@ public class DefaultTextView implements TextView {
         PrintService[] services = PrintServiceLookup.lookupPrintServices(null,
                 null);
 
-        // Print this job on the first print server
-        DocPrintJob job = services[0].createPrintJob();
-        Doc doc = new SimpleDoc(is, flavor, null);
-
         // Print it
         try {
+            // Print this job on the first print server
+            DocPrintJob job = services[0].createPrintJob();
+            Doc doc = new SimpleDoc(is, flavor, null);
+
             job.print(doc, null);
         }
         catch (Exception ex) {
-            System.out.println(ex);
+            log.debug("print(): failure: ", ex);
         }
-    }
-
-    private class TextAreaRenderer
-    {
-        //private final DefaultTableCellRenderer adaptee = new DefaultTableCellRenderer();
-
-        /** map from table to map of rows to map of column heights */
-        private final Map cellSizes = new HashMap();
-
-        public TextAreaRenderer() {
-            //setLineWrap(true);
-            //setWrapStyleWord(true);
-        }
-
-        /*
-        public Component getTableCellRendererComponent(
-                //
-                JTable table, Object obj, boolean isSelected, boolean hasFocus,
-                int row, int column) {
-            // set the colours, etc. using the standard for that platform
-            adaptee.getTableCellRendererComponent(table, obj, isSelected,
-                    hasFocus, row, column);
-            setForeground(adaptee.getForeground());
-            setBackground(adaptee.getBackground());
-            setBorder(adaptee.getBorder());
-            setFont(adaptee.getFont());
-            setText(adaptee.getText());
-
-            // This line was very important to get it working with JDK1.4
-            TableColumnModel columnModel = table.getColumnModel();
-            setSize(columnModel.getColumn(column).getWidth(), 100000);
-            int height_wanted = (int) getPreferredSize().getHeight();
-            addSize(table, row, column, height_wanted);
-            height_wanted = findTotalMaximumRowSize(table, row);
-            if (height_wanted != table.getRowHeight(row)) {
-                table.setRowHeight(row, height_wanted);
-                rowHeaders.setRowHeight(row, height_wanted);
-
-            }
-            return this;
-        }
-        */
-
-        /*
-        private void addSize(JTable table, int row, int column, int height) {
-            Map rows = (Map) cellSizes.get(table);
-            if (rows == null) {
-                cellSizes.put(table, rows = new HashMap());
-            }
-            Map rowheights = (Map) rows.get(new Integer(row));
-            if (rowheights == null) {
-                rows.put(new Integer(row), rowheights = new HashMap());
-            }
-            rowheights.put(new Integer(column), new Integer(height));
-        }
-        */
-
-        /**
-         * Look through all columns and get the renderer. If it is also a
-         * TextAreaRenderer, we look at the maximum height in its hash table for
-         * this row.
-         */
-        /*
-        private int findTotalMaximumRowSize(JTable table, int row) {
-            int maximum_height = 0;
-            Enumeration columns = table.getColumnModel().getColumns();
-            while (columns.hasMoreElements()) {
-                TableColumn tc = (TableColumn) columns.nextElement();
-                TableCellRenderer cellRenderer = tc.getCellRenderer();
-                if (cellRenderer instanceof TextAreaRenderer) {
-                    TextAreaRenderer tar = (TextAreaRenderer) cellRenderer;
-                    maximum_height = Math.max(maximum_height, tar
-                            .findMaximumRowSize(table, row));
-                }
-            }
-            return maximum_height;
-        }
-        */
-
-        /*
-        private int findMaximumRowSize(JTable table, int row) {
-            Map rows = (Map) cellSizes.get(table);
-            if (rows == null) {
-                return 0;
-            }
-            Map rowheights = (Map) rows.get(new Integer(row));
-            if (rowheights == null) {
-                return 0;
-            }
-            int maximum_height = 0;
-            for (Iterator it = rowheights.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry) it.next();
-                int cellHeight = ((Integer) entry.getValue()).intValue();
-                maximum_height = Math.max(maximum_height, cellHeight);
-            }
-            return maximum_height;
-        }
-        */
     }
 
     // Listener to allow in-place editing of Text area cells
@@ -723,18 +506,23 @@ public class DefaultTextView implements TextView {
                     if (rect.contains(pt)) {
                         final int column = i;
 
-                        final Text text = new Text(table, SWT.NONE);
+                        if (column == 0) return;
+
+                        final Text text = new Text(table, SWT.WRAP);
+                        text.setFont(curFont);
 
                         Listener textListener = new Listener() {
                             public void handleEvent(final Event e) {
                                 switch (e.type) {
                                 case SWT.FocusOut:
+                                    if (!item.getText(column).equals(text.getText())) isTextChanged=true;
                                     item.setText(column, text.getText());
                                     text.dispose();
                                     break;
                                 case SWT.Traverse:
                                     switch (e.detail) {
                                     case SWT.TRAVERSE_RETURN:
+                                        if (!item.getText(column).equals(text.getText())) isTextChanged=true;
                                         item.setText(column, text.getText());
                                     case SWT.TRAVERSE_ESCAPE:
                                         text.dispose();
@@ -753,13 +541,11 @@ public class DefaultTextView implements TextView {
                         text.selectAll();
                         text.setFocus();
                         return;
-
                     }
 
                     if (!visible && rect.intersects(clientArea)) {
                         visible = true;
                     }
-
                 }
 
                 if (!visible) return;
@@ -768,25 +554,6 @@ public class DefaultTextView implements TextView {
             }
         }
     };
-
-    private class TextAreaEditor
-    {
-        /*
-        public TextAreaEditor(KeyListener keyListener) {
-            textArea.addKeyListener(keyListener);
-            textArea.setWrapStyleWord(true);
-            textArea.setLineWrap(true);
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setBorder(null);
-            editorComponent = scrollPane;
-            delegate = new DefaultCellEditor.EditorDelegate() {
-                public void setValue(Object value) {
-                    textArea.setText((value != null) ? value.toString() : "");
-                }
-            };
-        }
-        */
-    }
 
     /** RowHeader defines the row header component of the Spreadsheet. */
     private class RowHeader extends Table {

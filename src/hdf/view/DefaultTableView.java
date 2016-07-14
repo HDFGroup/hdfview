@@ -4295,6 +4295,11 @@ public class DefaultTableView implements TableView {
         public CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer, SelectionLayer selectionLayer, ColumnGroupModel columnGroupModel) {
             super(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
 
+            if (curFont != null) {
+                this.setRowHeight(2 * curFont.getFontData()[0].getHeight());
+                columnGroupHeaderLayer.setRowHeight(2 * curFont.getFontData()[0].getHeight());
+            }
+
             final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNamesFull;
             final int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
             final int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
