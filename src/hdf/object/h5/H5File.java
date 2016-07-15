@@ -472,7 +472,7 @@ public class H5File extends FileFormat {
                 }
 
                 Object value = null;
-                if (isVLEN || is_variable_str) {
+                if (is_variable_str) {
                     String[] strs = new String[(int) lsize];
                     for (int j = 0; j < lsize; j++) {
                         strs[j] = "";
@@ -497,6 +497,21 @@ public class H5File extends FileFormat {
                         H5.H5AreadComplex(aid, tid, strs);
                     }
                     catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    value = strs;
+                }
+                else if (isVLEN) {
+                    String[] strs = new String[(int) lsize];
+                    for (int j = 0; j < lsize; j++) {
+                        strs[j] = "";
+                    }
+                    try {
+                        log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
+                        H5.H5AreadComplex(aid, tid, strs);
+                    }
+                    catch (Exception ex) {
+                        log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
                         ex.printStackTrace();
                     }
                     value = strs;
