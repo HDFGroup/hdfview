@@ -419,7 +419,7 @@ public class DefaultTreeView implements TreeView {
                     //tree.setSelection(selPath);
                 }
 
-                popupMenu.setLocation(new Point(e.x, e.y));
+                popupMenu.setLocation(display.map(tree, null, pt));
                 popupMenu.setVisible(true);
             }
         });
