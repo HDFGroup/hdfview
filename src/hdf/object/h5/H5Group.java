@@ -220,7 +220,7 @@ public class H5Group extends Group {
         }
 
         try {
-            this.linkTargetObjName = H5File.getLinkTargetName(this);
+            if (!this.isRoot()) this.linkTargetObjName = H5File.getLinkTargetName(this);
         }
         catch (Exception ex) {
             log.debug("getMetadata(): getLinkTargetName failure: ", ex);

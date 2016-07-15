@@ -388,8 +388,8 @@ public class DefaultTreeView implements TreeView {
             public void menuDetected(MenuDetectEvent e) {
                 Display display = Display.getDefault();
 
-//                Point pt = display.map(null, tree, new Point(e.x, e.y));
-                TreeItem item = tree.getItem(new Point(e.x, e.y));
+                Point pt = display.map(null, tree, new Point(e.x, e.y));
+                TreeItem item = tree.getItem(pt);
                 if(item == null) { e.doit = false; return; }
 
                 FileFormat theFile = null;
@@ -419,7 +419,7 @@ public class DefaultTreeView implements TreeView {
                     //tree.setSelection(selPath);
                 }
 
-                popupMenu.setLocation(display.getCursorLocation());
+                popupMenu.setLocation(new Point(e.x, e.y));
                 popupMenu.setVisible(true);
             }
         });
