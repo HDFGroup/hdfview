@@ -16,7 +16,7 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
     private static String JPGFILE = "apollo17_earth.jpg";
     private static String HDF4IMAGE = JPGFILE + ".hdf";
     private static String HDF5IMAGE = JPGFILE + ".h5";
-    
+
     @Test
     public void convertImageToHDF4() {
         File hdf_file = new File(workDir, HDF4IMAGE);
@@ -61,10 +61,9 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             metaDataShell.bot().button("   &Close   ").click();
             bot.waitUntil(Conditions.shellCloses(metaDataShell));
 
-            items[0].getNode(0).click();
-
             // Test sample pixels
-            filetree.contextMenu("Open As").click();
+            items[0].getNode(0).click();
+            items[0].getNode(0).contextMenu("Open As").click();
 
             SWTBotShell openAsShell = bot.shell("Dataset Selection - /" + JPGFILE);
             openAsShell.bot().radio("&Image").click();
@@ -75,7 +74,7 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             testSamplePixel(325, 53, "x=325,   y=53,   value=(152, 106, 91)");
             testSamplePixel(430, 357, "x=430,   y=357,   value=(83, 80, 107)");
             testSamplePixel(197, 239, "x=197,   y=239,   value=(206, 177, 159)");
-            
+
             bot.activeShell().bot().menu("Close").click();
         }
         catch (Exception ex) {
@@ -120,10 +119,10 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             assertTrue("convertImageToHDF5 filetree is missing image " + JPGFILE,
                     items[0].getNode(0).getText().compareTo(JPGFILE) == 0);
 
-            items[0].getNode(0).click();
 
             // Test metadata
-            filetree.contextMenu("Show Properties").click();
+            items[0].getNode(0).click();
+            items[0].getNode(0).contextMenu("Show Properties").click();
 
             SWTBotShell metaDataShell = bot.shell("Properties - /" + JPGFILE);
             metaDataShell.activate();
@@ -136,10 +135,9 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             metaDataShell.bot().button("   &Close   ").click();
             bot.waitUntil(Conditions.shellCloses(metaDataShell));
 
-            items[0].getNode(0).click();
-
             // Test sample pixels
-            filetree.contextMenu("Open As").click();
+            items[0].getNode(0).click();
+            items[0].getNode(0).contextMenu("Open As").click();
 
             SWTBotShell openAsShell = bot.shell("Dataset Selection - /" + JPGFILE);
             openAsShell.bot().radio("&Image").click();
@@ -150,7 +148,7 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             testSamplePixel(325, 53, "x=325,   y=53,   value=(152, 106, 91)");
             testSamplePixel(430, 357, "x=430,   y=357,   value=(83, 80, 107)");
             testSamplePixel(197, 239, "x=197,   y=239,   value=(206, 177, 159)");
-            
+
             bot.activeShell().bot().menu("Close").click();
         }
         catch (Exception ex) {
