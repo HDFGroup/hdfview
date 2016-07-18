@@ -20,16 +20,16 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -70,7 +70,7 @@ public class NewCompoundDatasetDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewCompoundDatasetDialog.class);
 
     private Shell                 shell;
-    
+
     private Font                  curFont;
 
     private static final String[] DATATYPE_NAMES   = {
@@ -94,7 +94,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
     /** A list of current groups */
     private Vector<Group>         groupList;
-    private Vector<Object>        compoundDSList;
+    private Vector<CompoundDS>    compoundDSList;
 
     private HObject               newObject;
     private Group                 parentGroup;
@@ -124,7 +124,7 @@ public class NewCompoundDatasetDialog extends Dialog {
      */
     public NewCompoundDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -142,7 +142,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         objList = objs;
 
         groupList = new Vector<Group>(objs.size());
-        compoundDSList = new Vector<Object>(objs.size());
+        compoundDSList = new Vector<CompoundDS>(objs.size());
 
         fileformat = pGroup.getFileFormat();
     }
@@ -200,7 +200,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 }
             }
             else if (obj instanceof CompoundDS) {
-                compoundDSList.add(obj);
+                compoundDSList.add((CompoundDS) obj);
             }
         }
 
@@ -221,12 +221,15 @@ public class NewCompoundDatasetDialog extends Dialog {
         templateChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 // TODO: get Dataset from combobox name
-                Object obj = templateChoice.getSelection();
-                if (!(obj instanceof CompoundDS)) {
-                    return;
-                }
+                CompoundDS dset = null;
+                String name = templateChoice.getItem(templateChoice.getSelectionIndex());
 
-                CompoundDS dset = (CompoundDS) obj;
+                for (CompoundDS ds : compoundDSList)
+                    if (ds.getName().equals(name))
+                        dset = ds;
+
+                if (dset == null) return;
+
                 int rank = dset.getRank();
                 if (rank < 1) {
                     dset.init();
@@ -280,8 +283,9 @@ public class NewCompoundDatasetDialog extends Dialog {
                     }
                 }
 
-                numberOfMembers = dset.getMemberCount();
-                nFieldBox.select(numberOfMembers - 1);
+                int memberCount = dset.getMemberCount();
+                nFieldBox.select(memberCount - 1);
+                nFieldBox.notifyListeners(SWT.Selection, new Event());
                 table.setItemCount(numberOfMembers);
                 for (int i = 0; i < numberOfMembers; i++) {
                     table.getItem(i).setText(0, mNames[i]);
@@ -357,7 +361,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
                     memberTypeChoice.select(typeIdx);
                     table.getItem(i).setText(1, memberTypeChoice.getItem(memberTypeChoice.getSelectionIndex()));
-                    
+
                     if (tclass == Datatype.CLASS_STRING) {
                         table.getItem(i).setText(2, String.valueOf(tsize));
                     }
@@ -367,14 +371,13 @@ public class NewCompoundDatasetDialog extends Dialog {
                     else {
                         table.getItem(i).setText(2, String.valueOf(mOrders[i]));
                     }
-
                 } // for (int i=0; i<numberOfMembers; i++)
             }
         });
 
-        Iterator<Object> it = compoundDSList.iterator();
+        Iterator<CompoundDS> it = compoundDSList.iterator();
         while(it.hasNext()) {
-            templateChoice.add(((CompoundDS) it.next()).getName());
+            templateChoice.add(it.next().getName());
         }
 
 
@@ -580,11 +583,11 @@ public class NewCompoundDatasetDialog extends Dialog {
         label = new Label(layoutGroup, SWT.LEFT);
         label.setFont(curFont);
         label.setText("");
-        
+
         label = new Label(layoutGroup, SWT.LEFT);
         label.setFont(curFont);
         label.setText("");
-        
+
         label = new Label(layoutGroup, SWT.LEFT);
         label.setFont(curFont);
         label.setText("");
@@ -642,7 +645,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         for(int i = 0; i < table.getColumnCount(); i++) {
             table.getColumn(i).pack();
         }
-        
+
         // Last table column always expands to fill remaining table size
         table.addListener(SWT.Resize, new Listener() {
             public void handleEvent(Event e) {
@@ -650,19 +653,19 @@ public class NewCompoundDatasetDialog extends Dialog {
                 Rectangle area = table.getClientArea();
                 int columnCount = table.getColumnCount();
                 int totalGridLineWidth = (columnCount - 1) * table.getGridLineWidth();
-                
+
                 int totalColumnWidth = 0;
                 for (TableColumn column : table.getColumns()) {
                     totalColumnWidth += column.getWidth();
                 }
-                
+
                 int diff = area.width - (totalColumnWidth + totalGridLineWidth);
-                
+
                 TableColumn col = table.getColumns()[columnCount - 1];
                 col.setWidth(diff + col.getWidth());
             }
         });
-        
+
         // Disable table selection highlighting
         table.addListener(SWT.EraseItem, new Listener() {
             public void handleEvent(Event e) {
@@ -715,10 +718,10 @@ public class NewCompoundDatasetDialog extends Dialog {
         nFieldBox.select(nFieldBox.indexOf(String.valueOf(numberOfMembers)));
 
         shell.pack();
-        
+
         table.getColumn(0).setWidth(table.getClientArea().width / 3);
         table.getColumn(1).setWidth(table.getClientArea().width / 3);
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -978,7 +981,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
         return obj;
     }
-    
+
     private void updateMemberTableItems() {
         int n = 0;
 
@@ -994,14 +997,19 @@ public class NewCompoundDatasetDialog extends Dialog {
             return;
         }
 
-        if(n > numberOfMembers) {
-            for(int i = 0; i < n - numberOfMembers; i++) {
-                addMemberTableItem(table);
+        try {
+            if(n > numberOfMembers) {
+                for(int i = 0; i < n - numberOfMembers; i++) {
+                    addMemberTableItem(table);
+                }
+            } else {
+                for(int i = numberOfMembers - 1; i >= n; i--) {
+                    table.remove(i);
+                }
             }
-        } else {
-            for(int i = numberOfMembers - 1; i >= n; i--) {
-                table.remove(i);
-            }
+        } catch (Exception ex) {
+            log.debug("Error adding or removing member table items: ", ex);
+            return;
         }
 
         table.setItemCount(n);
@@ -1013,16 +1021,16 @@ public class NewCompoundDatasetDialog extends Dialog {
         final TableEditor nameEditor = new TableEditor(table);
         final TableEditor typeEditor = new TableEditor(table);
         final TableEditor sizeEditor = new TableEditor(table);
-        
+
         final Text nameText = new Text(table, SWT.SINGLE | SWT.BORDER);
         nameText.setFont(curFont);
-        
+
         nameEditor.grabHorizontal = true;
         nameEditor.grabVertical = true;
         nameEditor.horizontalAlignment = SWT.LEFT;
         nameEditor.verticalAlignment = SWT.TOP;
         nameEditor.setEditor(nameText, item, 0);
-        
+
         nameText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
                 Text text = (Text) e.widget;
@@ -1033,13 +1041,13 @@ public class NewCompoundDatasetDialog extends Dialog {
         final CCombo typeCombo = new CCombo(table, SWT.DROP_DOWN | SWT.READ_ONLY);
         typeCombo.setFont(curFont);
         typeCombo.setItems(DATATYPE_NAMES);
-        
+
         typeEditor.grabHorizontal = true;
         typeEditor.grabVertical = true;
         typeEditor.horizontalAlignment = SWT.LEFT;
         typeEditor.verticalAlignment = SWT.TOP;
         typeEditor.setEditor(typeCombo, item, 1);
-        
+
         typeCombo.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 CCombo combo = (CCombo) e.widget;
@@ -1049,24 +1057,24 @@ public class NewCompoundDatasetDialog extends Dialog {
 
         final Text sizeText = new Text(table, SWT.SINGLE | SWT.BORDER);
         sizeText.setFont(curFont);
-        
+
         sizeEditor.grabHorizontal = true;
         sizeEditor.grabVertical = true;
         sizeEditor.horizontalAlignment = SWT.LEFT;
         sizeEditor.verticalAlignment = SWT.TOP;
         sizeEditor.setEditor(sizeText, item, 2);
-        
+
         sizeText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
                 Text text = (Text) e.widget;
                 item.setData("MemberSize", text.getText());
             }
         });
-        
+
         item.setData("MemberName", "");
         item.setData("MemberType", "");
         item.setData("MemberSize", "");
-        
+
         item.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 nameEditor.dispose();
