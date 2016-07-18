@@ -960,7 +960,6 @@ public class DefaultTableView implements TableView {
                 public void widgetSelected(SelectionEvent e) {
                     if (!checkFixedDataLength.getSelection()) {
                         fixedDataLength = -1;
-                        //this.updateUI();
                         return;
                     }
 
@@ -3731,11 +3730,25 @@ public class DefaultTableView implements TableView {
                     theValue = Array.get(dataValue, (int) index);
                     Long l = (Long) theValue;
                     if (l < 0) {
+                        // 64-bit integer
                         l = (l << 1) >>> 1;
                         BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
                         BigInteger big2 = new BigInteger(l.toString());
                         BigInteger big = big1.add(big2);
-                        theValue = big.toString();
+
+                        if (showAsHex)
+                            theValue = big.toString(16).toUpperCase();
+                        else if (showAsBin)
+                            theValue = big.toString(2);
+                        else
+                            theValue = big.toString();
+                    }
+                    else {
+                        // 32-bit integer
+                        if (showAsHex)
+                            theValue = Long.toHexString(l).toUpperCase();
+                        else if (showAsBin)
+                            theValue = Long.toBinaryString(l);
                     }
                 }
                 else if (showAsHex && isInt) {
