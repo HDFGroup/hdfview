@@ -62,7 +62,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
  */
 public final class Tools {
     private final static Display display = Display.getDefault();
-    
+
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     public static final long       MAX_INT8        = 127;
@@ -714,7 +714,7 @@ public final class Tools {
 
         return theImage;
     }
-    
+
     /**
      * This method returns a buffered image with the contents of an image.
      *
@@ -1775,7 +1775,7 @@ public final class Tools {
         StringBuffer sb = new StringBuffer();
         boolean isEven = true;
         for (int i = nhex - 1; i >= 0; i--) {
-            if (isEven) sb.append(" ");
+            if (isEven && i < nhex - 1) sb.append(" ");
             isEven = !isEven; // toggle
 
             switch (hex[i]) {
@@ -1941,7 +1941,7 @@ public final class Tools {
 
         return true;
     } /* public static final boolean applyBitmask() */
-    
+
     /**
      * Read HDF5 user block data into byte array.
      *
@@ -2249,7 +2249,7 @@ public final class Tools {
         }
         return true;
     }
-    
+
     /**
      * look at the first 4 bytes of the file to see if it is an HDF4 file.
      * byte[0]=14, byte[1]=3, byte[2]=19, byte[3]=1 or if it is a netCDF file
@@ -2553,7 +2553,7 @@ public final class Tools {
 
         if (f.exists()) {
             Shell tempShell = new Shell(display);
-            
+
             MessageBox confirm = new MessageBox(tempShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
             confirm.setText("Create New File");
             confirm.setMessage("File exists. Do you want to replace it?");
@@ -2561,7 +2561,7 @@ public final class Tools {
                 tempShell.dispose();
                 return null;
             }
-            
+
             tempShell.dispose();
         }
 
@@ -2613,8 +2613,8 @@ public final class Tools {
 
         return false;
     }
-    
-    /** 
+
+    /**
      * Show an SWT error dialog with the given error message.
      * @param parent
      *           The parent Shell of the MessageBox
