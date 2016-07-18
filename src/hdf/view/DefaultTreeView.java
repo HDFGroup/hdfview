@@ -1521,7 +1521,7 @@ public class DefaultTreeView implements TreeView {
      * to the file object.
      */
     private TreeItem populateTree(FileFormat theFile) {
-        if (theFile.getFID() < 0 || theFile.getRootObject() == null) {
+        if (theFile == null || theFile.getFID() < 0 || theFile.getRootObject() == null) {
             //TODO: Update FitsFile and NC2File to have a fid other than -1
             // so this check isn't needed
             if ((theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
@@ -1568,6 +1568,8 @@ public class DefaultTreeView implements TreeView {
      *            Expands the TreeItem and its children if true.
      *            Collapse the TreeItem and its children if false.
      */
+    //TODO: some groups dont get expanded right, likely due to SetData not being
+    // able to catch up with a large number of expanding
     private void recursiveExpand(TreeItem item, boolean expand) {
         if(item == null || !(item.getData() instanceof Group)) {
             return;
@@ -1602,6 +1604,8 @@ public class DefaultTreeView implements TreeView {
      * @return the image for the specified HObject
      */
     private Image getObjectTypeImage(HObject obj) {
+        if (obj ==null) return null;
+
         boolean hasAttribute = obj.hasAttribute();
 
         if(obj instanceof Dataset) {
@@ -2221,6 +2225,8 @@ public class DefaultTreeView implements TreeView {
 
     /** enable/disable GUI components */
     private static void setEnabled(List<MenuItem> list, boolean b) {
+        if (list == null) return;
+
         Iterator<MenuItem> it = list.iterator();
         while (it.hasNext()) {
             it.next().setEnabled(b);
@@ -2468,7 +2474,9 @@ public class DefaultTreeView implements TreeView {
      * Returns the tree item that contains the given data object.
      */
     public TreeItem findTreeItem(HObject obj) {
-        if (obj == null || (obj.getFileFormat().getRootObject() == null)) return null;
+        if (obj == null) return null;
+
+        if (obj.getFileFormat().getRootObject() == null) return null;
 
         // Locate the item's file root to save on search time in large files
         TreeItem[] fileRoots = tree.getItems();
@@ -2477,6 +2485,8 @@ public class DefaultTreeView implements TreeView {
         for(int i = 0; i < fileRoots.length; i++) {
             rootItem = fileRoots[i];
             rootObject = (HObject) rootItem.getData();
+
+            if (rootObject == null) continue;
 
             if(rootObject.getFileFormat().equals(obj.getFileFormat())) {
                 // If the object being looked for is a file root, return
@@ -2494,18 +2504,22 @@ public class DefaultTreeView implements TreeView {
 
         TreeItem theItem = null;
         HObject theObj = null;
-        Iterator<TreeItem> it = getItemsBreadthFirst(rootItem).iterator();
+        List<TreeItem> breadthFirstItems = getItemsBreadthFirst(rootItem);
 
-        while(it.hasNext()) {
-            theItem = (TreeItem) it.next();
-            theObj = (HObject) theItem.getData();
+        if (breadthFirstItems != null) {
+            Iterator<TreeItem> it = getItemsBreadthFirst(rootItem).iterator();
 
-            if (theObj == null) {
-                continue;
-            }
+            while(it.hasNext()) {
+                theItem = (TreeItem) it.next();
+                theObj = (HObject) theItem.getData();
 
-            if(theObj.equals(obj)) {
-                return theItem;
+                if (theObj == null) {
+                    continue;
+                }
+
+                if(theObj.equals(obj)) {
+                    return theItem;
+                }
             }
         }
 
