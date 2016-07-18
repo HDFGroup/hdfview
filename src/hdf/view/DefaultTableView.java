@@ -3737,18 +3737,18 @@ public class DefaultTableView implements TableView {
                         BigInteger big = big1.add(big2);
 
                         if (showAsHex)
-                            theValue = big.toString(16).toUpperCase();
+                            theValue = Tools.toHexString(big, 8);
                         else if (showAsBin)
-                            theValue = big.toString(2);
+                            theValue = Tools.toBinaryString(big, 8);
                         else
                             theValue = big.toString();
                     }
                     else {
                         // 32-bit integer
                         if (showAsHex)
-                            theValue = Long.toHexString(l).toUpperCase();
+                            theValue = Tools.toHexString(l, 8);
                         else if (showAsBin)
-                            theValue = Long.toBinaryString(l);
+                            theValue = Tools.toBinaryString(l, 8);
                     }
                 }
                 else if (showAsHex && isInt) {

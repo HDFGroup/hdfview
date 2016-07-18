@@ -1833,6 +1833,19 @@ public final class Tools {
         return sb.toString();
     }
 
+    public static final String toBinaryString(BigInteger v, int nbytes) {
+        StringBuffer sb = new StringBuffer();
+        String val = String.format("%" + nbytes + "s", v.toString(2)).replace(" ", "0").toUpperCase();
+
+        // Insert spacing
+        for (int i = 0; i < nbytes; i++) {
+            sb.append(val.substring(i * nbytes, nbytes * (i + 1)));
+            if (i < nbytes - 1) sb.append(" ");
+        }
+
+        return sb.toString();
+    }
+
     final static char[] HEXCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     /**
@@ -1863,6 +1876,22 @@ public final class Tools {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Returns a string representation of the BigInteger argument as an unsigned integer in base 16.
+     * This is different from BigInteger.toString(16). This function adds padding (0's) to the string
+     * based on the nbytes. For example, if v=42543, nbytes=4, the string will be "0000A62F".
+     *
+     * @param v
+     *            the BigInteger value
+     * @param nbytes
+     *            number of bytes in the integer
+     * @return the string representation of the unsigned long value represented by the argument in
+     *         hexadecimal (base 16).
+     */
+    public static final String toHexString (BigInteger v, int nbytes) {
+        return String.format("%" + nbytes + "s", v.toString(16)).replace(" ", "0").toUpperCase();
     }
 
     /**
