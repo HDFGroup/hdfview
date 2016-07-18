@@ -439,16 +439,20 @@ public class DefaultTreeView implements TreeView {
         tree.addListener(SWT.Expand, new Listener() {
             public void handleEvent(Event event) {
                 TreeItem item = (TreeItem) event.item;
-                Group obj = (Group) item.getData();
+                Object obj = item.getData();
 
-                if(obj.isRoot()) return;
+                if (!(obj instanceof Group)) return;
+
+                Group theGroup = (Group) item.getData();
+
+                if(theGroup.isRoot()) return;
 
                 // Prevent graphical issues from happening by stopping
                 // tree from redrawing until all the items are created
                 tree.setRedraw(false);
 
                 if(item.getItemCount() > 0)
-                    item.setImage(obj.hasAttribute() ? folderOpenIconA : folderOpenIcon);
+                    item.setImage(theGroup.hasAttribute() ? folderOpenIconA : folderOpenIcon);
 
                 // Process any remaining SetData events and then allow
                 // the tree to redraw once all are finished
@@ -461,11 +465,15 @@ public class DefaultTreeView implements TreeView {
         tree.addListener(SWT.Collapse, new Listener() {
             public void handleEvent(Event event) {
                 TreeItem item = (TreeItem) event.item;
-                Group obj = (Group) item.getData();
+                Object obj = item.getData();
 
-                if(obj.isRoot()) return;
+                if (!(obj instanceof Group)) return;
 
-                item.setImage(obj.hasAttribute() ? folderCloseIconA : folderCloseIcon);
+                Group theGroup = (Group) item.getData();
+
+                if(theGroup.isRoot()) return;
+
+                item.setImage(theGroup.hasAttribute() ? folderCloseIconA : folderCloseIcon);
             }
         });
 
@@ -653,7 +661,7 @@ public class DefaultTreeView implements TreeView {
                     objList.add(selectedItems[i]);
                 }
 
-                pasteObject((TreeItem[]) objList.toArray(new TreeItem[0]), findTreeItem(dstFile.getRootObject()), dstFile);
+                pasteObject(objList.toArray(new TreeItem[0]), findTreeItem(dstFile.getRootObject()), dstFile);
             }
         });
 
@@ -2510,7 +2518,7 @@ public class DefaultTreeView implements TreeView {
             Iterator<TreeItem> it = getItemsBreadthFirst(rootItem).iterator();
 
             while(it.hasNext()) {
-                theItem = (TreeItem) it.next();
+                theItem = it.next();
                 theObj = (HObject) theItem.getData();
 
                 if (theObj == null) {
@@ -2612,7 +2620,7 @@ public class DefaultTreeView implements TreeView {
                 dataViewName = (String) HDFView.getListOfTextViews().get(0);
             }
             else if (isImage) {
-                dataViewName = (String) HDFView.getListOfImageViews().get(0);
+                dataViewName = HDFView.getListOfImageViews().get(0);
             }
             else {
                 dataViewName = (String) HDFView.getListOfTableViews().get(0);
