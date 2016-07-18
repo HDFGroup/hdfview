@@ -95,7 +95,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
 
             for (int row = 1; row <= table.preferredRowCount() - 1; row++) {
                 for (int col = 1; col <= table.preferredColumnCount() - 1; col++) {
