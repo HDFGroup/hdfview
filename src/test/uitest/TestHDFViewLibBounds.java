@@ -1,9 +1,7 @@
 package test.uitest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
@@ -30,7 +28,10 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             SWTBotText text = shell.bot().text();
             text.setText(filename + file_ext);
-            assertEquals(filename + file_ext, text.getText());
+
+            String val = text.getText();
+            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong file name", filename + file_ext, val),
+                    val.equals(filename + file_ext));
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
@@ -38,8 +39,9 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             final SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("testLibVersion filetree row count: ", filetree.rowCount() == 1);
-            assertTrue("testLibVersion filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue(constructWrongValueMessage("testLibVersion()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 1);
+            assertTrue("testLibVersion() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
 
             items[0].click();
             items[0].contextMenu("Set Lib version bounds").click();
@@ -59,7 +61,9 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             SWTBotShell propertiesWindow = bot.shell("Properties - /");
             propertiesWindow.activate();
 
-            assertEquals("Earliest and Latest", propertiesWindow.bot().label(7).getText());
+            val = propertiesWindow.bot().label(7).getText();
+            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and Latest", val),
+                    val.equals("Earliest and Latest"));
 
             propertiesWindow.bot().button("   &Close   ").click();
 
@@ -81,7 +85,9 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             propertiesWindow = bot.shell("Properties - /");
             propertiesWindow.activate();
 
-            assertEquals("Latest and Latest", propertiesWindow.bot().label(7).getText());
+            val = propertiesWindow.bot().label(7).getText();
+            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Latest and Latest", val),
+                    val.equals("Latest and Latest"));
 
             propertiesWindow.bot().button("   &Close   ").click();
         }
@@ -95,7 +101,9 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             try {
                 closeFile(hdf_file, true);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

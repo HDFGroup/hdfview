@@ -1,32 +1,31 @@
 package test.uitest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import org.junit.Test;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
+import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.junit.Test;
 
 /**
  * Tests the Next Page, Previous Page, First Page and Last Page buttons of TableView.
  * Also tests manual page selection.
- * 
+ *
  * NatTable indices take the table row and column header into account.
  * Therefore, to get the cell data value for the cell at (row, col),
  * table.getCellDataValueByPosition(row + 1, col + 1) must be called.
- * 
+ *
  * @author Jordan Henderson
  */
 public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
@@ -37,18 +36,20 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     @Test
     public void testNextFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, false);
+        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("testNextFrame filetree row count: "+filetree.visibleRowCount(), filetree.visibleRowCount()==2);
-            assertTrue("testNextFrame filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("testNextFrame filetree missing dataset ", items[0].getNode(0).getText().compareTo(dataset_name)==0);
+            assertTrue(constructWrongValueMessage("testNextFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount()==2);
+            assertTrue("testNextFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testNextFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]")));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -57,7 +58,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             try {
-                assertEquals(tableShell.bot().text(0).getText(), "0");
+                assertTrue(tableShell.bot().text(0).getText().equals("0"));
             }
             catch (AssertionError e) {
                 final SWTBotText text = tableShell.bot().text(0);
@@ -75,14 +76,22 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 });
             }
 
-            assertEquals(table.getCellDataValueByPosition(5, 3), "478");
-            assertEquals(table.getCellDataValueByPosition(2, 4), "52");
+            String val = table.getCellDataValueByPosition(5, 3);
+            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "478", val), val.equals("478"));
+
+            val = table.getCellDataValueByPosition(2, 4);
+            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "52", val), val.equals("52"));
 
             tableShell.bot().toolbarButtonWithTooltip("Next Page").click();
 
-            assertEquals(tableShell.bot().text(0).getText(), "1");
-            assertEquals(table.getCellDataValueByPosition(4, 5), "454");
-            assertEquals(table.getCellDataValueByPosition(3, 2), "984");
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testNextFrame()", "frame field shows wrong value", "1", val), val.equals("1"));
+
+            val = table.getCellDataValueByPosition(4, 5);
+            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "454", val), val.equals("454"));
+
+            val = table.getCellDataValueByPosition(3, 2);
+            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "984", val), val.equals("984"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -91,31 +100,37 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            if(tableShell != null) tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
 
             try {
                 closeFile(hdf_file, false);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     @Test
     public void testPreviousFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, false);
+        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("testNextFrame filetree row count: "+filetree.visibleRowCount(), filetree.visibleRowCount()==2);
-            assertTrue("testNextFrame filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("testNextFrame filetree missing dataset ", items[0].getNode(0).getText().compareTo(dataset_name)==0);
+            assertTrue(constructWrongValueMessage("testPreviousFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount()==2);
+            assertTrue("testPreviousFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testPreviousFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]")));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -124,7 +139,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             try {
-                assertEquals(tableShell.bot().text(0).getText(), "1");
+                assertTrue(tableShell.bot().text(0).getText().equals("1"));
             }
             catch (AssertionError e) {
                 final SWTBotText text = tableShell.bot().text(0);
@@ -142,14 +157,22 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 });
             }
 
-            assertEquals(table.getCellDataValueByPosition(4, 2), "6");
-            assertEquals(table.getCellDataValueByPosition(5, 3), "215");
+            String val = table.getCellDataValueByPosition(4, 2);
+            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "6", val), val.equals("6"));
+
+            val = table.getCellDataValueByPosition(5, 3);
+            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "215", val), val.equals("215"));
 
             tableShell.bot().toolbarButtonWithTooltip("Previous Page").click();
 
-            assertEquals(tableShell.bot().text(0).getText(), "0");
-            assertEquals(table.getCellDataValueByPosition(1, 1), "13");
-            assertEquals(table.getCellDataValueByPosition(5, 5), "4");
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testPreviousFrame()", "frame field shows wrong value", "0", val), val.equals("0"));
+
+            val = table.getCellDataValueByPosition(1, 1);
+            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "13", val), val.equals("13"));
+
+            val = table.getCellDataValueByPosition(5, 5);
+            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "4", val), val.equals("4"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -158,31 +181,37 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            if(tableShell != null) tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
 
             try {
                 closeFile(hdf_file, false);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     @Test
     public void testFirstFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, false);
+        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("testNextFrame filetree row count: "+filetree.visibleRowCount(), filetree.visibleRowCount()==2);
-            assertTrue("testNextFrame filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("testNextFrame filetree missing dataset ", items[0].getNode(0).getText().compareTo(dataset_name)==0);
+            assertTrue(constructWrongValueMessage("testFirstFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount()==2);
+            assertTrue("testFirstFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testFirstFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]")));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -191,7 +220,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             try {
-                assertEquals(tableShell.bot().text(0).getText(), "0");
+                assertTrue(tableShell.bot().text(0).getText().equals("0"));
             }
             catch (AssertionError e) {
                 final SWTBotText text = tableShell.bot().text(0);
@@ -212,16 +241,25 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             for (int i = 0; i < 3; i++)
                 tableShell.bot().toolbarButtonWithTooltip("Next Page").click();
 
-            assertEquals(tableShell.bot().text(0).getText(), "3");
+            String val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "3", val), val.equals("3"));
 
-            assertEquals(table.getCellDataValueByPosition(4, 2), "456");
-            assertEquals(table.getCellDataValueByPosition(1, 3), "7");
+            val = table.getCellDataValueByPosition(4, 2);
+            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "456", val), val.equals("456"));
+
+            val = table.getCellDataValueByPosition(1, 3);
+            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "7", val), val.equals("7"));
 
             tableShell.bot().toolbarButtonWithTooltip("First Page").click();
 
-            assertEquals(tableShell.bot().text(0).getText(), "0");
-            assertEquals(table.getCellDataValueByPosition(4, 5), "52");
-            assertEquals(table.getCellDataValueByPosition(5, 2), "345");
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "0", val), val.equals("0"));
+
+            val = table.getCellDataValueByPosition(4, 5);
+            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "52", val), val.equals("52"));
+
+            val = table.getCellDataValueByPosition(5, 2);
+            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "345", val), val.equals("345"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -230,31 +268,37 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            if(tableShell != null) tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
 
             try {
                 closeFile(hdf_file, false);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     @Test
     public void testLastFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, false);
+        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("testNextFrame filetree row count: "+filetree.visibleRowCount(), filetree.visibleRowCount()==2);
-            assertTrue("testNextFrame filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("testNextFrame filetree missing dataset ", items[0].getNode(0).getText().compareTo(dataset_name)==0);
+            assertTrue(constructWrongValueMessage("testLastFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount()==2);
+            assertTrue("testLastFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testLastFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]")));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -263,7 +307,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             try {
-                assertEquals(tableShell.bot().text(0).getText(), "0");
+                assertTrue(tableShell.bot().text(0).getText().equals("0"));
             }
             catch (AssertionError e) {
                 final SWTBotText text = tableShell.bot().text(0);
@@ -281,14 +325,22 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 });
             }
 
-            assertEquals(table.getCellDataValueByPosition(3, 4), "63");
-            assertEquals(table.getCellDataValueByPosition(2, 1), "2");
+            String val = table.getCellDataValueByPosition(3, 4);
+            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "63", val), val.equals("63"));
+
+            val = table.getCellDataValueByPosition(2, 1);
+            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "2", val), val.equals("2"));
 
             tableShell.bot().toolbarButtonWithTooltip("Last Page").click();
 
-            assertEquals(tableShell.bot().text(0).getText(), "4");
-            assertEquals(table.getCellDataValueByPosition(1, 5), "789");
-            assertEquals(table.getCellDataValueByPosition(5, 2), "7945");
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testLastFrame()", "frame field shows wrong value", "4", val), val.equals("4"));
+
+            val = table.getCellDataValueByPosition(1, 5);
+            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "789", val), val.equals("789"));
+
+            val = table.getCellDataValueByPosition(5, 2);
+            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "7945", val), val.equals("7945"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -297,31 +349,37 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            if(tableShell != null) tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
 
             try {
                 closeFile(hdf_file, false);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     @Test
     public void testEnterFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, false);
+        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("testNextFrame filetree row count: "+filetree.visibleRowCount(), filetree.visibleRowCount()==2);
-            assertTrue("testNextFrame filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("testNextFrame filetree missing dataset ", items[0].getNode(0).getText().compareTo(dataset_name)==0);
+            assertTrue(constructWrongValueMessage("testEnterFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount()==2);
+            assertTrue("testEnterFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testEnterFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
+            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]")));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -330,7 +388,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             try {
-                assertEquals(tableShell.bot().text(0).getText(), "0");
+                assertTrue(tableShell.bot().text(0).getText().equals("0"));
             }
             catch (AssertionError e) {
                 final SWTBotText text = tableShell.bot().text(0);
@@ -348,8 +406,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 });
             }
 
-            assertEquals(table.getCellDataValueByPosition(4, 3), "99");
-            assertEquals(table.getCellDataValueByPosition(5, 4), "86");
+            String val = table.getCellDataValueByPosition(4, 3);
+            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "99", val), val.equals("99"));
+
+            val = table.getCellDataValueByPosition(5, 4);
+            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "86", val), val.equals("86"));
 
             final SWTBotText text = tableShell.bot().text(0);
             text.setText("3");
@@ -364,8 +425,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 }
             });
 
-            assertEquals(table.getCellDataValueByPosition(3, 2), "63");
-            assertEquals(table.getCellDataValueByPosition(1, 3), "7");
+            val = table.getCellDataValueByPosition(3, 2);
+            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "63", val), val.equals("63"));
+
+            val = table.getCellDataValueByPosition(1, 3);
+            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "7", val), val.equals("7"));
 
             text.setText("2");
 
@@ -379,8 +443,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 }
             });
 
-            assertEquals(table.getCellDataValueByPosition(3, 2), "88");
-            assertEquals(table.getCellDataValueByPosition(1, 3), "66");
+            val = table.getCellDataValueByPosition(3, 2);
+            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "88", val), val.equals("88"));
+
+            val = table.getCellDataValueByPosition(1, 3);
+            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "66", val), val.equals("66"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -389,13 +456,17 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
-            if(tableShell != null) tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
 
             try {
                 closeFile(hdf_file, false);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
