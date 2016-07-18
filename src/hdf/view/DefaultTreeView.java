@@ -35,7 +35,6 @@ import java.util.Queue;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -48,14 +47,27 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -1769,6 +1781,8 @@ public class DefaultTreeView implements TreeView {
      * @return
      */
     private ArrayList<TreeItem> getItemsBreadthFirst(TreeItem item) {
+        if (item == null) return null;
+
         ArrayList<TreeItem> allItems = new ArrayList<TreeItem>();
         Queue<TreeItem> currentChildren = new LinkedList<TreeItem>();
         TreeItem currentItem = item;
@@ -1893,7 +1907,7 @@ public class DefaultTreeView implements TreeView {
             Tools.showError(shell, "Select a file to save.", null);
             return;
         }
-        
+
         HObject root = srcFile.getRootObject();
         if (root == null) {
             shell.getDisplay().beep();
@@ -2070,7 +2084,7 @@ public class DefaultTreeView implements TreeView {
         TreeItem rootItem = findTreeItem(root);
         int n = rootItem.getItemCount();
         Vector<TreeItem> objList = new Vector<TreeItem>(n);
-        
+
         try {
             for (int i = 0; i < n; i++) objList.add(rootItem.getItem(i));
         } catch (Exception ex) {
