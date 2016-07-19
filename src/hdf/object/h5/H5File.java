@@ -2113,31 +2113,58 @@ public class H5File extends FileFormat {
                 isReadOnly = true;
             }
             catch (Exception ex2) {
-                log.debug("open(): open read-only failed, checking for file family");
-                // try to see if it is a file family, always open a family file
-                // from the first one since other files will not be recognized
-                // as an HDF5 file
-                File tmpf = new File(fullFileName);
-                String tmpname = tmpf.getName();
-                int idx = tmpname.lastIndexOf(".");
-                int cnt = idx;
-                System.out.println(tmpname);
-                while (idx > 0) {
-                    char c = tmpname.charAt(idx - 1);
-                    if (Character.isDigit(c))
-                        idx--;
-                    else
-                        break;
-                }
+                // Attemp to open the file as a split file or family file
+                try {
+                    File tmpf = new File(fullFileName);
+                    String tmpname = tmpf.getName();
+                    int idx = tmpname.lastIndexOf(".");
 
-                if (idx > 0) {
-                    cnt -= idx;
-                    tmpname = tmpname.substring(0, idx) + "%0" + cnt + "d" + tmpname.substring(tmpname.lastIndexOf("."));
-                    log.trace("open(): attempting to open file family with name {}", tmpname);
-                    long pid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
-                    H5.H5Pset_fapl_family(pid, 0, HDF5Constants.H5P_DEFAULT);
-                    fid = H5.H5Fopen(tmpf.getParent() + File.separator + tmpname, flag, pid);
-                    H5.H5Pclose(pid);
+                    if (tmpname.contains("-m")) {
+                        log.debug("open(): open read-only failed, attempting to open split file");
+
+                        while (idx > 0) {
+                            char c = tmpname.charAt(idx - 1);
+                            if (!(c == '-'))
+                                idx--;
+                            else
+                                break;
+                        }
+
+                        if (idx > 0) {
+                            tmpname = tmpname.substring(0, idx - 1);
+                            log.trace("open(): attempting to open split file with name {}", tmpname);
+                            long pid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+                            H5.H5Pset_fapl_split(pid, "-m.h5", HDF5Constants.H5P_DEFAULT, "-r.h5", HDF5Constants.H5P_DEFAULT);
+                            fid = H5.H5Fopen(tmpf.getParent() + File.separator + tmpname, flag, pid);
+                            H5.H5Pclose(pid);
+                        }
+                    }
+                    else {
+                        log.debug("open(): open read-only failed, checking for file family");
+                        // try to see if it is a file family, always open a family file
+                        // from the first one since other files will not be recognized
+                        // as an HDF5 file
+                        int cnt = idx;
+                        while (idx > 0) {
+                            char c = tmpname.charAt(idx - 1);
+                            if (Character.isDigit(c))
+                                idx--;
+                            else
+                                break;
+                        }
+
+                        if (idx > 0) {
+                            cnt -= idx;
+                            tmpname = tmpname.substring(0, idx) + "%0" + cnt + "d" + tmpname.substring(tmpname.lastIndexOf("."));
+                            log.trace("open(): attempting to open file family with name {}", tmpname);
+                            long pid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+                            H5.H5Pset_fapl_family(pid, 0, HDF5Constants.H5P_DEFAULT);
+                            fid = H5.H5Fopen(tmpf.getParent() + File.separator + tmpname, flag, pid);
+                            H5.H5Pclose(pid);
+                        }
+                    }
+                } catch (Exception ex3) {
+                    log.debug("open(): open failed: ", ex3);
                 }
             } /* catch (Exception ex) { */
         }
