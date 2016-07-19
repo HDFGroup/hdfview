@@ -129,7 +129,7 @@
       excludes="*sources.jar" />
   </path>
   <path id="swtbot-classpath">
-    <fileset dir="${lib.dir}" includes="*swtbot*.jar *log4j*.jar" excludes="*sources.jar" />
+    <fileset dir="${lib.dir}/ext/swt/swtbot" includes="*swtbot*.jar *log4j*.jar" excludes="*sources.jar" />
   </path>
   <path id="ui-test-sources">
     <fileset dir="${src.dir}/"
@@ -240,13 +240,11 @@
       <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}" includes="swt.jar" />
 
-      <zipfileset src="${lib.dir}/ext/swt/commons-logging-1.2.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/commons-logging.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.core.commands.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.equinox.common.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.jface.jar" excludes="META-INF/**/*"></zipfileset>
-      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.nebula.widgets.nattable.core_1.3.0.201503261201.jar" excludes="META-INF/**/*"></zipfileset>
-      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.osgi.jar" excludes="META-INF/**/*"></zipfileset>
-      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.ui.workbench.jar" excludes="META-INF/**/*"></zipfileset>
+      <zipfileset src="${lib.dir}/ext/swt/org.eclipse.nebula.widgets.nattable.core.jar" excludes="META-INF/**/*"></zipfileset>
 
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
