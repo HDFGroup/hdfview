@@ -2108,26 +2108,32 @@ public class H5File extends FileFormat {
         }
         catch (Exception ex) {
             try {
+                log.debug("open(): open failed, attempting to open file read-only");
                 fid = H5.H5Fopen(fullFileName, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
                 isReadOnly = true;
             }
             catch (Exception ex2) {
+                log.debug("open(): open read-only failed, checking for file family");
                 // try to see if it is a file family, always open a family file
                 // from the first one since other files will not be recognized
                 // as an HDF5 file
                 File tmpf = new File(fullFileName);
                 String tmpname = tmpf.getName();
                 int idx = tmpname.lastIndexOf(".");
+                int cnt = idx;
+                System.out.println(tmpname);
                 while (idx > 0) {
-                    char c = tmpname.charAt(idx);
-                    if (c >= '0')
+                    char c = tmpname.charAt(idx - 1);
+                    if (Character.isDigit(c))
                         idx--;
                     else
                         break;
                 }
 
                 if (idx > 0) {
-                    tmpname = tmpname.substring(0, idx - 1) + "%d" + tmpname.substring(tmpname.lastIndexOf("."));
+                    cnt -= idx;
+                    tmpname = tmpname.substring(0, idx) + "%0" + cnt + "d" + tmpname.substring(tmpname.lastIndexOf("."));
+                    log.trace("open(): attempting to open file family with name {}", tmpname);
                     long pid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
                     H5.H5Pset_fapl_family(pid, 0, HDF5Constants.H5P_DEFAULT);
                     fid = H5.H5Fopen(tmpf.getParent() + File.separator + tmpname, flag, pid);
