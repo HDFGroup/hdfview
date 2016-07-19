@@ -928,15 +928,15 @@
     </apply>
 
     <exec executable="codesign" dir="${dist.dir}">
+      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/_CodeSignature/CodeResources" />
+    </exec>
+
+    <exec executable="codesign" dir="${dist.dir}">
       <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Info.plist" />
     </exec>
 
     <exec executable="codesign" dir="${dist.dir}">
       <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Pkginfo" />
-    </exec>
-
-    <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/_CodeSignature/CodeResources" />
     </exec>
 
     <exec executable="codesign" dir="${dist.dir}">
@@ -1037,7 +1037,7 @@
     It is assumed that a 32-bit JVM is used for building on a 32-bit
     Windows system and a 64-bit JVM is used for building on a 64-bit
     Windows system. -->
-    <condition property="buildArch" value="x64" else="x32">
+    <condition property="buildArch" value="x64" else="x86">
         <matches pattern="64" string="${os.arch}" />
     </condition>
 

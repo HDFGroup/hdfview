@@ -601,6 +601,11 @@ public class H5CompoundDS extends CompoundDS {
                         tmptid = tid;
                         log.trace("read(): H5Tget_super");
                         tid = H5.H5Tget_super(tmptid);
+
+                        // ARRAY of COMPOUND currently unsupported
+                        if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
+                            return null;
+                        }
                     }
                     finally {
                         try {H5.H5Tclose(tmptid);}
@@ -709,7 +714,7 @@ public class H5CompoundDS extends CompoundDS {
                         catch (HDF5Exception ex) {
                             String[] nullValues = new String[(int) lsize[0]];
                             for (int j = 0; j < lsize[0]; j++) {
-                                nullValues[j] = "";
+                                nullValues[j] = "*unsupported*";
                             }
                             list.add(nullValues);
                             log.debug("read(): {} Member[{}] createCompoundFieldType failure:", member_name, i, ex);
@@ -747,7 +752,7 @@ public class H5CompoundDS extends CompoundDS {
                         catch (HDF5Exception ex2) {
                             String[] nullValues = new String[(int) lsize[0]];
                             for (int j = 0; j < lsize[0]; j++) {
-                                nullValues[j] = "";
+                                nullValues[j] = "*unsupported*";
                             }
                             list.add(nullValues);
                             log.debug("read(): {} Member[{}] read failure:", member_name, i, ex2);
