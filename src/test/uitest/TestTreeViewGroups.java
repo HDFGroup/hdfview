@@ -30,8 +30,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5Group()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("openHDF5Group() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("openHDF5Group() filetree is missing dataset " + datasetname, items[0].getNode(3).getText().compareTo(datasetname)==0);
+            assertTrue("openHDF5Group() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5Group() filetree is missing dataset '" + datasetname + "'", items[0].getNode(3).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS64BITS'
             items[0].getNode(3).click();
@@ -120,8 +120,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS08() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDS08() filetree is missing dataset " + datasetname, items[0].getNode(0).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDS08() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDS08() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS08BITS'
             items[0].getNode(0).click();
@@ -215,8 +215,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU08()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU08() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDU08() filetree is missing dataset " + datasetname, items[0].getNode(4).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDU08() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU08() filetree is missing dataset '" + datasetname + "'", items[0].getNode(4).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU08BITS'
             items[0].getNode(4).click();
@@ -310,8 +310,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDS16()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS16() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDS16() filetree is missing dataset " + datasetname, items[0].getNode(1).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDS16() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDS16() filetree is missing dataset '" + datasetname + "'", items[0].getNode(1).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS16BITS'
             items[0].getNode(1).click();
@@ -405,8 +405,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU16()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU16() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDU16() filetree is missing dataset " + datasetname, items[0].getNode(5).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDU16() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU16() filetree is missing dataset '" + datasetname + "'", items[0].getNode(5).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU16BITS'
             items[0].getNode(5).click();
@@ -500,8 +500,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDS32()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS32() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDS32() filetree is missing dataset " + datasetname, items[0].getNode(2).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDS32() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDS32() filetree is missing dataset '" + datasetname + "'", items[0].getNode(2).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS32BITS'
             items[0].getNode(2).click();
@@ -595,8 +595,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU32()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU32() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDU32() filetree is missing dataset " + datasetname, items[0].getNode(6).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDU32() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU32() filetree is missing dataset '" + datasetname + "'", items[0].getNode(6).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU32BITS'
             items[0].getNode(6).click();
@@ -693,8 +693,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDS64()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS64() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDS64() filetree is missing dataset " + datasetname, items[0].getNode(3).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDS64() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDS64() filetree is missing dataset '" + datasetname + "'", items[0].getNode(3).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS64BITS'
             items[0].getNode(3).click();
@@ -791,8 +791,8 @@ public class TestTreeViewGroups extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU64()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU64() filetree is missing file " + filename + file_ext, items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDU64() filetree is missing dataset " + datasetname, items[0].getNode(7).getText().compareTo(datasetname)==0);
+            assertTrue("checkHDF5GroupDU64() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU64() filetree is missing dataset '" + datasetname + "'", items[0].getNode(7).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU64BITS'
             items[0].getNode(7).click();
