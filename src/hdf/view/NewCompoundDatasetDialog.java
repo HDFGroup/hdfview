@@ -105,9 +105,11 @@ public class NewCompoundDatasetDialog extends Dialog {
 
     private Table                 table;
 
+    private TableEditor[][]       editors;
+
     private Text                  nameField, currentSizeField, maxSizeField, chunkSizeField;
 
-    private Combo                 compressionLevel, rankChoice, memberTypeChoice;
+    private Combo                 compressionLevel, rankChoice;
     private Button                checkCompression;
     private Button                checkContiguous, checkChunked;
 
@@ -220,7 +222,6 @@ public class NewCompoundDatasetDialog extends Dialog {
         templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         templateChoice.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                // TODO: get Dataset from combobox name
                 CompoundDS dset = null;
                 String name = templateChoice.getItem(templateChoice.getSelectionIndex());
 
@@ -283,12 +284,10 @@ public class NewCompoundDatasetDialog extends Dialog {
                     }
                 }
 
-                int memberCount = dset.getMemberCount();
-                nFieldBox.select(memberCount - 1);
+                nFieldBox.select(dset.getMemberCount() - 1);
                 nFieldBox.notifyListeners(SWT.Selection, new Event());
-                table.setItemCount(numberOfMembers);
                 for (int i = 0; i < numberOfMembers; i++) {
-                    table.getItem(i).setText(0, mNames[i]);
+                    ((Text) editors[i][0].getEditor()).setText(mNames[i]);
 
                     int typeIdx = -1;
                     int tclass = mTypes[i].getDatatypeClass();
@@ -359,17 +358,21 @@ public class NewCompoundDatasetDialog extends Dialog {
                         continue;
                     }
 
-                    memberTypeChoice.select(typeIdx);
-                    table.getItem(i).setText(1, memberTypeChoice.getItem(memberTypeChoice.getSelectionIndex()));
+                    CCombo typeCombo = ((CCombo) editors[i][1].getEditor());
+                    typeCombo.select(typeIdx);
+                    typeCombo.notifyListeners(SWT.Selection, new Event());
 
+                    //TODO: Array size is wrong for enums and for array types. Array types such as 8x8
+                    // show as size 64, not 8x8
                     if (tclass == Datatype.CLASS_STRING) {
-                        table.getItem(i).setText(2, String.valueOf(tsize));
+                        ((Text) editors[i][2].getEditor()).setText(String.valueOf(tsize));
                     }
                     else if (tclass == Datatype.CLASS_ENUM) {
+                        ((Text) editors[i][2].getEditor()).setText(mTypes[i].getEnumMembers());
                         table.getItem(i).setText(2, mTypes[i].getEnumMembers());
                     }
                     else {
-                        table.getItem(i).setText(2, String.valueOf(mOrders[i]));
+                        ((Text) editors[i][2].getEditor()).setText(String.valueOf(mOrders[i]));
                     }
                 } // for (int i=0; i<numberOfMembers; i++)
             }
@@ -628,6 +631,8 @@ public class NewCompoundDatasetDialog extends Dialog {
         table.setHeaderVisible(true);
         table.setFont(curFont);
 
+        editors = new TableEditor[nFieldBox.getItemCount()][3];
+
         String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
 
         TableColumn column = new TableColumn(table, SWT.NONE);
@@ -639,8 +644,12 @@ public class NewCompoundDatasetDialog extends Dialog {
         column = new TableColumn(table, SWT.NONE);
         column.setText(colNames[2]);
 
-        addMemberTableItem(table);
-        addMemberTableItem(table);
+        for (int i = 0; i < 2; i++) {
+            TableEditor[] editor = addMemberTableItem(table);
+            editors[i][0] = editor[0];
+            editors[i][1] = editor[1];
+            editors[i][2] = editor[2];
+        }
 
         for(int i = 0; i < table.getColumnCount(); i++) {
             table.getColumn(i).pack();
@@ -997,39 +1006,49 @@ public class NewCompoundDatasetDialog extends Dialog {
             return;
         }
 
-        try {
-            if(n > numberOfMembers) {
-                for(int i = 0; i < n - numberOfMembers; i++) {
-                    addMemberTableItem(table);
+        if(n > numberOfMembers) {
+            try {
+                for (int i = numberOfMembers; i < n; i++) {
+                    TableEditor[] editor = addMemberTableItem(table);
+                    editors[i][0] = editor[0];
+                    editors[i][1] = editor[1];
+                    editors[i][2] = editor[2];
                 }
-            } else {
+            }
+            catch (Exception ex) {
+                log.debug("Error adding member table items: ", ex);
+                return;
+            }
+        } else {
+            try {
                 for(int i = numberOfMembers - 1; i >= n; i--) {
                     table.remove(i);
                 }
             }
-        } catch (Exception ex) {
-            log.debug("Error adding or removing member table items: ", ex);
-            return;
+            catch (Exception ex) {
+                log.debug("Error removing member table items: ", ex);
+                return;
+            }
         }
 
         table.setItemCount(n);
         numberOfMembers = n;
     }
 
-    private TableItem addMemberTableItem(Table table) {
+    private TableEditor[] addMemberTableItem(Table table) {
         final TableItem item = new TableItem(table, SWT.NONE);
-        final TableEditor nameEditor = new TableEditor(table);
-        final TableEditor typeEditor = new TableEditor(table);
-        final TableEditor sizeEditor = new TableEditor(table);
+        final TableEditor[] editor = new TableEditor[3];
+
+        for (int i = 0; i < editor.length; i++) editor[i] = new TableEditor(table);
 
         final Text nameText = new Text(table, SWT.SINGLE | SWT.BORDER);
         nameText.setFont(curFont);
 
-        nameEditor.grabHorizontal = true;
-        nameEditor.grabVertical = true;
-        nameEditor.horizontalAlignment = SWT.LEFT;
-        nameEditor.verticalAlignment = SWT.TOP;
-        nameEditor.setEditor(nameText, item, 0);
+        editor[0].grabHorizontal = true;
+        editor[0].grabVertical = true;
+        editor[0].horizontalAlignment = SWT.LEFT;
+        editor[0].verticalAlignment = SWT.TOP;
+        editor[0].setEditor(nameText, item, 0);
 
         nameText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -1042,11 +1061,11 @@ public class NewCompoundDatasetDialog extends Dialog {
         typeCombo.setFont(curFont);
         typeCombo.setItems(DATATYPE_NAMES);
 
-        typeEditor.grabHorizontal = true;
-        typeEditor.grabVertical = true;
-        typeEditor.horizontalAlignment = SWT.LEFT;
-        typeEditor.verticalAlignment = SWT.TOP;
-        typeEditor.setEditor(typeCombo, item, 1);
+        editor[1].grabHorizontal = true;
+        editor[1].grabVertical = true;
+        editor[1].horizontalAlignment = SWT.LEFT;
+        editor[1].verticalAlignment = SWT.TOP;
+        editor[1].setEditor(typeCombo, item, 1);
 
         typeCombo.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -1058,11 +1077,11 @@ public class NewCompoundDatasetDialog extends Dialog {
         final Text sizeText = new Text(table, SWT.SINGLE | SWT.BORDER);
         sizeText.setFont(curFont);
 
-        sizeEditor.grabHorizontal = true;
-        sizeEditor.grabVertical = true;
-        sizeEditor.horizontalAlignment = SWT.LEFT;
-        sizeEditor.verticalAlignment = SWT.TOP;
-        sizeEditor.setEditor(sizeText, item, 2);
+        editor[2].grabHorizontal = true;
+        editor[2].grabVertical = true;
+        editor[2].horizontalAlignment = SWT.LEFT;
+        editor[2].verticalAlignment = SWT.TOP;
+        editor[2].setEditor(sizeText, item, 2);
 
         sizeText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -1077,16 +1096,16 @@ public class NewCompoundDatasetDialog extends Dialog {
 
         item.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                nameEditor.dispose();
-                typeEditor.dispose();
-                sizeEditor.dispose();
+                editor[0].dispose();
+                editor[1].dispose();
+                editor[2].dispose();
                 nameText.dispose();
                 typeCombo.dispose();
                 sizeText.dispose();
             }
         });
 
-        return item;
+        return editor;
     }
 
     /** @return the new dataset created. */
