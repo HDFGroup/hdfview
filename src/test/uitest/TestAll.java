@@ -10,6 +10,7 @@ import org.junit.runners.Suite;
     TestHDFViewDatasetFrameSelection.class,
     TestHDFViewImageConversion.class,
     TestTreeViewFiles.class,
+    TestTreeViewGroups.class,
     TestTreeViewNewMenu.class
 })
 
