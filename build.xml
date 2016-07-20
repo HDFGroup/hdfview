@@ -211,7 +211,7 @@
      HDF-Java version: ${hdfjava.version}
      HDF4 version:     ${hdf4.version}
      HDF5 version:     ${hdf5.version}
-     Operating System: ${machine.os}
+     Operating System: ${os.name} ${os.version} ${os.arch}
   </echo>
 
   <target name="clean" description="Cleans up the build directory">
