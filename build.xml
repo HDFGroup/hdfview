@@ -137,7 +137,7 @@
   <property name="lib.dir"           value="lib" />
   <property name="dist.dir"          value="${build.dir}/dist" />
   <property name="java.bin"          value="/bin/jre/bin" />
-  <property name="release.dir"       value="${build.dir}/HDF_Group/HDFView/${app.version}.0" />
+  <property name="release.dir"       value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}.0" />
   <property name="includeantruntime" value="false" />
   <property name="jre.version"       value="${ant.java.version}" />
 
@@ -797,14 +797,14 @@
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
     <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
     <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}                 - HDFView Directory" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}                 - ${ant.project.name} Directory" />
     <replace file="${dist.dir}/README.txt" token="@LINUX_INSTALL_EXECUTABLE@" value="" />
     <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
     <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
     <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
     <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.bat" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="This release of HDFView for Windows doesn't require installation,${line.separator}simply copy the ${ant.project.name} directory where you would like the application${line.separator}at and:${line.separator}" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="This release of ${ant.project.name} for Windows doesn't require installation,${line.separator}simply copy the ${ant.project.name} directory where you would like the application${line.separator}at and:${line.separator}" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
     <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="" />
 
@@ -887,7 +887,7 @@
       executableName="${ant.project.name}"
       identifier="org.hdfgroup.${ant.project.name}-${app.version}"
       shortversion="${app.version}"
-      icon="${lib.dir}/macosx/HDFView.icns"
+      icon="${lib.dir}/macosx/${ant.project.name}.icns"
       signature="????"
       copyright="Copyright © 2006-2016 by The HDF Group. All rights reserved."
       applicationCategory="public.app-category.developer-tools"
@@ -900,14 +900,14 @@
 
       <bundledocument
         extensions="hdf,hdf4,h4,hdf5,h5"
-        icon="${lib.dir}/macosx/HDFView.icns"
+        icon="${lib.dir}/macosx/${ant.project.name}.icns"
         name="HDF Files"
         role="editor">
       </bundledocument>
 
       <option value="-Xmx1024m" name="Xmx" />
       <option value="-Dhdfview.root=$APP_ROOT/Contents/Java" />
-      <option value="-Xdock:icon=$APP_ROOT/Contents/Resources/HDFView.icns" />
+      <option value="-Xdock:icon=$APP_ROOT/Contents/Resources/${ant.project.name}.icns" />
       <option value="-Dapple.laf.useScreenMenuBar=true" />
       <option value="-Dcom.apple.macos.use-file-dialog-packages=true" />
       <option value="-Dcom.apple.macos.useScreenMenuBar=true" />
@@ -944,7 +944,7 @@
     <apply executable="codesign">
       <!-- note: this loops through the contents of dir -->
       <arg line="-v -f -s ${env.SIGNER}" />
-      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/MacOS" excludes="HDFView" />
+      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/MacOS" excludes="${ant.project.name}" />
     </apply>
 
     <exec executable="codesign" dir="${dist.dir}">
@@ -1075,7 +1075,7 @@
       <arg value="-b" />
       <arg value=".\src\hdf\view\icons" />
       <arg value="-out" />
-      <arg value=".\${dist.dir}\HDFView-${app.version}.msi" />
+      <arg value=".\${dist.dir}\${ant.project.name}-${app.version}.msi" />
       <arg value="-ext" />
       <arg value="WixUIExtension" />
       <arg value="-ext" />
@@ -1088,7 +1088,19 @@
     </exec>
 
     <!-- Sign the generated MSI -->
-
+    <exec executable="signtool.exe">
+      <arg value="sign" />
+      <arg value="/v" />
+      <arg value="/d" />
+      <arg value="${ant.project.name} ${app.version} Utility" />
+      <arg value="/f" />
+      <arg value="HDF_Certificate.p12" />
+      <arg value="/p" />
+      <arg value="5k insomnia" />
+      <arg value="/t" />
+      <arg value="http://timestamp.verisign.com/scripts/timstamp.dll"/>
+      <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.msi" />
+    </exec>
   </target>
 
   <target name="createUnixInstaller" depends="clean-package, deploy" if="isUnix">
