@@ -1088,7 +1088,7 @@
     </exec>
 
     <!-- Sign the generated MSI -->
-    <exec executable="signtool.exe">
+    <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
       <arg value="sign" />
       <arg value="/v" />
       <arg value="/d" />
