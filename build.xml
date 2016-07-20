@@ -69,6 +69,43 @@
       </tokenfilter>
     </filterchain>
   </loadresource>
+  
+  <condition property="isWindows">
+    <os family="windows" />
+  </condition>
+
+  <condition property="isUnix">
+    <os family="unix" />
+  </condition>
+
+  <condition property="isMac">
+    <os family="mac" />
+  </condition>
+
+  <condition property="machine.os" value="Windows">
+    <equals arg1="${isWindows}" arg2="true" />
+  </condition>
+
+  <condition property="machine.os" value="Linux">
+    <and>
+      <equals arg1="${isUnix}" arg2="true" />
+      <not>
+        <equals arg1="${isWindows}" arg2="true" />
+      </not>
+    </and>
+  </condition>
+
+  <condition property="machine.os" value="OS X">
+    <and>
+      <equals arg1="${isMac}" arg2="true" />
+      <not>
+        <equals arg1="${isWindows}" arg2="true" />
+      </not>
+      <not>
+        <equals arg1="${isUnix}" arg2="true" />
+      </not>
+    </and>
+  </condition>
 
   <!-- Sets variables which can later be used. -->
   <!-- The value of a property is accessed via ${} -->
@@ -109,7 +146,7 @@
     <fileset dir="${hdf5.lib.dir}" includes="jarhdf5*.jar" />
   </path>
   <path id="slf4j-classpath">
-  	<fileset dir="${lib.dir}"
+      <fileset dir="${lib.dir}"
       includes="slf4j-api*.jar"
       excludes="*sources.jar" />
   </path>
@@ -119,7 +156,7 @@
       excludes="*sources.jar" />
   </path>
   <path id="nop-classpath">
-  	<fileset dir="${lib.dir}/extra"
+      <fileset dir="${lib.dir}/extra"
       includes="slf4j-nop*.jar"
       excludes="*sources.jar" />
   </path>
@@ -140,13 +177,13 @@
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
-  	<path refid="slf4j-classpath" />
+      <path refid="slf4j-classpath" />
   </path>
   <path id="jar-classpath">
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
-  	<path refid="slf4j-classpath" />
+      <path refid="slf4j-classpath" />
   </path>
 
   <property name="main-class" value="hdf.view.HDFView" />
@@ -165,9 +202,10 @@
      HDF-Java version: ${hdfjava.version}
      HDF4 version:     ${hdf4.version}
      HDF5 version:     ${hdf5.version}
+     Operating System: ${machine.os}
   </echo>
 
-  <target name="clean">
+  <target name="clean" description="Cleans up the build directory">
     <delete dir="${classes.dir}" />
     <delete dir="${jar.dir}" />
     <delete dir="${report.dir}" />
@@ -259,7 +297,7 @@
      <os family="mac"/>
   </condition>
 
-  <target name="run" depends="jar">
+  <target name="run" depends="jar" description="Runs the application">
     <mkdir dir="${jar.dir}/lib/ext" />
     <java fork="true" classname="${main-class}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -276,7 +314,7 @@
     </java>
   </target>
 
-  <target name="run-jar" depends="jar">
+  <target name="run-jar" depends="jar" description="Runs the application directly from the .jar file">
     <mkdir dir="${jar.dir}/lib" />
     <mkdir dir="${jar.dir}/lib/ext" />
     <copy todir="${jar.dir}/lib">
@@ -312,7 +350,7 @@
   <classfileset id="reqdClasses" dir="${exclasses.dir}">
     <rootfileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
   </classfileset>
-  <target name="run-examples" depends="compile-examples">
+  <target name="run-examples" depends="compile-examples" description="Runs the examples">
     <foreach target="run-one-example" param="exfile">
       <path>
         <fileset refid="reqdClasses" />
@@ -425,7 +463,8 @@
     </junit>
   </target>
 
-  <target name="junit" depends="jar,compile-test,clean-junit-uitest">
+  <target name="junit" depends="jar,compile-test,clean-junit-uitest"
+          description="Runs the Object Library tests">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -487,7 +526,8 @@
     </junit>
   </target>
 
-  <target name="junit-uitest" depends="jar,compile-test,clean-junit-uitest">
+  <target name="junit-uitest" depends="jar,compile-test,clean-junit-uitest"
+          description="Runs the UI tests">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -513,7 +553,8 @@
     </junit>
   </target>
 
-  <target name="junit-uimodules" depends="jar,compile-test,clean-junit-uitest">
+  <target name="junit-uimodules" depends="jar,compile-test,clean-junit-uitest"
+          description="Runs the tests for the UI modules">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -580,14 +621,17 @@
     </javadoc>
   </target>
 
-  <target name="createDocumentationTGZ">
+  <target name="createDocumentationTGZ" description="Compresses the application User's Guide project pointed to by userguide.dir into a .tar.gz file to be distributed">
     <mkdir dir="${build.dir}/docs" />
     <tar destfile="${build.dir}/docs/UserGuide.tar.gz" compression="gzip">
       <tarfileset dir="${userguide.dir}" includes="hdf-java-html/** hdf-object/** hdfview/** JNI/** index.html" />
     </tar>
   </target>
 
-  <target name="deployWindows" depends="jar,javadoc">
+  <target name="deploy" depends="deployWindows, deployUnix, deployMac"
+      description="Creates the release directory containing the fully-prepared application binaries, libraries, etc. ready to be packaged up for distribution" />
+
+  <target name="deployWindows" depends="jar,javadoc" if="isWindows">
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
@@ -627,7 +671,7 @@
     </copy>
   </target>
 
-  <target name="deployUnix" depends="jar,javadoc">
+  <target name="deployUnix" depends="jar,javadoc" if="isUnix">
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
@@ -691,7 +735,7 @@
     </copy>
   </target>
 
-  <target name="deployMac" depends="jar,javadoc">
+  <target name="deployMac" depends="jar,javadoc" if="isMac">
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/lib" />
     <mkdir dir="${release.dir}/doc" />
@@ -724,14 +768,18 @@
     </copy>
   </target>
 
-  <target name="packageWindows" depends="deployWindows,clean-package">
+  <target name="package" depends="packageWindows, packageUnix, packageMac"
+          description="Packages up the release directory, the license file and the README file into a distributable form" />
+
+  <target name="packageWindows" depends="createInstaller, clean-package" if="isWindows">
     <mkdir dir="${dist.dir}" />
 
-    <!-- Copy over COPYING and generate Readme.txt -->
+    <!-- Copy over license file -->
     <copy todir="${dist.dir}">
       <fileset dir="${basedir}" includes="COPYING" />
     </copy>
 
+    <!-- Create README.txt and add appropriate version information -->
     <concat destfile="${dist.dir}/README.txt">${readme.txt}</concat>
     <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
@@ -751,30 +799,21 @@
     <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
     <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="" />
 
-    <mkdir dir="${dist.dir}/${ant.project.name}/${app.version}.0" />
-    <copy todir="${dist.dir}/${ant.project.name}/${app.version}.0">
-      <fileset dir="${release.dir}" />
-    </copy>
-
     <!-- Compress everything into one zip file -->
-    <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-win-${os.arch}.zip"
+    <condition property="win.extension" value="win32" else="win64">
+      <contains string="${os.arch}" substring="32" />
+    </condition>
+    <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip"
       basedir="${dist.dir}" />
   </target>
 
-  <target name="packageUnix" depends="deployUnix,clean-package">
-    <!-- Copy over COPYING and generate Readme.txt -->
+  <target name="packageUnix" depends="createInstaller, clean-package" if="isUnix">
+    <!-- Copy over license file -->
     <copy todir="${dist.dir}">
       <fileset dir="${basedir}" includes="COPYING" />
     </copy>
 
-    <exec executable="uname" outputproperty="uname.os">
-      <arg value="-s" />
-    </exec>
-
-    <exec executable="uname" outputproperty="uname.version">
-      <arg value="-r" />
-    </exec>
-
+    <!-- Create README.txt and add appropriate version information -->
     <concat destfile="${dist.dir}/README.txt">${readme.txt}</concat>
     <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
@@ -793,34 +832,7 @@
     <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh" />
     <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/${app.version}.0/hdfview.sh to run ${ant.project.name}" />
 
-    <!-- For Linux, create install script, then compress HDFJava into tar.gz file and concat it with
-         install script to create a self-extracting .sh file -->
-    <concat destfile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh">${installscript.text}</concat>
-    <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
-    <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@OS@" value="${uname.os}" />
-    <chmod perm="ugo+rx">
-      <fileset dir="${dist.dir}" includes="${ant.project.name}-${app.version}.0-${uname.os}.sh" />
-    </chmod>
-
-    <tar destfile="${dist.dir}/temp.tar.gz" compression="gzip">
-      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}.0">
-        <exclude name="*.sh" />
-      </tarfileset>
-      <tarfileset dir="${release.dir}/jre"
-        prefix="${ant.project.name}/${app.version}.0/jre"
-        filemode="777">
-        <include name="**" />
-      </tarfileset>
-      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}.0" filemode="777">
-        <include name="*.sh" />
-      </tarfileset>
-    </tar>
-
-    <concat destfile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" append="yes" binary="yes">
-      <fileset dir="${dist.dir}" includes="temp.tar.gz" />
-    </concat>
-
-    <!-- Then compress everything into one tar.gz file -->
+    <!-- Compress everything into one tar.gz file -->
     <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-x64.tar.gz"
       compression="gzip">
       <tarfileset dir="${dist.dir}" filemode="777">
@@ -829,10 +841,10 @@
     </tar>
   </target>
 
-  <target name="packageMac" depends="deployMac,clean-package">
+  <target name="packageMac" depends="createInstaller, clean-package" if="isMac">
     <mkdir dir="${dist.dir}" />
 
-    <!-- Copy over COPYING and generate Readme.txt -->
+    <!-- Copy over license file -->
     <copy tofile="${dist.dir}/COPYING.txt">
       <fileset dir="${basedir}" includes="COPYING" />
     </copy>
@@ -841,6 +853,7 @@
       <arg value="-r" />
     </exec>
 
+    <!-- Create README.txt and add appropriate version information -->
     <concat destfile="${dist.dir}/README.txt">${macreadme.txt}</concat>
     <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
@@ -961,7 +974,28 @@
     </exec>
   </target>
 
-  <target name="packageSourceUnix" depends="clean-package">
+  <target name="packageSource" depends="packageSourceWindows, packageSourceUnix"
+            description="Packages the application source files into a compressed archive" />
+
+  <target name="packageSourceWindows" depends="clean-package" if="isWindows">
+    <zip destfile="${build.dir}/${ant.project.name}-${app.version}.0-source.zip">
+      <zipfileset dir="${basedir}"
+        excludes="bin/** build/** .*
+                  lib/eos/**
+                  lib/*sources.jar
+                  lib/fest-assert-*.jar
+                  lib/fest-reflect-*.jar
+                  lib/fest-swing-*.jar
+                  lib/fest-util-*.jar
+                  lib/jcip-annotations-*.jar
+                  lib/extra/hamcrest*.jar
+                  lib/extra/junit*.jar
+                  lib/extra/netcdf*.jar
+                  lib/extra/*sources.jar" />
+    </zip>
+  </target>
+
+  <target name="packageSourceUnix" depends="clean-package" if="isUnix">
     <tar destfile="${build.dir}/${ant.project.name}-${app.version}.0-source.tar.gz" compression="gzip">
       <tarfileset dir="${basedir}"
         excludes="bin/** build/** .*
@@ -979,64 +1013,19 @@
     </tar>
   </target>
 
-  <target name="packageSourceWindows" depends="clean-package">
-    <zip destfile="${build.dir}/${ant.project.name}-${app.version}.0-source.zip">
-      <zipfileset dir="${basedir}"
-        excludes="bin/** build/** .*
-            lib/eos/**
-            lib/*sources.jar
-            lib/fest-assert-*.jar
-            lib/fest-reflect-*.jar
-            lib/fest-swing-*.jar
-            lib/fest-util-*.jar
-            lib/jcip-annotations-*.jar
-            lib/extra/hamcrest*.jar
-            lib/extra/junit*.jar
-            lib/extra/netcdf*.jar
-            lib/extra/*sources.jar" />
-    </zip>
-  </target>
+  <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller, createMacInstaller"
+          description="Creates a binary installer to install the application on the machine" />
 
-  <target name="createMacInstaller" depends="clean-package,deployMac">
-    <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
-             uri="javafx:com.sun.javafx.tools.ant"
-             classpath="${java.home}/../lib/ant-javafx.jar" />
-
-    <!-- Sign .app before creating DMG -->
-
-    <fx:deploy outdir="${basedir}/${dist.dir}" nativeBundles="dmg" outfile="${ant.project.name}-${app.version}">
-      <fx:application name="${ant.project.name}" mainClass="${main-class}" />
-
-      <fx:resources>
-        <!-- Include applications .jars -->
-        <fx:fileset dir="${basedir}/${release.dir}/lib" includes="*.jar" />
-
-        <!-- Include native libraries -->
-        <fx:fileset dir="${basedir}/${release.dir}/lib" type="data">
-          <include name="*.dylib" />
-        </fx:fileset>
-
-        <fx:fileset dir="${basedir}" includes="COPYING" type="license" />
-      </fx:resources>
-
-      <fx:info title="${ant.project.name}" vendor="The HDF Group">
-        <fx:association extension="hdf h5" description="HDF4/5 File" mimetype="application/x-hdf" />
-      </fx:info>
-
-      <fx:preferences shortcut="true" />
-
-      <!-- Set JVM Options -->
-    </fx:deploy>
-  </target>
-
-  <target name="createWindowsInstaller" depends="clean-package,deployWindows">
+  <target name="createWindowsInstaller" depends="clean-package, deploy" if="isWindows">
+    <mkdir dir="${dist.dir}" />
+    
     <!-- Determine whether to build 32- or 64-bit binary.
     Note: os.arch gives the architecture of the JVM, NOT the OS;
     It is assumed that a 32-bit JVM is used for building on a 32-bit
     Windows system and a 64-bit JVM is used for building on a 64-bit
     Windows system. -->
     <condition property="buildArch" value="x64" else="x86">
-        <matches pattern="64" string="${os.arch}" />
+      <matches pattern="64" string="${os.arch}" />
     </condition>
 
     <!-- Generate allfiles.wxs describing structure of HDFView folder tree -->
@@ -1083,23 +1072,96 @@
     <exec executable="${wix.dir}/light.exe">
       <arg value="-b" />
       <arg value=".\${release.dir}" />
-    <arg value="-b" />
-    <arg value=".\src\hdf\view\icons" />
+      <arg value="-b" />
+      <arg value=".\src\hdf\view\icons" />
       <arg value="-out" />
-      <arg value=".\${build.dir}\HDFView-${app.version}.msi" />
+      <arg value=".\${dist.dir}\HDFView-${app.version}.msi" />
       <arg value="-ext" />
       <arg value="WixUIExtension" />
       <arg value="-ext" />
       <arg value="WixUtilExtension" />
       <arg value="-cultures:en-us" />
       <arg value="-spdb" />
-    <arg value="-dWixUILicenseRtf=License.rtf" />
+      <arg value="-dWixUILicenseRtf=License.rtf" />
       <arg value=".\${build.dir}\allfiles.wixobj" />
       <arg value=".\${build.dir}\build.wixobj" />
     </exec>
 
     <!-- Sign the generated MSI -->
 
+  </target>
+
+  <target name="createUnixInstaller" depends="clean-package, deploy" if="isUnix">
+    <mkdir dir="${dist.dir}" />
+
+    <exec executable="uname" outputproperty="uname.os">
+      <arg value="-s" />
+    </exec>
+
+    <exec executable="uname" outputproperty="uname.version">
+      <arg value="-r" />
+    </exec>
+    
+    <!-- For Linux/Unix, create install script, then compress HDFJava into tar.gz file and concat it with
+         install script to create a self-extracting .sh file -->
+    <concat destfile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh">${installscript.text}</concat>
+    <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
+    <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@OS@" value="${uname.os}" />
+    <chmod perm="ugo+rx">
+      <fileset dir="${dist.dir}" includes="${ant.project.name}-${app.version}.0-${uname.os}.sh" />
+    </chmod>
+
+    <tar destfile="${dist.dir}/temp.tar.gz" compression="gzip">
+      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}.0">
+        <exclude name="*.sh" />
+      </tarfileset>
+      <tarfileset dir="${release.dir}/jre"
+        prefix="${ant.project.name}/${app.version}.0/jre"
+        filemode="777">
+        <include name="**" />
+      </tarfileset>
+      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}.0" filemode="777">
+        <include name="*.sh" />
+      </tarfileset>
+    </tar>
+
+    <concat destfile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" append="yes" binary="yes">
+      <fileset dir="${dist.dir}" includes="temp.tar.gz" />
+    </concat>
+  </target>
+
+  <target name="createMacInstaller" depends="clean-package, deploy" if="isMac">
+    <mkdir dir="${dist.dir}" />
+    
+    <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
+             uri="javafx:com.sun.javafx.tools.ant"
+             classpath="${java.home}/../lib/ant-javafx.jar" />
+
+    <!-- Sign .app before creating DMG -->
+
+    <fx:deploy outdir="${basedir}/${dist.dir}" nativeBundles="dmg" outfile="${ant.project.name}-${app.version}">
+      <fx:application name="${ant.project.name}" mainClass="${main-class}" />
+
+      <fx:resources>
+        <!-- Include applications .jars -->
+        <fx:fileset dir="${basedir}/${release.dir}/lib" includes="*.jar" />
+
+        <!-- Include native libraries -->
+        <fx:fileset dir="${basedir}/${release.dir}/lib" type="data">
+          <include name="*.dylib" />
+        </fx:fileset>
+
+        <fx:fileset dir="${basedir}" includes="COPYING" type="license" />
+      </fx:resources>
+
+      <fx:info title="${ant.project.name}" vendor="The HDF Group">
+        <fx:association extension="hdf h5" description="HDF4/5 File" mimetype="application/x-hdf" />
+      </fx:info>
+
+      <fx:preferences shortcut="true" />
+
+      <!-- Set JVM Options -->
+    </fx:deploy>
   </target>
 
   <target name="createUnixRPM" depends="clean-package,deployUnix">
