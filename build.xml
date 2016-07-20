@@ -82,11 +82,11 @@
     <os family="mac" />
   </condition>
 
-  <condition property="machine.os" value="Windows">
+  <condition property="machine.os" value="win">
     <equals arg1="${isWindows}" arg2="true" />
   </condition>
 
-  <condition property="machine.os" value="Linux">
+  <condition property="machine.os" value="linux">
     <and>
       <equals arg1="${isUnix}" arg2="true" />
       <not>
@@ -95,7 +95,7 @@
     </and>
   </condition>
 
-  <condition property="machine.os" value="OS X">
+  <condition property="machine.os" value="osx">
     <and>
       <equals arg1="${isMac}" arg2="true" />
       <not>
@@ -105,6 +105,15 @@
         <equals arg1="${isUnix}" arg2="true" />
       </not>
     </and>
+  </condition>
+
+  <!-- Determine whether to build 32- or 64-bit binary.
+       Note: os.arch gives the architecture of the JVM, NOT the OS;
+       It is assumed that a 32-bit JVM is used for building on a 32-bit
+       Windows system and a 64-bit JVM is used for building on a 64-bit
+       Windows system. -->
+  <condition property="machine.arch" value="x64" else="x86">
+    <matches pattern="64" string="${os.arch}" />
   </condition>
 
   <!-- Sets variables which can later be used. -->
@@ -138,7 +147,7 @@
       excludes="*sources.jar" />
   </path>
   <path id="swt-classpath">
-    <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
+    <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
     <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
   </path>
   <path id="jni-classpath">
@@ -276,7 +285,7 @@
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
-      <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}" includes="swt.jar" />
+      <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.os}/${machine.arch}" includes="swt.jar" />
 
       <zipfileset src="${lib.dir}/ext/swt/commons-logging.jar" excludes="META-INF/**/*"></zipfileset>
       <zipfileset src="${lib.dir}/ext/swt/org.eclipse.core.commands.jar" excludes="META-INF/**/*"></zipfileset>
@@ -686,7 +695,7 @@
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
-      <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
+      <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
       <fileset dir="${hdf.lib.dir}">
         <include name="*.jar" />
@@ -750,7 +759,7 @@
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
-      <fileset file="${lib.dir}/ext/swt/${machine.platform}/${machine.arch}/swt.jar" />
+      <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
     </copy>
 
     <!-- Copy the documentation -->
@@ -1018,15 +1027,6 @@
 
   <target name="createWindowsInstaller" depends="clean-package, deploy" if="isWindows">
     <mkdir dir="${dist.dir}" />
-    
-    <!-- Determine whether to build 32- or 64-bit binary.
-    Note: os.arch gives the architecture of the JVM, NOT the OS;
-    It is assumed that a 32-bit JVM is used for building on a 32-bit
-    Windows system and a 64-bit JVM is used for building on a 64-bit
-    Windows system. -->
-    <condition property="buildArch" value="x64" else="x86">
-      <matches pattern="64" string="${os.arch}" />
-    </condition>
 
     <!-- Generate allfiles.wxs describing structure of HDFView folder tree -->
     <exec executable="${wix.dir}/heat.exe">
@@ -1035,7 +1035,7 @@
       <arg value="-cg" />
       <arg value="MediaGroup" />
       <arg value="-platform" />
-      <arg value="${buildArch}" />
+      <arg value="${machine.arch}" />
       <arg value="-gg" />
       <arg value="-srd" />
       <arg value="-dr" />
@@ -1050,7 +1050,7 @@
     <!-- Compile all source files into .wixobj file -->
     <exec executable="${wix.dir}/candle.exe">
       <arg value="-arch" />
-      <arg value="${buildArch}" />
+      <arg value="${machine.arch}" />
       <arg value="-out" />
       <arg value=".\${build.dir}\allfiles.wixobj" />
       <arg value=".\${build.dir}\allfiles.wxs" />
@@ -1059,7 +1059,7 @@
     <!-- Compile build.wxs file into .wixobj file -->
     <exec executable="${wix.dir}/candle.exe">
       <arg value="-arch" />
-      <arg value="${buildArch}" />
+      <arg value="${machine.arch}" />
       <arg value="-dproductName=${ant.project.name}" />
       <arg value="-dreleasedir=.\${release.dir}" />
       <arg value="-dproductVersion=${app.version}" />
