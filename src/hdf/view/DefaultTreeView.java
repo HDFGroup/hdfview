@@ -274,7 +274,7 @@ public class DefaultTreeView implements TreeView {
                 TreeItem item = selectedItem;
                 if(item == null) return;
 
-                HObject obj = (HObject) item.getData();
+                final HObject obj = (HObject) item.getData();
                 if(obj == null) return;
 
                 if(obj instanceof Group) {
@@ -294,7 +294,16 @@ public class DefaultTreeView implements TreeView {
                 }
                 else {
                     try {
-                        showDataContent(obj);
+                        Display.getCurrent().asyncExec(new Runnable() {
+                            public void run() {
+                                try {
+                                    showDataContent(obj);
+                                }
+                                catch (Exception ex) {
+                                    log.debug("showDataContent failure: ", ex);
+                                }
+                            }
+                        });
                     }
                     catch (Throwable err) {
                         shell.getDisplay().beep();
@@ -318,7 +327,16 @@ public class DefaultTreeView implements TreeView {
 
                 try {
                     if(!(selectedObject instanceof Group)) {
-                        showDataContent(selectedObject);
+                        Display.getCurrent().asyncExec(new Runnable() {
+                            public void run() {
+                                try {
+                                    showDataContent(selectedObject);
+                                }
+                                catch (Exception ex) {
+                                    log.debug("showDataContent failure: ", ex);
+                                }
+                            }
+                        });
                     } else {
                         boolean isExpanded = selectedItem.getExpanded();
 
@@ -412,7 +430,7 @@ public class DefaultTreeView implements TreeView {
                     selectedObject = (HObject) selectedItem.getData();
                 }
                 catch(NullPointerException ex) {
-                    System.err.println("TreeItem " + selectedItem.getText() + " had no associated data.");
+                    ((HDFView) viewer).showStatus("Object " + selectedItem.getText() + " had no associated data.");
                     return;
                 }
 
@@ -420,7 +438,7 @@ public class DefaultTreeView implements TreeView {
                     theFile = selectedObject.getFileFormat();
                 }
                 catch(NullPointerException ex) {
-                    System.err.println("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    ((HDFView) viewer).showStatus("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
                     return;
                 }
 
@@ -517,7 +535,16 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = true;
 
                 try {
-                    showDataContent(selectedObject);
+                    Display.getCurrent().asyncExec(new Runnable() {
+                        public void run() {
+                            try {
+                                showDataContent(selectedObject);
+                            }
+                            catch (Exception ex) {
+                                log.debug("showDataContent failure: ", ex);
+                            }
+                        }
+                    });
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
@@ -534,7 +561,16 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = false;
 
                 try {
-                    showDataContent(selectedObject);
+                    Display.getCurrent().asyncExec(new Runnable() {
+                        public void run() {
+                            try {
+                                showDataContent(selectedObject);
+                            }
+                            catch (Exception ex) {
+                                log.debug("showDataContent failure: ", ex);
+                            }
+                        }
+                    });
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
