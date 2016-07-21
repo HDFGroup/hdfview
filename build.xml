@@ -1110,9 +1110,9 @@
       <arg value="/d" />
       <arg value="${ant.project.name} ${app.version} Utility" />
       <arg value="/f" />
-      <arg value="HDF_Certificate.p12" />
+      <arg value="${env.CERTIFICATE}" />
       <arg value="/p" />
-      <arg value="5k insomnia" />
+      <arg value="${env.SIGNPASSWORD}" />
       <arg value="/t" />
       <arg value="http://timestamp.verisign.com/scripts/timstamp.dll"/>
       <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.msi" />
