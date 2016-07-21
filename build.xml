@@ -69,30 +69,26 @@
       </tokenfilter>
     </filterchain>
   </loadresource>
-  
+
   <condition property="isWindows">
     <os family="windows" />
-  </condition>
-
-  <condition property="isUnix">
-    <os family="unix" />
   </condition>
 
   <condition property="isMac">
     <os family="mac" />
   </condition>
 
-  <condition property="machine.os" value="win">
-    <equals arg1="${isWindows}" arg2="true" />
-  </condition>
-
-  <condition property="machine.os" value="linux">
+  <condition property="isUnix">
     <and>
-      <equals arg1="${isUnix}" arg2="true" />
+      <os family="unix" />
       <not>
-        <equals arg1="${isWindows}" arg2="true" />
+        <equals arg1="${isMac}" arg2="true" />
       </not>
     </and>
+  </condition>
+
+  <condition property="machine.os" value="win">
+    <equals arg1="${isWindows}" arg2="true" />
   </condition>
 
   <condition property="machine.os" value="osx">
@@ -103,6 +99,18 @@
       </not>
       <not>
         <equals arg1="${isUnix}" arg2="true" />
+      </not>
+    </and>
+  </condition>
+
+  <condition property="machine.os" value="linux">
+    <and>
+      <equals arg1="${isUnix}" arg2="true" />
+      <not>
+        <equals arg1="${isWindows}" arg2="true" />
+      </not>
+      <not>
+        <equals arg1="${isMac}" arg2="true" />
       </not>
     </and>
   </condition>
@@ -882,104 +890,6 @@
       <arg value="${dist.dir}/Applications"/>
     </exec>
 
-    <taskdef name="bundleapp"
-      classpath="lib/appbundler-1.0ea.jar"
-      classname="com.oracle.appbundler.AppBundlerTask" />
-
-    <!-- Use appbundler to create .app -->
-    <bundleapp
-      outputdirectory="${dist.dir}"
-      name="${ant.project.name}"
-      displayname="${ant.project.name}-${app.version}"
-      executableName="${ant.project.name}"
-      identifier="org.hdfgroup.${ant.project.name}-${app.version}"
-      shortversion="${app.version}"
-      icon="${lib.dir}/macosx/${ant.project.name}.icns"
-      signature="????"
-      copyright="Copyright © 2006-2016 by The HDF Group. All rights reserved."
-      applicationCategory="public.app-category.developer-tools"
-      mainclassname="${main-class}">
-
-      <runtime dir="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home" />
-      <classpath dir="${release.dir}" includes="**/lib/*.jar" />
-      <librarypath dir="${release.dir}/lib" includes="*.dylib" />
-      <arch name="x86_64" />
-
-      <bundledocument
-        extensions="hdf,hdf4,h4,hdf5,h5"
-        icon="${lib.dir}/macosx/${ant.project.name}.icns"
-        name="HDF Files"
-        role="editor">
-      </bundledocument>
-
-      <option value="-Xmx1024m" name="Xmx" />
-      <option value="-Dhdfview.root=$APP_ROOT/Contents/Java" />
-      <option value="-Xdock:icon=$APP_ROOT/Contents/Resources/${ant.project.name}.icns" />
-      <option value="-Dapple.laf.useScreenMenuBar=true" />
-      <option value="-Dcom.apple.macos.use-file-dialog-packages=true" />
-      <option value="-Dcom.apple.macos.useScreenMenuBar=true" />
-      <option value="-Dcom.apple.mrj.application.apple.menu.about.name=${ant.project.name}" />
-      <option value="-Dapple.awt.application.name=${ant.project.name}" />
-      <option value="-Dcom.apple.smallTabs=true" />
-      <option value="-XstartOnFirstThread"/>
-    </bundleapp>
-
-    <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS/libjli.dylib" />
-    <copy file="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS" />
-
-    <!-- Sign the app -->
-    <exec executable="chmod">
-      <arg line="a+w ${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk" />
-    </exec>
-
-    <apply executable="codesign">
-      <!-- note: this loops through the contents of dir -->
-      <arg line="-v -f -s ${env.SIGNER}" />
-      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk" />
-    </apply>
-
-    <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk" />
-    </exec>
-
-    <apply executable="codesign">
-      <!-- note: this loops through the contents of dir -->
-      <arg line="-v -f -s ${env.SIGNER}" />
-      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/Java" />
-    </apply>
-
-    <apply executable="codesign">
-      <!-- note: this loops through the contents of dir -->
-      <arg line="-v -f -s ${env.SIGNER}" />
-      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/MacOS" excludes="${ant.project.name}" />
-    </apply>
-
-    <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/_CodeSignature/CodeResources" />
-    </exec>
-
-    <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Info.plist" />
-    </exec>
-
-    <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Pkginfo" />
-    </exec>
-
-    <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app" />
-    </exec>
-
-    <!-- verify codesign -->
-    <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-      <arg line="-vvvv ${ant.project.name}.app" />
-    </exec>
-
-    <!-- verify gatekeeper -->
-    <exec executable="spctl" dir="${dist.dir}" failonerror="true">
-      <arg line="-vvvv --assess --type execute ${ant.project.name}.app" />
-    </exec>
-
     <!-- Create .dmg file -->
     <exec dir="${dist.dir}" executable="hdiutil">
       <arg line="create -volname ${ant.project.name}Installer -srcfolder . -ov -format UDZO ${ant.project.name}-${app.version}.dmg" />
@@ -1129,7 +1039,7 @@
     <exec executable="uname" outputproperty="uname.version">
       <arg value="-r" />
     </exec>
-    
+
     <!-- For Linux/Unix, create install script, then compress HDFJava into tar.gz file and concat it with
          install script to create a self-extracting .sh file -->
     <concat destfile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh">${installscript.text}</concat>
@@ -1160,36 +1070,104 @@
 
   <target name="createMacInstaller" depends="clean-package, deploy" if="isMac">
     <mkdir dir="${dist.dir}" />
-    
-    <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
-             uri="javafx:com.sun.javafx.tools.ant"
-             classpath="${java.home}/../lib/ant-javafx.jar" />
 
-    <!-- Sign .app before creating DMG -->
+    <taskdef name="bundleapp"
+          classpath="lib/appbundler-1.0ea.jar"
+          classname="com.oracle.appbundler.AppBundlerTask" />
 
-    <fx:deploy outdir="${basedir}/${dist.dir}" nativeBundles="dmg" outfile="${ant.project.name}-${app.version}">
-      <fx:application name="${ant.project.name}" mainClass="${main-class}" />
+    <!-- Use appbundler to create .app -->
+    <bundleapp
+      outputdirectory="${dist.dir}"
+      name="${ant.project.name}"
+      displayname="${ant.project.name}-${app.version}"
+      executableName="${ant.project.name}"
+      identifier="org.hdfgroup.${ant.project.name}-${app.version}"
+      shortversion="${app.version}"
+      icon="${lib.dir}/macosx/${ant.project.name}.icns"
+      signature="????"
+      copyright="Copyright © 2006-2016 by The HDF Group. All rights reserved."
+      applicationCategory="public.app-category.developer-tools"
+      mainclassname="${main-class}">
 
-      <fx:resources>
-        <!-- Include applications .jars -->
-        <fx:fileset dir="${basedir}/${release.dir}/lib" includes="*.jar" />
+      <runtime dir="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home" />
+      <classpath dir="${release.dir}" includes="**/lib/*.jar" />
+      <librarypath dir="${release.dir}/lib" includes="*.dylib" />
+      <arch name="x86_64" />
 
-        <!-- Include native libraries -->
-        <fx:fileset dir="${basedir}/${release.dir}/lib" type="data">
-          <include name="*.dylib" />
-        </fx:fileset>
+      <bundledocument
+        extensions="hdf,hdf4,h4,hdf5,h5"
+        icon="${lib.dir}/macosx/${ant.project.name}.icns"
+        name="HDF Files"
+        role="editor">
+      </bundledocument>
 
-        <fx:fileset dir="${basedir}" includes="COPYING" type="license" />
-      </fx:resources>
+      <option value="-Xmx1024m" name="Xmx" />
+      <option value="-Dhdfview.root=$APP_ROOT/Contents/Java" />
+      <option value="-Xdock:icon=$APP_ROOT/Contents/Resources/${ant.project.name}.icns" />
+      <option value="-Dapple.laf.useScreenMenuBar=true" />
+      <option value="-Dcom.apple.macos.use-file-dialog-packages=true" />
+      <option value="-Dcom.apple.macos.useScreenMenuBar=true" />
+      <option value="-Dcom.apple.mrj.application.apple.menu.about.name=${ant.project.name}" />
+      <option value="-Dapple.awt.application.name=${ant.project.name}" />
+      <option value="-Dcom.apple.smallTabs=true" />
+      <option value="-XstartOnFirstThread"/>
+    </bundleapp>
 
-      <fx:info title="${ant.project.name}" vendor="The HDF Group">
-        <fx:association extension="hdf h5" description="HDF4/5 File" mimetype="application/x-hdf" />
-      </fx:info>
+    <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS/libjli.dylib" />
+    <copy file="/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk/Contents/MacOS" />
 
-      <fx:preferences shortcut="true" />
+    <!-- Sign the app -->
+    <exec executable="chmod">
+      <arg line="a+w ${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk" />
+    </exec>
 
-      <!-- Set JVM Options -->
-    </fx:deploy>
+    <apply executable="codesign">
+      <!-- note: this loops through the contents of dir -->
+      <arg line="-v -f -s ${env.SIGNER}" />
+      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk" />
+    </apply>
+
+    <exec executable="codesign" dir="${dist.dir}">
+      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/PlugIns/jdk1.8.0_51.jdk" />
+    </exec>
+
+    <apply executable="codesign">
+      <!-- note: this loops through the contents of dir -->
+      <arg line="-v -f -s ${env.SIGNER}" />
+      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/Java" />
+    </apply>
+
+    <apply executable="codesign">
+      <!-- note: this loops through the contents of dir -->
+      <arg line="-v -f -s ${env.SIGNER}" />
+      <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/MacOS" excludes="${ant.project.name}" />
+    </apply>
+
+    <exec executable="codesign" dir="${dist.dir}">
+      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/_CodeSignature/CodeResources" />
+    </exec>
+
+    <exec executable="codesign" dir="${dist.dir}">
+      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Info.plist" />
+    </exec>
+
+    <exec executable="codesign" dir="${dist.dir}">
+      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Pkginfo" />
+    </exec>
+
+    <exec executable="codesign" dir="${dist.dir}">
+      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app" />
+    </exec>
+
+    <!-- verify codesign -->
+    <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+      <arg line="-vvvv ${ant.project.name}.app" />
+    </exec>
+
+    <!-- verify gatekeeper -->
+    <exec executable="spctl" dir="${dist.dir}" failonerror="true">
+      <arg line="-vvvv --assess --type execute ${ant.project.name}.app" />
+    </exec>    
   </target>
 
   <target name="createUnixRPM" depends="clean-package,deployUnix">
