@@ -18,7 +18,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -29,21 +28,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Font;
-
-import org.eclipse.swt.dnd.*;
-
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -52,8 +45,35 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Monitor;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 
-import hdf.object.Attribute;
+import hdf.HDFVersions;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -62,7 +82,6 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Link;
-import hdf.HDFVersions;
 
 /**
  * HDFView is the main class of this HDF visual tool. It is used to layout the
@@ -3098,8 +3117,14 @@ public class HDFView implements ViewManager {
         if(j >= 0) {
             for(int i = args.length - j; i < args.length; i++) {
                 tmpFile = new File(args[i]);
-                if(tmpFile.exists() && (tmpFile.isFile() || tmpFile.isDirectory()))
+                if(!tmpFile.isAbsolute())
+                    tmpFile = new File(rootDir, args[i]);
+                log.trace("main: filelist - file = {} ", tmpFile.getAbsolutePath());
+                log.trace("main: filelist - add file = {} exists={} isFile={} isDir={}", tmpFile, tmpFile.exists(), tmpFile.isFile(), tmpFile.isDirectory());
+                if(tmpFile.exists() && (tmpFile.isFile() || tmpFile.isDirectory())) {
+                    log.trace("main: flist - add file = {}", tmpFile.getAbsolutePath());
                     fList.add(new File(tmpFile.getAbsolutePath()));
+                }
             }
         }
 
