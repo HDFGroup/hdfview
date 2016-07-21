@@ -875,6 +875,13 @@
     <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
     <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
 
+    <!-- Add Applications folder link -->
+    <exec executable="ln">
+      <arg value="-s"/>
+      <arg value="/Applications"/>
+      <arg value="${dist.dir}/Applications"/>
+    </exec>
+
     <taskdef name="bundleapp"
       classpath="lib/appbundler-1.0ea.jar"
       classname="com.oracle.appbundler.AppBundlerTask" />
@@ -980,6 +987,15 @@
 
     <exec dir="${dist.dir}" executable="hdiutil">
       <arg line="internet-enable -yes ${ant.project.name}-${app.version}.dmg" />
+    </exec>
+
+    <exec executable="codesign" dir="${dist.dir}">
+      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}-${app.version}.dmg" />
+    </exec>
+
+    <!-- verify gatekeeper -->
+    <exec executable="spctl" dir="${dist.dir}" failonerror="true">
+      <arg line="-vvvv --assess --type install ${ant.project.name}-${app.version}.dmg" />
     </exec>
   </target>
 
