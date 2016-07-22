@@ -65,6 +65,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -101,15 +102,22 @@ public class DefaultTreeView implements TreeView {
 
     private Shell                         shell;
 
+    private Composite                     treeComposite;
+
     private Font                          curFont;
 
     /** The owner of this TreeView */
     private ViewManager                   viewer;
 
+    /** Thread to load TableView Data in the background */
+    private LoadDataThread                loadDataThread;
+
     /**
      * The tree which holds file structures.
      */
     private final Tree                    tree;
+
+    private ProgressBar                   progressBar;
 
     /** The currently selected tree item */
     private TreeItem                      selectedItem = null;
@@ -209,9 +217,29 @@ public class DefaultTreeView implements TreeView {
         }
 
         // Initialize the Tree
-        tree = new Tree(parent, SWT.MULTI | SWT.VIRTUAL);
+        treeComposite = new Composite(parent, SWT.NONE);
+        treeComposite.setLayout(new GridLayout(1, true));
+
+        tree = new Tree(treeComposite, SWT.MULTI | SWT.VIRTUAL);
+        tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         tree.setSize(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         tree.setFont(curFont);
+
+        Composite progressComposite = new Composite(treeComposite, SWT.NONE);
+        progressComposite.setLayout(new GridLayout(2, false));
+        progressComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        progressBar = new ProgressBar(progressComposite, SWT.SMOOTH);
+        progressBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        Button stopButton = new Button(progressComposite, SWT.PUSH);
+        stopButton.setImage(ViewProperties.getFilecloseIcon());
+        stopButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                if (loadDataThread != null) loadDataThread.interrupt();
+                progressBar.setSelection(0);
+            }
+        });
 
         // Create the context menu for the Tree
         popupMenu = createPopupMenu();
@@ -294,16 +322,8 @@ public class DefaultTreeView implements TreeView {
                 }
                 else {
                     try {
-                        Display.getCurrent().asyncExec(new Runnable() {
-                            public void run() {
-                                try {
-                                    showDataContent(obj);
-                                }
-                                catch (Exception ex) {
-                                    log.debug("showDataContent failure: ", ex);
-                                }
-                            }
-                        });
+                        loadDataThread = new LoadDataThread();
+                        loadDataThread.start();
                     }
                     catch (Throwable err) {
                         shell.getDisplay().beep();
@@ -327,16 +347,8 @@ public class DefaultTreeView implements TreeView {
 
                 try {
                     if(!(selectedObject instanceof Group)) {
-                        Display.getCurrent().asyncExec(new Runnable() {
-                            public void run() {
-                                try {
-                                    showDataContent(selectedObject);
-                                }
-                                catch (Exception ex) {
-                                    log.debug("showDataContent failure: ", ex);
-                                }
-                            }
-                        });
+                        loadDataThread = new LoadDataThread();
+                        loadDataThread.start();
                     } else {
                         boolean isExpanded = selectedItem.getExpanded();
 
@@ -380,7 +392,7 @@ public class DefaultTreeView implements TreeView {
                     selectedObject = (HObject) selectedItem.getData();
                 }
                 catch(NullPointerException ex) {
-                    System.err.println("TreeItem " + selectedItem.getText() + " had no associated data.");
+                    ((HDFView) viewer).showStatus("Object " + selectedItem.getText() + " had no associated data.");
                     return;
                 }
 
@@ -388,7 +400,7 @@ public class DefaultTreeView implements TreeView {
                     theFile = selectedObject.getFileFormat();
                 }
                 catch(NullPointerException ex) {
-                    System.err.println("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    ((HDFView) viewer).showStatus("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
                     return;
                 }
 
@@ -535,16 +547,8 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = true;
 
                 try {
-                    Display.getCurrent().asyncExec(new Runnable() {
-                        public void run() {
-                            try {
-                                showDataContent(selectedObject);
-                            }
-                            catch (Exception ex) {
-                                log.debug("showDataContent failure: ", ex);
-                            }
-                        }
-                    });
+                    loadDataThread = new LoadDataThread();
+                    loadDataThread.start();
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
@@ -561,16 +565,8 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = false;
 
                 try {
-                    Display.getCurrent().asyncExec(new Runnable() {
-                        public void run() {
-                            try {
-                                showDataContent(selectedObject);
-                            }
-                            catch (Exception ex) {
-                                log.debug("showDataContent failure: ", ex);
-                            }
-                        }
-                    });
+                    loadDataThread = new LoadDataThread();
+                    loadDataThread.start();
                 }
                 catch (Throwable err) {
                     shell.getDisplay().beep();
@@ -2595,6 +2591,13 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
+     * @return the Composite holding the Tree and Progress bar
+     */
+    public Composite getTreeArea() {
+        return treeComposite;
+    }
+
+    /**
      * @return the list of currently open files.
      */
     public List<FileFormat> getCurrentFiles() {
@@ -3141,6 +3144,31 @@ public class DefaultTreeView implements TreeView {
             Display display = parent.getDisplay();
             while (!shell.isDisposed()) {
                 if (!display.readAndDispatch()) display.sleep();
+            }
+        }
+    }
+
+    private class LoadDataThread extends Thread {
+        LoadDataThread() {
+            super();
+            setDaemon(true);
+        }
+
+        public void run() {
+            try {
+                Display.getDefault().syncExec(new Runnable() {
+                    public void run() {
+                        try {
+                            showDataContent(selectedObject);
+                        }
+                        catch (Exception ex) {
+                            log.debug("showDataContent failure: ", ex);
+                        }
+                    }
+                });
+            }
+            catch (Exception e) {
+                log.debug("showDataContent loading manually interrupted");
             }
         }
     }
