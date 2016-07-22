@@ -226,14 +226,15 @@ public class DefaultTreeView implements TreeView {
         tree.setFont(curFont);
 
         Composite progressComposite = new Composite(treeComposite, SWT.NONE);
-        progressComposite.setLayout(new GridLayout(2, false));
+        progressComposite.setLayout(new GridLayout(1, false));
         progressComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         progressBar = new ProgressBar(progressComposite, SWT.SMOOTH);
-        progressBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        progressBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Button stopButton = new Button(progressComposite, SWT.PUSH);
         stopButton.setImage(ViewProperties.getFilecloseIcon());
+        stopButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         stopButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 if (loadDataThread != null) loadDataThread.interrupt();
