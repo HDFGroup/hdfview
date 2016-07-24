@@ -2644,6 +2644,23 @@ public final class Tools {
     }
 
     /**
+     * Since Java does not allow array indices to be larger than int type,
+     * check the given value to see if it is within the valid range of a
+     * Java int.
+     *
+     * @param value
+     *         The value to check
+     *
+     * @return false if the value is outside the range of a Java int, true
+     *         otherwise.
+     */
+    public static boolean checkIsValidJavaInt(final long value) {
+        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) return false;
+
+        return true;
+    }
+
+    /**
      * Show an SWT error dialog with the given error message.
      * @param parent
      *           The parent Shell of the MessageBox
@@ -2654,8 +2671,8 @@ public final class Tools {
      */
     public static void showError(Shell parent, String errorMsg, String title) {
         MessageBox error = new MessageBox(parent, SWT.ICON_ERROR | SWT.OK);
-        error.setText(title);
-        error.setMessage(errorMsg);
+        error.setText((title == null) ? "null" : title);
+        error.setMessage((errorMsg == null) ? "null" : errorMsg);
         error.open();
     }
 }

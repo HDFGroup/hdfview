@@ -471,6 +471,12 @@ public class H5File extends FileFormat {
                     continue;
                 }
 
+                if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) {
+                    log.debug("getAttribute(): Attribute[{}] lsize outside valid Java int range; unsafe cast", i);
+                    log.trace("getAttribute(): Attribute[{}] continue", i);
+                    continue;
+                }
+
                 Object value = null;
                 if (is_variable_str) {
                     String[] strs = new String[(int) lsize];
@@ -1126,6 +1132,8 @@ public class H5File extends FileFormat {
             log.trace("close(): open objects={}", n);
 
             if (n > 0) {
+                if (n < Integer.MIN_VALUE || n > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+
                 oids = new long[(int)n];
                 H5.H5Fget_obj_ids(fid, HDF5Constants.H5F_OBJ_ALL, n, oids);
 

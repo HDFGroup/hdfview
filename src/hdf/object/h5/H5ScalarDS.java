@@ -564,8 +564,14 @@ public class H5ScalarDS extends ScalarDS {
                 tid = H5.H5Dget_type(did);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size = {}", size);
+
+                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+
                 theData = new byte[(int)size];
                 H5.H5Dread(did, tid, mspace, fspace, HDF5Constants.H5P_DEFAULT, theData);
+            }
+            catch (Exception ex) {
+                log.debug("readBytes(): failed to read data: ", ex);
             }
             finally {
                 try {
@@ -643,8 +649,12 @@ public class H5ScalarDS extends ScalarDS {
 
                 if (lsize[0] == 0) {
                     log.debug("read(): No data to read. Dataset or selected subset is empty.");
-                    log.trace("read(): finish");
                     throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
+                }
+
+                if (lsize[0] < Integer.MIN_VALUE || lsize[0] > Integer.MAX_VALUE) {
+                    log.debug("read(): lsize outside valid Java int range; unsafe cast");
+                    throw new HDF5Exception("Dataset too large to read.");
                 }
 
                 if (log.isDebugEnabled()) {
@@ -727,7 +737,7 @@ public class H5ScalarDS extends ScalarDS {
                     log.debug("read(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex2);
                 }
                 try {
-                    if (isText && convertByteToString) {
+                    if (isText && convertByteToString && theData instanceof byte[]) {
                         log.trace("read(): H5Dread isText convertByteToString");
                         theData = byteToString((byte[]) theData, (int)H5.H5Tget_size(tid));
                     }
@@ -1640,6 +1650,9 @@ public class H5ScalarDS extends ScalarDS {
                     }
                 }
                 log.trace("getAttrValue(): lsize={}", lsize);
+
+                if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+
                 avalue = H5Datatype.allocateArray(atid, (int) lsize);
 
                 if (avalue != null) {
@@ -2113,6 +2126,8 @@ public class H5ScalarDS extends ScalarDS {
                     size *= (int) dims[i];
                 }
             }
+
+            if ((size * 8) < Integer.MIN_VALUE || (size * 8) > Integer.MAX_VALUE) throw new HDF5Exception("Invalid int size");
 
             ref_buf = new byte[size * 8];
             atype = H5.H5Aget_type(aid);

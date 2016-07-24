@@ -466,16 +466,16 @@ public class H5Datatype extends Datatype {
                     compoundMemberTypes = new Vector<Datatype>(nMembers);
                     compoundMemberOffsets = new Vector<Long>(nMembers);
                     compoundMemberFieldIDs = new Vector<Long>(nMembers);
-                    
+
                     for (int i = 0; i < nMembers; i++) {
                         String memberName = H5.H5Tget_member_name(tid, i);
                         long memberOffset = H5.H5Tget_member_offset(tid, i);
                         long memberID = H5.H5Tget_member_type(tid, i);
-                        
+
                         compoundMemberNames.add(i, memberName);
                         compoundMemberOffsets.add(i, memberOffset);
                         compoundMemberFieldIDs.add(i, memberID);
-                        
+
                         H5Datatype t = new H5Datatype(memberID);
                         compoundMemberTypes.add(i, t);
                     }
@@ -678,12 +678,12 @@ public class H5Datatype extends Datatype {
             case CLASS_COMPOUND:
                 try {
                     tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
-                    
+
                     for (int i = 0; i < compoundMemberNames.size(); i++) {
                         String memberName = compoundMemberNames.get(i);
                         long memberOffset = compoundMemberOffsets.get(i);
                         long memberID = compoundMemberFieldIDs.get(i);
-                        
+
                         H5.H5Tinsert(tid, memberName, memberOffset, memberID);
                     }
                 }
@@ -1479,7 +1479,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Checks if a datatype is variable-length.
-     * 
+     *
      * @return if the datatype is variable-length.
      */
     public boolean isVLEN() {

@@ -14,13 +14,13 @@
 
 package hdf.view;
 
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
-import java.awt.Image;
 import java.util.BitSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -73,7 +73,7 @@ import hdf.object.ScalarDS;
 public class DataOptionDialog extends Dialog {
 
     private Shell                  shell;
-    
+
     private Font                   curFont;
 
     /** the rank of the dataset/image */
@@ -155,7 +155,7 @@ public class DataOptionDialog extends Dialog {
         if(theDataset == null) return;
 
         dataset = theDataset;
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -326,7 +326,7 @@ public class DataOptionDialog extends Dialog {
                 }
             }
         });
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -334,7 +334,7 @@ public class DataOptionDialog extends Dialog {
         });
 
         shell.open();
-        
+
         // Prevent SWT from selecting TableView button by
         // default if dataset is an image
         if (dataset instanceof ScalarDS) {
@@ -626,7 +626,15 @@ public class DataOptionDialog extends Dialog {
             selectedIndex[i] = sIndex[i];
             start[selectedIndex[i]] = n0[i];
             if (i < 2) {
-                selected[selectedIndex[i]] = (int) ((n1[i] - n0[i]) / n2[i]) + 1;
+                long selectedSize = ((n1[i] - n0[i]) / n2[i]) + 1;
+
+                if (!Tools.checkIsValidJavaInt(selectedSize)) {
+                    shell.getDisplay().beep();
+                    Tools.showError(shell, "Subset selection too large to display.", shell.getText());
+                    return false;
+                }
+
+                selected[selectedIndex[i]] = (int) selectedSize;
                 stride[selectedIndex[i]] = n2[i];
             }
         }
@@ -1077,7 +1085,7 @@ public class DataOptionDialog extends Dialog {
                                     Tools.showError(shell,
                                             "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.",
                                             "Select Bitmask");
-                                    
+
                                     source.setSelection(false);
                                     return;
                                 }
@@ -1441,7 +1449,7 @@ public class DataOptionDialog extends Dialog {
                                 "Slice location is out of range.\n" + start4[i]
                                 + " >= " + dims[choice4Index[i]],
                                 "Select Slice Location");
-                        
+
                         return;
                     }
 

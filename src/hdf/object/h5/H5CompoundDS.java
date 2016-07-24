@@ -490,10 +490,16 @@ public class H5CompoundDS extends CompoundDS {
                 tid = H5.H5Dget_type(did);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size = {}", size);
+
+                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Dataset too large to read.");
+
                 theData = new byte[(int)size];
-                
+
                 log.trace("readBytes(): H5Dread: did={} tid={} fspace={} mspace={}", did, tid, fspace, mspace);
                 H5.H5Dread(did, tid, mspace, fspace, HDF5Constants.H5P_DEFAULT, theData);
+            }
+            catch (Exception ex) {
+                log.debug("readBytes(): failed to read data: ", ex);
             }
             finally {
                 try {
@@ -578,6 +584,12 @@ public class H5CompoundDS extends CompoundDS {
                     throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
                 }
 
+                if (lsize[0] < Integer.MIN_VALUE || lsize[0] > Integer.MAX_VALUE) {
+                    log.debug("read(): lsize outside valid int range; unsafe cast");
+                    log.trace("read(): finish");
+                    throw new HDF5Exception("Invalid int size");
+                }
+
                 if (log.isDebugEnabled()) {
                     // check is storage space is allocated
                     try {
@@ -658,7 +670,7 @@ public class H5CompoundDS extends CompoundDS {
                         try {
                             tmptid = H5.H5Tget_super(atom_tid);
                             member_base_class = H5.H5Tget_class(tmptid);
-                            
+
                             isVL = isVL || H5.H5Tis_variable_str(tmptid);
                             isVL = isVL || H5.H5Tdetect_class(tmptid, HDF5Constants.H5T_VLEN);
 
@@ -788,10 +800,10 @@ public class H5CompoundDS extends CompoundDS {
                                     && enumConverted) {
                                 try {
                                     String[] strs = null;
-                                    
+
                                     if (member_class == HDF5Constants.H5T_ARRAY) {
                                         long base_tid = -1;
-                                        
+
                                         try {
                                             base_tid = H5.H5Tget_super(atom_tid);
                                             strs = H5Datatype.convertEnumValueToName(base_tid, member_data, null);
@@ -1464,7 +1476,7 @@ public class H5CompoundDS extends CompoundDS {
                 close(did);
             }
         }
-        
+
         log.trace("removeMetadata(): finish");
     }
 

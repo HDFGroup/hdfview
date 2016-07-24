@@ -31,14 +31,12 @@ import javax.print.DocPrintJob;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
-import javax.print.StreamPrintServiceFactory;
 
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -46,8 +44,20 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Dataset;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
@@ -70,7 +80,7 @@ public class DefaultTextView implements TextView {
     private final Display           display = Display.getDefault();
 
     private final Shell             shell;
-    
+
     private Font                    curFont;
 
     /**
@@ -263,12 +273,6 @@ public class DefaultTextView implements TextView {
         theTable.addListener(SWT.MouseDoubleClick, CellEditor);
         theTable.setFont(curFont);
 
-        theTable.addListener(SWT.Resize, new Listener() {
-            public void handleEvent(Event e) {
-                theTable.getColumn(1).setWidth(table.getBounds().width);
-            }
-        });
-
         TableColumn indexColumn = new TableColumn(theTable, SWT.NONE);
         indexColumn.setAlignment(SWT.CENTER);
         indexColumn.setWidth(70);
@@ -285,9 +289,11 @@ public class DefaultTextView implements TextView {
             TableItem item = new TableItem(theTable, SWT.BORDER);
             item.setFont(curFont);
             item.setText(0, String.valueOf(startIndex + indexBase + i * stride));
-            item.setText(1, text[i]);
+            item.setText(1, (text[i] == null) ? "" : text[i]);
             item.setBackground(0, display.getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
         }
+
+        theTable.getColumn(1).pack();
 
         return theTable;
     }
@@ -443,15 +449,15 @@ public class DefaultTextView implements TextView {
 
     // print the table
     private void print() {
-        StreamPrintServiceFactory[] spsf = StreamPrintServiceFactory
-                .lookupStreamPrintServiceFactories(null, null);
-//        for (int i = 0; i < spsf.length; i++) {
-//            System.out.println(spsf[i]);
-//        }
-        DocFlavor[] docFlavors = spsf[0].getSupportedDocFlavors();
-//        for (int i = 0; i < docFlavors.length; i++) {
-//            System.out.println(docFlavors[i]);
-//        }
+        // StreamPrintServiceFactory[] spsf = StreamPrintServiceFactory
+        //         .lookupStreamPrintServiceFactories(null, null);
+        // for (int i = 0; i < spsf.length; i++) {
+        //     System.out.println(spsf[i]);
+        // }
+        // DocFlavor[] docFlavors = spsf[0].getSupportedDocFlavors();
+        // for (int i = 0; i < docFlavors.length; i++) {
+        //     System.out.println(docFlavors[i]);
+        // }
 
         // TODO: windows url
         // Get a text DocFlavor

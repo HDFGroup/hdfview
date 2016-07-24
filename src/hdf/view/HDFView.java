@@ -599,7 +599,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, null);
+                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, mainWindow.getText());
                 }
             }
         });
@@ -662,7 +662,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, null);
+                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, mainWindow.getText());
                 }
             }
         });
@@ -2001,7 +2001,7 @@ public class HDFView implements ViewManager {
     }
 
     public void addDataView(DataView dataView) {
-        if (dataView == null) {
+        if (dataView == null || dataView instanceof MetaDataView) {
             return;
         }
 
