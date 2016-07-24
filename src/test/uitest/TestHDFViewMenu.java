@@ -626,37 +626,40 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             hdf_file = openFile(filename, false);
 
             SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "filetree wrong row count", "5", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 5);
+            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 6);
             assertTrue("verifyMenuWindowCloseAll() too many shells open", bot.shells().length == 1);
 
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D float array").click();
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D float array").doubleClick();
+            filetree.expandNode(filename + ".h5", true);
+
+            items[0].getNode(2).getNode(1).click();
+            items[0].getNode(2).getNode(1).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D int array").click();
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("2D int array").doubleClick();
+            items[0].getNode(2).getNode(2).click();
+            items[0].getNode(2).getNode(2).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("3D int array").click();
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("3D int array").doubleClick();
+            items[0].getNode(2).getNode(4).click();
+            items[0].getNode(2).getNode(4).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("4D int").click();
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("4D int").doubleClick();
+            items[0].getNode(2).getNode(5).click();
+            items[0].getNode(2).getNode(5).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("ArrayOfStructures").click();
-            filetree.getTreeItem(filename + ".h5").getNode("arrays").getNode("ArrayOfStructures").doubleClick();
+            items[0].getNode(2).getNode(6).click();
+            items[0].getNode(2).getNode(6).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
-            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("Iceberg").click();
-            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("Iceberg").doubleClick();
+            items[0].getNode(4).getNode(1).click();
+            items[0].getNode(4).getNode(1).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
-            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("pixel interlace").click();
-            filetree.getTreeItem(filename + ".h5").getNode("images").getNode("pixel interlace").doubleClick();
+            items[0].getNode(4).getNode(5).click();
+            items[0].getNode(4).getNode(5).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
 
             assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "too many or missing shells", "8", String.valueOf(bot.shells().length)),
@@ -681,7 +684,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
         finally {
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdf_file, false);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
