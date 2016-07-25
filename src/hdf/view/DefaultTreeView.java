@@ -2780,22 +2780,7 @@ public class DefaultTreeView implements TreeView {
         }
 
         try {
-            final HObject obj = dataObject;
-
             shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
-
-            // Run background task to reset busy cursor since Tools.newInstance does not return
-            // until the DataView instance closes
-            Display.getCurrent().asyncExec(new Runnable() {
-                public void run() {
-                    while (true) {
-                        if (((HDFView) viewer).getDataView(obj) != null) {
-                            if (!shell.isDisposed()) shell.setCursor(null);
-                            break;
-                        }
-                    }
-                }
-            });
 
             theView = Tools.newInstance(theClass, initargs);
             log.trace("showDataContent: Tools.newInstance");

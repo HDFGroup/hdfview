@@ -2039,6 +2039,8 @@ public class HDFView implements ViewManager {
                 }
             }
         });
+
+        mainWindow.setCursor(null);
     }
 
     public void removeDataView(DataView dataView) {
