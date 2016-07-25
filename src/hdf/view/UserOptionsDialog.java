@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
@@ -52,12 +52,12 @@ import org.eclipse.swt.widgets.Text;
  */
 public class UserOptionsDialog extends Dialog {
     private Shell                 shell;
-    
+
     private Font                  curFont;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
 
-    private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField;
+    private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField, pageSizeField;
     private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
     private Combo                 choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView, choiceImageView, choicePaletteView;
     private String                rootDir, workDir;
@@ -103,7 +103,7 @@ public class UserOptionsDialog extends Dialog {
 
     public UserOptionsDialog(Shell parent, String viewRoot) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -195,7 +195,7 @@ public class UserOptionsDialog extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -340,6 +340,18 @@ public class UserOptionsDialog extends Dialog {
             ViewProperties.setIndexBase1(false);
         else
             ViewProperties.setIndexBase1(true);
+
+        if (pageSizeField.isEnabled()) {
+            ViewProperties.setLoadByHyperslabs(true);
+
+            try {
+                int pageSize = Integer.parseInt(pageSizeField.getText());
+                ViewProperties.setPageSize(pageSize);
+            }
+            catch (Exception ex) {
+                ViewProperties.setPageSize(5);
+            }
+        }
     }
 
     private Composite createGeneralSettingsRegion(Composite parent) {
@@ -347,7 +359,7 @@ public class UserOptionsDialog extends Dialog {
         scroller.setExpandHorizontal(true);
         scroller.setExpandVertical(true);
         scroller.setMinSize(shell.getSize());
-        
+
         Composite composite = new Composite(scroller, SWT.NONE);
         composite.setLayout(new GridLayout(1, true));
         scroller.setContent(composite);
@@ -384,9 +396,9 @@ public class UserOptionsDialog extends Dialog {
             	final DirectoryDialog dChooser = new DirectoryDialog(shell);
             	dChooser.setFilterPath(workDir);
             	dChooser.setText("Select a Directory");
-            	
+
             	String dir = dChooser.open();
-            	
+
                 if(dir == null) return;
 
                 workField.setText(dir);
@@ -520,7 +532,7 @@ public class UserOptionsDialog extends Dialog {
         } catch (Exception ex) {
         	fontSizeChoice.select(0);
         }
-        
+
         label = new Label(textFontGroup, SWT.RIGHT);
         label.setFont(curFont);
         label.setText("Font Type: ");
@@ -687,7 +699,7 @@ public class UserOptionsDialog extends Dialog {
 
         String[] delimiterChoices = { ViewProperties.DELIMITER_TAB, ViewProperties.DELIMITER_COMMA,
                 ViewProperties.DELIMITER_SPACE, ViewProperties.DELIMITER_COLON, ViewProperties.DELIMITER_SEMI_COLON };
-        
+
         delimiterChoice = new Combo(dataGroup, SWT.SINGLE | SWT.READ_ONLY);
         delimiterChoice.setFont(curFont);
         delimiterChoice.setItems(delimiterChoices);
@@ -699,7 +711,7 @@ public class UserOptionsDialog extends Dialog {
         } catch (Exception ex) {
         	delimiterChoice.select(0);
         }
-        
+
 
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         objectsGroup.setLayout(new GridLayout(5, false));
@@ -790,6 +802,33 @@ public class UserOptionsDialog extends Dialog {
         nativeOrder.setText("Native");
         nativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
         nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+
+
+        org.eclipse.swt.widgets.Group dataLoadGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
+        dataLoadGroup.setLayout(new GridLayout(3, false));
+        dataLoadGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        dataLoadGroup.setFont(curFont);
+        dataLoadGroup.setText("Data Loading Options");
+
+        Button checkLoadByHyperslab = new Button(dataLoadGroup, SWT.CHECK);
+        checkLoadByHyperslab.setFont(curFont);
+        checkLoadByHyperslab.setText("Load by Hyperslabs");
+        checkLoadByHyperslab.setSelection(ViewProperties.getPageSize() != ViewProperties.DEFAULT_PAGE_SIZE);
+        checkLoadByHyperslab.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkLoadByHyperslab.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                pageSizeField.setEnabled(((Button) e.widget).getSelection());
+            }
+        });
+
+        label = new Label(dataLoadGroup, SWT.NONE);
+        label.setText("Page Size: ");
+
+        pageSizeField = new Text(dataLoadGroup, SWT.SINGLE | SWT.BORDER);
+        pageSizeField.setFont(curFont);
+        pageSizeField.setText(String.valueOf(ViewProperties.getPageSize()));
+        pageSizeField.setEnabled(ViewProperties.getPageSize() != ViewProperties.DEFAULT_PAGE_SIZE);
+        pageSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         return scroller;
     }

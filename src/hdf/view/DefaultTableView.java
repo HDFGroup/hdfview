@@ -623,34 +623,80 @@ public class DefaultTableView implements TableView {
         }
 
         dataValue = null;
-        try {
-            dataValue = theDataset.getData();
-            if (dataValue == null) {
-                Tools.showError(shell, "No data read", "ScalarDS createTable:" + shell.getText());
-                return null;
+
+        long totalDataSize = theDataset.getSelectedDims()[theDataset.getSelectedIndex()[0]] *
+                        theDataset.getSelectedDims()[theDataset.getSelectedIndex()[1]];
+
+        // TODO: correct and efficient hyperslab loading implementation
+        if (ViewProperties.getLoadByHyperslabs() && (totalDataSize > Math.pow(ViewProperties.getPageSize(), 2.0))) {
+            log.debug("createTable(): Page size is " + Math.pow(ViewProperties.getPageSize(), 2.0));
+            log.debug("createTable(): Dimension size is " + totalDataSize);
+            log.debug("createTable(): Loading by Hyperslab");
+
+            try {
+                int numPages = /*ViewProperties.getNumPages();*/ 2;
+                int pageSize = /*ViewProperties.getPageSize()*/ 10;
+                Object[][] data = new Object[numPages][numPages];
+
+                for (int row = 0; row < numPages; row++) {
+                    for (int col = 0; col < numPages; col++) {
+                        data[row][col] = theDataset.read();
+                    }
+                }
+
+                String className = data[0][0].getClass().getName();
+                if (className.equals("[I")) {
+                    dataValue = new int[(int) (Math.pow(numPages, 2.0) * Math.pow(pageSize, 2.0))];
+
+                    // Collect hyperslabs into a flat array
+                    int cnt = 0;
+                    for (int row = 0; row < numPages; row++) {
+                        for (int col = 0; col < numPages; col++) {
+                            for (int idx = 0; idx < pageSize; idx++) {
+                                ((int[]) dataValue)[cnt++] = ((int[]) data[row][col])[idx];
+                            }
+                        }
+                    }
+                }
+
+//                for (int  i = 0; i < ((int[]) dataValue).length; i++)
+//                    System.out.println("Entry " + i + " is " + ((int[]) dataValue)[i]);
             }
-
-            log.trace("createTable: dataValue={}", dataValue);
-
-            if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
-                isReadOnly = true;
-                String opName = "Bits ";
-
-                if (bitmaskOP == ViewProperties.BITMASK_OP.AND) opName = "Bitwise AND ";
-
-                String title = group.getText();
-                title += ", " + opName + bitmask;
-                group.setText(title);
+            catch (Exception ex) {
+                Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
+                dataValue = null;
             }
-
-            theDataset.convertFromUnsignedC();
-            dataValue = theDataset.getData();
-
-            //TODO: Revise if (Array.getLength(dataValue) <= rows) cols = 1;
         }
-        catch (Throwable ex) {
-            Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
-            dataValue = null;
+        else {
+            try {
+                dataValue = theDataset.getData();
+                if (dataValue == null) {
+                    Tools.showError(shell, "No data read", "ScalarDS createTable:" + shell.getText());
+                    return null;
+                }
+
+                log.trace("createTable: dataValue={}", dataValue);
+
+                if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
+                    isReadOnly = true;
+                    String opName = "Bits ";
+
+                    if (bitmaskOP == ViewProperties.BITMASK_OP.AND) opName = "Bitwise AND ";
+
+                    String title = group.getText();
+                    title += ", " + opName + bitmask;
+                    group.setText(title);
+                }
+
+                theDataset.convertFromUnsignedC();
+                dataValue = theDataset.getData();
+
+                //TODO: Revise if (Array.getLength(dataValue) <= rows) cols = 1;
+            }
+            catch (Throwable ex) {
+                Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
+                dataValue = null;
+            }
         }
 
         if (dataValue == null) {
