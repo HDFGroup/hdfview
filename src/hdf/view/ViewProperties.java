@@ -47,18 +47,6 @@ public class ViewProperties extends Properties {
     /** the maximum number of most recent files */
     public static final int     MAX_RECENT_FILES     = 15;
 
-    /** the default page size to use when loading
-     *  by hyperslabs
-     */
-    public static final int     DEFAULT_PAGE_SIZE    = 25;
-
-    /** the number of pages to use in a given
-     *  dimension when loading by hyperslabs.
-     *  E.g. 5 pages defines a 5 x 5 region of
-     *  pages to use in loading.
-     */
-    public static final int     DEFAULT_NUM_PAGES    = 5;
-
     /** name of the tab delimiter */
     public static final String  DELIMITER_TAB        = "Tab";
 
@@ -165,8 +153,6 @@ public class ViewProperties extends Properties {
     /** flag to indicate if enum data is converted to strings */
     private static boolean          convertEnum            = true;
 
-    private static boolean          loadByHyperslabs       = false;
-
     /** flag to indicate if data is 1-based index */
     private static boolean          isIndexBase1           = false;
 
@@ -182,11 +168,6 @@ public class ViewProperties extends Properties {
      * starting index of objects that will be loaded into memory.
      */
     private static int              start_members          = 0;
-
-    /** the page dimension size when loading by hyperslabs */
-    private static int              page_size              = DEFAULT_PAGE_SIZE;
-
-    private static int              num_pages              = DEFAULT_NUM_PAGES;
 
     private static Image        hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, largeHdfIcon, blankIcon, helpIcon, fileopenIcon,
     filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon, folderopenIcon, foldercloseIconA,
@@ -1464,18 +1445,6 @@ public class ViewProperties extends Properties {
         return MAX_RECENT_FILES;
     }
 
-    public static int getPageSize() {
-        return page_size;
-    }
-
-    public static int getNumPages() {
-        return num_pages;
-    }
-
-    public static boolean getLoadByHyperslabs() {
-        return loadByHyperslabs;
-    }
-
     /** @return the path of the HDFView users guide */
     public static String getUsersGuide() {
         return usersGuide;
@@ -1862,41 +1831,5 @@ public class ViewProperties extends Properties {
      */
     public static void setRecentFiles(Vector<String> recentFilesList) {
         recentFiles = recentFilesList;
-    }
-
-    /**
-     * Sets the page dimension size to use when loading
-     * by hyperslabs.
-     *
-     * @param newPageSize
-     *              The dimension of the page size to use.
-     */
-    public static void setPageSize(int newPageSize) {
-        page_size = newPageSize;
-    }
-
-    /**
-     * Sets the number of pages to use in a given dimension
-     * when loading by hyperslabs. A page number of 5 defines
-     * a 5 x 5 region of pages, each of size 'page size' to
-     * use when loading.
-     *
-     * @param numPages
-     *            The number of pages to use.
-     */
-    public static void setNumPages(int numPages) {
-        num_pages = numPages;
-    }
-
-    /**
-     * Sets whether to load a dataset by using hyperslabs
-     * to increase performance and capability of loading
-     * large datasets.
-     *
-     * @param hyperslabLoad
-     *              true to load by hyperslabs, false otherwise
-     */
-    public static void setLoadByHyperslabs(boolean hyperslabLoad) {
-        loadByHyperslabs = hyperslabLoad;
     }
 }

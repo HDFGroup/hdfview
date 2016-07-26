@@ -57,7 +57,7 @@ public class UserOptionsDialog extends Dialog {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
 
-    private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField, pageSizeField;
+    private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField;
     private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
     private Combo                 choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView, choiceImageView, choicePaletteView;
     private String                rootDir, workDir;
@@ -340,18 +340,6 @@ public class UserOptionsDialog extends Dialog {
             ViewProperties.setIndexBase1(false);
         else
             ViewProperties.setIndexBase1(true);
-
-        if (pageSizeField.isEnabled()) {
-            ViewProperties.setLoadByHyperslabs(true);
-
-            try {
-                int pageSize = Integer.parseInt(pageSizeField.getText());
-                ViewProperties.setPageSize(pageSize);
-            }
-            catch (Exception ex) {
-                ViewProperties.setPageSize(5);
-            }
-        }
     }
 
     private Composite createGeneralSettingsRegion(Composite parent) {
@@ -802,33 +790,6 @@ public class UserOptionsDialog extends Dialog {
         nativeOrder.setText("Native");
         nativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
         nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
-
-
-        org.eclipse.swt.widgets.Group dataLoadGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        dataLoadGroup.setLayout(new GridLayout(3, false));
-        dataLoadGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        dataLoadGroup.setFont(curFont);
-        dataLoadGroup.setText("Data Loading Options");
-
-        Button checkLoadByHyperslab = new Button(dataLoadGroup, SWT.CHECK);
-        checkLoadByHyperslab.setFont(curFont);
-        checkLoadByHyperslab.setText("Load by Hyperslabs");
-        checkLoadByHyperslab.setSelection(ViewProperties.getPageSize() != ViewProperties.DEFAULT_PAGE_SIZE);
-        checkLoadByHyperslab.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
-        checkLoadByHyperslab.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                pageSizeField.setEnabled(((Button) e.widget).getSelection());
-            }
-        });
-
-        label = new Label(dataLoadGroup, SWT.NONE);
-        label.setText("Page Size: ");
-
-        pageSizeField = new Text(dataLoadGroup, SWT.SINGLE | SWT.BORDER);
-        pageSizeField.setFont(curFont);
-        pageSizeField.setText(String.valueOf(ViewProperties.getPageSize()));
-        pageSizeField.setEnabled(ViewProperties.getPageSize() != ViewProperties.DEFAULT_PAGE_SIZE);
-        pageSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         return scroller;
     }
