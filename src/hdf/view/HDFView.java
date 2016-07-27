@@ -1135,7 +1135,7 @@ public class HDFView implements ViewManager {
         // Could not load user's treeview, use default treeview.
         if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
 
-        treeArea.setContent(((DefaultTreeView) treeView).getTreeArea());
+        treeArea.setContent(treeView.getTree());
 
         // Add drag and drop support for opening files
         DropTarget target = new DropTarget(treeArea, DND.DROP_COPY);

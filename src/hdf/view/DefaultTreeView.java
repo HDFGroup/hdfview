@@ -65,7 +65,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -102,8 +101,6 @@ public class DefaultTreeView implements TreeView {
 
     private Shell                         shell;
 
-    private Composite                     treeComposite;
-
     private Font                          curFont;
 
     /** The owner of this TreeView */
@@ -116,8 +113,6 @@ public class DefaultTreeView implements TreeView {
      * The tree which holds file structures.
      */
     private final Tree                    tree;
-
-    private ProgressBar                   progressBar;
 
     /** The currently selected tree item */
     private TreeItem                      selectedItem = null;
@@ -217,30 +212,9 @@ public class DefaultTreeView implements TreeView {
         }
 
         // Initialize the Tree
-        treeComposite = new Composite(parent, SWT.NONE);
-        treeComposite.setLayout(new GridLayout(1, true));
-
-        tree = new Tree(treeComposite, SWT.MULTI | SWT.VIRTUAL);
-        tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        tree = new Tree(parent, SWT.MULTI | SWT.VIRTUAL);
         tree.setSize(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         tree.setFont(curFont);
-
-        Composite progressComposite = new Composite(treeComposite, SWT.NONE);
-        progressComposite.setLayout(new GridLayout(1, false));
-        progressComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-        progressBar = new ProgressBar(progressComposite, SWT.SMOOTH);
-        progressBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-        Button stopButton = new Button(progressComposite, SWT.PUSH);
-        stopButton.setImage(ViewProperties.getFilecloseIcon());
-        stopButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        stopButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                if (loadDataThread != null) loadDataThread.interrupt();
-                progressBar.setSelection(0);
-            }
-        });
 
         // Create the context menu for the Tree
         popupMenu = createPopupMenu();
@@ -2593,13 +2567,6 @@ public class DefaultTreeView implements TreeView {
      */
     public Tree getTree() {
         return tree;
-    }
-
-    /**
-     * @return the Composite holding the Tree and Progress bar
-     */
-    public Composite getTreeArea() {
-        return treeComposite;
     }
 
     /**
