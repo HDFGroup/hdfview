@@ -231,7 +231,7 @@ public class H4File extends FileFormat {
                 doCreateFile = false;
             }
         }
-        
+
         log.trace("createFile(): doCreateFile={}", doCreateFile);
 
         if (doCreateFile) {
@@ -303,7 +303,7 @@ public class H4File extends FileFormat {
         if (isNetCDF) {
             isReadOnly = true; // read only for netCDF
         }
-        
+
         log.trace("open(): isNetCDF={}", isNetCDF);
 
         // only support SDS APIs for netCDF
@@ -331,7 +331,7 @@ public class H4File extends FileFormat {
     @Override
     public void close() throws HDFException {
         log.trace("close(): start");
-        
+
         // clean unused objects
         if (rootObject != null) {
             HObject theObj = null;
@@ -455,7 +455,7 @@ public class H4File extends FileFormat {
      * @throws Exception if the object can not be copied
      */
     @Override
-    public H4Group copy(HObject srcObj, Group dstGroup, String dstName)
+    public HObject copy(HObject srcObj, Group dstGroup, String dstName)
             throws Exception {
         log.trace("copy(): start: srcObj={} dstGroup={} dstName={}", srcObj, dstGroup, dstName);
 
@@ -470,25 +470,26 @@ public class H4File extends FileFormat {
             log.trace("copy(): dstName is null, using dstName={}", dstName);
         }
 
+        HObject newObj = null;
         if (srcObj instanceof H4SDS) {
             log.trace("copy(): srcObj instanceof H4SDS");
-            ((H4SDS) srcObj).copy(dstGroup, dstName, null, null);
+            newObj = ((H4SDS) srcObj).copy(dstGroup, dstName, null, null);
         }
         else if (srcObj instanceof H4GRImage) {
             log.trace("copy(): srcObj instanceof H4GRImage");
-            ((H4GRImage) srcObj).copy(dstGroup, dstName, null, null);
+            newObj = ((H4GRImage) srcObj).copy(dstGroup, dstName, null, null);
         }
         else if (srcObj instanceof H4Vdata) {
             log.trace("copy(): srcObj instanceof H4Vdata");
-            ((H4Vdata) srcObj).copy(dstGroup, dstName, null, null);
+            newObj = ((H4Vdata) srcObj).copy(dstGroup, dstName, null, null);
         }
         else if (srcObj instanceof H4Group) {
             log.trace("copy(): srcObj instanceof H4Group");
-            copyGroup((H4Group) srcObj, (H4Group) dstGroup);
+            newObj = copyGroup((H4Group) srcObj, (H4Group) dstGroup);
         }
 
         log.trace("copy(): finish");
-        return (H4Group) dstGroup;
+        return newObj;
     }
 
     /**
@@ -556,7 +557,7 @@ public class H4File extends FileFormat {
         }
 
         long id = obj.open();
-        
+
         if (id >= 0) {
             if (obj instanceof H4Group) {
                 HDFLibrary.Vsetattr(id, attrName, attrType, count, attrValue);
@@ -577,14 +578,14 @@ public class H4File extends FileFormat {
 
             obj.close(id);
         }
-        
+
         log.trace("writeAttribute(): finish");
     }
 
-    private void copyGroup(H4Group srcGroup, H4Group pgroup)
+    private HObject copyGroup(H4Group srcGroup, H4Group pgroup)
             throws Exception {
         log.trace("copyGroup(): start: srcGroup={} parentGroup={}", srcGroup, pgroup);
-        
+
         H4Group group = null;
         long srcgid, dstgid;
         String gname = null, path = null;
@@ -593,7 +594,7 @@ public class H4File extends FileFormat {
         if (dstgid < 0) {
             log.trace("copyGroup(): Invalid dst Group Id");
             log.trace("copyGroup(): finish");
-            return;
+            return null;
         }
 
         gname = srcGroup.getName();
@@ -663,7 +664,7 @@ public class H4File extends FileFormat {
         }
 
         srcGroup.close(srcgid);
-        
+
         if (dstgid >= 0) {
             try {
                 HDFLibrary.Vdetach(dstgid);
@@ -674,6 +675,7 @@ public class H4File extends FileFormat {
         }
 
         log.trace("copyGroup(): finish");
+        return group;
     }
 
     /**
@@ -685,7 +687,7 @@ public class H4File extends FileFormat {
      */
     private void loadIntoMemory() {
         log.trace("loadIntoMemory(): start");
-        
+
         if (fid < 0) {
             log.debug("loadIntoMemory(): Invalid File Id");
             log.trace("loadIntoMemory(): finish");
@@ -705,7 +707,7 @@ public class H4File extends FileFormat {
             n = HDFLibrary.Vlone(fid, tmpN, 0);
             log.trace("loadIntoMemory(): number of lone Vgroups={}", n);
             refs = new int[n];
-            
+
             // second call to get the references of all lone Vgroups
             log.trace("loadIntoMemory(): second call to Vlone: get references of lone Vgroups");
             n = HDFLibrary.Vlone(fid, refs, n);
@@ -969,7 +971,7 @@ public class H4File extends FileFormat {
             } // switch (tag)
 
         } // for (int i=0; i<nelms; i++)
-        
+
         log.trace("depth_first(): finish");
     } // private depth_first()
 
@@ -1061,7 +1063,7 @@ public class H4File extends FileFormat {
 
             gr = new H4GRImage(this, objName[0], path, oid);
         }
-        
+
         log.trace("getGRImage(): finish");
         return gr;
     }
@@ -1261,13 +1263,13 @@ public class H4File extends FileFormat {
         String[] vClass = { "" };
         // int tag = HDFConstants.DFTAG_VG;
         long oid[] = { tag, ref };
-        
+
         if (ref <= 0) {
             log.trace("getVGroup(): Skipping dummy root group with ref={}", ref);
             log.trace("getVGroup(): finish");
             return null;
         }
-        
+
         if (copyAllowed) {
             objList.add(oid);
         }
@@ -1383,7 +1385,7 @@ public class H4File extends FileFormat {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private List getFileAnnotation(long fid, List attrList) throws HDFException {
         log.trace("getFileAnnotation(): start: FID={}", fid);
-        
+
         if (fid < 0) {
             log.debug("getFileAnnotation(): Invalid FID");
             log.trace("getFileAnnotation(): finish");
@@ -1405,7 +1407,7 @@ public class H4File extends FileFormat {
                 catch (HDFException ex) {
                     log.debug("getFileAnnotation(): ANend failure: ", ex);
                 }
-                
+
                 log.debug("getFileAnnotation(): n_file_labels + n_file_descriptions <= 0");
                 log.trace("getFileAnnotation(): finish");
                 return attrList;
@@ -1496,7 +1498,7 @@ public class H4File extends FileFormat {
                 }
             }
         }
-        
+
         log.trace("getFileAnnotation(): finish");
         return attrList;
     }
@@ -1518,7 +1520,7 @@ public class H4File extends FileFormat {
     private List getGRglobalAttribute(long grid, List attrList)
             throws HDFException {
         log.trace("getGRglobalAttribute(): start: GRID={}", grid);
-        
+
         if (grid == HDFConstants.FAIL) {
             log.debug("getGRglobalAttribute(): Invalid GRID");
             log.trace("getGRglobalAttribute(): finish");
@@ -1576,7 +1578,7 @@ public class H4File extends FileFormat {
 
             } // for (int i=0; i<numberOfAttributes; i++)
         } // if (b && numberOfAttributes>0)
-        
+
         log.trace("getGRglobalAttribute(): finish");
         return attrList;
     }
@@ -1598,7 +1600,7 @@ public class H4File extends FileFormat {
     private List getSDSglobalAttribute(long sdid, List attrList)
             throws HDFException {
         log.trace("getSDSglobalAttribute(): start: SDID:{}", sdid);
-        
+
         if (sdid == HDFConstants.FAIL) {
             log.debug("getSDSglobalAttribute(): Invalid SDID");
             log.trace("getSDSglobalAttribute(): finish");
@@ -1656,7 +1658,7 @@ public class H4File extends FileFormat {
 
             } // for (int i=0; i<numberOfAttributes; i++)
         } // if (b && numberOfAttributes>0)
-        
+
         log.trace("getSDSglobalAttribute(): finish");
         return attrList;
     }
@@ -1788,7 +1790,7 @@ public class H4File extends FileFormat {
                 pPath = path.substring(0, idx);
             }
         }
-        
+
         log.trace("get(): isRoot={}", isRoot);
 
         HObject obj = null;

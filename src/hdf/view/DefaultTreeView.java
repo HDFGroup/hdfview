@@ -1384,15 +1384,16 @@ public class DefaultTreeView implements TreeView {
             }
 
             try {
-                log.trace("pasteObject(...): dstFile.copy(theObj, pgroup, null)");
+                log.trace("pasteObject(...): dstFile.copy({}, {}, null)", theObj, pgroup);
 
-                if(srcFile.copy(theObj, pgroup, null) != null) {
+                HObject newObj = null;
+                if((newObj = srcFile.copy(theObj, pgroup, null)) != null) {
                     // Add the node to the tree
-                    TreeItem newItem = insertObject(theObj, pobj);
+                    TreeItem newItem = insertObject(newObj, pobj);
 
                     // If this is a group, add its first level child items
-                    if(theObj instanceof Group) {
-                        Iterator<HObject> children = ((Group) theObj).getMemberList().iterator();
+                    if(newObj instanceof Group) {
+                        Iterator<HObject> children = ((Group) newObj).getMemberList().iterator();
                         while(children.hasNext()) {
                             insertObject(children.next(), newItem);
                         }

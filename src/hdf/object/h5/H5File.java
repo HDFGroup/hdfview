@@ -1796,7 +1796,7 @@ public class H5File extends FileFormat {
      * @see hdf.object.FileFormat#copy(hdf.object.HObject, hdf.object.Group, java.lang.String)
      */
     @Override
-    public H5Group copy(HObject srcObj, Group dstGroup, String dstName) throws Exception {
+    public HObject copy(HObject srcObj, Group dstGroup, String dstName) throws Exception {
         log.trace("copy(): start: srcObj={} dstGroup={} dstName={}", srcObj, dstGroup, dstName);
         if ((srcObj == null) || (dstGroup == null)) {
             log.debug("copy(): srcObj or dstGroup is null");
@@ -1817,21 +1817,22 @@ public class H5File extends FileFormat {
                 dstName += "~copy";
         }
 
+        HObject newObj = null;
         if (srcObj instanceof Dataset) {
             log.trace("copy(): srcObj instanceof Dataset");
-            copyDataset((Dataset) srcObj, (H5Group) dstGroup, dstName);
+            newObj = copyDataset((Dataset) srcObj, (H5Group) dstGroup, dstName);
         }
         else if (srcObj instanceof H5Group) {
             log.trace("copy(): srcObj instanceof H5Group");
-            copyGroup((H5Group) srcObj, (H5Group) dstGroup, dstName);
+            newObj = copyGroup((H5Group) srcObj, (H5Group) dstGroup, dstName);
         }
         else if (srcObj instanceof H5Datatype) {
             log.trace("copy(): srcObj instanceof H5Datatype");
-            copyDatatype((H5Datatype) srcObj, (H5Group) dstGroup, dstName);
+            newObj = copyDatatype((H5Datatype) srcObj, (H5Group) dstGroup, dstName);
         }
 
         log.trace("copy(): finish");
-        return (H5Group) dstGroup;
+        return newObj;
     }
 
     /*
@@ -2427,7 +2428,7 @@ public class H5File extends FileFormat {
         return allMembers;
     }
 
-    private void copyDataset(Dataset srcDataset, H5Group pgroup, String dstName) throws Exception {
+    private HObject copyDataset(Dataset srcDataset, H5Group pgroup, String dstName) throws Exception {
         log.trace("copyDataset(): start");
         Dataset dataset = null;
         long srcdid = -1, dstdid = -1;
@@ -2490,7 +2491,9 @@ public class H5File extends FileFormat {
                 log.debug("copyDataset(): {} pgroup.close(dstdid {}) failure: ", dname, dstdid, ex);
             }
         }
+
         log.trace("copyDataset(): finish");
+        return dataset;
     }
 
     /**
@@ -2566,7 +2569,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *            If there is a failure.
      */
-    private void copyDatatype(Datatype srcType, H5Group pgroup, String dstName) throws Exception {
+    private HObject copyDatatype(Datatype srcType, H5Group pgroup, String dstName) throws Exception {
         log.trace("copyDatatype(): start");
         Datatype datatype = null;
         long tid_src = -1;
@@ -2612,7 +2615,9 @@ public class H5File extends FileFormat {
                 log.debug("copyDatatype(): {} pgroup.close(gid_dst {}) failure: ", dstName, gid_dst, ex);
             }
         }
+
         log.trace("copyDatatype(): finish");
+        return datatype;
     }
 
     /**
@@ -2628,7 +2633,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *            If there is a failure.
      */
-    private void copyGroup(H5Group srcGroup, H5Group dstGroup, String dstName) throws Exception {
+    private HObject copyGroup(H5Group srcGroup, H5Group dstGroup, String dstName) throws Exception {
         log.trace("copyGroup(): start");
         H5Group group = null;
         long srcgid = -1, dstgid = -1;
@@ -2674,7 +2679,9 @@ public class H5File extends FileFormat {
                 log.debug("copyGroup(): {} pgroup.close(dstgid {}) failure: ", dstName, dstgid, ex);
             }
         }
+
         log.trace("copyGroup(): finish");
+        return group;
     }
 
     /**

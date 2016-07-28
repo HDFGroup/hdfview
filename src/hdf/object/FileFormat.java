@@ -56,7 +56,7 @@ public abstract class FileFormat extends File {
     /***************************************************************************
      * File access flags used in calls to createInstance( String, flag );
      **************************************************************************/
-    
+
     /**
      * File first time access flag for open file. With this access flag, added
      * to the regular value, indicates this file has no existing state.
@@ -746,7 +746,7 @@ public abstract class FileFormat extends File {
      * // Create an instance of H5File object with read/write access
      * H5File test1 = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;,
      *                                               FileFormat.WRITE);
-     *                                                                                                                  
+     *
      * // Open the file and load the file structure; file id is returned.
      * int fid = test1.open();
      * </pre>
@@ -1524,8 +1524,8 @@ public abstract class FileFormat extends File {
      * Group dstGroup = (Group) newFile.get(&quot;/&quot;);
      * // First copy goes to &quot;/copy1&quot; and second goes to &quot;/copy2&quot;.
      * // Notice that we can use either H5File instance to perform the copy.
-     * TreeNode copy1 = existingFile.copy(srcObj, dstGroup, &quot;copy1&quot;);
-     * TreeNode copy2 = newFile.copy(srcObj, dstGroup, &quot;copy2&quot;);
+     * HObject copy1 = existingFile.copy(srcObj, dstGroup, &quot;copy1&quot;);
+     * HObject copy2 = newFile.copy(srcObj, dstGroup, &quot;copy2&quot;);
      * // Close both the files.
      * file.close();
      * newFile.close();
@@ -1539,8 +1539,7 @@ public abstract class FileFormat extends File {
      *            The name of the new object. If dstName is null, the name of
      *            srcObj will be used.
      *
-     * @return The tree object that contains the new object, or null if the copy
-     *         fails.
+     * @return The new object, or null if the copy fails.
      *
      * @throws Exception
      *             are specific to the implementing class.
@@ -1819,7 +1818,7 @@ public abstract class FileFormat extends File {
             log.trace("findObject(): finish");
             return null;
         }
-        
+
         Iterator<HObject> member_it = ((Group) theRoot).breadthFirstMemberList().iterator();
         while (member_it.hasNext()) {
             theObj = member_it.next();
