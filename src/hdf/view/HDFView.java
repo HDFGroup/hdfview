@@ -1523,9 +1523,7 @@ public class HDFView implements ViewManager {
             long[] OID = obj.getOID();
             if (OID != null) {
                 oidStr = String.valueOf(OID[0]);
-                for (int i = 1; i < OID.length; i++) {
-                    oidStr += ", " + OID[i];
-                }
+                if (isH4) oidStr += ", " + OID[1];
             }
 
             label = new Label(generalInfoGroup, SWT.RIGHT);

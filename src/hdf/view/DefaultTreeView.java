@@ -603,12 +603,17 @@ public class DefaultTreeView implements TreeView {
         item.setText("&Save to");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                if (selectedObject == null) return;
+                TreeItem[] selectedItems = tree.getSelection();
 
-                if ((selectedObject instanceof Group) && ((Group) selectedObject).isRoot()) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, "Cannot save the root group.\nUse \"Save As\" from file menu to save the whole file", shell.getText());
-                    return;
+                if (selectedItems.length <= 0) return;
+
+                for (int i = 0; i < selectedItems.length; i++) {
+                    if (((HObject) selectedItems[i].getData() instanceof Group)
+                            && ((Group) selectedItems[i].getData()).isRoot()) {
+                        shell.getDisplay().beep();
+                        Tools.showError(shell, "Cannot save the root group.\nUse \"Save As\" from file menu to save the whole file", shell.getText());
+                        return;
+                    }
                 }
 
                 String filetype = FileFormat.FILE_TYPE_HDF4;
@@ -661,14 +666,7 @@ public class DefaultTreeView implements TreeView {
                     Tools.showError(shell, ex.getMessage() + "\n" + filename, shell.getText());
                 }
 
-                TreeItem[] selectedItems = tree.getSelection();
-                List<TreeItem> objList = new Vector<TreeItem>(selectedItems.length);
-
-                for(int i = 0; i < selectedItems.length; i++) {
-                    objList.add(selectedItems[i]);
-                }
-
-                pasteObject(objList.toArray(new TreeItem[0]), findTreeItem(dstFile.getRootObject()), dstFile);
+                pasteObject(selectedItems, findTreeItem(dstFile.getRootObject()), dstFile);
             }
         });
 
@@ -1360,7 +1358,7 @@ public class DefaultTreeView implements TreeView {
     private void pasteObject(TreeItem[] objList, TreeItem pobj, FileFormat dstFile) {
         if ((objList == null) || (objList.length <= 0) || (pobj == null)) return;
 
-        ((HObject) objList[0].getData()).getFileFormat();
+        FileFormat srcFile = ((HObject) objList[0].getData()).getFileFormat();
         Group pgroup = (Group) pobj.getData();
         log.trace("pasteObject(...): start");
 
@@ -1388,7 +1386,7 @@ public class DefaultTreeView implements TreeView {
             try {
                 log.trace("pasteObject(...): dstFile.copy(theObj, pgroup, null)");
 
-                if(dstFile.copy(theObj, pgroup, null) != null) {
+                if(srcFile.copy(theObj, pgroup, null) != null) {
                     // Add the node to the tree
                     TreeItem newItem = insertObject(theObj, pobj);
 
