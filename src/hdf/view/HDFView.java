@@ -937,6 +937,8 @@ public class HDFView implements ViewManager {
             }
         });
 
+        setEnabled(Arrays.asList(windowMenu.getItems()), false);
+
         log.info("Menubar created");
     }
 
@@ -2018,6 +2020,11 @@ public class HDFView implements ViewManager {
             }
         }
 
+        // First window being added
+        if (shellList.length == 2) {
+            setEnabled(Arrays.asList(windowMenu.getItems()), true);
+        }
+
         HObject obj = dataView.getDataObject();
         String fullPath = obj.getPath() + obj.getName();
 
@@ -2055,6 +2062,11 @@ public class HDFView implements ViewManager {
             if(items[i].getText().equals(obj.getFullName())) {
                 items[i].dispose();
             }
+        }
+
+        // Last window being closed
+        if (display.getShells().length == 2) {
+            for (MenuItem item : windowMenu.getItems()) item.setEnabled(false);
         }
     }
 

@@ -96,6 +96,7 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.BodyCellEditorMouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
@@ -106,6 +107,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -2047,17 +2049,19 @@ public class DefaultTableView implements TableView {
 
         Class<?> theClass = null;
         String viewName = null;
-        boolean isText = ((dset_copy instanceof ScalarDS) && ((ScalarDS) dset_copy).isText());
-        boolean isImage = ((dset_copy instanceof ScalarDS) && ((ScalarDS) dset_copy).isImage());
 
-        if (isText) {
-            viewName = (String) HDFView.getListOfTextViews().get(0);
-        }
-        else if (isImage) {
-            viewName = HDFView.getListOfImageViews().get(0);
-        }
-        else {
-            viewName = (String) HDFView.getListOfTableViews().get(0);
+        switch (viewType) {
+            case TEXT:
+                viewName = (String) HDFView.getListOfTextViews().get(0);
+                break;
+            case IMAGE:
+                viewName = HDFView.getListOfImageViews().get(0);
+                break;
+            case TABLE:
+                viewName = (String) HDFView.getListOfTableViews().get(0);
+                break;
+            default:
+                viewName = null;
         }
 
         try {
@@ -2075,12 +2079,20 @@ public class DefaultTableView implements TableView {
         // Use default dataview
         if (theClass == null) {
             log.trace("showObjRefData(): Using default dataview");
-            if (isText)
-                viewName = "hdf.view.DefaultTextView";
-            else if (isImage)
-                viewName = "hdf.view.DefaultImageView";
-            else
-                viewName = "hdf.view.DefaultTableView";
+            switch (viewType) {
+                case TEXT:
+                    viewName = "hdf.view.DefaultTextView";
+                    break;
+                case IMAGE:
+                    viewName = "hdf.view.DefaultImageView";
+                    break;
+                case TABLE:
+                    viewName = "hdf.view.DefaultTableView";
+                    break;
+                default:
+                    viewName = null;
+            }
+
             try {
                 theClass = Class.forName(viewName);
             }
@@ -2273,17 +2285,19 @@ public class DefaultTableView implements TableView {
 
             Class<?> theClass = null;
             String viewName = null;
-            boolean isText = ((dset_copy instanceof ScalarDS) && ((ScalarDS) dset_copy).isText());
-            boolean isImage = ((dset_copy instanceof ScalarDS) && ((ScalarDS) dset_copy).isImage());
 
-            if (isText) {
-                viewName = (String) HDFView.getListOfTextViews().get(0);
-            }
-            else if (isImage) {
-                viewName = HDFView.getListOfImageViews().get(0);
-            }
-            else {
-                viewName = (String) HDFView.getListOfTableViews().get(0);
+            switch (viewType) {
+                case TEXT:
+                    viewName = (String) HDFView.getListOfTextViews().get(0);
+                    break;
+                case IMAGE:
+                    viewName = HDFView.getListOfImageViews().get(0);
+                    break;
+                case TABLE:
+                    viewName = (String) HDFView.getListOfTableViews().get(0);
+                    break;
+                default:
+                    viewName = null;
             }
 
             try {
@@ -2301,12 +2315,20 @@ public class DefaultTableView implements TableView {
             // Use default dataview
             if (theClass == null) {
                 log.trace("showRegRefData(): Using default dataview");
-                if (isText)
-                    viewName = "hdf.view.DefaultTextView";
-                else if (isImage)
-                    viewName = "hdf.view.DefaultImageView";
-                else
-                    viewName = "hdf.view.DefaultTableView";
+                switch (viewType) {
+                    case TEXT:
+                        viewName = "hdf.view.DefaultTextView";
+                        break;
+                    case IMAGE:
+                        viewName = "hdf.view.DefaultImageView";
+                        break;
+                    case TABLE:
+                        viewName = "hdf.view.DefaultTableView";
+                        break;
+                    default:
+                        viewName = null;
+                }
+
                 try {
                     theClass = Class.forName(viewName);
                 }
@@ -4408,7 +4430,52 @@ public class DefaultTableView implements TableView {
                 this.addConfiguration(new AbstractUiBindingConfiguration() {
                     @Override
                     public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
-//                        uiBindingRegistry.registerDoubleClickBinding(mouseEventMatcher, action);
+                        uiBindingRegistry.registerDoubleClickBinding(new MouseEventMatcher(), new IMouseAction() {
+                            @Override
+                            public void run(NatTable table, MouseEvent event) {
+                                if (!(isRegRef || isObjRef)) return;
+
+                                viewType = ViewType.TABLE;
+
+                                Object theData = null;
+                                try {
+                                    theData = ((Dataset) getDataObject()).getData();
+                                }
+                                catch (Exception ex) {
+                                    log.debug("show reference data: ", ex);
+                                    theData = null;
+                                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                                }
+
+                                if (theData == null) {
+                                    shell.getDisplay().beep();
+                                    Tools.showError(shell, "No data selected.", shell.getText());
+                                    return;
+                                }
+
+                                // Since NatTable returns the selected row positions as a Set<Range>, convert this to
+                                // an Integer[]
+                                Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+                                Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+                                Iterator<Range> i1 = rowPositions.iterator();
+                                while(i1.hasNext()) {
+                                    selectedRowPos.addAll(i1.next().getMembers());
+                                }
+
+                                Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
+                                if (selectedRows == null || selectedRows.length <= 0) {
+                                    log.debug("show reference data: no data selected");
+                                    Tools.showError(shell, "No data selected.", shell.getText());
+                                    return;
+                                }
+                                int len = Array.getLength(selectedRows);
+                                for (int i = 0; i < len; i++) {
+                                    if (isRegRef)
+                                        showRegRefData((String) Array.get(theData, selectedRows[i]));
+                                    else if (isObjRef) showObjRefData(Array.getLong(theData, selectedRows[i]));
+                                }
+                            }
+                        });
                     }
                 });
             }
