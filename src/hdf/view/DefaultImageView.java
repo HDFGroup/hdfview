@@ -14,16 +14,66 @@
 
 package hdf.view;
 
-import org.eclipse.swt.custom.ScrolledComposite;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DirectColorModel;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+import java.awt.image.IndexColorModel;
+import java.awt.image.PixelGrabber;
+import java.awt.image.RGBImageFilter;
+import java.awt.image.WritableRaster;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseWheelListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
@@ -44,58 +94,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.layout.GridData;
-
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.MouseWheelListener;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.events.PaintEvent;
-
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.awt.image.ImageFilter;
-import java.awt.image.ImageObserver;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DirectColorModel;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.ImageProducer;
-import java.awt.image.IndexColorModel;
-import java.awt.image.PixelGrabber;
-import java.awt.image.RGBImageFilter;
-import java.awt.image.WritableRaster;
-import java.awt.Color;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.RandomAccessFile;
-import java.lang.reflect.Array;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
 
 import hdf.object.Datatype;
 import hdf.object.Group;
@@ -157,7 +155,7 @@ public class DefaultImageView implements ImageView {
      * The main HDFView.
      */
     private final ViewManager       viewer;
-    
+
     private Toolkit                 toolkit;
 
     /**
@@ -243,7 +241,7 @@ public class DefaultImageView implements ImageView {
     private long                    curFrame = 0, maxFrame = 1;
 
     private BufferedImage           bufferedImage;
-    
+
     private ContrastSlider          contrastSlider;
 
     private int                     indexBase = 0;
@@ -302,7 +300,7 @@ public class DefaultImageView implements ImageView {
 
         shell.setImage(ViewProperties.getImageIcon());
         shell.setLayout(new GridLayout(1, true));
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 // reload the data when it is displayed next time
@@ -311,7 +309,7 @@ public class DefaultImageView implements ImageView {
                 if (!dataset.isImage()) {
                     dataset.clearData();
                 }
-                
+
                 if (curFont != null) curFont.dispose();
 
                 data = null;
@@ -320,14 +318,14 @@ public class DefaultImageView implements ImageView {
                 imageComponent = null;
                 autoGainData = null;
                 ((Vector) rotateRelatedItems).setSize(0);
-                
+
                 viewer.removeDataView(DefaultImageView.this);
-                
+
                 System.runFinalization();
                 System.gc();
             }
         });
-        
+
         try {
             curFont = new Font(
                     display,
@@ -338,7 +336,7 @@ public class DefaultImageView implements ImageView {
         catch (Exception ex) {
             curFont = null;
         }
-        
+
         shell.setFont(curFont);
 
         viewer = theView;
@@ -361,7 +359,7 @@ public class DefaultImageView implements ImageView {
         contrastSlider = null;
         bitmask = null;
         invalidValueIndex = new ArrayList<Integer>();
-        
+
         toolkit = Toolkit.getDefaultToolkit();
 
         String origStr = ViewProperties.getImageOrigin();
@@ -537,7 +535,7 @@ public class DefaultImageView implements ImageView {
         valueField.setEditable(false);
         valueField.setFont(curFont);
         setValueVisible(showValues);
-        
+
         shell.pack();
 
         int width = 700 + (ViewProperties.getFontSize() - 12) * 15;
@@ -545,13 +543,8 @@ public class DefaultImageView implements ImageView {
         shell.setSize(width, height);
 
         viewer.addDataView(this);
-        
-        shell.open();
 
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
+        shell.open();
     }
 
     private Menu createMenuBar() {
@@ -680,7 +673,7 @@ public class DefaultImageView implements ImageView {
             public void widgetSelected(SelectionEvent e) {
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(ViewProperties.getWorkDir());
-                
+
                 fChooser.setFilterExtensions(new String[] {"*.*"});
                 fChooser.setFilterNames(new String[] {"All Files"});
                 fChooser.setFilterIndex(0);
@@ -711,11 +704,11 @@ public class DefaultImageView implements ImageView {
                 String workDir = ViewProperties.getWorkDir() + File.separator;
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(workDir);
-                
+
                 fChooser.setFilterExtensions(new String[] {"*.*", "*.lut"});
                 fChooser.setFilterNames(new String[] {"All Files", "Color Lookup Table"});
                 fChooser.setFilterIndex(1);
-                
+
                 File pfile = Tools.checkNewFile(workDir, ".lut");
 
                 fChooser.setFileName(pfile.getName());
@@ -1753,7 +1746,7 @@ public class DefaultImageView implements ImageView {
         fChooser.setOverwrite(true);
 
         DefaultFileFilter filter = null;
-        
+
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
             filter = DefaultFileFilter.getFileFilterJPEG();
         } /* else if (type.equals(Tools.FILE_TYPE_TIFF)) {
@@ -1768,7 +1761,7 @@ public class DefaultImageView implements ImageView {
         else if (type.equals(Tools.FILE_TYPE_BMP)) {
             filter = DefaultFileFilter.getFileFilterBMP();
         }
-        
+
         if (filter == null) {
             fChooser.setFilterExtensions(new String[] {"*.*"});
             fChooser.setFilterNames(new String[] {"All Files"});
@@ -2352,13 +2345,13 @@ public class DefaultImageView implements ImageView {
 
                     FontData[] fontData;
                     int fontHeight = 10;
-                    
+
                     if (curFont != null) {
                         fontData = curFont.getFontData();
                     } else {
                         fontData = Display.getDefault().getSystemFont().getFontData();
                     }
-                    
+
                     Font newFont = new Font(display, fontData[0].getName(), fontHeight, fontData[0].getStyle());
                     gc.setFont(newFont);
 
@@ -2560,10 +2553,7 @@ public class DefaultImageView implements ImageView {
                 public void mouseScrolled(MouseEvent e) {
                     ScrollBar jb = imageScroller.getVerticalBar();
 
-                    //int us = e.getUnitsToScroll();
-                    //int wr = e.getWheelRotation();
-                    //int n = us * jb.getIncrement();
-                    int y = jb.getSelection();
+                    jb.getSelection();
 
                     /*if (((y <= 0) && (wr < 0))
                             || (y + jb.getVisibleAmount() * wr >= zoomFactor
@@ -2585,11 +2575,11 @@ public class DefaultImageView implements ImageView {
 
                     org.eclipse.swt.graphics.Image converted = convertBufferedImageToSWTImage((BufferedImage) image);
                     org.eclipse.swt.graphics.Rectangle sourceBounds = converted.getBounds();
-                    
-                    
+
+
                     gc.drawImage(converted, 0, 0, sourceBounds.width, sourceBounds.height,
                             0, 0, imageSize.width, imageSize.height);
-                    
+
                     /*if (gc instanceof Graphics2D && (zoomFactor<0.99)) {
                         Graphics2D g2 = (Graphics2D) g;
 
@@ -3635,7 +3625,7 @@ public class DefaultImageView implements ImageView {
         double min, max, min_org, max_org;
         final double[] minmax_previous = {0, 0};
         final double[] minmax_dist = {0,0};
-        
+
         final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
 
         public DataRangeDialog(Shell parent, int style, double[] minmaxCurrent,
@@ -3665,8 +3655,8 @@ public class DefaultImageView implements ImageView {
 
             tickRatio = (max_org-min_org)/(double)NTICKS;
 
-            
-            
+
+
             //NumberFormatter formatter = new NumberFormatter(numberFormat);
             //formatter.setMinimum(new Double(min));
             //formatter.setMaximum(new Double(max));
@@ -3687,20 +3677,20 @@ public class DefaultImageView implements ImageView {
             data.widthHint = 400;
             data.heightHint = 150;
             chartCanvas.setLayoutData(data);
-            
+
             final int numberOfPoints = dataDist.length;
             int gap = 5;
             final int xgap = 2 * gap;
             final double xmin = originalRange[0];
             final double xmax = originalRange[1];
-            
+
             chartCanvas.addPaintListener(new PaintListener() {
                 public void paintControl(PaintEvent e) {
                     GC gc = e.gc;
-                    
+
                     // TODO: Update Chart to be able to handle large fonts
                     gc.setFont(curFont);
-                    
+
                     int h = H/3 -50;
                     int w = W;
                     int xnpoints = Math.min(10, numberOfPoints - 1);
@@ -3726,7 +3716,7 @@ public class DefaultImageView implements ImageView {
 
                     xp = xgap;
                     yp = 0;
-                    
+
                     int barWidth = w / numberOfPoints;
                     if (barWidth <= 0) {
                         barWidth = 1;
@@ -3734,11 +3724,11 @@ public class DefaultImageView implements ImageView {
                     dw = (double) w / (double) numberOfPoints;
 
                     gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
-                    
+
                     for (int j = 0; j < numberOfPoints; j++) {
                         xp = xgap + j * dw;
                         yp = (int) (h * (dataDist[j] - ymin) / dy);
-                        
+
                         gc.fillRectangle((int) xp, (int) (h - yp), barWidth, (int) yp);
                     }
 
@@ -3759,8 +3749,8 @@ public class DefaultImageView implements ImageView {
             minField.addModifyListener(new ModifyListener() {
                 public void modifyText(ModifyEvent e) {
                     if (minSlider != null && minSlider.getEnabled()) {
-                        double value = Double.valueOf(((Text) e.widget).getText()); 
-                        
+                        double value = Double.valueOf(((Text) e.widget).getText());
+
                         if (value > max_org) {
                             value = max_org;
                             minField.setText(String.valueOf(value));
@@ -3770,7 +3760,7 @@ public class DefaultImageView implements ImageView {
                     }
                 }
             });
-            
+
             minSlider = new Slider(lowerBoundGroup, SWT.HORIZONTAL);
             minSlider.setMinimum(0);
             minSlider.setMaximum(NTICKS);
@@ -3806,17 +3796,17 @@ public class DefaultImageView implements ImageView {
                 public void modifyText(ModifyEvent e) {
                     if (maxSlider != null && maxSlider.getEnabled()) {
                         double value = Double.valueOf(((Text) e.widget).getText());
-                        
+
                         if (value < min_org) {
                             value = min_org;
                             maxField.setText(String.valueOf(value));
                         }
-                        
+
                         maxSlider.setSelection((int) ((value-min_org)/tickRatio));
                     }
                 }
             });
-            
+
             maxSlider = new Slider(upperBoundGroup, SWT.HORIZONTAL);
             maxSlider.setMinimum(0);
             maxSlider.setMaximum(NTICKS);
@@ -3887,7 +3877,7 @@ public class DefaultImageView implements ImageView {
                     minmax_current[0] = minmax_current[1] = 0;
                 }
             });
-            
+
             if (min == max) {
                 minSlider.setEnabled(false);
                 maxSlider.setEnabled(false);
@@ -3895,7 +3885,7 @@ public class DefaultImageView implements ImageView {
 
 
             shell.pack();
-            
+
             shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
@@ -3916,7 +3906,7 @@ public class DefaultImageView implements ImageView {
             return minmax_current;
         }
     }
-    
+
     private class ContrastSlider extends Dialog {
 
         private Shell shell;
@@ -3963,14 +3953,14 @@ public class DefaultImageView implements ImageView {
                     if (e.detail == SWT.TRAVERSE_RETURN) {
                         if (brightSlider != null) {
                             double value = Double.parseDouble(((Text) e.widget).getText());
-                            
+
                             if (value > 100) {
                                 value = 100;
                             }
                             else if (value < -100) {
                                 value = -100;
                             }
-                            
+
                             brightSlider.setSelection((int) value + 100);
                         }
                     }
@@ -4007,14 +3997,14 @@ public class DefaultImageView implements ImageView {
                     if (e.detail == SWT.TRAVERSE_RETURN) {
                         if (contrastSlider != null) {
                             double value = Double.parseDouble(((Text) e.widget).getText());
-                            
+
                             if (value > 100) {
                                 value = 100;
                             }
                             else if (value < -100) {
                                 value = -100;
                             }
-                            
+
                             contrastSlider.setSelection((int) value + 100);
                         }
                     }

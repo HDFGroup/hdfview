@@ -64,7 +64,7 @@ public class NewDatasetDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 
     private Shell             shell;
-    
+
     private Font              curFont;
 
     private String            maxSize;
@@ -106,7 +106,7 @@ public class NewDatasetDialog extends Dialog {
      */
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -143,7 +143,7 @@ public class NewDatasetDialog extends Dialog {
      */
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -650,7 +650,7 @@ public class NewDatasetDialog extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -665,12 +665,6 @@ public class NewDatasetDialog extends Dialog {
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
-
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
     }
 
     /** Check if the max size is valid */
@@ -1036,7 +1030,7 @@ public class NewDatasetDialog extends Dialog {
                 datatype.setEnumMembers(stringLengthField.getText());
             }
             String fillValue = null;
-            
+
             if (fillValueField != null) {
                 if (fillValueField.isEnabled()) fillValue = fillValueField.getText();
             }
@@ -1220,9 +1214,9 @@ public class NewDatasetDialog extends Dialog {
                         while(scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
-                        
+
                         browser.setText(buffer.toString());
-                        
+
                         scan.close();
                         in.close();
                     }
@@ -1313,7 +1307,7 @@ public class NewDatasetDialog extends Dialog {
                 Tools.showError(shell,
                         "Platform doesn't support Browser. Opening external link in web browser...",
                         "Browser support");
-                
+
                 //TODO: Add support for launching in external browser
             }
             catch (Exception ex) {

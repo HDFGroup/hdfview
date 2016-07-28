@@ -65,7 +65,7 @@ import hdf.object.ScalarDS;
 public class DefaultPaletteView extends Dialog {
 
     private Shell               shell;
-    
+
     private Font                curFont;
 
     private ScalarDS            dataset;
@@ -108,7 +108,7 @@ public class DefaultPaletteView extends Dialog {
 
     public DefaultPaletteView(Shell parent, ViewManager theViewer, ImageView theImageView) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -147,7 +147,7 @@ public class DefaultPaletteView extends Dialog {
 
         isH5 = dataset.getFileFormat().isThisType(
                 FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        
+
         createUI();
     }
 
@@ -183,7 +183,7 @@ public class DefaultPaletteView extends Dialog {
         checkRed.setText("Red");
         checkRed.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
         checkRed.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-        
+
         checkGreen = new Button(rgbComposite, SWT.RADIO);
         checkGreen.setFont(curFont);
         checkGreen.setText("Green");
@@ -307,7 +307,7 @@ public class DefaultPaletteView extends Dialog {
                 if (paletteValueTable == null) {
                     paletteValueTable = new PaletteValueTable(shell, SWT.NONE);
                 }
-                
+
                 paletteValueTable.open();
             }
         });
@@ -354,7 +354,7 @@ public class DefaultPaletteView extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -369,12 +369,6 @@ public class DefaultPaletteView extends Dialog {
                 (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
-
-        Display display = shell.getDisplay();
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
     }
 
     /** @return the data object displayed in this data viewer */
@@ -426,12 +420,12 @@ public class DefaultPaletteView extends Dialog {
 
         public ChartCanvas(Composite parent, int style) {
             canvas = new Canvas(parent, style);
-            
+
             GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
             data.widthHint = 700 + (ViewProperties.getFontSize() - 12) * 15;
             data.heightHint = 500 + (ViewProperties.getFontSize() - 12) * 10;
             canvas.setLayoutData(data);
-            
+
             canvas.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
             canvas.addPaintListener(new PaintListener() {
@@ -516,7 +510,7 @@ public class DefaultPaletteView extends Dialog {
 
     /** The dialog to show the palette values in spreadsheet. */
     private class PaletteValueTable extends Dialog {
-    	
+
     	private Display display;
     	private Shell tableShell;
 
@@ -532,7 +526,7 @@ public class DefaultPaletteView extends Dialog {
         public void open() {
             Shell parent = getParent();
             display = parent.getDisplay();
-            
+
             tableShell = new Shell(parent, SWT.SHELL_TRIM);
             tableShell.setFont(curFont);
             tableShell.setText("");
@@ -542,7 +536,7 @@ public class DefaultPaletteView extends Dialog {
             Composite content = new Composite(tableShell, SWT.NONE);
             content.setLayout(new GridLayout(1, true));
             content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            
+
             GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
             data.heightHint = 200;
             content.setLayoutData(data);
@@ -556,45 +550,45 @@ public class DefaultPaletteView extends Dialog {
 
             // Add cell editor for changing cell values in-place
             valueTable.addListener(SWT.MouseDoubleClick, valueTableCellEditor);
-            
+
             valueTable.addListener(SWT.Resize, new Listener() {
             	public void handleEvent(Event e) {
             		int numColumns = valueTable.getColumnCount();
-            		
+
             		for (int i = 0; i < numColumns; i++) {
             			valueTable.getColumn(i).setWidth(valueTable.getClientArea().width / numColumns);
             		}
             	}
             });
-            
+
             valueTable.addPaintListener(new PaintListener() {
             	public void paintControl(PaintEvent e) {
             		for (int i = 0; i < valueTable.getItemCount(); i++) {
             			Color cellColor = new Color(display, paletteData[0][i],
                                 paletteData[1][i], paletteData[2][i]);
-            			
+
             			valueTable.getItem(i).setBackground(4, cellColor);
-            			
+
             			cellColor.dispose();
             		}
             	}
             });
-            
+
             for (int i = 0; i < columnNames.length; i++) {
             	TableColumn column = new TableColumn(valueTable, SWT.NONE);
             	column.setText(columnNames[i]);
             	column.setMoveable(false);
             	column.pack();
             }
-            
+
             for (int i = 0; i < 256; i++) {
             	TableItem item = new TableItem(valueTable, SWT.NONE);
             	item.setFont(curFont);
-            	
+
             	item.setText(new String[] {String.valueOf(i), String.valueOf(paletteData[0][i]),
             			String.valueOf(paletteData[1][i]), String.valueOf(paletteData[2][i]),
             			null});
-            	
+
             	item.setBackground(0, Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
             }
 
@@ -614,7 +608,7 @@ public class DefaultPaletteView extends Dialog {
             });
 
             tableShell.pack();
-            
+
             int w = 300 + (ViewProperties.getFontSize() - 12) * 10;
             int h = 600 + (ViewProperties.getFontSize() - 12) * 15;
 
@@ -633,7 +627,7 @@ public class DefaultPaletteView extends Dialog {
                     display.sleep();
             }
         }
-        
+
         private void updatePaletteValue(String strValue, int row, int col) {
             if (strValue == null) {
                 return;
@@ -683,14 +677,14 @@ public class DefaultPaletteView extends Dialog {
                         if (rect.contains(pt)) {
                             final int column = i;
                             final int row = index;
-                            
+
                             final Text text = new Text(valueTable, SWT.NONE);
                             text.setFont(curFont);
 
                             Listener textListener = new Listener() {
                                 public void handleEvent(final Event e) {
                                 	int newValue = Integer.parseInt(text.getText());
-                                	
+
                                     switch (e.type) {
                                     case SWT.FocusOut:
                                     	if (newValue >= 0 && newValue <= 255) {
@@ -699,7 +693,7 @@ public class DefaultPaletteView extends Dialog {
                                     	} else {
                                     	    Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
                                     	}
-                                        
+
                                         text.dispose();
                                         break;
                                     case SWT.Traverse:
@@ -720,7 +714,7 @@ public class DefaultPaletteView extends Dialog {
                                     }
                                 }
                             };
-                            
+
                             text.addListener(SWT.FocusOut, textListener);
                             text.addListener(SWT.Traverse, textListener);
                             editor.setEditor(text, item, i);
@@ -729,14 +723,14 @@ public class DefaultPaletteView extends Dialog {
                             text.setFocus();
                             return;
                         }
-                        
+
                         if (!visible && rect.intersects(clientArea)) {
                             visible = true;
                         }
                     }
-                    
+
                     if (!visible) return;
-                    
+
                     index++;
                 }
             }

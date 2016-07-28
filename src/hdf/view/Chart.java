@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 public class Chart extends Dialog {
 
     private Shell                       shell;
-    
+
     private Font                        curFont;
 
     private String                      windowTitle;
@@ -131,7 +131,7 @@ public class Chart extends Dialog {
         }
 
         this.windowTitle = title;
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -204,7 +204,7 @@ public class Chart extends Dialog {
         shell.setText(windowTitle);
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -244,12 +244,6 @@ public class Chart extends Dialog {
                 (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
-
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
     }
 
     /** Sets the color of each line of a line plot
@@ -302,7 +296,7 @@ public class Chart extends Dialog {
                 public void paintControl(PaintEvent e) {
                     // Get the graphics context for this paint event
                     GC g = e.gc;
-                    
+
                     //TODO: Update Chart to handle large fonts
                     //g.setFont(curFont);
 

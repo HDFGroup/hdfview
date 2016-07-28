@@ -199,11 +199,6 @@ public class DefaultMetaDataView implements MetaDataView {
         viewer.addDataView(this);
 
         shell.open();
-
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
     }
 
     /** Add an attribute to a data object. */

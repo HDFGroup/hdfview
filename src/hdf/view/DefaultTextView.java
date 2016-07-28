@@ -235,11 +235,6 @@ public class DefaultTextView implements TextView {
         viewer.addDataView(this);
 
         shell.open();
-
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
     }
 
     /**

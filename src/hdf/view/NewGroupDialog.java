@@ -54,7 +54,7 @@ import hdf.object.HObject;
 public class NewGroupDialog extends Dialog {
 
     private Shell       shell;
-    
+
     private Font        curFont;
 
     /* Used to restore original size after click "less" button */
@@ -106,7 +106,7 @@ public class NewGroupDialog extends Dialog {
      */
     public NewGroupDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -251,7 +251,7 @@ public class NewGroupDialog extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -268,12 +268,6 @@ public class NewGroupDialog extends Dialog {
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
-
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
     }
 
     private HObject create() {

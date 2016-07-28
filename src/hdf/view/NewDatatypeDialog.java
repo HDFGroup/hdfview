@@ -53,7 +53,7 @@ import hdf.object.HObject;
 public class NewDatatypeDialog extends Dialog {
 
     private Shell             shell;
-    
+
     private Font              curFont;
 
     private Text              nameField, stringLengthField;
@@ -87,7 +87,7 @@ public class NewDatatypeDialog extends Dialog {
      */
     public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -343,7 +343,7 @@ public class NewDatatypeDialog extends Dialog {
         endianChoice.select(0);
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -358,12 +358,6 @@ public class NewDatatypeDialog extends Dialog {
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
-
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep();
-        }
     }
 
     private HObject createDatatype() {

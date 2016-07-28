@@ -22,7 +22,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import hdf.HDFVersions;
@@ -56,21 +56,21 @@ public class InputDialog extends Dialog {
     public InputDialog(Shell parent, String title, String message) {
         this(parent, title, message, "");
     }
-    
+
     public InputDialog(Shell parent, String title, String message, int style) {
         this(parent, title, message, "", style);
     }
 
     public InputDialog(Shell parent, String title, String message, String initialText) {
         this(parent, title, message, initialText, SWT.NONE);
-    }    
+    }
 
     public InputDialog(Shell parent, String title, String message, String initialText, int style) {
         super(parent, style);
         this.title = title;
         this.message = message;
         this.initialText = initialText;
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -154,7 +154,7 @@ public class InputDialog extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -176,6 +176,8 @@ public class InputDialog extends Dialog {
                 display.sleep();
         }
 
+        // TODO: Display loop should not wait here, but we must wait until
+        // an input is given before returning
         return result;
     }
 }
