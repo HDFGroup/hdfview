@@ -1540,12 +1540,17 @@ public class DefaultTreeView implements TreeView {
      * to the file object.
      */
     private TreeItem populateTree(FileFormat theFile) {
+        log.trace("populateTree(): start");
+
         if (theFile == null || theFile.getFID() < 0 || theFile.getRootObject() == null) {
             //TODO: Update FitsFile and NC2File to have a fid other than -1
             // so this check isn't needed
             if ((theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
                     theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))) {
-                log.trace("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
+                shell.getDisplay().beep();
+                Tools.showError(shell, "Error opening file " + theFile.getName(), "Open File");
+                log.debug("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
+                log.trace("populateTree(): finish");
                 return null;
             }
         }
@@ -1569,13 +1574,15 @@ public class DefaultTreeView implements TreeView {
             }
         }
         catch (Exception ex) {
-            log.trace("Error occured when populating Tree with members of file {}", theFile.getFilePath());
+            log.debug("populateTree(): Error populating Tree with members of file {}", theFile.getFilePath());
             if(rootItem != null) rootItem.dispose();
             shell.getDisplay().beep();
             Tools.showError(shell, "Error opening file " + theFile.getName(), "Open File");
+            log.trace("populateTree(): finish");
             return null;
         }
 
+        log.trace("populateTree(): finish");
         return rootItem;
     }
 

@@ -17,9 +17,9 @@ package hdf.view;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Iterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -66,20 +66,20 @@ import hdf.object.h5.H5Link;
  * DefaultMetadataView is a dialog window used to show data properties. Data
  * properties include attributes and general information such as object type,
  * data type and data space.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 2/21/2016
  */
 public class DefaultMetaDataView implements MetaDataView {
     private final Display              display = Display.getDefault();
     private Shell                      shell;
-    
+
     private Font                       curFont;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
 
     private final ViewManager          viewer;
-    
+
     /** The HDF data object */
     private HObject                    hObject;
 
@@ -96,14 +96,14 @@ public class DefaultMetaDataView implements MetaDataView {
 
     public DefaultMetaDataView(ViewManager theView, HObject theObj) {
         log.trace("DefaultMetaDataView: start");
-        
+
         shell = new Shell(display, SWT.SHELL_TRIM);
-        
+
         shell.setData(this);
-        
+
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
-        
+
         try {
             curFont = new Font(
                     display,
@@ -114,13 +114,13 @@ public class DefaultMetaDataView implements MetaDataView {
         catch (Exception ex) {
             curFont = null;
         }
-        
+
         shell.setFont(curFont);
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
-                
+
                 viewer.removeDataView(DefaultMetaDataView.this);
             }
         });
@@ -142,7 +142,7 @@ public class DefaultMetaDataView implements MetaDataView {
         } else {
             shell.setText("Properties - " + hObject.getPath() + hObject.getName());
         }
-        
+
         // Get the metadata information before adding GUI components */
         try {
             hObject.getMetadata();
@@ -164,7 +164,7 @@ public class DefaultMetaDataView implements MetaDataView {
         TabItem attributeItem = new TabItem(folder, SWT.NONE);
         attributeItem.setText("Attributes");
         attributeItem.setControl(createAttributesComposite(folder));
-        
+
         boolean isRoot = ((hObject instanceof Group) && ((Group) hObject).isRoot());
         if (isH5 && isRoot) {
             // Add panel to display user block
@@ -188,16 +188,16 @@ public class DefaultMetaDataView implements MetaDataView {
         log.trace("DefaultMetaDataView: finish");
 
         shell.pack();
-        
+
 //        shell.setMinimumSize(new Point(500, 500));
 //        shell.setSize(minimumSize.x / 2, minimumSize.y / 2);
 
 //        Point shellSize = shell.getSize();
 //        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
 //                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         viewer.addDataView(this);
-        
+
         shell.open();
 
         while (!shell.isDisposed()) {
@@ -211,7 +211,7 @@ public class DefaultMetaDataView implements MetaDataView {
         if (obj == null) {
             return null;
         }
-        
+
         HObject node = obj.getFileFormat().getRootObject();
         NewAttributeDialog dialog = new NewAttributeDialog(shell, obj, ((Group) node).breadthFirstMemberList());
         dialog.open();
@@ -234,7 +234,7 @@ public class DefaultMetaDataView implements MetaDataView {
         for (int j = 1; j < dims.length; j++) {
             rowData[3] += " x " + dims[j];
         }
-        
+
         TableItem item = new TableItem(attrTable, SWT.NONE);
         item.setFont(curFont);
         item.setText(rowData);
@@ -251,13 +251,13 @@ public class DefaultMetaDataView implements MetaDataView {
         if (obj == null) {
             return null;
         }
-        
+
         int idx = attrTable.getSelectionIndex();
         if (idx < 0) {
             Tools.showError(shell, "No attribute is selected.", shell.getText());
             return null;
         }
-        
+
         MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
         confirm.setText(shell.getText());
         confirm.setMessage("Do you want to delete the selected attribute?");
@@ -284,7 +284,7 @@ public class DefaultMetaDataView implements MetaDataView {
         catch (Exception ex) {
             log.debug("delete an attribute from a data object:", ex);
         }
-        
+
         attrTable.remove(idx);
         numAttributes--;
 
@@ -298,10 +298,10 @@ public class DefaultMetaDataView implements MetaDataView {
     public HObject getDataObject() {
         return hObject;
     }
-    
+
     /**
      * update attribute value. Currently can only update single data point.
-     * 
+     *
      * @param newValue
      *            the string of the new value.
      * @param row
@@ -432,7 +432,7 @@ public class DefaultMetaDataView implements MetaDataView {
                             if (theToken != null) {
                                 String theValue = theToken;
                                 BigInteger Jmax = new BigInteger("18446744073709551615");
-                                BigInteger big = new BigInteger(theValue); 
+                                BigInteger big = new BigInteger(theValue);
                                 if ((big.compareTo(Jmax)>0) || (big.compareTo(BigInteger.ZERO)<0)) {
                                     Tools.showError(shell, "Data is out of range[" + min + ", " + max
                                             + "]: " + theToken, shell.getText());
@@ -507,7 +507,7 @@ public class DefaultMetaDataView implements MetaDataView {
             log.trace("updateAttributeValue: hObject is not instanceof ScalarDS");
         }
     }
-    
+
     private int showUserBlockAs(int radix) {
         int headerSize = 0;
 
@@ -542,7 +542,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
         return headerSize;
     }
-    
+
     private void writeUserBlock() {
         if (!isH5) {
             return;
@@ -621,7 +621,7 @@ public class DefaultMetaDataView implements MetaDataView {
                     + "\n\"Cancel\" to quit without saving the change.\n\n ");
 
             int op = confirm.open();
-            
+
             if(op == SWT.CANCEL) {
                 return;
             }
@@ -641,7 +641,7 @@ public class DefaultMetaDataView implements MetaDataView {
             if (op == SWT.NO) {
                 FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
                 fChooser.setFileName(fout);
-                
+
                 DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
                 fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
                 fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
@@ -672,7 +672,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
             // close the file
             TreeView view = ((HDFView) viewer).getTreeView();
-            
+
             try {
                 view.closeFile((view.getSelectedFile()));
             } catch (Exception ex) {
@@ -702,7 +702,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
             // reopen the file
             shell.dispose();
-            
+
             try {
                 view.openFile(fin, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
             } catch (Exception ex) {
@@ -710,21 +710,21 @@ public class DefaultMetaDataView implements MetaDataView {
             }
         }
     }
-    
+
     private Composite createGeneralComposite(TabFolder folder) {
         boolean isRoot = ((hObject instanceof Group) && ((Group) hObject).isRoot());
         FileFormat theFile = hObject.getFileFormat();
-        
+
         Composite composite = new Composite(folder, SWT.NONE);
         composite.setLayout(new GridLayout(1, true));
-        
+
         Composite detailComposite = new Composite(composite, SWT.BORDER);
         detailComposite.setLayout(new GridLayout(2, false));
         detailComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         String typeStr = "Unknown";
         String fileInfo = "";
-        
+
         if(isRoot) {
             long size = 0;
             try {
@@ -734,35 +734,35 @@ public class DefaultMetaDataView implements MetaDataView {
                 size = -1;
             }
             size /= 1024;
-            
+
             int groupCount = 0, datasetCount = 0;
-            
+
             HObject root = theFile.getRootObject();
             HObject theObj = null;
             Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
-            
+
             while(it.hasNext()) {
                 theObj = it.next();
-                
+
                 if(theObj instanceof Group) {
                     groupCount++;
                 } else {
                     datasetCount++;
                 }
             }
-            
+
             fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
-            
+
             new Label(detailComposite, SWT.RIGHT).setText("File Name: ");
-            
+
             new Label(detailComposite, SWT.RIGHT).setText(hObject.getName());
-            
+
             new Label(detailComposite, SWT.RIGHT).setText("File Path: ");
-            
+
             new Label(detailComposite, SWT.RIGHT).setText((new File(hObject.getFile())).getParent());
-            
+
             new Label(detailComposite, SWT.RIGHT).setText("File Type: ");
-            
+
             if (isH5) {
                 typeStr = "HDF5,  " + fileInfo;
             }
@@ -772,9 +772,9 @@ public class DefaultMetaDataView implements MetaDataView {
             else {
                 typeStr = fileInfo;
             }
-            
+
             new Label(detailComposite, SWT.RIGHT).setText(typeStr);
-            
+
             if (isH5) {
                 try {
                     libver = hObject.getFileFormat().getLibBounds();
@@ -782,11 +782,11 @@ public class DefaultMetaDataView implements MetaDataView {
                 catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                
+
                 if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
                     new Label(detailComposite, SWT.RIGHT).setText("Library version: ");
                 }
-                
+
                 String libversion = null;
                 if ((libver[0] == 0) && (libver[1] == 1))
                     libversion = "Earliest and Latest";
@@ -794,27 +794,27 @@ public class DefaultMetaDataView implements MetaDataView {
                 else {
                     libversion = "";
                 }
-                
+
                 new Label(detailComposite, SWT.RIGHT).setText(libversion);
             }
         }
         else {
             new Label(detailComposite, SWT.RIGHT).setText("Name: ");
-            
+
             new Label(detailComposite, SWT.RIGHT).setText(hObject.getName());
-            
+
             if(isH5) {
                 if (hObject.getLinkTargetObjName() != null) {
                     new Label(detailComposite, SWT.RIGHT).setText("Link To Target: ");
                 }
             }
-            
+
             new Label(detailComposite, SWT.RIGHT).setText("Path: ");
-            
+
             new Label(detailComposite, SWT.RIGHT).setText(hObject.getPath());
-            
+
             new Label(detailComposite, SWT.RIGHT).setText("Type: ");
-            
+
             if(isH5) {
                 if (hObject instanceof Group) {
                     typeStr = "HDF5 Group";
@@ -855,9 +855,9 @@ public class DefaultMetaDataView implements MetaDataView {
                     typeStr = "Compound Dataset";
                 }
             }
-            
+
             new Label(detailComposite, SWT.RIGHT).setText(typeStr);
-            
+
             // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
             if (isH4) {
                 new Label(detailComposite, SWT.RIGHT).setText("Tag, Ref:        ");
@@ -865,7 +865,7 @@ public class DefaultMetaDataView implements MetaDataView {
             else {
                 new Label(detailComposite, SWT.RIGHT).setText("Object Ref:       ");
             }
-            
+
             // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
             String oidStr = null;
             long[] OID = hObject.getOID();
@@ -875,13 +875,13 @@ public class DefaultMetaDataView implements MetaDataView {
                     oidStr += ", " + OID[i];
                 }
             }
-            
+
             if (!isRoot) {
                 new Label(detailComposite, SWT.RIGHT).setText(oidStr);
             }
         }
-        
-        
+
+
         if (hObject instanceof Group) {
             createGroupInfoComposite(composite, (Group) hObject);
         }
@@ -891,16 +891,16 @@ public class DefaultMetaDataView implements MetaDataView {
         else if (hObject instanceof Datatype) {
             createNamedDatatypeInfoComposite(composite, (Datatype) hObject);
         }
-        
+
         return composite;
     }
-    
+
     /**
      * Creates a composite used to display HDF group information.
      */
     private Composite createGroupInfoComposite(Composite parent, Group g) {
         log.trace("createGroupInfoComposite: start");
-        
+
         List<?> mlist = g.getMemberList();
         if (mlist == null) {
             return null;
@@ -910,14 +910,14 @@ public class DefaultMetaDataView implements MetaDataView {
         if (n <= 0) {
             return null;
         }
-        
+
         org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
         groupInfoGroup.setText("Group Members");
         GridLayout layout = new GridLayout(1, true);
         layout.verticalSpacing = 10;
         groupInfoGroup.setLayout(layout);
         groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
             new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n);
         }
@@ -925,7 +925,7 @@ public class DefaultMetaDataView implements MetaDataView {
             new Label(groupInfoGroup, SWT.RIGHT).setText("Number of members: " + n + " (in memory),"
                     + "" + g.getNumberOfMembersInFile() + " (in file)");
         }
-        
+
         String rowData[][] = new String[n][2];
         for (int i = 0; i < n; i++) {
             HObject theObj = (HObject) mlist.get(i);
@@ -945,72 +945,72 @@ public class DefaultMetaDataView implements MetaDataView {
             else
                 rowData[i][1] = "Unknown";
         }
-        
+
         String[] columnNames = { "Name", "Type" };
-        
+
         Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
         memberTable.setLinesVisible(true);
         memberTable.setHeaderVisible(true);
         memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         for(int i = 0; i < columnNames.length; i++) {
             TableColumn column = new TableColumn(memberTable, SWT.NONE);
             column.setText(columnNames[i]);
             column.setMoveable(false);
         }
-        
+
         for(int i = 0; i < rowData.length; i++) {
             TableItem item = new TableItem(memberTable, SWT.NONE);
             item.setText(0, rowData[i][0]);
             item.setText(1, rowData[i][1]);
         }
-        
+
         for(int i = 0; i < columnNames.length; i++) {
             memberTable.getColumn(i).pack();
         }
-        
+
         // set cell height for large fonts
         //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
         //table.setRowHeight(cellRowHeight);
-        
+
         log.trace("createGroupInfoComposite: finish");
-        
+
         return groupInfoGroup;
     }
-    
+
     /**
      * Creates a composite used to display HDF dataset information.
      */
     private Composite createDatasetInfoComposite(Composite parent, Dataset d) {
         log.trace("createDatasetInfoComposite: start");
-        
+
         if (d.getRank() <= 0) {
             d.init();
         }
-        
+
         org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
         datasetInfoGroup.setText("Dataspace and Datatype");
         GridLayout layout = new GridLayout(1, true);
         layout.verticalSpacing = 40;
         datasetInfoGroup.setLayout(layout);
         datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
-        
+
+
         // Create composite for displaying dataset dimensions, dimension size,
         // max dimension size, and data type
         Composite dimensionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
         dimensionComposite.setLayout(new GridLayout(2, false));
         dimensionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         new Label(dimensionComposite, SWT.RIGHT).setText("No. of Dimension(s): ");
-        
+
         Text text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
         text.setText("" + d.getRank());
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         new Label(dimensionComposite, SWT.RIGHT).setText("Dimension Size(s): ");
-        
+
         // Set Dimension Size
         String dimStr = null;
         String maxDimStr = null;
@@ -1056,22 +1056,23 @@ public class DefaultMetaDataView implements MetaDataView {
 
         text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
-        text.setText(dimStr);
+        text.setText((dimStr == null) ? "null" : dimStr);
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         new Label(dimensionComposite, SWT.RIGHT).setText("Max Dimension Size(s): ");
-        
+
         text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
-        text.setText(maxDimStr);
+        text.setText((maxDimStr == null) ? "null" : maxDimStr);
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         new Label(dimensionComposite, SWT.RIGHT).setText("Data Type: ");
-        
+
         String typeStr = null;
         if (d instanceof ScalarDS) {
             ScalarDS sd = (ScalarDS) d;
-            typeStr = sd.getDatatype().getDatatypeDescription();
+            Datatype t = sd.getDatatype();
+            typeStr = (t == null) ? "null" : t.getDatatypeDescription();
         }
         else if (d instanceof CompoundDS) {
             if (isH4) {
@@ -1081,13 +1082,13 @@ public class DefaultMetaDataView implements MetaDataView {
                 typeStr = "Compound";
             }
         }
-        
+
         text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
         text.setText(typeStr);
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
-        
+
+
         // Create composite for possible compound dataset info
         if (d instanceof CompoundDS) {
             CompoundDS compound = (CompoundDS) d;
@@ -1117,49 +1118,49 @@ public class DefaultMetaDataView implements MetaDataView {
                         }
                         rowData[i][2] = mStr;
                     }
-                    rowData[i][1] = types[i].getDatatypeDescription();
+                    rowData[i][1] = (types[i] == null) ? "null" : types[i].getDatatypeDescription();
                 }
 
                 String[] columnNames = { "Name", "Type", "Array Size" };
-                
+
                 Table memberTable = new Table(datasetInfoGroup, SWT.BORDER);
                 memberTable.setLinesVisible(true);
                 memberTable.setHeaderVisible(true);
                 memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-                
+
                 for(int i = 0; i < columnNames.length; i++) {
                     TableColumn column = new TableColumn(memberTable, SWT.NONE);
                     column.setText(columnNames[i]);
                     column.setMoveable(false);
                 }
-                
+
                 for(int i = 0; i < rowData.length; i++) {
                     TableItem item = new TableItem(memberTable, SWT.NONE);
                     item.setText(0, rowData[i][0]);
                     item.setText(1, rowData[i][1]);
                     item.setText(2, rowData[i][2]);
                 }
-                
+
                 for(int i = 0; i < columnNames.length; i++) {
                     memberTable.getColumn(i).pack();
                 }
-                
+
                 // set cell height for large fonts
                 //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
                 //table.setRowHeight(cellRowHeight);
             } // if (n > 0)
         } // if (d instanceof Compound)
-        
-        
+
+
         // Create composite for displaying dataset chunking, compression, filters,
         // storage type, and fill value
         Composite compressionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
         compressionComposite.setLayout(new GridLayout(2, false));
         compressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         // Add compression and data layout information
         new Label(compressionComposite, SWT.RIGHT).setText("Chunking: ");
-        
+
         // try { d.getMetadata(); } catch (Exception ex) {}
         String chunkInfo = "";
         long[] chunks = d.getChunkSize();
@@ -1173,23 +1174,23 @@ public class DefaultMetaDataView implements MetaDataView {
                 chunkInfo += " X " + chunks[i];
             }
         }
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText(chunkInfo);
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText("Compression: ");
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText(d.getCompression());
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText("Filters: ");
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText(d.getFilters());
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText("Storage: ");
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText(d.getStorage());
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText("Fill value: ");
-        
+
         Object fillValue = null;
         String fillValueInfo = "NONE";
         if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
@@ -1205,37 +1206,37 @@ public class DefaultMetaDataView implements MetaDataView {
             else
                 fillValueInfo = fillValue.toString();
         }
-        
+
         new Label(compressionComposite, SWT.RIGHT).setText(fillValueInfo);
-        
+
         log.trace("createDatasetInfoComposite: finish");
-        
+
         return datasetInfoGroup;
     }
-    
+
     private Composite createNamedDatatypeInfoComposite(Composite parent, Datatype t) {
         log.trace("createNamedDatatypeInfoComposite: start");
-        
+
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new FillLayout());
         composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         Text infoArea = new Text(composite, SWT.MULTI);
-        
+
         infoArea.setText(t.getDatatypeDescription());
         infoArea.setEditable(false);
-        
+
         log.trace("createNamedDatatypeInfoComposite: finish");
-        
+
         return composite;
     }
-    
+
     private Composite createAttributesComposite(TabFolder folder) {
         log.trace("createAttributesComposite: start");
-        
+
         List<?> attrList = null;
         FileFormat theFile = hObject.getFileFormat();
-        
+
         try {
             attrList = hObject.getMetadata();
         }
@@ -1245,25 +1246,25 @@ public class DefaultMetaDataView implements MetaDataView {
         if (attrList != null) {
             numAttributes = attrList.size();
         }
-        
+
         log.trace("createAttributesComposite:  isH5={} numAttributes={}", isH5, numAttributes);
-        
+
         Composite composite = new Composite(folder, SWT.NONE);
         composite.setLayout(new GridLayout(4, false));
-        
+
         attrNumberLabel = new Label(composite, SWT.RIGHT);
         attrNumberLabel.setFont(curFont);
         attrNumberLabel.setText("Number of attributes = 0");
-        
+
         // Add dummy labels
         Label dummyLabel = new Label(composite, SWT.RIGHT);
         dummyLabel.setFont(curFont);
         dummyLabel.setText("");
-        
+
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
         if (isH4) data.horizontalSpan = 2; // Delete button doesn't show for HDF4 files
         dummyLabel.setLayoutData(data);
-        
+
         Button addButton = new Button(composite, SWT.PUSH);
         addButton.setFont(curFont);
         addButton.setText("  &Add  ");
@@ -1274,7 +1275,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 addAttribute(hObject);
             }
         });
-        
+
         // deleting is not supported by HDF4
         if(isH5) {
             Button delButton = new Button(composite, SWT.PUSH);
@@ -1288,50 +1289,50 @@ public class DefaultMetaDataView implements MetaDataView {
                 }
             });
         }
-        
-        
+
+
         SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
-        
+
         String[] columnNames = { "Name", "Value", "Type", "Array Size" };
-        
+
         attrTable = new Table(sashForm, SWT.FULL_SELECTION | SWT.BORDER);
         attrTable.setLinesVisible(true);
         attrTable.setHeaderVisible(true);
         attrTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         attrTable.setFont(curFont);
-        
+
         // Only allow editing of attribute name and value
         attrTable.addListener(SWT.MouseDoubleClick, attrTableCellEditor);
-        
+
         attrTable.addListener(SWT.MouseDown, new Listener() {
             public void handleEvent(Event e) {
                 Point location = new Point(e.x, e.y);
                 TableItem item = attrTable.getItem(location);
-                
+
                 if(item == null) return;
-                
+
                 for(int i = 0; i < attrTable.getColumnCount(); i++) {
                     Rectangle rect = item.getBounds(i);
-                    
+
                     if(rect.contains(location)) {
                         attrContentArea.setText(item.getText(i));
                     }
                 }
             }
         });
-        
+
         for(int i = 0; i < columnNames.length; i++) {
             TableColumn column = new TableColumn(attrTable, SWT.NONE);
             column.setText(columnNames[i]);
             column.setMoveable(false);
         }
-        
+
         if (attrList == null) {
             log.trace("createAttributesComposite:  attrList == null");
         } else {
             attrNumberLabel.setText("Number of attributes = " + numAttributes);
-            
+
             Attribute attr = null;
             String name, type, size;
             for (int i = 0; i < numAttributes; i++) {
@@ -1350,7 +1351,7 @@ public class DefaultMetaDataView implements MetaDataView {
                         size += " x " + dims[j];
                     }
                 }
-                
+
                 TableItem item = new TableItem(attrTable, SWT.NONE);
                 item.setFont(curFont);
 
@@ -1360,50 +1361,50 @@ public class DefaultMetaDataView implements MetaDataView {
                 } else {
                     item.setText(0, name);
                 }
-                
+
                 item.setText(1, attr.toString(", "));
                 item.setText(2, type);
                 item.setText(3, size);
             } // for (int i=0; i<n; i++)
         }
-        
+
         for(int i = 0; i < columnNames.length; i++) {
             attrTable.getColumn(i).pack();
         }
-        
+
         // set cell height for large fonts
         //int cellRowHeight = Math.max(16, attrTable.getFontMetrics(attrTable.getFont()).getHeight());
         //attrTable.setRowHeight(cellRowHeight);
-        
+
         attrContentArea = new Text(sashForm, SWT.MULTI | SWT.BORDER);
         attrContentArea.setEditable(false);
         attrContentArea.setFont(curFont);
-        
-        
+
+
         sashForm.setWeights(new int[] {1, 2});
-        
+
         log.trace("createAttributesComposite: finish");
-        
+
         return composite;
     }
-    
+
     /**
      * Creates a panel used to display HDF5 user block.
      */
     private Composite createUserBlockComposite(TabFolder folder) {
         log.trace("createUserBlockComposite: start");
-        
+
         userBlock = Tools.getHDF5UserBlock(hObject.getFile());
-        
+
         Composite composite = new Composite(folder, SWT.NONE);
         composite.setLayout(new GridLayout(5, false));
-        
+
         Label label = new Label(composite, SWT.RIGHT);
         label.setFont(curFont);
         label.setText("Display As: ");
-        
+
         String[] displayChoices = { "Text", "Binary", "Octal", "Hexadecimal", "Decimal" };
-        
+
         Combo userBlockDisplayChoice = new Combo(composite, SWT.SINGLE | SWT.READ_ONLY);
         userBlockDisplayChoice.setFont(curFont);
         userBlockDisplayChoice.setItems(displayChoices);
@@ -1412,9 +1413,9 @@ public class DefaultMetaDataView implements MetaDataView {
             public void widgetSelected(SelectionEvent e) {
                 Combo source = (Combo) e.widget;
                 int type = 0;
-                
+
                 String typeName = (String) source.getItem(source.getSelectionIndex());
-                
+
                 jamButton.setEnabled(false);
                 userBlockArea.setEditable(false);
 
@@ -1439,16 +1440,16 @@ public class DefaultMetaDataView implements MetaDataView {
                 showUserBlockAs(type);
             }
         });
-        
+
         Label dummyLabel = new Label(composite, SWT.RIGHT);
         dummyLabel.setFont(curFont);
         dummyLabel.setText("");
         dummyLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         Label sizeLabel = new Label(composite, SWT.RIGHT);
         sizeLabel.setFont(curFont);
         sizeLabel.setText("Header Size (Bytes): 0");
-        
+
         jamButton = new Button(composite, SWT.PUSH);
         jamButton.setFont(curFont);
         jamButton.setText("Save User Block");
@@ -1458,17 +1459,17 @@ public class DefaultMetaDataView implements MetaDataView {
                 writeUserBlock();
             }
         });
-        
+
         ScrolledComposite userBlockScroller = new ScrolledComposite(composite, SWT.V_SCROLL | SWT.BORDER);
         userBlockScroller.setExpandHorizontal(true);
         userBlockScroller.setExpandVertical(true);
         userBlockScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
-        
+
         userBlockArea = new Text(userBlockScroller, SWT.MULTI | SWT.WRAP);
         userBlockArea.setEditable(true);
         userBlockArea.setFont(curFont);
         userBlockScroller.setContent(userBlockArea);
-        
+
         int headSize = 0;
         if (userBlock != null) {
             headSize = showUserBlockAs(0);
@@ -1477,12 +1478,12 @@ public class DefaultMetaDataView implements MetaDataView {
         else {
             userBlockDisplayChoice.setEnabled(false);
         }
-        
+
         log.trace("createUserBlockComposite: finish");
-        
+
         return composite;
     }
-    
+
     // Listener to allow user to only change attribute name or value
     private Listener attrTableCellEditor = new Listener() {
         public void handleEvent(Event event) {
@@ -1492,7 +1493,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
             Rectangle clientArea = attrTable.getClientArea();
             Point pt = new Point(event.x, event.y);
-            
+
             int index = attrTable.getTopIndex();
 
             while (index < attrTable.getItemCount()) {
@@ -1507,10 +1508,10 @@ public class DefaultMetaDataView implements MetaDataView {
                             // Only attribute value and name can be changed
                             return;
                         }
-                        
+
                         final int column = i;
                         final int row = index;
-                        
+
                         final Text text = new Text(attrTable, SWT.NONE);
                         text.setFont(curFont);
 
@@ -1536,7 +1537,7 @@ public class DefaultMetaDataView implements MetaDataView {
                                 }
                             }
                         };
-                        
+
                         text.addListener(SWT.FocusOut, textListener);
                         text.addListener(SWT.Traverse, textListener);
                         editor.setEditor(text, item, i);
@@ -1544,16 +1545,16 @@ public class DefaultMetaDataView implements MetaDataView {
                         text.selectAll();
                         text.setFocus();
                         return;
-                        
+
                     }
-                    
+
                     if (!visible && rect.intersects(clientArea)) {
                         visible = true;
                     }
                 }
-                
+
                 if (!visible) return;
-                
+
                 index++;
             }
         }

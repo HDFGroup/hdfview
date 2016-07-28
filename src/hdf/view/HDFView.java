@@ -1687,7 +1687,7 @@ public class HDFView implements ViewManager {
             text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(currentFont);
-            text.setText(dimStr);
+            text.setText((dimStr == null) ? "null" : dimStr);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(dimensionComposite, SWT.LEFT);
@@ -1697,7 +1697,7 @@ public class HDFView implements ViewManager {
             text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(currentFont);
-            text.setText(maxDimStr);
+            text.setText((maxDimStr == null) ? "null" : maxDimStr);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(dimensionComposite, SWT.LEFT);
@@ -1707,7 +1707,8 @@ public class HDFView implements ViewManager {
             String type = null;
             if (d instanceof ScalarDS) {
                 ScalarDS sd = (ScalarDS) d;
-                type = sd.getDatatype().getDatatypeDescription();
+                Datatype t = sd.getDatatype();
+                type = (t == null) ? "null" : t.getDatatypeDescription();
             }
             else if (d instanceof CompoundDS) {
                 if (isH4) {
@@ -1760,7 +1761,7 @@ public class HDFView implements ViewManager {
                             }
                             rowData[i][2] = mStr;
                         }
-                        rowData[i][1] = types[i].getDatatypeDescription();
+                        rowData[i][1] = (types[i] == null) ? "null" : types[i].getDatatypeDescription();
                     }
 
                     String[] columnNames = { "Name", "Type", "Array Size" };

@@ -367,6 +367,11 @@ public class DefaultTableView implements TableView {
         long[] dims = dataset.getDims();
         long tsize = 1;
 
+        if (dims == null) {
+            Tools.showError(shell, "Could not open dataset '" + dataset.getName() + "'. Dataset has null dimensions.", shell.getText());
+            return;
+        }
+
         for (int i = 0; i < dims.length; i++)
             tsize *= dims[i];
 
