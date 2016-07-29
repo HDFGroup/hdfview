@@ -289,61 +289,80 @@ public class Chart extends Dialog {
 
     /** The canvas that paints the data lines. */
     private class ChartCanvas extends Canvas {
+        // Value controlling gap between the sides of the canvas
+        // and the drawn elements
+        private final int gap = 20;
+
+        private int legendWidth = 0;
+        private int legendHeight = 0;
+        private final int LEGEND_LINE_GAP = 30;
+
         public ChartCanvas(Composite parent, int style) {
             super(parent, style | SWT.BORDER);
 
+            if ((chartStyle == LINEPLOT) && (lineLabels != null)) {
+                legendWidth = 60;
+                legendHeight = (2 * LEGEND_LINE_GAP) + (numberOfLines * LEGEND_LINE_GAP);
+            }
+
             this.addPaintListener(new PaintListener() {
                 public void paintControl(PaintEvent e) {
+                    if (numberOfLines <= 0) return;
+
                     // Get the graphics context for this paint event
                     GC g = e.gc;
 
                     //TODO: Update Chart to handle large fonts
                     //g.setFont(curFont);
 
-                    if (numberOfLines <= 0) {
-                        return; // no data
-                    }
+                    Rectangle p = getClientArea();
 
-                    Point p = getSize();
-                    int gap = 20;
-                    int xgap = 2 * gap;
-                    int ygap = 2 * gap;
-                    int legendSpace = 0;
-                    if ((chartStyle == LINEPLOT) && (lineLabels != null)) {
-                        legendSpace = 60;
-                    }
+                    // Calculate maximum width needed to draw the y-axis labels
+                    int maxYLabelWidth = g.stringExtent(String.valueOf(ymax)).x;
 
-                    int h = p.y - gap;
-                    int w = p.x - (3 * gap + legendSpace);
+                    // Calculate maximum height needed to draw the x-axis labels
+                    int maxXLabelHeight = g.stringExtent(String.valueOf(xmin)).y;
+
+                    int xgap = maxYLabelWidth + gap;
+                    int ygap = p.height - maxXLabelHeight - gap - 1;
+                    int plotHeight = p.height - gap;
+                    int plotWidth = p.width - (legendWidth - maxYLabelWidth - (3 * gap) - gap);
                     int xnpoints = Math.min(10, numberOfPoints - 1);
                     int ynpoints = 10;
 
                     // draw the X axis
-                    g.drawLine(xgap, h, w + xgap, h);
+                    g.drawLine(xgap, ygap, p.width - legendWidth - (2 * gap), ygap);
 
                     // draw the Y axis
-                    g.drawLine(ygap, h, ygap, 0);
+                    g.drawLine(xgap, ygap, xgap, 0);
 
                     // draw x labels
                     double xp = 0, x = xmin;
-                    double dw = (double) w / (double) xnpoints;
+                    double dw = (double) plotWidth / (double) xnpoints;
                     double dx = (xmax - xmin) / xnpoints;
                     boolean gtOne = (dx >= 1);
                     for (int i = 0; i <= xnpoints; i++) {
                         x = xmin + i * dx;
                         xp = xgap + i * dw;
-                        g.drawLine((int) xp, h, (int) xp, h - 5);
+
+                        // Draw a tick mark
+                        g.drawLine((int) xp, ygap, (int) xp, ygap - 5);
+
                         if (gtOne) {
-                            g.drawString(String.valueOf((int) x), (int) xp - 5, h + gap);
+                            String value = String.valueOf((int) x);
+                            Point numberSize = g.stringExtent(value);
+                            g.drawString(value, (int) xp - (numberSize.x / 2), p.height - numberSize.y);
                         }
                         else {
-                            g.drawString(String.valueOf(x), (int) xp - 5, h + gap);
+                            String value = String.valueOf(x);
+                            Point numberSize = g.stringExtent(value);
+                            g.drawString(value, (int) xp - (numberSize.x / 2), p.height - numberSize.y);
                         }
                     }
 
                     // draw y labels
                     double yp = 0, y = ymin;
-                    double dh = (double) h / (double) ynpoints;
+                    double dh = (double) plotHeight / (double) ynpoints;
                     double dy = (ymax - ymin) / (ynpoints);
                     if (dy > 1) {
                         dy = Math.round(dy * 10.0) / 10.0;
@@ -351,26 +370,33 @@ public class Chart extends Dialog {
                     for (int i = 0; i <= ynpoints; i++) {
                         yp = i * dh;
                         y = i * dy + ymin;
-                        g.drawLine(ygap, h - (int) yp, ygap + 5, h - (int) yp);
+
+                        // Draw a tick mark
+                        g.drawLine(xgap, ygap - (int) yp, xgap + 5, ygap - (int) yp);
+
                         if (isInteger) {
-                            g.drawString(String.valueOf((int) y), 0, h - (int) yp + 8);
+                            String value = String.valueOf((int) y);
+                            Point numberSize = g.stringExtent(value);
+                            g.drawString(value, 0, ygap - (int) yp - (numberSize.y / 2));
                         }
                         else {
-                            g.drawString(format.format(y), 0, h - (int) yp + 8);
+                            String value = format.format(y);
+                            Point numberSize = g.stringExtent(value);
+                            g.drawString(value, 0, ygap - (int) yp - (numberSize.y / 2));
                         }
                     }
 
                     Color c = g.getForeground();
                     double x0, y0, x1, y1;
                     if (chartStyle == LINEPLOT) {
-                        dw = (double) w / (double) (numberOfPoints - 1);
+                        dw = (double) plotWidth / (double) (numberOfPoints - 1);
 
                         // use y = a + b* x to calculate pixel positions
-                        double b = h / (ymin - ymax);
+                        double b = plotHeight / (ymin - ymax);
                         double a = -b * ymax;
                         boolean hasXdata = ((xData != null) && (xData.length >= numberOfPoints));
-                        double xRatio = (1 / (xmax - xmin)) * w;
-                        double xD = (xmin / (xmax - xmin)) * w;
+                        double xRatio = (1 / (xmax - xmin)) * plotWidth;
+                        double xD = (xmin / (xmax - xmin)) * plotWidth;
 
                         // draw lines for selected spreadsheet columns
                         for (int i = 0; i < numberOfLines; i++) {
@@ -407,9 +433,10 @@ public class Chart extends Dialog {
                             // draw line legend
                             if ((lineLabels != null)
                                     && (lineLabels.length >= numberOfLines)) {
-                                x0 = w + legendSpace;
-                                y0 = gap + gap * i;
-                                g.drawLine((int) x0, (int) y0, (int) x0 + 7, (int) y0);
+                                int lineWidth = 10;
+                                x0 = p.width - gap - (legendWidth / 2) - (lineWidth / 2);
+                                y0 = gap + LEGEND_LINE_GAP * (i + 1);
+                                g.drawLine((int) x0, (int) y0, (int) x0 + lineWidth, (int) y0);
                                 g.drawString(lineLabels[i], (int) x0 + 10, (int) y0 + 3);
                             }
                         }
@@ -419,24 +446,24 @@ public class Chart extends Dialog {
                         // draw a box on the legend
                         if ((lineLabels != null)
                                 && (lineLabels.length >= numberOfLines)) {
-                            g.drawRectangle(w + legendSpace - 10, 10, legendSpace, 10 * gap);
+                            g.drawRectangle(p.width - legendWidth - gap, gap, legendWidth, legendHeight);
                         }
-
                     } // if (chartStyle == LINEPLOT)
                     else if (chartStyle == HISTOGRAM) {
                         // draw histogram for selected image area
                         xp = xgap;
                         yp = 0;
                         g.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
-                        int barWidth = w / numberOfPoints;
+                        int barWidth = plotWidth / numberOfPoints;
                         if (barWidth <= 0) {
                             barWidth = 1;
                         }
-                        dw = (double) w / (double) numberOfPoints;
+                        dw = (double) plotWidth / (double) numberOfPoints;
                         for (int j = 0; j < numberOfPoints; j++) {
                             xp = xgap + j * dw;
-                            yp = (int) (h * (data[0][j] - ymin) / (ymax - ymin));
-                            g.fillRectangle((int) xp, (int) (h - yp), barWidth, (int) yp);
+                            yp = (int) (plotHeight * (data[0][j] - ymin) / (ymax - ymin));
+                            System.out.println(yp);
+                            g.fillRectangle((int) xp, (int) (ygap - yp), barWidth, (int) yp);
                         }
 
                         g.setBackground(c); // set the color back to its default
