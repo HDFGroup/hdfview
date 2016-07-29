@@ -50,6 +50,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
@@ -124,7 +125,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -139,6 +139,7 @@ import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
+import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
@@ -232,9 +233,6 @@ public class DefaultTableView implements TableView {
      * Global variables for GUI components
      */
 
-    // Menubar for Table
-    private Menu                            menuBar;
-
     private MenuItem                        checkFixedDataLength = null;
     private MenuItem                        checkCustomNotation = null;
     private MenuItem                        checkScientificNotation = null;
@@ -242,7 +240,7 @@ public class DefaultTableView implements TableView {
     private MenuItem                        checkBin = null;
 
     // Labeled Group to display the index base
-    private Group                           group;
+    private org.eclipse.swt.widgets.Group   group;
 
     // Text field to display the value of the current cell.
     private Text                            cellValueField;
@@ -272,6 +270,7 @@ public class DefaultTableView implements TableView {
      *          data as character, applying bitmask, and etc. Predefined keys are listed at
      *          ViewProperties.DATA_VIEW_KEY.
      */
+    @SuppressWarnings("rawtypes")
     public DefaultTableView(ViewManager theView, HashMap map) {
         log.trace("DefaultTableView start");
 
@@ -421,7 +420,7 @@ public class DefaultTableView implements TableView {
         bar.setSize(shell.getSize().x, 30);
         bar.setLocation(0, 0);
 
-        group = new Group(shell, SWT.SHADOW_ETCHED_OUT);
+        group = new org.eclipse.swt.widgets.Group(shell, SWT.SHADOW_ETCHED_OUT);
         group.setFont(curFont);
         group.setText(indexBase + "-based");
         group.setLayout(new GridLayout(1, true));
@@ -454,7 +453,7 @@ public class DefaultTableView implements TableView {
             shell.setImage(ViewProperties.getTableIcon());
             table = createTable(content, (CompoundDS) dataset);
 
-            shell.setMenuBar(menuBar = createMenuBar());
+            shell.setMenuBar(createMenuBar());
         }
         else { /* if (dataset instanceof ScalarDS) */
             log.trace("createTable((ScalarDS) dataset): dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
@@ -476,7 +475,7 @@ public class DefaultTableView implements TableView {
              * calls like checkHex.setSelection() will throw null pointers, since the "Show Hexadecimal"
              * MenuItem will not have been initialized at that point.
              */
-            shell.setMenuBar(menuBar = createMenuBar());
+            shell.setMenuBar(createMenuBar());
 
             if ((dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) || (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE)) {
                 showAsHex = true;
@@ -1076,27 +1075,20 @@ public class DefaultTableView implements TableView {
                     return;
                 }
 
-                // TODO
-                /*
                 TreeView treeView = viewer.getTreeView();
-                TreeNode node = viewer.getTreeView().findTreeNode(dataset);
-                Group pGroup = (Group) ((DefaultMutableTreeNode) node.getParent()).getUserObject();
-                TreeNode root = dataset.getFileFormat().getRootNode();
+                Group pGroup = (Group) (treeView.findTreeItem(dataset).getParentItem().getData());
+                HObject root = dataset.getFileFormat().getRootObject();
 
-                if (root == null) {
-                    return;
-                }
+                if (root == null) return;
 
-                Vector<Object> list = new Vector<Object>(dataset.getFileFormat().getNumberOfMembers() + 5);
-                DefaultMutableTreeNode theNode = null;
-                Enumeration<?> local_enum = ((DefaultMutableTreeNode) root).depthFirstEnumeration();
-                while (local_enum.hasMoreElements()) {
-                    theNode = (DefaultMutableTreeNode) local_enum.nextElement();
-                    list.add(theNode.getUserObject());
-                }
+                Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
+                Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
 
-                NewDatasetDialog dialog = new NewDatasetDialog((JFrame) viewer, pGroup, list, this);
-                dialog.setVisible(true);
+                while(it.hasNext()) list.add(it.next());
+                list.add(root);
+
+                NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, DefaultTableView.this);
+                dialog.open();
 
                 HObject obj = (HObject) dialog.getObject();
                 if (obj != null) {
@@ -1110,7 +1102,6 @@ public class DefaultTableView implements TableView {
                 }
 
                 list.setSize(0);
-                 */
             }
         });
 

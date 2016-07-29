@@ -147,7 +147,6 @@ public class DefaultTreeView implements TreeView {
     private Menu                          newObjectMenu;
     private Menu                          exportDatasetMenu;
 
-    private MenuItem                      separator;
     private MenuItem                      addDatasetMenuItem;
     private MenuItem                      exportDatasetMenuItem;
     private MenuItem                      addTableMenuItem;
@@ -461,7 +460,7 @@ public class DefaultTreeView implements TreeView {
 
                 // Process any remaining SetData events and then allow
                 // the tree to redraw once all are finished
-                while(tree.getDisplay().readAndDispatch());
+//                while(tree.getDisplay().readAndDispatch());
 
                 tree.setRedraw(true);
             }
@@ -844,7 +843,7 @@ public class DefaultTreeView implements TreeView {
             }
         });
 
-        separator = new MenuItem(menu, SWT.SEPARATOR);
+        new MenuItem(menu, SWT.SEPARATOR);
 
         setLibVerBoundsItem = new MenuItem(menu, SWT.NONE);
         setLibVerBoundsItem.setText("Set Lib version bounds");
@@ -1761,46 +1760,6 @@ public class DefaultTreeView implements TreeView {
         }
 
         return isOpen;
-    }
-
-    /**
-     * Returns the number of items in the tree, since tree.getItemCount()
-     * only returns the number of top-level objects.
-     */
-    private int getAllItemCount() {
-        // Consider different way of doing this
-        return getAllItemsBreadthFirst().size();
-    }
-
-    /**
-     * Returns a list that lists all TreeItems in the
-     * current Tree in a breadth-first manner.
-     * @return
-     */
-    private ArrayList<TreeItem> getAllItemsBreadthFirst() {
-        //if(breadthFirstItems != null) return breadthFirstItems;
-
-        ArrayList<TreeItem> allItems = new ArrayList<TreeItem>();
-        Queue<TreeItem> currentChildren = new LinkedList<TreeItem>();
-        TreeItem currentItem = null;
-
-        // Add all root items in the Tree to a Queue
-        currentChildren.addAll(Arrays.asList(tree.getItems()));
-
-        // For every item in the queue, remove it from the head of the queue,
-        // add it to the list of all items, then add all of its possible children
-        // TreeItems to the end of the queue. This produces a breadth-first
-        // ordering of the Tree's TreeItems.
-        while(!currentChildren.isEmpty()) {
-            currentItem = currentChildren.remove();
-            allItems.add(currentItem);
-
-            if(currentItem.getItemCount() <= 0) continue;
-
-            currentChildren.addAll(Arrays.asList(currentItem.getItems()));
-        }
-
-        return allItems;
     }
 
     /**
