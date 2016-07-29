@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -83,7 +84,7 @@ public class DefaultMetaDataView implements MetaDataView {
     /** The HDF data object */
     private HObject                    hObject;
 
-    private Text                       attrContentArea;
+    private StyledText                 attrContentArea;
     private Table                      attrTable; // table to hold a list of attributes
     private Label                      attrNumberLabel;
     private int                        numAttributes;
@@ -185,18 +186,11 @@ public class DefaultMetaDataView implements MetaDataView {
         });
 
 
-        log.trace("DefaultMetaDataView: finish");
-
-        shell.pack();
-
-//        shell.setMinimumSize(new Point(500, 500));
-//        shell.setSize(minimumSize.x / 2, minimumSize.y / 2);
-
-//        Point shellSize = shell.getSize();
-//        shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-//                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+//        shell.pack();
 
         viewer.addDataView(this);
+
+        log.trace("DefaultMetaDataView: finish");
 
         shell.open();
     }
@@ -1294,7 +1288,6 @@ public class DefaultMetaDataView implements MetaDataView {
         attrTable = new Table(sashForm, SWT.FULL_SELECTION | SWT.BORDER);
         attrTable.setLinesVisible(true);
         attrTable.setHeaderVisible(true);
-        attrTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         attrTable.setFont(curFont);
 
         // Only allow editing of attribute name and value
@@ -1367,14 +1360,18 @@ public class DefaultMetaDataView implements MetaDataView {
             attrTable.getColumn(i).pack();
         }
 
+        // Prevent attributes with many values, such as array types, from making
+        // the window too wide
+        attrTable.getColumn(1).setWidth(400);
+
         // set cell height for large fonts
         //int cellRowHeight = Math.max(16, attrTable.getFontMetrics(attrTable.getFont()).getHeight());
         //attrTable.setRowHeight(cellRowHeight);
 
-        attrContentArea = new Text(sashForm, SWT.MULTI | SWT.BORDER);
+        attrContentArea = new StyledText(sashForm, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
         attrContentArea.setEditable(false);
+        attrContentArea.setAlwaysShowScrollBars(false);
         attrContentArea.setFont(curFont);
-
 
         sashForm.setWeights(new int[] {1, 2});
 
