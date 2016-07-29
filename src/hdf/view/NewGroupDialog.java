@@ -268,6 +268,11 @@ public class NewGroupDialog extends Dialog {
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
+
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed())
+            if (!display.readAndDispatch())
+                display.sleep();
     }
 
     private HObject create() {
