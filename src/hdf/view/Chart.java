@@ -27,14 +27,18 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -51,6 +55,8 @@ public class Chart extends Dialog {
     private Font                        curFont;
 
     private String                      windowTitle;
+
+    private Color                       barColor;
 
     /** histogram style chart */
     public static final int             HISTOGRAM = 0;
@@ -148,6 +154,7 @@ public class Chart extends Dialog {
 
         if (style == HISTOGRAM) {
             isInteger = true;
+            barColor = new Color(Display.getDefault(), new RGB(0, 0, 255));
         }
         else {
             isInteger = false;
@@ -205,9 +212,12 @@ public class Chart extends Dialog {
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
 
+        if (chartStyle == HISTOGRAM) shell.setMenuBar(createMenuBar(shell));
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
+                if (barColor != null) barColor.dispose();
             }
         });
 
@@ -244,6 +254,46 @@ public class Chart extends Dialog {
                 (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
+    }
+
+    private Menu createMenuBar(Shell parent) {
+        Menu menu = new Menu(parent, SWT.BAR);
+
+        MenuItem item = new MenuItem(menu, SWT.CASCADE);
+        item.setText("Histogram");
+
+        Menu histogramMenu = new Menu(item);
+        item.setMenu(histogramMenu);
+
+        MenuItem setColor = new MenuItem(histogramMenu, SWT.PUSH);
+        setColor.setText("Change bar color");
+        setColor.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                ColorDialog dialog = new ColorDialog(shell);
+                dialog.setRGB(barColor.getRGB());
+                dialog.setText("Select a bar color");
+
+                RGB newColor = dialog.open();
+
+                if (newColor != null) {
+                    barColor.dispose();
+                    barColor = new Color(Display.getDefault(), newColor);
+                    chartP.redraw();
+                }
+            }
+        });
+
+        new MenuItem(histogramMenu, SWT.SEPARATOR);
+
+        MenuItem close = new MenuItem(histogramMenu, SWT.PUSH);
+        close.setText("Close");
+        close.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                shell.dispose();
+            }
+        });
+
+        return menu;
     }
 
     /** Sets the color of each line of a line plot
@@ -291,8 +341,11 @@ public class Chart extends Dialog {
     private class ChartCanvas extends Canvas {
         // Value controlling gap between the sides of the canvas
         // and the drawn elements
-        private final int gap = 20;
+        private final int gap = 10;
 
+        // Values controlling the dimensions of the legend for
+        // line plots, as well as the gap in between each
+        // element displayed in the legend
         private int legendWidth = 0;
         private int legendHeight = 0;
         private final int LEGEND_LINE_GAP = 30;
@@ -300,6 +353,7 @@ public class Chart extends Dialog {
         public ChartCanvas(Composite parent, int style) {
             super(parent, style | SWT.BORDER);
 
+            // Only draw the legend if the Chart type is a line plot
             if ((chartStyle == LINEPLOT) && (lineLabels != null)) {
                 legendWidth = 60;
                 legendHeight = (2 * LEGEND_LINE_GAP) + (numberOfLines * LEGEND_LINE_GAP);
@@ -315,7 +369,7 @@ public class Chart extends Dialog {
                     //TODO: Update Chart to handle large fonts
                     //g.setFont(curFont);
 
-                    Rectangle p = getClientArea();
+                    Rectangle canvasBounds = getClientArea();
 
                     // Calculate maximum width needed to draw the y-axis labels
                     int maxYLabelWidth = g.stringExtent(String.valueOf(ymax)).x;
@@ -324,17 +378,17 @@ public class Chart extends Dialog {
                     int maxXLabelHeight = g.stringExtent(String.valueOf(xmin)).y;
 
                     int xgap = maxYLabelWidth + gap;
-                    int ygap = p.height - maxXLabelHeight - gap - 1;
-                    int plotHeight = p.height - gap;
-                    int plotWidth = p.width - (legendWidth - maxYLabelWidth - (3 * gap) - gap);
+                    int ygap = canvasBounds.height - maxXLabelHeight - gap - 1;
+                    int plotHeight = ygap - gap;
+                    int plotWidth = canvasBounds.width - legendWidth - (2 * gap) - xgap;
                     int xnpoints = Math.min(10, numberOfPoints - 1);
                     int ynpoints = 10;
 
                     // draw the X axis
-                    g.drawLine(xgap, ygap, p.width - legendWidth - (2 * gap), ygap);
+                    g.drawLine(xgap, ygap, xgap + plotWidth, ygap);
 
                     // draw the Y axis
-                    g.drawLine(xgap, ygap, xgap, 0);
+                    g.drawLine(xgap, ygap, xgap, gap);
 
                     // draw x labels
                     double xp = 0, x = xmin;
@@ -351,12 +405,12 @@ public class Chart extends Dialog {
                         if (gtOne) {
                             String value = String.valueOf((int) x);
                             Point numberSize = g.stringExtent(value);
-                            g.drawString(value, (int) xp - (numberSize.x / 2), p.height - numberSize.y);
+                            g.drawString(value, (int) xp - (numberSize.x / 2), canvasBounds.height - numberSize.y);
                         }
                         else {
                             String value = String.valueOf(x);
                             Point numberSize = g.stringExtent(value);
-                            g.drawString(value, (int) xp - (numberSize.x / 2), p.height - numberSize.y);
+                            g.drawString(value, (int) xp - (numberSize.x / 2), canvasBounds.height - numberSize.y);
                         }
                     }
 
@@ -393,16 +447,15 @@ public class Chart extends Dialog {
 
                         // use y = a + b* x to calculate pixel positions
                         double b = plotHeight / (ymin - ymax);
-                        double a = -b * ymax;
+                        double a = -b * ymax + gap;
                         boolean hasXdata = ((xData != null) && (xData.length >= numberOfPoints));
                         double xRatio = (1 / (xmax - xmin)) * plotWidth;
                         double xD = (xmin / (xmax - xmin)) * plotWidth;
 
                         // draw lines for selected spreadsheet columns
                         for (int i = 0; i < numberOfLines; i++) {
-                            if ((lineColors != null)
-                                    && (lineColors.length >= numberOfLines)) {
-
+                            // Display each line with a unique color for clarity
+                            if ((lineColors != null) && (lineColors.length >= numberOfLines)) {
                                 g.setForeground(Display.getCurrent().getSystemColor(lineColors[i]));
                             }
 
@@ -431,10 +484,9 @@ public class Chart extends Dialog {
                             }
 
                             // draw line legend
-                            if ((lineLabels != null)
-                                    && (lineLabels.length >= numberOfLines)) {
+                            if ((lineLabels != null) && (lineLabels.length >= numberOfLines)) {
                                 int lineWidth = 10;
-                                x0 = p.width - gap - (legendWidth / 2) - (lineWidth / 2);
+                                x0 = canvasBounds.width - gap - (legendWidth / 2) - (lineWidth / 2);
                                 y0 = gap + LEGEND_LINE_GAP * (i + 1);
                                 g.drawLine((int) x0, (int) y0, (int) x0 + lineWidth, (int) y0);
                                 g.drawString(lineLabels[i], (int) x0 + 10, (int) y0 + 3);
@@ -446,14 +498,14 @@ public class Chart extends Dialog {
                         // draw a box on the legend
                         if ((lineLabels != null)
                                 && (lineLabels.length >= numberOfLines)) {
-                            g.drawRectangle(p.width - legendWidth - gap, gap, legendWidth, legendHeight);
+                            g.drawRectangle(canvasBounds.width - legendWidth - gap, gap, legendWidth, legendHeight);
                         }
                     } // if (chartStyle == LINEPLOT)
                     else if (chartStyle == HISTOGRAM) {
                         // draw histogram for selected image area
                         xp = xgap;
-                        yp = 0;
-                        g.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
+                        int barHeight = 0;
+                        g.setBackground(barColor);
                         int barWidth = plotWidth / numberOfPoints;
                         if (barWidth <= 0) {
                             barWidth = 1;
@@ -461,9 +513,8 @@ public class Chart extends Dialog {
                         dw = (double) plotWidth / (double) numberOfPoints;
                         for (int j = 0; j < numberOfPoints; j++) {
                             xp = xgap + j * dw;
-                            yp = (int) (plotHeight * (data[0][j] - ymin) / (ymax - ymin));
-                            System.out.println(yp);
-                            g.fillRectangle((int) xp, (int) (ygap - yp), barWidth, (int) yp);
+                            barHeight = (int) (data[0][j] * (plotHeight / (ymax - ymin)));
+                            g.fillRectangle((int) xp, (int) (ygap - barHeight), barWidth, barHeight);
                         }
 
                         g.setBackground(c); // set the color back to its default
