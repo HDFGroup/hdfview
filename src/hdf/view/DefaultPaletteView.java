@@ -26,6 +26,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -64,43 +65,40 @@ import hdf.object.ScalarDS;
  */
 public class DefaultPaletteView extends Dialog {
 
-    private Shell               shell;
+    private Shell shell;
 
-    private Font                curFont;
+    private Font curFont;
 
-    private ScalarDS            dataset;
+    private ScalarDS dataset;
 
     /** Panel that draws plot of data values. */
-    private ChartCanvas         chartP;
-    private ImageView           imageView;
-    private PaletteValueTable   paletteValueTable;
+    private ChartCanvas chartP;
+    private ImageView imageView;
+    private PaletteValueTable paletteValueTable;
 
-    private Button              checkRed, checkGreen, checkBlue;
+    private Button checkRed, checkGreen, checkBlue;
 
-    private Combo               choicePalette;
+    private Combo choicePalette;
 
-    private Image               originalImage, currentImage;
+    private Image originalImage, currentImage;
 
-    private final int[]         lineColors = { SWT.COLOR_RED, SWT.COLOR_GREEN, SWT.COLOR_BLUE };
-    private final String        lineLabels[] = { "Red", "Green", "Blue" };
+    private final int[] lineColors = { SWT.COLOR_RED, SWT.COLOR_GREEN, SWT.COLOR_BLUE };
+    private final String lineLabels[] = { "Red", "Green", "Blue" };
 
-    private static String       PALETTE_GRAY = "Gray";
-    private static String       PALETTE_DEFAULT = "Default";
-    private static String       PALETTE_REVERSE_GRAY = "Reverse Gray";
-    private static String       PALETTE_GRAY_WAVE = "GrayWave";
-    private static String       PALETTE_RAINBOW = "Rainbow";
-    private static String       PALETTE_NATURE = "Nature";
-    private static String       PALETTE_WAVE = "Wave";
+    private static String PALETTE_GRAY = "Gray";
+    private static String PALETTE_DEFAULT = "Default";
+    private static String PALETTE_REVERSE_GRAY = "Reverse Gray";
+    private static String PALETTE_GRAY_WAVE = "GrayWave";
+    private static String PALETTE_RAINBOW = "Rainbow";
+    private static String PALETTE_NATURE = "Nature";
+    private static String PALETTE_WAVE = "Wave";
 
-    private int                 x0, y0; // starting point of mouse drag
+    byte[][] palette;
+    private int numberOfPalettes;
+    private int[][] paletteData;
 
-    byte[][]                    palette;
-    private int                 numberOfPalettes;
-    private int[][]             paletteData;
-
-    boolean                     isPaletteChanged = false;
-    private boolean             isH5 = false;
-
+    boolean isPaletteChanged = false;
+    private boolean isH5 = false;
 
     public DefaultPaletteView(Shell parent, ImageView theImageView) {
         this(parent, null, theImageView);
@@ -141,12 +139,10 @@ public class DefaultPaletteView extends Dialog {
 
         imageView = theImageView;
 
-        x0 = y0 = 0;
         originalImage = currentImage = imageView.getImage();
         palette = new byte[3][256];
 
-        isH5 = dataset.getFileFormat().isThisType(
-                FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+        isH5 = dataset.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
 
         createUI();
     }
@@ -242,7 +238,7 @@ public class DefaultPaletteView extends Dialog {
                     imagePalette = ((ScalarDS) dataset).readPalette(idx - 1);
                 }
                 else {
-                    imagePalette = Tools.readPalette((String)item);
+                    imagePalette = Tools.readPalette((String) item);
                 }
 
                 if (imagePalette == null) {
@@ -269,16 +265,16 @@ public class DefaultPaletteView extends Dialog {
 
         String paletteName = ((ScalarDS) dataset).getPaletteName(0);
 
-        if (paletteName!= null)
+        if (paletteName != null)
             paletteName = paletteName.trim();
 
-        if (paletteName!= null && paletteName.length()>0)
+        if (paletteName != null && paletteName.length() > 0)
             choicePalette.add(paletteName);
 
         if (isH5 && (dataset instanceof ScalarDS)) {
             byte[] palRefs = ((ScalarDS) dataset).getPaletteRefs();
             if ((palRefs != null) && (palRefs.length > 8)) {
-              numberOfPalettes = palRefs.length / 8;
+                numberOfPalettes = palRefs.length / 8;
             }
         }
         for (int i = 1; i < numberOfPalettes; i++) {
@@ -356,7 +352,8 @@ public class DefaultPaletteView extends Dialog {
 
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
@@ -402,12 +399,11 @@ public class DefaultPaletteView extends Dialog {
         }
 
         if (memoryImageSource == null) {
-            memoryImageSource = new MemoryImageSource((int)w, (int)h, colorModel,
-                    imageView.getImageByteData(), 0, (int)w);
+            memoryImageSource = new MemoryImageSource((int) w, (int) h, colorModel, imageView.getImageByteData(), 0,
+                    (int) w);
         }
         else {
-            memoryImageSource.newPixels(imageView.getImageByteData(),
-                    colorModel, 0, (int)w);
+            memoryImageSource.newPixels(imageView.getImageByteData(), colorModel, 0, (int) w);
         }
 
         currentImage = Tools.toBufferedImage(Toolkit.getDefaultToolkit().createImage(memoryImageSource));
@@ -419,6 +415,12 @@ public class DefaultPaletteView extends Dialog {
         // and the drawn elements
         private final int gap = 20;
 
+        private int xgap = 0;
+        private int ygap = 0;
+
+        private int plotWidth = 0;
+        private int plotHeight = 0;
+
         private final int LEGEND_LINE_WIDTH = 10;
         private final int LEGEND_LINE_GAP = 30;
 
@@ -429,6 +431,8 @@ public class DefaultPaletteView extends Dialog {
         private final int LEGEND_HEIGHT = (5 * LEGEND_LINE_GAP);
 
         private final int PALETTE_MAX = 255;
+
+        private int dragX0, dragY0; // starting point of mouse drag
 
         public ChartCanvas(Composite parent, int style) {
             super(parent, style);
@@ -445,22 +449,23 @@ public class DefaultPaletteView extends Dialog {
                     Rectangle canvasBounds = getClientArea();
                     org.eclipse.swt.graphics.Color c = g.getForeground();
 
-                    // Calculate maximum width needed to draw the y-axis labels
-                    int maxYLabelWidth = g.stringExtent(String.valueOf(PALETTE_MAX)).x;
-
-                    // Calculate maximum height needed to draw the x-axis labels
-                    int maxXLabelHeight = g.stringExtent(String.valueOf(PALETTE_MAX)).y;
-
                     // Make sure legend width scales with font size
                     for (int i = 0; i < lineLabels.length; i++) {
                         int width = g.stringExtent(lineLabels[i]).x;
-                        if (width > (2 * LEGEND_WIDTH / 3) - 10) LEGEND_WIDTH += width;
+                        if (width > (2 * LEGEND_WIDTH / 3) - 10)
+                            LEGEND_WIDTH += width;
                     }
 
-                    int xgap = maxYLabelWidth + gap;
-                    int ygap = canvasBounds.height - maxXLabelHeight - gap - 1;
-                    int plotHeight = ygap - gap;
-                    int plotWidth = canvasBounds.width - LEGEND_WIDTH - (2 * gap) - xgap;
+                    // Calculate maximum width needed to draw the y-axis labels
+                    final int maxYLabelWidth = g.stringExtent(String.valueOf(PALETTE_MAX)).x;
+
+                    // Calculate maximum height needed to draw the x-axis labels
+                    final int maxXLabelHeight = g.stringExtent(String.valueOf(PALETTE_MAX)).y;
+
+                    xgap = maxYLabelWidth + gap;
+                    ygap = getSize().y - maxXLabelHeight - gap - 1;
+                    plotHeight = ygap - gap;
+                    plotWidth = canvasBounds.width - LEGEND_WIDTH - (2 * gap) - xgap;
 
                     // draw the X axis
                     g.drawLine(xgap, ygap, xgap + plotWidth, ygap);
@@ -507,10 +512,10 @@ public class DefaultPaletteView extends Dialog {
 
                         // set up the line data for drawing one line a time
                         for (int j = 0; j < 255; j++) {
-                            x0 = (plotWidth * j / 255) + 2 * gap;
-                            y0 = (plotHeight - plotHeight * paletteData[i][j] / 255);
-                            x1 = (plotWidth * (j + 1) / 255) + 2 * gap;
-                            y1 = (plotHeight - plotHeight * (paletteData[i][j + 1]) / 255);
+                            x0 = xgap + (plotWidth * j / 255);
+                            y0 = ygap - (plotHeight * paletteData[i][j] / 255);
+                            x1 = xgap + (plotWidth * (j + 1) / 255);
+                            y1 = ygap - (plotHeight * (paletteData[i][j + 1]) / 255);
                             g.drawLine(x0, y0, x1, y1);
                         }
 
@@ -529,11 +534,74 @@ public class DefaultPaletteView extends Dialog {
                 }
             });
 
-            this.addMouseListener(new MouseAdapter() {
-                public void mouseUp(MouseEvent e) {
-                    if ((paletteValueTable != null)) {
-                        paletteValueTable.refresh();
+            //TODO: editing behavior not quite correct yet
+            this.addMouseMoveListener(new MouseMoveListener() {
+                public void mouseMove(MouseEvent e) {
+                    if ((e.stateMask & SWT.BUTTON1) != 0) {
+                        int x1 = e.x - 40;
+                        if (x1 < 0) {
+                            x1 = 0;
+                        }
+                        int y1 = e.y + 20;
+
+                        Point size = chartP.getSize();
+                        double ry = 255 / (double) size.y;
+                        double rx = 255 / (double) size.x;
+
+                        int lineIdx = 0;
+                        if (checkGreen.getSelection()) {
+                            lineIdx = 1;
+                        }
+                        else if (checkBlue.getSelection()) {
+                            lineIdx = 2;
+                        }
+
+                        int idx = 0;
+                        double b = (double) (y1 - dragY0) / (double) (x1 - dragX0);
+                        double a = dragY0 - b * dragX0;
+                        double value = dragY0 * ry;
+                        int i0 = Math.min(dragX0, x1);
+                        int i1 = Math.max(dragX0, x1);
+                        for (int i = i0; i < i1; i++) {
+                            idx = (int) (rx * i);
+                            if (idx > 255) {
+                                continue;
+                            }
+                            value = 255 - (a + b * i) * ry;
+                            if (value < 0) {
+                                value = 0;
+                            }
+                            else if (value > 255) {
+                                value = 255;
+                            }
+
+                            paletteData[lineIdx][idx] = (int) value;
+                        }
+
+                        chartP.redraw();
+                        isPaletteChanged = true;
                     }
+                }
+            });
+
+            this.addMouseListener(new MouseAdapter() {
+                public void mouseDown(MouseEvent e) {
+                    // dragX0 = e.x - xgap;
+                    // dragY0 = e.y + gap;
+                    //
+                    // if (dragX0 < 0)
+                    // dragX0 = 0;
+                    // if (dragX0 > xgap + plotWidth)
+                    // dragX0 = xgap + plotWidth;
+                    // if (dragY0 < 0)
+                    // dragY0 = 0;
+                    // if (dragY0 > plotHeight + gap)
+                    // dragY0 = plotHeight + gap;
+                }
+
+                public void mouseUp(MouseEvent e) {
+                    if (paletteValueTable != null)
+                        paletteValueTable.refresh();
                 }
             });
         }
@@ -542,13 +610,13 @@ public class DefaultPaletteView extends Dialog {
     /** The dialog to show the palette values in spreadsheet. */
     private class PaletteValueTable extends Dialog {
 
-    	private Display display;
-    	private Shell tableShell;
+        private Display display;
+        private Shell tableShell;
 
-    	Table valueTable;
+        private Table valueTable;
 
-        String rgbName = "Color";
-        String idxName = "Index";
+        private final String rgbName = "Color";
+        private final String idxName = "Index";
 
         public PaletteValueTable(Shell parent, int style) {
             super(parent, style);
@@ -583,50 +651,48 @@ public class DefaultPaletteView extends Dialog {
             valueTable.addListener(SWT.MouseDoubleClick, valueTableCellEditor);
 
             valueTable.addListener(SWT.Resize, new Listener() {
-            	public void handleEvent(Event e) {
-            		int numColumns = valueTable.getColumnCount();
+                public void handleEvent(Event e) {
+                    int numColumns = valueTable.getColumnCount();
 
-            		for (int i = 0; i < numColumns; i++) {
-            			valueTable.getColumn(i).setWidth(valueTable.getClientArea().width / numColumns);
-            		}
-            	}
+                    for (int i = 0; i < numColumns; i++) {
+                        valueTable.getColumn(i).setWidth(valueTable.getClientArea().width / numColumns);
+                    }
+                }
             });
 
             valueTable.addPaintListener(new PaintListener() {
-            	public void paintControl(PaintEvent e) {
-            		for (int i = 0; i < valueTable.getItemCount(); i++) {
-            			Color cellColor = new Color(display, paletteData[0][i],
-                                paletteData[1][i], paletteData[2][i]);
+                public void paintControl(PaintEvent e) {
+                    for (int i = 0; i < valueTable.getItemCount(); i++) {
+                        Color cellColor = new Color(display, paletteData[0][i], paletteData[1][i], paletteData[2][i]);
 
-            			valueTable.getItem(i).setBackground(4, cellColor);
+                        valueTable.getItem(i).setBackground(4, cellColor);
 
-            			cellColor.dispose();
-            		}
-            	}
+                        cellColor.dispose();
+                    }
+                }
             });
 
             for (int i = 0; i < columnNames.length; i++) {
-            	TableColumn column = new TableColumn(valueTable, SWT.NONE);
-            	column.setText(columnNames[i]);
-            	column.setMoveable(false);
-            	column.pack();
+                TableColumn column = new TableColumn(valueTable, SWT.NONE);
+                column.setText(columnNames[i]);
+                column.setMoveable(false);
+                column.pack();
             }
 
             for (int i = 0; i < 256; i++) {
-            	TableItem item = new TableItem(valueTable, SWT.NONE);
-            	item.setFont(curFont);
+                TableItem item = new TableItem(valueTable, SWT.NONE);
+                item.setFont(curFont);
 
-            	item.setText(new String[] {String.valueOf(i), String.valueOf(paletteData[0][i]),
-            			String.valueOf(paletteData[1][i]), String.valueOf(paletteData[2][i]),
-            			null});
+                item.setText(new String[] { String.valueOf(i), String.valueOf(paletteData[0][i]),
+                        String.valueOf(paletteData[1][i]), String.valueOf(paletteData[2][i]), null });
 
-            	item.setBackground(0, Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+                item.setBackground(0, Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
             }
 
             // set cell height for large fonts
-            //int cellRowHeight = Math.max(16, valueTable.getFontMetrics(
-            //        valueTable.getFont()).getHeight());
-            //valueTable.setRowHeight(cellRowHeight);
+            // int cellRowHeight = Math.max(16, valueTable.getFontMetrics(
+            // valueTable.getFont()).getHeight());
+            // valueTable.setRowHeight(cellRowHeight);
 
             Button okButton = new Button(tableShell, SWT.PUSH);
             okButton.setFont(curFont);
@@ -648,12 +714,12 @@ public class DefaultPaletteView extends Dialog {
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = tableShell.getSize();
             tableShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             tableShell.open();
 
             Display display = parent.getDisplay();
-            while(!tableShell.isDisposed()) {
+            while (!tableShell.isDisposed()) {
                 if (!display.readAndDispatch())
                     display.sleep();
             }
@@ -675,7 +741,7 @@ public class DefaultPaletteView extends Dialog {
 
             if (value < 0 || value > 255) {
                 Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
-            	return;
+                return;
             }
 
             paletteData[col][row] = value;
@@ -684,7 +750,8 @@ public class DefaultPaletteView extends Dialog {
         }
 
         public void refresh() {
-            valueTable.redraw();
+            if (valueTable != null && !valueTable.isDisposed())
+                valueTable.redraw();
         }
 
         private Listener valueTableCellEditor = new Listener() {
@@ -714,34 +781,25 @@ public class DefaultPaletteView extends Dialog {
 
                             Listener textListener = new Listener() {
                                 public void handleEvent(final Event e) {
-                                	int newValue = Integer.parseInt(text.getText());
+                                    Integer.parseInt(text.getText());
 
                                     switch (e.type) {
-                                    case SWT.FocusOut:
-                                    	if (newValue >= 0 && newValue <= 255) {
-                                    		item.setText(column, text.getText());
-                                    		updatePaletteValue(item.getText(column), row, column - 1);
-                                    	} else {
-                                    	    Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
-                                    	}
-
-                                        text.dispose();
-                                        break;
-                                    case SWT.Traverse:
-                                        switch (e.detail) {
-                                        case SWT.TRAVERSE_RETURN:
-                                        	if (newValue >= 0 && newValue <= 255) {
-                                        		item.setText(column, text.getText());
-                                        		updatePaletteValue(item.getText(column), row, column - 1);
-                                        	} else {
-                                        	    Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
-                                        	}
-                                        case SWT.TRAVERSE_ESCAPE:
+                                        case SWT.FocusOut:
+                                            item.setText(column, text.getText());
+                                            updatePaletteValue(item.getText(column), row, column - 1);
                                             text.dispose();
-                                            e.doit = false;
-                                        }
+                                            break;
+                                        case SWT.Traverse:
+                                            switch (e.detail) {
+                                                case SWT.TRAVERSE_RETURN:
+                                                    item.setText(column, text.getText());
+                                                    updatePaletteValue(item.getText(column), row, column - 1);
+                                                case SWT.TRAVERSE_ESCAPE:
+                                                    text.dispose();
+                                                    e.doit = false;
+                                            }
 
-                                        break;
+                                            break;
                                     }
                                 }
                             };
@@ -760,7 +818,8 @@ public class DefaultPaletteView extends Dialog {
                         }
                     }
 
-                    if (!visible) return;
+                    if (!visible)
+                        return;
 
                     index++;
                 }
