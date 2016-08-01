@@ -221,7 +221,7 @@ public class Chart extends Dialog {
             }
         });
 
-        chartP = new ChartCanvas(shell, SWT.DOUBLE_BUFFERED);
+        chartP = new ChartCanvas(shell, SWT.DOUBLE_BUFFERED | SWT.BORDER);
         chartP.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         chartP.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -346,17 +346,19 @@ public class Chart extends Dialog {
         // Values controlling the dimensions of the legend for
         // line plots, as well as the gap in between each
         // element displayed in the legend
-        private int legendWidth = 0;
-        private int legendHeight = 0;
+        private int LEGEND_WIDTH;
+        private int LEGEND_HEIGHT;
+
+        private final int LEGEND_LINE_WIDTH = 10;
         private final int LEGEND_LINE_GAP = 30;
 
         public ChartCanvas(Composite parent, int style) {
-            super(parent, style | SWT.BORDER);
+            super(parent, style);
 
             // Only draw the legend if the Chart type is a line plot
             if ((chartStyle == LINEPLOT) && (lineLabels != null)) {
-                legendWidth = 60;
-                legendHeight = (2 * LEGEND_LINE_GAP) + (numberOfLines * LEGEND_LINE_GAP);
+                LEGEND_WIDTH = 60;
+                LEGEND_HEIGHT = (2 * LEGEND_LINE_GAP) + (numberOfLines * LEGEND_LINE_GAP);
             }
 
             this.addPaintListener(new PaintListener() {
@@ -366,21 +368,27 @@ public class Chart extends Dialog {
                     // Get the graphics context for this paint event
                     GC g = e.gc;
 
-                    //TODO: Update Chart to handle large fonts
-                    //g.setFont(curFont);
+                    g.setFont(curFont);
 
                     Rectangle canvasBounds = getClientArea();
+                    Color c = g.getForeground();
 
                     // Calculate maximum width needed to draw the y-axis labels
                     int maxYLabelWidth = g.stringExtent(String.valueOf(ymax)).x;
 
                     // Calculate maximum height needed to draw the x-axis labels
-                    int maxXLabelHeight = g.stringExtent(String.valueOf(xmin)).y;
+                    int maxXLabelHeight = g.stringExtent(String.valueOf(xmax)).y;
+
+                    // Make sure legend width scales with font size and large column values
+                    for (int i = 0; i < lineLabels.length; i++) {
+                        int width = g.stringExtent(lineLabels[i]).x;
+                        if (width > (2 * LEGEND_WIDTH / 3) - 10) LEGEND_WIDTH += width;
+                    }
 
                     int xgap = maxYLabelWidth + gap;
                     int ygap = canvasBounds.height - maxXLabelHeight - gap - 1;
                     int plotHeight = ygap - gap;
-                    int plotWidth = canvasBounds.width - legendWidth - (2 * gap) - xgap;
+                    int plotWidth = canvasBounds.width - LEGEND_WIDTH - (2 * gap) - xgap;
                     int xnpoints = Math.min(10, numberOfPoints - 1);
                     int ynpoints = 10;
 
@@ -440,7 +448,6 @@ public class Chart extends Dialog {
                         }
                     }
 
-                    Color c = g.getForeground();
                     double x0, y0, x1, y1;
                     if (chartStyle == LINEPLOT) {
                         dw = (double) plotWidth / (double) (numberOfPoints - 1);
@@ -485,21 +492,20 @@ public class Chart extends Dialog {
 
                             // draw line legend
                             if ((lineLabels != null) && (lineLabels.length >= numberOfLines)) {
-                                int lineWidth = 10;
-                                x0 = canvasBounds.width - gap - (legendWidth / 2) - (lineWidth / 2);
+                                x0 = (canvasBounds.width - gap - LEGEND_WIDTH) + (LEGEND_WIDTH / 3);
                                 y0 = gap + LEGEND_LINE_GAP * (i + 1);
-                                g.drawLine((int) x0, (int) y0, (int) x0 + lineWidth, (int) y0);
+                                g.drawLine((int) x0, (int) y0, (int) x0 + LEGEND_LINE_WIDTH, (int) y0);
                                 g.drawString(lineLabels[i], (int) x0 + 10, (int) y0 + 3);
                             }
                         }
 
-                        g.setForeground(c); // set the color back to its default
-
                         // draw a box on the legend
-                        if ((lineLabels != null)
-                                && (lineLabels.length >= numberOfLines)) {
-                            g.drawRectangle(canvasBounds.width - legendWidth - gap, gap, legendWidth, legendHeight);
+                        if ((lineLabels != null) && (lineLabels.length >= numberOfLines)) {
+                            g.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+                            g.drawRectangle(canvasBounds.width - LEGEND_WIDTH - gap, gap, LEGEND_WIDTH, LEGEND_HEIGHT);
                         }
+
+                        g.setForeground(c); // set the color back to its default
                     } // if (chartStyle == LINEPLOT)
                     else if (chartStyle == HISTOGRAM) {
                         // draw histogram for selected image area

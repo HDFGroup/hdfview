@@ -161,12 +161,11 @@ public class DefaultPaletteView extends Dialog {
 
         shell.setData(this);
 
-        // Create the content composite for the Canvas
-        Composite content = new Composite(shell, SWT.BORDER);
-        content.setLayout(new GridLayout(1, true));
-        content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-        chartP = new ChartCanvas(content, SWT.DOUBLE_BUFFERED);
+        chartP = new ChartCanvas(shell, SWT.DOUBLE_BUFFERED | SWT.BORDER);
+        GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+        data.widthHint = 700 + (ViewProperties.getFontSize() - 12) * 15;
+        data.heightHint = 500 + (ViewProperties.getFontSize() - 12) * 10;
+        chartP.setLayoutData(data);
 
         // Create the toolbar composite
         Composite tools = new Composite(shell, SWT.NONE);
@@ -261,7 +260,7 @@ public class DefaultPaletteView extends Dialog {
                     }
                 }
 
-                chartP.refresh();
+                chartP.redraw();
                 isPaletteChanged = true;
             }
         });
@@ -415,96 +414,128 @@ public class DefaultPaletteView extends Dialog {
     }
 
     /** The canvas that paints the data lines. */
-    private class ChartCanvas {
-        private Canvas canvas;
+    private class ChartCanvas extends Canvas {
+        // Value controlling gap between the sides of the canvas
+        // and the drawn elements
+        private final int gap = 20;
+
+        private final int LEGEND_LINE_WIDTH = 10;
+        private final int LEGEND_LINE_GAP = 30;
+
+        // Values controlling the dimensions of the legend,
+        // as well as the gap in between each
+        // element displayed in the legend
+        private int LEGEND_WIDTH = 60;
+        private final int LEGEND_HEIGHT = (5 * LEGEND_LINE_GAP);
+
+        private final int PALETTE_MAX = 255;
 
         public ChartCanvas(Composite parent, int style) {
-            canvas = new Canvas(parent, style);
+            super(parent, style);
 
-            GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
-            data.widthHint = 700 + (ViewProperties.getFontSize() - 12) * 15;
-            data.heightHint = 500 + (ViewProperties.getFontSize() - 12) * 10;
-            canvas.setLayoutData(data);
+            this.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
-            canvas.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-
-            canvas.addPaintListener(new PaintListener() {
+            this.addPaintListener(new PaintListener() {
                 public void paintControl(PaintEvent e) {
                     // Get the graphics context for this paint event
                     GC g = e.gc;
 
-                    Point p = canvas.getSize();
-                    int gap = 20;
-                    int legendSpace = 60;
-                    int h = p.y - gap;
-                    int w = p.x - 3 * gap - legendSpace;
+                    g.setFont(curFont);
+
+                    Rectangle canvasBounds = getClientArea();
+                    org.eclipse.swt.graphics.Color c = g.getForeground();
+
+                    // Calculate maximum width needed to draw the y-axis labels
+                    int maxYLabelWidth = g.stringExtent(String.valueOf(PALETTE_MAX)).x;
+
+                    // Calculate maximum height needed to draw the x-axis labels
+                    int maxXLabelHeight = g.stringExtent(String.valueOf(PALETTE_MAX)).y;
+
+                    // Make sure legend width scales with font size
+                    for (int i = 0; i < lineLabels.length; i++) {
+                        int width = g.stringExtent(lineLabels[i]).x;
+                        if (width > (2 * LEGEND_WIDTH / 3) - 10) LEGEND_WIDTH += width;
+                    }
+
+                    int xgap = maxYLabelWidth + gap;
+                    int ygap = canvasBounds.height - maxXLabelHeight - gap - 1;
+                    int plotHeight = ygap - gap;
+                    int plotWidth = canvasBounds.width - LEGEND_WIDTH - (2 * gap) - xgap;
 
                     // draw the X axis
-                    g.drawLine(2 * gap, h, w + 2 * gap, h);
+                    g.drawLine(xgap, ygap, xgap + plotWidth, ygap);
 
                     // draw the Y axis
-                    g.drawLine(2 * gap, h, 2 * gap, 0);
+                    g.drawLine(xgap, ygap, xgap, gap);
 
                     // draw X and Y labels: 10 labels for x and y
-                    int dh = h / 10;
-                    int dw = w / 10;
+                    int dh = plotHeight / 10;
+                    int dw = plotWidth / 10;
                     int dx = 25;
                     double dy = 25;
                     int xp = 2 * gap, yp = 0, x = 0, x0, y0, x1, y1;
                     double y = 0;
 
                     // draw X and Y grid labels
-                    g.drawString(String.valueOf((int) y), 0, h + 8);
-                    g.drawString(String.valueOf(x), xp - 5, h + gap);
+                    String xVal = String.valueOf(x);
+                    String yVal = String.valueOf((int) y);
+                    Point xLabelSize = g.stringExtent(xVal);
+                    Point yLabelSize = g.stringExtent(yVal);
+                    g.drawString(yVal, 0, ygap - yLabelSize.y / 2);
+                    g.drawString(xVal, xgap - xLabelSize.x / 2, canvasBounds.height - xLabelSize.y);
                     for (int i = 0; i < 10; i++) {
                         xp += dw;
                         yp += dh;
                         x += dx;
                         y += dy;
-                        g.drawLine(xp, h, xp, h - 5);
-                        g.drawLine(2 * gap, h - yp, 2 * gap + 5, h - yp);
-                        g.drawString(String.valueOf((int) y), 0, h - yp + 8);
-                        g.drawString(String.valueOf(x), xp - 5, h + gap);
+
+                        xVal = String.valueOf(x);
+                        yVal = String.valueOf((int) y);
+                        xLabelSize = g.stringExtent(xVal);
+                        yLabelSize = g.stringExtent(yVal);
+
+                        // Draw tick marks
+                        g.drawLine(xp, ygap, xp, ygap - 5);
+                        g.drawLine(xgap, ygap - yp, xgap + 5, ygap - yp);
+
+                        g.drawString(xVal, xp - (xLabelSize.x / 2), canvasBounds.height - xLabelSize.y);
+                        g.drawString(yVal, 0, ygap - yp - (yLabelSize.y / 2));
                     }
 
-                    org.eclipse.swt.graphics.Color c = g.getForeground();
                     for (int i = 0; i < 3; i++) {
                         g.setForeground(Display.getCurrent().getSystemColor(lineColors[i]));
 
                         // set up the line data for drawing one line a time
                         for (int j = 0; j < 255; j++) {
-                            x0 = (w * j / 255) + 2 * gap;
-                            y0 = (h - h * paletteData[i][j] / 255);
-                            x1 = (w * (j + 1) / 255) + 2 * gap;
-                            y1 = (h - h * (paletteData[i][j + 1]) / 255);
+                            x0 = (plotWidth * j / 255) + 2 * gap;
+                            y0 = (plotHeight - plotHeight * paletteData[i][j] / 255);
+                            x1 = (plotWidth * (j + 1) / 255) + 2 * gap;
+                            y1 = (plotHeight - plotHeight * (paletteData[i][j + 1]) / 255);
                             g.drawLine(x0, y0, x1, y1);
                         }
 
-                        x0 = w + legendSpace;
-                        y0 = gap + gap * i;
-                        g.drawLine(x0, y0, x0 + 7, y0);
+                        // Draw lines and labels in the legend
+                        x0 = (canvasBounds.width - gap - LEGEND_WIDTH) + (LEGEND_WIDTH / 3);
+                        y0 = gap + LEGEND_LINE_GAP * (i + 1);
+                        g.drawLine(x0, y0, x0 + LEGEND_LINE_WIDTH, y0);
                         g.drawString(lineLabels[i], x0 + 10, y0 + 3);
                     }
 
-                    g.setForeground(c); // set the color back to its default
-
                     // draw a box on the legend
-                    g.drawRectangle(w + legendSpace - 10, 10, legendSpace, 10 * gap);
+                    g.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+                    g.drawRectangle(canvasBounds.width - LEGEND_WIDTH - gap, gap, LEGEND_WIDTH, LEGEND_HEIGHT);
+
+                    g.setForeground(c); // set the color back to its default
                 }
             });
 
-            canvas.addMouseListener(new MouseAdapter() {
+            this.addMouseListener(new MouseAdapter() {
                 public void mouseUp(MouseEvent e) {
                     if ((paletteValueTable != null)) {
                         paletteValueTable.refresh();
                     }
                 }
             });
-
-        }
-
-        public void refresh() {
-            canvas.redraw();
         }
     }
 
@@ -648,7 +679,7 @@ public class DefaultPaletteView extends Dialog {
             }
 
             paletteData[col][row] = value;
-            chartP.refresh();
+            chartP.redraw();
             isPaletteChanged = true;
         }
 
