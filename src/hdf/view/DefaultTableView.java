@@ -64,10 +64,13 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
+import org.eclipse.nebula.widgets.nattable.data.validate.ValidationFailedException;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.action.KeyEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
+import org.eclipse.nebula.widgets.nattable.edit.config.DialogErrorHandling;
 import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
@@ -2389,58 +2392,6 @@ public class DefaultTableView implements TableView {
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         log.trace("updateScalarData: isUnsigned={} cname={} dname={}", isUnsigned, cname, dname);
 
-        // check data range for unsigned datatype converted sizes!
-        if (isUnsigned) {
-            long lvalue = -1;
-            long maxValue = Long.MAX_VALUE;
-            if (dname == 'B') {
-                maxValue = 255;
-                lvalue = Long.parseLong(cellValue);
-
-                if (lvalue < 0) {
-                    throw new NumberFormatException("Negative value for unsigned integer: " + lvalue);
-                }
-
-                if (lvalue > maxValue) {
-                    throw new NumberFormatException("Data value is out of range: " + lvalue);
-                }
-            }
-            else if (dname == 'S') {
-                maxValue = 65535;
-                lvalue = Long.parseLong(cellValue);
-
-                if (lvalue < 0) {
-                    throw new NumberFormatException("Negative value for unsigned integer: " + lvalue);
-                }
-
-                if (lvalue > maxValue) {
-                    throw new NumberFormatException("Data value is out of range: " + lvalue);
-                }
-            }
-            else if (dname == 'I') {
-                maxValue = 4294967295L;
-                lvalue = Long.parseLong(cellValue);
-
-                if (lvalue < 0) {
-                    throw new NumberFormatException("Negative value for unsigned integer: " + lvalue);
-                }
-
-                if (lvalue > maxValue) {
-                    throw new NumberFormatException("Data value is out of range: " + lvalue);
-                }
-            }
-            else if (dname == 'J') {
-                BigInteger Jmax = new BigInteger("18446744073709551615");
-                BigInteger big = new BigInteger(cellValue);
-                if (big.compareTo(Jmax) > 0) {
-                    throw new NumberFormatException("Negative value for unsigned integer: " + cellValue);
-                }
-                if (big.compareTo(BigInteger.ZERO) < 0) {
-                    throw new NumberFormatException("Data value is out of range: " + cellValue);
-                }
-            }
-        }
-
         switch (NT) {
             case 'B':
                 byte bvalue = 0;
@@ -3592,6 +3543,138 @@ public class DefaultTableView implements TableView {
     }
 
     /**
+     * Returns an appropriate data validator to check that the
+     * data entered is valid before committing it to memory.
+     *
+     * @param theDataset
+     * @return
+     */
+    private static DataValidator getScalarDSDataValidator(final ScalarDS theDataset) {
+        boolean isUnsigned = theDataset.isUnsigned();
+        String cname = theDataset.getOriginalClass().getName();
+
+        switch(cname.charAt(cname.lastIndexOf("[") + 1)) {
+            case 'B':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidUByte(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidByte(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+            case 'S':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidUShort(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidShort(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+            case 'I':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidUInt(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidInt(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+            case 'J':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidULong(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidLong(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+            default:
+                // Default: never validate
+                return new DataValidator() {
+                    @Override
+                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                        return false;
+                    }
+                };
+        }
+    }
+
+    private static DataValidator getCompoundDSDataValidator(final CompoundDS theDataset) {
+        return new DataValidator() {
+            @Override
+            public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                return true;
+            }
+        };
+    }
+
+    /**
      * Provides the NatTable with data from a Scalar Dataset for each cell.
      */
     private class ScalarDSDataProvider implements IDataProvider {
@@ -3802,9 +3885,7 @@ public class DefaultTableView implements TableView {
                 updateValueInMemory((String) newValue, rowIndex, columnIndex);
             }
             catch (Exception ex) {
-                display.beep();
-                Tools.showError(shell, "Failed to update value at "
-                        + "(" + rowIndex + ", " + columnIndex + ") to '" + newValue.toString() + "'", shell.getText());
+                log.debug("DefaultTableView setDataValue failure: ", ex);
             }
         }
 
@@ -4081,9 +4162,7 @@ public class DefaultTableView implements TableView {
                 updateValueInMemory((String) newValue, rowIndex, columnIndex);
             }
             catch (Exception ex) {
-                shell.getDisplay().beep();
-                Tools.showError(shell, "Failed to update value at "
-                        + "(" + rowIndex + ", " + columnIndex + ") to '" + newValue.toString() + "'", shell.getText());
+                log.debug("DefaultTableView setDataValue failure: ", ex);
             }
         }
 
@@ -4487,6 +4566,23 @@ public class DefaultTableView implements TableView {
             else {
                 // Add default bindings for editing
                 this.addConfiguration(new DefaultEditConfiguration());
+
+                // Add data validator
+                this.addConfiguration(new AbstractRegistryConfiguration() {
+                    public void configureRegistry(IConfigRegistry configRegistry) {
+                        configRegistry.registerConfigAttribute(
+                                EditConfigAttributes.DATA_VALIDATOR,
+                                (dataset instanceof ScalarDS) ? getScalarDSDataValidator((ScalarDS) dataset) : getCompoundDSDataValidator((CompoundDS) dataset),
+                                DisplayMode.EDIT,
+                                GridRegion.BODY);
+
+                        configRegistry.registerConfigAttribute(
+                                EditConfigAttributes.VALIDATION_ERROR_HANDLER,
+                                new DialogErrorHandling(),
+                                DisplayMode.EDIT,
+                                GridRegion.BODY);
+                    }
+                });
 
                 // Change cell editing to be on double click rather than single click
                 this.addConfiguration(new AbstractUiBindingConfiguration() {

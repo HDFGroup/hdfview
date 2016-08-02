@@ -2660,6 +2660,86 @@ public final class Tools {
         return true;
     }
 
+    public static boolean checkValidByte(String value) {
+        try {
+            Byte b = Byte.parseByte(value);
+            return (b >= Byte.MIN_VALUE && b <= Byte.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidUByte(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= 0 && l <= MAX_UINT8);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidShort(String value) {
+        try {
+            Short s = Short.parseShort(value);
+            return (s >= Short.MIN_VALUE && s <= Short.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidUShort(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= 0 && l <= MAX_UINT16);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidInt(String value) {
+        try {
+            Integer i = Integer.parseInt(value);
+            return (i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidUInt(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= 0 && l <= MAX_UINT32);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidLong(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= Long.MIN_VALUE && l <= Long.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidULong(String value) {
+        try {
+            BigInteger big = new BigInteger(value);
+            return (big.compareTo(BigInteger.ZERO) >= 0 && big.compareTo(MAX_UINT64) <= 0);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
     /**
      * Show an SWT error dialog with the given error message.
      * @param parent
