@@ -1131,7 +1131,7 @@ public class DefaultTableView implements TableView {
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    selectAll();
+                    table.doCommand(new SelectAllCommand());
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -1615,6 +1615,12 @@ public class DefaultTableView implements TableView {
     private void copyData() {
         StringBuffer sb = new StringBuffer();
 
+        Rectangle selection = selectionLayer.getLastSelectedRegion();
+        if (selection == null) {
+            Tools.showError(shell, "Select data to copy.", shell.getText());
+            return;
+        }
+
         int r0 = selectionLayer.getLastSelectedRegion().y; // starting row
         int c0 = selectionLayer.getLastSelectedRegion().x; // starting column
 
@@ -1659,8 +1665,14 @@ public class DefaultTableView implements TableView {
 
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
-        int r0 = selectionLayer.getLastSelectedRegion().y;
-        int c0 = selectionLayer.getLastSelectedRegion().x;
+        int r0 = 0;
+        int c0 = 0;
+
+        Rectangle selection = selectionLayer.getLastSelectedRegion();
+        if (selection != null) {
+            r0 = selection.y;
+            c0 = selection.x;
+        }
 
         if (c0 < 0) {
             c0 = 0;
@@ -1672,7 +1684,6 @@ public class DefaultTableView implements TableView {
         int c = c0;
 
         Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-        // Transferable content = cb.getContents(this);
         String line = "";
         try {
             String s = (String) cb.getData(DataFlavor.stringFlavor);
@@ -1984,13 +1995,6 @@ public class DefaultTableView implements TableView {
             System.gc();
             isValueChanged = true;
         }
-    }
-
-    /**
-     * Selects all rows, columns, and cells in the table.
-     */
-    private void selectAll() {
-        table.doCommand(new SelectAllCommand());
     }
 
     /**
@@ -2756,7 +2760,6 @@ public class DefaultTableView implements TableView {
                 c = c0;
             }
 
-            //c = 0; // causes a bug where data is imported to the left
             r++;
         } // while ((line != null) && (r < rows))
 
@@ -3049,17 +3052,13 @@ public class DefaultTableView implements TableView {
      */
     private void saveAsText() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
-        fchooser.setFilterPath(dataset.getFile());
+        fchooser.setFilterPath(dataset.getFileFormat().getParent());
 
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
         fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
         fchooser.setFilterIndex(1);
-
-        //fchooser.changeToParentDirectory();
         fchooser.setText("Save Current Data To Text File --- " + dataset.getName());
-
-        //fchooser.setSelectedFile(new File(dataset.getName() + ".txt"));
 
         if(fchooser.open() == null) return;
 
@@ -3139,17 +3138,13 @@ public class DefaultTableView implements TableView {
      */
     private void saveAsBinary() throws Exception {
         FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
-        fchooser.setFilterPath(dataset.getFile());
+        fchooser.setFilterPath(dataset.getFileFormat().getParent());
 
         DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
         fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
         fchooser.setFilterIndex(1);
-
-        //fchooser.changeToParentDirectory();
         fchooser.setText("Save Current Data To Binary File --- " + dataset.getName());
-
-        //fchooser.setSelectedFile(new File(dataset.getName() + ".bin"));
 
         if(fchooser.open() == null) return;
 
