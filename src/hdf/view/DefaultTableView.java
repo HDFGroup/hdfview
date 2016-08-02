@@ -3686,21 +3686,38 @@ public class DefaultTableView implements TableView {
                     if (isUINT64) {
                         for (int i = i0; i < i1; i++) {
                             Long l = (Long) Array.get(dataValue, i);
+                            BigInteger big;
                             if (l < 0) {
                                 l = (l << 1) >>> 1;
                                 BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
                                 BigInteger big2 = new BigInteger(l.toString());
-                                BigInteger big = big1.add(big2);
-                                stringBuffer.append(big.toString());
+                                big = big1.add(big2);
                             }
+                            else {
+                                big = new BigInteger(l.toString());
+                            }
+                            if (showAsHex)
+                                theValue = Tools.toHexString(big.longValue(), 8);
+                            else if (showAsBin)
+                                theValue = Tools.toBinaryString(big.longValue(), 8);
                             else
-                                stringBuffer.append(Array.get(dataValue, i));
+                                theValue = big.toString(10);
+
+                            stringBuffer.append(theValue);
                             if (stringBuffer.length() > 0 && i < (i1 - 1)) stringBuffer.append(", ");
                         }
                     }
                     else {
                         for (int i = i0; i < i1; i++) {
-                            stringBuffer.append(Array.get(dataValue, i));
+                            theValue = Array.get(dataValue, i);
+                            if (showAsHex)
+                                theValue = Tools.toHexString(Long.valueOf(theValue.toString()), (int) (typeSize / arraySize));
+                            else if (showAsBin)
+                                theValue = Tools.toBinaryString(Long.valueOf(theValue.toString()), (int) (typeSize / arraySize));
+                            else
+                                theValue = theValue.toString();
+
+                            stringBuffer.append(theValue);
                             if (stringBuffer.length() > 0 && i < (i1 - 1)) stringBuffer.append(", ");
                         }
                     }
