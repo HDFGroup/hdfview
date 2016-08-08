@@ -342,6 +342,12 @@ public class DataOptionDialog extends Dialog {
                 spreadsheetButton.setSelection(false);
             }
         }
+
+        Display display = parent.getDisplay();
+        while(!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
     }
 
     /**

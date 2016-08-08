@@ -208,6 +208,12 @@ public class UserOptionsDialog extends Dialog {
                 (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
+
+        Display display = parent.getDisplay();
+        while(!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
     }
 
     public boolean isFontChanged() {

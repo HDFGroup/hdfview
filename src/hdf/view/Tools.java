@@ -1835,7 +1835,7 @@ public final class Tools {
 
     public static final String toBinaryString(BigInteger v, int nbytes) {
         StringBuffer sb = new StringBuffer();
-        String val = String.format("%" + nbytes + "s", v.toString(2)).replace(" ", "0").toUpperCase();
+        String val = String.format("%" + (8 * nbytes) + "s", v.toString(2)).replace(" ", "0").toUpperCase();
 
         // Insert spacing
         for (int i = 0; i < nbytes; i++) {
