@@ -3594,6 +3594,8 @@ public class DefaultTableView implements TableView {
         boolean isUnsigned = theDataset.isUnsigned();
         String cname = theDataset.getOriginalClass().getName();
 
+        //TODO: Add validation for array types when array editing is added
+
         switch(cname.charAt(cname.lastIndexOf("[") + 1)) {
             case 'B':
                 if (isUnsigned) {
@@ -3856,7 +3858,21 @@ public class DefaultTableView implements TableView {
                 }
 //                log.trace("ScalarDS:ScalarDSDataProvider:getValueAt index={} isStr={} isUINT64={}", index, isStr, isUINT64);
 
-                theValue = Array.get(dataValue, (int) index);
+                if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE) {
+                    int len = (int) dtype.getDatatypeSize();
+                    byte[] elements = new byte[len];
+
+                    index *= len;
+
+                    for (int i = 0; i < len; i++) {
+                        elements[i] = (Byte) Array.get(dataValue, (int) index + i);
+                    }
+
+                    theValue = elements;
+                }
+                else {
+                    theValue = Array.get(dataValue, (int) index);
+                }
             }
 
             log.trace("ScalarDS:ScalarDSDataProvider:getValueAt finish");
@@ -3990,6 +4006,15 @@ public class DefaultTableView implements TableView {
                             if (i < (int) arraySize - 1) buffer.append(", ");
                         }
                     }
+                }
+
+                return buffer;
+            }
+            else if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE) {
+                buffer.setLength(0);
+
+                for (int i = 0; i < ((byte[]) value).length; i++) {
+                    buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                 }
 
                 return buffer;
