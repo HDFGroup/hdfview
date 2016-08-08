@@ -87,6 +87,7 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.IUniqueIndexLayer;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderLayerConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderLayerConfiguration;
@@ -3968,42 +3969,42 @@ public class DefaultTableView implements TableView {
                 if (isUINT64) {
                     if (showAsHex) {
                         for (int i = 0; i < (int) arraySize; i++) {
+                            if (i > 0) buffer.append(", ");
                             buffer.append(Tools.toHexString((BigInteger) ((Object[]) value)[i], 8));
-                            if (i < (int) arraySize - 1) buffer.append(", ");
                         }
                     }
                     else if (showAsBin) {
                         for (int i = 0; i < (int) arraySize; i++) {
+                            if (i > 0) buffer.append(", ");
                             buffer.append(Tools.toBinaryString((BigInteger) ((Object[]) value)[i], 8));
-                            if (i < (int) arraySize - 1) buffer.append(", ");
                         }
                     }
                     else {
                         for (int i = 0; i < (int) arraySize; i++) {
+                            if (i > 0) buffer.append(", ");
                             buffer.append(((Object[]) value)[i]);
-                            if (i < (int) arraySize - 1) buffer.append(", ");
                         }
                     }
                 }
                 else {
                     if (showAsHex) {
                         for (int i = 0; i < (int) arraySize; i++) {
+                            if (i > 0) buffer.append(", ");
                             Long l = Long.valueOf(((Object[]) value)[i].toString());
                             buffer.append(Tools.toHexString(l, (int) (typeSize / arraySize)));
-                            if (i < (int) arraySize - 1) buffer.append(", ");
                         }
                     }
                     else if (showAsBin) {
                         for (int i = 0; i < (int) arraySize; i++) {
+                            if (i > 0) buffer.append(", ");
                             Long l = Long.valueOf(((Object[]) value)[i].toString());
                             buffer.append(Tools.toBinaryString(l, (int) (typeSize / arraySize)));
-                            if (i < (int) arraySize - 1) buffer.append(", ");
                         }
                     }
                     else {
                         for (int i = 0; i < (int) arraySize; i++) {
+                            if (i > 0) buffer.append(", ");
                             buffer.append(((Object[]) value)[i]);
-                            if (i < (int) arraySize - 1) buffer.append(", ");
                         }
                     }
                 }
@@ -4370,6 +4371,7 @@ public class DefaultTableView implements TableView {
      * Provides the NatTable with data from a Compound Dataset for each cell.
      */
     private class CompoundDSDataProvider implements IDataProvider {
+        private Object[]                arrayElements;
 
         private final StringBuffer      stringBuffer;
 
@@ -4515,6 +4517,8 @@ public class DefaultTableView implements TableView {
             }
             else {
                 // numerical values
+                arrayElements = new Object[orders[fieldIdx]];
+
                 String cName = colValue.getClass().getName();
                 int cIndex = cName.lastIndexOf("[");
                 if (cIndex >= 0) {
@@ -4529,7 +4533,7 @@ public class DefaultTableView implements TableView {
                 int classType = dtype.getDatatypeClass();
 
                 if ((classType == Datatype.CLASS_BITFIELD) || (classType == Datatype.CLASS_OPAQUE)) {
-                    CshowAsHex = true;
+//                    CshowAsHex = true;
                     log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() class={} (BITFIELD or OPAQUE)", classType);
                 }
                 if (dtype.isUnsigned()) {
@@ -4537,7 +4541,7 @@ public class DefaultTableView implements TableView {
                         isUINT64 = (cName.charAt(cIndex + 1) == 'J');
                     }
                 }
-                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() isUINT64={} isInt={} CshowAsHex={} typeSize={}", isUINT64, isInt, CshowAsHex, typeSize);
+                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() isUINT64={} isInt={} CshowAsHex={} typeSize={}", isUINT64, isInt, typeSize);
 
                 if (isEnum) {
                     String[] outValues;
@@ -4644,9 +4648,31 @@ public class DefaultTableView implements TableView {
     }
 
     private class CompoundDSDataDisplayConverter extends DisplayConverter {
+        private final CompoundDS    theDataset;
+
+        private final StringBuffer  buffer;
+
+        private final Datatype[]    types;
+
+        private final int[]         orders;
+        private final int           nFields;
+        private int                 fieldIndex;
 
         public CompoundDSDataDisplayConverter(final CompoundDS theDataset) {
+            this.theDataset = theDataset;
 
+            buffer = new StringBuffer();
+
+            types = theDataset.getSelectedMemberTypes();
+
+            orders = theDataset.getSelectedMemberOrders();
+            nFields = ((List<?>) dataValue).size();
+        }
+
+        @Override
+        public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
+            fieldIndex = cell.getColumnIndex();
+            return canonicalToDisplayValue(value);
         }
 
         @Override
