@@ -3724,6 +3724,9 @@ public class DefaultTableView implements TableView {
     private class ScalarDSDataProvider implements IDataProvider {
         private final Object[]     arrayElements;
 
+        // StringBuffer used to store variable-length datatypes
+        private final StringBuffer buffer;
+
         private final Datatype     dtype;
         private final Datatype     btype;
 
@@ -3735,6 +3738,8 @@ public class DefaultTableView implements TableView {
         private final boolean      isInt;
         private final boolean      isUINT64;
 
+        private boolean            isVLStr;
+
         private Object             theValue;
 
         private final boolean      isNaturalOrder;
@@ -3743,6 +3748,8 @@ public class DefaultTableView implements TableView {
         private final long         colCount;
 
         public ScalarDSDataProvider(ScalarDS theDataset) {
+            buffer = new StringBuffer();
+
             dtype = theDataset.getDatatype();
             btype = dtype.getBasetype();
 
@@ -3756,26 +3763,22 @@ public class DefaultTableView implements TableView {
                     .getSelectedIndex()[1]));
 
             if (isArray) {
-                if (dtype instanceof H5Datatype) {
-                    if (((H5Datatype) dtype).isVLEN() && dtype.getBasetype().getDatatypeClass() == Datatype.CLASS_STRING) {
-                        // Variable-length string arrays don't have a defined
-                        // array size
-                        arraySize = dtype.getArrayDims()[0];
-                    }
-                    else if (isArray && btype.getDatatypeClass() == Datatype.CLASS_ARRAY){
-                        // Array of Array
-                        long[] dims = btype.getArrayDims();
+                if (dtype.isVLEN() && btype.getDatatypeClass() == Datatype.CLASS_STRING) {
+                    isVLStr = true;
 
-                        long size = 1;
-                        for (int i = 0; i < dims.length; i++) {
-                            size *= dims[i];
-                        }
+                    // Variable-length string arrays don't have a defined array size
+                    arraySize = dtype.getArrayDims()[0];
+                }
+                else if (btype.getDatatypeClass() == Datatype.CLASS_ARRAY) {
+                    // Array of Array
+                    long[] dims = btype.getArrayDims();
 
-                        arraySize = size * (dtype.getDatatypeSize() / btype.getDatatypeSize());
+                    long size = 1;
+                    for (int i = 0; i < dims.length; i++) {
+                        size *= dims[i];
                     }
-                    else {
-                        arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
-                    }
+
+                    arraySize = size * (dtype.getDatatypeSize() / btype.getDatatypeSize());
                 }
                 else {
                     arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
@@ -3784,6 +3787,8 @@ public class DefaultTableView implements TableView {
                 arrayElements = new Object[(int) arraySize];
             }
             else {
+                if (dtype.isVLEN() && dtype.getDatatypeClass() == Datatype.CLASS_STRING) isVLStr = true;
+
                 arraySize = 0;
                 arrayElements = null;
             }
@@ -3813,6 +3818,16 @@ public class DefaultTableView implements TableView {
                     for (int i = 0; i < arraySize; i++) {
                         arrayElements[i] = Array.getChar(dataValue, index++);
                     }
+                }
+                else if (isVLStr) {
+                    buffer.setLength(0);
+
+                    for (int i = 0; i < dtype.getArrayDims()[0]; i++) {
+                        if (i > 0) buffer.append(", ");
+                        buffer.append(Array.get(dataValue, i));
+                    }
+
+                    return buffer.toString();
                 }
                 else {
                     if (isUINT64) {
@@ -3915,6 +3930,8 @@ public class DefaultTableView implements TableView {
         private final boolean      isInt;
         private final boolean      isUINT64;
 
+        private boolean            isVLStr;
+
         public ScalarDSDataDisplayConverter(final ScalarDS theDataset) {
             buffer = new StringBuffer();
 
@@ -3929,26 +3946,22 @@ public class DefaultTableView implements TableView {
             isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
 
             if (isArray) {
-                if (dtype instanceof H5Datatype) {
-                    if (((H5Datatype) dtype).isVLEN() && dtype.getBasetype().getDatatypeClass() == Datatype.CLASS_STRING) {
-                        // Variable-length string arrays don't have a defined
-                        // array size
-                        arraySize = dtype.getArrayDims()[0];
-                    }
-                    else if (isArray && btype.getDatatypeClass() == Datatype.CLASS_ARRAY){
-                        // Array of Array
-                        long[] dims = btype.getArrayDims();
+                if (dtype.isVLEN() && btype.getDatatypeClass() == Datatype.CLASS_STRING) {
+                    isVLStr = true;
 
-                        long size = 1;
-                        for (int i = 0; i < dims.length; i++) {
-                            size *= dims[i];
-                        }
+                    // Variable-length string arrays don't have a defined array size
+                    arraySize = dtype.getArrayDims()[0];
+                }
+                else if (btype.getDatatypeClass() == Datatype.CLASS_ARRAY){
+                    // Array of Array
+                    long[] dims = btype.getArrayDims();
 
-                        arraySize = size * (dtype.getDatatypeSize() / btype.getDatatypeSize());
+                    long size = 1;
+                    for (int i = 0; i < dims.length; i++) {
+                        size *= dims[i];
                     }
-                    else {
-                        arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
-                    }
+
+                    arraySize = size * (dtype.getDatatypeSize() / btype.getDatatypeSize());
                 }
                 else {
                     arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
@@ -3961,7 +3974,7 @@ public class DefaultTableView implements TableView {
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
-            if (isStr) return value; // String value type doesn't need converting
+            if (isStr || value instanceof String) return value; // String value type doesn't need converting
 
             if (isArray) {
                 buffer.setLength(0); // clear the old string
@@ -4371,8 +4384,10 @@ public class DefaultTableView implements TableView {
      * Provides the NatTable with data from a Compound Dataset for each cell.
      */
     private class CompoundDSDataProvider implements IDataProvider {
+        // Used to store any data fields of type ARRAY
         private Object[]                arrayElements;
 
+        // StringBuffer used for variable-length types
         private final StringBuffer      stringBuffer;
 
         private final Datatype          types[];
@@ -4399,61 +4414,111 @@ public class DefaultTableView implements TableView {
         public Object getDataValue(int col, int row) {
             int fieldIdx = col;
             int rowIdx = row;
-            char CNT = ' ';
-            boolean CshowAsHex = false;
-            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue({},{}) start", row, col);
+            log.trace("CompoundDSDataProvider:getDataValue({},{}) start", row, col);
 
             if (nSubColumns > 1) { // multi-dimension compound dataset
                 int colIdx = col / nFields;
-                fieldIdx = col - colIdx * nFields;
-                // BUG 573: rowIdx = row * orders[fieldIdx] + colIdx * nRows
-                // * orders[fieldIdx];
+//                fieldIdx = col - colIdx * nFields;
+                fieldIdx %= nFields;
                 rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
-                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
+                log.trace("CompoundDSDataProvider:getDataValue() row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
             }
             else {
                 rowIdx = row * orders[fieldIdx];
-                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
+                log.trace("CompoundDSDataProvider:getDataValue() row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
             }
-            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() rowIdx={}", rowIdx);
+            log.trace("CompoundDSDataProvider:getDataValue() rowIdx={}", rowIdx);
 
             Object colValue = ((List<?>) dataValue).get(fieldIdx);
             if (colValue == null) {
                 return "Null";
             }
 
-            stringBuffer.setLength(0); // clear the old string
             Datatype dtype = types[fieldIdx];
-            boolean isString = (dtype.getDatatypeClass() == Datatype.CLASS_STRING);
-            boolean isArray = (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY);
-            if (isArray) {
-                dtype = types[fieldIdx].getBasetype();
-                isString = (dtype.getDatatypeClass() == Datatype.CLASS_STRING);
-                log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
+            int typeClass = dtype.getDatatypeClass();
 
-                if (dtype instanceof H5Datatype) {
+            boolean isArray = (typeClass == Datatype.CLASS_ARRAY);
+            boolean isEnum = (typeClass == Datatype.CLASS_ENUM);
+            boolean isString = (typeClass == Datatype.CLASS_STRING);
+            boolean isVLEN = (dtype.isVLEN());
+
+            if (isArray) {
+                dtype = dtype.getBasetype();
+                typeClass = dtype.getDatatypeClass();
+                isString = (typeClass == Datatype.CLASS_STRING);
+                log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
+
+                if (typeClass == Datatype.CLASS_COMPOUND) {
+                    int numberOfMembers = dtype.getCompoundMemberNames().size();
+                    arrayElements = new Object[orders[fieldIdx] * numberOfMembers];
+
+                    for (int i = 0; i < orders[fieldIdx]; i++) {
+                        try {
+                            Object field_data = null;
+
+                            try {
+                                field_data = Array.get(colValue, rowIdx + i);
+                            }
+                            catch (Exception ex) {
+                                log.debug("CompoundDSDataProvider:getDataValue(): could not retrieve field_data: ", ex);
+                            }
+
+                            for (int j = 0; j < numberOfMembers; j++) {
+                                Object theValue = null;
+
+                                try {
+                                    theValue = Array.get(field_data, j);
+                                    log.trace("CompoundDSDataProvider:getDataValue() theValue[{}]={}", (i * numberOfMembers) + j, theValue.toString());
+                                }
+                                catch (Exception ex) {
+                                    theValue = "*unsupported*";
+                                }
+
+                                arrayElements[(i * numberOfMembers) + j] = theValue;
+                            }
+                        }
+                        catch (Exception ex) {
+                            log.trace("CompoundDSDataProvider:getDataValue(): ", ex);
+                        }
+                    }
+
+                    return arrayElements;
+                }
+                else if (isVLEN) {
+                    stringBuffer.setLength(0); // clear the old string
+
                     // Since variable-length strings are of type CLASS_STRING, not CLASS_VLEN,
                     // the check below cannot determine if the datatype is a variable-length string
-                    if (((H5Datatype) dtype).isVLEN() && isString) {
+                    if (isString) {
                         for (int i = 0; i < orders[fieldIdx]; i++) {
                             if (i > 0) stringBuffer.append(", ");
                             stringBuffer.append(((String[]) colValue)[i]);
                         }
-                        return stringBuffer;
+                        return stringBuffer.toString();
+                    }
+                    else {
+                        // Only support variable length strings
+                        log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} of {} istype={}", isArray, types[fieldIdx].getDatatypeSize(), dtype.getDatatypeDescription());
+                        stringBuffer.append("*unsupported*");
+                        return stringBuffer.toString();
                     }
                 }
-                else if (dtype.getDatatypeClass() == Datatype.CLASS_VLEN) {
-                    // Only support variable length strings
-                    if (!(dtype.getDatatypeClass() == Datatype.CLASS_STRING)) {
-                        int arraylen = (int) types[fieldIdx].getDatatypeSize();
-                        log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} of {} istype={}", isArray, arraylen, dtype);
-                        String str = new String( "*unsupported*");
-                        stringBuffer.append(str.trim());
-                        return stringBuffer;
+                else {
+                    arrayElements = new Object[orders[fieldIdx]];
+
+                    for (int i = 0; i < orders[fieldIdx]; i++) {
+                        arrayElements[i] = Array.get(colValue, rowIdx + i);
                     }
+
+                    return arrayElements;
                 }
             }
-            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): isString={} getBasetype()={}", isString, types[fieldIdx].getDatatypeClass());
+            else if (isEnum) {
+                for (int i = 0; i < orders[fieldIdx]; i++) {
+                    arrayElements[i] = Array.get(colValue, rowIdx + i);
+                }
+            }
+
             if (isString && ((colValue instanceof byte[]) || isArray)) {
                 // strings
                 int strlen = (int) dtype.getDatatypeSize();
@@ -4461,7 +4526,7 @@ public class DefaultTableView implements TableView {
                 if(isArray) {
                     arraylen = (int) types[fieldIdx].getDatatypeSize();
                 }
-                log.trace("**CompoundDS:CompoundDSDataProvider:getDataValue(): isArray={} of {} isString={} of {}", isArray, arraylen, isString, strlen);
+                log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} of {} isString={} of {}", isArray, arraylen, isString, strlen);
                 int arraycnt = arraylen / strlen;
                 for (int loopidx = 0; loopidx < arraycnt; loopidx++) {
                     if(isArray && loopidx > 0) {
@@ -4474,156 +4539,12 @@ public class DefaultTableView implements TableView {
                     }
                     stringBuffer.append(str.trim());
                 }
-            }
-            else if (isArray && dtype.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
-                for (int i = 0; i < orders[fieldIdx]; i++) {
-                    try {
-                        int numberOfMembers = dtype.getCompoundMemberNames().size();
-                        Object field_data = null;
-
-                        try {
-                            field_data = Array.get(colValue, rowIdx + i);
-                        }
-                        catch (Exception ex) {
-                            log.debug("CompoundDS:CompoundDSDataProvider:getDataValue(): could not retrieve field_data: ", ex);
-                        }
-
-                        if (i > 0) stringBuffer.append(", ");
-                        stringBuffer.append("[ ");
-
-                        for (int j = 0; j < numberOfMembers; j++) {
-                            Object theValue = null;
-
-                            try {
-                                theValue = Array.get(field_data, j);
-                                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", j, theValue.toString());
-                            }
-                            catch (Exception ex) {
-                                theValue = "*unsupported*";
-                            }
-
-                            if (j > 0) stringBuffer.append(", ");
-                            stringBuffer.append(theValue);
-                        }
-
-                        stringBuffer.append(" ]");
-                    }
-                    catch (Exception ex) {
-                        log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): ", ex);
-                    }
-                }
 
                 return stringBuffer;
             }
-            else {
-                // numerical values
-                arrayElements = new Object[orders[fieldIdx]];
 
-                String cName = colValue.getClass().getName();
-                int cIndex = cName.lastIndexOf("[");
-                if (cIndex >= 0) {
-                    CNT = cName.charAt(cIndex + 1);
-                }
-                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): cName={} CNT={}", cName, CNT);
-
-                boolean isUINT64 = false;
-                boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
-                boolean isEnum = dtype.getDatatypeClass() == Datatype.CLASS_ENUM;
-                int typeSize = (int) dtype.getDatatypeSize();
-                int classType = dtype.getDatatypeClass();
-
-                if ((classType == Datatype.CLASS_BITFIELD) || (classType == Datatype.CLASS_OPAQUE)) {
-//                    CshowAsHex = true;
-                    log.trace("CompoundDS:CompoundDSDataProvider:getValueAt() class={} (BITFIELD or OPAQUE)", classType);
-                }
-                if (dtype.isUnsigned()) {
-                    if (cIndex >= 0) {
-                        isUINT64 = (cName.charAt(cIndex + 1) == 'J');
-                    }
-                }
-                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() isUINT64={} isInt={} CshowAsHex={} typeSize={}", isUINT64, isInt, typeSize);
-
-                if (isEnum) {
-                    String[] outValues;
-
-                    if (!dataset.isEnumConverted()) {
-                        outValues = new String[selectionLayer.getPreferredRowCount() * orders[fieldIdx]];
-
-                        try {
-                            H5Datatype.convertEnumValueToName(dtype.toNative(), colValue, outValues);
-                        } catch (HDF5Exception ex) {
-                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue(): Could not convert enum values to names: ex");
-                            return stringBuffer;
-                        }
-                    }
-                    else
-                        outValues = (String[]) colValue;
-
-                    for (int i = rowIdx; i < (rowIdx + orders[fieldIdx]); i++) {
-                        if (i > rowIdx) stringBuffer.append(", ");
-                        stringBuffer.append(outValues[i]);
-                    }
-                }
-                else {
-                    for (int i = 0; i < orders[fieldIdx]; i++) {
-                        if (isUINT64) {
-                            Object theValue = Array.get(colValue, rowIdx + i);
-                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
-                            Long l = (Long) theValue;
-                            if (l < 0) {
-                                l = (l << 1) >>> 1;
-                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                BigInteger big2 = new BigInteger(l.toString());
-                                BigInteger big = big1.add(big2);
-                                theValue = big.toString();
-                            }
-                            if (i > 0) stringBuffer.append(", ");
-                            stringBuffer.append(theValue);
-                        }
-                        else if (CshowAsHex && isInt) {
-                            char[] hexArray = "0123456789ABCDEF".toCharArray();
-                            Object theValue = Array.get(colValue, rowIdx * typeSize + typeSize * i);
-                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
-                            // show in Hexadecimal
-                            char[] hexChars = new char[2];
-                            if (i > 0) stringBuffer.append(", ");
-                            for (int x = 0; x < typeSize; x++) {
-                                if (x > 0)
-                                    theValue = Array.get(colValue, rowIdx * typeSize + typeSize * i + x);
-                                int v = (int)((Byte)theValue) & 0xFF;
-                                hexChars[0] = hexArray[v >>> 4];
-                                hexChars[1] = hexArray[v & 0x0F];
-                                if (x > 0) stringBuffer.append(":");
-                                stringBuffer.append(hexChars);
-                                log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() hexChars[{}]={}", x, hexChars);
-                            }
-                        }
-                        else if (showAsBin && isInt) {
-                            Object theValue = Array.get(colValue, rowIdx + typeSize * i);
-                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
-                            theValue = Tools.toBinaryString(Long.valueOf(theValue.toString()), typeSize);
-                            if (i > 0) stringBuffer.append(", ");
-                            stringBuffer.append(theValue);
-                        }
-                        else if (numberFormat != null) {
-                            // show in scientific format
-                            Object theValue = Array.get(colValue, rowIdx + i);
-                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
-                            theValue = numberFormat.format(theValue);
-                            if (i > 0) stringBuffer.append(", ");
-                            stringBuffer.append(theValue);
-                        }
-                        else {
-                            Object theValue = Array.get(colValue, rowIdx + i);
-                            log.trace("CompoundDS:CompoundDSDataProvider:getDataValue() theValue[{}]={}", i, theValue.toString());
-                            if (i > 0) stringBuffer.append(", ");
-                            stringBuffer.append(theValue);
-                        }
-                    }
-                } // end of else {
-            } // end of else {
-
-            return stringBuffer;
+            // Non-array, non-enum numerical types
+            return Array.get(colValue, rowIdx);
         }
 
         @Override
@@ -4632,7 +4553,7 @@ public class DefaultTableView implements TableView {
                 updateValueInMemory((String) newValue, rowIndex, columnIndex);
             }
             catch (Exception ex) {
-                log.debug("CompoundDSDataProvider: setDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
+                log.debug("CompoundDSDataProvider:setDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
             }
         }
 
@@ -4657,6 +4578,7 @@ public class DefaultTableView implements TableView {
         private final int[]         orders;
         private final int           nFields;
         private int                 fieldIndex;
+        private final int           nSubColumns;
 
         public CompoundDSDataDisplayConverter(final CompoundDS theDataset) {
             this.theDataset = theDataset;
@@ -4667,16 +4589,136 @@ public class DefaultTableView implements TableView {
 
             orders = theDataset.getSelectedMemberOrders();
             nFields = ((List<?>) dataValue).size();
+            nSubColumns = (nFields > 0) ?  (int) (theDataset.getWidth() * theDataset.getSelectedMemberCount()) / nFields : 0;
         }
 
         @Override
         public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
             fieldIndex = cell.getColumnIndex();
+            if (nSubColumns > 1) fieldIndex %= nFields;
             return canonicalToDisplayValue(value);
         }
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
+            if (value instanceof String) return value;
+
+            char CNT = ' ';
+            boolean CshowAsHex = false;
+
+            Datatype dtype = types[fieldIndex];
+            int typeClass = dtype.getDatatypeClass();
+            int typeSize = (int) dtype.getDatatypeSize();
+            boolean isArray = (typeClass == Datatype.CLASS_ARRAY);
+            boolean isEnum = (typeClass == Datatype.CLASS_ENUM);
+            boolean isStr = (typeClass == Datatype.CLASS_STRING);
+
+            if ((typeClass == Datatype.CLASS_BITFIELD) || (typeClass == Datatype.CLASS_OPAQUE)) {
+                CshowAsHex = true;
+                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): class={} (BITFIELD or OPAQUE)", typeClass);
+            }
+
+            if (isArray) {
+                buffer.setLength(0);
+
+                dtype = dtype.getBasetype();
+                typeClass = dtype.getDatatypeClass();
+                isStr = (typeClass == Datatype.CLASS_STRING);
+                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isStr={}", isArray, isStr);
+
+                if (typeClass == Datatype.CLASS_COMPOUND) {
+                    int numberOfMembers = dtype.getCompoundMemberNames().size();
+
+                    for (int i = 0; i < orders[fieldIndex]; i++) {
+                        if (i > 0) buffer.append(", ");
+
+                        buffer.append("[");
+
+                        for (int j = 0; j < numberOfMembers; j++) {
+                            if (j > 0) buffer.append(", ");
+                            buffer.append(Array.get(value, (i * numberOfMembers) + j));
+                        }
+
+                        buffer.append("]");
+                    }
+
+                    return buffer;
+                }
+                else {
+                    for (int i = 0; i < orders[fieldIndex]; i++) {
+                        if (i > 0) buffer.append(", ");
+                        buffer.append(((Object[]) value)[i]);
+                    }
+
+                    return buffer;
+                }
+            }
+            else if (isEnum) {
+                String[] outValues;
+                int len = Array.getLength(value);
+
+                buffer.setLength(0);
+
+                if (!dataset.isEnumConverted()) {
+                    outValues = new String[len];
+
+                    try {
+                        H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                    } catch (HDF5Exception ex) {
+                        log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                        return buffer;
+                    }
+                }
+                else
+                    outValues = (String[]) value;
+
+                for (int i = 0; i < len; i++) {
+                    if (i > 0) buffer.append(", ");
+                    buffer.append(outValues[i]);
+                }
+            }
+            else {
+                boolean isUINT64 = false;
+                boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
+
+                String cName = value.getClass().getName();
+                int cIndex = cName.lastIndexOf("[");
+                if (cIndex >= 0) {
+                    CNT = cName.charAt(cIndex + 1);
+                    if (dtype.isUnsigned()) isUINT64 = (CNT == 'J');
+                }
+
+                if (isUINT64) {
+                    Long l = (Long) value;
+                    if (l < 0) {
+                        // 64-bit integer
+                        l = (l << 1) >>> 1;
+                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                        BigInteger big2 = new BigInteger(l.toString());
+                        BigInteger big = big1.add(big2);
+
+                        if (showAsHex) return Tools.toHexString(big, 8);
+                        if (showAsBin) return Tools.toBinaryString(big, 8);
+                        return big.toString();
+                    }
+                    else {
+                        // 32-bit integer
+                        if (showAsHex) return Tools.toHexString(l, 8);
+                        if (showAsBin) return Tools.toBinaryString(l, 8);
+                    }
+                }
+                else if (CshowAsHex && isInt) {
+                    return Tools.toHexString(Long.valueOf(value.toString()), (int) typeSize);
+                }
+                else if (showAsBin && isInt) {
+                    return Tools.toBinaryString(Long.valueOf(value.toString()), (int) typeSize);
+                }
+                else if (numberFormat != null) {
+                    // show in scientific or custom notation
+                    return numberFormat.format(value);
+                }
+            }
+
             return value;
         }
 

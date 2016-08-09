@@ -175,22 +175,22 @@ public abstract class Datatype extends HObject {
      * The (name, value) pairs of enum members.
      */
     protected String enumMembers;
-    
+
     /**
      * The list of names of members of a compound Datatype.
      */
     protected List<String> compoundMemberNames;
-    
+
     /**
      * The list of types of members of a compound Datatype.
      */
     protected List<Datatype> compoundMemberTypes;
-    
+
     /**
      * The list of offsets of members of a compound Datatype.
      */
     protected List<Long> compoundMemberOffsets;
-    
+
     /**
      * The list of field IDs of members of a compound Datatype.
      */
@@ -206,6 +206,11 @@ public abstract class Datatype extends HObject {
      * The dimensions of the ARRAY element of an ARRAY datatype.
      */
     protected long[] dims;
+
+    /**
+     * Determines whether this datatype is a variable-length type.
+     */
+    protected boolean isVLEN = false;
 
 
     /**
@@ -444,20 +449,20 @@ public abstract class Datatype extends HObject {
     public final String getEnumMembers() {
         return enumMembers;
     }
-    
+
     /**
      * Returns the dimensions of an Array Datatype.
-     * 
+     *
      * @return dims the dimensions of the Array Datatype
      */
     public final long[] getArrayDims() {
         return dims;
     }
-    
+
     public final List<String> getCompoundMemberNames() {
         return compoundMemberNames;
     }
-    
+
     public final List<Datatype> getCompoundMemberTypes() {
         return compoundMemberTypes;
     }
@@ -517,7 +522,7 @@ public abstract class Datatype extends HObject {
      */
     public String getDatatypeDescription() {
         log.trace("getDatatypeDescription(): start");
-        
+
         String description = "Unknown";
 
         switch (datatypeClass) {
@@ -572,6 +577,15 @@ public abstract class Datatype extends HObject {
      *         false.
      */
     public abstract boolean isUnsigned();
+
+    /**
+     * Checks if this datatype is a variable-length type.
+     *
+     * @return true if the datatype is variable-length; false otherwise
+     */
+    public boolean isVLEN() {
+        return isVLEN;
+    }
 
     /**
      * Opens access to this named datatype. Sub-classes must replace this default

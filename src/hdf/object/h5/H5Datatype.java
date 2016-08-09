@@ -56,8 +56,6 @@ public class H5Datatype extends Datatype {
 
     private H5O_info_t obj_info;
 
-    private boolean isVLEN = false;
-
     private String description = null;
 
     /**
@@ -1475,15 +1473,6 @@ public class H5Datatype extends Datatype {
         }
 
         return unsigned;
-    }
-
-    /**
-     * Checks if a datatype is variable-length.
-     *
-     * @return if the datatype is variable-length.
-     */
-    public boolean isVLEN() {
-        return isVLEN;
     }
 
     /**
