@@ -300,7 +300,7 @@ public class DataOptionDialog extends Dialog {
                 if (transposeChoice == null) {
                     isTransposed = false;
                 } else {
-                    isTransposed = transposeChoice.getSelectionIndex() == 1;
+                    isTransposed = transposeChoice.getSelectionIndex() == 0;
                 }
 
                 if (base1Button == null) {
@@ -1209,8 +1209,8 @@ public class DataOptionDialog extends Dialog {
             transposeChoice.setFont(curFont);
             transposeChoice.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
 
-            transposeChoice.add("Reshape");
             transposeChoice.add("Transpose");
+            transposeChoice.add("Reshape");
 
             transposeChoice.select(0);
         }
@@ -1507,7 +1507,7 @@ public class DataOptionDialog extends Dialog {
         }
 
         if (theSelectedChoice < 0) {
-            return; // the selected JComboBox is not a dimension choice
+            return; // the selected ComboBox is not a dimension choice
         }
 
         int theIndex = source.getSelectionIndex();

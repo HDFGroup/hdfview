@@ -2740,6 +2740,26 @@ public final class Tools {
         }
     }
 
+    public static boolean checkValidDouble(String value) {
+        try {
+            Double d = Double.parseDouble(value);
+            return (d >= Double.MIN_VALUE && d <= Double.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidFloat(String value) {
+        try {
+            Float f = Float.parseFloat(value);
+            return (f >= Float.MIN_VALUE && f <= Float.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
     /**
      * Show an SWT error dialog with the given error message.
      * @param parent
