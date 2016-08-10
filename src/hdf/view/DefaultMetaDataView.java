@@ -1329,6 +1329,9 @@ public class DefaultMetaDataView implements MetaDataView {
                 type = attr.getType().getDatatypeDescription();
                 log.trace("createAttributesComposite:  attr[{}] is {} as {}", i, name, type);
 
+                if (name == null) name = "null";
+                if (type == null) type = "null";
+
                 if (attr.isScalar()) {
                     size = "Scalar";
                 }
@@ -1338,6 +1341,8 @@ public class DefaultMetaDataView implements MetaDataView {
                     for (int j = 1; j < dims.length; j++) {
                         size += " x " + dims[j];
                     }
+
+                    if (size == null) size = "null";
                 }
 
                 TableItem item = new TableItem(attrTable, SWT.NONE);
@@ -1345,12 +1350,15 @@ public class DefaultMetaDataView implements MetaDataView {
 
                 if (attr.getProperty("field") != null) {
                     String fieldInfo = " {Field: "+attr.getProperty("field")+"}";
-                    item.setText(0, name + fieldInfo);
+                    item.setText(0, (name + fieldInfo == null) ? "null" : name + fieldInfo);
                 } else {
-                    item.setText(0, name);
+                    item.setText(0, (name == null) ? "null" : name);
                 }
 
-                item.setText(1, attr.toString(", "));
+                String value = attr.toString(", ");
+                if (value == null) value = "null";
+
+                item.setText(1, value);
                 item.setText(2, type);
                 item.setText(3, size);
             } // for (int i=0; i<n; i++)
