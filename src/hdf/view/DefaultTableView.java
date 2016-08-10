@@ -3877,7 +3877,7 @@ public class DefaultTableView implements TableView {
                 }
 //                log.trace("ScalarDSDataProvider:getValueAt index={} isStr={} isUINT64={}", index, isStr, isUINT64);
 
-                if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE) {
+                if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) {
                     int len = (int) dtype.getDatatypeSize();
                     byte[] elements = new byte[len];
 
@@ -4018,7 +4018,7 @@ public class DefaultTableView implements TableView {
 
                 return buffer;
             }
-            else if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE) {
+            else if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) {
                 buffer.setLength(0);
 
                 for (int i = 0; i < ((byte[]) value).length; i++) {
