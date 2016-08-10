@@ -380,9 +380,11 @@ public class Chart extends Dialog {
                     int maxXLabelHeight = g.stringExtent(String.valueOf(xmax)).y;
 
                     // Make sure legend width scales with font size and large column values
-                    for (int i = 0; i < lineLabels.length; i++) {
-                        int width = g.stringExtent(lineLabels[i]).x;
-                        if (width > (2 * LEGEND_WIDTH / 3) - 10) LEGEND_WIDTH += width;
+                    if (lineLabels != null) {
+                        for (int i = 0; i < lineLabels.length; i++) {
+                            int width = g.stringExtent(lineLabels[i]).x;
+                            if (width > (2 * LEGEND_WIDTH / 3) - 10) LEGEND_WIDTH += width;
+                        }
                     }
 
                     int xgap = maxYLabelWidth + gap;

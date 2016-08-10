@@ -3890,7 +3890,24 @@ public class DefaultTableView implements TableView {
                     theValue = elements;
                 }
                 else {
-                    theValue = Array.get(dataValue, (int) index);
+                    if (isUINT64) {
+                        Long l = (Long) Array.get(dataValue, (int) index);
+                        BigInteger big;
+                        if (l < 0) {
+                            l = (l << 1) >>> 1;
+                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                            BigInteger big2 = new BigInteger(l.toString());
+                            big = big1.add(big2);
+                        }
+                        else {
+                            big = new BigInteger(l.toString());
+                        }
+
+                        theValue = big;
+                    }
+                    else {
+                        theValue = Array.get(dataValue, (int) index);
+                    }
                 }
             }
 
@@ -4031,23 +4048,9 @@ public class DefaultTableView implements TableView {
                 // Numerical values
 
                 if (isUINT64) {
-                    Long l = (Long) value;
-                    if (l < 0) {
-                        // 64-bit integer
-                        l = (l << 1) >>> 1;
-                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                        BigInteger big2 = new BigInteger(l.toString());
-                        BigInteger big = big1.add(big2);
-
-                        if (showAsHex) return Tools.toHexString(big, 8);
-                        if (showAsBin) return Tools.toBinaryString(big, 8);
-                        return big.toString();
-                    }
-                    else {
-                        // 32-bit integer
-                        if (showAsHex) return Tools.toHexString(l, 8);
-                        if (showAsBin) return Tools.toBinaryString(l, 8);
-                    }
+                    if (showAsHex) return Tools.toHexString((BigInteger) value, 8);
+                    if (showAsBin) return Tools.toBinaryString((BigInteger) value, 8);
+                    return ((BigInteger) value).toString();
                 }
                 else if (showAsHex && isInt) {
                     return Tools.toHexString(Long.valueOf(value.toString()), (int) typeSize);
@@ -4435,6 +4438,14 @@ public class DefaultTableView implements TableView {
             boolean isArray = (typeClass == Datatype.CLASS_ARRAY);
             boolean isEnum = (typeClass == Datatype.CLASS_ENUM);
             boolean isString = (typeClass == Datatype.CLASS_STRING);
+            boolean isUINT64 = false;
+
+            String cName = colValue.getClass().getName();
+            int cIndex = cName.lastIndexOf("[");
+            if (cIndex >= 0) {
+                cName.charAt(cIndex + 1);
+                if (dtype.isUnsigned()) isUINT64 = (cName.charAt(cIndex + 1) == 'J');
+            }
 
             if (isArray) {
                 dtype = dtype.getBasetype();
@@ -4527,8 +4538,28 @@ public class DefaultTableView implements TableView {
                 else {
                     arrayElements = new Object[orders[fieldIdx]];
 
-                    for (int i = 0; i < orders[fieldIdx]; i++) {
-                        arrayElements[i] = Array.get(colValue, rowIdx + i);
+                    if (isUINT64) {
+                        // Unsigned 32- or 64-bit integer
+                        for (int i = 0; i < orders[fieldIdx]; i++) {
+                            Long l = (Long) Array.get(colValue, rowIdx + i);
+                            BigInteger big;
+                            if (l < 0) {
+                                l = (l << 1) >>> 1;
+                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                                BigInteger big2 = new BigInteger(l.toString());
+                                big = big1.add(big2);
+                            }
+                            else {
+                                big = new BigInteger(l.toString());
+                            }
+
+                            arrayElements[i] = big;
+                        }
+                    }
+                    else {
+                        for (int i = 0; i < orders[fieldIdx]; i++) {
+                            arrayElements[i] = Array.get(colValue, rowIdx + i);
+                        }
                     }
 
                     theValue = arrayElements;
@@ -4547,9 +4578,38 @@ public class DefaultTableView implements TableView {
 
                 theValue = str.trim();
             }
+            else if (typeClass == Datatype.CLASS_OPAQUE || typeClass == Datatype.CLASS_BITFIELD) {
+                int len = (int) dtype.getDatatypeSize();
+                byte[] elements = new byte[len];
+
+                rowIdx *= len;
+
+                for (int i = 0; i < len; i++) {
+                    elements[i] = Array.getByte(colValue, (int) rowIdx + i);
+                }
+
+                theValue = elements;
+            }
             else {
                 // Flat numerical types
-                theValue = Array.get(colValue, rowIdx);
+                if (isUINT64) {
+                    Long l = (Long) Array.get(colValue, (int) rowIdx);
+                    BigInteger big;
+                    if (l < 0) {
+                        l = (l << 1) >>> 1;
+                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                        BigInteger big2 = new BigInteger(l.toString());
+                        big = big1.add(big2);
+                    }
+                    else {
+                        big = new BigInteger(l.toString());
+                    }
+
+                    theValue = big;
+                }
+                else {
+                    theValue = Array.get(colValue, rowIdx);
+                }
             }
 
             return theValue;
@@ -4681,41 +4741,21 @@ public class DefaultTableView implements TableView {
                     buffer.append(outValues[i]);
                 }
             }
+            else if (typeClass == Datatype.CLASS_OPAQUE || typeClass == Datatype.CLASS_BITFIELD) {
+                buffer.setLength(0);
+
+                for (int i = 0; i < ((byte[]) value).length; i++) {
+                    if (i > 0) buffer.append(":");
+                    buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
+                }
+
+                return buffer;
+            }
             else {
-                boolean isUINT64 = false;
                 boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
 
-                String cName = value.getClass().getName();
-                int cIndex = cName.lastIndexOf("[");
-                if (cIndex >= 0) {
-                    CNT = cName.charAt(cIndex + 1);
-                    if (dtype.isUnsigned()) isUINT64 = (CNT == 'J');
-                }
-
-                if (isUINT64) {
-                    Long l = (Long) value;
-                    if (l < 0) {
-                        // 64-bit integer
-                        l = (l << 1) >>> 1;
-                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                        BigInteger big2 = new BigInteger(l.toString());
-                        BigInteger big = big1.add(big2);
-
-                        if (showAsHex) return Tools.toHexString(big, 8);
-                        if (showAsBin) return Tools.toBinaryString(big, 8);
-                        return big.toString();
-                    }
-                    else {
-                        // 32-bit integer
-                        if (showAsHex) return Tools.toHexString(l, 8);
-                        if (showAsBin) return Tools.toBinaryString(l, 8);
-                    }
-                }
-                else if (CshowAsHex && isInt) {
+                if (CshowAsHex && isInt) {
                     return Tools.toHexString(Long.valueOf(value.toString()), (int) typeSize);
-                }
-                else if (showAsBin && isInt) {
-                    return Tools.toBinaryString(Long.valueOf(value.toString()), (int) typeSize);
                 }
                 else if (numberFormat != null) {
                     // show in scientific or custom notation
