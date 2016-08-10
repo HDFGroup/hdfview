@@ -1095,7 +1095,7 @@ public class DefaultTableView implements TableView {
 
                 if (root == null) return;
 
-                Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
+                Vector<HObject> list = new Vector<>(dataset.getFileFormat().getNumberOfMembers() + 5);
                 Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
 
                 while(it.hasNext()) list.add(it.next());
@@ -2025,7 +2025,7 @@ public class DefaultTableView implements TableView {
         // Since NatTable returns the selected row positions as a Set<Range>, convert this to
         // an Integer[]
         Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-        Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+        Set<Integer> selectedRowPos = new LinkedHashSet<>();
         Iterator<Range> i1 = rowPositions.iterator();
         while(i1.hasNext()) {
             selectedRowPos.addAll(i1.next().getMembers());
@@ -2220,7 +2220,7 @@ public class DefaultTableView implements TableView {
                 // Since NatTable returns the selected row positions as a Set<Range>, convert this to
                 // an Integer[]
                 Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-                Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+                Set<Integer> selectedRowPos = new LinkedHashSet<>();
                 Iterator<Range> i1 = rowPositions.iterator();
                 while(i1.hasNext()) {
                     selectedRowPos.addAll(i1.next().getMembers());
@@ -3383,7 +3383,7 @@ public class DefaultTableView implements TableView {
         // Since NatTable returns the selected row positions as a Set<Range>, convert this to
         // an Integer[]
         Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-        Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+        Set<Integer> selectedRowPos = new LinkedHashSet<>();
         Iterator<Range> i1 = rowPositions.iterator();
         while(i1.hasNext()) {
             selectedRowPos.addAll(i1.next().getMembers());
@@ -3722,6 +3722,9 @@ public class DefaultTableView implements TableView {
      * Provides the NatTable with data from a Scalar Dataset for each cell.
      */
     private class ScalarDSDataProvider implements IDataProvider {
+        private Object             theValue;
+
+        // Array used to store elements of ARRAY datatypes
         private final Object[]     arrayElements;
 
         // StringBuffer used to store variable-length datatypes
@@ -3739,8 +3742,6 @@ public class DefaultTableView implements TableView {
         private final boolean      isUINT64;
 
         private boolean            isVLStr;
-
-        private Object             theValue;
 
         private final boolean      isNaturalOrder;
 
@@ -3805,11 +3806,11 @@ public class DefaultTableView implements TableView {
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            log.trace("ScalarDS:ScalarDSDataProvider:getValueAt({},{}) start", rowIndex, columnIndex);
-            log.trace("ScalarDS:ScalarDSDataProvider:getValueAt isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray, showAsHex, showAsBin);
+            log.trace("ScalarDSDataProvider:getValueAt({},{}) start", rowIndex, columnIndex);
+            log.trace("ScalarDSDataProvider:getValueAt isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray, showAsHex, showAsBin);
 
             if (isArray) {
-                log.trace("ScalarDS:ScalarDSDataProvider:getValueAt ARRAY dataset size={} isDisplayTypeChar={} isUINT64={}",
+                log.trace("ScalarDSDataProvider:getValueAt ARRAY dataset size={} isDisplayTypeChar={} isUINT64={}",
                         arraySize, isDisplayTypeChar, isUINT64);
 
                 int index = (int)(rowIndex * colCount + columnIndex) * (int)arraySize;
@@ -3818,6 +3819,8 @@ public class DefaultTableView implements TableView {
                     for (int i = 0; i < arraySize; i++) {
                         arrayElements[i] = Array.getChar(dataValue, index++);
                     }
+
+                    theValue = arrayElements;
                 }
                 else if (isVLStr) {
                     buffer.setLength(0);
@@ -3827,7 +3830,7 @@ public class DefaultTableView implements TableView {
                         buffer.append(Array.get(dataValue, i));
                     }
 
-                    return buffer.toString();
+                    theValue = buffer.toString();
                 }
                 else {
                     if (isUINT64) {
@@ -3852,15 +3855,15 @@ public class DefaultTableView implements TableView {
                             arrayElements[i] = Array.get(dataValue, index++);
                         }
                     }
-                }
 
-                theValue = arrayElements;
+                    theValue = arrayElements;
+                }
             }
             else {
                 long index = columnIndex * rowCount + rowIndex;
 
                 if (dataset.getRank() > 1) {
-                    log.trace("ScalarDS:ScalarDSDataProvider:getValueAt rank={} isDataTransposed={} isNaturalOrder={}", dataset.getRank(), isDataTransposed, isNaturalOrder);
+                    log.trace("ScalarDSDataProvider:getValueAt rank={} isDataTransposed={} isNaturalOrder={}", dataset.getRank(), isDataTransposed, isNaturalOrder);
                     if (isDataTransposed && isNaturalOrder)
                         index = columnIndex * rowCount + rowIndex;
                     else if (!isDataTransposed && !isNaturalOrder)
@@ -3872,7 +3875,7 @@ public class DefaultTableView implements TableView {
                     else
                         index = rowIndex * colCount + columnIndex;
                 }
-//                log.trace("ScalarDS:ScalarDSDataProvider:getValueAt index={} isStr={} isUINT64={}", index, isStr, isUINT64);
+//                log.trace("ScalarDSDataProvider:getValueAt index={} isStr={} isUINT64={}", index, isStr, isUINT64);
 
                 if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE) {
                     int len = (int) dtype.getDatatypeSize();
@@ -3881,7 +3884,7 @@ public class DefaultTableView implements TableView {
                     index *= len;
 
                     for (int i = 0; i < len; i++) {
-                        elements[i] = (Byte) Array.get(dataValue, (int) index + i);
+                        elements[i] = Array.getByte(dataValue, (int) index + i);
                     }
 
                     theValue = elements;
@@ -3891,7 +3894,7 @@ public class DefaultTableView implements TableView {
                 }
             }
 
-            log.trace("ScalarDS:ScalarDSDataProvider:getValueAt finish");
+            log.trace("ScalarDSDataProvider:getValueAt finish");
             return theValue;
         }
 
@@ -3901,7 +3904,7 @@ public class DefaultTableView implements TableView {
                 updateValueInMemory((String) newValue, rowIndex, columnIndex);
             }
             catch (Exception ex) {
-                log.debug("ScalarDSDataProvider: setDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
+                log.debug("ScalarDSDataProvider:setDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
             }
         }
 
@@ -3930,8 +3933,6 @@ public class DefaultTableView implements TableView {
         private final boolean      isInt;
         private final boolean      isUINT64;
 
-        private boolean            isVLStr;
-
         public ScalarDSDataDisplayConverter(final ScalarDS theDataset) {
             buffer = new StringBuffer();
 
@@ -3947,8 +3948,6 @@ public class DefaultTableView implements TableView {
 
             if (isArray) {
                 if (dtype.isVLEN() && btype.getDatatypeClass() == Datatype.CLASS_STRING) {
-                    isVLStr = true;
-
                     // Variable-length string arrays don't have a defined array size
                     arraySize = dtype.getArrayDims()[0];
                 }
@@ -3979,14 +3978,23 @@ public class DefaultTableView implements TableView {
             if (isArray) {
                 buffer.setLength(0); // clear the old string
 
-                if (isUINT64) {
-                    if (showAsHex) {
+                if (showAsHex) {
+                    if (isUINT64) {
                         for (int i = 0; i < (int) arraySize; i++) {
                             if (i > 0) buffer.append(", ");
                             buffer.append(Tools.toHexString((BigInteger) ((Object[]) value)[i], 8));
                         }
                     }
-                    else if (showAsBin) {
+                    else {
+                        for (int i = 0; i < (int) arraySize; i++) {
+                            if (i > 0) buffer.append(", ");
+                            Long l = Long.valueOf(((Object[]) value)[i].toString());
+                            buffer.append(Tools.toHexString(l, (int) (typeSize / arraySize)));
+                        }
+                    }
+                }
+                else if (showAsBin) {
+                    if (isUINT64) {
                         for (int i = 0; i < (int) arraySize; i++) {
                             if (i > 0) buffer.append(", ");
                             buffer.append(Tools.toBinaryString((BigInteger) ((Object[]) value)[i], 8));
@@ -3995,30 +4003,16 @@ public class DefaultTableView implements TableView {
                     else {
                         for (int i = 0; i < (int) arraySize; i++) {
                             if (i > 0) buffer.append(", ");
-                            buffer.append(((Object[]) value)[i]);
-                        }
-                    }
-                }
-                else {
-                    if (showAsHex) {
-                        for (int i = 0; i < (int) arraySize; i++) {
-                            if (i > 0) buffer.append(", ");
-                            Long l = Long.valueOf(((Object[]) value)[i].toString());
-                            buffer.append(Tools.toHexString(l, (int) (typeSize / arraySize)));
-                        }
-                    }
-                    else if (showAsBin) {
-                        for (int i = 0; i < (int) arraySize; i++) {
-                            if (i > 0) buffer.append(", ");
                             Long l = Long.valueOf(((Object[]) value)[i].toString());
                             buffer.append(Tools.toBinaryString(l, (int) (typeSize / arraySize)));
                         }
                     }
-                    else {
-                        for (int i = 0; i < (int) arraySize; i++) {
-                            if (i > 0) buffer.append(", ");
-                            buffer.append(((Object[]) value)[i]);
-                        }
+                }
+                else {
+                    // Default case if no special display type is chosen
+                    for (int i = 0; i < (int) arraySize; i++) {
+                        if (i > 0) buffer.append(", ");
+                        buffer.append(((Object[]) value)[i]);
                     }
                 }
 
@@ -4384,6 +4378,8 @@ public class DefaultTableView implements TableView {
      * Provides the NatTable with data from a Compound Dataset for each cell.
      */
     private class CompoundDSDataProvider implements IDataProvider {
+        private Object                  theValue;
+
         // Used to store any data fields of type ARRAY
         private Object[]                arrayElements;
 
@@ -4418,7 +4414,6 @@ public class DefaultTableView implements TableView {
 
             if (nSubColumns > 1) { // multi-dimension compound dataset
                 int colIdx = col / nFields;
-//                fieldIdx = col - colIdx * nFields;
                 fieldIdx %= nFields;
                 rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
                 log.trace("CompoundDSDataProvider:getDataValue() row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
@@ -4440,7 +4435,6 @@ public class DefaultTableView implements TableView {
             boolean isArray = (typeClass == Datatype.CLASS_ARRAY);
             boolean isEnum = (typeClass == Datatype.CLASS_ENUM);
             boolean isString = (typeClass == Datatype.CLASS_STRING);
-            boolean isVLEN = (dtype.isVLEN());
 
             if (isArray) {
                 dtype = dtype.getBasetype();
@@ -4482,26 +4476,53 @@ public class DefaultTableView implements TableView {
                         }
                     }
 
-                    return arrayElements;
+                    theValue = arrayElements;
                 }
-                else if (isVLEN) {
+                else if (dtype.isVLEN()) {
                     stringBuffer.setLength(0); // clear the old string
 
-                    // Since variable-length strings are of type CLASS_STRING, not CLASS_VLEN,
-                    // the check below cannot determine if the datatype is a variable-length string
                     if (isString) {
                         for (int i = 0; i < orders[fieldIdx]; i++) {
                             if (i > 0) stringBuffer.append(", ");
                             stringBuffer.append(((String[]) colValue)[i]);
                         }
-                        return stringBuffer.toString();
                     }
                     else {
                         // Only support variable length strings
-                        log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} of {} istype={}", isArray, types[fieldIdx].getDatatypeSize(), dtype.getDatatypeDescription());
+                        log.debug("**CompoundDSDataProvider:getDataValue(): Unsupported Variable-length of {}", dtype.getDatatypeDescription());
                         stringBuffer.append("*unsupported*");
-                        return stringBuffer.toString();
                     }
+
+                    theValue = stringBuffer.toString();
+                }
+                else if (isString) {
+                    // ARRAY of strings
+                    int strlen = (int) dtype.getDatatypeSize();
+                    int arraylen = (int) types[fieldIdx].getDatatypeSize();
+                    arrayElements = new Object[arraylen];
+
+                    log.trace("**CompoundDSDataProvider:getDataValue(): ARRAY of size {}: isString={} of size {}", arraylen, isString, strlen);
+                    int arraycnt = arraylen / strlen;
+                    for (int i = 0; i < arraycnt; i++) {
+                        String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
+                        int idx = str.indexOf('\0');
+                        if (idx > 0) {
+                            str = str.substring(0, idx);
+                        }
+
+                        arrayElements[i] = str.trim();
+                    }
+
+                    theValue = arrayElements;
+                }
+                else if (isEnum) {
+                    arrayElements = new Object[orders[fieldIdx]];
+
+                    for (int i = 0; i < orders[fieldIdx]; i++) {
+                        arrayElements[i] = Array.get(colValue, rowIdx + i);
+                    }
+
+                    theValue = arrayElements;
                 }
                 else {
                     arrayElements = new Object[orders[fieldIdx]];
@@ -4510,41 +4531,28 @@ public class DefaultTableView implements TableView {
                         arrayElements[i] = Array.get(colValue, rowIdx + i);
                     }
 
-                    return arrayElements;
+                    theValue = arrayElements;
                 }
             }
-            else if (isEnum) {
-                for (int i = 0; i < orders[fieldIdx]; i++) {
-                    arrayElements[i] = Array.get(colValue, rowIdx + i);
-                }
-            }
-
-            if (isString && ((colValue instanceof byte[]) || isArray)) {
+            else if (isString && colValue instanceof byte[]) {
                 // strings
                 int strlen = (int) dtype.getDatatypeSize();
-                int arraylen = strlen;
-                if(isArray) {
-                    arraylen = (int) types[fieldIdx].getDatatypeSize();
-                }
-                log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} of {} isString={} of {}", isArray, arraylen, isString, strlen);
-                int arraycnt = arraylen / strlen;
-                for (int loopidx = 0; loopidx < arraycnt; loopidx++) {
-                    if(isArray && loopidx > 0) {
-                        stringBuffer.append(", ");
-                    }
-                    String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
-                    int idx = str.indexOf('\0');
-                    if (idx > 0) {
-                        str = str.substring(0, idx);
-                    }
-                    stringBuffer.append(str.trim());
+                log.trace("**CompoundDSDataProvider:getDataValue(): isString={} of size {}", strlen);
+
+                String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
+                int idx = str.indexOf('\0');
+                if (idx > 0) {
+                    str = str.substring(0, idx);
                 }
 
-                return stringBuffer;
+                theValue = str.trim();
+            }
+            else {
+                // Flat numerical types
+                theValue = Array.get(colValue, rowIdx);
             }
 
-            // Non-array, non-enum numerical types
-            return Array.get(colValue, rowIdx);
+            return theValue;
         }
 
         @Override
@@ -4569,8 +4577,6 @@ public class DefaultTableView implements TableView {
     }
 
     private class CompoundDSDataDisplayConverter extends DisplayConverter {
-        private final CompoundDS    theDataset;
-
         private final StringBuffer  buffer;
 
         private final Datatype[]    types;
@@ -4581,8 +4587,6 @@ public class DefaultTableView implements TableView {
         private final int           nSubColumns;
 
         public CompoundDSDataDisplayConverter(final CompoundDS theDataset) {
-            this.theDataset = theDataset;
-
             buffer = new StringBuffer();
 
             types = theDataset.getSelectedMemberTypes();
@@ -5171,7 +5175,7 @@ public class DefaultTableView implements TableView {
                                 // Since NatTable returns the selected row positions as a Set<Range>, convert this to
                                 // an Integer[]
                                 Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-                                Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+                                Set<Integer> selectedRowPos = new LinkedHashSet<>();
                                 Iterator<Range> i1 = rowPositions.iterator();
                                 while(i1.hasNext()) {
                                     selectedRowPos.addAll(i1.next().getMembers());
@@ -5441,7 +5445,7 @@ public class DefaultTableView implements TableView {
                     // Since NatTable returns the selected row positions as a Set<Range>, convert this to
                     // an Integer[]
                     Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-                    Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+                    Set<Integer> selectedRowPos = new LinkedHashSet<>();
                     Iterator<Range> i1 = rowPositions.iterator();
                     while(i1.hasNext()) {
                         selectedRowPos.addAll(i1.next().getMembers());
@@ -5490,7 +5494,7 @@ public class DefaultTableView implements TableView {
                     // Since NatTable returns the selected row positions as a Set<Range>, convert this to
                     // an Integer[]
                     Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-                    Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+                    Set<Integer> selectedRowPos = new LinkedHashSet<>();
                     Iterator<Range> i1 = rowPositions.iterator();
                     while(i1.hasNext()) {
                         selectedRowPos.addAll(i1.next().getMembers());
