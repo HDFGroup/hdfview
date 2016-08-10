@@ -103,6 +103,27 @@ public final class Tools {
     }
 
     /**
+     * Converts unsigned 64-bit integer data to a BigInteger since Java does not
+     * have unsigned types.
+     *
+     * @param l
+     *        The long value to convert to a BigInteger
+     *
+     * @return A BigInteger representing the unsigned value of the given long.
+     */
+    public static BigInteger convertUINT64toBigInt(Long l) {
+        if (l < 0) {
+            l = (l << 1) >>> 1;
+            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+            BigInteger big2 = new BigInteger(l.toString());
+            return big1.add(big2);
+        }
+        else {
+            return new BigInteger(l.toString());
+        }
+    }
+
+    /**
      * Converts an image file into HDF4/5 file.
      *
      * @param imgFileName

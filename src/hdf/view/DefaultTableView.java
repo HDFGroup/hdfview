@@ -3558,6 +3558,21 @@ public class DefaultTableView implements TableView {
         cv.open();
     }
 
+    /**
+     * Returns an IEditableRule that determines whether cells can be edited.
+     *
+     * If the dataset is a Scalar dataset, cells can be edited as long as
+     * the dataset is not opened in read-only mode and the data is not
+     * currently displayed in hexadecimal, binary, or character mode.
+     *
+     * If the dataset is a Compound dataset, cells can be edited as long
+     * as the dataset is not opened in read-only mode.
+     *
+     * @param theDataset
+     *             The dataset for editing
+     *
+     * @return a new IEditableRule for the dataset
+     */
     private IEditableRule getDatasetEditingRule(final Dataset theDataset) {
         if (theDataset instanceof ScalarDS) {
             return new EditableRule() {
@@ -3585,11 +3600,15 @@ public class DefaultTableView implements TableView {
     }
 
     /**
-     * Returns an appropriate data validator to check that the
+     * Returns an appropriate DataValidator to check that the
      * data entered is valid before committing it to memory.
      *
      * @param theDataset
-     * @return
+     *             The dataset being edited
+     *
+     * @return A new DataValidator that returns true if the data
+     *         is valid and can be committed to memory, or false
+     *         otherwise.
      */
     private static DataValidator getScalarDSDataValidator(final ScalarDS theDataset) {
         boolean isUnsigned = theDataset.isUnsigned();
@@ -3835,19 +3854,7 @@ public class DefaultTableView implements TableView {
                 else {
                     if (isUINT64) {
                         for (int i = 0; i < arraySize; i++) {
-                            Long l = (Long) Array.get(dataValue, index++);
-                            BigInteger big;
-                            if (l < 0) {
-                                l = (l << 1) >>> 1;
-                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                BigInteger big2 = new BigInteger(l.toString());
-                                big = big1.add(big2);
-                            }
-                            else {
-                                big = new BigInteger(l.toString());
-                            }
-
-                            arrayElements[i] = big;
+                            arrayElements[i] = Tools.convertUINT64toBigInt(Array.getLong(dataValue, index++));
                         }
                     }
                     else {
@@ -3891,19 +3898,7 @@ public class DefaultTableView implements TableView {
                 }
                 else {
                     if (isUINT64) {
-                        Long l = (Long) Array.get(dataValue, (int) index);
-                        BigInteger big;
-                        if (l < 0) {
-                            l = (l << 1) >>> 1;
-                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                            BigInteger big2 = new BigInteger(l.toString());
-                            big = big1.add(big2);
-                        }
-                        else {
-                            big = new BigInteger(l.toString());
-                        }
-
-                        theValue = big;
+                        theValue = Tools.convertUINT64toBigInt(Array.getLong(dataValue, (int) index));
                     }
                     else {
                         theValue = Array.get(dataValue, (int) index);
@@ -4539,21 +4534,8 @@ public class DefaultTableView implements TableView {
                     arrayElements = new Object[orders[fieldIdx]];
 
                     if (isUINT64) {
-                        // Unsigned 32- or 64-bit integer
                         for (int i = 0; i < orders[fieldIdx]; i++) {
-                            Long l = (Long) Array.get(colValue, rowIdx + i);
-                            BigInteger big;
-                            if (l < 0) {
-                                l = (l << 1) >>> 1;
-                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                BigInteger big2 = new BigInteger(l.toString());
-                                big = big1.add(big2);
-                            }
-                            else {
-                                big = new BigInteger(l.toString());
-                            }
-
-                            arrayElements[i] = big;
+                            arrayElements[i] = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx + i));
                         }
                     }
                     else {
@@ -4593,19 +4575,7 @@ public class DefaultTableView implements TableView {
             else {
                 // Flat numerical types
                 if (isUINT64) {
-                    Long l = (Long) Array.get(colValue, (int) rowIdx);
-                    BigInteger big;
-                    if (l < 0) {
-                        l = (l << 1) >>> 1;
-                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                        BigInteger big2 = new BigInteger(l.toString());
-                        big = big1.add(big2);
-                    }
-                    else {
-                        big = new BigInteger(l.toString());
-                    }
-
-                    theValue = big;
+                    theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, (int) rowIdx));
                 }
                 else {
                     theValue = Array.get(colValue, rowIdx);
