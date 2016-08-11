@@ -235,6 +235,7 @@ public class DefaultTableView implements TableView {
     private IDataProvider                   rowHeaderDataProvider;
     private IDataProvider                   columnHeaderDataProvider;
 
+    private DisplayConverter                displayConverter;
 
     /**
      * Global variables for GUI components
@@ -4076,11 +4077,11 @@ public class DefaultTableView implements TableView {
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
+                log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
                 String strVal = null;
-
-                log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 String[] columnNames = ((ScalarDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNames;
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
@@ -4364,11 +4365,11 @@ public class DefaultTableView implements TableView {
                     }
                 }
 
-                if (strVal == null && val != null) strVal = val.toString();
-
-                log.trace("NATTable CellSelected finish");
+                if (strVal == null && val != null) strVal = displayConverter.canonicalToDisplayValue(val).toString();
 
                 cellValueField.setText(strVal);
+
+                log.trace("NATTable CellSelected finish");
             }
         }
     }
@@ -4772,7 +4773,8 @@ public class DefaultTableView implements TableView {
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
 
-                cellValueField.setText(val.toString());
+                ILayerCell cell = table.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
+                cellValueField.setText(displayConverter.canonicalToDisplayValue(cell, table.getConfigRegistry(), val).toString());
 
                 log.trace("NATTable CellSelected finish");
             }
@@ -5144,11 +5146,12 @@ public class DefaultTableView implements TableView {
 
 
                     // Add data display conversion capability
+                    displayConverter = (dataset instanceof ScalarDS) ?
+                            new ScalarDSDataDisplayConverter((ScalarDS) dataset) :
+                            new CompoundDSDataDisplayConverter((CompoundDS) dataset);
                     configRegistry.registerConfigAttribute(
                             CellConfigAttributes.DISPLAY_CONVERTER,
-                            (dataset instanceof ScalarDS) ?
-                                    new ScalarDSDataDisplayConverter((ScalarDS) dataset) :
-                                    new CompoundDSDataDisplayConverter((CompoundDS) dataset),
+                            displayConverter,
                             DisplayMode.NORMAL,
                             GridRegion.BODY);
                 }
