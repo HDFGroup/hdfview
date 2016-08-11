@@ -213,7 +213,7 @@ public class DefaultTextView implements TextView {
         tableScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         tableScroller.setExpandHorizontal(true);
         tableScroller.setExpandVertical(true);
-        tableScroller.setAlwaysShowScrollBars(true);
+        tableScroller.setAlwaysShowScrollBars(false);
 
         table = createTable(tableScroller);
         tableScroller.setContent(table);
