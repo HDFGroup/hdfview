@@ -3759,6 +3759,7 @@ public class DefaultTableView implements TableView {
         private final boolean      isArray;
         private final boolean      isInt;
         private final boolean      isUINT64;
+        private final boolean      isBitfieldOrOpaque;
 
         private boolean            isVLStr;
 
@@ -3778,6 +3779,7 @@ public class DefaultTableView implements TableView {
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
             isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
             isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
+            isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
 
             isNaturalOrder = (theDataset.getRank() == 1 || (theDataset.getSelectedIndex()[0] < theDataset
                     .getSelectedIndex()[1]));
@@ -3799,6 +3801,9 @@ public class DefaultTableView implements TableView {
                     }
 
                     arraySize = size * (dtype.getDatatypeSize() / btype.getDatatypeSize());
+                }
+                else if (isBitfieldOrOpaque) {
+                    arraySize = dtype.getDatatypeSize();
                 }
                 else {
                     arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
@@ -3846,10 +3851,17 @@ public class DefaultTableView implements TableView {
 
                     for (int i = 0; i < dtype.getArrayDims()[0]; i++) {
                         if (i > 0) buffer.append(", ");
-                        buffer.append(Array.get(dataValue, i));
+                        buffer.append(Array.get(dataValue, index++));
                     }
 
                     theValue = buffer.toString();
+                }
+                else if (isBitfieldOrOpaque) {
+                    for (int i = 0; i < arraySize; i++) {
+                        arrayElements[i] = Array.getByte(dataValue, index++);
+                    }
+
+                    theValue = arrayElements;
                 }
                 else {
                     if (isUINT64) {
@@ -3882,9 +3894,8 @@ public class DefaultTableView implements TableView {
                     else
                         index = rowIndex * colCount + columnIndex;
                 }
-//                log.trace("ScalarDSDataProvider:getValueAt index={} isStr={} isUINT64={}", index, isStr, isUINT64);
 
-                if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) {
+                if (isBitfieldOrOpaque) {
                     int len = (int) dtype.getDatatypeSize();
                     byte[] elements = new byte[len];
 
@@ -3937,13 +3948,11 @@ public class DefaultTableView implements TableView {
         private final Datatype     dtype;
         private final Datatype     btype;
 
-        private final long         arraySize;
         private final long         typeSize;
 
         private final boolean      isArray;
-        private final boolean      isStr;
-        private final boolean      isInt;
         private final boolean      isUINT64;
+        private final boolean      isBitfieldOrOpaque;
 
         public ScalarDSDataDisplayConverter(final ScalarDS theDataset) {
             buffer = new StringBuffer();
@@ -3951,115 +3960,107 @@ public class DefaultTableView implements TableView {
             dtype = theDataset.getDatatype();
             btype = dtype.getBasetype();
 
-            typeSize = dtype.getDatatypeSize();
+            typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
-            isStr = (NT == 'L');
-            isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
             isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
-
-            if (isArray) {
-                if (dtype.isVLEN() && btype.getDatatypeClass() == Datatype.CLASS_STRING) {
-                    // Variable-length string arrays don't have a defined array size
-                    arraySize = dtype.getArrayDims()[0];
-                }
-                else if (btype.getDatatypeClass() == Datatype.CLASS_ARRAY){
-                    // Array of Array
-                    long[] dims = btype.getArrayDims();
-
-                    long size = 1;
-                    for (int i = 0; i < dims.length; i++) {
-                        size *= dims[i];
-                    }
-
-                    arraySize = size * (dtype.getDatatypeSize() / btype.getDatatypeSize());
-                }
-                else {
-                    arraySize = dtype.getDatatypeSize() / btype.getDatatypeSize();
-                }
-            }
-            else {
-                arraySize = 0;
-            }
+            isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
         }
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
-            if (isStr || value instanceof String) return value; // String value type doesn't need converting
+            if (value instanceof String) return value; // String value type doesn't need converting
+
+            buffer.setLength(0); // clear the old string
 
             if (isArray) {
-                buffer.setLength(0); // clear the old string
+                int len = Array.getLength(value);
 
                 if (showAsHex) {
                     if (isUINT64) {
-                        for (int i = 0; i < (int) arraySize; i++) {
+                        for (int i = 0; i < len; i++) {
                             if (i > 0) buffer.append(", ");
                             buffer.append(Tools.toHexString((BigInteger) ((Object[]) value)[i], 8));
                         }
                     }
                     else {
-                        for (int i = 0; i < (int) arraySize; i++) {
+                        for (int i = 0; i < len; i++) {
                             if (i > 0) buffer.append(", ");
                             Long l = Long.valueOf(((Object[]) value)[i].toString());
-                            buffer.append(Tools.toHexString(l, (int) (typeSize / arraySize)));
+                            buffer.append(Tools.toHexString(l, (int) (typeSize / len)));
                         }
                     }
                 }
                 else if (showAsBin) {
                     if (isUINT64) {
-                        for (int i = 0; i < (int) arraySize; i++) {
+                        for (int i = 0; i < len; i++) {
                             if (i > 0) buffer.append(", ");
                             buffer.append(Tools.toBinaryString((BigInteger) ((Object[]) value)[i], 8));
                         }
                     }
                     else {
-                        for (int i = 0; i < (int) arraySize; i++) {
+                        for (int i = 0; i < len; i++) {
                             if (i > 0) buffer.append(", ");
                             Long l = Long.valueOf(((Object[]) value)[i].toString());
-                            buffer.append(Tools.toBinaryString(l, (int) (typeSize / arraySize)));
+                            buffer.append(Tools.toBinaryString(l, (int) (typeSize / len)));
                         }
+                    }
+                }
+                else if (isBitfieldOrOpaque) {
+                    for (int i = 0; i < ((byte[]) value).length; i++) {
+                        if ((i + 1) % typeSize == 0) buffer.append(", ");
+                        if (i > 0) {
+                            if (dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) buffer.append(":");
+                            else buffer.append(" ");
+                        }
+                        buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }
                 }
                 else {
                     // Default case if no special display type is chosen
-                    for (int i = 0; i < (int) arraySize; i++) {
+                    for (int i = 0; i < len; i++) {
                         if (i > 0) buffer.append(", ");
                         buffer.append(((Object[]) value)[i]);
                     }
                 }
-
-                return buffer;
             }
-            else if (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) {
-                buffer.setLength(0);
-
+            else if (isBitfieldOrOpaque) {
                 for (int i = 0; i < ((byte[]) value).length; i++) {
+                    if (i > 0) {
+                        if (dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD) buffer.append(":");
+                        else buffer.append(" ");
+                    }
                     buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                 }
-
-                return buffer;
             }
             else {
                 // Numerical values
 
-                if (isUINT64) {
-                    if (showAsHex) return Tools.toHexString((BigInteger) value, 8);
-                    if (showAsBin) return Tools.toBinaryString((BigInteger) value, 8);
-                    return ((BigInteger) value).toString();
+                if (showAsHex) {
+                    if (isUINT64) {
+                        buffer.append(Tools.toHexString((BigInteger) value, 8));
+                    }
+                    else {
+                        buffer.append(Tools.toHexString(Long.valueOf(value.toString()), (int) typeSize));
+                    }
                 }
-                else if (showAsHex && isInt) {
-                    return Tools.toHexString(Long.valueOf(value.toString()), (int) typeSize);
-                }
-                else if (showAsBin && isInt) {
-                    return Tools.toBinaryString(Long.valueOf(value.toString()), (int) typeSize);
+                else if (showAsBin) {
+                    if (isUINT64) {
+                        buffer.append(Tools.toBinaryString((BigInteger) value, 8));
+                    }
+                    else {
+                        buffer.append(Tools.toBinaryString(Long.valueOf(value.toString()), (int) typeSize));
+                    }
                 }
                 else if (numberFormat != null) {
-                    // show in scientific or custom notation
-                    return numberFormat.format(value);
+                    buffer.append(numberFormat.format(value));
                 }
-
-                return value;
+                else {
+                    buffer.append(value.toString());
+                }
             }
+
+            return buffer;
         }
 
         @Override
@@ -4530,6 +4531,24 @@ public class DefaultTableView implements TableView {
 
                     theValue = arrayElements;
                 }
+                else if (typeClass == Datatype.CLASS_OPAQUE || typeClass == Datatype.CLASS_BITFIELD) {
+                    arrayElements = new Object[orders[fieldIdx]];
+
+                    int len = (int) dtype.getDatatypeSize();
+                    byte[] elements = new byte[len];
+
+                    for (int i = 0; i < orders[fieldIdx]; i++) {
+                        rowIdx *= len;
+
+                        for (int j = 0; i < len; i++) {
+                            elements[j] = Array.getByte(colValue, (int) rowIdx + j);
+                        }
+
+                        arrayElements[i] = elements;
+                    }
+
+                    theValue = arrayElements;
+                }
                 else {
                     arrayElements = new Object[orders[fieldIdx]];
 
@@ -4637,24 +4656,16 @@ public class DefaultTableView implements TableView {
         public Object canonicalToDisplayValue(Object value) {
             if (value instanceof String) return value;
 
-            char CNT = ' ';
-            boolean CshowAsHex = false;
-
             Datatype dtype = types[fieldIndex];
             int typeClass = dtype.getDatatypeClass();
-            int typeSize = (int) dtype.getDatatypeSize();
+            dtype.getDatatypeSize();
             boolean isArray = (typeClass == Datatype.CLASS_ARRAY);
             boolean isEnum = (typeClass == Datatype.CLASS_ENUM);
             boolean isStr = (typeClass == Datatype.CLASS_STRING);
 
-            if ((typeClass == Datatype.CLASS_BITFIELD) || (typeClass == Datatype.CLASS_OPAQUE)) {
-                CshowAsHex = true;
-                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): class={} (BITFIELD or OPAQUE)", typeClass);
-            }
+            buffer.setLength(0);
 
             if (isArray) {
-                buffer.setLength(0);
-
                 dtype = dtype.getBasetype();
                 typeClass = dtype.getDatatypeClass();
                 isStr = (typeClass == Datatype.CLASS_STRING);
@@ -4675,23 +4686,17 @@ public class DefaultTableView implements TableView {
 
                         buffer.append("]");
                     }
-
-                    return buffer;
                 }
                 else {
                     for (int i = 0; i < orders[fieldIndex]; i++) {
                         if (i > 0) buffer.append(", ");
                         buffer.append(((Object[]) value)[i]);
                     }
-
-                    return buffer;
                 }
             }
             else if (isEnum) {
                 String[] outValues;
                 int len = Array.getLength(value);
-
-                buffer.setLength(0);
 
                 if (!dataset.isEnumConverted()) {
                     outValues = new String[len];
@@ -4712,28 +4717,23 @@ public class DefaultTableView implements TableView {
                 }
             }
             else if (typeClass == Datatype.CLASS_OPAQUE || typeClass == Datatype.CLASS_BITFIELD) {
-                buffer.setLength(0);
-
                 for (int i = 0; i < ((byte[]) value).length; i++) {
-                    if (i > 0) buffer.append(":");
+                    if (i > 0) {
+                        if (typeClass == Datatype.CLASS_BITFIELD) buffer.append(":");
+                        else buffer.append(" ");
+                    }
                     buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                 }
-
-                return buffer;
+            }
+            else if (numberFormat != null) {
+                // show in scientific or custom notation
+                buffer.append(numberFormat.format(value));
             }
             else {
-                boolean isInt = (CNT == 'B' || CNT == 'S' || CNT == 'I' || CNT == 'J');
-
-                if (CshowAsHex && isInt) {
-                    return Tools.toHexString(Long.valueOf(value.toString()), (int) typeSize);
-                }
-                else if (numberFormat != null) {
-                    // show in scientific or custom notation
-                    return numberFormat.format(value);
-                }
+                buffer.append(value);
             }
 
-            return value;
+            return buffer;
         }
 
         @Override

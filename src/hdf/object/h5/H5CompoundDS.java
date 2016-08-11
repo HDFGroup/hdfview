@@ -240,8 +240,8 @@ public class H5CompoundDS extends CompoundDS {
         long sid = -1;
         long tid = -1;
         int tclass = -1;
-        flatNameList = new Vector<String>();
-        flatTypeList = new Vector<Long>();
+        flatNameList = new Vector<>();
+        flatTypeList = new Vector<>();
         long[] memberTIDs = null;
 
         did = open();
@@ -572,8 +572,8 @@ public class H5CompoundDS extends CompoundDS {
         log.trace("read(): open dataset");
         did = open();
         if (did >= 0) {
-            list = new Vector<Object>(flatNameList.size());
-            Vector<Long> atomicList = new Vector<Long>();
+            list = new Vector<>(flatNameList.size());
+            Vector<Long> atomicList = new Vector<>();
             try {
                 lsize[0] = selectHyperslab(did, spaceIDs);
                 log.trace("read(): opened dataset size {} for {}", lsize[0], nPoints);
@@ -616,7 +616,9 @@ public class H5CompoundDS extends CompoundDS {
 
                         // ARRAY of COMPOUND currently unsupported
                         if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
-                            return null;
+                            log.debug("read(): cannot read dataset of type ARRAY of COMPOUND");
+                            log.trace("read(): finish");
+                            throw new Exception("Unsupported dataset of type ARRAY of COMPOUND");
                         }
                     }
                     finally {
@@ -989,7 +991,7 @@ public class H5CompoundDS extends CompoundDS {
         did = open();
         if (did >= 0) {
             log.trace("write(): dataset opened");
-            Vector<Long> atomicList = new Vector<Long>();
+            Vector<Long> atomicList = new Vector<>();
             try {
                 lsize[0] = selectHyperslab(did, spaceIDs);
                 long tmptid = H5.H5Dget_type(did);
