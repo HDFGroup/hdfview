@@ -134,10 +134,10 @@ public class DefaultTreeView implements TreeView {
     //private ArrayList<TreeItem>           breadthFirstItems = null;
 
     /** A list of currently open files */
-    private final List<FileFormat>        fileList = new Vector<FileFormat>();
+    private final List<FileFormat>        fileList = new Vector<>();
 
     /** A list of editing GUI components */
-    private List<MenuItem>                editGUIs = new Vector<MenuItem>();
+    private List<MenuItem>                editGUIs = new Vector<>();
 
     /**
      * The popup menu used to display user choice of actions on data object.
@@ -681,7 +681,7 @@ public class DefaultTreeView implements TreeView {
         new MenuItem(menu, SWT.SEPARATOR);
 
         item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Show Properties");
+        item.setText("Show Attributes");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 isDefaultDisplay = true;
@@ -720,7 +720,7 @@ public class DefaultTreeView implements TreeView {
         });
 
         item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Show Properties As");
+        item.setText("Show Attributes As");
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 isDefaultDisplay = false;
@@ -1771,8 +1771,8 @@ public class DefaultTreeView implements TreeView {
     private ArrayList<TreeItem> getItemsBreadthFirst(TreeItem item) {
         if (item == null) return null;
 
-        ArrayList<TreeItem> allItems = new ArrayList<TreeItem>();
-        Queue<TreeItem> currentChildren = new LinkedList<TreeItem>();
+        ArrayList<TreeItem> allItems = new ArrayList<>();
+        Queue<TreeItem> currentChildren = new LinkedList<>();
         TreeItem currentItem = item;
 
         // Add all root items in the Tree to a Queue
@@ -1804,7 +1804,7 @@ public class DefaultTreeView implements TreeView {
     private final List<Object> breadthFirstUserObjects(TreeItem item) {
         if (item == null) return null;
 
-        Vector<Object> list = new Vector<Object>();
+        Vector<Object> list = new Vector<>();
         list.add(item.getData()); // Add this item to the list first
 
         Iterator<TreeItem> it = getItemsBreadthFirst(item).iterator();
@@ -2071,7 +2071,7 @@ public class DefaultTreeView implements TreeView {
 
         TreeItem rootItem = findTreeItem(root);
         int n = rootItem.getItemCount();
-        Vector<TreeItem> objList = new Vector<TreeItem>(n);
+        Vector<TreeItem> objList = new Vector<>(n);
 
         try {
             for (int i = 0; i < n; i++) objList.add(rootItem.getItem(i));
@@ -2655,7 +2655,7 @@ public class DefaultTreeView implements TreeView {
 
         Object theView = null;
         Object[] initargs = { viewer };
-        HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<DATA_VIEW_KEY, Serializable>(8);
+        HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<>(8);
         map.put(ViewProperties.DATA_VIEW_KEY.INDEXBASE1, new Boolean(isIndexBase1));
         if (bitmask != null) {
             map.put(ViewProperties.DATA_VIEW_KEY.BITMASK, bitmask);
@@ -2783,7 +2783,7 @@ public class DefaultTreeView implements TreeView {
         // On certain platforms, calling tree.setFont() does not update
         // the font of currently visible TreeItems. Since setting the
         // font on all TreeItems causes a bug, all files must be reloaded.
-        LinkedList<FileFormat> files = new LinkedList<FileFormat>();
+        LinkedList<FileFormat> files = new LinkedList<>();
         TreeItem[] items = tree.getItems();
 
         for (int i = 0; i < items.length; i++) {
