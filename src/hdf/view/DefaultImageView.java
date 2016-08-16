@@ -358,7 +358,7 @@ public class DefaultImageView implements ImageView {
         autoGainData = null;
         contrastSlider = null;
         bitmask = null;
-        invalidValueIndex = new ArrayList<Integer>();
+        invalidValueIndex = new ArrayList<>();
 
         toolkit = Toolkit.getDefaultToolkit();
 
@@ -2266,7 +2266,7 @@ public class DefaultImageView implements ImageView {
 
         if (root == null) return;
 
-        Vector<HObject> list = new Vector<HObject>(dataset.getFileFormat().getNumberOfMembers() + 5);
+        Vector<HObject> list = new Vector<>(dataset.getFileFormat().getNumberOfMembers() + 5);
         Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
 
         list.add(dataset.getFileFormat().getRootObject());
@@ -3688,7 +3688,6 @@ public class DefaultImageView implements ImageView {
                 public void paintControl(PaintEvent e) {
                     GC gc = e.gc;
 
-                    // TODO: Update Chart to be able to handle large fonts
                     gc.setFont(curFont);
 
                     int h = H/3 -50;

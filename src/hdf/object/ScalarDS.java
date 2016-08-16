@@ -34,13 +34,13 @@ public abstract class ScalarDS extends Dataset {
     private static final long serialVersionUID = 8925371455928203981L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDS.class);
-    
+
     /************************************************************
      * The following constant strings are copied from           *
      * https://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html *
      * to make the definition consistent with the image specs.  *
      ************************************************************/
- 
+
     /**
      * Indicates that the pixel RGB values are contiguous.
      */
@@ -161,7 +161,7 @@ public abstract class ScalarDS extends Dataset {
         isImageDisplay = false;
         isDefaultImageOrder = true;
         isFillValueConverted = false;
-        filteredImageValues = new Vector<Number>();
+        filteredImageValues = new Vector<>();
     }
 
     /*
@@ -352,10 +352,6 @@ public abstract class ScalarDS extends Dataset {
      */
     public final void setIsImageDisplay(boolean b) {
         isImageDisplay = b;
-
-        if (isImageDisplay) {
-            enumConverted = false;
-        }
     }
 
     /**
@@ -366,10 +362,6 @@ public abstract class ScalarDS extends Dataset {
      */
     public final void setIsImage(boolean b) {
         isImage = b;
-
-        if (isImage) {
-            enumConverted = false;
-        }
     }
 
     /**

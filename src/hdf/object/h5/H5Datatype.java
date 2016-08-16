@@ -253,7 +253,16 @@ public class H5Datatype extends Datatype {
         log.trace("convertEnumValueToName start");
         int inSize = 0;
 
-        if ((inValues == null) || ((inSize = Array.getLength(inValues)) <= 0)
+        String cName = inValues.getClass().getName();
+        boolean isArray = cName.lastIndexOf("[") >= 0;
+        if (isArray) {
+            inSize = Array.getLength(inValues);
+        }
+        else {
+            inSize = 1;
+        }
+
+        if ((inValues == null) || (inSize <= 0)
                 || ((outNames != null) && (inSize != Array.getLength(outNames)))) {
             log.debug("convertEnumValueToName() failure: in/out values null or inSize not equal to outNames length");
             log.debug("convertEnumValueToName(): inValues={} inSize={} outNames length={}", inValues, inSize, outNames.length);
@@ -296,7 +305,12 @@ public class H5Datatype extends Datatype {
 
         // Look for matches
         for (int i = 0; i < inSize; i++) {
-            val = Array.getInt(inValues, i);
+            if (isArray) {
+                val = (Integer) Array.get(inValues, i);
+            }
+            else {
+                val = (Integer) inValues;
+            }
             boolean notfound = true;
             for (int j = 0; j < nMembers; j++) {
                 if (val == values[j]) {
@@ -460,10 +474,10 @@ public class H5Datatype extends Datatype {
 
                 try {
                     int nMembers = H5.H5Tget_nmembers(tid);
-                    compoundMemberNames = new Vector<String>(nMembers);
-                    compoundMemberTypes = new Vector<Datatype>(nMembers);
-                    compoundMemberOffsets = new Vector<Long>(nMembers);
-                    compoundMemberFieldIDs = new Vector<Long>(nMembers);
+                    compoundMemberNames = new Vector<>(nMembers);
+                    compoundMemberTypes = new Vector<>(nMembers);
+                    compoundMemberOffsets = new Vector<>(nMembers);
+                    compoundMemberFieldIDs = new Vector<>(nMembers);
 
                     for (int i = 0; i < nMembers; i++) {
                         String memberName = H5.H5Tget_member_name(tid, i);

@@ -223,6 +223,8 @@ public class DefaultTableView implements TableView {
 
     private boolean                         isValueChanged = false;
 
+    private boolean                         isEnumConverted = false;
+
     private boolean                         isDisplayTypeChar, isDataTransposed;
 
     private boolean                         isRegRef = false, isObjRef = false;
@@ -408,8 +410,8 @@ public class DefaultTableView implements TableView {
         isDisplayTypeChar = (isDisplayTypeChar && (dtype.getDatatypeSize() == 1 || (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY && dtype
                 .getBasetype().getDatatypeClass() == Datatype.CLASS_CHAR)));
 
-        log.trace("dataset isDisplayTypeChar={} isConvertEnum={}", isDisplayTypeChar, ViewProperties.isConvertEnum());
-        dataset.setEnumConverted(ViewProperties.isConvertEnum());
+        isEnumConverted = ViewProperties.isConvertEnum();
+        log.trace("dataset isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar, isEnumConverted);
 
         // Setup subset information
         log.trace("DefaultTableView: Setup subset information");
@@ -3751,6 +3753,7 @@ public class DefaultTableView implements TableView {
         }
     }
 
+    // TODO: implement DataValidator to validate based upon current column index
     private static DataValidator getCompoundDSDataValidator(final CompoundDS theDataset) {
         return new DataValidator() {
             @Override
@@ -4469,6 +4472,7 @@ public class DefaultTableView implements TableView {
             if (isArray) {
                 dtype = dtype.getBasetype();
                 typeClass = dtype.getDatatypeClass();
+                isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isString = (typeClass == Datatype.CLASS_STRING);
                 log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
 
@@ -4691,6 +4695,7 @@ public class DefaultTableView implements TableView {
             if (isArray) {
                 dtype = dtype.getBasetype();
                 typeClass = dtype.getDatatypeClass();
+                isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isStr = (typeClass == Datatype.CLASS_STRING);
                 log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isStr={}", isArray, isStr);
 
@@ -4710,6 +4715,31 @@ public class DefaultTableView implements TableView {
                         buffer.append("]");
                     }
                 }
+                else if (isEnum) {
+                    int len = Array.getLength(value);
+
+                    if (isEnumConverted) {
+                        String[] outValues = new String[len];
+
+                        try {
+                            H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                        } catch (HDF5Exception ex) {
+                            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                            return buffer;
+                        }
+
+                        for (int i = 0; i < outValues.length; i++) {
+                            if (i > 0) buffer.append(", ");
+                            buffer.append(outValues[i]);
+                        }
+                    }
+                    else {
+                        for (int i = 0; i < len; i++) {
+                            if (i > 0) buffer.append(", ");
+                            buffer.append(Array.get(value, i));
+                        }
+                    }
+                }
                 else {
                     for (int i = 0; i < orders[fieldIndex]; i++) {
                         if (i > 0) buffer.append(", ");
@@ -4718,11 +4748,8 @@ public class DefaultTableView implements TableView {
                 }
             }
             else if (isEnum) {
-                String[] outValues;
-                int len = Array.getLength(value);
-
-                if (!dataset.isEnumConverted()) {
-                    outValues = new String[len];
+                if (isEnumConverted) {
+                    String[] outValues = new String[1];
 
                     try {
                         H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
@@ -4730,14 +4757,11 @@ public class DefaultTableView implements TableView {
                         log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                         return buffer;
                     }
+
+                    buffer.append(outValues[0]);
                 }
                 else
-                    outValues = (String[]) value;
-
-                for (int i = 0; i < len; i++) {
-                    if (i > 0) buffer.append(", ");
-                    buffer.append(outValues[i]);
-                }
+                    buffer.append(value);
             }
             else if (typeClass == Datatype.CLASS_OPAQUE || typeClass == Datatype.CLASS_BITFIELD) {
                 for (int i = 0; i < ((byte[]) value).length; i++) {

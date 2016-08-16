@@ -177,11 +177,6 @@ public abstract class Dataset extends HObject {
     protected Object          convertedBuf        = null;
 
     /**
-     * Flag to indicate if the enum data is converted to strings.
-     */
-    protected boolean         enumConverted       = false;
-
-    /**
      * Constructs a Dataset object with a given file, name and path.
      *
      * @param theFile
@@ -1014,7 +1009,7 @@ public abstract class Dataset extends HObject {
     @SuppressWarnings("rawtypes")
     public static Object convertFromUnsignedC(Object data_in, Object data_out) {
         log.trace("convertFromUnsignedC(): start");
-        
+
         if (data_in == null) {
             log.debug("convertFromUnsignedC(): data_in is null");
             log.trace("convertFromUnsignedC(): finish");
@@ -1131,7 +1126,7 @@ public abstract class Dataset extends HObject {
     @SuppressWarnings("rawtypes")
     public static Object convertToUnsignedC(Object data_in, Object data_out) {
         log.trace("convertToUnsignedC(): start");
-        
+
         if (data_in == null) {
             log.debug("convertToUnsignedC(): data_in is null");
             log.trace("convertToUnsignedC(): finish");
@@ -1238,7 +1233,7 @@ public abstract class Dataset extends HObject {
      */
     public static final String[] byteToString(byte[] bytes, int length) {
         log.trace("byteToString(): start");
-        
+
         if (bytes == null) {
             log.debug("byteToString(): input is null");
             log.trace("byteToString(): finish");
@@ -1298,7 +1293,7 @@ public abstract class Dataset extends HObject {
      */
     public static final byte[] stringToByte(String[] strings, int length) {
         log.trace("stringToByte(): start");
-        
+
         if (strings == null) {
             log.debug("stringToByte(): input is null");
             log.trace("stringToByte(): finish");
@@ -1323,7 +1318,7 @@ public abstract class Dataset extends HObject {
             strBuff.setLength(length);
             System.arraycopy(strBuff.toString().getBytes(), 0, bytes, length * i, length);
         }
-        
+
         log.trace("stringToByte(): finish");
 
         return bytes;
@@ -1369,30 +1364,6 @@ public abstract class Dataset extends HObject {
      */
     public long getSize(long tid) {
         return -1;
-    }
-
-    /**
-     * Get flag that indicates if enum data is converted to strings.
-     *
-     * @return the enumConverted
-     */
-    public boolean isEnumConverted() {
-        return enumConverted;
-    }
-
-    /**
-     * Set flag that indicates if enum data is converted to strings.
-     *
-     * @param b
-     *            the enumConverted to set
-     */
-    public void setEnumConverted(boolean b) {
-        if (enumConverted != b) {
-            originalBuf = convertedBuf = null;
-            this.clearData();
-        }
-
-        enumConverted = b;
     }
 
     /**
