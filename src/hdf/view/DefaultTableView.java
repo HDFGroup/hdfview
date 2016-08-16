@@ -3718,6 +3718,28 @@ public class DefaultTableView implements TableView {
                         }
                     };
                 }
+            case 'F':
+                return new DataValidator() {
+                    @Override
+                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                        if (!Tools.checkValidFloat(newValue.toString()))
+                            throw new ValidationFailedException("Failed to update value at "
+                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                        return true;
+                    }
+                };
+            case 'D':
+                return new DataValidator() {
+                    @Override
+                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                        if (!Tools.checkValidDouble(newValue.toString()))
+                            throw new ValidationFailedException("Failed to update value at "
+                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                        return true;
+                    }
+                };
             default:
                 // Default: never validate
                 return new DataValidator() {
