@@ -1238,6 +1238,8 @@ public class HDFView implements ViewManager {
     }
 
     public void showMetaData(final HObject obj) {
+        for (Control control : attributeArea.getChildren()) control.dispose();
+
         if (obj == null) return;
 
         log.trace("showMetaData: start");
@@ -1250,8 +1252,6 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
         }
-
-        for (Control control : attributeArea.getChildren()) control.dispose();
 
         boolean isRoot = ((obj instanceof Group) && ((Group) obj).isRoot());
         boolean isH4 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));

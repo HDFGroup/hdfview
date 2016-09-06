@@ -353,6 +353,10 @@ public class DefaultTreeView implements TreeView {
                     selectedItem = null;
                     selectedObject = null;
                     selectedFile = null;
+
+                    // Clear any information shown in the object info panel
+                    ((HDFView) viewer).showMetaData(null);
+
                     return;
                 }
 
