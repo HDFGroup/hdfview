@@ -1327,6 +1327,7 @@ public class H5ScalarDS extends ScalarDS {
 
             selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
             selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
+            selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
         }
 
         // by default, only one-D is selected for text data
