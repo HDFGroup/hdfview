@@ -1327,6 +1327,7 @@ public class H5ScalarDS extends ScalarDS {
 
             selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
             selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
+            selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
         }
 
         // by default, only one-D is selected for text data
@@ -1887,8 +1888,7 @@ public class H5ScalarDS extends ScalarDS {
         byte[] refs = getPaletteRefs();
         long did = -1;
         long pal_id = -1;
-        String[] paletteName = { "" };
-        long size = 100L;
+        String paletteName = null;
 
         if (refs == null) {
             log.debug("getPaletteName(): refs is null");
@@ -1911,7 +1911,7 @@ public class H5ScalarDS extends ScalarDS {
         if (did >= 0) {
             try {
                 pal_id = H5.H5Rdereference(getFID(), HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_OBJECT, ref_buf);
-                H5.H5Iget_name(pal_id, paletteName, size);
+                paletteName = H5.H5Iget_name(pal_id);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1923,7 +1923,7 @@ public class H5ScalarDS extends ScalarDS {
         }
 
         log.trace("getPaletteName(): finish");
-        return paletteName[0];
+        return paletteName;
     }
 
     /*
