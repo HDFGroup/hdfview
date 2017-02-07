@@ -625,7 +625,7 @@
       </doctitle>
 
       <bottom>
-        <![CDATA[Copyright © 2016. All Rights Reserved.]]>
+        <![CDATA[Copyright © 2017. All Rights Reserved.]]>
       </bottom>
 
       <group title="object packages" packages="hdf.object.*" />
