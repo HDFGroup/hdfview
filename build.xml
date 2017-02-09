@@ -805,16 +805,16 @@
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
     <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
     <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}                 - ${ant.project.name} Directory" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi                 - ${ant.project.name} Installer" />
     <replace file="${dist.dir}/README.txt" token="@LINUX_INSTALL_EXECUTABLE@" value="" />
     <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
     <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
     <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
     <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.bat" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="This release of ${ant.project.name} for Windows doesn't require installation,${line.separator}simply copy the ${ant.project.name} directory where you would like the application${line.separator}at and:${line.separator}" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
-    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="Execute ${ant.project.name}-${app.version}.msi" />
+    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
 
     <!-- Compress everything into one zip file -->
     <condition property="win.extension" value="win32" else="win64">
@@ -1085,7 +1085,7 @@
       shortversion="${app.version}"
       icon="${lib.dir}/macosx/${ant.project.name}.icns"
       signature="????"
-      copyright="Copyright © 2006-2016 by The HDF Group. All rights reserved."
+      copyright="Copyright © 2006-2017 by The HDF Group. All rights reserved."
       applicationCategory="public.app-category.developer-tools"
       mainclassname="${main-class}">
 
@@ -1167,7 +1167,7 @@
     <!-- verify gatekeeper -->
     <exec executable="spctl" dir="${dist.dir}" failonerror="true">
       <arg line="-vvvv --assess --type execute ${ant.project.name}.app" />
-    </exec>    
+    </exec>
   </target>
 
   <target name="createUnixRPM" depends="clean-package,deployUnix">
