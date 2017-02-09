@@ -632,6 +632,7 @@ public class H5CompoundDS extends CompoundDS {
                 log.trace("read(): foreach nMembers={}", n);
                 for (int i = 0; i < n; i++) {
                     boolean isVL = false;
+                    member_base_class = -1;
 
                     if (!isMemberSelected[i]) {
                         log.debug("read(): Member[{}] is not selected", i);
