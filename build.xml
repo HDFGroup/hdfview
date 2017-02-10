@@ -403,7 +403,6 @@
     <mkdir dir="${testclasses.dir}" />
     <javac srcdir="${test.dir}" destdir="${classes.dir}"
       includes="**/*.java"
-      excludes="**/*German*"
       includeantruntime="false">
       <classpath>
         <path refid="project-classpath" />

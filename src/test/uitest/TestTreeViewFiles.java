@@ -1,6 +1,7 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
@@ -42,7 +44,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -57,7 +60,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(7).click();
             items[0].getNode(7).contextMenu().menu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(dataset_name2 + ".*at.*\\[.*in.*\\]")));
+            shellMatcher = WithRegex.withRegex(dataset_name2 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -167,7 +171,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex("TextView.*" + datasetname + ".*" + filename + file_ext)));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("TextView.*" + datasetname + ".*" + filename + file_ext);
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             SWTBotShell textShell = bot.shells()[1];
             textShell.activate();
@@ -428,7 +433,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -490,7 +496,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(datasetname1 + ".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname1 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -535,7 +542,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(1).click();
             items[0].getNode(1).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]")));
+            shellMatcher = WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -610,7 +618,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[1].getNode(1).click();
             items[1].getNode(1).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]")));
+            shellMatcher = WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -671,7 +680,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[1].getNode(1).click();
             items[1].getNode(1).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]")));
+            shellMatcher = WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -855,7 +865,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(1).click();
             items[0].getNode(1).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(newDatasetName + ".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(newDatasetName + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -924,7 +935,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(0).getNode(0).click();
             items[0].getNode(0).getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -996,7 +1008,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
