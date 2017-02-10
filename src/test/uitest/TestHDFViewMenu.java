@@ -199,7 +199,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuOpen() {
         String filename = "testopenfile";
         String file_ext = ".hdf";
@@ -208,7 +208,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         try {
             closeFile(hdf_file, false);
 
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("&Open 	Ctrl-O");
+            SWTBotMenu fileMenuItem = bot.menu("File").menu("Open");
             fileMenuItem.click();
 
             SWTBotShell shell = bot.shell("Enter a file name");

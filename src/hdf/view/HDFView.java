@@ -500,7 +500,7 @@ public class HDFView implements ViewManager {
         menuItem.setMenu(fileMenu);
 
         MenuItem item = new MenuItem(fileMenu, SWT.PUSH);
-        item.setText("&Open \tCtrl-O");
+        item.setText("&Open\tCtrl-O");
         item.setAccelerator(SWT.MOD1 + 'O');
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -747,7 +747,7 @@ public class HDFView implements ViewManager {
         new MenuItem(fileMenu, SWT.SEPARATOR);
 
         item = new MenuItem(fileMenu, SWT.PUSH);
-        item.setText("E&xit \tCtrl-Q");
+        item.setText("E&xit\tCtrl-Q");
         item.setAccelerator(SWT.MOD1 + 'Q');
         item.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
