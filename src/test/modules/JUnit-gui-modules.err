@@ -1,6 +1,0 @@
-[AWT-EventQueue-0] INFO hdf.view.HDFView - CurrentDir is (dir name)
-[AWT-EventQueue-0] INFO hdf.view.HDFView - MenuBar created
-[AWT-EventQueue-0] INFO hdf.hdf5lib.H5 - HDF5 library: jhdf5
-[AWT-EventQueue-0] INFO hdf.hdf5lib.H5 -  successfully loaded from java.library.path
-[AWT-EventQueue-0] INFO hdf.view.HDFView - ToolBar created
-[AWT-EventQueue-0] INFO hdf.view.HDFView - MainWindow created

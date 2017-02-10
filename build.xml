@@ -403,7 +403,6 @@
     <mkdir dir="${testclasses.dir}" />
     <javac srcdir="${test.dir}" destdir="${classes.dir}"
       includes="**/*.java"
-      excludes="**/*German*"
       includeantruntime="false">
       <classpath>
         <path refid="project-classpath" />
@@ -805,7 +804,7 @@
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
     <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
     <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi                 - ${ant.project.name} Installer" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi       - ${ant.project.name} Installer" />
     <replace file="${dist.dir}/README.txt" token="@LINUX_INSTALL_EXECUTABLE@" value="" />
     <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
     <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />

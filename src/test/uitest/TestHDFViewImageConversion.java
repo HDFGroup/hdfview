@@ -1,9 +1,11 @@
 package test.uitest;
 
+import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -82,7 +84,8 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             openAsShell.bot().radio("&Image").click();
             openAsShell.bot().button("   &OK   ").click();
 
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             SWTBotShell imageShell = bot.shells()[1];
             imageShell.activate();
@@ -176,7 +179,8 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             openAsShell.bot().radio("&Image").click();
             openAsShell.bot().button("   &OK   ").click();
 
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             SWTBotShell imageShell = bot.shells()[1];
             imageShell.activate();

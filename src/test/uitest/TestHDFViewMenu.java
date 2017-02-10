@@ -1,12 +1,14 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
+import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
@@ -199,7 +201,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void verifyMenuOpen() {
         String filename = "testopenfile";
         String file_ext = ".hdf";
@@ -208,7 +210,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         try {
             closeFile(hdf_file, false);
 
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("&Open 	Ctrl-O");
+            SWTBotMenu fileMenuItem = bot.menu("File").menu("Open");
             fileMenuItem.click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
@@ -634,33 +636,34 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             filetree.expandNode(filename + ".h5", true);
 
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             items[0].getNode(2).getNode(1).click();
             items[0].getNode(2).getNode(1).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             items[0].getNode(2).getNode(2).click();
             items[0].getNode(2).getNode(2).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             items[0].getNode(2).getNode(4).click();
             items[0].getNode(2).getNode(4).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             items[0].getNode(2).getNode(5).click();
             items[0].getNode(2).getNode(5).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             items[0].getNode(2).getNode(6).click();
             items[0].getNode(2).getNode(6).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             items[0].getNode(4).getNode(1).click();
             items[0].getNode(4).getNode(1).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             items[0].getNode(4).getNode(5).click();
             items[0].getNode(4).getNode(5).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "too many or missing shells", "8", String.valueOf(bot.shells().length)),
                     bot.shells().length == 8);

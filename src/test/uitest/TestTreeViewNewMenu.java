@@ -1,5 +1,6 @@
 package test.uitest;
 
+import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -7,6 +8,7 @@ import java.io.File;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
@@ -89,7 +91,8 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
 
             items[0].getNode(0).getNode(0).click();
             items[0].getNode(0).getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
@@ -123,7 +126,8 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
 
             items[0].getNode(0).getNode(0).click();
             items[0].getNode(0).getNode(0).contextMenu("Open").click();
-            bot.waitUntil(Conditions.waitForShell(WithRegex.withRegex(".*at.*\\[.*in.*\\]")));
+            shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
