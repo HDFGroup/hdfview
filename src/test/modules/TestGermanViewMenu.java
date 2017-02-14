@@ -300,16 +300,17 @@ public class TestGermanViewMenu {
             openAsShell.bot().comboBox(0).setSelection("test.modules.GermanTableView");
             openAsShell.bot().button("   &OK   ").click();
 
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*an.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu("Hexadezimal Anzeigen").click();
+            bot.sleep(3000);
 
             String val = table.getCellDataValueByPosition(1, 1);
             assertTrue(constructWrongValueMessage("verifyOpenAs()", "wrong data", "FF", val),

@@ -3943,7 +3943,7 @@ public class DefaultTableView implements TableView {
                 }
             }
 
-            log.trace("ScalarDSDataProvider:getValueAt finish");
+            log.trace("ScalarDSDataProvider:getValueAt {} finish", theValue);
             return theValue;
         }
 
@@ -3991,11 +3991,13 @@ public class DefaultTableView implements TableView {
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
             isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
             isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
+            log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
         }
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
             if (value instanceof String) return value; // String value type doesn't need converting
+            log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
 
             buffer.setLength(0); // clear the old string
 
@@ -4085,6 +4087,7 @@ public class DefaultTableView implements TableView {
                     buffer.append(value.toString());
                 }
             }
+            log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue {} finish", buffer);
 
             return buffer;
         }
