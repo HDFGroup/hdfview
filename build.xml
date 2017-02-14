@@ -419,6 +419,29 @@
   </target>
   <path id="alltest-classes" location="${testclasses.dir}" />
 
+  <target name="modulejar" depends="compile-test">
+    <mkdir dir="${testclasses.dir}/lib/ext" />
+
+    <pathconvert property="manifest.classpath" pathsep=" ">
+        <path refid="jar-classpath" />
+        <mapper>
+          <chainedmapper>
+            <flattenmapper />
+          </chainedmapper>
+        </mapper>
+    </pathconvert>
+
+    <jar destfile="${testclasses.dir}/lib/ext/test.modules.TestGermanViewMenu.jar"
+        basedir="${classes.dir}"
+        includes="test/modules/**"
+        excludes="Test*.java *.h5">
+
+        <manifest>
+          <attribute name="Main-Class" value="test.modules.TestGermanViewMenu" />
+        </manifest>
+    </jar>
+  </target>
+
   <target name="clean-junit-uitest">
     <delete>
       <filelist dir="${testclasses.dir}/uitest/" files="
@@ -569,7 +592,7 @@
     </junit>
   </target>
 
-  <target name="junit-uimodules" depends="jar,compile-test,clean-junit-uitest"
+  <target name="junit-uimodules" depends="jar,modulejar,compile-test,clean-junit-uitest"
           description="Runs the tests for the UI modules">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
