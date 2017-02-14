@@ -745,10 +745,6 @@ public class H5ScalarDS extends ScalarDS {
                         log.trace("read(): H5Dread isREF byteToLong");
                         theData = HDFNativeData.byteToLong((byte[]) theData);
                     }
-                    else if (isEnum && isEnumConverted()) {
-                        log.trace("read(): H5Dread isEnum convertEnumValueToName theData={}", theData);
-                        theData = H5Datatype.convertEnumValueToName(tid, theData, null);
-                    }
                 }
                 catch (Exception ex) {
                     log.debug("read(): convert data: ", ex);

@@ -141,10 +141,10 @@ public class HDFView implements ViewManager {
     private static List<?>             helpViews;
 
     /* The list of GUI components related to HDF4 */
-    private final List<MenuItem>       h4GUIs = new Vector<MenuItem>();
+    private final List<MenuItem>       h4GUIs = new Vector<>();
 
     /* The list of GUI components related to HDF5 */
-    private final List<MenuItem>       h5GUIs = new Vector<MenuItem>();
+    private final List<MenuItem>       h5GUIs = new Vector<>();
 
     /* The list of GUI components related to editing */
     //private final List<?>            editGUIs;
@@ -448,7 +448,7 @@ public class HDFView implements ViewManager {
         shell.setLayout(new GridLayout(3, false));
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                ViewProperties.setRecentFiles(new Vector<String>(Arrays.asList(url_bar.getItems())));
+                ViewProperties.setRecentFiles(new Vector<>(Arrays.asList(url_bar.getItems())));
 
                 try {
                     props.save();
@@ -1237,7 +1237,9 @@ public class HDFView implements ViewManager {
         status.append("\n");
     }
 
-    public void showMetaData(HObject obj) {
+    public void showMetaData(final HObject obj) {
+        for (Control control : attributeArea.getChildren()) control.dispose();
+
         if (obj == null) return;
 
         log.trace("showMetaData: start");
@@ -1250,8 +1252,6 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
         }
-
-        for (Control control : attributeArea.getChildren()) control.dispose();
 
         boolean isRoot = ((obj instanceof Group) && ((Group) obj).isRoot());
         boolean isH4 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
@@ -1368,6 +1368,14 @@ public class HDFView implements ViewManager {
                     label.setFont(currentFont);
                     label.setText(libversion);
                 }
+
+                Button userBlockButton = new Button(generalInfoGroup, SWT.PUSH);
+                userBlockButton.setText("Show User Block");
+                userBlockButton.addSelectionListener(new SelectionAdapter() {
+                    public void widgetSelected(SelectionEvent e) {
+                        new UserBlockDialog(mainWindow, SWT.NONE, obj).open();
+                    }
+                });
             }
         }
         else {
@@ -2651,7 +2659,7 @@ public class HDFView implements ViewManager {
 
     private void unregisterFileFormat() {
         Enumeration<?> keys = FileFormat.getFileFormatKeys();
-        ArrayList<Object> keyList = new ArrayList<Object>();
+        ArrayList<Object> keyList = new ArrayList<>();
 
         while (keys.hasMoreElements())
             keyList.add((Object) keys.nextElement());
@@ -3022,6 +3030,343 @@ public class HDFView implements ViewManager {
         }
     }
 
+    private class UserBlockDialog extends Dialog {
+        private Shell          shell;
+
+        private final HObject  obj;
+
+        private byte[]         userBlock;
+
+        private final String[] displayChoices = { "Text", "Binary", "Octal", "Hexadecimal", "Decimal" };
+
+        private Button         jamButton;
+        private Text           userBlockArea;
+
+        public UserBlockDialog(Shell parent, int style, HObject obj) {
+            super(parent, style);
+
+            this.obj = obj;
+
+            userBlock = Tools.getHDF5UserBlock(obj.getFile());
+        }
+
+        public void open() {
+            Shell parent = getParent();
+            shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE);
+            shell.setFont(currentFont);
+            shell.setText("User Block - " + obj);
+            shell.setLayout(new GridLayout(5, false));
+
+
+            Label label = new Label(shell, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText("Display As: ");
+
+            Combo userBlockDisplayChoice = new Combo(shell, SWT.SINGLE | SWT.READ_ONLY);
+            userBlockDisplayChoice.setFont(currentFont);
+            userBlockDisplayChoice.setItems(displayChoices);
+            userBlockDisplayChoice.select(0);
+            userBlockDisplayChoice.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    Combo source = (Combo) e.widget;
+                    int type = 0;
+
+                    String typeName = (String) source.getItem(source.getSelectionIndex());
+
+                    jamButton.setEnabled(false);
+                    userBlockArea.setEditable(false);
+
+                    if (typeName.equalsIgnoreCase("Text")) {
+                        type = 0;
+                        jamButton.setEnabled(true);
+                        userBlockArea.setEditable(true);
+                    }
+                    else if (typeName.equalsIgnoreCase("Binary")) {
+                        type = 2;
+                    }
+                    else if (typeName.equalsIgnoreCase("Octal")) {
+                        type = 8;
+                    }
+                    else if (typeName.equalsIgnoreCase("Hexadecimal")) {
+                        type = 16;
+                    }
+                    else if (typeName.equalsIgnoreCase("Decimal")) {
+                        type = 10;
+                    }
+
+                    showUserBlockAs(type);
+                }
+            });
+
+            Label dummyLabel = new Label(shell, SWT.RIGHT);
+            dummyLabel.setFont(currentFont);
+            dummyLabel.setText("");
+            dummyLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            Label sizeLabel = new Label(shell, SWT.RIGHT);
+            sizeLabel.setFont(currentFont);
+            sizeLabel.setText("Header Size (Bytes): 0");
+
+            jamButton = new Button(shell, SWT.PUSH);
+            jamButton.setFont(currentFont);
+            jamButton.setText("Save User Block");
+            jamButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+            jamButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    writeUserBlock();
+                }
+            });
+
+            ScrolledComposite userBlockScroller = new ScrolledComposite(shell, SWT.V_SCROLL | SWT.BORDER);
+            userBlockScroller.setExpandHorizontal(true);
+            userBlockScroller.setExpandVertical(true);
+            userBlockScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
+
+            userBlockArea = new Text(userBlockScroller, SWT.MULTI | SWT.WRAP);
+            userBlockArea.setEditable(true);
+            userBlockArea.setFont(currentFont);
+            userBlockScroller.setContent(userBlockArea);
+
+            Button closeButton = new Button(shell, SWT.CENTER);
+            closeButton.setFont(currentFont);
+            closeButton.setText(" &Close ");
+            closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 5, 1));
+            closeButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    shell.dispose();
+                }
+            });
+
+            if (userBlock != null) {
+                int headSize = showUserBlockAs(0);
+                sizeLabel.setText("Header Size (Bytes): " + headSize);
+            }
+            else {
+                userBlockDisplayChoice.setEnabled(false);
+            }
+
+
+            shell.pack();
+
+            Rectangle parentBounds = parent.getBounds();
+
+            Point shellSize = new Point((int) (0.5 * parentBounds.width), (int) (0.5 * parentBounds.height));
+            shell.setSize(shellSize);
+
+            shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+
+            shell.open();
+
+            Display display = parent.getDisplay();
+            while(!shell.isDisposed()) {
+                if (!display.readAndDispatch())
+                    display.sleep();
+            }
+        }
+
+        private int showUserBlockAs(int radix) {
+            if (userBlock == null) return 0;
+
+            int headerSize = 0;
+
+            String userBlockInfo = null;
+            if ((radix == 2) || (radix == 8) || (radix == 16) || (radix == 10)) {
+                StringBuffer sb = new StringBuffer();
+                for (headerSize = 0; headerSize < userBlock.length; headerSize++) {
+                    int intValue = (int) userBlock[headerSize];
+                    if (intValue < 0) {
+                        intValue += 256;
+                    }
+                    else if (intValue == 0) {
+                        break; // null end
+                    }
+                    sb.append(Integer.toString(intValue, radix));
+                    sb.append(" ");
+                }
+                userBlockInfo = sb.toString();
+            }
+            else {
+                userBlockInfo = new String(userBlock).trim();
+                if (userBlockInfo != null) {
+                    headerSize = userBlockInfo.length();
+                }
+            }
+
+            userBlockArea.setText(userBlockInfo);
+
+            return headerSize;
+        }
+
+        private void writeUserBlock() {
+            if (!obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
+                return;
+            }
+
+            int blkSize0 = 0;
+            if (userBlock != null) {
+                blkSize0 = userBlock.length;
+                // The super block space is allocated by offset 0, 512, 1024, 2048, etc
+                if (blkSize0 > 0) {
+                    int offset = 512;
+                    while (offset < blkSize0) {
+                        offset *= 2;
+                    }
+                    blkSize0 = offset;
+                }
+            }
+
+            int blkSize1 = 0;
+            String userBlockStr = userBlockArea.getText();
+            if (userBlockStr == null) {
+                if (blkSize0 <= 0) {
+                    return; // nothing to write
+                }
+                else {
+                    userBlockStr = " "; // want to wipe out old userblock content
+                }
+            }
+            byte buf[] = null;
+            buf = userBlockStr.getBytes();
+
+            blkSize1 = buf.length;
+            if (blkSize1 <= blkSize0) {
+                java.io.RandomAccessFile raf = null;
+                try {
+                    raf = new java.io.RandomAccessFile(obj.getFile(), "rw");
+                }
+                catch (Exception ex) {
+                    Tools.showError(shell, "Can't open output file: " + obj.getFile(), shell.getText());
+                    return;
+                }
+
+                try {
+                    raf.seek(0);
+                    raf.write(buf, 0, buf.length);
+                    raf.seek(buf.length);
+                    if (blkSize0 > buf.length) {
+                        byte[] padBuf = new byte[blkSize0 - buf.length];
+                        raf.write(padBuf, 0, padBuf.length);
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("raf write:", ex);
+                }
+                try {
+                    raf.close();
+                }
+                catch (Exception ex) {
+                    log.debug("raf close:", ex);
+                }
+
+                MessageBox success = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                success.setText(shell.getText());
+                success.setMessage("Saving user block is successful.");
+                success.open();
+            }
+            else {
+                // must rewrite the whole file
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
+                confirm.setText(shell.getText());
+                confirm.setMessage("The user block to write is " + blkSize1 + " (bytes),\n"
+                        + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
+                        + "To expand the user block, the file must be rewriten.\n\n"
+                        + "Do you want to replace the current file? Click "
+                        + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
+                        + "\n\"Cancel\" to quit without saving the change.\n\n ");
+
+                int op = confirm.open();
+
+                if(op == SWT.CANCEL) {
+                    return;
+                }
+
+                String fin = obj.getFile();
+
+                String fout = fin + "~copy.h5";
+                if (fin.endsWith(".h5")) {
+                    fout = fin.substring(0, fin.length() - 3) + "~copy.h5";
+                }
+                else if (fin.endsWith(".hdf5")) {
+                    fout = fin.substring(0, fin.length() - 5) + "~copy.h5";
+                }
+
+                File outFile = null;
+
+                if (op == SWT.NO) {
+                    FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+                    fChooser.setFileName(fout);
+
+                    DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
+                    fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+                    fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+                    fChooser.setFilterIndex(1);
+
+                    if(fChooser.open() == null) {
+                        return;
+                    }
+
+                    File chosenFile = new File(fChooser.getFileName());
+
+                    outFile = chosenFile;
+                    fout = outFile.getAbsolutePath();
+                }
+                else {
+                    outFile = new File(fout);
+                }
+
+                if (!outFile.exists()) {
+                    try {
+                        outFile.createNewFile();
+                    }
+                    catch (Exception ex) {
+                        Tools.showError(shell, "Failed to write user block into file.", shell.getText());
+                        return;
+                    }
+                }
+
+                // close the file
+                TreeView view = getTreeView();
+
+                try {
+                    view.closeFile(view.getSelectedFile());
+                } catch (Exception ex) {
+                    log.debug("Error closing file {}", fin);
+                }
+
+                if (Tools.setHDF5UserBlock(fin, fout, buf)) {
+                    if (op == SWT.NO) {
+                        fin = fout; // open the new file
+                    }
+                    else {
+                        File oldFile = new File(fin);
+                        boolean status = oldFile.delete();
+                        if (status) {
+                            outFile.renameTo(oldFile);
+                        }
+                        else {
+                            Tools.showError(shell, "Cannot replace the current file.\nPlease save to a different file.", shell.getText());
+                            outFile.delete();
+                        }
+                    }
+                }
+                else {
+                    Tools.showError(shell, "Failed to write user block into file.", shell.getText());
+                    outFile.delete();
+                }
+
+                // reopen the file
+                shell.dispose();
+
+                try {
+                    view.openFile(fin, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
+                } catch (Exception ex) {
+                    log.debug("Error opening file {}", fin);
+                }
+            }
+        }
+    }
+
     /**
      * The starting point of this application.
      *
@@ -3125,7 +3470,7 @@ public class HDFView implements ViewManager {
             }
         }
 
-        Vector<File> fList = new Vector<File>();
+        Vector<File> fList = new Vector<>();
         tmpFile = null;
 
         if(j >= 0) {

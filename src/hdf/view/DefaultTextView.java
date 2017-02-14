@@ -352,11 +352,8 @@ public class DefaultTextView implements TextView {
     public void updateValueInFile() {
         if (!(dataset instanceof ScalarDS) || isReadOnly || !isTextChanged) return;
 
-        int row = table.getSelectionIndex();
-        if (row >= 0) {
-            String cellValue = (String) null;
-            // String cellValue = (String) textEditor.getCellEditorValue();
-            text[row] = cellValue;
+        for (int i = 0; i < table.getItemCount(); i++) {
+            text[i] = table.getItem(i).getText(1);
         }
 
         try {
