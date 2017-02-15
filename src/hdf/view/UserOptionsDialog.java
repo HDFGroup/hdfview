@@ -65,8 +65,6 @@ public class UserOptionsDialog extends Dialog {
     private Button                currentDirButton;
     private Button                checkReadOnly, checkIndexType, checkIndexOrder, checkIndexNative, checkLibVersion, checkReadAll;
 
-    private int                   fontSize;
-
     private boolean               isFontChanged;
 
     private boolean               isUserGuideChanged;
@@ -120,7 +118,6 @@ public class UserOptionsDialog extends Dialog {
         isUserGuideChanged = false;
         isWorkDirChanged = false;
         // srbJList = null;
-        fontSize = ViewProperties.getFontSize();
         workDir = ViewProperties.getWorkDir();
         if (workDir == null) {
             workDir = rootDir;
@@ -264,25 +261,25 @@ public class UserOptionsDialog extends Dialog {
         else
             ViewProperties.setEarlyLib(false);
 
-        // set font size
-        int fsize = 12;
+        // set font size and type
         try {
-            fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
-            ViewProperties.setFontSize(fsize);
+        	String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
+        	int fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
 
-            if ((fontSize != ViewProperties.getFontSize())) {
-                isFontChanged = true;
+            if (ViewProperties.getFontSize() != fsize) {
+            	ViewProperties.setFontSize(fsize);
+            	isFontChanged = true;
+            }
+
+            if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
+            	ViewProperties.setFontType(ftype);
+            	isFontChanged = true;
             }
         }
         catch (Exception ex) {
+        	isFontChanged = false;
         }
 
-        // set font type
-        String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
-        if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
-            isFontChanged = true;
-            ViewProperties.setFontType(ftype);
-        }
 
         // set data delimiter
         ViewProperties.setDataDelimiter((String) delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
