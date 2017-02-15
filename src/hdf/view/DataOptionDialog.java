@@ -300,7 +300,7 @@ public class DataOptionDialog extends Dialog {
                 if (transposeChoice == null) {
                     isTransposed = false;
                 } else {
-                    isTransposed = transposeChoice.getSelectionIndex() == 0;
+                    isTransposed = transposeChoice.isEnabled() && transposeChoice.getSelectionIndex() == 0;
                 }
 
                 if (base1Button == null) {
