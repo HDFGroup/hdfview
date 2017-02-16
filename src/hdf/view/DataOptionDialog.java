@@ -423,6 +423,9 @@ public class DataOptionDialog extends Dialog {
             }
 
             if (rank > 2) {
+            	endFields[2].setEnabled(false);
+            	strideFields[2].setEnabled(false);
+
                 if (isTrueColorImage && imageButton != null) {
                     if(imageButton.getSelection()) {
                         choices[0].setEnabled(false);
@@ -433,6 +436,9 @@ public class DataOptionDialog extends Dialog {
                         endFields[2].setEnabled(false);
                         endFields[2].setText("0");
                     }
+                }
+                else {
+                	endFields[2].setText(startFields[2].getText());
                 }
             }
         }

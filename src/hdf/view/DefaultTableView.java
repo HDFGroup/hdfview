@@ -1473,7 +1473,7 @@ public class DefaultTableView implements TableView {
             return; // current page is the first page
         }
 
-        gotoPage(start[selectedIndex[2]] - 1);
+        gotoPage(idx - 1);
     }
 
     // Flip to next page of Table
@@ -1489,7 +1489,7 @@ public class DefaultTableView implements TableView {
             return; // current page is the last page
         }
 
-        gotoPage(start[selectedIndex[2]] + 1);
+        gotoPage(idx + 1);
     }
 
     // Flip to first page of Table
