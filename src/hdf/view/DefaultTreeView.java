@@ -340,8 +340,8 @@ public class DefaultTreeView implements TreeView {
                     }
                 }
                 catch (Exception ex) {
-                	log.trace("defaultDisplay showDataContent failed: {}", ex.getMessage());
-                	ex.printStackTrace();
+                    log.trace("defaultDisplay showDataContent failed: {}", ex.getMessage());
+                    ex.printStackTrace();
                 }
             }
 
@@ -1773,7 +1773,10 @@ public class DefaultTreeView implements TreeView {
      * Returns a list that lists all TreeItems in the
      * current Tree that are children of the specified
      * TreeItem in a breadth-first manner.
-     * @return
+     *
+     * @param the current Tree item
+     *
+     * @return list of TreeItems
      */
     private ArrayList<TreeItem> getItemsBreadthFirst(TreeItem item) {
         if (item == null) return null;
@@ -2612,7 +2615,7 @@ public class DefaultTreeView implements TreeView {
             // Make sure entire dataset is not loaded when looking at 3D datasets
             // using the default display mode (double clicking the data object)
             if (d.getRank() > 2) {
-            	d.getSelectedDims()[2] = 1;
+                d.getSelectedDims()[2] = 1;
             }
         }
         else {
