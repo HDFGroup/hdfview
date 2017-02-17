@@ -1,6 +1,5 @@
 package test.uitest;
 
-import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -55,29 +54,19 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             items[0].getNode(0).click();
 
             // Test metadata
-            filetree.contextMenu("Show Properties").click();
-
-            SWTBotShell metaDataShell = bot.shell("Properties - /" + JPGFILE);
-            metaDataShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            val = metaDataShell.bot().label(1).getText();
+			val = bot.labelInGroup("General Object Info", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image name", JPGFILE, val),
                     val.equals(JPGFILE));       // Test dataset name
 
-            val = metaDataShell.bot().text(0).getText();
+			val = bot.textInGroup("Dataspace and Datatype", 0).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image rank", "2", val),
                     val.equals("2"));           // Test rank
 
-            val = metaDataShell.bot().text(1).getText();
+			val = bot.textInGroup("Dataspace and Datatype", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image dimension sizes", "533 x 533", val),
                     val.equals("533 x 533"));   // Test dimension sizes
 
-            metaDataShell.bot().button("   &Close   ").click();
-            bot.waitUntil(Conditions.shellCloses(metaDataShell));
-
             // Test sample pixels
-            items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open As").click();
 
             SWTBotShell openAsShell = bot.shell("Dataset Selection - /" + JPGFILE);
@@ -150,29 +139,20 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
 
             // Test metadata
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Show Properties").click();
 
-            SWTBotShell metaDataShell = bot.shell("Properties - /" + JPGFILE);
-            metaDataShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            val = metaDataShell.bot().label(1).getText();
+			val = bot.labelInGroup("General Object Info", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image name", JPGFILE, val),
                     val.equals(JPGFILE));           // Test dataset name
 
-            val = metaDataShell.bot().text(0).getText();
+			val = bot.textInGroup("Dataspace and Datatype", 0).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image rank", "3", val),
                     val.equals("3"));               // Test rank
 
-            val = metaDataShell.bot().text(1).getText();
+			val = bot.textInGroup("Dataspace and Datatype", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image dimension sizes", "533 x 533 x 3", val),
                     val.equals("533 x 533 x 3"));   // Test dimension sizes
 
-            metaDataShell.bot().button("   &Close   ").click();
-            bot.waitUntil(Conditions.shellCloses(metaDataShell));
-
             // Test sample pixels
-            items[0].getNode(0).click();
             items[0].getNode(0).contextMenu("Open As").click();
 
             SWTBotShell openAsShell = bot.shell("Dataset Selection - /" + JPGFILE);

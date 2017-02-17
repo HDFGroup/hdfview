@@ -201,7 +201,8 @@ public abstract class AbstractWindowTest {
             }
 
             Display.getDefault().syncExec(new Runnable() {
-                public void run() {
+                @Override
+				public void run() {
                     imageCanvas.widget.notifyListeners(SWT.MouseMove, new Event() {
                         {
                             x = theX;
@@ -267,7 +268,8 @@ public abstract class AbstractWindowTest {
                     }
 
                     Display.getDefault().syncExec(new Runnable() {
-                        public void run() {
+                        @Override
+						public void run() {
                             shell.getDisplay().dispose();
                         }
                     });
@@ -291,7 +293,8 @@ public abstract class AbstractWindowTest {
     public void closeShell() throws InterruptedException {
         // close the shell
         Display.getDefault().syncExec(new Runnable() {
-            public void run() {
+            @Override
+			public void run() {
                 shell.close();
             }
         });
