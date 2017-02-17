@@ -1,7 +1,6 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
-import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -16,7 +15,6 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.junit.Ignore;
 import org.junit.Test;
 
 //@RunWith(SWTBotJunit4ClassRunner.class)
@@ -511,6 +509,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(botshell));
 
             Display.getDefault().syncExec(new Runnable() {
+                @Override
                 public void run() {
                     shell.forceActive();
                 }
@@ -572,6 +571,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(botshell));
 
             Display.getDefault().syncExec(new Runnable() {
+                @Override
                 public void run() {
                     shell.forceActive();
                 }
@@ -665,10 +665,15 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             items[0].getNode(4).getNode(5).contextMenu("Open").click();
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
+            // Make sure all shells have time to open and the bot has time to
+            // stabilize before checking how many shells are open
+            bot.sleep(1000);
+
             assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "too many or missing shells", "8", String.valueOf(bot.shells().length)),
                     bot.shells().length == 8);
 
             Display.getDefault().syncExec(new Runnable() {
+                @Override
                 public void run() {
                     shell.forceActive();
                 }

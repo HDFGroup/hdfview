@@ -55,19 +55,10 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             bot.waitUntil(shellCloses(libVersionShell));
 
-            items[0].click();
-            items[0].contextMenu("Show Properties").click();
-
-            SWTBotShell propertiesWindow = bot.shell("Properties - /");
-            propertiesWindow.activate();
-
-            val = propertiesWindow.bot().label(7).getText();
+			val = bot.labelInGroup("General Object Info", 9).getText();
             assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and Latest", val),
                     val.equals("Earliest and Latest"));
 
-            propertiesWindow.bot().button("   &Close   ").click();
-
-            items[0].click();
             items[0].contextMenu("Set Lib version bounds").click();
 
             libVersionShell = bot.shell("Set the library version bounds: ");
@@ -79,17 +70,9 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             bot.waitUntil(shellCloses(libVersionShell));
 
-            items[0].click();
-            items[0].contextMenu("Show Properties").click();
-
-            propertiesWindow = bot.shell("Properties - /");
-            propertiesWindow.activate();
-
-            val = propertiesWindow.bot().label(7).getText();
+			val = bot.labelInGroup("General Object Info", 9).getText();
             assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Latest and Latest", val),
                     val.equals("Latest and Latest"));
-
-            propertiesWindow.bot().button("   &Close   ").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();

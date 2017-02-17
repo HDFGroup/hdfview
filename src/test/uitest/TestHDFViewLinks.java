@@ -1,7 +1,6 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -16,7 +15,6 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestHDFViewLinks extends AbstractWindowTest {
@@ -106,6 +104,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             Display.getDefault().syncExec(new Runnable() {
+                @Override
                 public void run() {
                     for (int row = 1; row <= 4; row++) {
                         for (int col = 1; col <= 4; col++) {
@@ -202,6 +201,9 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
 
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
@@ -263,7 +265,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     String thisVal = table.getCellDataValueByPosition(row, col);
                     String expected = String.valueOf(((row - 1) * 4) + (col));
                     assertTrue(constructWrongValueMessage("testHardLinks()", "wrong data", expected, thisVal),
-                            val.equals(expected));
+                            thisVal.equals(expected));
                 }
             }
 
@@ -291,7 +293,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void testSoftLinks() {
         String filename = "testsoftlinks";
         String file_ext = ".h5";
@@ -347,6 +349,9 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
+
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -409,7 +414,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     String thisVal = table.getCellDataValueByPosition(row, col);
                     String expected = String.valueOf(((row - 1) * 4) + (col));
                     assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong data", expected, thisVal),
-                            val.equals(expected));
+                            thisVal.equals(expected));
                 }
             }
 

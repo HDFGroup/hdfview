@@ -11,7 +11,7 @@ import org.junit.runners.Suite;
     TestHDFViewDatasetFrameSelection.class,
     TestHDFViewImageConversion.class,
     TestTreeViewFiles.class,
-    TestTreeViewGroups.class,
+    TestHDFViewIntConversions.class,
     TestTreeViewNewMenu.class
 })
 

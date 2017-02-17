@@ -1,7 +1,6 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -53,7 +52,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            assertTrue("openHDF5ScalarGroup() data did not match regex '^-1, .*'", table.getCellDataValueByPosition(1, 1).matches("^-1, .*"));
+            table.click(1, 1);
+            assertTrue("openHDF5ScalarGroup() data did not match regex '^-1, .*'",
+                    tableShell.bot().text(0).getText().matches("^-1, .*"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -69,7 +70,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            assertTrue("openHDF5ScalarGroup() data did not match regex '^18446744073709551615, .*'", table.getCellDataValueByPosition(1, 1).matches("^18446744073709551615, .*"));
+            table.click(1, 1);
+            assertTrue("openHDF5ScalarGroup() data did not match regex '^18446744073709551615, .*'",
+                    tableShell.bot().text(0).getText().matches("^18446744073709551615, .*"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -108,13 +111,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5ScalarAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
 
             items[0].click();
-            items[0].contextMenu("Show Properties").click();
+            items[0].contextMenu("Show Attributes").click();
 
             SWTBotShell metaDataShell = bot.shell("Properties - /");
             metaDataShell.activate();
             bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            metaDataShell.bot().tabItem("Attributes").activate();
 
             SWTBotTable attrTable = metaDataShell.bot().table();
 
@@ -188,13 +189,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(textShell));
 
             items[0].click();
-            items[0].contextMenu("Show Properties").click();
+            items[0].contextMenu("Show Attributes").click();
 
             SWTBotShell metaDataShell = bot.shell("Properties - /");
             metaDataShell.activate();
             bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            metaDataShell.bot().tabItem("Attributes").activate();
 
             SWTBotTable attrTable = metaDataShell.bot().table();
 
@@ -317,13 +316,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5Attribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
 
             items[0].click();
-            items[0].contextMenu("Show Properties").click();
+            items[0].contextMenu("Show Attributes").click();
 
             SWTBotShell metaDataShell = bot.shell("Properties - /");
             metaDataShell.activate();
             bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            metaDataShell.bot().tabItem("Attributes").activate();
 
             SWTBotTable attrTable = metaDataShell.bot().table();
 
@@ -378,13 +375,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5IntsAttribute() filetree is missing dataset '" + datasetname + "'", items[0].getNode(7).getText().compareTo(datasetname)==0);
 
             items[0].getNode(7).click();
-            items[0].getNode(7).contextMenu("Show Properties").click();
+            items[0].getNode(7).contextMenu("Show Attributes").click();
 
             SWTBotShell metaDataShell = bot.shell("Properties - /" + datasetname);
             metaDataShell.activate();
             bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            metaDataShell.bot().tabItem("Attributes").activate();
 
             SWTBotTable attrTable = metaDataShell.bot().table();
 
@@ -442,14 +437,40 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'", table.getCellDataValueByPosition(3, 5).matches("^-1, .*"));
-            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'", table.getCellDataValueByPosition(4, 6).matches("^-1, .*"));
-            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'", table.getCellDataValueByPosition(5, 7).matches("^-1, .*"));
-            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'", table.getCellDataValueByPosition(6, 8).matches("^-1, .*"));
-            assertTrue("openHDF5CompoundDS() data did not match regex '^255, .*'", table.getCellDataValueByPosition(3, 1).matches("^255, .*"));
-            assertTrue("openHDF5CompoundDS() data did not match regex '^65535, .*'", table.getCellDataValueByPosition(4, 2).matches("^65535, .*"));
-            assertTrue("openHDF5CompoundDS() data did not match regex '^4294967295, .*'", table.getCellDataValueByPosition(5, 3).matches("^4294967295, .*"));
-            assertTrue("openHDF5CompoundDS() data did not match regex '^18446744073709551615, .*'", table.getCellDataValueByPosition(6, 4).matches("^18446744073709551615, .*"));
+            table.click(3, 5);
+            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
+                    tableShell.bot().text(0).getText().matches("^-1, .*"));
+
+            table.click(4, 6);
+            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
+                    tableShell.bot().text(0).getText().matches("^-1, .*"));
+
+            table.click(5, 7);
+            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
+                    tableShell.bot().text(0).getText().matches("^-1, .*"));
+
+            // Disabled until offscreen columns/rows can be accessed
+            /*
+             * table.click(6, 8);
+             * assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'"
+             * , tableShell.bot().text(0).getText().matches("^-1, .*"));
+             */
+
+            table.click(3, 1);
+            assertTrue("openHDF5CompoundDS() data did not match regex '^255, .*'",
+                    tableShell.bot().text(0).getText().matches("^255, .*"));
+
+            table.click(4, 2);
+            assertTrue("openHDF5CompoundDS() data did not match regex '^65535, .*'",
+                    tableShell.bot().text(0).getText().matches("^65535, .*"));
+
+            table.click(5, 3);
+            assertTrue("openHDF5CompoundDS() data did not match regex '^4294967295, .*'",
+                    tableShell.bot().text(0).getText().matches("^4294967295, .*"));
+
+            table.click(6, 4);
+            assertTrue("openHDF5CompoundDS() data did not match regex '^18446744073709551615, .*'",
+                    tableShell.bot().text(0).getText().matches("^18446744073709551615, .*"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -739,13 +760,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5CompoundAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
 
             items[0].click();
-            items[0].contextMenu("Show Properties").click();
+            items[0].contextMenu("Show Attributes").click();
 
             SWTBotShell metaDataShell = bot.shell("Properties - /");
             metaDataShell.activate();
             bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            metaDataShell.bot().tabItem("Attributes").activate();
 
             SWTBotTable attrTable = metaDataShell.bot().table();
 
@@ -846,7 +865,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5CompoundArrayImport() filetree is missing dataset '" + newDatasetName + "'", items[0].getNode(1).getText().compareTo(newDatasetName)==0);
 
             items[0].getNode(1).click();
-            items[0].getNode(1).contextMenu("Show Properties").click();
+            items[0].getNode(1).contextMenu("Show Attributes").click();
 
             SWTBotShell metaDataShell = bot.shell("Properties - /" + newDatasetName);
             metaDataShell.activate();
@@ -919,18 +938,25 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
+            String val;
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSBits()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "4",
+					String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==4);
-            assertTrue("openHDF5CompoundDSBits() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("openHDF5CompoundDSBits() filetree is missing group '" + groupname1 + "'", items[0].getNode(0).getText().compareTo(groupname1)==0);
-            assertTrue("openHDF5CompoundDSBits() filetree is missing group '" + groupname2 + "'", items[0].getNode(1).getText().compareTo(groupname2)==0);
-            assertTrue("openHDF5CompoundDSBits() filetree is missing group '" + groupname3 + "'", items[0].getNode(2).getText().compareTo(groupname3)==0);
+			assertTrue("openHDF5CompoundBits() filetree is missing file '" + filename + file_ext + "'",
+					items[0].getText().compareTo(filename + file_ext) == 0);
+			assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname1 + "'",
+					items[0].getNode(0).getText().compareTo(groupname1) == 0);
+			assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname2 + "'",
+					items[0].getNode(1).getText().compareTo(groupname2) == 0);
+			assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname3 + "'",
+					items[0].getNode(2).getText().compareTo(groupname3) == 0);
 
             filetree.expandNode(filename + file_ext, true);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSBits()", "filetree wrong row count", "11", String.valueOf(filetree.visibleRowCount())),
+			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "11",
+					String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==11);
 
             items[0].getNode(0).getNode(0).click();
@@ -944,25 +970,30 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            String val = table.getCellDataValueByPosition(1, 1);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSBits()", "wrong data", "FF", val),
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val),
                     val.equals("FF"));
 
-            val = table.getCellDataValueByPosition(2, 1);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSBits()", "wrong data", "FE", val),
+            table.click(2, 1);
+            val = tableShell.bot().text(0).getText();
+			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FE", val),
                     val.equals("FE"));
 
-            val = table.getCellDataValueByPosition(3, 1);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSBits()", "wrong data", "FD", val),
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
+			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FD", val),
                     val.equals("FD"));
 
-            val = table.getCellDataValueByPosition(4, 1);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSBits()", "wrong data", "FC", val),
+            table.click(4, 1);
+            val = tableShell.bot().text(0).getText();
+			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FC", val),
                     val.equals("FC"));
 
             // TODO: disabled until a solution for getting values of non-visible cells is found
 //            val = table.getCellDataValueByPosition(31, 1);
-//            assertTrue(constructWrongValueMessage("openHDF5CompoundDSBits()", "wrong data", "E1", val),
+			// assertTrue(constructWrongValueMessage("openHDF5CompoundBits()",
+			// "wrong data", "E1", val),
 //                    val.equals("E1"));
 
             tableShell.bot().menu("Close").click();
@@ -998,6 +1029,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
+            String val;
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
@@ -1017,10 +1049,12 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            String val = table.getCellDataValueByPosition(3, 1);
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
             assertTrue("openHDF5ArrayString() data did not match regex '^0, 1, 4, .*'", val.matches("^0, 1, 4, .*"));
 
-            val = table.getCellDataValueByPosition(3, 2);
+            table.click(3, 2);
+            val = tableShell.bot().text(0).getText();
             assertTrue("openHDF5ArrayString() data did not match regex '^abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*'",
                     val.matches("^abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*"));
 
