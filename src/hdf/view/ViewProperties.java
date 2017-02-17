@@ -98,7 +98,7 @@ public class ViewProperties extends Properties {
     private static int              fontSize               = 12;
 
     /** the font type */
-    private static String           fontType               = null;
+    private static String           fontType               = "Serif";
 
     /** the full path of H4toH5 converter */
     private static String           h4toh5                 = "";

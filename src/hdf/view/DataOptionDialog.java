@@ -300,7 +300,7 @@ public class DataOptionDialog extends Dialog {
                 if (transposeChoice == null) {
                     isTransposed = false;
                 } else {
-                    isTransposed = transposeChoice.getSelectionIndex() == 0;
+                    isTransposed = transposeChoice.isEnabled() && transposeChoice.getSelectionIndex() == 0;
                 }
 
                 if (base1Button == null) {
@@ -421,29 +421,25 @@ public class DataOptionDialog extends Dialog {
                 endFields[1].setEnabled(false);
                 endFields[1].setText(startFields[1].getText());
             }
-        }
 
-        if (rank > 2) {
-            endFields[2].setEnabled(false);
-            strideFields[2].setEnabled(false);
+            if (rank > 2) {
+            	endFields[2].setEnabled(false);
+            	strideFields[2].setEnabled(false);
 
-            if (isTrueColorImage && imageButton != null) {
-                if(imageButton.getSelection()) {
-                    choices[0].setEnabled(false);
-                    choices[1].setEnabled(false);
-                    choices[2].setEnabled(false);
-                    startFields[2].setEnabled(false);
-                    startFields[2].setText("0");
-                    endFields[2].setText("0");
+                if (isTrueColorImage && imageButton != null) {
+                    if(imageButton.getSelection()) {
+                        choices[0].setEnabled(false);
+                        choices[1].setEnabled(false);
+                        choices[2].setEnabled(false);
+                        startFields[2].setEnabled(false);
+                        startFields[2].setText("0");
+                        endFields[2].setEnabled(false);
+                        endFields[2].setText("0");
+                    }
                 }
-            }
-            else {
-                choices[0].setEnabled(true);
-                choices[1].setEnabled(true);
-                choices[2].setEnabled(true);
-                startFields[2].setEnabled(true);
-                startFields[2].setText(String.valueOf(start[selectedIndex[2]]));
-                endFields[2].setText(startFields[2].getText());
+                else {
+                	endFields[2].setText(startFields[2].getText());
+                }
             }
         }
 
@@ -623,20 +619,18 @@ public class DataOptionDialog extends Dialog {
 
         // find no error, set selection the the dataset object
         for (int i = 0; i < n; i++) {
+        	long selectedSize = ((n1[i] - n0[i]) / n2[i]) + 1;
+
+        	if (!Tools.checkIsValidJavaInt(selectedSize)) {
+                shell.getDisplay().beep();
+                Tools.showError(shell, "Subset selection too large to display.", shell.getText());
+                return false;
+            }
+
             selectedIndex[i] = sIndex[i];
             start[selectedIndex[i]] = n0[i];
-            if (i < 2) {
-                long selectedSize = ((n1[i] - n0[i]) / n2[i]) + 1;
-
-                if (!Tools.checkIsValidJavaInt(selectedSize)) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, "Subset selection too large to display.", shell.getText());
-                    return false;
-                }
-
-                selected[selectedIndex[i]] = (int) selectedSize;
-                stride[selectedIndex[i]] = n2[i];
-            }
+            selected[selectedIndex[i]] = (int) selectedSize;
+            stride[selectedIndex[i]] = n2[i];
         }
 
         if ((rank > 1) && isText) {

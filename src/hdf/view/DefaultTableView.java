@@ -423,7 +423,7 @@ public class DefaultTableView implements TableView {
         int n = Math.min(3, rank);
         if (rank > 2) {
             curFrame = start[selectedIndex[2]] + indexBase;
-            maxFrame = dims[selectedIndex[2]];
+            maxFrame = (indexBase == 1) ? dims[selectedIndex[2]] : dims[selectedIndex[2]] - 1;
         }
 
         ToolBar bar = createToolbar(shell);
@@ -1426,7 +1426,7 @@ public class DefaultTableView implements TableView {
 
             Text maxFrameText = new Text(toolbar, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
             maxFrameText.setFont(curFont);
-            maxFrameText.setText(String.valueOf(maxFrame - 1));
+            maxFrameText.setText(String.valueOf(maxFrame));
             maxFrameText.setEditable(false);
             maxFrameText.setEnabled(false);
 
@@ -1473,7 +1473,7 @@ public class DefaultTableView implements TableView {
             return; // current page is the first page
         }
 
-        gotoPage(start[selectedIndex[2]] - 1);
+        gotoPage(idx - 1);
     }
 
     // Flip to next page of Table
@@ -1489,7 +1489,7 @@ public class DefaultTableView implements TableView {
             return; // current page is the last page
         }
 
-        gotoPage(start[selectedIndex[2]] + 1);
+        gotoPage(idx + 1);
     }
 
     // Flip to first page of Table
