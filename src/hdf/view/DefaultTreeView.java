@@ -2659,12 +2659,6 @@ public class DefaultTreeView implements TreeView {
             else {
                 dataViewName = (String) HDFView.getListOfTableViews().get(0);
             }
-
-            // Make sure entire dataset is not loaded when looking at 3D datasets
-            // using the default display mode (double clicking the data object)
-            if (d.getRank() > 2) {
-                d.getSelectedDims()[2] = 1;
-            }
         }
         else {
             DataOptionDialog dialog = new DataOptionDialog(shell, d);

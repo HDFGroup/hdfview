@@ -291,6 +291,7 @@ public class DefaultTableView implements TableView {
         shell.setLayout(new GridLayout(1, true));
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
                     MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
@@ -627,6 +628,13 @@ public class DefaultTableView implements TableView {
             }
         }
 
+        // Make sure entire dataset is not loaded when looking at 3D
+        // datasets using the default display mode (double clicking the
+        // data object)
+        if (theDataset.getRank() > 2) {
+            theDataset.getSelectedDims()[theDataset.getSelectedIndex()[2]] = 1;
+        }
+
         dataValue = null;
         try {
             dataValue = theDataset.getData();
@@ -774,6 +782,13 @@ public class DefaultTableView implements TableView {
             theDataset.setConvertByteToString(false);
         }
 
+        // Make sure entire dataset is not loaded when looking at 3D
+        // datasets using the default display mode (double clicking the
+        // data object)
+        if (theDataset.getRank() > 2) {
+            theDataset.getSelectedDims()[theDataset.getSelectedIndex()[2]] = 1;
+        }
+
         dataValue = null;
         try {
             dataValue = theDataset.getData();
@@ -866,6 +881,7 @@ public class DefaultTableView implements TableView {
         MenuItem item = new MenuItem(menu, SWT.PUSH);
         item.setText("Export Data to Text File");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     saveAsText();
@@ -886,6 +902,7 @@ public class DefaultTableView implements TableView {
             item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
             item.setText("Native Order");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 1;
 
@@ -902,6 +919,7 @@ public class DefaultTableView implements TableView {
             item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
             item.setText("Little Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 2;
 
@@ -918,6 +936,7 @@ public class DefaultTableView implements TableView {
             item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
             item.setText("Big Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 3;
 
@@ -940,6 +959,7 @@ public class DefaultTableView implements TableView {
         item.setText("Import Data from Text File");
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String currentDir = dataset.getFileFormat().getParent();
 
@@ -972,6 +992,7 @@ public class DefaultTableView implements TableView {
             checkFixedDataLength = new MenuItem(menu, SWT.CHECK);
             checkFixedDataLength.setText("Fixed Data Length");
             checkFixedDataLength.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (!checkFixedDataLength.getSelection()) {
                         fixedDataLength = -1;
@@ -1011,6 +1032,7 @@ public class DefaultTableView implements TableView {
             item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
             item.setText("Native Order");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 1;
 
@@ -1026,6 +1048,7 @@ public class DefaultTableView implements TableView {
             item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
             item.setText("Little Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 2;
 
@@ -1041,6 +1064,7 @@ public class DefaultTableView implements TableView {
             item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
             item.setText("Big Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 3;
 
@@ -1062,6 +1086,7 @@ public class DefaultTableView implements TableView {
         item.setText("Copy");
         item.setAccelerator(SWT.CTRL | 'C');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 copyData();
             }
@@ -1072,6 +1097,7 @@ public class DefaultTableView implements TableView {
         item.setAccelerator(SWT.CTRL | 'V');
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 pasteData();
             }
@@ -1083,6 +1109,7 @@ public class DefaultTableView implements TableView {
         item.setText("Copy to New Dataset");
         item.setEnabled(isEditable && (dataset instanceof ScalarDS));
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if ((selectionLayer.getSelectedColumnPositions().length <= 0) || (selectionLayer.getSelectedRowCount() <= 0)) {
                     MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
@@ -1127,6 +1154,7 @@ public class DefaultTableView implements TableView {
         item.setAccelerator(SWT.CTRL | 'U');
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     updateValueInFile();
@@ -1144,6 +1172,7 @@ public class DefaultTableView implements TableView {
         item.setText("Select All");
         item.setAccelerator(SWT.CTRL | 'A');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     table.doCommand(new SelectAllCommand());
@@ -1160,6 +1189,7 @@ public class DefaultTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Show Lineplot");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 showLineplot();
             }
@@ -1168,6 +1198,7 @@ public class DefaultTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Show Statistics");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     Object theData = getSelectedData();
@@ -1212,6 +1243,7 @@ public class DefaultTableView implements TableView {
         item.setText("Math Conversion");
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     mathConversion();
@@ -1229,6 +1261,7 @@ public class DefaultTableView implements TableView {
             checkScientificNotation = new MenuItem(menu, SWT.CHECK);
             checkScientificNotation.setText("Show Scientific Notation");
             checkScientificNotation.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (checkScientificNotation.getSelection()) {
                         if(checkCustomNotation != null)
@@ -1251,6 +1284,7 @@ public class DefaultTableView implements TableView {
             checkCustomNotation = new MenuItem(menu, SWT.CHECK);
             checkCustomNotation.setText("Show Custom Notation");
             checkCustomNotation.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (checkCustomNotation.getSelection()) {
                         if(checkScientificNotation != null)
@@ -1274,6 +1308,7 @@ public class DefaultTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Create custom notation");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String msg = "Create number format by pattern \nINTEGER . FRACTION E EXPONENT\nusing # for optional digits and 0 for required digits"
                         + "\nwhere, INTEGER: the pattern for the integer part"
@@ -1301,6 +1336,7 @@ public class DefaultTableView implements TableView {
             checkHex = new MenuItem(menu, SWT.CHECK);
             checkHex.setText("Show Hexadecimal");
             checkHex.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     showAsHex = checkHex.getSelection();
                     if (showAsHex) {
@@ -1321,6 +1357,7 @@ public class DefaultTableView implements TableView {
             checkBin = new MenuItem(menu, SWT.CHECK);
             checkBin.setText("Show Binary");
             checkBin.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     showAsBin = checkBin.getSelection();
                     if (showAsBin) {
@@ -1344,6 +1381,7 @@ public class DefaultTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Close");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 shell.dispose();
             }
@@ -1362,6 +1400,7 @@ public class DefaultTableView implements TableView {
         item.setImage(ViewProperties.getChartIcon());
         item.setToolTipText("Line Plot");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 showLineplot();
             }
@@ -1375,6 +1414,7 @@ public class DefaultTableView implements TableView {
             item.setImage(ViewProperties.getFirstIcon());
             item.setToolTipText("First Page");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     firstPage();
                 }
@@ -1385,6 +1425,7 @@ public class DefaultTableView implements TableView {
             item.setImage(ViewProperties.getPreviousIcon());
             item.setToolTipText("Previous Page");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     previousPage();
                 }
@@ -1396,6 +1437,7 @@ public class DefaultTableView implements TableView {
             frameField.setFont(curFont);
             frameField.setText(String.valueOf(curFrame));
             frameField.addTraverseListener(new TraverseListener() {
+                @Override
                 public void keyTraversed(TraverseEvent e) {
                     if (e.detail == SWT.TRAVERSE_RETURN) {
                         try {
@@ -1442,6 +1484,7 @@ public class DefaultTableView implements TableView {
             item.setImage(ViewProperties.getNextIcon());
             item.setToolTipText("Next Page");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     nextPage();
                 }
@@ -1452,6 +1495,7 @@ public class DefaultTableView implements TableView {
             item.setImage(ViewProperties.getLastIcon());
             item.setToolTipText("Last Page");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     lastPage();
                 }
@@ -1622,7 +1666,7 @@ public class DefaultTableView implements TableView {
         }
 
         // No need to update if values are the same
-        if (cellValue.equals((String) dataLayer.getDataValue(col, row).toString())) {
+        if (cellValue.equals(dataLayer.getDataValue(col, row).toString())) {
             log.debug("updateValueInMemory(): cell value not updated; new value same as old value");
             log.trace("updateValueInMemory(): finish");
             return;
@@ -2284,7 +2328,7 @@ public class DefaultTableView implements TableView {
             Class[] paramClass = { FileFormat.class, String.class, String.class };
             constructor = dset.getClass().getConstructor(paramClass);
             paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
-            dset_copy = (ScalarDS) constructor.newInstance(paramObj);
+            dset_copy = constructor.newInstance(paramObj);
             data = dset_copy.getData();
         }
         catch (Exception ex) {
@@ -2458,7 +2502,7 @@ public class DefaultTableView implements TableView {
         while (st.hasMoreTokens()) {
             log.trace("showRegRefData(): st.hasMoreTokens() begin");
             try {
-                dset_copy = (ScalarDS) constructor.newInstance(paramObj);
+                dset_copy = constructor.newInstance(paramObj);
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): constructor newInstance failure: ", ex);
@@ -4323,7 +4367,7 @@ public class DefaultTableView implements TableView {
                                                         break;
                                                     case 'J':
                                                         long[] larray = (long[]) dbuf;
-                                                        Long l = (Long) larray[0];
+                                                        Long l = larray[0];
                                                         String theValue = Long.toString(l);
                                                         if (l < 0) {
                                                             l = (l << 1) >>> 1;
@@ -4335,7 +4379,7 @@ public class DefaultTableView implements TableView {
                                                         strvalSB.append(theValue);
                                                         for (int i = 1; i < n; i++) {
                                                             strvalSB.append(',');
-                                                            l = (Long) larray[i];
+                                                            l = larray[i];
                                                             theValue = Long.toString(l);
                                                             if (l < 0) {
                                                                 l = (l << 1) >>> 1;
@@ -4571,7 +4615,7 @@ public class DefaultTableView implements TableView {
                         rowIdx *= len;
 
                         for (int j = 0; i < len; i++) {
-                            elements[j] = Array.getByte(colValue, (int) rowIdx + j);
+                            elements[j] = Array.getByte(colValue, rowIdx + j);
                         }
 
                         arrayElements[i] = elements;
@@ -4616,7 +4660,7 @@ public class DefaultTableView implements TableView {
                 rowIdx *= len;
 
                 for (int i = 0; i < len; i++) {
-                    elements[i] = Array.getByte(colValue, (int) rowIdx + i);
+                    elements[i] = Array.getByte(colValue, rowIdx + i);
                 }
 
                 theValue = elements;
@@ -4624,7 +4668,7 @@ public class DefaultTableView implements TableView {
             else {
                 // Flat numerical types
                 if (isUINT64) {
-                    theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, (int) rowIdx));
+                    theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx));
                 }
                 else {
                     theValue = Array.get(colValue, rowIdx);
@@ -5355,6 +5399,7 @@ public class DefaultTableView implements TableView {
             colButton.setText("Column");
             colButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             colButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     colBox.setEnabled(true);
                     rowBox.setEnabled(false);
@@ -5366,6 +5411,7 @@ public class DefaultTableView implements TableView {
             rowButton.setText("Row");
             rowButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             rowButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     rowBox.setEnabled(true);
                     colBox.setEnabled(false);
@@ -5417,6 +5463,7 @@ public class DefaultTableView implements TableView {
             okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (colButton.getSelection()) {
                         idx_xaxis = colBox.getSelectionIndex() - 1;
@@ -5436,6 +5483,7 @@ public class DefaultTableView implements TableView {
             cancelButton.setText(" &Cancel ");
             cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     plotType = NO_PLOT;
                     linePlotOptionShell.dispose();
@@ -5492,6 +5540,7 @@ public class DefaultTableView implements TableView {
             MenuItem item = new MenuItem(menu, SWT.PUSH);
             item.setText("Show As &Table");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     viewType = ViewType.TABLE;
 
@@ -5541,6 +5590,7 @@ public class DefaultTableView implements TableView {
             item = new MenuItem(menu, SWT.PUSH);
             item.setText("Show As &Image");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     viewType = ViewType.IMAGE;
 
