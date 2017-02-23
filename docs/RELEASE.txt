@@ -12,16 +12,84 @@ This release was built and tested with JDK 1.7.
 
 Major Enhancements
 ==============================================================================
-    *
+    * Complete overhaul of the GUI framework. Migrated to SWT so HDFView
+      now has a more native application look and feel.
+
+    * Separated all DataViews from the main HDFView window
+        -- The system window manager can now be used to organize DataViews
+           as desired, allowing full maximization and minimization of the
+           windows, as well as side-by-side views, window decorations, etc.
+
+        -- The main HDFView window still displays open files and their
+           structure on the left hand side
+
+        -- The right side of the window now displays the general metadata of
+           the selected object, such as the object name, path, type, number of
+           attributes, etc. In addition, the following extra information is
+           displayed for these specific objects:
+            -- Datasets: Dataspace, Datatype, Chunking Information, Compression
+               Ratio, Applied Filters, Allocated Storage and Fill Value are
+               displayed. If the Dataset is a Compound Dataset, the datasets'
+               Compound Datatype members are displayed as well.
+
+            -- Images: The Dataspace and Datatype of the image are displayed
+
+            -- Groups: Number of members in the group, as well as the group
+               member names and types are displayed
+
+            -- Datatypes: Just the type of the Datatype is displayed
+
+        -- As a result of now showing the metadata immediately when an
+           object is selected, the 'Show Properties' menu item shown when
+           right-clicking on an object in the tree has now been replaced
+           with a 'Show Attributes' item to specifically show just the
+           attributes of the data object. The 'User Block' tab in the old
+           'Show Properties' window has been removed and is now a clickable
+           button that has been moved out to the metadata display when the
+           selected object is the root group of a file
+
+    * Better support for displaying Compound Datasets
+        -- Each Compound entry in the TableView can now be collapsed by
+           double clicking on the column header for that entry. If the
+           Compound Datatype of the Dataset has nested Compound Datatype
+           members inside of it, those members will be collapsable as well,
+           as indicated by their individual column headers
+
+    * Added support for split files and family files
+        -- When opening split files, the file containing all the metadata
+           must be opened
+
+        -- When opening family files, the first file in the family must
+           be opened
+
+    * Added support for displaying data of type Array of Compound
+        -- Currently only Integer and Float data is supported
+
+    * Added the ability to open multiple files at once using either the
+      file browser or by dragging and dropping
 
 
 Major Bug Fixes
 ==============================================================================
-    *
+    * Fixed issue with transposing/reshaping displayed data where
+      'transpose' instead acted as 'reshape' and vice versa
+
+    * Corrected display of Opaque types that were larger than 1 byte in size
+
+    * Corrected issue where trying to save an Image from the ImageView as
+      a JPEG threw an IOException and trying to save as a BMP produced an
+      empty file
+
+    * Fixed an issue with displaying arrays of variable-length strings
 
 
 Limitations / Known Problems
 ==============================================================================
+    * The 'Recent Files' button does not work on Mac due to a cross-platform
+      issue with SWT
+
+    * Selecting and changing individual points in PaletteView for an image
+      palette is broken
 
 Other Notes
 ==============================================================================
