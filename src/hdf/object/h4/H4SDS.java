@@ -162,7 +162,7 @@ public class H4SDS extends ScalarDS
             sdid = ((H4File)getFileFormat()).getSDAccessID();
 
             long id = open();
-            
+
             if (id >= 0) {
                 try { // retireve attributes of the dataset
                     String[] objName = {""};
@@ -175,7 +175,7 @@ public class H4SDS extends ScalarDS
                     log.debug("hasAttribute(): failure: ", ex);
                     nAttributes=0;
                 }
-                
+
                 log.trace("hasAttribute(): nAttributes={}", nAttributes);
 
                 close(id);
@@ -211,7 +211,7 @@ public class H4SDS extends ScalarDS
     throws Exception
     {
         log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
-        
+
         Dataset dataset = null;
         long srcdid=-1, dstdid=-1, tid=-1;
         int size=1, theRank=2;
@@ -304,7 +304,7 @@ public class H4SDS extends ScalarDS
         pgroup.addToMemberList(dataset);
 
         close(srcdid);
-        
+
         try {
             HDFLibrary.SDendaccess(dstdid);
         }
@@ -321,7 +321,7 @@ public class H4SDS extends ScalarDS
     public byte[] readBytes() throws HDFException
     {
         log.trace("readBytes(): start");
-        
+
         byte[] theData = null;
 
         if (rank <=0 ) {
@@ -496,7 +496,7 @@ public class H4SDS extends ScalarDS
             tmpData = null;
             close(id);
         }
-        
+
         log.trace("write(): finish");
     }
 
@@ -785,11 +785,16 @@ public class H4SDS extends ScalarDS
 
                 if (cflag[0] == HDFConstants.HDF_NONE) {
                     chunkSize = null;
+                    storage_layout = "NONE";
                 }
                 else {
                     chunkSize = new long[rank];
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
+                    }
+                    storage_layout = "CHUNKED: " + String.valueOf(chunkSize[0]);
+                    for (int i = 1; i < rank; i++) {
+                        storage_layout += " X " + chunkSize[i];
                     }
                 }
             }

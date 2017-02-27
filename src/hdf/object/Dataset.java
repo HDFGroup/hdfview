@@ -139,6 +139,9 @@ public abstract class Dataset extends HObject {
     /** The filters information. */
     protected String          filters;
 
+    /** The storage layout information. */
+    protected String          storage_layout;
+
     /** The storage information. */
     protected String          storage;
 
@@ -915,6 +918,17 @@ public abstract class Dataset extends HObject {
         if (rank < 0) init();
 
         return filters;
+    }
+
+    /**
+     * Returns the string representation of storage layout information.
+     *
+     * @return the string representation of storage layout information.
+     */
+    public final String getStorageLayout() {
+        if (rank < 0) init();
+
+        return storage_layout;
     }
 
     /**
