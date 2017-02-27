@@ -46,7 +46,9 @@ Major Enhancements
            attributes of the data object. The 'User Block' tab in the old
            'Show Properties' window has been removed and is now a clickable
            button that has been moved out to the metadata display when the
-           selected object is the root group of a file
+           selected object is the root group of a file.
+           The storage layout for HDF5 files are now shown in place of the
+           Chunking status.
 
     * Better support for displaying Compound Datasets
         -- Each Compound entry in the TableView can now be collapsed by
