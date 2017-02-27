@@ -688,11 +688,16 @@ public class H4GRImage extends ScalarDS
                 HDFLibrary.GRgetchunkinfo(id, chunkInfo, cflag);
                 if (cflag[0] == HDFConstants.HDF_NONE) {
                     chunkSize = null;
+                    storage_layout = "NONE";
                 }
                 else {
                     chunkSize = new long[rank];
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
+                    }
+                    storage_layout = "CHUNKED: " + String.valueOf(chunkSize[0]);
+                    for (int i = 1; i < rank; i++) {
+                        storage_layout += " X " + chunkSize[i];
                     }
                 }
             }

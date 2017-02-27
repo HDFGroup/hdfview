@@ -1805,7 +1805,7 @@ public class HDFView implements ViewManager {
             } // if (d instanceof Compound)
 
 
-            // Create composite for displaying dataset chunking, compression, filters,
+            // Create composite for displaying dataset storage layout, compression, filters,
             // storage type, and fill value
             Composite compressionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
             compressionComposite.setLayout(new GridLayout(2, false));
@@ -1814,25 +1814,11 @@ public class HDFView implements ViewManager {
             // Add compression and data layout information
             label = new Label(compressionComposite, SWT.LEFT);
             label.setFont(currentFont);
-            label.setText("Chunking: ");
-
-            // try { d.getMetadata(); } catch (Exception ex) {}
-            String chunkInfo = "";
-            long[] chunks = d.getChunkSize();
-            if (chunks == null) {
-                chunkInfo = "NONE";
-            }
-            else {
-                int n = chunks.length;
-                chunkInfo = String.valueOf(chunks[0]);
-                for (int i = 1; i < n; i++) {
-                    chunkInfo += " X " + chunks[i];
-                }
-            }
+            label.setText("Storage Layout ");
 
             label = new Label(compressionComposite, SWT.RIGHT);
             label.setFont(currentFont);
-            label.setText(chunkInfo);
+            label.setText(d.getStorageLayout());
 
             label = new Label(compressionComposite, SWT.LEFT);
             label.setFont(currentFont);

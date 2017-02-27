@@ -1204,9 +1204,16 @@ public class H5CompoundDS extends CompoundDS {
                 pid = H5.H5Dget_create_plist(did);
                 long storage_size = H5.H5Dget_storage_size(did);
                 int nfilt = H5.H5Pget_nfilters(pid);
-                if (H5.H5Pget_layout(pid) == HDF5Constants.H5D_CHUNKED) {
+                int layout_type = H5.H5Pget_layout(pid);
+                if (layout_type == HDF5Constants.H5D_CHUNKED) {
                     chunkSize = new long[rank];
                     H5.H5Pget_chunk(pid, rank, chunkSize);
+                    int n = chunkSize.length;
+                    storage_layout = "CHUNKED: " + String.valueOf(chunkSize[0]);
+                    for (int i = 1; i < n; i++) {
+                        storage_layout += " X " + chunkSize[i];
+                    }
+
                     if(nfilt > 0) {
                         long    nelmts = 1;
                         long    uncomp_size;
@@ -1240,8 +1247,21 @@ public class H5CompoundDS extends CompoundDS {
                         }
                     }
                 }
+                else if (layout_type == HDF5Constants.H5D_COMPACT) {
+                    storage_layout = "COMPACT";
+                }
+                else if (layout_type == HDF5Constants.H5D_CONTIGUOUS) {
+                    storage_layout = "CONTIGUOUS";
+                    if (H5.H5Pget_external_count(pid) > 0)
+                        storage_layout += " - EXTERNAL ";
+                }
+                else if (layout_type == HDF5Constants.H5D_VIRTUAL) {
+                    long vmaps = H5.H5Pget_virtual_count(pid);
+                    storage_layout = "VIRTUAL - MAPS: " + String.valueOf(vmaps);
+                }
                 else {
                     chunkSize = null;
+                    storage_layout = "NONE";
                 }
 
                 int[] flags = { 0, 0 };
@@ -1338,7 +1358,7 @@ public class H5CompoundDS extends CompoundDS {
                 }
                 log.trace("getMetadata(): filter information={}", filters);
 
-                storage = "" + storage_size;
+                storage = "SIZE: " + storage_size;
                 try {
                     int[] at = { 0 };
                     H5.H5Pget_alloc_time(pid, at);
