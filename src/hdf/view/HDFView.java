@@ -565,7 +565,8 @@ public class HDFView implements ViewManager {
                     fChooser.setFilterIndex(0);
 
                     filename = fChooser.open();
-                } else {
+                }
+                else {
                     // Prepend test file directory to filename
                     filename = currentDir.concat(new InputDialog(mainWindow, "Enter a file name", "").open());
                 }
