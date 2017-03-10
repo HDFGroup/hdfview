@@ -613,6 +613,16 @@ public class GermanTableView implements TableView {
         return selectionLayer.getSelectedColumnPositions().length;
     }
 
+    @Override
+    public SelectionLayer getSelectionLayer() {
+        return selectionLayer;
+    }
+
+    @Override
+    public DataLayer getDataLayer() {
+        return dataLayer;
+    }
+
     /**
      * Creates a NatTable for a Scalar dataset.
      *

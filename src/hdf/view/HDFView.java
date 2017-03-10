@@ -1476,7 +1476,8 @@ public class HDFView implements ViewManager {
                 else if (obj instanceof Datatype) {
                     typeStr = "HDF5 Named Datatype";
                 }
-            } else if(isH4) {
+            }
+            else if(isH4) {
                 if (obj instanceof Group) {
                     typeStr = "HDF4 Group";
                 }
@@ -1492,7 +1493,8 @@ public class HDFView implements ViewManager {
                 else if (obj instanceof CompoundDS) {
                     typeStr = "HDF4 Vdata";
                 }
-            } else {
+            }
+            else {
                 if (obj instanceof Group) {
                     typeStr = "Group";
                 }
@@ -1815,7 +1817,7 @@ public class HDFView implements ViewManager {
             // Add compression and data layout information
             label = new Label(compressionComposite, SWT.LEFT);
             label.setFont(currentFont);
-            label.setText("Storage Layout ");
+            label.setText("Storage Layout: ");
 
             label = new Label(compressionComposite, SWT.RIGHT);
             label.setFont(currentFont);

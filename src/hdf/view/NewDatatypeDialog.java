@@ -128,6 +128,11 @@ public class NewDatatypeDialog extends Dialog {
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
         nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        nameField.addTraverseListener(e -> {
+            if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
+                e.doit = true;
+            }
+        });
 
         label = new Label(fieldComposite, SWT.LEFT);
         label.setFont(curFont);
@@ -342,6 +347,8 @@ public class NewDatatypeDialog extends Dialog {
         sizeChoice.select(0);
         endianChoice.select(0);
 
+        //Control[] controls = new Control[] { okButton, cancelButton };
+        //shell.setTabList(controls);
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
