@@ -145,7 +145,7 @@ public class ViewProperties extends Properties {
      */
     private static boolean          isReadOnly             = false;
 
-    private static boolean          isEarlyLib             = true;
+    private static boolean          isEarlyLib             = false;
 
     /** a list of palette files */
     private static Vector<String>   paletteList            = new Vector<String>(5);

@@ -1180,11 +1180,12 @@ public class H5CompoundDS extends CompoundDS {
         }
 
         long did = -1;
-        // load attributes first
-        long pid = -1;
+        long pcid = -1;
+        long paid = -1;
         int indxType = fileFormat.getIndexType(null);
         int order = fileFormat.getIndexOrder(null);
 
+        // load attributes first
         if (attrPropList.length > 0) {
             indxType = attrPropList[0];
             if (attrPropList.length > 1) {
@@ -1201,13 +1202,14 @@ public class H5CompoundDS extends CompoundDS {
                 log.trace("getMetadata(): attributeList loaded");
 
                 // get the compression and chunk information
-                pid = H5.H5Dget_create_plist(did);
+                pcid = H5.H5Dget_create_plist(did);
+                paid = H5.H5Dget_access_plist(did);
                 long storage_size = H5.H5Dget_storage_size(did);
-                int nfilt = H5.H5Pget_nfilters(pid);
-                int layout_type = H5.H5Pget_layout(pid);
+                int nfilt = H5.H5Pget_nfilters(pcid);
+                int layout_type = H5.H5Pget_layout(pcid);
                 if (layout_type == HDF5Constants.H5D_CHUNKED) {
                     chunkSize = new long[rank];
-                    H5.H5Pget_chunk(pid, rank, chunkSize);
+                    H5.H5Pget_chunk(pcid, rank, chunkSize);
                     int n = chunkSize.length;
                     storage_layout = "CHUNKED: " + String.valueOf(chunkSize[0]);
                     for (int i = 1; i < n; i++) {
@@ -1252,12 +1254,49 @@ public class H5CompoundDS extends CompoundDS {
                 }
                 else if (layout_type == HDF5Constants.H5D_CONTIGUOUS) {
                     storage_layout = "CONTIGUOUS";
-                    if (H5.H5Pget_external_count(pid) > 0)
+                    if (H5.H5Pget_external_count(pcid) > 0)
                         storage_layout += " - EXTERNAL ";
                 }
                 else if (layout_type == HDF5Constants.H5D_VIRTUAL) {
-                    long vmaps = H5.H5Pget_virtual_count(pid);
-                    storage_layout = "VIRTUAL - MAPS: " + String.valueOf(vmaps);
+                    storage_layout = "VIRTUAL - ";
+                    try {
+                        long vmaps = H5.H5Pget_virtual_count(pcid);
+                        try {
+                            int virt_view = H5.H5Pget_virtual_view(paid);
+                            long virt_gap = H5.H5Pget_virtual_printf_gap(paid);
+                            if (virt_view == HDF5Constants.H5D_VDS_FIRST_MISSING)
+                                storage_layout += "First Missing";
+                            else
+                                storage_layout += "Last Available";
+                            storage_layout += "\nGAP : " + String.valueOf(virt_gap);
+                        }
+                        catch (Throwable err) {
+                            log.debug("getMetadata(): vds error: ", err);
+                            storage_layout += "ERROR";
+                        }
+                        storage_layout += "\nMAPS : " + String.valueOf(vmaps);
+                        if (vmaps > 0) {
+                            for (long next = 0; next < vmaps; next++) {
+                                try {
+                                    long virtual_vspace = H5.H5Pget_virtual_vspace(pcid, next);
+                                    long virtual_srcspace = H5.H5Pget_virtual_srcspace(pcid, next);
+                                    String fname = H5.H5Pget_virtual_filename(pcid, next);
+                                    String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
+                                    storage_layout += "\n" + fname + " : " + dsetname;
+                                }
+                                catch (Throwable err) {
+                                    log.debug("getMetadata(): vds space[{}] error: ", next, err);
+                                    log.trace("getMetadata(): vds[{}] continue", next);
+                                    storage_layout += "ERROR";
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    catch (Throwable err) {
+                        log.debug("getMetadata(): vds count error: ", err);
+                        storage_layout += "ERROR";
+                    }
                 }
                 else {
                     chunkSize = null;
@@ -1286,7 +1325,7 @@ public class H5CompoundDS extends CompoundDS {
                         cd_nelmts[0] = 20;
                         cd_values = new int[(int) cd_nelmts[0]];
                         cd_values = new int[(int) cd_nelmts[0]];
-                        filter = H5.H5Pget_filter(pid, i, flags, cd_nelmts, cd_values, 120, cd_name, filter_config);
+                        filter = H5.H5Pget_filter(pcid, i, flags, cd_nelmts, cd_values, 120, cd_name, filter_config);
                         log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cd_name[0], cd_nelmts[0]);
                         for (int j = 0; j < cd_nelmts[0]; j++) {
                             log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cd_values[j]);
@@ -1361,7 +1400,7 @@ public class H5CompoundDS extends CompoundDS {
                 storage = "SIZE: " + storage_size;
                 try {
                     int[] at = { 0 };
-                    H5.H5Pget_alloc_time(pid, at);
+                    H5.H5Pget_alloc_time(pcid, at);
                     storage += ", allocation time: ";
                     if (at[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY) {
                         storage += "Early";
@@ -1383,10 +1422,16 @@ public class H5CompoundDS extends CompoundDS {
             }
             finally {
                 try {
-                    H5.H5Pclose(pid);
+                    H5.H5Pclose(paid);
                 }
                 catch (Exception ex) {
-                    log.debug("getMetadata(): H5Pclose(pid {}) failure: ", pid, ex);
+                    log.debug("getMetadata(): H5Pclose(paid {}) failure: ", paid, ex);
+                }
+                try {
+                    H5.H5Pclose(pcid);
+                }
+                catch (Exception ex) {
+                    log.debug("getMetadata(): H5Pclose(pcid {}) failure: ", pcid, ex);
                 }
                 close(did);
             }

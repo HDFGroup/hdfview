@@ -1,14 +1,12 @@
 package test.uitest;
 
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
@@ -20,6 +18,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+
+import static org.junit.Assert.assertTrue;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -942,21 +942,21 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "4",
-					String.valueOf(filetree.visibleRowCount())),
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "4",
+                    String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==4);
-			assertTrue("openHDF5CompoundBits() filetree is missing file '" + filename + file_ext + "'",
-					items[0].getText().compareTo(filename + file_ext) == 0);
-			assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname1 + "'",
-					items[0].getNode(0).getText().compareTo(groupname1) == 0);
-			assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname2 + "'",
-					items[0].getNode(1).getText().compareTo(groupname2) == 0);
-			assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname3 + "'",
-					items[0].getNode(2).getText().compareTo(groupname3) == 0);
+            assertTrue("openHDF5CompoundBits() filetree is missing file '" + filename + file_ext + "'",
+                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname1 + "'",
+                    items[0].getNode(0).getText().compareTo(groupname1) == 0);
+            assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname2 + "'",
+                    items[0].getNode(1).getText().compareTo(groupname2) == 0);
+            assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname3 + "'",
+                    items[0].getNode(2).getText().compareTo(groupname3) == 0);
 
             filetree.expandNode(filename + file_ext, true);
-			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "11",
-					String.valueOf(filetree.visibleRowCount())),
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "11",
+                    String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==11);
 
             items[0].getNode(0).getNode(0).click();
@@ -972,28 +972,28 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table.click(1, 1);
             val = tableShell.bot().text(0).getText();
-			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val),
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val),
                     val.equals("FF"));
 
             table.click(2, 1);
             val = tableShell.bot().text(0).getText();
-			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FE", val),
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FE", val),
                     val.equals("FE"));
 
             table.click(3, 1);
             val = tableShell.bot().text(0).getText();
-			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FD", val),
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FD", val),
                     val.equals("FD"));
 
             table.click(4, 1);
             val = tableShell.bot().text(0).getText();
-			assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FC", val),
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FC", val),
                     val.equals("FC"));
 
             // TODO: disabled until a solution for getting values of non-visible cells is found
 //            val = table.getCellDataValueByPosition(31, 1);
-			// assertTrue(constructWrongValueMessage("openHDF5CompoundBits()",
-			// "wrong data", "E1", val),
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundBits()",
+            // "wrong data", "E1", val),
 //                    val.equals("E1"));
 
             tableShell.bot().menu("Close").click();

@@ -11,8 +11,10 @@ import org.junit.runners.Suite;
     TestHDFViewDatasetFrameSelection.class,
     TestHDFViewImageConversion.class,
     TestTreeViewFiles.class,
+    TestTreeViewFilters.class,
     TestHDFViewIntConversions.class,
-    TestTreeViewNewMenu.class
+    TestTreeViewNewMenu.class,
+    TestTreeViewNewVLDatatypes.class
 })
 
 public class TestAll {
