@@ -861,7 +861,7 @@ public class H4File extends FileFormat {
      *            the parent object.
      */
     private void depth_first(HObject parentObj) {
-        log.trace("depth_first(pobj = " + parentObj + ")");
+        log.trace("depth_first(pobj = {})", parentObj);
 
         if (parentObj == null) {
             log.debug("depth_first(): Parent object is null");
