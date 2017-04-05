@@ -1389,4 +1389,34 @@ public abstract class Dataset extends HObject {
     public final Class getOriginalClass() {
         return originalBuf.getClass();
     }
+
+    /*
+     * Checks if dataset is virtual. Sub-classes must replace
+     * this default implementation.
+     *
+     * @return true if the dataset is virtual; otherwise returns false.
+     */
+    public boolean isVirtual() {
+        return false;
+    }
+
+    /*
+     * Gets the source file name at index if dataset is virtual. Sub-classes must replace
+     * this default implementation.
+     *
+     * @return filename if the dataset is virtual; otherwise returns null.
+     */
+    public String getVirtualFilename(int index) {
+        return null;
+    }
+
+    /*
+     * Gets the number of source files if dataset is virtual. Sub-classes must replace
+     * this default implementation.
+     *
+     * @return the list size if the dataset is virtual; otherwise returns negative.
+     */
+    public int getVirtualMaps() {
+        return -1;
+    }
 }

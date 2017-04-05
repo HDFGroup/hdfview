@@ -76,6 +76,8 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.h5.H5CompoundDS;
+import hdf.object.h5.H5ScalarDS;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
 
 /**
@@ -147,6 +149,7 @@ public class DefaultTreeView implements TreeView {
     private Menu                          newObjectMenu;
     private Menu                          exportDatasetMenu;
 
+    private MenuItem                      openVirtualFilesMenuItem;
     private MenuItem                      addDatasetMenuItem;
     private MenuItem                      exportDatasetMenuItem;
     private MenuItem                      addTableMenuItem;
@@ -326,7 +329,8 @@ public class DefaultTreeView implements TreeView {
                     if(!(selectedObject instanceof Group)) {
                         loadDataThread = new LoadDataThread();
                         loadDataThread.start();
-                    } else {
+                    }
+                    else {
                         boolean isExpanded = selectedItem.getExpanded();
 
                         selectedItem.setExpanded(!isExpanded);
@@ -424,6 +428,7 @@ public class DefaultTreeView implements TreeView {
 
                 selectedItem = item;
 
+                log.trace("tree.addMenuDetectListener(): selectedItem={}", selectedItem.getText());
                 try {
                     selectedObject = (HObject) selectedItem.getData();
                 }
@@ -445,6 +450,7 @@ public class DefaultTreeView implements TreeView {
                     selectedFile = theFile;
                     //tree.deselectAll();
                     //tree.setSelection(selPath);
+                    log.trace("tree.addMenuDetectListener(): selectedFile={}", selectedFile.getAbsolutePath());
                 }
 
                 popupMenu.setLocation(display.map(tree, null, pt));
@@ -536,6 +542,7 @@ public class DefaultTreeView implements TreeView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 isDefaultDisplay = true;
+                log.trace("createPopupMenu(): Open");
 
                 try {
                     loadDataThread = new LoadDataThread();
@@ -565,6 +572,41 @@ public class DefaultTreeView implements TreeView {
                     err.printStackTrace();
                     Tools.showError(shell, err.getMessage(), shell.getText());
                     return;
+                }
+            }
+        });
+
+        openVirtualFilesMenuItem = new MenuItem(menu, SWT.PUSH);
+        openVirtualFilesMenuItem.setText("Open Source Fi&les");
+        openVirtualFilesMenuItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                isDefaultDisplay = false;
+
+                log.trace("createPopupMenu(): selectedObject={}", selectedObject);
+                // If dataset is virtual - open source files. Only for HDF5
+                if (selectedObject != null) {
+                    log.trace("createPopupMenu(): selectedObject={} is dataset instance-{} of type H5 {}", selectedObject, selectedObject instanceof Dataset, selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)));
+                    if (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)) &&
+                            (selectedObject instanceof Dataset)) {
+                        Dataset dataset = (Dataset) selectedObject;
+                        boolean isVirtual = dataset.isVirtual();
+                        log.trace("createPopupMenu(): isVirtual={}", isVirtual);
+                        if(isVirtual) {
+                            for(int ndx=0; ndx<dataset.getVirtualMaps(); ndx++) {
+                                try {
+                                    String theFile = selectedFile.getParentFile().getAbsolutePath() + File.separator + dataset.getVirtualFilename(ndx);
+                                    openFile(theFile, FileFormat.WRITE);
+                                }
+                                catch (Exception ex) {
+                                    shell.getDisplay().beep();
+                                    ex.printStackTrace();
+                                    Tools.showError(shell, ex.getMessage() + "\n" + dataset.getVirtualFilename(ndx), shell.getText());
+                                }
+                                log.trace("createPopupMenu(): virtualNameList[{}]={}", ndx, dataset.getVirtualFilename(ndx));
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -721,18 +763,22 @@ public class DefaultTreeView implements TreeView {
                                 if (selectedItem.getExpanded()) {
                                     if (selectedObject.hasAttribute()) {
                                         selectedItem.setImage(folderOpenIconA);
-                                    } else {
+                                    }
+                                    else {
                                         selectedItem.setImage(folderOpenIcon);
                                     }
-                                } else {
+                                }
+                                else {
                                     if (selectedObject.hasAttribute()) {
                                         selectedItem.setImage(folderCloseIconA);
-                                    } else {
+                                    }
+                                    else {
                                         selectedItem.setImage(folderCloseIcon);
                                     }
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             selectedItem.setImage(getObjectTypeImage(selectedObject));
                         }
                     }
@@ -761,18 +807,22 @@ public class DefaultTreeView implements TreeView {
                                 if (selectedItem.getExpanded()) {
                                     if (selectedObject.hasAttribute()) {
                                         selectedItem.setImage(folderOpenIconA);
-                                    } else {
+                                    }
+                                    else {
                                         selectedItem.setImage(folderOpenIcon);
                                     }
-                                } else {
+                                }
+                                else {
                                     if (selectedObject.hasAttribute()) {
                                         selectedItem.setImage(folderCloseIconA);
-                                    } else {
+                                    }
+                                    else {
                                         selectedItem.setImage(folderCloseIcon);
                                     }
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             selectedItem.setImage(getObjectTypeImage(selectedObject));
                         }
                     }
@@ -1037,34 +1087,37 @@ public class DefaultTreeView implements TreeView {
                 setEnabled(editGUIs, !isReadOnly);
 
                 if (selectedObject instanceof Group) {
+                    boolean state = !(((Group) selectedObject).isRoot());
+
                     popupMenu.getItem(0).setEnabled(false); // "Open" menuitem
                     popupMenu.getItem(1).setEnabled(false); // "Open as" menuitem
-                    popupMenu.getItem(3).setEnabled(isWritable); // "New" menuitem
-
-                    boolean state = !(((Group) selectedObject).isRoot());
-                    popupMenu.getItem(6).setEnabled(state); // "Copy" menuitem
-                    popupMenu.getItem(7).setEnabled(isWritable); // "Paste" menuitem
-                    popupMenu.getItem(8).setEnabled(state && isWritable); // "Delete" menuitem
-                    popupMenu.getItem(9).setEnabled(false); // "Export Dataset" menuitem
-                    popupMenu.getItem(11).setEnabled(state && isWritable); // "Save to" menuitem
-                    popupMenu.getItem(12).setEnabled(state && isWritable); // "Rename" menuitem
-                    popupMenu.getItem(5).setEnabled(
+                    popupMenu.getItem(2).setEnabled(false); // "Open Source Files" menuitem
+                    popupMenu.getItem(4).setEnabled(isWritable); // "New" menuitem
+                    popupMenu.getItem(6).setEnabled(
                             (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
                            && state && isWritable); // "Cut" menuitem
+                    popupMenu.getItem(7).setEnabled(state); // "Copy" menuitem
+                    popupMenu.getItem(8).setEnabled(isWritable); // "Paste" menuitem
+                    popupMenu.getItem(9).setEnabled(state && isWritable); // "Delete" menuitem
+                    popupMenu.getItem(10).setEnabled(false); // "Export Dataset" menuitem
+                    popupMenu.getItem(12).setEnabled(state && isWritable); // "Save to" menuitem
+                    popupMenu.getItem(13).setEnabled(state && isWritable); // "Rename" menuitem
                 }
                 else {
                     popupMenu.getItem(0).setEnabled(true); // "Open" menuitem
                     popupMenu.getItem(1).setEnabled(true); // "Open as" menuitem
-                    popupMenu.getItem(3).setEnabled(isWritable); // "New" menuitem
-                    popupMenu.getItem(6).setEnabled(true); // "Copy" menuitem
-                    popupMenu.getItem(7).setEnabled(isWritable); // "Paste" menuitem
-                    popupMenu.getItem(8).setEnabled(isWritable); // "Delete" menuitem
-                    popupMenu.getItem(9).setEnabled(true); // "Export Dataset" menuitem
-                    popupMenu.getItem(11).setEnabled(true); // "Save to" menuitem
-                    popupMenu.getItem(12).setEnabled(isWritable); // "Rename" menuitem
-                    popupMenu.getItem(5).setEnabled(
+                    popupMenu.getItem(2).setEnabled(
+                            (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))); // "Open Source Files" menuitem
+                    popupMenu.getItem(4).setEnabled(isWritable); // "New" menuitem
+                    popupMenu.getItem(6).setEnabled(
                             (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
                             && isWritable); // "Cut" menuitem
+                    popupMenu.getItem(7).setEnabled(true); // "Copy" menuitem
+                    popupMenu.getItem(8).setEnabled(isWritable); // "Paste" menuitem
+                    popupMenu.getItem(9).setEnabled(isWritable); // "Delete" menuitem
+                    popupMenu.getItem(10).setEnabled(true); // "Export Dataset" menuitem
+                    popupMenu.getItem(12).setEnabled(true); // "Save to" menuitem
+                    popupMenu.getItem(13).setEnabled(isWritable); // "Rename" menuitem
                 }
 
                 // Adding table is only supported by HDF5
@@ -1073,6 +1126,7 @@ public class DefaultTreeView implements TreeView {
                     addTableMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
                     addDatatypeMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
                     addLinkMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
+                    //openVirtualFilesMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
 
                     boolean state = false;
                     if ((selectedObject instanceof Group)) {
@@ -1092,6 +1146,7 @@ public class DefaultTreeView implements TreeView {
                     addTableMenuItem.setEnabled(false);
                     addDatatypeMenuItem.setEnabled(false);
                     addLinkMenuItem.setEnabled(false);
+                    //openVirtualFilesMenuItem.setEnabled(false);
                     //separator.setVisible(false);
                     setLibVerBoundsItem.setEnabled(false);
                     changeIndexItem.setEnabled(false);
@@ -1103,13 +1158,16 @@ public class DefaultTreeView implements TreeView {
                         Dataset dataset = (Dataset) selectedObject;
                         if ((dataset instanceof ScalarDS))
                             exportDatasetMenuItem.setEnabled(true);
+                        openVirtualFilesMenuItem.setEnabled(true);
                     }
                     else {
                         exportDatasetMenuItem.setEnabled(false);
+                        openVirtualFilesMenuItem.setEnabled(false);
                     }
                 }
                 else {
                     exportDatasetMenuItem.setEnabled(false);
+                    openVirtualFilesMenuItem.setEnabled(false);
                 }
             }
         });

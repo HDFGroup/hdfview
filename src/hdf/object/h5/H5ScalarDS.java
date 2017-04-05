@@ -73,6 +73,10 @@ public class H5ScalarDS extends ScalarDS {
     /** flag to indicate if the dataset is an external dataset */
     private boolean isExternal = false;
 
+    /** flag to indicate is the dataset is a virtual dataset */
+    private boolean isVirtual = false;
+    private List<String> virtualNameList;
+
     private boolean isArrayOfCompound = false;
 
     private boolean isArrayOfVLEN = false;
@@ -202,15 +206,38 @@ public class H5ScalarDS extends ScalarDS {
 
         did = open();
         if (did >= 0) {
-            // check if it is an external dataset
+            // check if it is an external or virtual dataset
             long pid = -1;
             try {
                 pid = H5.H5Dget_create_plist(did);
                 int nfiles = H5.H5Pget_external_count(pid);
                 isExternal = (nfiles > 0);
+                int layout_type = H5.H5Pget_layout(pid);
+                isVirtual = (layout_type == HDF5Constants.H5D_VIRTUAL);
+                try {
+                    long vmaps = H5.H5Pget_virtual_count(pid);
+                    if (vmaps > 0) {
+                        virtualNameList = new Vector<>();
+                        for (long next = 0; next < vmaps; next++) {
+                            try {
+                                String fname = H5.H5Pget_virtual_filename(pid, next);
+                                virtualNameList.add(fname);
+                                log.trace("init(): virtualNameList[{}]={}", next, fname);
+                            }
+                            catch (Throwable err) {
+                                log.trace("init(): vds[{}] continue", next);
+                                continue;
+                            }
+                        }
+                    }
+                }
+                catch (Throwable err) {
+                    log.debug("init(): vds count error: ", err);
+                }
+                log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal, isVirtual);
             }
             catch (Exception ex) {
-                log.debug("init(): check if it is an external dataset: ", ex);
+                log.debug("init(): check if it is an external or virtual dataset: ", ex);
             }
             finally {
                 try {
@@ -2271,4 +2298,39 @@ public class H5ScalarDS extends ScalarDS {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Dataset#isVirtual()
+     */
+    @Override
+    public boolean isVirtual() {
+        return isVirtual;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Dataset#getVirtualFilename(int)
+     */
+    @Override
+    public String getVirtualFilename(int index) {
+        if(isVirtual)
+            return virtualNameList.get(index);
+        else
+            return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Dataset#getVirtualMaps()
+     */
+    @Override
+    public int getVirtualMaps() {
+        if(isVirtual)
+            return virtualNameList.size();
+        else
+            return -1;
+    }
 }
