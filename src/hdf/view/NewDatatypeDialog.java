@@ -128,9 +128,11 @@ public class NewDatatypeDialog extends Dialog {
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
         nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        nameField.addTraverseListener(e -> {
-            if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
-                e.doit = true;
+        nameField.addTraverseListener(new TraverseListener() {
+            public void keyTraversed(TraverseEvent e) {
+                if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
+                    e.doit = true;
+                }
             }
         });
 

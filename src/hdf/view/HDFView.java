@@ -161,7 +161,7 @@ public class HDFView implements ViewManager {
 
     private static final String        aboutHDFView = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
     + "For " + System.getProperty("os.name") + "\n\n"
-    + "Copyright " + '\u00a9' + " 2006-2016 The HDF Group.\n"
+    + "Copyright " + '\u00a9' + " 2006-2017 The HDF Group.\n"
     + "All rights reserved.";
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
