@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -1317,10 +1318,19 @@ public class DefaultTreeView implements TreeView {
     /** Copy selected objects */
     private void copyObject() {
         if (moveFlag == true) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Copy object");
-            confirm.setMessage("Do you want to copy all the selected object(s) instead of move?");
-            if (confirm.open() == SWT.NO) return;
+            int answer = SWT.NO;
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        "Copy object", "Do you want to copy all the selected object(s) instead of move?"))
+                    answer = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText("Copy object");
+                confirm.setMessage("Do you want to copy all the selected object(s) instead of move?");
+                answer = confirm.open();
+            }
+            if (answer == SWT.NO) return;
         }
         moveFlag = false;
         currentSelectionsForMove = null;
@@ -1330,10 +1340,19 @@ public class DefaultTreeView implements TreeView {
     /** Delete selected objects */
     private void cutObject() {
         if (moveFlag == true) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Delete object");
-            confirm.setMessage("Do you want to delete all the selected object(s) instead of move?");
-            if (confirm.open() == SWT.NO) return;
+            int answer = SWT.NO;
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        "Delete object", "Do you want to delete all the selected object(s) instead of move?"))
+                    answer = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText("Delete object");
+                confirm.setMessage("Do you want to delete all the selected object(s) instead of move?");
+                answer = confirm.open();
+            }
+            if (answer == SWT.NO) return;
         }
         moveFlag = false;
         currentSelectionsForMove = null;
@@ -1429,16 +1448,30 @@ public class DefaultTreeView implements TreeView {
         if (moveFlag == true) {
             String moveMsg = "Do you want to move the selected object(s) to \nGroup: " + fullPath + "\nFile: "
                     + dstFile.getFilePath();
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Move Object");
-            confirm.setMessage(moveMsg);
-            op = confirm.open();
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        "Move Object", moveMsg))
+                    op = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText("Move Object");
+                confirm.setMessage(moveMsg);
+                op = confirm.open();
+            }
         }
         else {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Copy object");
-            confirm.setMessage(msg);
-            op = confirm.open();
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        "Copy object", msg))
+                    op = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText("Copy object");
+                confirm.setMessage(msg);
+                op = confirm.open();
+            }
         }
 
         log.trace("pasteObject(): op={}", op);
@@ -1516,10 +1549,19 @@ public class DefaultTreeView implements TreeView {
      */
     private void renameObject() {
         if (moveFlag == true) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Rename object");
-            confirm.setMessage("Do you want to rename all the selected object(s) instead of move?");
-            if (confirm.open() == SWT.NO) return;
+            int answer = SWT.NO;
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        "Rename object", "Do you want to rename all the selected object(s) instead of move?"))
+                    answer = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText("Rename object");
+                confirm.setMessage("Do you want to rename all the selected object(s) instead of move?");
+                answer = confirm.open();
+            }
+            if (answer == SWT.NO) return;
         }
         moveFlag = false;
         currentSelectionsForMove = null;
@@ -1579,10 +1621,19 @@ public class DefaultTreeView implements TreeView {
             return;
         }
         if (moveFlag != true) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Remove object");
-            confirm.setMessage("Do you want to remove all the selected object(s) ?");
-            if (confirm.open() == SWT.NO) return;
+            int answer = SWT.NO;
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        "Remove object", "Do you want to remove all the selected object(s) ?"))
+                    answer = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText("Remove object");
+                confirm.setMessage("Do you want to remove all the selected object(s) ?");
+                answer = confirm.open();
+            }
+            if (answer == SWT.NO) return;
         }
 
         HObject theObj = null;
@@ -2018,8 +2069,7 @@ public class DefaultTreeView implements TreeView {
             currentDir = "";
         }
 
-        String filename;
-
+        String filename = null;
         if (((HDFView) viewer).getTestState()) {
             filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
         }
@@ -2034,7 +2084,6 @@ public class DefaultTreeView implements TreeView {
 
             filename = fChooser.open();
         }
-
         if(filename == null) return;
 
         try {
@@ -2149,8 +2198,7 @@ public class DefaultTreeView implements TreeView {
             currentDir = "";
         }
 
-        String filename;
-
+        String filename = null;
         if (((HDFView) viewer).getTestState()) {
             filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
         }
@@ -2165,7 +2213,6 @@ public class DefaultTreeView implements TreeView {
 
             filename = fChooser.open();
         }
-
         if(filename == null) return;
 
         try {
@@ -2181,7 +2228,8 @@ public class DefaultTreeView implements TreeView {
 
         try {
             for (int i = 0; i < n; i++) objList.add(rootItem.getItem(i));
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             log.debug("saveAsHDF5() objList add failure: ", ex);
         }
 
@@ -2247,27 +2295,38 @@ public class DefaultTreeView implements TreeView {
         File chosenFile = null;
         String filename = null;
         Dataset dataset = (Dataset) selectedObject;
-        FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-        fChooser.setFilterPath(dataset.getFile().substring(0, dataset.getFile().lastIndexOf(File.separator)));
-
-        DefaultFileFilter filter = null;
-
-        if(binaryOrder == 99) {
-            fChooser.setText("Save Dataset Data To Text File --- " + dataset.getName());
-            fChooser.setFileName(dataset.getName() + ".txt");
-            filter = DefaultFileFilter.getFileFilterText();
+        String currentDir = dataset.getFile().substring(0, dataset.getFile().lastIndexOf(File.separator));
+        String msgtext = null;
+        if(binaryOrder == 99)
+            msgtext = "Save Dataset Data To Text File --- " + dataset.getName();
+        else
+            msgtext = "Save Current Data To Binary File --- " + dataset.getName();
+        if (((HDFView) viewer).getTestState()) {
+            filename = currentDir + File.separator + new InputDialog(shell, msgtext, "").open();
         }
         else {
-            fChooser.setText("Save Current Data To Binary File --- " + dataset.getName());
-            fChooser.setFileName(dataset.getName() + ".bin");
-            filter = DefaultFileFilter.getFileFilterBinary();
+            FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            fChooser.setFilterPath(currentDir);
+
+            DefaultFileFilter filter = null;
+
+            if(binaryOrder == 99) {
+                fChooser.setText(msgtext);
+                fChooser.setFileName(dataset.getName() + ".txt");
+                filter = DefaultFileFilter.getFileFilterText();
+            }
+            else {
+                fChooser.setText(msgtext);
+                fChooser.setFileName(dataset.getName() + ".bin");
+                filter = DefaultFileFilter.getFileFilterBinary();
+            }
+
+            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+            fChooser.setFilterIndex(1);
+
+            filename = fChooser.open();
         }
-
-        fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-        fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-        fChooser.setFilterIndex(1);
-
-        filename = fChooser.open();
         if(filename == null) return;
 
         // Check if the file is in use
@@ -2288,10 +2347,19 @@ public class DefaultTreeView implements TreeView {
         chosenFile = new File(filename);
 
         if (chosenFile.exists()) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Export Dataset");
-            confirm.setMessage("File exists. Do you want to replace it?");
-            if (confirm.open() == SWT.NO) return;
+            int answer = SWT.NO;
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        "Export Dataset", "File exists. Do you want to replace it?"))
+                    answer = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText("Export Dataset");
+                confirm.setMessage("File exists. Do you want to replace it?");
+                answer = confirm.open();
+            }
+            if (answer == SWT.NO) return;
         }
 
         boolean isH4 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));

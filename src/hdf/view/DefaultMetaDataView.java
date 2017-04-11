@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
@@ -206,12 +207,19 @@ public class DefaultMetaDataView implements MetaDataView {
             return null;
         }
 
-        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-        confirm.setText(shell.getText());
-        confirm.setMessage("Do you want to delete the selected attribute?");
-        if(confirm.open() == SWT.NO) {
-            return null;
+        int answer = SWT.NO;
+        if (((HDFView) viewer).getTestState()) {
+            if(MessageDialog.openConfirm(shell,
+                    shell.getText(), "Do you want to delete the selected attribute?"))
+                answer = SWT.YES;
         }
+        else {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText(shell.getText());
+            confirm.setMessage("Do you want to delete the selected attribute?");
+            answer = confirm.open();
+        }
+        if (answer == SWT.NO) return null;
 
         List<?> attrList = null;
         try {
