@@ -257,26 +257,27 @@ public class H5CompoundDS extends CompoundDS {
                 int nfiles = H5.H5Pget_external_count(pid);
                 isExternal = (nfiles > 0);
                 int layout_type = H5.H5Pget_layout(pid);
-                isVirtual = (layout_type == HDF5Constants.H5D_VIRTUAL);
-                try {
-                    long vmaps = H5.H5Pget_virtual_count(pid);
-                    if (vmaps > 0) {
-                        virtualNameList = new Vector<>();
-                        for (long next = 0; next < vmaps; next++) {
-                            try {
-                                String fname = H5.H5Pget_virtual_filename(pid, next);
-                                virtualNameList.add(fname);
-                                log.trace("init(): virtualNameList[{}]={}", next, fname);
-                            }
-                            catch (Throwable err) {
-                                log.trace("init(): vds[{}] continue", next);
-                                continue;
+                if(isVirtual = (layout_type == HDF5Constants.H5D_VIRTUAL)) {
+                    try {
+                        long vmaps = H5.H5Pget_virtual_count(pid);
+                        if (vmaps > 0) {
+                            virtualNameList = new Vector<>();
+                            for (long next = 0; next < vmaps; next++) {
+                                try {
+                                    String fname = H5.H5Pget_virtual_filename(pid, next);
+                                    virtualNameList.add(fname);
+                                    log.trace("init(): virtualNameList[{}]={}", next, fname);
+                                }
+                                catch (Throwable err) {
+                                    log.trace("init(): vds[{}] continue", next);
+                                    continue;
+                                }
                             }
                         }
                     }
-                }
-                catch (Throwable err) {
-                    log.debug("init(): vds count error: ", err);
+                    catch (Throwable err) {
+                        log.debug("init(): vds count error: ", err);
+                    }
                 }
                 log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal, isVirtual);
             }

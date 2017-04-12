@@ -326,7 +326,7 @@ public class Attribute implements Metadata {
      */
     public String toString(String delimiter) {
         log.trace("toString(): start");
-        
+
         if (value == null) {
             log.debug("toString(): value is null");
             log.trace("toString(): finish");
@@ -347,96 +347,7 @@ public class Attribute implements Metadata {
         boolean is_unsigned = (this.getType().getDatatypeSign() == Datatype.SIGN_NONE);
         boolean is_enum = (this.getType().getDatatypeClass() == Datatype.CLASS_ENUM);
         log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", is_enum, is_unsigned, n);
-        if (is_unsigned) {
-            String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-            log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
-
-            switch (dname) {
-                case 'B':
-                    byte[] barray = (byte[]) value;
-                    short sValue = barray[0];
-                    if (sValue < 0) {
-                        sValue += 256;
-                    }
-                    sb.append(sValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sValue = barray[i];
-                        if (sValue < 0) {
-                            sValue += 256;
-                        }
-                        sb.append(sValue);
-                    }
-                    break;
-                case 'S':
-                    short[] sarray = (short[]) value;
-                    int iValue = sarray[0];
-                    if (iValue < 0) {
-                        iValue += 65536;
-                    }
-                    sb.append(iValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        iValue = sarray[i];
-                        if (iValue < 0) {
-                            iValue += 65536;
-                        }
-                        sb.append(iValue);
-                    }
-                    break;
-                case 'I':
-                    int[] iarray = (int[]) value;
-                    long lValue = iarray[0];
-                    if (lValue < 0) {
-                        lValue += 4294967296L;
-                    }
-                    sb.append(lValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        lValue = iarray[i];
-                        if (lValue < 0) {
-                            lValue += 4294967296L;
-                        }
-                        sb.append(lValue);
-                    }
-                    break;
-                case 'J':
-                    long[] larray = (long[]) value;
-                    Long l = (Long) larray[0];
-                    String theValue = Long.toString(l);
-                    if (l < 0) {
-                        l = (l << 1) >>> 1;
-                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                        BigInteger big2 = new BigInteger(l.toString());
-                        BigInteger big = big1.add(big2);
-                        theValue = big.toString();
-                    }
-                    sb.append(theValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        l = (Long) larray[i];
-                        theValue = Long.toString(l);
-                        if (l < 0) {
-                            l = (l << 1) >>> 1;
-                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                            BigInteger big2 = new BigInteger(l.toString());
-                            BigInteger big = big1.add(big2);
-                            theValue = big.toString();
-                        }
-                        sb.append(theValue);
-                    }
-                    break;
-                default:
-                    sb.append(Array.get(value, 0));
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sb.append(Array.get(value, i));
-                    }
-                    break;
-            }
-        }
-        else if(is_enum) {
+        if(is_enum) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
@@ -530,6 +441,95 @@ public class Attribute implements Metadata {
                         }
                         else
                             sb.append(theValue);
+                    }
+                    break;
+                default:
+                    sb.append(Array.get(value, 0));
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sb.append(Array.get(value, i));
+                    }
+                    break;
+            }
+        }
+        else if (is_unsigned) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
+
+            switch (dname) {
+                case 'B':
+                    byte[] barray = (byte[]) value;
+                    short sValue = barray[0];
+                    if (sValue < 0) {
+                        sValue += 256;
+                    }
+                    sb.append(sValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        if (sValue < 0) {
+                            sValue += 256;
+                        }
+                        sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) value;
+                    int iValue = sarray[0];
+                    if (iValue < 0) {
+                        iValue += 65536;
+                    }
+                    sb.append(iValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        if (iValue < 0) {
+                            iValue += 65536;
+                        }
+                        sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) value;
+                    long lValue = iarray[0];
+                    if (lValue < 0) {
+                        lValue += 4294967296L;
+                    }
+                    sb.append(lValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        if (lValue < 0) {
+                            lValue += 4294967296L;
+                        }
+                        sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) value;
+                    Long l = (Long) larray[0];
+                    String theValue = Long.toString(l);
+                    if (l < 0) {
+                        l = (l << 1) >>> 1;
+                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                        BigInteger big2 = new BigInteger(l.toString());
+                        BigInteger big = big1.add(big2);
+                        theValue = big.toString();
+                    }
+                    sb.append(theValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = (Long) larray[i];
+                        theValue = Long.toString(l);
+                        if (l < 0) {
+                            l = (l << 1) >>> 1;
+                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                            BigInteger big2 = new BigInteger(l.toString());
+                            BigInteger big = big1.add(big2);
+                            theValue = big.toString();
+                        }
+                        sb.append(theValue);
                     }
                     break;
                 default:

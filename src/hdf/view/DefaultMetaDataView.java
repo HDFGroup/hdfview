@@ -39,6 +39,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -119,11 +121,18 @@ public class DefaultMetaDataView implements MetaDataView {
 
         if (hObject == null) {
             shell.dispose();
-        } else if (hObject.getPath() == null) {
-            shell.setText("Properties - " + hObject.getName());
-        } else {
-            shell.setText("Properties - " + hObject.getPath() + hObject.getName());
         }
+        StringBuffer sb = new StringBuffer("Properties");
+        if (hObject.getPath() != null) {
+            sb.append("  at  ");
+            sb.append(hObject.getPath());
+        }
+        sb.append("  [");
+        sb.append(hObject.getName());
+        sb.append("  in  ");
+        sb.append(hObject.getFileFormat().getParent());
+        sb.append("]");
+        shell.setText(sb.toString());
 
         // Get the metadata information before adding GUI components */
         try {
@@ -136,6 +145,8 @@ public class DefaultMetaDataView implements MetaDataView {
         // Create main content
         Composite content = createAttributesComposite(shell);
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        shell.setMenuBar(createMenuBar());
 
         // Create Close button region
         Button closeButton = new Button(shell, SWT.PUSH);
@@ -562,7 +573,8 @@ public class DefaultMetaDataView implements MetaDataView {
 
         if (attrList == null) {
             log.trace("createAttributesComposite:  attrList == null");
-        } else {
+        }
+        else {
             attrNumberLabel.setText("Number of attributes = " + numAttributes);
 
             Attribute attr = null;
@@ -630,6 +642,20 @@ public class DefaultMetaDataView implements MetaDataView {
         log.trace("createAttributesComposite: finish");
 
         return composite;
+    }
+
+    private Menu createMenuBar() {
+        Menu menuBar = new Menu(shell, SWT.BAR);
+
+        MenuItem item = new MenuItem(menuBar, SWT.PUSH);
+        item.setText("Close");
+        item.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                shell.dispose();
+            }
+        });
+
+        return menuBar;
     }
 
     // Listener to allow user to only change attribute name or value

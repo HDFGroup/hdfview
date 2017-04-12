@@ -4143,6 +4143,7 @@ public class DefaultTableView implements TableView {
         private final long         typeSize;
 
         private final boolean      isArray;
+        private final boolean      isEnum;
         private final boolean      isUINT64;
         private final boolean      isBitfieldOrOpaque;
 
@@ -4155,6 +4156,7 @@ public class DefaultTableView implements TableView {
             typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
+            isEnum = dtype.getDatatypeClass() == Datatype.CLASS_ENUM;
             isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
             isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
             log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
@@ -4169,6 +4171,7 @@ public class DefaultTableView implements TableView {
 
             if (isArray) {
                 int len = Array.getLength(value);
+                log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isEnum={} isBitfieldOrOpaque={}", isArray, isEnum, isBitfieldOrOpaque);
 
                 if (showAsHex) {
                     if (isUINT64) {
@@ -4210,13 +4213,52 @@ public class DefaultTableView implements TableView {
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }
                 }
-                else {
+                else if (isEnum) {
+                    if (isEnumConverted) {
+                        String[] outValues = new String[len];
+
+                        try {
+                            H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                        } catch (HDF5Exception ex) {
+                            log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                            return buffer;
+                        }
+
+                        for (int i = 0; i < outValues.length; i++) {
+                            if (i > 0) buffer.append(", ");
+                            buffer.append(outValues[i]);
+                        }
+                    }
+                    else {
+                        for (int i = 0; i < len; i++) {
+                            if (i > 0) buffer.append(", ");
+                            buffer.append(Array.get(value, i));
+                        }
+                    }
+                }
+              else {
                     // Default case if no special display type is chosen
                     for (int i = 0; i < len; i++) {
                         if (i > 0) buffer.append(", ");
                         buffer.append(((Object[]) value)[i]);
                     }
                 }
+            }
+            else if (isEnum) {
+                if (isEnumConverted) {
+                    String[] outValues = new String[1];
+
+                    try {
+                        H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                    } catch (HDF5Exception ex) {
+                        log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                        return buffer;
+                    }
+
+                    buffer.append(outValues[0]);
+                }
+                else
+                    buffer.append(value);
             }
             else if (isBitfieldOrOpaque) {
                 for (int i = 0; i < ((byte[]) value).length; i++) {
@@ -4839,6 +4881,7 @@ public class DefaultTableView implements TableView {
             orders = theDataset.getSelectedMemberOrders();
             nFields = ((List<?>) dataValue).size();
             nSubColumns = (nFields > 0) ?  (int) (theDataset.getWidth() * theDataset.getSelectedMemberCount()) / nFields : 0;
+            log.trace("CompoundDSDataDisplayConverter {} finish", nSubColumns);
         }
 
         @Override
@@ -4851,6 +4894,7 @@ public class DefaultTableView implements TableView {
         @Override
         public Object canonicalToDisplayValue(Object value) {
             if (value instanceof String) return value;
+            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
 
             Datatype dtype = types[fieldIndex];
             int typeClass = dtype.getDatatypeClass();
@@ -4866,7 +4910,7 @@ public class DefaultTableView implements TableView {
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isStr = (typeClass == Datatype.CLASS_STRING);
-                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isStr={}", isArray, isStr);
+                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isEnum={} isStr={}", isArray, isEnum, isStr);
 
                 if (typeClass == Datatype.CLASS_COMPOUND) {
                     int numberOfMembers = dtype.getCompoundMemberNames().size();
@@ -4948,6 +4992,7 @@ public class DefaultTableView implements TableView {
             else {
                 buffer.append(value);
             }
+            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} finish", buffer);
 
             return buffer;
         }

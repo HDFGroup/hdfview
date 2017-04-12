@@ -194,9 +194,16 @@ public class DefaultTextView implements TextView {
             return;
         }
 
-        String fname = new java.io.File(dataset.getFile()).getName();
-        shell.setText("TextView  -  " + dataset.getName() + "  -  "
-                + dataset.getPath() + "  -  " + fname);
+        StringBuffer sb = new StringBuffer(dataset.getName());
+        sb.append("  at  ");
+        sb.append(dataset.getPath());
+        sb.append("  [");
+        sb.append(dataset.getFileFormat().getName());
+        sb.append("  in  ");
+        sb.append(dataset.getFileFormat().getParent());
+        sb.append("]");
+        shell.setText(sb.toString());
+
         shell.setImage(ViewProperties.getTextIcon());
 
         isReadOnly = dataset.getFileFormat().isReadOnly();
