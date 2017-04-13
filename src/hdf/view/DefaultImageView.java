@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
@@ -732,13 +733,19 @@ public class DefaultImageView implements ImageView {
                 }
 
                 if (chosenFile.exists()) {
-                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                    confirm.setText(shell.getText());
-                    confirm.setMessage("File exists. Do you want to replace it ?");
-
-                    if(confirm.open() == SWT.NO) {
-                        return;
+                    int answer = SWT.NO;
+                    if (((HDFView) viewer).getTestState()) {
+                        if(MessageDialog.openConfirm(shell,
+                                shell.getText(), "File exists. Do you want to replace it ?"))
+                            answer = SWT.YES;
                     }
+                    else {
+                        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                        confirm.setText(shell.getText());
+                        confirm.setMessage("File exists. Do you want to replace it ?");
+                        answer = confirm.open();
+                    }
+                    if (answer == SWT.NO) return;
                 }
 
                 PrintWriter out = null;

@@ -14,6 +14,8 @@ import org.junit.runners.Suite;
     TestTreeViewFilters.class,
     TestHDFViewIntConversions.class,
     TestTreeViewNewMenu.class,
+    TestTreeViewExport.class,
+    TestHDFViewTAttr2.class,
     TestTreeViewNewVLDatatypes.class
 })
 

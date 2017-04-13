@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
@@ -294,10 +295,19 @@ public class DefaultTableView implements TableView {
             @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
-                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                    confirm.setText(shell.getText());
-                    confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
-                    if (confirm.open() == SWT.YES) {
+                    int answer = SWT.NO;
+                    if (((HDFView) viewer).getTestState()) {
+                        if(MessageDialog.openConfirm(shell,
+                                "Changes Detected", "\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?"))
+                            answer = SWT.YES;
+                    }
+                    else {
+                        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                        confirm.setText(shell.getText());
+                        confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
+                        answer = confirm.open();
+                    }
+                    if (answer == SWT.YES) {
                         updateValueInFile();
                     }
                     else dataset.clearData(); // reload data
@@ -973,27 +983,43 @@ public class DefaultTableView implements TableView {
             public void widgetSelected(SelectionEvent e) {
                 String currentDir = dataset.getFileFormat().getParent();
 
-                FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
-                fchooser.setFilterPath(currentDir);
+                String filename = null;
+                if (((HDFView) viewer).getTestState()) {
+                    filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
+                }
+                else {
+                    FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
+                    fChooser.setFilterPath(currentDir);
 
-                DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-                fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-                fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-                fchooser.setFilterIndex(1);
+                    DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
+                    fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+                    fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+                    fChooser.setFilterIndex(1);
 
-                if (fchooser.open() == null) return;
+                    filename = fChooser.open();
+                }
 
-                File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
+                if (filename == null) return;
+
+                File chosenFile = new File(filename);
                 if (!chosenFile.exists()) {
-                    Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Text File");
+                    Tools.showError(shell, "File " + filename + " does not exist.", "Import Data from Text File");
                     return;
                 }
 
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                confirm.setText(shell.getText());
-                confirm.setMessage("Do you want to paste selected data?");
-                if (confirm.open() == SWT.NO) return;
-
+                int answer = SWT.NO;
+                if (((HDFView) viewer).getTestState()) {
+                    if(MessageDialog.openConfirm(shell,
+                            "Import Data", "Do you want to paste selected data?"))
+                        answer = SWT.YES;
+                }
+                else {
+                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                    confirm.setText("Import Data");
+                    confirm.setMessage("Do you want to paste selected data?");
+                    answer = confirm.open();
+                }
+                if (answer == SWT.NO) return;
                 importTextData(chosenFile.getAbsolutePath());
             }
         });
@@ -1122,10 +1148,16 @@ public class DefaultTableView implements TableView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if ((selectionLayer.getSelectedColumnPositions().length <= 0) || (selectionLayer.getSelectedRowCount() <= 0)) {
-                    MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                    info.setText(shell.getText());
-                    info.setMessage("Select table cells to write.");
-                    info.open();
+                    if (((HDFView) viewer).getTestState()) {
+                        MessageDialog.openInformation(shell,
+                                shell.getText(), "Select table cells to write.");
+                    }
+                    else {
+                        MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                        info.setText(shell.getText());
+                        info.setMessage("Select table cells to write.");
+                        info.open();
+                    }
                     return;
                 }
 
@@ -1231,10 +1263,16 @@ public class DefaultTableView implements TableView {
                     if (Tools.computeStatistics(theData, stat, fillValue) > 0) {
                         String stats = "Min                      = " + minmax[0] + "\nMax                      = " + minmax[1]
                                      + "\nMean                     = " + stat[0] + "\nStandard deviation = " + stat[1];
-                        MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                        info.setText("Statistics");
-                        info.setMessage(stats);
-                        info.open();
+                        if (((HDFView) viewer).getTestState()) {
+                            MessageDialog.openInformation(shell,
+                                    "Statistics", stats);
+                        }
+                        else {
+                            MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+                            info.setText("Statistics");
+                            info.setMessage(stats);
+                            info.open();
+                        }
                     }
 
                     theData = null;
@@ -1956,10 +1994,19 @@ public class DefaultTableView implements TableView {
      * Paste data from the system clipboard to the spreadsheet.
      */
     private void pasteData() {
-        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-        confirm.setText(shell.getText());
-        confirm.setMessage("Do you want to paste selected data?");
-        if (confirm.open() == SWT.NO) return;
+        int answer = SWT.NO;
+        if (((HDFView) viewer).getTestState()) {
+            if(MessageDialog.openConfirm(shell,
+                    "Clipboard Data", "Do you want to paste selected data?"))
+                answer = SWT.YES;
+        }
+        else {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText("Clipboard Data");
+            confirm.setMessage("Do you want to paste selected data?");
+            answer = confirm.open();
+        }
+        if (answer == SWT.NO) return;
 
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
@@ -2827,26 +2874,43 @@ public class DefaultTableView implements TableView {
     private void importBinaryData() {
         String currentDir = dataset.getFileFormat().getParent();
 
-        FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
-        fchooser.setFilterPath(currentDir);
+        String filename = null;
+        if (((HDFView) viewer).getTestState()) {
+            filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
+        }
+        else {
+            FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
+            fChooser.setFilterPath(currentDir);
 
-        DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
-        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-        fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-        fchooser.setFilterIndex(1);
+            DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
+            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+            fChooser.setFilterIndex(1);
 
-        if (fchooser.open() == null) return;
+            filename = fChooser.open();
+        }
 
-        File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
+        if (filename == null) return;
+
+        File chosenFile = new File(filename);
         if (!chosenFile.exists()) {
             Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Binary File");
             return;
         }
 
-        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-        confirm.setText(shell.getText());
-        confirm.setMessage("Do you want to paste selected data?");
-        if (confirm.open() == SWT.NO) return;
+        int answer = SWT.NO;
+        if (((HDFView) viewer).getTestState()) {
+            if(MessageDialog.openConfirm(shell,
+                    "Import Data", "Do you want to paste selected data?"))
+                answer = SWT.YES;
+        }
+        else {
+            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+            confirm.setText("Import Data");
+            confirm.setMessage("Do you want to paste selected data?");
+            answer = confirm.open();
+        }
+        if (answer == SWT.NO) return;
 
         getBinaryDataFromFile(chosenFile.getAbsolutePath());
     }
@@ -3101,18 +3165,27 @@ public class DefaultTableView implements TableView {
      * @throws Exception if a failure occurred
      */
     private void saveAsText() throws Exception {
-        FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
-        fchooser.setFilterPath(dataset.getFileFormat().getParent());
+        String currentDir = dataset.getFileFormat().getParent();
 
-        DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-        fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-        fchooser.setFilterIndex(1);
-        fchooser.setText("Save Current Data To Text File --- " + dataset.getName());
+        String filename = null;
+        if (((HDFView) viewer).getTestState()) {
+            filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
+        }
+        else {
+            FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            fChooser.setFilterPath(currentDir);
 
-        if(fchooser.open() == null) return;
+            DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
+            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+            fChooser.setFilterIndex(1);
+            fChooser.setText("Save Current Data To Text File --- " + dataset.getName());
 
-        File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
+            filename = fChooser.open();
+        }
+        if(filename == null) return;
+
+        File chosenFile = new File(filename);
         String fname = chosenFile.getAbsolutePath();
 
         log.trace("DefaultTableView: saveAsText: file={}", fname);
@@ -3133,10 +3206,19 @@ public class DefaultTableView implements TableView {
                 }
             }
 
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText(shell.getText());
-            confirm.setMessage("File exists. Do you want to replace it?");
-            if (confirm.open() == SWT.NO) return;
+            int answer = SWT.NO;
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        shell.getText(), "File exists. Do you want to replace it?"))
+                    answer = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText(shell.getText());
+                confirm.setMessage("File exists. Do you want to replace it?");
+                answer = confirm.open();
+            }
+            if (answer == SWT.NO) return;
         }
 
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(chosenFile)));
@@ -3187,18 +3269,27 @@ public class DefaultTableView implements TableView {
      * @throws Exception if a failure occurred
      */
     private void saveAsBinary() throws Exception {
-        FileDialog fchooser = new FileDialog(shell, SWT.SAVE);
-        fchooser.setFilterPath(dataset.getFileFormat().getParent());
+        String currentDir = dataset.getFileFormat().getParent();
 
-        DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
-        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-        fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-        fchooser.setFilterIndex(1);
-        fchooser.setText("Save Current Data To Binary File --- " + dataset.getName());
+        String filename = null;
+        if (((HDFView) viewer).getTestState()) {
+            filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
+        }
+        else {
+            FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+            fChooser.setFilterPath(currentDir);
 
-        if(fchooser.open() == null) return;
+            DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
+            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+            fChooser.setFilterIndex(1);
+            fChooser.setText("Save Current Data To Binary File --- " + dataset.getName());
 
-        File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
+            filename = fChooser.open();
+        }
+        if(filename == null) return;
+
+        File chosenFile = new File(filename);
         String fname = chosenFile.getAbsolutePath();
 
         log.trace("DefaultTableView: saveAsBinary: file={}", fname);
@@ -3219,10 +3310,19 @@ public class DefaultTableView implements TableView {
                 }
             }
 
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText(shell.getText());
-            confirm.setMessage("File exists. Do you want to replace it?");
-            if (confirm.open() == SWT.NO) return;
+            int answer = SWT.NO;
+            if (((HDFView) viewer).getTestState()) {
+                if(MessageDialog.openConfirm(shell,
+                        shell.getText(), "File exists. Do you want to replace it?"))
+                    answer = SWT.YES;
+            }
+            else {
+                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                confirm.setText(shell.getText());
+                confirm.setMessage("File exists. Do you want to replace it?");
+                answer = confirm.open();
+            }
+            if (answer == SWT.NO) return;
         }
 
         FileOutputStream outputFile = new FileOutputStream(chosenFile);
@@ -3486,10 +3586,16 @@ public class DefaultTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-                warning.setText(shell.getText());
-                warning.setMessage("More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
-                warning.open();
+                if (((HDFView) viewer).getTestState()) {
+                    MessageDialog.openWarning(shell,
+                            shell.getText(), "More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
+                }
+                else {
+                    MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+                    warning.setText(shell.getText());
+                    warning.setMessage("More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
+                    warning.open();
+                }
             }
             lineLabels = new String[nLines];
             data = new double[nLines][cols.length];
@@ -3531,10 +3637,16 @@ public class DefaultTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-                warning.setText(shell.getText());
-                warning.setMessage("More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
-                warning.open();
+                if (((HDFView) viewer).getTestState()) {
+                    MessageDialog.openWarning(shell,
+                            shell.getText(), "More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
+                }
+                else {
+                    MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+                    warning.setText(shell.getText());
+                    warning.setMessage("More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
+                    warning.open();
+                }
             }
             lineLabels = new String[nLines];
             data = new double[nLines][rows.length];
@@ -4031,6 +4143,7 @@ public class DefaultTableView implements TableView {
         private final long         typeSize;
 
         private final boolean      isArray;
+        private final boolean      isEnum;
         private final boolean      isUINT64;
         private final boolean      isBitfieldOrOpaque;
 
@@ -4043,6 +4156,7 @@ public class DefaultTableView implements TableView {
             typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
+            isEnum = dtype.getDatatypeClass() == Datatype.CLASS_ENUM;
             isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
             isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
             log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
@@ -4057,6 +4171,7 @@ public class DefaultTableView implements TableView {
 
             if (isArray) {
                 int len = Array.getLength(value);
+                log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isEnum={} isBitfieldOrOpaque={}", isArray, isEnum, isBitfieldOrOpaque);
 
                 if (showAsHex) {
                     if (isUINT64) {
@@ -4098,13 +4213,52 @@ public class DefaultTableView implements TableView {
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }
                 }
-                else {
+                else if (isEnum) {
+                    if (isEnumConverted) {
+                        String[] outValues = new String[len];
+
+                        try {
+                            H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                        } catch (HDF5Exception ex) {
+                            log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                            return buffer;
+                        }
+
+                        for (int i = 0; i < outValues.length; i++) {
+                            if (i > 0) buffer.append(", ");
+                            buffer.append(outValues[i]);
+                        }
+                    }
+                    else {
+                        for (int i = 0; i < len; i++) {
+                            if (i > 0) buffer.append(", ");
+                            buffer.append(Array.get(value, i));
+                        }
+                    }
+                }
+              else {
                     // Default case if no special display type is chosen
                     for (int i = 0; i < len; i++) {
                         if (i > 0) buffer.append(", ");
                         buffer.append(((Object[]) value)[i]);
                     }
                 }
+            }
+            else if (isEnum) {
+                if (isEnumConverted) {
+                    String[] outValues = new String[1];
+
+                    try {
+                        H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                    } catch (HDF5Exception ex) {
+                        log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                        return buffer;
+                    }
+
+                    buffer.append(outValues[0]);
+                }
+                else
+                    buffer.append(value);
             }
             else if (isBitfieldOrOpaque) {
                 for (int i = 0; i < ((byte[]) value).length; i++) {
@@ -4727,6 +4881,7 @@ public class DefaultTableView implements TableView {
             orders = theDataset.getSelectedMemberOrders();
             nFields = ((List<?>) dataValue).size();
             nSubColumns = (nFields > 0) ?  (int) (theDataset.getWidth() * theDataset.getSelectedMemberCount()) / nFields : 0;
+            log.trace("CompoundDSDataDisplayConverter {} finish", nSubColumns);
         }
 
         @Override
@@ -4739,6 +4894,7 @@ public class DefaultTableView implements TableView {
         @Override
         public Object canonicalToDisplayValue(Object value) {
             if (value instanceof String) return value;
+            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
 
             Datatype dtype = types[fieldIndex];
             int typeClass = dtype.getDatatypeClass();
@@ -4754,7 +4910,7 @@ public class DefaultTableView implements TableView {
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isStr = (typeClass == Datatype.CLASS_STRING);
-                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isStr={}", isArray, isStr);
+                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isEnum={} isStr={}", isArray, isEnum, isStr);
 
                 if (typeClass == Datatype.CLASS_COMPOUND) {
                     int numberOfMembers = dtype.getCompoundMemberNames().size();
@@ -4836,6 +4992,7 @@ public class DefaultTableView implements TableView {
             else {
                 buffer.append(value);
             }
+            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} finish", buffer);
 
             return buffer;
         }

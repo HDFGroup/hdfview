@@ -32,6 +32,7 @@ import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
@@ -128,13 +129,19 @@ public class DefaultTextView implements TextView {
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (isTextChanged && !isReadOnly) {
-                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                    confirm.setMessage("\""
-                            + dataset.getName() + "\" has changed.\n"
-                            + "Do you want to save the changes?");
-                    confirm.setText(shell.getText());
-
-                    if (confirm.open() == SWT.YES) {
+                    int answer = SWT.NO;
+                    if (((HDFView) viewer).getTestState()) {
+                        if(MessageDialog.openConfirm(shell,
+                                shell.getText(), "\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?"))
+                            answer = SWT.YES;
+                    }
+                    else {
+                        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                        confirm.setText(shell.getText());
+                        confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
+                        answer = confirm.open();
+                    }
+                    if (answer == SWT.YES) {
                         updateValueInFile();
                     }
                 }
@@ -187,9 +194,16 @@ public class DefaultTextView implements TextView {
             return;
         }
 
-        String fname = new java.io.File(dataset.getFile()).getName();
-        shell.setText("TextView  -  " + dataset.getName() + "  -  "
-                + dataset.getPath() + "  -  " + fname);
+        StringBuffer sb = new StringBuffer(dataset.getName());
+        sb.append("  at  ");
+        sb.append(dataset.getPath());
+        sb.append("  [");
+        sb.append(dataset.getFileFormat().getName());
+        sb.append("  in  ");
+        sb.append(dataset.getFileFormat().getParent());
+        sb.append("]");
+        shell.setText(sb.toString());
+
         shell.setImage(ViewProperties.getTextIcon());
 
         isReadOnly = dataset.getFileFormat().isReadOnly();
@@ -198,7 +212,7 @@ public class DefaultTextView implements TextView {
             text = (String[]) dataset.getData();
         }
         catch (Exception ex) {
-        	Tools.showError(shell, ex.getMessage(), "TextView" + shell.getText());
+            Tools.showError(shell, ex.getMessage(), "TextView" + shell.getText());
             text = null;
         }
 
@@ -310,7 +324,7 @@ public class DefaultTextView implements TextView {
                     saveAsText();
                 }
                 catch (Exception ex) {
-                	Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, ex.getMessage(), shell.getText());
                 }
             }
         });
@@ -360,7 +374,7 @@ public class DefaultTextView implements TextView {
             dataset.write();
         }
         catch (Exception ex) {
-        	Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, ex.getMessage(), shell.getText());
             return;
         }
 
@@ -397,7 +411,7 @@ public class DefaultTextView implements TextView {
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(fname)) {
-                	Tools.showError(shell, "Unable to save data to file \"" + fname
+                    Tools.showError(shell, "Unable to save data to file \"" + fname
                             + "\". \nThe file is being used.", shell.getText());
                     return;
                 }
