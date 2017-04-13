@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.TableEditor;
@@ -43,7 +44,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -951,22 +951,16 @@ public class NewCompoundDatasetDialog extends Dialog {
 
             if (tchunksize >= tdimsize) {
                 shell.getDisplay().beep();
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                confirm.setText(shell.getText());
-                confirm.setMessage("Chunk size is equal/greater than the current size. "
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
-                if(confirm.open() == SWT.NO) {
+                if(!MessageDialog.openConfirm(shell, shell.getText(), "Chunk size is equal/greater than the current size. "
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
                 }
             }
 
             if (tchunksize == 1) {
                 shell.getDisplay().beep();
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                confirm.setText(shell.getText());
-                confirm.setMessage("Chunk size is one, which may cause large memory overhead for large dataset."
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
-                if(confirm.open() == SWT.NO) {
+                if(!MessageDialog.openConfirm(shell, shell.getText(), "Chunk size is one, which may cause large memory overhead for large dataset."
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
                 }
             }

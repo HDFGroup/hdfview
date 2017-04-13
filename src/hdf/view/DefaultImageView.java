@@ -86,7 +86,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
@@ -734,17 +733,10 @@ public class DefaultImageView implements ImageView {
 
                 if (chosenFile.exists()) {
                     int answer = SWT.NO;
-                    if (((HDFView) viewer).getTestState()) {
-                        if(MessageDialog.openConfirm(shell,
+                    if(MessageDialog.openConfirm(shell,
                                 shell.getText(), "File exists. Do you want to replace it ?"))
                             answer = SWT.YES;
-                    }
-                    else {
-                        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                        confirm.setText(shell.getText());
-                        confirm.setMessage("File exists. Do you want to replace it ?");
-                        answer = confirm.open();
-                    }
+
                     if (answer == SWT.NO) return;
                 }
 
@@ -1022,10 +1014,7 @@ public class DefaultImageView implements ImageView {
                             + minmax[1] + "\nMean                     = "
                             + stat[0] + "\nStandard deviation = " + stat[1];
 
-                        MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                        info.setMessage(statistics);
-                        info.setText("Statistics");
-                        info.open();
+                        MessageDialog.openInformation(shell, "Statistics", statistics);
                     }
                 }
                 catch (Exception ex) {

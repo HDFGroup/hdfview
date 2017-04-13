@@ -260,13 +260,27 @@ public class H5ScalarDS extends ScalarDS {
 
                 long tmptid = 0;
                 if (tclass == HDF5Constants.H5T_ARRAY) {
-                    // use the base datatype to define the array
-                    long basetid = H5.H5Tget_super(tid);
-                    int baseclass = H5.H5Tget_class(basetid);
-                    isArrayOfCompound = (baseclass == HDF5Constants.H5T_COMPOUND);
-                    isArrayOfVLEN = (baseclass == HDF5Constants.H5T_VLEN);
-                    isVLEN = isVLEN || ((baseclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(basetid));
-                    isVLEN = isVLEN || H5.H5Tdetect_class(basetid, HDF5Constants.H5T_VLEN);
+                    long basetid = -1;
+                    try {
+                        // use the base datatype to define the array
+                        basetid = H5.H5Tget_super(tid);
+                        int baseclass = H5.H5Tget_class(basetid);
+                        isArrayOfCompound = (baseclass == HDF5Constants.H5T_COMPOUND);
+                        isArrayOfVLEN = (baseclass == HDF5Constants.H5T_VLEN);
+                        isVLEN = isVLEN || ((baseclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(basetid));
+                        isVLEN = isVLEN || H5.H5Tdetect_class(basetid, HDF5Constants.H5T_VLEN);
+                    }
+                    catch (Exception ex) {
+                        log.debug("init():  use the base datatype to define the array: ", ex);
+                    }
+                    finally {
+                        try {
+                            H5.H5Pclose(basetid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("init(): H5Pclose(basetid {}) failure: ", basetid, ex);
+                        }
+                    }
                 }
 
                 isText = (tclass == HDF5Constants.H5T_STRING);
@@ -731,7 +745,17 @@ public class H5ScalarDS extends ScalarDS {
                 if (theData != null) {
                     if (isVLEN) {
                         log.trace("read(): H5DreadVL");
-                        H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
+                        boolean is_variable_str = false;
+                        try {
+                            is_variable_str = H5.H5Tis_variable_str(tid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("allocateArray(): H5Tis_variable_str(tid {}) failure: ", tid, ex);
+                        }
+                        if (is_variable_str)
+                            H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
+                        else
+                            H5.H5DreadVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
                     }
                     else {
                         log.trace("read(): H5Dread did={} spaceIDs[0]={} spaceIDs[1]={}", did, spaceIDs[0], spaceIDs[1]);

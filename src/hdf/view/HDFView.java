@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -63,7 +64,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -408,15 +408,12 @@ public class HDFView implements ViewManager {
             // so that if any event causes an exception it does
             // not break the main UI loop
             // ===================================================
-            try
-            {
-               if (!display.readAndDispatch())
-               {
+            try {
+               if (!display.readAndDispatch()) {
                   display.sleep();
                }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                e.printStackTrace();
             }
         }
@@ -452,7 +449,8 @@ public class HDFView implements ViewManager {
 
                 try {
                     props.save();
-                } catch (Exception ex) {}
+                }
+                catch (Exception ex) {}
 
                 closeAllWindows();
 
@@ -629,7 +627,8 @@ public class HDFView implements ViewManager {
                     fChooser.setFilterIndex(0);
 
                     filename = fChooser.open();
-                } else {
+                }
+                else {
                     // Prepend test file directory to filename
                     filename = currentDir.concat(new InputDialog(mainWindow, "Enter a file name", "").open());
                 }
@@ -1441,10 +1440,7 @@ public class HDFView implements ViewManager {
                                     return;
                                 }
 
-                                MessageBox success = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
-                                success.setText(mainWindow.getText());
-                                success.setMessage("Link target changed.");
-                                success.open();
+                                MessageDialog.openInformation(mainWindow, mainWindow.getText(), "Link target changed.");
                             }
                         }
                     });
@@ -3248,27 +3244,21 @@ public class HDFView implements ViewManager {
                     log.debug("raf close:", ex);
                 }
 
-                MessageBox success = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                success.setText(shell.getText());
-                success.setMessage("Saving user block is successful.");
-                success.open();
+                MessageDialog.openInformation(shell, shell.getText(), "Saving user block is successful.");
             }
             else {
                 // must rewrite the whole file
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-                confirm.setText(shell.getText());
-                confirm.setMessage("The user block to write is " + blkSize1 + " (bytes),\n"
+                MessageDialog confirm = new MessageDialog(shell, shell.getText(), null,
+                        "The user block to write is " + blkSize1 + " (bytes),\n"
                         + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
                         + "To expand the user block, the file must be rewriten.\n\n"
                         + "Do you want to replace the current file? Click "
                         + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
-                        + "\n\"Cancel\" to quit without saving the change.\n\n ");
-
+                        + "\n\"Cancel\" to quit without saving the change.\n\n ",
+                        MessageDialog.QUESTION_WITH_CANCEL, new String[] { "Yes", "No", "Cancel" }, 0);
                 int op = confirm.open();
 
-                if(op == SWT.CANCEL) {
-                    return;
-                }
+                if(op == 2) return;
 
                 String fin = obj.getFile();
 
@@ -3282,7 +3272,7 @@ public class HDFView implements ViewManager {
 
                 File outFile = null;
 
-                if (op == SWT.NO) {
+                if (op == 1) {
                     FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
                     fChooser.setFileName(fout);
 
@@ -3291,9 +3281,7 @@ public class HDFView implements ViewManager {
                     fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
                     fChooser.setFilterIndex(1);
 
-                    if(fChooser.open() == null) {
-                        return;
-                    }
+                    if(fChooser.open() == null) return;
 
                     File chosenFile = new File(fChooser.getFileName());
 
@@ -3319,12 +3307,13 @@ public class HDFView implements ViewManager {
 
                 try {
                     view.closeFile(view.getSelectedFile());
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     log.debug("Error closing file {}", fin);
                 }
 
                 if (Tools.setHDF5UserBlock(fin, fout, buf)) {
-                    if (op == SWT.NO) {
+                    if (op == 1) {
                         fin = fout; // open the new file
                     }
                     else {
@@ -3349,7 +3338,8 @@ public class HDFView implements ViewManager {
 
                 try {
                     view.openFile(fin, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     log.debug("Error opening file {}", fin);
                 }
             }
@@ -3451,10 +3441,7 @@ public class HDFView implements ViewManager {
             }
             else if("-java.version".equalsIgnoreCase(args[i])) {
                 /* Set icon to ViewProperties.getLargeHdfIcon() */
-                MessageBox info = new MessageBox(mainWindow, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(mainWindow.getText());
-                info.setMessage(JAVA_VER_INFO);
-                info.open();
+                MessageDialog.openInformation(mainWindow, mainWindow.getText(), JAVA_VER_INFO);
                 System.exit(0);
             }
         }

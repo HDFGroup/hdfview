@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -40,7 +41,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -506,20 +506,14 @@ public class NewAttributeDialog extends Dialog {
             }
             torder = Datatype.NATIVE;
 
-            MessageBox warn = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-            warn.setText(shell.getText());
-            warn.setMessage("Multi-dimensional Variable Length Integer Attributes will be created without data.");
-            warn.open();
+            MessageDialog.openWarning(shell, shell.getText(), "Multi-dimensional Variable Length Integer Attributes will be created without data.");
         }
         else if (idx == 6) {;
             isVLen = true;
             tclass = Datatype.CLASS_FLOAT;
             torder = Datatype.NATIVE;
 
-            MessageBox warn = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-            warn.setText(shell.getText());
-            warn.setMessage("Multi-dimensional Variable Length Float Attributes will be created without data.");
-            warn.open();
+            MessageDialog.openWarning(shell, shell.getText(), "Multi-dimensional Variable Length Float Attributes will be created without data.");
         }
         else if (idx == 7) {
             isVLen = true;

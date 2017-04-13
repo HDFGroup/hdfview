@@ -923,7 +923,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void openTAttr2GroupVlen() {
         String filename = "tattr2";
         String file_ext = ".h5";
@@ -1385,12 +1385,19 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                     tableShell.bot().text(2).getText().matches("/dset"));
 
             table.contextMenu(3, 3).menu("Show As &Table").click();
-            shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            org.hamcrest.Matcher<Shell> shell2Matcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shell2Matcher));
 
             table2Shell = bot.shells()[2];
             table2Shell.activate();
             bot.waitUntil(Conditions.shellIsActive(table2Shell.getText()));
+
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
 
             SWTBotNatTable table2 = new SWTBotNatTable(table2Shell.bot().widget(widgetOfType(NatTable.class)));
 
