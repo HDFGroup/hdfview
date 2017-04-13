@@ -482,16 +482,31 @@ public class H5Datatype extends Datatype {
                     for (int i = 0; i < nMembers; i++) {
                         String memberName = H5.H5Tget_member_name(tid, i);
                         long memberOffset = H5.H5Tget_member_offset(tid, i);
-                        long memberID = H5.H5Tget_member_type(tid, i);
+                        long memberID = -1;
+                        H5Datatype t = null;
+                        try {
+                            memberID = H5.H5Tget_member_type(tid, i);
+                            t = new H5Datatype(memberID);
+                        }
+                        catch (Exception ex1) {
+                            log.debug("fromNative(): compound type failure: ", ex1);
+                        }
+                        finally {
+                            try {
+                                H5.H5Tclose(memberID);
+                            }
+                            catch (Exception ex2) {
+                                log.debug("fromNative(): compound H5Tclose(memberID {}) failure: ", memberID, ex2);
+                            }
+                        }
 
                         compoundMemberNames.add(i, memberName);
                         compoundMemberOffsets.add(i, memberOffset);
                         compoundMemberFieldIDs.add(i, memberID);
-
-                        H5Datatype t = new H5Datatype(memberID);
                         compoundMemberTypes.add(i, t);
                     }
-                } catch (HDF5LibraryException ex) {
+                }
+                catch (HDF5LibraryException ex) {
                     log.debug("fromNative(): compound type failure: ", ex);
                 }
             }

@@ -202,7 +202,7 @@ public abstract class AbstractWindowTest {
 
             Display.getDefault().syncExec(new Runnable() {
                 @Override
-				public void run() {
+                public void run() {
                     imageCanvas.widget.notifyListeners(SWT.MouseMove, new Event() {
                         {
                             x = theX;
@@ -269,7 +269,7 @@ public abstract class AbstractWindowTest {
 
                     Display.getDefault().syncExec(new Runnable() {
                         @Override
-						public void run() {
+                        public void run() {
                             shell.getDisplay().dispose();
                         }
                     });
@@ -294,7 +294,7 @@ public abstract class AbstractWindowTest {
         // close the shell
         Display.getDefault().syncExec(new Runnable() {
             @Override
-			public void run() {
+            public void run() {
                 shell.close();
             }
         });

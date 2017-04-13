@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -34,7 +35,6 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -323,12 +323,8 @@ public class ImageConversionDialog extends Dialog {
         }
 
         if (f.exists()) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText(shell.getText());
-            confirm.setMessage("Destination file exists. Do you want to replace it ?");
-            if(confirm.open() == SWT.NO) {
+            if(!MessageDialog.openConfirm(shell, shell.getText(), "Destination file exists. Do you want to replace it ?"))
                 return false;
-            }
         }
 
         try {

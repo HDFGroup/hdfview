@@ -41,7 +41,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -219,17 +218,9 @@ public class DefaultMetaDataView implements MetaDataView {
         }
 
         int answer = SWT.NO;
-        if (((HDFView) viewer).getTestState()) {
-            if(MessageDialog.openConfirm(shell,
+        if(MessageDialog.openConfirm(shell,
                     shell.getText(), "Do you want to delete the selected attribute?"))
                 answer = SWT.YES;
-        }
-        else {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText(shell.getText());
-            confirm.setMessage("Do you want to delete the selected attribute?");
-            answer = confirm.open();
-        }
         if (answer == SWT.NO) return null;
 
         List<?> attrList = null;

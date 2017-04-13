@@ -136,12 +136,12 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import hdf.hdf5lib.H5;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -295,22 +295,10 @@ public class DefaultTableView implements TableView {
             @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
-                    int answer = SWT.NO;
-                    if (((HDFView) viewer).getTestState()) {
-                        if(MessageDialog.openConfirm(shell,
-                                "Changes Detected", "\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?"))
-                            answer = SWT.YES;
-                    }
-                    else {
-                        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                        confirm.setText(shell.getText());
-                        confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
-                        answer = confirm.open();
-                    }
-                    if (answer == SWT.YES) {
+                    if(MessageDialog.openConfirm(shell, "Changes Detected", "\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?"))
                         updateValueInFile();
-                    }
-                    else dataset.clearData(); // reload data
+                    else
+                        dataset.clearData(); // reload data
                 }
 
                 if (dataset instanceof ScalarDS) {
@@ -1007,19 +995,8 @@ public class DefaultTableView implements TableView {
                     return;
                 }
 
-                int answer = SWT.NO;
-                if (((HDFView) viewer).getTestState()) {
-                    if(MessageDialog.openConfirm(shell,
-                            "Import Data", "Do you want to paste selected data?"))
-                        answer = SWT.YES;
-                }
-                else {
-                    MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                    confirm.setText("Import Data");
-                    confirm.setMessage("Do you want to paste selected data?");
-                    answer = confirm.open();
-                }
-                if (answer == SWT.NO) return;
+                if(!MessageDialog.openConfirm(shell, "Import Data", "Do you want to paste selected data?"))
+                    return;
                 importTextData(chosenFile.getAbsolutePath());
             }
         });
@@ -1148,16 +1125,7 @@ public class DefaultTableView implements TableView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if ((selectionLayer.getSelectedColumnPositions().length <= 0) || (selectionLayer.getSelectedRowCount() <= 0)) {
-                    if (((HDFView) viewer).getTestState()) {
-                        MessageDialog.openInformation(shell,
-                                shell.getText(), "Select table cells to write.");
-                    }
-                    else {
-                        MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                        info.setText(shell.getText());
-                        info.setMessage("Select table cells to write.");
-                        info.open();
-                    }
+                    MessageDialog.openInformation(shell, shell.getText(), "Select table cells to write.");
                     return;
                 }
 
@@ -1263,16 +1231,7 @@ public class DefaultTableView implements TableView {
                     if (Tools.computeStatistics(theData, stat, fillValue) > 0) {
                         String stats = "Min                      = " + minmax[0] + "\nMax                      = " + minmax[1]
                                      + "\nMean                     = " + stat[0] + "\nStandard deviation = " + stat[1];
-                        if (((HDFView) viewer).getTestState()) {
-                            MessageDialog.openInformation(shell,
-                                    "Statistics", stats);
-                        }
-                        else {
-                            MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                            info.setText("Statistics");
-                            info.setMessage(stats);
-                            info.open();
-                        }
+                        MessageDialog.openInformation(shell, "Statistics", stats);
                     }
 
                     theData = null;
@@ -1994,19 +1953,8 @@ public class DefaultTableView implements TableView {
      * Paste data from the system clipboard to the spreadsheet.
      */
     private void pasteData() {
-        int answer = SWT.NO;
-        if (((HDFView) viewer).getTestState()) {
-            if(MessageDialog.openConfirm(shell,
-                    "Clipboard Data", "Do you want to paste selected data?"))
-                answer = SWT.YES;
-        }
-        else {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Clipboard Data");
-            confirm.setMessage("Do you want to paste selected data?");
-            answer = confirm.open();
-        }
-        if (answer == SWT.NO) return;
+        if(!MessageDialog.openConfirm(shell, "Clipboard Data", "Do you want to paste selected data?"))
+            return;
 
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
@@ -2898,19 +2846,8 @@ public class DefaultTableView implements TableView {
             return;
         }
 
-        int answer = SWT.NO;
-        if (((HDFView) viewer).getTestState()) {
-            if(MessageDialog.openConfirm(shell,
-                    "Import Data", "Do you want to paste selected data?"))
-                answer = SWT.YES;
-        }
-        else {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Import Data");
-            confirm.setMessage("Do you want to paste selected data?");
-            answer = confirm.open();
-        }
-        if (answer == SWT.NO) return;
+        if(!MessageDialog.openConfirm(shell, "Import Data", "Do you want to paste selected data?"))
+            return;
 
         getBinaryDataFromFile(chosenFile.getAbsolutePath());
     }
@@ -3206,19 +3143,8 @@ public class DefaultTableView implements TableView {
                 }
             }
 
-            int answer = SWT.NO;
-            if (((HDFView) viewer).getTestState()) {
-                if(MessageDialog.openConfirm(shell,
-                        shell.getText(), "File exists. Do you want to replace it?"))
-                    answer = SWT.YES;
-            }
-            else {
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                confirm.setText(shell.getText());
-                confirm.setMessage("File exists. Do you want to replace it?");
-                answer = confirm.open();
-            }
-            if (answer == SWT.NO) return;
+            if(!MessageDialog.openConfirm(shell, shell.getText(), "File exists. Do you want to replace it?"))
+               return;
         }
 
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(chosenFile)));
@@ -3310,19 +3236,8 @@ public class DefaultTableView implements TableView {
                 }
             }
 
-            int answer = SWT.NO;
-            if (((HDFView) viewer).getTestState()) {
-                if(MessageDialog.openConfirm(shell,
-                        shell.getText(), "File exists. Do you want to replace it?"))
-                    answer = SWT.YES;
-            }
-            else {
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                confirm.setText(shell.getText());
-                confirm.setMessage("File exists. Do you want to replace it?");
-                answer = confirm.open();
-            }
-            if (answer == SWT.NO) return;
+            if(!MessageDialog.openConfirm(shell, shell.getText(), "File exists. Do you want to replace it?"))
+                return;
         }
 
         FileOutputStream outputFile = new FileOutputStream(chosenFile);
@@ -3586,16 +3501,7 @@ public class DefaultTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                if (((HDFView) viewer).getTestState()) {
-                    MessageDialog.openWarning(shell,
-                            shell.getText(), "More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
-                }
-                else {
-                    MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-                    warning.setText(shell.getText());
-                    warning.setMessage("More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
-                    warning.open();
-                }
+                MessageDialog.openWarning(shell, shell.getText(), "More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
             }
             lineLabels = new String[nLines];
             data = new double[nLines][cols.length];
@@ -3637,16 +3543,7 @@ public class DefaultTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                if (((HDFView) viewer).getTestState()) {
-                    MessageDialog.openWarning(shell,
-                            shell.getText(), "More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
-                }
-                else {
-                    MessageBox warning = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-                    warning.setText(shell.getText());
-                    warning.setMessage("More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
-                    warning.open();
-                }
+                MessageDialog.openWarning(shell, shell.getText(), "More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
             }
             lineLabels = new String[nLines];
             data = new double[nLines][rows.length];
@@ -4216,18 +4113,31 @@ public class DefaultTableView implements TableView {
                 else if (isEnum) {
                     if (isEnumConverted) {
                         String[] outValues = new String[len];
+                        String[] retValues = null;
+                        long tmptid = -1;
 
                         try {
-                            H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
-                        } catch (HDF5Exception ex) {
+                            tmptid = dtype.toNative();
+                            retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                        }
+                        catch (HDF5Exception ex) {
                             log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                            return buffer;
+                            retValues = null;
+                        }
+                        finally {
+                            try {
+                                H5.H5Tclose(tmptid);
+                            }
+                            catch (Exception ex) {
+                                log.debug("ScalarDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ", tmptid, ex);
+                            }
                         }
 
-                        for (int i = 0; i < outValues.length; i++) {
-                            if (i > 0) buffer.append(", ");
-                            buffer.append(outValues[i]);
-                        }
+                        if(retValues != null)
+                            for (int i = 0; i < outValues.length; i++) {
+                                if (i > 0) buffer.append(", ");
+                                buffer.append(outValues[i]);
+                            }
                     }
                     else {
                         for (int i = 0; i < len; i++) {
@@ -4236,7 +4146,7 @@ public class DefaultTableView implements TableView {
                         }
                     }
                 }
-              else {
+                else {
                     // Default case if no special display type is chosen
                     for (int i = 0; i < len; i++) {
                         if (i > 0) buffer.append(", ");
@@ -4247,15 +4157,28 @@ public class DefaultTableView implements TableView {
             else if (isEnum) {
                 if (isEnumConverted) {
                     String[] outValues = new String[1];
+                    String[] retValues = null;
+                    long tmptid = -1;
 
                     try {
-                        H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
-                    } catch (HDF5Exception ex) {
+                        tmptid = dtype.toNative();
+                        retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                    }
+                    catch (HDF5Exception ex) {
                         log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                        return buffer;
+                        retValues = null;
+                    }
+                    finally {
+                        try {
+                            H5.H5Tclose(tmptid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("ScalarDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ", tmptid, ex);
+                        }
                     }
 
-                    buffer.append(outValues[0]);
+                    if(retValues != null)
+                        buffer.append(outValues[0]);
                 }
                 else
                     buffer.append(value);
@@ -4933,18 +4856,31 @@ public class DefaultTableView implements TableView {
 
                     if (isEnumConverted) {
                         String[] outValues = new String[len];
+                        String[] retValues = null;
+                        long tmptid = -1;
 
                         try {
-                            H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
-                        } catch (HDF5Exception ex) {
+                            tmptid = dtype.toNative();
+                            retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                        }
+                        catch (HDF5Exception ex) {
                             log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                            return buffer;
+                            retValues = null;
+                        }
+                        finally {
+                            try {
+                                H5.H5Tclose(tmptid);
+                            }
+                            catch (Exception ex) {
+                                log.debug("CompoundDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ", tmptid, ex);
+                            }
                         }
 
-                        for (int i = 0; i < outValues.length; i++) {
-                            if (i > 0) buffer.append(", ");
-                            buffer.append(outValues[i]);
-                        }
+                        if(retValues != null)
+                            for (int i = 0; i < outValues.length; i++) {
+                                if (i > 0) buffer.append(", ");
+                                buffer.append(outValues[i]);
+                            }
                     }
                     else {
                         for (int i = 0; i < len; i++) {
@@ -4963,15 +4899,28 @@ public class DefaultTableView implements TableView {
             else if (isEnum) {
                 if (isEnumConverted) {
                     String[] outValues = new String[1];
+                    String[] retValues = null;
+                    long tmptid = -1;
 
                     try {
-                        H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
-                    } catch (HDF5Exception ex) {
+                        tmptid = dtype.toNative();
+                        retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                    }
+                    catch (HDF5Exception ex) {
                         log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                        return buffer;
+                        retValues = null;
+                    }
+                    finally {
+                        try {
+                            H5.H5Tclose(tmptid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("CompoundDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ", tmptid, ex);
+                        }
                     }
 
-                    buffer.append(outValues[0]);
+                    if(retValues != null)
+                        buffer.append(outValues[0]);
                 }
                 else
                     buffer.append(value);

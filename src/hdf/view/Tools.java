@@ -42,9 +42,9 @@ import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.Datatype;
@@ -2604,10 +2604,7 @@ public final class Tools {
         if (f.exists()) {
             Shell tempShell = new Shell(display);
 
-            MessageBox confirm = new MessageBox(tempShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Create New File");
-            confirm.setMessage("File exists. Do you want to replace it?");
-            if (confirm.open() == SWT.NO) {
+            if(!MessageDialog.openConfirm(tempShell, "Create New File", "File exists. Do you want to replace it?")) {
                 tempShell.dispose();
                 return null;
             }
@@ -2784,16 +2781,13 @@ public final class Tools {
     /**
      * Show an SWT error dialog with the given error message.
      * @param parent
-     *           The parent Shell of the MessageBox
+     *           The parent Shell of the MessageDialog
      * @param errorMsg
-     *           The error message to display in the MessageBox
+     *           The error message to display in the MessageDialog
      * @param title
-     *           The title to set for the MessageBox
+     *           The title to set for the MessageDialog
      */
     public static void showError(Shell parent, String errorMsg, String title) {
-        MessageBox error = new MessageBox(parent, SWT.ICON_ERROR | SWT.OK);
-        error.setText((title == null) ? "null" : title);
-        error.setMessage((errorMsg == null) ? "null" : errorMsg);
-        error.open();
+        MessageDialog.openError(parent, (title == null) ? "null" : title, (errorMsg == null) ? "null" : errorMsg);
     }
 }

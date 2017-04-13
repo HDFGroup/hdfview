@@ -25,6 +25,7 @@ import java.util.BitSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -53,7 +54,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -423,8 +423,8 @@ public class DataOptionDialog extends Dialog {
             }
 
             if (rank > 2) {
-            	endFields[2].setEnabled(false);
-            	strideFields[2].setEnabled(false);
+                endFields[2].setEnabled(false);
+                strideFields[2].setEnabled(false);
 
                 if (isTrueColorImage && imageButton != null) {
                     if(imageButton.getSelection()) {
@@ -438,7 +438,7 @@ public class DataOptionDialog extends Dialog {
                     }
                 }
                 else {
-                	endFields[2].setText(startFields[2].getText());
+                    endFields[2].setText(startFields[2].getText());
                 }
             }
         }
@@ -619,9 +619,9 @@ public class DataOptionDialog extends Dialog {
 
         // find no error, set selection the the dataset object
         for (int i = 0; i < n; i++) {
-        	long selectedSize = ((n1[i] - n0[i]) / n2[i]) + 1;
+            long selectedSize = ((n1[i] - n0[i]) / n2[i]) + 1;
 
-        	if (!Tools.checkIsValidJavaInt(selectedSize)) {
+            if (!Tools.checkIsValidJavaInt(selectedSize)) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Subset selection too large to display.", shell.getText());
                 return false;
@@ -1012,10 +1012,7 @@ public class DataOptionDialog extends Dialog {
                         + "their corresponding bits in the bitmask are 0. \nFor the same example above, "
                         + "the result is \n101 ==> the decimal value is 5.\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(msg);
-                info.open();
+                MessageDialog.openInformation(shell, shell.getText(), msg);
             }
         });
 

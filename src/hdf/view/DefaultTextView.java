@@ -52,7 +52,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -129,21 +128,9 @@ public class DefaultTextView implements TextView {
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (isTextChanged && !isReadOnly) {
-                    int answer = SWT.NO;
-                    if (((HDFView) viewer).getTestState()) {
-                        if(MessageDialog.openConfirm(shell,
+                    if(MessageDialog.openConfirm(shell,
                                 shell.getText(), "\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?"))
-                            answer = SWT.YES;
-                    }
-                    else {
-                        MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                        confirm.setText(shell.getText());
-                        confirm.setMessage("\"" + dataset.getName() + "\" has changed.\n" + "Do you want to save the changes?");
-                        answer = confirm.open();
-                    }
-                    if (answer == SWT.YES) {
                         updateValueInFile();
-                    }
                 }
 
                 viewer.removeDataView(DefaultTextView.this);
