@@ -164,7 +164,10 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             items[0].click();
             items[0].contextMenu("Show Attributes").click();
 
-            SWTBotShell metaDataShell = bot.shell("Properties - /");
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("Properties.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            SWTBotShell metaDataShell = bot.shells()[1];
             metaDataShell.activate();
             bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
 
