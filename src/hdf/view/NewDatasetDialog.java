@@ -23,6 +23,7 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -40,7 +41,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -64,7 +64,7 @@ public class NewDatasetDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 
     private Shell             shell;
-    
+
     private Font              curFont;
 
     private String            maxSize;
@@ -106,7 +106,7 @@ public class NewDatasetDialog extends Dialog {
      */
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -143,7 +143,7 @@ public class NewDatasetDialog extends Dialog {
      */
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -185,7 +185,9 @@ public class NewDatasetDialog extends Dialog {
 
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
         nameField.setFont(curFont);
-        nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+        data.minimumWidth = 250;
+        nameField.setLayoutData(data);
 
         Label parentGroupLabel = new Label(fieldComposite, SWT.LEFT);
         parentGroupLabel.setFont(curFont);
@@ -224,385 +226,388 @@ public class NewDatasetDialog extends Dialog {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
         }
 
-        // Create Datatype region
-        org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        datatypeGroup.setFont(curFont);
-        datatypeGroup.setText("Datatype");
-        datatypeGroup.setLayout(new GridLayout(4, true));
-        datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        // Create New Dataset from scratch
+        if (dataView == null) {
+            // Create Datatype region
+            org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            datatypeGroup.setFont(curFont);
+            datatypeGroup.setText("Datatype");
+            datatypeGroup.setLayout(new GridLayout(4, true));
+            datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        Label label = new Label(datatypeGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Datatype Class");
+            Label label = new Label(datatypeGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Datatype Class");
 
-        label = new Label(datatypeGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Size (bits)");
+            label = new Label(datatypeGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Size (bits)");
 
-        label = new Label(datatypeGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Byte Ordering");
+            label = new Label(datatypeGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Byte Ordering");
 
-        checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
-        checkUnsigned.setFont(curFont);
-        checkUnsigned.setText("Unsigned");
+            checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
+            checkUnsigned.setFont(curFont);
+            checkUnsigned.setText("Unsigned");
 
-        classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-        classChoice.setFont(curFont);
-        classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        classChoice.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                int idx = classChoice.getSelectionIndex();
-                sizeChoice.select(0);
-                endianChoice.select(0);
-                stringLengthField.setEnabled(false);
-
-                if ((idx == 0) || (idx == 6)) { // INTEGER
-                    sizeChoice.setEnabled(true);
-                    endianChoice.setEnabled(isH5);
-                    checkUnsigned.setEnabled(true);
-
-                    if (sizeChoice.getItemCount() == 3) {
-                        sizeChoice.remove("32");
-                        sizeChoice.remove("64");
-                        sizeChoice.add("8");
-                        sizeChoice.add("16");
-                        sizeChoice.add("32");
-                        sizeChoice.add("64");
-                    }
-                }
-                else if ((idx == 1) || (idx == 7)) { // FLOAT
-                    sizeChoice.setEnabled(true);
-                    endianChoice.setEnabled(isH5);
-                    checkUnsigned.setEnabled(false);
-
-                    if (sizeChoice.getItemCount() == 5) {
-                        sizeChoice.remove("16");
-                        sizeChoice.remove("8");
-                    }
-                }
-                else if (idx == 2) { // CHAR
-                    sizeChoice.setEnabled(false);
-                    endianChoice.setEnabled(isH5);
-                    checkUnsigned.setEnabled(true);
-                }
-                else if (idx == 3) { // STRING
-                    sizeChoice.setEnabled(false);
-                    endianChoice.setEnabled(false);
-                    checkUnsigned.setEnabled(false);
-                    stringLengthField.setEnabled(true);
-                    stringLengthField.setText("String length");
-                }
-                else if (idx == 4) { // REFERENCE
-                    sizeChoice.setEnabled(false);
-                    endianChoice.setEnabled(false);
-                    checkUnsigned.setEnabled(false);
-                    stringLengthField.setEnabled(false);
-                }
-                else if (idx == 5) { // ENUM
-                    sizeChoice.setEnabled(true);
-                    checkUnsigned.setEnabled(true);
-                    stringLengthField.setEnabled(true);
-                    stringLengthField.setText("R=0,G=1,B=2,...");
-                }
-                else if (idx == 8) {
-                    sizeChoice.setEnabled(false);
-                    endianChoice.setEnabled(false);
-                    checkUnsigned.setEnabled(false);
-                    stringLengthField.setEnabled(false);
-                }
-            }
-        });
-
-        classChoice.add("INTEGER");
-        classChoice.add("FLOAT");
-        classChoice.add("CHAR");
-
-        if(isH5) {
-            classChoice.add("STRING");
-            classChoice.add("REFERENCE");
-            classChoice.add("ENUM");
-            classChoice.add("VLEN_INTEGER");
-            classChoice.add("VLEN_FLOAT");
-            classChoice.add("VLEN_STRING");
-        }
-
-        sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-        sizeChoice.setFont(curFont);
-        sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        sizeChoice.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                if (classChoice.getSelectionIndex() == 0) {
-                    checkUnsigned.setEnabled(true);
-                }
-            }
-        });
-
-        if(isH5) {
-            sizeChoice.add("NATIVE");
-        } else {
-            sizeChoice.add("DEFAULT");
-        }
-
-        sizeChoice.add("8");
-        sizeChoice.add("16");
-        sizeChoice.add("32");
-        sizeChoice.add("64");
-
-        endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-        endianChoice.setFont(curFont);
-        endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        endianChoice.setEnabled(isH5);
-
-        if(isH5) {
-            endianChoice.add("NATIVE");
-            endianChoice.add("LITTLE ENDIAN");
-            endianChoice.add("BIG ENDIAN");
-        } else {
-            endianChoice.add("DEFAULT");
-        }
-
-        stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
-        stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        stringLengthField.setFont(curFont);
-        stringLengthField.setText("String Length");
-        stringLengthField.setEnabled(false);
-
-        classChoice.select(0);
-        sizeChoice.select(0);
-        endianChoice.select(0);
-
-
-        // Create Dataspace region
-        org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        dataspaceGroup.setFont(curFont);
-        dataspaceGroup.setText("Dataspace");
-        dataspaceGroup.setLayout(new GridLayout(3, true));
-        dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-        label = new Label(dataspaceGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("No. of dimensions");
-
-        label = new Label(dataspaceGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Current size");
-
-        // Dummy label
-        label = new Label(dataspaceGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("");
-
-        rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-        rankChoice.setFont(curFont);
-        rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        rankChoice.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                int rank = rankChoice.getSelectionIndex() + 1;
-                String currentSizeStr = "1";
-
-                for (int i = 1; i < rank; i++) {
-                    currentSizeStr += " x 1";
-                }
-
-                currentSizeField.setText(currentSizeStr);
-
-                String currentStr = currentSizeField.getText();
-                int idx = currentStr.lastIndexOf("x");
-                String chunkStr = "1";
-
-                if (rank <= 1) {
-                    chunkStr = currentStr;
-                }
-                else {
-                    for (int i = 1; i < rank - 1; i++) {
-                        chunkStr += " x 1";
-                    }
-                    if (idx > 0) {
-                        chunkStr += " x " + currentStr.substring(idx + 1);
-                    }
-                }
-
-                chunkSizeField.setText(chunkStr);
-            }
-        });
-
-        for (int i = 1; i < 33; i++) {
-            rankChoice.add(String.valueOf(i));
-        }
-        rankChoice.select(1);
-
-        currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
-        currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        currentSizeField.setFont(curFont);
-        currentSizeField.setText("1 x 1");
-
-        Button setMaxSizeButton = new Button(dataspaceGroup, SWT.PUSH);
-        setMaxSizeButton.setFont(curFont);
-        setMaxSizeButton.setText("Set Max Size");
-        setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
-        setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                if (maxSize == null || maxSize.length() < 1)
-                    maxSize = currentSizeField.getText();
-
-                String msg = new InputDialog(shell, "Set Max Size", "Enter max dimension sizes. \n"
-                        + "Use \"unlimited\" for unlimited dimension size.\n\n" + "For example,\n" + "    200 x 100\n"
-                        + "    100 x unlimited\n\n", maxSize).open();
-
-                if (msg == null || msg.length() < 1)
-                    maxSize = currentSizeField.getText();
-                else
-                    maxSize = msg;
-
-                checkMaxSize();
-            }
-        });
-
-
-        // Create Storage Properties region
-        org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        storagePropertiesGroup.setFont(curFont);
-        storagePropertiesGroup.setText("Storage Properties");
-        storagePropertiesGroup.setLayout(new GridLayout(5, true));
-        storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-        label = new Label(storagePropertiesGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Storage layout: ");
-
-        checkContiguous = new Button(storagePropertiesGroup, SWT.RADIO);
-        checkContiguous.setFont(curFont);
-        checkContiguous.setText("Contiguous");
-        checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-        checkContiguous.setSelection(true);
-        checkContiguous.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                chunkSizeField.setEnabled(false);
-            }
-        });
-
-        // Dummy label
-        label = new Label(storagePropertiesGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("");
-        label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-        checkChunked = new Button(storagePropertiesGroup, SWT.RADIO);
-        checkChunked.setFont(curFont);
-        checkChunked.setText("Chunked (size) ");
-        checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-        checkChunked.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                chunkSizeField.setEnabled(true);
-                String chunkStr = "";
-                StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
-                int rank = rankChoice.getSelectionIndex() + 1;
-                while (st.hasMoreTokens()) {
-                    long l = Math.max(1, Long.valueOf(st.nextToken().trim()) / (2 * rank));
-                    chunkStr += String.valueOf(l) + "x";
-                }
-                chunkStr = chunkStr.substring(0, chunkStr.lastIndexOf('x'));
-                chunkSizeField.setText(chunkStr);
-            }
-        });
-
-        chunkSizeField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
-        chunkSizeField.setFont(curFont);
-        chunkSizeField.setText("1 x 1");
-        chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        chunkSizeField.setEnabled(false);
-
-        label = new Label(storagePropertiesGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Compression: ");
-
-        checkCompression = new Button(storagePropertiesGroup, SWT.CHECK);
-        checkCompression.setFont(curFont);
-        checkCompression.setText("gzip (level) ");
-        checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-        checkCompression.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                boolean isCompressed = checkCompression.getSelection();
-
-                if (isCompressed && isH5) {
-                    if (!checkChunked.getSelection()) {
-                        String currentStr = currentSizeField.getText();
-                        int idx = currentStr.lastIndexOf("x");
-                        String chunkStr = "1";
-
-                        int rank = rankChoice.getSelectionIndex() + 1;
-                        if (rank <= 1) {
-                            chunkStr = currentStr;
-                        }
-                        else {
-                            for (int i = 1; i < rank - 1; i++) {
-                                chunkStr += " x 1";
-                            }
-                            if (idx > 0) {
-                                chunkStr += " x " + currentStr.substring(idx + 1);
-                            }
-                        }
-
-                        chunkSizeField.setText(chunkStr);
-                    }
-                    compressionLevel.setEnabled(true);
-                    checkContiguous.setEnabled(false);
-                    checkContiguous.setSelection(false);
-                    checkChunked.setSelection(true);
-                    chunkSizeField.setEnabled(true);
-                }
-                else {
-                    compressionLevel.setEnabled(isCompressed);
-                    checkContiguous.setEnabled(true);
-                }
-            }
-        });
-
-        compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-        compressionLevel.setFont(curFont);
-        compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-        for (int i = 0; i < 10; i++) {
-            compressionLevel.add(String.valueOf(i));
-        }
-        compressionLevel.select(6);
-        compressionLevel.setEnabled(false);
-
-        if(isH5) {
-            checkFillValue = new Button(storagePropertiesGroup, SWT.CHECK);
-            checkFillValue.setFont(curFont);
-            checkFillValue.setText("Fill Value");
-            checkFillValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-            checkFillValue.setSelection(false);
-            checkFillValue.addSelectionListener(new SelectionAdapter() {
+            classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+            classChoice.setFont(curFont);
+            classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            classChoice.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    fillValueField.setEnabled(checkFillValue.getSelection());
+                    int idx = classChoice.getSelectionIndex();
+                    sizeChoice.select(0);
+                    endianChoice.select(0);
+                    stringLengthField.setEnabled(false);
+
+                    if ((idx == 0) || (idx == 6)) { // INTEGER
+                        sizeChoice.setEnabled(true);
+                        endianChoice.setEnabled(isH5);
+                        checkUnsigned.setEnabled(true);
+
+                        if (sizeChoice.getItemCount() == 3) {
+                            sizeChoice.remove("32");
+                            sizeChoice.remove("64");
+                            sizeChoice.add("8");
+                            sizeChoice.add("16");
+                            sizeChoice.add("32");
+                            sizeChoice.add("64");
+                        }
+                    }
+                    else if ((idx == 1) || (idx == 7)) { // FLOAT
+                        sizeChoice.setEnabled(true);
+                        endianChoice.setEnabled(isH5);
+                        checkUnsigned.setEnabled(false);
+
+                        if (sizeChoice.getItemCount() == 5) {
+                            sizeChoice.remove("16");
+                            sizeChoice.remove("8");
+                        }
+                    }
+                    else if (idx == 2) { // CHAR
+                        sizeChoice.setEnabled(false);
+                        endianChoice.setEnabled(isH5);
+                        checkUnsigned.setEnabled(true);
+                    }
+                    else if (idx == 3) { // STRING
+                        sizeChoice.setEnabled(false);
+                        endianChoice.setEnabled(false);
+                        checkUnsigned.setEnabled(false);
+                        stringLengthField.setEnabled(true);
+                        stringLengthField.setText("String length");
+                    }
+                    else if (idx == 4) { // REFERENCE
+                        sizeChoice.setEnabled(false);
+                        endianChoice.setEnabled(false);
+                        checkUnsigned.setEnabled(false);
+                        stringLengthField.setEnabled(false);
+                    }
+                    else if (idx == 5) { // ENUM
+                        sizeChoice.setEnabled(true);
+                        checkUnsigned.setEnabled(true);
+                        stringLengthField.setEnabled(true);
+                        stringLengthField.setText("R=0,G=1,B=2,...");
+                    }
+                    else if (idx == 8) {
+                        sizeChoice.setEnabled(false);
+                        endianChoice.setEnabled(false);
+                        checkUnsigned.setEnabled(false);
+                        stringLengthField.setEnabled(false);
+                    }
                 }
             });
 
-            fillValueField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
-            fillValueField.setFont(curFont);
-            fillValueField.setText("0");
-            fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-            fillValueField.setEnabled(false);
-        } else {
-            // Add two dummy labels
+            classChoice.add("INTEGER");
+            classChoice.add("FLOAT");
+            classChoice.add("CHAR");
+
+            if(isH5) {
+                classChoice.add("STRING");
+                classChoice.add("REFERENCE");
+                classChoice.add("ENUM");
+                classChoice.add("VLEN_INTEGER");
+                classChoice.add("VLEN_FLOAT");
+                classChoice.add("VLEN_STRING");
+            }
+
+            sizeChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+            sizeChoice.setFont(curFont);
+            sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            sizeChoice.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    if (classChoice.getSelectionIndex() == 0) {
+                        checkUnsigned.setEnabled(true);
+                    }
+                }
+            });
+
+            if(isH5) {
+                sizeChoice.add("NATIVE");
+            } else {
+                sizeChoice.add("DEFAULT");
+            }
+
+            sizeChoice.add("8");
+            sizeChoice.add("16");
+            sizeChoice.add("32");
+            sizeChoice.add("64");
+
+            endianChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+            endianChoice.setFont(curFont);
+            endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            endianChoice.setEnabled(isH5);
+
+            if(isH5) {
+                endianChoice.add("NATIVE");
+                endianChoice.add("LITTLE ENDIAN");
+                endianChoice.add("BIG ENDIAN");
+            } else {
+                endianChoice.add("DEFAULT");
+            }
+
+            stringLengthField = new Text(datatypeGroup, SWT.SINGLE | SWT.BORDER);
+            stringLengthField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            stringLengthField.setFont(curFont);
+            stringLengthField.setText("String Length");
+            stringLengthField.setEnabled(false);
+
+            classChoice.select(0);
+            sizeChoice.select(0);
+            endianChoice.select(0);
+
+
+            // Create Dataspace region
+            org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            dataspaceGroup.setFont(curFont);
+            dataspaceGroup.setText("Dataspace");
+            dataspaceGroup.setLayout(new GridLayout(3, true));
+            dataspaceGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            label = new Label(dataspaceGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("No. of dimensions");
+
+            label = new Label(dataspaceGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Current size");
+
+            // Dummy label
+            label = new Label(dataspaceGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("");
+
+            rankChoice = new Combo(dataspaceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+            rankChoice.setFont(curFont);
+            rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            rankChoice.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    int rank = rankChoice.getSelectionIndex() + 1;
+                    String currentSizeStr = "1";
+
+                    for (int i = 1; i < rank; i++) {
+                        currentSizeStr += " x 1";
+                    }
+
+                    currentSizeField.setText(currentSizeStr);
+
+                    String currentStr = currentSizeField.getText();
+                    int idx = currentStr.lastIndexOf("x");
+                    String chunkStr = "1";
+
+                    if (rank <= 1) {
+                        chunkStr = currentStr;
+                    }
+                    else {
+                        for (int i = 1; i < rank - 1; i++) {
+                            chunkStr += " x 1";
+                        }
+                        if (idx > 0) {
+                            chunkStr += " x " + currentStr.substring(idx + 1);
+                        }
+                    }
+
+                    chunkSizeField.setText(chunkStr);
+                }
+            });
+
+            for (int i = 1; i < 33; i++) {
+                rankChoice.add(String.valueOf(i));
+            }
+            rankChoice.select(1);
+
+            currentSizeField = new Text(dataspaceGroup, SWT.SINGLE | SWT.BORDER);
+            currentSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            currentSizeField.setFont(curFont);
+            currentSizeField.setText("1 x 1");
+
+            Button setMaxSizeButton = new Button(dataspaceGroup, SWT.PUSH);
+            setMaxSizeButton.setFont(curFont);
+            setMaxSizeButton.setText("Set Max Size");
+            setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
+            setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    if (maxSize == null || maxSize.length() < 1)
+                        maxSize = currentSizeField.getText();
+
+                    String msg = new InputDialog(shell, "Set Max Size", "Enter max dimension sizes. \n"
+                            + "Use \"unlimited\" for unlimited dimension size.\n\n" + "For example,\n" + "    200 x 100\n"
+                            + "    100 x unlimited\n\n", maxSize).open();
+
+                    if (msg == null || msg.length() < 1)
+                        maxSize = currentSizeField.getText();
+                    else
+                        maxSize = msg;
+
+                    checkMaxSize();
+                }
+            });
+
+
+            // Create Storage Properties region
+            org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            storagePropertiesGroup.setFont(curFont);
+            storagePropertiesGroup.setText("Storage Properties");
+            storagePropertiesGroup.setLayout(new GridLayout(5, true));
+            storagePropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            label = new Label(storagePropertiesGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Storage layout: ");
+
+            checkContiguous = new Button(storagePropertiesGroup, SWT.RADIO);
+            checkContiguous.setFont(curFont);
+            checkContiguous.setText("Contiguous");
+            checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+            checkContiguous.setSelection(true);
+            checkContiguous.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    chunkSizeField.setEnabled(false);
+                }
+            });
+
+            // Dummy label
             label = new Label(storagePropertiesGroup, SWT.LEFT);
             label.setFont(curFont);
             label.setText("");
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+            checkChunked = new Button(storagePropertiesGroup, SWT.RADIO);
+            checkChunked.setFont(curFont);
+            checkChunked.setText("Chunked (size) ");
+            checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+            checkChunked.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    chunkSizeField.setEnabled(true);
+                    String chunkStr = "";
+                    StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
+                    int rank = rankChoice.getSelectionIndex() + 1;
+                    while (st.hasMoreTokens()) {
+                        long l = Math.max(1, Long.valueOf(st.nextToken().trim()) / (2 * rank));
+                        chunkStr += String.valueOf(l) + "x";
+                    }
+                    chunkStr = chunkStr.substring(0, chunkStr.lastIndexOf('x'));
+                    chunkSizeField.setText(chunkStr);
+                }
+            });
+
+            chunkSizeField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
+            chunkSizeField.setFont(curFont);
+            chunkSizeField.setText("1 x 1");
+            chunkSizeField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            chunkSizeField.setEnabled(false);
+
             label = new Label(storagePropertiesGroup, SWT.LEFT);
             label.setFont(curFont);
-            label.setText("");
-            label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            label.setText("Compression: ");
+
+            checkCompression = new Button(storagePropertiesGroup, SWT.CHECK);
+            checkCompression.setFont(curFont);
+            checkCompression.setText("gzip (level) ");
+            checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+            checkCompression.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    boolean isCompressed = checkCompression.getSelection();
+
+                    if (isCompressed && isH5) {
+                        if (!checkChunked.getSelection()) {
+                            String currentStr = currentSizeField.getText();
+                            int idx = currentStr.lastIndexOf("x");
+                            String chunkStr = "1";
+
+                            int rank = rankChoice.getSelectionIndex() + 1;
+                            if (rank <= 1) {
+                                chunkStr = currentStr;
+                            }
+                            else {
+                                for (int i = 1; i < rank - 1; i++) {
+                                    chunkStr += " x 1";
+                                }
+                                if (idx > 0) {
+                                    chunkStr += " x " + currentStr.substring(idx + 1);
+                                }
+                            }
+
+                            chunkSizeField.setText(chunkStr);
+                        }
+                        compressionLevel.setEnabled(true);
+                        checkContiguous.setEnabled(false);
+                        checkContiguous.setSelection(false);
+                        checkChunked.setSelection(true);
+                        chunkSizeField.setEnabled(true);
+                    }
+                    else {
+                        compressionLevel.setEnabled(isCompressed);
+                        checkContiguous.setEnabled(true);
+                    }
+                }
+            });
+
+            compressionLevel = new Combo(storagePropertiesGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+            compressionLevel.setFont(curFont);
+            compressionLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            for (int i = 0; i < 10; i++) {
+                compressionLevel.add(String.valueOf(i));
+            }
+            compressionLevel.select(6);
+            compressionLevel.setEnabled(false);
+
+            if(isH5) {
+                checkFillValue = new Button(storagePropertiesGroup, SWT.CHECK);
+                checkFillValue.setFont(curFont);
+                checkFillValue.setText("Fill Value");
+                checkFillValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+                checkFillValue.setSelection(false);
+                checkFillValue.addSelectionListener(new SelectionAdapter() {
+                    public void widgetSelected(SelectionEvent e) {
+                        fillValueField.setEnabled(checkFillValue.getSelection());
+                    }
+                });
+
+                fillValueField = new Text(storagePropertiesGroup, SWT.SINGLE | SWT.BORDER);
+                fillValueField.setFont(curFont);
+                fillValueField.setText("0");
+                fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+                fillValueField.setEnabled(false);
+            } else {
+                // Add two dummy labels
+                label = new Label(storagePropertiesGroup, SWT.LEFT);
+                label.setFont(curFont);
+                label.setText("");
+                label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+                label = new Label(storagePropertiesGroup, SWT.LEFT);
+                label.setFont(curFont);
+                label.setText("");
+                label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            }
         }
 
 
         // Create Ok/Cancel/Help button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
-        buttonComposite.setLayout(new GridLayout(3, false));
+        buttonComposite.setLayout(new GridLayout((dataView == null) ? 3 : 2, false));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button okButton = new Button(buttonComposite, SWT.PUSH);
@@ -630,7 +635,8 @@ public class NewDatasetDialog extends Dialog {
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setFont(curFont);
         cancelButton.setText(" &Cancel ");
-        cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        cancelButton.setLayoutData(new GridData((dataView == null) ? SWT.CENTER : SWT.BEGINNING, SWT.FILL,
+                (dataView == null) ? false : true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
@@ -639,18 +645,20 @@ public class NewDatasetDialog extends Dialog {
             }
         });
 
-        Button helpButton = new Button(buttonComposite, SWT.PUSH);
-        helpButton.setFont(curFont);
-        helpButton.setText(" &Help ");
-        helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
-        helpButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                new HelpDialog(shell).open();
-            }
-        });
+        if (dataView == null) {
+            Button helpButton = new Button(buttonComposite, SWT.PUSH);
+            helpButton.setFont(curFont);
+            helpButton.setText(" &Help ");
+            helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
+            helpButton.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    new HelpDialog(shell).open();
+                }
+            });
+        }
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -666,11 +674,10 @@ public class NewDatasetDialog extends Dialog {
 
         shell.open();
 
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed())
             if (!display.readAndDispatch())
                 display.sleep();
-        }
     }
 
     /** Check if the max size is valid */
@@ -996,22 +1003,18 @@ public class NewDatasetDialog extends Dialog {
 
             if (tchunksize >= tdimsize) {
                 shell.getDisplay().beep();
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                confirm.setText(shell.getText());
-                confirm.setMessage("Chunk size is equal/greater than the current size. "
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
-                if(confirm.open() == SWT.NO) {
+                if(!MessageDialog.openConfirm(shell, shell.getText(),
+                        "Chunk size is equal/greater than the current size. "
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
                 }
             }
 
             if (tchunksize == 1) {
                 shell.getDisplay().beep();
-                MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                confirm.setText(shell.getText());
-                confirm.setMessage("Chunk size is one, which may cause large memory overhead for large dataset."
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?");
-                if(confirm.open() == SWT.NO) {
+                if(!MessageDialog.openConfirm(shell, shell.getText(),
+                        "Chunk size is one, which may cause large memory overhead for large dataset."
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
                 }
             }
@@ -1036,7 +1039,7 @@ public class NewDatasetDialog extends Dialog {
                 datatype.setEnumMembers(stringLengthField.getText());
             }
             String fillValue = null;
-            
+
             if (fillValueField != null) {
                 if (fillValueField.isEnabled()) fillValue = fillValueField.getText();
             }
@@ -1220,9 +1223,9 @@ public class NewDatasetDialog extends Dialog {
                         while(scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
-                        
+
                         browser.setText(buffer.toString());
-                        
+
                         scan.close();
                         in.close();
                     }
@@ -1313,7 +1316,7 @@ public class NewDatasetDialog extends Dialog {
                 Tools.showError(shell,
                         "Platform doesn't support Browser. Opening external link in web browser...",
                         "Browser support");
-                
+
                 //TODO: Add support for launching in external browser
             }
             catch (Exception ex) {

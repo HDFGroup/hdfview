@@ -21,12 +21,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -43,7 +42,6 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -64,13 +62,13 @@ public class NewLinkDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewLinkDialog.class);
 
     private Shell         shell;
-    
+
     private Font          curFont;
 
     private Text          nameField;
 
     private Combo         parentChoice;
-    
+
     private CCombo        targetObject;
 
     private String        currentDir;
@@ -108,7 +106,7 @@ public class NewLinkDialog extends Dialog {
      */
     public NewLinkDialog(Shell parent, Group pGroup, List<?> objs, List<FileFormat> files) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -198,10 +196,7 @@ public class NewLinkDialog extends Dialog {
                         + "Soft links and external links are also known as symbolic links as they use "
                         + "a name to point to an object; hard links employ an object's address in the file.  \n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(msg);
-                info.open();
+                MessageDialog.openInformation(shell, shell.getText(), msg);
             }
         });
 
@@ -282,9 +277,9 @@ public class NewLinkDialog extends Dialog {
             public void keyTraversed(TraverseEvent e) {
                 if (e.detail == SWT.TRAVERSE_RETURN) {
                     String filename = targetFile.getText();
-                    
+
                     if (filename == null || filename.length() <= 0) return;
-                    
+
                     File chosenFile = new File(filename);
 
                     if (!chosenFile.exists()) {
@@ -297,7 +292,7 @@ public class NewLinkDialog extends Dialog {
                     else {
                         currentDir = chosenFile.getParent();
                     }
-                    
+
                     //Check if the target File is not the current file.
                     String currentFileName = fileFormat.getAbsolutePath();
                     if(currentFileName.equals(chosenFile.getAbsolutePath())) {
@@ -307,7 +302,7 @@ public class NewLinkDialog extends Dialog {
                         targetFile.setText("");
                         return;
                     }
-                    
+
                     getTargetFileObjs();
 
                     if(targetObject.getItemCount() > 0) targetObject.select(0);
@@ -384,7 +379,7 @@ public class NewLinkDialog extends Dialog {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName()
                     + HObject.separator));
         }
-        
+
         // Dummy label to take up space as dialog is resized
         label = new Label(content, SWT.LEFT);
         label.setFont(curFont);
@@ -426,7 +421,7 @@ public class NewLinkDialog extends Dialog {
         targetObject.select(0);
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -442,11 +437,10 @@ public class NewLinkDialog extends Dialog {
 
         shell.open();
 
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed())
             if (!display.readAndDispatch())
                 display.sleep();
-        }
     }
 
     private HObject createLink() {
@@ -611,7 +605,7 @@ public class NewLinkDialog extends Dialog {
     private String openTargetFile() {
         FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
         fchooser.setFilterPath(currentDir);
-        
+
         DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
         fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});

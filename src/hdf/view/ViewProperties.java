@@ -30,8 +30,8 @@ import java.util.jar.JarFile;
 
 import org.eclipse.swt.graphics.Image;
 
-import hdf.object.FileFormat;
 import hdf.HDFVersions;
+import hdf.object.FileFormat;
 
 public class ViewProperties extends Properties {
     private static final long   serialVersionUID     = -6411465283887959066L;
@@ -98,7 +98,7 @@ public class ViewProperties extends Properties {
     private static int              fontSize               = 12;
 
     /** the font type */
-    private static String           fontType               = null;
+    private static String           fontType               = "Serif";
 
     /** the full path of H4toH5 converter */
     private static String           h4toh5                 = "";
@@ -145,7 +145,7 @@ public class ViewProperties extends Properties {
      */
     private static boolean          isReadOnly             = false;
 
-    private static boolean             isEarlyLib                = true;
+    private static boolean          isEarlyLib             = false;
 
     /** a list of palette files */
     private static Vector<String>   paletteList            = new Vector<String>(5);

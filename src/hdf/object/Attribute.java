@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * <p>
  * For more details on attributes,
- * <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a>
+ * <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
  * <p>
  *
  * The following code is an example of an attribute with 1D integer array of two
@@ -136,18 +136,10 @@ public class Attribute implements Metadata {
      *
      * <pre>
      * long[] attrDims = { 1 };
-     *                          String attrName = &quot;CLASS&quot;;
-     *                                                     String[] classValue = { &quot;IMAGE&quot; };
-     *                                                                                        Datatype attrType = new H5Datatype(
-     *                                                                                                                  Datatype.CLASS_STRING,
-     *                                                                                                                  classValue[0]
-     *                                                                                                                          .length() + 1,
-     *                                                                                                                  -1, -1);
-     *                                                                                                                           Attribute attr = new Attribute(
-     *                                                                                                                                                  attrName,
-     *                                                                                                                                                  attrType,
-     *                                                                                                                                                  attrDims,
-     *                                                                                                                                                  classValue);
+     * String attrName = &quot;CLASS&quot;;
+     * String[] classValue = { &quot;IMAGE&quot; };
+     * Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+     * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
      * @param attrName
@@ -162,6 +154,7 @@ public class Attribute implements Metadata {
      *
      * @see hdf.object.Datatype
      */
+    @SuppressWarnings({"rawtypes","unchecked"})
     public Attribute(String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
         name = attrName;
         type = attrType;
@@ -188,10 +181,10 @@ public class Attribute implements Metadata {
     }
 
     /**
-     * Returns the value of the attribute. For atomic datatype, this will be an
-     * 1D array of integers, floats and strings. For compound datatype, it will
-     * be an 1D array of strings with field members separated by comma. For
-     * example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a cmpound attribute of
+     * Returns the value of the attribute. For an atomic datatype, this will be
+     * a 1D array of integers, floats and strings. For a compound datatype, it
+     * will be a 1D array of strings with field members separated by a comma. For
+     * example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of
      * {int, float} of three data points.
      *
      * @return the value of the attribute, or null if failed to retrieve data
@@ -236,8 +229,8 @@ public class Attribute implements Metadata {
 
 
     /**
-     * Sets the value of the attribute. It returns null if failed to retrieve
-     * the name from file.
+     * Sets the value of the attribute. It returns null if it failed to
+     * retrieve the name from file.
      *
      * @param theValue
      *            The value of the attribute to set
@@ -257,7 +250,7 @@ public class Attribute implements Metadata {
 
     /**
      * Returns the rank (number of dimensions) of the attribute. It returns a
-     * negative number if failed to retrieve the dimension information from
+     * negative number if it failed to retrieve the dimension information from
      * file.
      *
      * @return the number of dimensions of the attribute.
@@ -268,7 +261,7 @@ public class Attribute implements Metadata {
 
     /**
      * Returns the dimension sizes of the data value of the attribute. It
-     * returns null if failed to retrieve the dimension information from file.
+     * returns null if it failed to retrieve the dimension information from file.
      *
      * @return the dimension sizes of the attribute.
      */
@@ -277,7 +270,7 @@ public class Attribute implements Metadata {
     }
 
     /**
-     * Returns the datatype of the attribute. It returns null if failed to
+     * Returns the datatype of the attribute. It returns null if it failed to
      * retrieve the datatype information from file.
      *
      * @return the datatype of the attribute.
@@ -318,28 +311,32 @@ public class Attribute implements Metadata {
      * Returns a string representation of the data value of the attribute. For
      * example, "0, 255".
      * <p>
-     * For compound datatype, it will be an 1D array of strings with field
-     * members separated by comma. For example,
+     * For a compound datatype, it will be a 1D array of strings with field
+     * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
      * <p>
      *
      * @param delimiter
-     *            The delimiter to separate individual data point. It can be
-     *            comma, semicolon, tab or space. For example, to String(",")
-     *            will separate data by comma.
+     *            The delimiter used to separate individual data points. It
+     *            can be a comma, semicolon, tab or space. For example,
+     *            toString(",") will separate data by commas.
      *
      * @return the string representation of the data values.
      */
     public String toString(String delimiter) {
+        log.trace("toString(): start");
+
         if (value == null) {
+            log.debug("toString(): value is null");
+            log.trace("toString(): finish");
             return null;
         }
-        log.trace("toString: start");
 
         Class<? extends Object> valClass = value.getClass();
 
         if (!valClass.isArray()) {
+            log.trace("toString(): finish");
             return value.toString();
         }
 
@@ -350,96 +347,7 @@ public class Attribute implements Metadata {
         boolean is_unsigned = (this.getType().getDatatypeSign() == Datatype.SIGN_NONE);
         boolean is_enum = (this.getType().getDatatypeClass() == Datatype.CLASS_ENUM);
         log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", is_enum, is_unsigned, n);
-        if (is_unsigned) {
-            String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-            log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
-
-            switch (dname) {
-                case 'B':
-                    byte[] barray = (byte[]) value;
-                    short sValue = barray[0];
-                    if (sValue < 0) {
-                        sValue += 256;
-                    }
-                    sb.append(sValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sValue = barray[i];
-                        if (sValue < 0) {
-                            sValue += 256;
-                        }
-                        sb.append(sValue);
-                    }
-                    break;
-                case 'S':
-                    short[] sarray = (short[]) value;
-                    int iValue = sarray[0];
-                    if (iValue < 0) {
-                        iValue += 65536;
-                    }
-                    sb.append(iValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        iValue = sarray[i];
-                        if (iValue < 0) {
-                            iValue += 65536;
-                        }
-                        sb.append(iValue);
-                    }
-                    break;
-                case 'I':
-                    int[] iarray = (int[]) value;
-                    long lValue = iarray[0];
-                    if (lValue < 0) {
-                        lValue += 4294967296L;
-                    }
-                    sb.append(lValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        lValue = iarray[i];
-                        if (lValue < 0) {
-                            lValue += 4294967296L;
-                        }
-                        sb.append(lValue);
-                    }
-                    break;
-                case 'J':
-                    long[] larray = (long[]) value;
-                    Long l = (Long) larray[0];
-                    String theValue = Long.toString(l);
-                    if (l < 0) {
-                        l = (l << 1) >>> 1;
-                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                        BigInteger big2 = new BigInteger(l.toString());
-                        BigInteger big = big1.add(big2);
-                        theValue = big.toString();
-                    }
-                    sb.append(theValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        l = (Long) larray[i];
-                        theValue = Long.toString(l);
-                        if (l < 0) {
-                            l = (l << 1) >>> 1;
-                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                            BigInteger big2 = new BigInteger(l.toString());
-                            BigInteger big = big1.add(big2);
-                            theValue = big.toString();
-                        }
-                        sb.append(theValue);
-                    }
-                    break;
-                default:
-                    sb.append(Array.get(value, 0));
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sb.append(Array.get(value, i));
-                    }
-                    break;
-            }
-        }
-        else if(is_enum) {
+        if(is_enum) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
@@ -533,6 +441,95 @@ public class Attribute implements Metadata {
                         }
                         else
                             sb.append(theValue);
+                    }
+                    break;
+                default:
+                    sb.append(Array.get(value, 0));
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sb.append(Array.get(value, i));
+                    }
+                    break;
+            }
+        }
+        else if (is_unsigned) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
+
+            switch (dname) {
+                case 'B':
+                    byte[] barray = (byte[]) value;
+                    short sValue = barray[0];
+                    if (sValue < 0) {
+                        sValue += 256;
+                    }
+                    sb.append(sValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        if (sValue < 0) {
+                            sValue += 256;
+                        }
+                        sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) value;
+                    int iValue = sarray[0];
+                    if (iValue < 0) {
+                        iValue += 65536;
+                    }
+                    sb.append(iValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        if (iValue < 0) {
+                            iValue += 65536;
+                        }
+                        sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) value;
+                    long lValue = iarray[0];
+                    if (lValue < 0) {
+                        lValue += 4294967296L;
+                    }
+                    sb.append(lValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        if (lValue < 0) {
+                            lValue += 4294967296L;
+                        }
+                        sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) value;
+                    Long l = (Long) larray[0];
+                    String theValue = Long.toString(l);
+                    if (l < 0) {
+                        l = (l << 1) >>> 1;
+                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                        BigInteger big2 = new BigInteger(l.toString());
+                        BigInteger big = big1.add(big2);
+                        theValue = big.toString();
+                    }
+                    sb.append(theValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = (Long) larray[i];
+                        theValue = Long.toString(l);
+                        if (l < 0) {
+                            l = (l << 1) >>> 1;
+                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                            BigInteger big2 = new BigInteger(l.toString());
+                            BigInteger big = big1.add(big2);
+                            theValue = big.toString();
+                        }
+                        sb.append(theValue);
                     }
                     break;
                 default:

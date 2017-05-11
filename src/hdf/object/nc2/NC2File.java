@@ -180,7 +180,7 @@ public class NC2File extends FileFormat {
 
     // Implementing FileFormat
     @Override
-    public int open() throws Exception {
+    public long open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
             rootObject = loadTree();

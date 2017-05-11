@@ -130,7 +130,7 @@ public class NC2Datatype extends Datatype {
      *            the netcdf native datatype.
      */
     @Override
-    public void fromNative(int tid) {
+    public void fromNative(long tid) {
         if (nativeType == null) {
             return;
         }
@@ -185,7 +185,7 @@ public class NC2Datatype extends Datatype {
 
     // implementing Datatype
     @Override
-    public int toNative() {
+    public long toNative() {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = DataType.BYTE;
@@ -221,7 +221,7 @@ public class NC2Datatype extends Datatype {
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(int id) {
+    public void close(long id) {
         ;
     }
 

@@ -27,6 +27,7 @@ import java.util.List;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
+@SuppressWarnings("rawtypes")
 public interface DataFormat {
     /**
      * Returns the full path of the file that contains this data object.

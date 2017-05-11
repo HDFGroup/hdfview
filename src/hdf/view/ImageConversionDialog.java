@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -34,7 +35,6 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -43,15 +43,15 @@ import hdf.object.FileFormat;
 /**
  * ImageConversionDialog shows a message dialog requesting user input for
  * converting files.
- * 
+ *
  * @author Jordan T. Henderson
  * @version 2.4 1/28/2016
  */
 public class ImageConversionDialog extends Dialog {
     private Shell              shell;
-    
+
     private Font               curFont;
-    
+
     private String             fileTypeFrom, fileTypeTo;
 
     private Text               srcFileField, dstFileField;
@@ -70,7 +70,7 @@ public class ImageConversionDialog extends Dialog {
 
     /**
      * Constructs a FileConversionDialog
-     * 
+     *
      * @param parent
      *            The parent shell of the dialog.
      * @param typeFrom
@@ -85,7 +85,7 @@ public class ImageConversionDialog extends Dialog {
     public ImageConversionDialog(Shell parent, String typeFrom, String typeTo,
             String dir, List<FileFormat> openFiles) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -96,7 +96,7 @@ public class ImageConversionDialog extends Dialog {
         catch (Exception ex) {
             curFont = null;
         }
-        
+
         fileTypeFrom = typeFrom;
         fileTypeTo = typeTo;
         isConverted = false;
@@ -105,7 +105,7 @@ public class ImageConversionDialog extends Dialog {
         toFileExtension = "";
         currentDir = dir;
     }
-    
+
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
@@ -113,7 +113,7 @@ public class ImageConversionDialog extends Dialog {
         shell.setText(parent.getText());
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
-        
+
         if (fileTypeTo.equals(FileFormat.FILE_TYPE_HDF5)) {
             toFileExtension = ".h5";
             shell.setText("Convert Image to HDF5 ...");
@@ -124,23 +124,23 @@ public class ImageConversionDialog extends Dialog {
             shell.setText("Convert Image to HDF4 ...");
             isConvertedFromImage = true;
         }
-        
-        
+
+
         // Create content region
         Composite contentComposite = new Composite(shell, SWT.NONE);
         contentComposite.setLayout(new GridLayout(3, false));
         contentComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         Label label = new Label(contentComposite, SWT.RIGHT);
         label.setFont(curFont);
         label.setText("IMAGE File: ");
-        
+
         srcFileField = new Text(contentComposite, SWT.SINGLE | SWT.BORDER);
         srcFileField.setFont(curFont);
         GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
         fieldData.minimumWidth = 350;
         srcFileField.setLayoutData(fieldData);
-        
+
         Button browseButton = new Button(contentComposite, SWT.PUSH);
         browseButton.setFont(curFont);
         browseButton.setText("Browse...");
@@ -148,7 +148,7 @@ public class ImageConversionDialog extends Dialog {
             public void widgetSelected(SelectionEvent e) {
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(currentDir);
-                
+
                 if(isConvertedFromImage) {
                     DefaultFileFilter filter = DefaultFileFilter.getImageFileFilter();
                     fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
@@ -159,9 +159,9 @@ public class ImageConversionDialog extends Dialog {
                     fChooser.setFilterNames(new String[] {"All Files"});
                     fChooser.setFilterIndex(0);
                 }
-                
+
                 String filename = fChooser.open();
-                
+
                 if(filename == null) {
                     return;
                 }
@@ -173,45 +173,45 @@ public class ImageConversionDialog extends Dialog {
                 dstFileField.setText(chosenFile.getAbsolutePath() + toFileExtension);
             }
         });
-        
+
         label = new Label(contentComposite, SWT.RIGHT);
         label.setFont(curFont);
         label.setText("HDF File: ");
-        
+
         dstFileField = new Text(contentComposite, SWT.SINGLE | SWT.BORDER);
         dstFileField.setFont(curFont);
         dstFileField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        
+
         browseButton = new Button(contentComposite, SWT.PUSH);
         browseButton.setFont(curFont);
         browseButton.setText("Browse...");
         browseButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
-                
+
                 fChooser.setFilterExtensions(new String[] {"*.*"});
                 fChooser.setFilterNames(new String[] {"All Files"});
                 fChooser.setFilterIndex(0);
-                
+
                 String filename = fChooser.open();
-                
+
                 if(filename == null) {
                     return;
                 }
-                
+
                 dstFileField.setText(filename);
             }
         });
-        
+
         // Dummy label to fill space as dialog is resized
         new Label(shell, SWT.NONE).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
-        
+
+
         // Create Ok/Cancel button
         Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-        
+
         Button okButton = new Button(buttonComposite, SWT.PUSH);
         okButton.setFont(curFont);
         okButton.setText("   &OK   ");
@@ -225,7 +225,7 @@ public class ImageConversionDialog extends Dialog {
                 }
             }
         });
-        
+
         Button cancelButton = new Button(buttonComposite, SWT.PUSH);
         cancelButton.setFont(curFont);
         cancelButton.setText(" &Cancel ");
@@ -237,32 +237,32 @@ public class ImageConversionDialog extends Dialog {
                 shell.dispose();
             }
         });
-        
-        
+
+
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
         });
-        
+
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-        
+
         shell.open();
-        
+
         Display display = parent.getDisplay();
         while(!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
     }
-    
+
     /** Convert file */
     private boolean convert() {
         boolean converted = false;
@@ -323,12 +323,8 @@ public class ImageConversionDialog extends Dialog {
         }
 
         if (f.exists()) {
-            MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText(shell.getText());
-            confirm.setMessage("Destination file exists. Do you want to replace it ?");
-            if(confirm.open() == SWT.NO) {
+            if(!MessageDialog.openConfirm(shell, shell.getText(), "Destination file exists. Do you want to replace it ?"))
                 return false;
-            }
         }
 
         try {

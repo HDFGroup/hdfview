@@ -188,7 +188,7 @@ public class FitsFile extends FileFormat
 
     // Implementing FileFormat
     @Override
-    public int open() throws Exception {
+    public long open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
             rootObject = loadTree();
@@ -390,7 +390,7 @@ public class FitsFile extends FileFormat
     /**
      * Copy attributes of the source object to the destination object.
      */
-    public void copyAttributes(int src_id, int dst_id) {
+    public void copyAttributes(long src_id, long dst_id) {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }

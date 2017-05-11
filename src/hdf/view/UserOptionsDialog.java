@@ -18,6 +18,7 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
@@ -34,11 +35,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -52,7 +52,7 @@ import org.eclipse.swt.widgets.Text;
  */
 public class UserOptionsDialog extends Dialog {
     private Shell                 shell;
-    
+
     private Font                  curFont;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
@@ -64,8 +64,6 @@ public class UserOptionsDialog extends Dialog {
     private Button                checkCurrentUserDir, checkAutoContrast, checkConvertEnum, checkShowValues, checkShowRegRefValues;
     private Button                currentDirButton;
     private Button                checkReadOnly, checkIndexType, checkIndexOrder, checkIndexNative, checkLibVersion, checkReadAll;
-
-    private int                   fontSize;
 
     private boolean               isFontChanged;
 
@@ -103,7 +101,7 @@ public class UserOptionsDialog extends Dialog {
 
     public UserOptionsDialog(Shell parent, String viewRoot) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -120,7 +118,6 @@ public class UserOptionsDialog extends Dialog {
         isUserGuideChanged = false;
         isWorkDirChanged = false;
         // srbJList = null;
-        fontSize = ViewProperties.getFontSize();
         workDir = ViewProperties.getWorkDir();
         if (workDir == null) {
             workDir = rootDir;
@@ -195,7 +192,7 @@ public class UserOptionsDialog extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -264,25 +261,25 @@ public class UserOptionsDialog extends Dialog {
         else
             ViewProperties.setEarlyLib(false);
 
-        // set font size
-        int fsize = 12;
+        // set font size and type
         try {
-            fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
-            ViewProperties.setFontSize(fsize);
+            String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
+            int fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
 
-            if ((fontSize != ViewProperties.getFontSize())) {
+            if (ViewProperties.getFontSize() != fsize) {
+                ViewProperties.setFontSize(fsize);
+                isFontChanged = true;
+            }
+
+            if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
+                ViewProperties.setFontType(ftype);
                 isFontChanged = true;
             }
         }
         catch (Exception ex) {
+            isFontChanged = false;
         }
 
-        // set font type
-        String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
-        if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
-            isFontChanged = true;
-            ViewProperties.setFontType(ftype);
-        }
 
         // set data delimiter
         ViewProperties.setDataDelimiter((String) delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
@@ -347,7 +344,7 @@ public class UserOptionsDialog extends Dialog {
         scroller.setExpandHorizontal(true);
         scroller.setExpandVertical(true);
         scroller.setMinSize(shell.getSize());
-        
+
         Composite composite = new Composite(scroller, SWT.NONE);
         composite.setLayout(new GridLayout(1, true));
         scroller.setContent(composite);
@@ -381,12 +378,12 @@ public class UserOptionsDialog extends Dialog {
         currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         currentDirButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-            	final DirectoryDialog dChooser = new DirectoryDialog(shell);
-            	dChooser.setFilterPath(workDir);
-            	dChooser.setText("Select a Directory");
-            	
-            	String dir = dChooser.open();
-            	
+                final DirectoryDialog dChooser = new DirectoryDialog(shell);
+                dChooser.setFilterPath(workDir);
+                dChooser.setText("Select a Directory");
+
+                String dir = dChooser.open();
+
                 if(dir == null) return;
 
                 workField.setText(dir);
@@ -515,12 +512,12 @@ public class UserOptionsDialog extends Dialog {
         fontSizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         try {
-        	int selectionIndex = fontSizeChoice.indexOf(String.valueOf(ViewProperties.getFontSize()));
+            int selectionIndex = fontSizeChoice.indexOf(String.valueOf(ViewProperties.getFontSize()));
             fontSizeChoice.select(selectionIndex);
         } catch (Exception ex) {
-        	fontSizeChoice.select(0);
+            fontSizeChoice.select(0);
         }
-        
+
         label = new Label(textFontGroup, SWT.RIGHT);
         label.setFont(curFont);
         label.setText("Font Type: ");
@@ -547,10 +544,10 @@ public class UserOptionsDialog extends Dialog {
         }
 
         try {
-        	int selectionIndex = fontTypeChoice.indexOf(fname);
+            int selectionIndex = fontTypeChoice.indexOf(fname);
             fontTypeChoice.select(selectionIndex);
         } catch (Exception ex) {
-        	fontTypeChoice.select(0);
+            fontTypeChoice.select(0);
         }
 
 
@@ -586,10 +583,7 @@ public class UserOptionsDialog extends Dialog {
                         // + "bias_max = fabs(bias) * 3.0 \n"
                         + "\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(msg);
-                info.open();
+                MessageDialog.openInformation(shell, shell.getText(), msg);
             }
         });
 
@@ -618,10 +612,10 @@ public class UserOptionsDialog extends Dialog {
         imageOriginChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         try {
-        	int selectionIndex = imageOriginChoice.indexOf(ViewProperties.getImageOrigin());
-        	imageOriginChoice.select(selectionIndex);
+            int selectionIndex = imageOriginChoice.indexOf(ViewProperties.getImageOrigin());
+            imageOriginChoice.select(selectionIndex);
         } catch (Exception ex) {
-        	imageOriginChoice.select(0);
+            imageOriginChoice.select(0);
         }
 
 
@@ -641,10 +635,7 @@ public class UserOptionsDialog extends Dialog {
                         + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
                         + "shown as (R, B, B, B, G, G).\n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(msg);
-                info.open();
+                MessageDialog.openInformation(shell, shell.getText(), msg);
             }
         });
 
@@ -687,19 +678,19 @@ public class UserOptionsDialog extends Dialog {
 
         String[] delimiterChoices = { ViewProperties.DELIMITER_TAB, ViewProperties.DELIMITER_COMMA,
                 ViewProperties.DELIMITER_SPACE, ViewProperties.DELIMITER_COLON, ViewProperties.DELIMITER_SEMI_COLON };
-        
+
         delimiterChoice = new Combo(dataGroup, SWT.SINGLE | SWT.READ_ONLY);
         delimiterChoice.setFont(curFont);
         delimiterChoice.setItems(delimiterChoices);
         delimiterChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         try {
-        	int selectionIndex = delimiterChoice.indexOf(ViewProperties.getDataDelimiter());
-        	delimiterChoice.select(selectionIndex);
+            int selectionIndex = delimiterChoice.indexOf(ViewProperties.getDataDelimiter());
+            delimiterChoice.select(selectionIndex);
         } catch (Exception ex) {
-        	delimiterChoice.select(0);
+            delimiterChoice.select(0);
         }
-        
+
 
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         objectsGroup.setLayout(new GridLayout(5, false));

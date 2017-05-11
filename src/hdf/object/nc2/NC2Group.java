@@ -139,7 +139,7 @@ public class NC2Group extends Group {
 
     // Implementing DataFormat
     @Override
-    public int open() {
+    public long open() {
         // not supported
         throw new UnsupportedOperationException(
                 "Unsupported operation for NetCDF.");
@@ -147,7 +147,7 @@ public class NC2Group extends Group {
 
     /** close group access */
     @Override
-    public void close(int gid) {
+    public void close(long gid) {
         // not supported
         throw new UnsupportedOperationException(
                 "Unsupported operation for NetCDF.");

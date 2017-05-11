@@ -38,9 +38,6 @@ import hdf.object.HObject;
  */
 public class H4Group extends Group
 {
-    /**
-     *
-     */
     private static final long               serialVersionUID = 3785240955078867900L;
 
     private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4Group.class);
@@ -49,6 +46,7 @@ public class H4Group extends Group
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
+    @SuppressWarnings("rawtypes")
     private List                            attributeList;
 
     private int                             nAttributes = -1;
@@ -87,7 +85,7 @@ public class H4Group extends Group
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
-            int vgid = open();
+            long vgid = open();
             
             if (vgid > 0) {
                 try {
@@ -95,7 +93,7 @@ public class H4Group extends Group
                     nMembersInFile = HDFLibrary.Vntagrefs(vgid);
                 }
                 catch (Exception ex) {
-                    log.debug("hasAttribute() failure: ", ex);
+                    log.debug("hasAttribute(): failure: ", ex);
                     nAttributes = 0;
                 }
                 
@@ -109,11 +107,13 @@ public class H4Group extends Group
     }
 
     // Implementing DataFormat
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
         log.trace("getMetadata(): start");
         
         if (attributeList != null) {
+            log.trace("getMetadata(): attributeList != null");
             log.trace("getMetadata(): finish");
             return attributeList;
         }
@@ -123,10 +123,10 @@ public class H4Group extends Group
         
         // Library methods cannot be called on HDF4 dummy root group since it has a ref of 0
         if (oid[1] > 0) {
-            int vgid = open();
+            long vgid = open();
             log.trace("getMetadata(): open: id={}", vgid);
             if (vgid < 0) {
-                log.trace("getMetadata(): VG id < 0");
+                log.debug("getMetadata(): Invalid VG ID");
                 log.trace("getMetadata(): finish");
                 return attributeList;
             }
@@ -148,7 +148,7 @@ public class H4Group extends Group
                         attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                     }
                     catch (HDFException ex) {
-                        log.trace("getMetadata(): Vattrinfo failure: ", ex);
+                        log.trace("getMetadata(): attribute[{}] Vattrinfo failure: ", i, ex);
                         b = false;
                     }
 
@@ -166,7 +166,7 @@ public class H4Group extends Group
                         HDFLibrary.Vgetattr(vgid, i, buf);
                     }
                     catch (HDFException ex) {
-                        log.trace("getMetadata(): Vgetattr failure: ", ex);
+                        log.trace("getMetadata(): attribute[{}] Vgetattr failure: ", i, ex);
                         buf = null;
                     }
 
@@ -181,7 +181,7 @@ public class H4Group extends Group
                 }
             }
             catch (Exception ex) {
-                log.trace("getMetadata() failure: ", ex);
+                log.trace("getMetadata(): failure: ", ex);
             }
             finally {
                 close(vgid);
@@ -193,13 +193,14 @@ public class H4Group extends Group
     }
 
     // To do: implementing DataFormat
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
         log.trace("writeMetadata(): start");
         
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
-            log.trace("writeMetadata(): Object not an Attribute");
+            log.debug("writeMetadata(): Object not an Attribute");
             log.trace("writeMetadata(): finish");
             return;
         }
@@ -215,15 +216,17 @@ public class H4Group extends Group
             nAttributes = attributeList.size();
         }
         catch (Exception ex) {
-            log.debug("writeMetadata() failure: ", ex);
+            log.debug("writeMetadata(): failure: ", ex);
         }
         
         log.trace("writeMetadata(): finish");
     }
 
 
-   // To do: implementing DataFormat
-    public void removeMetadata(Object info) throws HDFException {;}
+    // To do: implementing DataFormat
+    public void removeMetadata(Object info) throws HDFException {
+        log.trace("removeMetadata(): disabled");
+    }
 
     // implementing DataFormat
     public void updateMetadata(Object info) throws Exception {
@@ -232,16 +235,17 @@ public class H4Group extends Group
 
     // Implementing HObject
     @Override
-    public int open()
+    public long open()
     {
-        log.trace("open(): start for file={} with ref={}", getFID(), oid[1]);
+        log.trace("open(): start: for file={} with ref={}", getFID(), oid[1]);
         
         if (oid[1] <= 0) {
+            log.debug("open(): oid[1] <= 0");
             log.trace("open(): finish");
             return -1; // Library methods cannot be called on HDF4 dummy group with ref 0
         }
         
-        int vgid = -1;
+        long vgid = -1;
 
         // try to open with write permission
         try {
@@ -266,22 +270,21 @@ public class H4Group extends Group
         }
 
         log.trace("open(): finish");
-        
         return vgid;
     }
 
     /** close group access. */
     @Override
-    public void close(int vgid)
+    public void close(long vgid)
     {
         log.trace("close(): id={}", vgid);
-        
+
         if (vgid >= 0) {
             try {
                 HDFLibrary.Vdetach(vgid);
             }
             catch (Exception ex) {
-                log.debug("close() Vdetach failure: ", ex);
+                log.debug("close(): Vdetach failure: ", ex);
             }
         }
     }
@@ -299,18 +302,20 @@ public class H4Group extends Group
     public static H4Group create(String name, Group pgroup)
         throws Exception
     {
-        log.trace("create(): name={} parentGroup={}", name, pgroup);
+        log.trace("create(): start: name={} parentGroup={}", name, pgroup);
         
         H4Group group = null;
         if ((pgroup == null) ||
             (name == null)) {
+            log.debug("create(): one or more parameters are null");
+            log.trace("create(): finish");
             return null;
         }
 
         H4File file = (H4File)pgroup.getFileFormat();
 
         if (file == null) {
-            log.trace("create(): Parent group FileFormat was null");
+            log.debug("create(): Parent group FileFormat is null");
             log.trace("create(): finish");
             return null;
         }
@@ -319,16 +324,16 @@ public class H4Group extends Group
         if (!pgroup.isRoot()) {
             path = pgroup.getPath()+pgroup.getName()+HObject.separator;
         }
-        int fileid = file.open();
+        long fileid = file.open();
         if (fileid < 0) {
-            log.trace("create(): File ID < 0");
+            log.debug("create(): Invalid File ID");
             log.trace("create(): finish");
             return null;
         }
 
-        int gid = HDFLibrary.Vattach(fileid, -1, "w");
+        long gid = HDFLibrary.Vattach(fileid, -1, "w");
         if (gid < 0) {
-            log.trace("create(): Group ID < 0");
+            log.debug("create(): Invalid Group ID");
             log.trace("create(): finish");
             return null;
         }
@@ -339,8 +344,10 @@ public class H4Group extends Group
 
         if (!pgroup.isRoot()) {
             // add the dataset to the parent group
-            int pid = pgroup.open();
+            long pid = pgroup.open();
             if (pid < 0) {
+                log.debug("create(): Invalid Parent Group ID");
+                log.trace("create(): finish");
                 throw (new HDFException("Unable to open the parent group."));
             }
 
@@ -362,13 +369,13 @@ public class H4Group extends Group
         if (group != null) {
             pgroup.addToMemberList(group);
         }
-        
-        log.trace("create(): finish");
 
+        log.trace("create(): finish");
         return group;
     }
 
     //Implementing DataFormat
+    @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

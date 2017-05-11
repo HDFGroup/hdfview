@@ -42,9 +42,9 @@ import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.Datatype;
@@ -62,7 +62,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
  */
 public final class Tools {
     private final static Display display = Display.getDefault();
-    
+
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     public static final long       MAX_INT8        = 127;
@@ -100,6 +100,27 @@ public final class Tools {
      */
     public static final void debug(Object caller, Object msg) {
         if (caller != null) System.out.println("*** " + caller.getClass().getName() + ": " + msg);
+    }
+
+    /**
+     * Converts unsigned 64-bit integer data to a BigInteger since Java does not
+     * have unsigned types.
+     *
+     * @param l
+     *        The long value to convert to a BigInteger
+     *
+     * @return A BigInteger representing the unsigned value of the given long.
+     */
+    public static BigInteger convertUINT64toBigInt(Long l) {
+        if (l < 0) {
+            l = (l << 1) >>> 1;
+            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+            BigInteger big2 = new BigInteger(l.toString());
+            return big1.add(big2);
+        }
+        else {
+            return new BigInteger(l.toString());
+        }
     }
 
     /**
@@ -149,12 +170,12 @@ public final class Tools {
 
         if (image == null) throw new UnsupportedOperationException("Failed to read image: " + imgFileName);
 
-        int h = image.getHeight();
-        int w = image.getWidth();
+        long h = image.getHeight();
+        long w = image.getWidth();
         byte[] data = null;
 
         try {
-            data = new byte[3 * h * w];
+            data = new byte[(int)(3 * h * w)];
         }
         catch (OutOfMemoryError err) {
             err.printStackTrace();
@@ -603,7 +624,7 @@ public final class Tools {
      *
      * @return the image.
      */
-    public static Image createIndexedImage(BufferedImage bufferedImage, byte[] imageData, byte[][] palette, int w, int h)
+    public static Image createIndexedImage(BufferedImage bufferedImage, byte[] imageData, byte[][] palette, long w, long h)
     {
         if (imageData==null || w<=0 || h<=0)
             return null;
@@ -612,7 +633,7 @@ public final class Tools {
             palette = Tools.createGrayPalette();
 
         if (bufferedImage == null)
-            bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            bufferedImage = new BufferedImage((int)w, (int)h, BufferedImage.TYPE_INT_ARGB);
 
         final int[] pixels = ( (DataBufferInt) bufferedImage.getRaster().getDataBuffer() ).getData();
         int len = pixels.length;
@@ -677,18 +698,18 @@ public final class Tools {
      *
      * @return the image.
      */
-    public static Image createTrueColorImage(byte[] imageData, boolean planeInterlace, int w, int h) {
+    public static Image createTrueColorImage(byte[] imageData, boolean planeInterlace, long w, long h) {
         Image theImage = null;
-        int imgSize = w * h;
-        int packedImageData[] = new int[imgSize];
+        long imgSize = w * h;
+        int packedImageData[] = new int[(int)imgSize];
         int pixel = 0, idx = 0, r = 0, g = 0, b = 0;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 pixel = r = g = b = 0;
                 if (planeInterlace) {
                     r = imageData[idx];
-                    g = imageData[imgSize + idx];
-                    b = imageData[imgSize * 2 + idx];
+                    g = imageData[(int)imgSize + idx];
+                    b = imageData[(int)imgSize * 2 + idx];
                 }
                 else {
                     r = imageData[idx * 3];
@@ -708,13 +729,13 @@ public final class Tools {
         } // for (int i=0; i<h; i++)
 
         DirectColorModel dcm = (DirectColorModel) ColorModel.getRGBdefault();
-        theImage = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(w, h, dcm, packedImageData, 0, w));
+        theImage = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource((int)w, (int)h, dcm, packedImageData, 0, (int)w));
 
         packedImageData = null;
 
         return theImage;
     }
-    
+
     /**
      * This method returns a buffered image with the contents of an image.
      *
@@ -770,16 +791,16 @@ public final class Tools {
      *
      * @return the byte array of pixel data.
      */
-    public static byte[] getBytes(Object rawData, double[] minmax, int w, int h, boolean isTransposed, byte[] byteData) {
+    public static byte[] getBytes(Object rawData, double[] minmax, long w, long h, boolean isTransposed, byte[] byteData) {
         return Tools.getBytes(rawData, minmax, w, h, isTransposed, null, false, byteData);
     }
 
-    public static byte[] getBytes(Object rawData, double[] minmax, int w, int h, boolean isTransposed,
+    public static byte[] getBytes(Object rawData, double[] minmax, long w, long h, boolean isTransposed,
             List<Number> invalidValues, byte[] byteData) {
         return getBytes(rawData, minmax, w, h, isTransposed, invalidValues, false, byteData);
     }
 
-    public static byte[] getBytes(Object rawData, double[] minmax, int w, int h, boolean isTransposed,
+    public static byte[] getBytes(Object rawData, double[] minmax, long w, long h, boolean isTransposed,
             List<Number> invalidValues, boolean convertByteData, byte[] byteData) {
         return getBytes(rawData, minmax, w, h, isTransposed,invalidValues, convertByteData, byteData, null);
     }
@@ -808,7 +829,7 @@ public final class Tools {
      *
      * @return the byte array of pixel data.
      */
-    public static byte[] getBytes(Object rawData, double[] minmax, int w, int h, boolean isTransposed,
+    public static byte[] getBytes(Object rawData, double[] minmax, long w, long h, boolean isTransposed,
             List<Number> invalidValues, boolean convertByteData, byte[] byteData, List<Integer> list)
     {
         double fillValue[] = null;
@@ -856,59 +877,59 @@ public final class Tools {
             }
         }
         ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
-        int idxSrc = 0, idxDst = 0;
+        long idxSrc = 0, idxDst = 0;
         switch (dname) {
             case 'S':
                 short[] s = (short[]) rawData;
-                for (int i = 0; i < h; i++) {
-                    for (int j = 0; j < w; j++) {
+                for (long i = 0; i < h; i++) {
+                    for (long j = 0; j < w; j++) {
                         idxSrc = idxDst =j * h + i;
                         if (isTransposed) idxDst = i * w + j;
-                        byteData[idxDst] = toByte(s[idxSrc], ratio, min, max, fillValue, idxSrc, list);
+                        byteData[(int)idxDst] = toByte(s[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
                 break;
 
             case 'I':
                 int[] ia = (int[]) rawData;
-                for (int i = 0; i < h; i++) {
-                    for (int j = 0; j < w; j++) {
-                        idxSrc = idxDst =j * h + i;
+                for (long i = 0; i < h; i++) {
+                    for (long j = 0; j < w; j++) {
+                        idxSrc = idxDst = (j * h + i);
                         if (isTransposed) idxDst = i * w + j;
-                        byteData[idxDst] = toByte(ia[idxSrc], ratio, min, max, fillValue, idxSrc, list);
+                        byteData[(int)idxDst] = toByte(ia[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
                 break;
 
             case 'J':
                 long[] l = (long[]) rawData;
-                for (int i = 0; i < h; i++) {
-                    for (int j = 0; j < w; j++) {
+                for (long i = 0; i < h; i++) {
+                    for (long j = 0; j < w; j++) {
                         idxSrc = idxDst =j * h + i;
                         if (isTransposed) idxDst = i * w + j;
-                        byteData[idxDst] = toByte(l[idxSrc], ratio, min, max, fillValue, idxSrc, list);
+                        byteData[(int)idxDst] = toByte(l[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
                 break;
 
             case 'F':
                 float[] f = (float[]) rawData;
-                for (int i = 0; i < h; i++) {
-                    for (int j = 0; j < w; j++) {
+                for (long i = 0; i < h; i++) {
+                    for (long j = 0; j < w; j++) {
                         idxSrc = idxDst =j * h + i;
                         if (isTransposed) idxDst = i * w + j;
-                        byteData[idxDst] = toByte(f[idxSrc], ratio, min, max, fillValue, idxSrc, list);
+                        byteData[(int)idxDst] = toByte(f[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
                 break;
 
             case 'D':
                 double[] d = (double[]) rawData;
-                for (int i = 0; i < h; i++) {
-                    for (int j = 0; j < w; j++) {
+                for (long i = 0; i < h; i++) {
+                    for (long j = 0; j < w; j++) {
                         idxSrc = idxDst =j * h + i;
                         if (isTransposed) idxDst = i * w + j;
-                        byteData[idxDst] = toByte(d[idxSrc], ratio, min, max, fillValue, idxSrc, list);
+                        byteData[(int)idxDst] = toByte(d[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
                 break;
@@ -949,7 +970,7 @@ public final class Tools {
         return false;
     }
 
-    private static byte[] convertByteData(byte[] rawData, double[] minmax, int w, int h, boolean isTransposed,
+    private static byte[] convertByteData(byte[] rawData, double[] minmax, long w, long h, boolean isTransposed,
             Object fillValue, boolean convertByteData, byte[] byteData, List<Integer> list) {
         double min = Double.MAX_VALUE, max = -Double.MAX_VALUE, ratio = 1.0d;
 
@@ -981,9 +1002,9 @@ public final class Tools {
             minmax[0] = 0;
             minmax[1] = 255;
             if (isTransposed) {
-                for (int i = 0; i < h; i++) {
-                    for (int j = 0; j < w; j++) {
-                        byteData[i * w + j] = rawData[j * h + i];
+                for (long i = 0; i < h; i++) {
+                    for (long j = 0; j < w; j++) {
+                        byteData[(int)(i * w + j)] = rawData[(int)(j * h + i)];
                     }
                 }
             }
@@ -994,19 +1015,19 @@ public final class Tools {
         min = minmax[0];
         max = minmax[1];
         ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
-        int idxSrc = 0, idxDst = 0;
-        for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w; j++) {
+        long idxSrc = 0, idxDst = 0;
+        for (long i = 0; i < h; i++) {
+            for (long j = 0; j < w; j++) {
                 idxSrc = idxDst =j * h + i;
                 if (isTransposed) idxDst = i * w + j;
 
-                if (rawData[idxSrc] > max || rawData[idxSrc] < min) {
-                    byteData[idxDst] = (byte) 0;
+                if (rawData[(int) idxSrc] > max || rawData[(int) idxSrc] < min) {
+                    byteData[(int)idxDst] = (byte) 0;
                     if (list!=null)
-                        list.add(idxSrc);
+                        list.add((int)idxSrc);
                 }
                 else
-                    byteData[idxDst] = (byte) ((rawData[idxSrc] - min) * ratio);
+                    byteData[(int)idxDst] = (byte) ((rawData[(int)idxSrc] - min) * ratio);
             }
         }
 
@@ -1775,7 +1796,7 @@ public final class Tools {
         StringBuffer sb = new StringBuffer();
         boolean isEven = true;
         for (int i = nhex - 1; i >= 0; i--) {
-            if (isEven) sb.append(" ");
+            if (isEven && i < nhex - 1) sb.append(" ");
             isEven = !isEven; // toggle
 
             switch (hex[i]) {
@@ -1833,6 +1854,19 @@ public final class Tools {
         return sb.toString();
     }
 
+    public static final String toBinaryString(BigInteger v, int nbytes) {
+        StringBuffer sb = new StringBuffer();
+        String val = String.format("%" + (8 * nbytes) + "s", v.toString(2)).replace(" ", "0").toUpperCase();
+
+        // Insert spacing
+        for (int i = 0; i < nbytes; i++) {
+            sb.append(val.substring(i * nbytes, nbytes * (i + 1)));
+            if (i < nbytes - 1) sb.append(" ");
+        }
+
+        return sb.toString();
+    }
+
     final static char[] HEXCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     /**
@@ -1863,6 +1897,22 @@ public final class Tools {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Returns a string representation of the BigInteger argument as an unsigned integer in base 16.
+     * This is different from BigInteger.toString(16). This function adds padding (0's) to the string
+     * based on the nbytes. For example, if v=42543, nbytes=4, the string will be "0000A62F".
+     *
+     * @param v
+     *            the BigInteger value
+     * @param nbytes
+     *            number of bytes in the integer
+     * @return the string representation of the unsigned long value represented by the argument in
+     *         hexadecimal (base 16).
+     */
+    public static final String toHexString (BigInteger v, int nbytes) {
+        return String.format("%" + nbytes + "s", v.toString(16)).replace(" ", "0").toUpperCase();
     }
 
     /**
@@ -1941,7 +1991,7 @@ public final class Tools {
 
         return true;
     } /* public static final boolean applyBitmask() */
-    
+
     /**
      * Read HDF5 user block data into byte array.
      *
@@ -2249,7 +2299,7 @@ public final class Tools {
         }
         return true;
     }
-    
+
     /**
      * look at the first 4 bytes of the file to see if it is an HDF4 file.
      * byte[0]=14, byte[1]=3, byte[2]=19, byte[3]=1 or if it is a netCDF file
@@ -2553,15 +2603,12 @@ public final class Tools {
 
         if (f.exists()) {
             Shell tempShell = new Shell(display);
-            
-            MessageBox confirm = new MessageBox(tempShell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-            confirm.setText("Create New File");
-            confirm.setMessage("File exists. Do you want to replace it?");
-            if (confirm.open() == SWT.NO) {
+
+            if(!MessageDialog.openConfirm(tempShell, "Create New File", "File exists. Do you want to replace it?")) {
                 tempShell.dispose();
                 return null;
             }
-            
+
             tempShell.dispose();
         }
 
@@ -2613,20 +2660,134 @@ public final class Tools {
 
         return false;
     }
-    
-    /** 
+
+    /**
+     * Since Java does not allow array indices to be larger than int type,
+     * check the given value to see if it is within the valid range of a
+     * Java int.
+     *
+     * @param value
+     *         The value to check
+     *
+     * @return false if the value is outside the range of a Java int, true
+     *         otherwise.
+     */
+    public static boolean checkIsValidJavaInt(final long value) {
+        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) return false;
+
+        return true;
+    }
+
+    public static boolean checkValidByte(String value) {
+        try {
+            Byte b = Byte.parseByte(value);
+            return (b >= Byte.MIN_VALUE && b <= Byte.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidUByte(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= 0 && l <= MAX_UINT8);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidShort(String value) {
+        try {
+            Short s = Short.parseShort(value);
+            return (s >= Short.MIN_VALUE && s <= Short.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidUShort(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= 0 && l <= MAX_UINT16);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidInt(String value) {
+        try {
+            Integer i = Integer.parseInt(value);
+            return (i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidUInt(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= 0 && l <= MAX_UINT32);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidLong(String value) {
+        try {
+            Long l = Long.parseLong(value);
+            return (l >= Long.MIN_VALUE && l <= Long.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidULong(String value) {
+        try {
+            BigInteger big = new BigInteger(value);
+            return (big.compareTo(BigInteger.ZERO) >= 0 && big.compareTo(MAX_UINT64) <= 0);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidDouble(String value) {
+        try {
+            Double d = Double.parseDouble(value);
+            return (d >= Double.MIN_VALUE && d <= Double.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean checkValidFloat(String value) {
+        try {
+            Float f = Float.parseFloat(value);
+            return (f >= Float.MIN_VALUE && f <= Float.MAX_VALUE);
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    /**
      * Show an SWT error dialog with the given error message.
      * @param parent
-     *           The parent Shell of the MessageBox
+     *           The parent Shell of the MessageDialog
      * @param errorMsg
-     *           The error message to display in the MessageBox
+     *           The error message to display in the MessageDialog
      * @param title
-     *           The title to set for the MessageBox
+     *           The title to set for the MessageDialog
      */
     public static void showError(Shell parent, String errorMsg, String title) {
-        MessageBox error = new MessageBox(parent, SWT.ICON_ERROR | SWT.OK);
-        error.setText(title);
-        error.setMessage(errorMsg);
-        error.open();
+        MessageDialog.openError(parent, (title == null) ? "null" : title, (errorMsg == null) ? "null" : errorMsg);
     }
 }

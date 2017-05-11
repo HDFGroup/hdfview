@@ -14,7 +14,6 @@
 
 package hdf.object;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,9 +33,6 @@ import java.util.Vector;
  */
 public abstract class Group extends HObject {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 3913174542591568052L;
 
     /**
@@ -51,7 +47,7 @@ public abstract class Group extends HObject {
     protected Group parent;
 
     /**
-     * Total number of (Groups and Datasets) of this group in file.
+     * Total number of members of this group in file.
      */
     protected int nMembersInFile;
 
@@ -74,10 +70,10 @@ public abstract class Group extends HObject {
      * <p>
      * For example, in H5Group(h5file, "grp", "/groups/", pgroup), "grp" is the
      * name of the group, "/groups/" is the group path of the group, and pgroup
-     * the group where "grp" is located.
+     * is the group where "grp" is located.
      *
      * @param theFile
-     *            the file which containing the group.
+     *            the file containing the group.
      * @param name
      *            the name of this group, e.g. "grp01".
      * @param path
@@ -94,7 +90,7 @@ public abstract class Group extends HObject {
      *             Using {@link #Group(FileFormat, String, String, Group)}
      *
      * @param theFile
-     *            the file which containing the group.
+     *            the file containing the group.
      * @param name
      *            the name of this group, e.g. "grp01".
      * @param path
@@ -127,7 +123,7 @@ public abstract class Group extends HObject {
      * Adds an object to the member list of this group in memory.
      *
      * @param object
-     *            the HObject (Group or Dataset) to be added to the member list.
+     *            the HObject to be added to the member list.
      */
     public void addToMemberList(HObject object) {
         if (memberList == null) {
@@ -155,25 +151,21 @@ public abstract class Group extends HObject {
     }
 
     /**
-     * Returns the list of members of this group. The list is an java.awt.List
-     * containing Groups and Datasets.
+     * Returns the list of members of this group. The list is an java.util.List
+     * containing HObjects.
      *
      * @return the list of members of this group.
      */
     public List<HObject> getMemberList() {
         FileFormat theFile = this.getFileFormat();
-        String thePath = this.getPath();
-        String theName = this.getName();
 
         if ((memberList == null) && (theFile != null)) {
             int size = Math.min(getNumberOfMembersInFile(), this
                     .getFileFormat().getMaxMembers());
-            memberList = new Vector<HObject>(size + 5); // avoid infinite loop search for
-                                               // groups without member
+            memberList = new Vector<HObject>(size + 5); // avoid infinite loop search for groups without members
 
-            // find the memberList from the file by check the group path and
-            // name
-            // group may be created out of the structure tree
+            // find the memberList from the file by checking the group path and
+            // name. group may be created out of the structure tree
             // (H4/5File.loadTree()).
             try {
                 theFile.open();
@@ -185,27 +177,25 @@ public abstract class Group extends HObject {
             HObject root = theFile.getRootObject();
             if (root == null) return memberList;
 
-            //Enumeration<?> emu = root.depthFirstEnumeration();
-
+            Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
             Group g = null;
             Object uObj = null;
-            //while (emu.hasMoreElements()) {
-            //    uObj = ((DefaultMutableTreeNode) emu.nextElement())
-            //            .getUserObject();
-            //    if (uObj instanceof Group) {
-            //        g = (Group) uObj;
-            //        if (g.getPath() != null) // add this check to get rid of
-                                             // null exception
-            //        {
-            //            if ((this.isRoot() && g.isRoot())
-            //                    || (thePath.equals(g.getPath()) && g.getName()
-            //                            .endsWith(theName))) {
-            //                memberList = g.getMemberList();
-            //                break;
-            //            }
-            //        }
-            //    }
-            //}
+            while (it.hasNext()) {
+                uObj = it.next();
+                
+                if (uObj instanceof Group) {
+                    g = (Group) uObj;
+                    if (g.getPath() != null) // add this check to get rid of null exception
+                    {
+                        if ((this.isRoot() && g.isRoot())
+                                || (this.getPath().equals(g.getPath()) &&
+                                        g.getName().endsWith(this.getName()))) {
+                            memberList = g.getMemberList();
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         return memberList;
@@ -307,7 +297,7 @@ public abstract class Group extends HObject {
     /**
      * Returns the total number of members of this group in file.
      *
-     * Current Java application such as HDFView cannot handle files with large
+     * Current Java applications such as HDFView cannot handle files with large
      * numbers of objects (1,000,000 or more objects) due to JVM memory
      * limitation. The max_members is used so that applications such as HDFView
      * will load up to <i>max_members</i> number of objects. If the number of
