@@ -23,6 +23,8 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -53,7 +55,7 @@ import hdf.object.HObject;
 public class NewDatatypeDialog extends Dialog {
 
     private Shell             shell;
-    
+
     private Font              curFont;
 
     private Text              nameField, stringLengthField;
@@ -87,7 +89,7 @@ public class NewDatatypeDialog extends Dialog {
      */
     public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -128,6 +130,13 @@ public class NewDatatypeDialog extends Dialog {
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
         nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        nameField.addTraverseListener(new TraverseListener() {
+            public void keyTraversed(TraverseEvent e) {
+                if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
+                    e.doit = true;
+                }
+            }
+        });
 
         label = new Label(fieldComposite, SWT.LEFT);
         label.setFont(curFont);
@@ -342,8 +351,10 @@ public class NewDatatypeDialog extends Dialog {
         sizeChoice.select(0);
         endianChoice.select(0);
 
+        //Control[] controls = new Control[] { okButton, cancelButton };
+        //shell.setTabList(controls);
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -359,11 +370,10 @@ public class NewDatatypeDialog extends Dialog {
 
         shell.open();
 
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed())
             if (!display.readAndDispatch())
                 display.sleep();
-        }
     }
 
     private HObject createDatatype() {

@@ -33,11 +33,9 @@ import hdf.object.HObject;
  */
 
 public class H5Link extends HObject {
-    /**
-     *
-     */
     private static final long serialVersionUID = -8137277460521594367L;
 
+    @SuppressWarnings("unused")
     private H5O_info_t obj_info;
 
     /**
@@ -62,14 +60,15 @@ public class H5Link extends HObject {
     }
 
     @Override
-    public void close(int id) {
+    public void close(long id) {
     }
 
     @Override
-    public int open() {
+    public long open() {
         return 0;
     }
 
+    @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
 
         try{
@@ -93,6 +92,7 @@ public class H5Link extends HObject {
     public void updateMetadata(Object info) throws Exception {
     }
 
+    @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         return null;
     }

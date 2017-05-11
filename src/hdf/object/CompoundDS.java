@@ -19,18 +19,18 @@ package hdf.object;
  * <p>
  * A compound datatype is an aggregation of one or more datatypes. Each member
  * of a compound type has a name which is unique within that type, and a
- * datatype of that member in a compound datum. Compound datatype can be nested,
- * i.e. members of compound datatype can be some other compound datatype.
+ * datatype of that member in a compound datum. Compound datatypes can be nested,
+ * i.e. members of a compound datatype can be some other compound datatype.
  * <p>
- * For more details on compound datatype,
- * see <b> <a href="http://hdfgroup.org/HDF5/doc/UG/index.html">HDF5 User's Guide</a> </b>
+ * For more details on compound datatypes,
+ * see <b> <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
  * <p>
- * Since Java cannot handle C-structured compound data, data in compound dataset
+ * Since Java cannot handle C-structured compound data, data in a compound dataset
  * is loaded in to an Java List. Each element of the list is a data array that
  * corresponds to a compound field. The data is read/written by compound field.
  * <p>
  * For example, if compound dataset "comp" has the following nested structure,
- * and memeber datatypes
+ * and member datatypes
  *
  * <pre>
  * comp --&gt; m01 (int)
@@ -41,7 +41,7 @@ package hdf.object;
  * comp --&gt; nest1 --&gt; nest2 --&gt; m22 (double)
  * </pre>
  *
- * The data object is an Java list of six arrays: {int[], float[], char[],
+ * The data object is a Java list of six arrays: {int[], float[], char[],
  * Stirng[], long[] and double[]}.
  *
  *
@@ -49,9 +49,6 @@ package hdf.object;
  * @author Peter X. Cao
  */
 public abstract class CompoundDS extends Dataset {
-    /**
-     *
-     */
     private static final long serialVersionUID = -4880399929644095662L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
@@ -75,7 +72,7 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Returns array containing the total number of elements of the members of
-     * compound.
+     * this compound dataset.
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
      *
@@ -106,8 +103,8 @@ public abstract class CompoundDS extends Dataset {
     protected Datatype[] memberTypes;
 
     /**
-     * The array to store flags to indicate if a member of compound dataset is
-     * selected for read/write.
+     * The array to store flags to indicate if a member of this compound
+     * dataset is selected for read/write.
      * <p>
      * If a member is selected, the read/write will perform on the member.
      * Applications such as HDFView will only display the selected members of
@@ -124,15 +121,15 @@ public abstract class CompoundDS extends Dataset {
     protected boolean[] isMemberSelected;
 
     /**
-     * Constructs a CompoundDS object with given file, dataset name and path.
+     * Constructs a CompoundDS object with the given file, dataset name and path.
      * <p>
      * The dataset object represents an existing dataset in the file. For
      * example, new H5CompoundDS(file, "dset1", "/g0/") constructs a dataset
-     * object that corresponds to the dataset,"dset1", at group "/g0/".
+     * object that corresponds to the dataset, "dset1", at group "/g0/".
      * <p>
      * This object is usually constructed at FileFormat.open(), which loads the
-     * file structure and object informatoin into tree structure (TreeNode). It
-     * is rarely used elsewhere.
+     * file structure and object information into memory. It is rarely used
+     * elsewhere.
      *
      * @param theFile
      *            the file that contains the dataset.
@@ -183,9 +180,9 @@ public abstract class CompoundDS extends Dataset {
      * Selected members are the compound fields which are selected for
      * read/write.
      * <p>
-     * For example, in a compound datatype of {int A, float B, char[] C}, users
-     * can choose to retrieve only {A, C} from dataset. In this case,
-     * getSelectedMemberCount() returns two.
+     * For example, in a compound datatype of {int A, float B, char[] C},
+     * users can choose to retrieve only {A, C} from the dataset. In this
+     * case, getSelectedMemberCount() returns two.
      *
      * @return the number of selected members.
      */
@@ -218,7 +215,7 @@ public abstract class CompoundDS extends Dataset {
     }
 
     /**
-     * Checks if a member of compound is selected for read/write.
+     * Checks if a member of the compound dataset is selected for read/write.
      *
      * @param idx
      *            the index of compound member.
@@ -266,7 +263,7 @@ public abstract class CompoundDS extends Dataset {
 
     /**
      * Returns array containing the total number of elements of the members of
-     * compound.
+     * the compound dataset.
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
      *
@@ -290,8 +287,8 @@ public abstract class CompoundDS extends Dataset {
     }
 
     /**
-     * Returns array containing the total number of elements of the elected
-     * members of compound.
+     * Returns array containing the total number of elements of the selected
+     * members of the compound dataset.
      *
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
@@ -327,7 +324,7 @@ public abstract class CompoundDS extends Dataset {
     }
 
     /**
-     * Returns the dimension sizes of of the i-th member.
+     * Returns the dimension sizes of the i-th member.
      * <p>
      * For example, a compound dataset COMP has members of A, B and C as
      *
@@ -340,11 +337,11 @@ public abstract class CompoundDS extends Dataset {
      * </pre>
      *
      * getMemberDims(2) returns an array of {2, 3}, while getMemberDims(1)
-     * returns an array of {5}, getMemberDims(0) returns null.
+     * returns an array of {5}, and getMemberDims(0) returns null.
      *
      * @param i  the i-th member
      *
-     * @return the dimension sizes of of the i-th member, null if the compound
+     * @return the dimension sizes of the i-th member, null if the compound
      *         member is not an array.
      */
     public final int[] getMemberDims(int i) {
@@ -399,5 +396,4 @@ public abstract class CompoundDS extends Dataset {
         throw new UnsupportedOperationException(
                 "Writing a subset of a compound dataset to a new dataset is not implemented.");
     }
-
 }

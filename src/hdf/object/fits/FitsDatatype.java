@@ -29,7 +29,7 @@ import nom.tam.fits.BasicHDU;
 public class FitsDatatype extends Datatype
 {
     private static final long serialVersionUID = 6545936196104493765L;
-    private int nativeType;
+    private long nativeType;
 
     /**
      * Create an Datatype with specified class, size, byte order and sign.
@@ -59,7 +59,7 @@ public class FitsDatatype extends Datatype
      *
      * @param theType the fits native datatype.
      */
-    public FitsDatatype(int theType) {
+    public FitsDatatype(long theType) {
         super(-1);
         nativeType = theType;
         fromNative(0);
@@ -80,7 +80,7 @@ public class FitsDatatype extends Datatype
      * @param size the total size of the array.
      * @return the array object if successful and null otherwise.
      */
-    public static Object allocateArray(int dtype, int size) throws OutOfMemoryError
+    public static Object allocateArray(long dtype, int size) throws OutOfMemoryError
     {
         Object data = null;
 
@@ -88,7 +88,7 @@ public class FitsDatatype extends Datatype
             return null;
         }
 
-        switch (dtype) {
+        switch ((int)dtype) {
             case BasicHDU.BITPIX_BYTE:
                 data = new byte[size];
                 break;
@@ -125,9 +125,9 @@ public class FitsDatatype extends Datatype
      * @param nativeID the fits native datatype.
      */
     @Override
-    public void fromNative(int dtype)
+    public void fromNative(long dtype)
     {
-        switch (dtype) {
+        switch ((int)dtype) {
             case BasicHDU.BITPIX_BYTE:
                 datatypeClass = CLASS_INTEGER;
                 datatypeSize = 1;
@@ -160,7 +160,7 @@ public class FitsDatatype extends Datatype
     public String getDatatypeDescription() {
         String description = "Unknown data type.";
 
-        switch (nativeType) {
+        switch ((int)nativeType) {
             case BasicHDU.BITPIX_BYTE:
                 description = "8-bit integer";
                 break;
@@ -206,7 +206,7 @@ public class FitsDatatype extends Datatype
 
     // implementing Datatype
     @Override
-    public int toNative() {
+    public long toNative() {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = BasicHDU.BITPIX_BYTE;
@@ -238,7 +238,7 @@ public class FitsDatatype extends Datatype
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(int id) {;}
+    public void close(long id) {;}
 
   //Implementing DataFormat
     public List getMetadata(int... attrPropList) throws Exception {

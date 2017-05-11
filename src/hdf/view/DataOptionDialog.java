@@ -14,17 +14,18 @@
 
 package hdf.view;
 
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
-import java.awt.Image;
 import java.util.BitSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -53,7 +54,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -73,7 +73,7 @@ import hdf.object.ScalarDS;
 public class DataOptionDialog extends Dialog {
 
     private Shell                  shell;
-    
+
     private Font                   curFont;
 
     /** the rank of the dataset/image */
@@ -155,7 +155,7 @@ public class DataOptionDialog extends Dialog {
         if(theDataset == null) return;
 
         dataset = theDataset;
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -300,7 +300,7 @@ public class DataOptionDialog extends Dialog {
                 if (transposeChoice == null) {
                     isTransposed = false;
                 } else {
-                    isTransposed = transposeChoice.getSelectionIndex() == 1;
+                    isTransposed = transposeChoice.isEnabled() && transposeChoice.getSelectionIndex() == 0;
                 }
 
                 if (base1Button == null) {
@@ -326,7 +326,7 @@ public class DataOptionDialog extends Dialog {
                 }
             }
         });
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -334,7 +334,7 @@ public class DataOptionDialog extends Dialog {
         });
 
         shell.open();
-        
+
         // Prevent SWT from selecting TableView button by
         // default if dataset is an image
         if (dataset instanceof ScalarDS) {
@@ -421,29 +421,25 @@ public class DataOptionDialog extends Dialog {
                 endFields[1].setEnabled(false);
                 endFields[1].setText(startFields[1].getText());
             }
-        }
 
-        if (rank > 2) {
-            endFields[2].setEnabled(false);
-            strideFields[2].setEnabled(false);
+            if (rank > 2) {
+                endFields[2].setEnabled(false);
+                strideFields[2].setEnabled(false);
 
-            if (isTrueColorImage && imageButton != null) {
-                if(imageButton.getSelection()) {
-                    choices[0].setEnabled(false);
-                    choices[1].setEnabled(false);
-                    choices[2].setEnabled(false);
-                    startFields[2].setEnabled(false);
-                    startFields[2].setText("0");
-                    endFields[2].setText("0");
+                if (isTrueColorImage && imageButton != null) {
+                    if(imageButton.getSelection()) {
+                        choices[0].setEnabled(false);
+                        choices[1].setEnabled(false);
+                        choices[2].setEnabled(false);
+                        startFields[2].setEnabled(false);
+                        startFields[2].setText("0");
+                        endFields[2].setEnabled(false);
+                        endFields[2].setText("0");
+                    }
                 }
-            }
-            else {
-                choices[0].setEnabled(true);
-                choices[1].setEnabled(true);
-                choices[2].setEnabled(true);
-                startFields[2].setEnabled(true);
-                startFields[2].setText(String.valueOf(start[selectedIndex[2]]));
-                endFields[2].setText(startFields[2].getText());
+                else {
+                    endFields[2].setText(startFields[2].getText());
+                }
             }
         }
 
@@ -455,7 +451,7 @@ public class DataOptionDialog extends Dialog {
         Datatype dtype = dataset.getDatatype();
         int tclass = dtype.getDatatypeClass();
         if (tclass == Datatype.CLASS_CHAR || tclass == Datatype.CLASS_INTEGER) {
-            int tsize = dtype.getDatatypeSize();
+            int tsize = (int) dtype.getDatatypeSize();
 
             if(charCheckbox != null) {
                 charCheckbox.setEnabled((tsize == 1) && spreadsheetButton.getSelection());
@@ -623,12 +619,18 @@ public class DataOptionDialog extends Dialog {
 
         // find no error, set selection the the dataset object
         for (int i = 0; i < n; i++) {
+            long selectedSize = ((n1[i] - n0[i]) / n2[i]) + 1;
+
+            if (!Tools.checkIsValidJavaInt(selectedSize)) {
+                shell.getDisplay().beep();
+                Tools.showError(shell, "Subset selection too large to display.", shell.getText());
+                return false;
+            }
+
             selectedIndex[i] = sIndex[i];
             start[selectedIndex[i]] = n0[i];
-            if (i < 2) {
-                selected[selectedIndex[i]] = (int) ((n1[i] - n0[i]) / n2[i]) + 1;
-                stride[selectedIndex[i]] = n2[i];
-            }
+            selected[selectedIndex[i]] = (int) selectedSize;
+            stride[selectedIndex[i]] = n2[i];
         }
 
         if ((rank > 1) && isText) {
@@ -1010,10 +1012,7 @@ public class DataOptionDialog extends Dialog {
                         + "their corresponding bits in the bitmask are 0. \nFor the same example above, "
                         + "the result is \n101 ==> the decimal value is 5.\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(msg);
-                info.open();
+                MessageDialog.openInformation(shell, shell.getText(), msg);
             }
         });
 
@@ -1048,8 +1047,8 @@ public class DataOptionDialog extends Dialog {
         buttonComposite.setLayout(new GridLayout(16, true));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
-        int tsize = dataset.getDatatype().getDatatypeSize();
-        bitmaskButtons = new Button[8 * tsize];
+        int tsize = (int)dataset.getDatatype().getDatatypeSize();
+        bitmaskButtons = (tsize >= 0) ? new Button[8 * tsize] : new Button[0];
 
         for (int i = 0; i < bitmaskButtons.length; i++) {
             bitmaskButtons[i] = new Button(buttonComposite, SWT.RADIO);
@@ -1077,7 +1076,7 @@ public class DataOptionDialog extends Dialog {
                                     Tools.showError(shell,
                                             "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.",
                                             "Select Bitmask");
-                                    
+
                                     source.setSelection(false);
                                     return;
                                 }
@@ -1201,8 +1200,8 @@ public class DataOptionDialog extends Dialog {
             transposeChoice.setFont(curFont);
             transposeChoice.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
 
-            transposeChoice.add("Reshape");
             transposeChoice.add("Transpose");
+            transposeChoice.add("Reshape");
 
             transposeChoice.select(0);
         }
@@ -1441,7 +1440,7 @@ public class DataOptionDialog extends Dialog {
                                 "Slice location is out of range.\n" + start4[i]
                                 + " >= " + dims[choice4Index[i]],
                                 "Select Slice Location");
-                        
+
                         return;
                     }
 
@@ -1499,7 +1498,7 @@ public class DataOptionDialog extends Dialog {
         }
 
         if (theSelectedChoice < 0) {
-            return; // the selected JComboBox is not a dimension choice
+            return; // the selected ComboBox is not a dimension choice
         }
 
         int theIndex = source.getSelectionIndex();
@@ -1756,8 +1755,8 @@ public class DataOptionDialog extends Dialog {
 
             try {
                 Object data = sd.read();
-                int h = sd.getHeight();
-                int w = sd.getWidth();
+                int h = (int)sd.getHeight();
+                int w = (int)sd.getWidth();
 
                 byte[] bData = Tools.getBytes(data, sd.getImageDataRange(), w, h, false, sd.getFilteredImageValues(), null);
 

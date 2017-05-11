@@ -1,7 +1,6 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,17 +9,10 @@ import java.util.Vector;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-import hdf.HDFVersions;
-import hdf.view.HDFView;
-
-import org.junit.BeforeClass;
-import org.junit.Before;
-import org.junit.After;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -30,6 +22,12 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+
+import hdf.HDFVersions;
+import hdf.view.HDFView;
 
 public abstract class AbstractWindowTest {
     protected static String HDF5VERSION = "HDF5 " + HDFVersions.HDF5_VERSION;
@@ -46,8 +44,10 @@ public abstract class AbstractWindowTest {
     protected static Shell shell;
 
     private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
-    
+
     private static int TEST_DELAY = 0;
+
+    private static int open_files = 0;
 
 
     private static void clearRemovePropertyFile() {
@@ -60,7 +60,7 @@ public abstract class AbstractWindowTest {
             prop_file.delete();
         }
     }
-    
+
     protected File openFile(String name, boolean hdf4_type) {
         String file_ext;
         if (hdf4_type) {
@@ -69,9 +69,9 @@ public abstract class AbstractWindowTest {
         else {
             file_ext = new String(".h5");
         }
-        
+
         File hdf_file = new File(workDir, name + file_ext);
-        
+
         try {
             bot.toolbarButtonWithTooltip("Open").click();
 
@@ -80,7 +80,10 @@ public abstract class AbstractWindowTest {
 
             SWTBotText text = shell.bot().text();
             text.setText(hdf_file.getName());
-            assertEquals(hdf_file.getName(), text.getText());
+
+            String val = text.getText();
+            assertTrue("openFile() wrong file name: expected '" + hdf_file.getName() + "' but was '" + val + "'",
+                    val.equals(hdf_file.getName()));
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
@@ -88,8 +91,9 @@ public abstract class AbstractWindowTest {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("Button-Open filetree row count: "+filetree.rowCount(), filetree.rowCount() == 1);
-            assertTrue("Button-Open filetree is missing file " + hdf_file.getName(), items[0].getText().compareTo(hdf_file.getName()) == 0);
+            open_files++;
+            assertTrue("openFile() filetree wrong row count: expected '" + String.valueOf(open_files) + "' but was '" + filetree.rowCount() + "'", filetree.rowCount() == open_files);
+            assertTrue("openFile() filetree is missing file '" + hdf_file.getName() + "'", items[open_files - 1].getText().compareTo(hdf_file.getName()) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -100,7 +104,7 @@ public abstract class AbstractWindowTest {
 
         return hdf_file;
     }
-    
+
     protected File createFile(String name, boolean hdf4_type) {
         String file_ext;
         String file_type;
@@ -120,18 +124,22 @@ public abstract class AbstractWindowTest {
         try {
             SWTBotMenu fileMenuItem = bot.menu("File").menu("New").menu(file_type);
             fileMenuItem.click();
-            
+
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
-            
+
             SWTBotText text = shell.bot().text();
             text.setText(name + file_ext);
-            assertEquals(name + file_ext, text.getText());
-            
+
+            String val = text.getText();
+            assertTrue("createFile() wrong file name: expected '" + name + file_ext + "' but was '" + val + "'",
+                    val.equals(name + file_ext));
+
             shell.bot().button("   &OK   ").click();
             shell.bot().waitUntil(shellCloses(shell));
-            
-            assertTrue("File- " + hdf_file + " file created", hdf_file.exists());
+
+            assertTrue("createFile() File '" + hdf_file + "' not created", hdf_file.exists());
+            open_files++;
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -152,20 +160,25 @@ public abstract class AbstractWindowTest {
     }
 
     protected void closeFile(File hdf_file, boolean delete_file) {
+        //TODO: re-implement to only close given file, not all files
         try {
             bot.shells()[0].activate();
             bot.waitUntil(Conditions.shellIsActive(bot.shells()[0].getText()));
-            
+
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Close All");
             fileMenuItem.click();
 
             if(delete_file) {
-                assertTrue("closeFile File " + hdf_file + " not deleted", hdf_file.delete());
-                assertFalse("closeFile File " + hdf_file + " not gone", hdf_file.exists());
+                if (hdf_file.exists()) {
+                    assertTrue("closeFile() File '" + hdf_file + "' not deleted", hdf_file.delete());
+                    assertFalse("closeFile() File '" + hdf_file + "' not gone", hdf_file.exists());
+                }
             }
 
             SWTBotTree filetree = bot.tree();
-            assertTrue("closeHDFFile filetree shows:"+filetree.rowCount(), filetree.rowCount() == 0);
+            assertTrue("closeFile() filetree wrong row count: expected '0' but was '" + filetree.rowCount() + "'", filetree.rowCount() == 0);
+
+            open_files = 0;
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -175,19 +188,20 @@ public abstract class AbstractWindowTest {
         }
     }
 
-    protected void testSamplePixel(int theX, int theY, String requiredValue) {
+    protected void testSamplePixel(final int theX, final int theY, String requiredValue) {
         try {
             SWTBotShell botshell = bot.activeShell();
             SWTBot thisbot = botshell.bot();
-            SWTBotCanvas imageCanvas = thisbot.canvas(1);
+            final SWTBotCanvas imageCanvas = thisbot.canvas(1);
 
             // Make sure Show Values is selected
-            SWTBotMenu showValuesMenuItem = thisbot.menu("Image").menu("Show Values"); 
+            SWTBotMenu showValuesMenuItem = thisbot.menu("Image").menu("Show Values");
             if(!showValuesMenuItem.isChecked()) {
                 showValuesMenuItem.click();
             }
 
             Display.getDefault().syncExec(new Runnable() {
+                @Override
                 public void run() {
                     imageCanvas.widget.notifyListeners(SWT.MouseMove, new Event() {
                         {
@@ -198,7 +212,8 @@ public abstract class AbstractWindowTest {
                 }
             });
 
-            assertEquals(thisbot.text().getText(), requiredValue);
+            String val = thisbot.text().getText();
+            assertTrue(constructWrongValueMessage("testSamplePixel()", "wrong pixel value", requiredValue, val), val.equals(requiredValue));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -206,6 +221,10 @@ public abstract class AbstractWindowTest {
         catch (AssertionError ae) {
             ae.printStackTrace();
         }
+    }
+
+    protected String constructWrongValueMessage(String methodName, String message, String expected, String actual) {
+        return methodName.concat(" " + message + ": expected '" + expected + "' but was '" + actual + "'");
     }
 
     @BeforeClass
@@ -226,7 +245,7 @@ public abstract class AbstractWindowTest {
                             H = 400,
                             X = 0,
                             Y = 0;
-                        
+
                         while (true) {
                             // open and layout the shell
                             HDFView window = new HDFView(rootDir);
@@ -247,8 +266,9 @@ public abstract class AbstractWindowTest {
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    
+
                     Display.getDefault().syncExec(new Runnable() {
+                        @Override
                         public void run() {
                             shell.getDisplay().dispose();
                         }
@@ -265,7 +285,7 @@ public abstract class AbstractWindowTest {
         // synchronize with the thread opening the shell
         swtBarrier.await();
         bot = new SWTBot(shell);
-        
+
         SWTBotPreferences.PLAYBACK_DELAY = TEST_DELAY;
     }
 
@@ -273,6 +293,7 @@ public abstract class AbstractWindowTest {
     public void closeShell() throws InterruptedException {
         // close the shell
         Display.getDefault().syncExec(new Runnable() {
+            @Override
             public void run() {
                 shell.close();
             }

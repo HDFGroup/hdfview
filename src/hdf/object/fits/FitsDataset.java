@@ -216,14 +216,14 @@ public class FitsDataset extends ScalarDS
      * @see hdf.object.HObject#open()
      */
     @Override
-    public int open() { return -1;}
+    public long open() { return -1;}
 
     /*
      * (non-Javadoc)
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(int did) {}
+    public void close(long did) {}
 
     /*
      * (non-Javadoc)

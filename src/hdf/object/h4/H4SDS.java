@@ -37,7 +37,7 @@ import hdf.object.ScalarDS;
 
 /**
  * H4SDS describes HDF4 Scientific Data Sets (SDS) and operations performed on
- * the SDS. A SDS, is a group of data structures used to store and describe
+ * the SDS. A SDS is a group of data structures used to store and describe
  * multidimensional arrays of scientific data.
  * <p>
  * The data contained in an SDS array has a data type associated with it. The
@@ -47,9 +47,9 @@ import hdf.object.ScalarDS;
  * <p>
  * <b>How to Select a Subset</b>
  * <p>
- * Dataset defines APIs for read, write and subet a dataset. No function is defined
- * to select a subset of a data array. The selection is done in an implicit way.
- * Function calls to dimension information such as getSelectedDims() return an array
+ * Dataset defines APIs for reading, writing and subsetting a dataset. No function
+ * is defined to select a subset of a data array. The selection is done in an implicit
+ * way. Function calls to dimension information such as getSelectedDims() return an array
  * of dimension values, which is a reference to the array in the dataset object.
  * Changes of the array outside the dataset object directly change the values of
  * the array in the dataset object. It is like pointers in C.
@@ -58,12 +58,12 @@ import hdf.object.ScalarDS;
  * The following is an example of how to make a subset. In the example, the dataset
  * is a 4-dimension with size of [200][100][50][10], i.e.
  * dims[0]=200; dims[1]=100; dims[2]=50; dims[3]=10; <br>
- * We want to select every other data points in dims[1] and dims[2]
+ * We want to select every other data point in dims[1] and dims[2]
  * <pre>
-     int rank = dataset.getRank();   // number of dimension of the dataset
+     int rank = dataset.getRank();   // number of dimensions of the dataset
      long[] dims = dataset.getDims(); // the dimension sizes of the dataset
      long[] selected = dataset.getSelectedDims(); // the selected size of the dataet
-     long[] start = dataset.getStartDims(); // the off set of the selection
+     long[] start = dataset.getStartDims(); // the offset of the selection
      long[] stride = dataset.getStride(); // the stride of the dataset
      int[]  selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for display
 
@@ -79,7 +79,7 @@ import hdf.object.ScalarDS;
          stride[i] = 1;
     }
 
-    // set stride to 2 on dim1 and dim2 so that every other data points are selected.
+    // set stride to 2 on dim1 and dim2 so that every other data point is selected.
     stride[1] = 2;
     stride[2] = 2;
 
@@ -100,9 +100,6 @@ import hdf.object.ScalarDS;
  */
 public class H4SDS extends ScalarDS
 {
-    /**
-     *
-     */
     private static final long serialVersionUID = 2557157923292438696L;
 
     private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4SDS.class);
@@ -117,15 +114,16 @@ public class H4SDS extends ScalarDS
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
+    @SuppressWarnings("rawtypes")
     private List                            attributeList;
 
     /**
      * The SDS interface identifier obtained from SDstart(filename, access)
      */
-    private int                             sdid;
+    private long                            sdid;
 
     /** the datatype identifier */
-    private int                             datatypeID = -1;
+    private long                            datatypeID = -1;
 
     private int                             nAttributes = -1;
 
@@ -163,8 +161,8 @@ public class H4SDS extends ScalarDS
         if (nAttributes < 0) {
             sdid = ((H4File)getFileFormat()).getSDAccessID();
 
-            int id = open();
-            
+            long id = open();
+
             if (id >= 0) {
                 try { // retireve attributes of the dataset
                     String[] objName = {""};
@@ -174,10 +172,10 @@ public class H4SDS extends ScalarDS
                     nAttributes = sdInfo[2];
                 }
                 catch (Exception ex) {
-                    log.debug("hasAttribute() failure: ", ex);
+                    log.debug("hasAttribute(): failure: ", ex);
                     nAttributes=0;
                 }
-                
+
                 log.trace("hasAttribute(): nAttributes={}", nAttributes);
 
                 close(id);
@@ -212,15 +210,16 @@ public class H4SDS extends ScalarDS
     public Dataset copy(Group pgroup, String dname, long[] dims, Object buff)
     throws Exception
     {
-        log.trace("copy(): parentGroup={} datasetName={}", pgroup, dname);
-        
+        log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
+
         Dataset dataset = null;
-        int srcdid=-1, dstdid=-1, tid=-1, size=1, theRank=2;
+        long srcdid=-1, dstdid=-1, tid=-1;
+        int size=1, theRank=2;
         String path=null;
         int[] count=null, start=null;
 
         if (pgroup == null) {
-            log.trace("copy(): Parent group was null");
+            log.debug("copy(): Parent group is null");
             log.trace("copy(): finish");
             return null;
         }
@@ -239,7 +238,7 @@ public class H4SDS extends ScalarDS
 
         srcdid = open();
         if (srcdid < 0) {
-            log.trace("copy(): Source SDID < 0");
+            log.debug("copy(): Invalid source SDID");
             log.trace("copy(): finish");
             return null;
         }
@@ -266,25 +265,26 @@ public class H4SDS extends ScalarDS
         }
         log.trace("copy(): theRank={} with size={}", theRank, size);
 
-        // create the new dataset and attached it to the parent group
+        // create the new dataset and attach it to the parent group
         tid = datatypeID;
         dstdid = HDFLibrary.SDcreate(
             ((H4File)pgroup.getFileFormat()).getSDAccessID(),
             dname, tid, theRank, count);
         if (dstdid < 0) {
-            log.trace("copy(): Dest SDID < 0");
+            log.debug("copy(): Invalid dest SDID");
             log.trace("copy(): finish");
             return null;
         }
 
         int ref = HDFLibrary.SDidtoref(dstdid);
         if (!pgroup.isRoot()) {
-            int vgid = pgroup.open();
+            long vgid = pgroup.open();
             HDFLibrary.Vaddtagref(vgid, HDFConstants.DFTAG_NDG, ref);
             pgroup.close(vgid);
         }
 
         // copy attributes from one object to the new object
+        log.trace("copy(): copy attributes");
         copyAttribute(srcdid, dstdid);
 
         // read data from the source dataset
@@ -304,7 +304,7 @@ public class H4SDS extends ScalarDS
         pgroup.addToMemberList(dataset);
 
         close(srcdid);
-        
+
         try {
             HDFLibrary.SDendaccess(dstdid);
         }
@@ -313,7 +313,6 @@ public class H4SDS extends ScalarDS
         }
 
         log.trace("copy(): finish");
-        
         return dataset;
     }
 
@@ -322,16 +321,16 @@ public class H4SDS extends ScalarDS
     public byte[] readBytes() throws HDFException
     {
         log.trace("readBytes(): start");
-        
+
         byte[] theData = null;
 
         if (rank <=0 ) {
             init();
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
-            log.trace("readBytes(): SDID < 0");
+            log.debug("readBytes(): Invalid SDID");
             log.trace("readBytes(): finish");
             return null;
         }
@@ -366,7 +365,6 @@ public class H4SDS extends ScalarDS
         }
 
         log.trace("readBytes(): finish");
-        
         return theData;
     }
 
@@ -374,16 +372,17 @@ public class H4SDS extends ScalarDS
     @Override
     public Object read() throws HDFException
     {
+        log.trace("read(): start");
+
         Object theData = null;
 
-        log.trace("read(): start");
-        if (rank <=0 ) {
+        if (rank <= 0) {
             init();
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
-            log.trace("read(): SDID < 0");
+            log.debug("read(): Invalid SDID");
             log.trace("read(): finish");
             return null;
         }
@@ -412,7 +411,7 @@ public class H4SDS extends ScalarDS
                 // assume external data files are located in the same directory as the main file.
                 HDFLibrary.HXsetdir(getFileFormat().getParent());
 
-                boolean status = HDFLibrary.SDreaddata(id, start, stride, select, theData);
+                HDFLibrary.SDreaddata(id, start, stride, select, theData);
 
                 if (isText) {
                     theData = byteToString((byte[])theData, select[0]);
@@ -440,8 +439,8 @@ public class H4SDS extends ScalarDS
         else
             isDefaultImageOrder = true;
 
+        log.trace("read(): isDefaultImageOrder={}", isDefaultImageOrder);
         log.trace("read(): finish");
-        
         return theData;
     }
 
@@ -450,16 +449,16 @@ public class H4SDS extends ScalarDS
     public void write(Object buf) throws HDFException
     {
         log.trace("write(): start");
-        
+
         if (buf == null) {
-            log.trace("write(): Object was null");
+            log.debug("write(): Object is null");
             log.trace("write(): finish");
             return;
         }
 
-        int id = open();
+        long id = open();
         if (id < 0) {
-            log.trace("write(): SDID < 0");
+            log.debug("write(): Invalid SDID");
             log.trace("write(): finish");
             return;
         }
@@ -497,21 +496,23 @@ public class H4SDS extends ScalarDS
             tmpData = null;
             close(id);
         }
-        
+
         log.trace("write(): finish");
     }
 
     // Implementing DataFormat
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
         log.trace("getMetadata(): start");
-        
+
         if (attributeList != null) {
+            log.trace("getMetdata(): attributeList != null");
             log.trace("getMetadata(): finish");
             return attributeList;
         }
 
-        int id = open();
+        long id = open();
         String[] objName = {""};
         int[] sdInfo = {0, 0, 0};
         try {
@@ -535,7 +536,7 @@ public class H4SDS extends ScalarDS
                     attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                 }
                 catch (HDFException ex) {
-                    log.debug("getMetadata(): SDattrinfo failure: ", ex);
+                    log.debug("getMetadata(): attribute[{}] SDattrinfo failure: ", i, ex);
                     b = false;
                 }
 
@@ -552,7 +553,7 @@ public class H4SDS extends ScalarDS
                     HDFLibrary.SDreadattr(id, i, buf);
                 }
                 catch (HDFException ex) {
-                    log.debug("getMetadata(): SDreadattr failure: ", ex);
+                    log.debug("getMetadata(): attribute[{}] SDreadattr failure: ", i, ex);
                     buf = null;
                 }
 
@@ -587,20 +588,20 @@ public class H4SDS extends ScalarDS
         finally {
             close(id);
         }
-        
-        log.trace("getMetadata(): finish");
 
+        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
     // To do: implementing DataFormat
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
         log.trace("writeMetadata(): start");
-        
+
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
-            log.trace("writeMetadata(): Object not an Attribute");
+            log.debug("writeMetadata(): Object not an Attribute");
             log.trace("writeMetadata(): finish");
             return;
         }
@@ -618,12 +619,14 @@ public class H4SDS extends ScalarDS
         catch (Exception ex) {
             log.trace("writeMetadata(): failure: ", ex);
         }
-        
+
         log.trace("writeMetadata(): finish");
     }
 
     // To do: implementing DataFormat
-    public void removeMetadata(Object info) throws HDFException {;}
+    public void removeMetadata(Object info) throws HDFException {
+        log.trace("removeMetadata(): disabled");
+    }
 
     // implementing DataFormat
     public void updateMetadata(Object info) throws Exception {
@@ -632,16 +635,17 @@ public class H4SDS extends ScalarDS
 
     // Implementing HObject
     @Override
-    public int open()
+    public long open()
     {
         log.trace("open(): start");
-        
-        int id=-1;
+
+        long id=-1;
 
         try {
             int index = 0;
             int tag = (int)oid[0];
 
+            log.trace("open(): tag={}", tag);
             if (tag == H4SDS.DFTAG_NDG_NETCDF) {
                 index = (int)oid[1]; //HDFLibrary.SDidtoref(id) fails for netCDF
             }
@@ -655,15 +659,14 @@ public class H4SDS extends ScalarDS
             log.debug("open(): failure: ", ex);
             id = -1;
         }
-        
-        log.trace("open(): finish");
 
+        log.trace("open(): finish");
         return id;
     }
 
     // Implementing HObject
     @Override
-    public void close(int id)
+    public void close(long id)
     {
         try { HDFLibrary.SDendaccess(id); }
         catch (HDFException ex) { log.debug("close(): failure: ", ex); }
@@ -676,14 +679,14 @@ public class H4SDS extends ScalarDS
     public void init()
     {
         log.trace("init(): start");
-        
+
         if (rank>0) {
             log.trace("init(): Already initialized");
             log.trace("init(): finish");
             return; // already called. Initialize only once
         }
 
-        int id = open();
+        long id = open();
         String[] objName = {""};
         String[] dimName = {""};
         int[] dimInfo = {0, 0, 0};
@@ -704,6 +707,7 @@ public class H4SDS extends ScalarDS
             }
 
             isUnlimited = HDFLibrary.SDisrecord(id);
+            log.trace("init(): isUnlimited={}", isUnlimited);
 
             datatypeID = sdInfo[1];
             isText = ((datatypeID == HDFConstants.DFNT_CHAR) || (datatypeID == HDFConstants.DFNT_UCHAR8));
@@ -715,7 +719,7 @@ public class H4SDS extends ScalarDS
             try {
                 dimNames = new String[rank];
                 for (int i=0; i<rank; i++) {
-                    int dimid = HDFLibrary.SDgetdimid(id, i);
+                    long dimid = HDFLibrary.SDgetdimid(id, i);
                     HDFLibrary.SDdiminfo(dimid, dimName, dimInfo);
                     dimNames[i] = dimName[0];
                 }
@@ -728,28 +732,28 @@ public class H4SDS extends ScalarDS
             try {
                 HDFCompInfo compInfo = new HDFCompInfo();
 
-                boolean status = HDFLibrary.SDgetcompress(id, compInfo);
+                HDFLibrary.SDgetcompinfo(id, compInfo);
                 if (compInfo.ctype == HDFConstants.COMP_CODE_DEFLATE) {
                     HDFDeflateCompInfo comp = new HDFDeflateCompInfo();
-                    HDFLibrary.SDgetcompress(id, comp);
+                    HDFLibrary.SDgetcompinfo(id, comp);
                     compression = "GZIP(level="+comp.level+")";
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SZIP) {
                     HDFSZIPCompInfo comp = new HDFSZIPCompInfo();
-                    HDFLibrary.SDgetcompress(id, comp);
+                    HDFLibrary.SDgetcompinfo(id, comp);
                     compression = "SZIP(bits_per_pixel="+comp.bits_per_pixel+",options_mask="+comp.options_mask+
                                   ",pixels="+comp.pixels+",pixels_per_block="+comp.pixels_per_block+
                                   ",pixels_per_scanline="+comp.pixels_per_scanline+")";
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_JPEG) {
                     HDFJPEGCompInfo comp = new HDFJPEGCompInfo();
-                    HDFLibrary.SDgetcompress(id, comp);
+                    HDFLibrary.SDgetcompinfo(id, comp);
                     compression = "JPEG(quality="+comp.quality+",options_mask="+
                                   ",force_baseline="+comp.force_baseline+")";
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SKPHUFF) {
                     HDFSKPHUFFCompInfo comp = new HDFSKPHUFFCompInfo();
-                    HDFLibrary.SDgetcompress(id, comp);
+                    HDFLibrary.SDgetcompinfo(id, comp);
                     compression = "SKPHUFF(skp_size="+comp.skp_size+")";
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_RLE) {
@@ -757,7 +761,7 @@ public class H4SDS extends ScalarDS
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_NBIT) {
                     HDFNBITCompInfo comp = new HDFNBITCompInfo();
-                    HDFLibrary.SDgetcompress(id, comp);
+                    HDFLibrary.SDgetcompinfo(id, comp);
                     compression = "NBIT(nt="+comp.nt+",bit_len="+comp.bit_len+",ctype="+comp.ctype+
                                   ",fill_one="+comp.fill_one+",sign_ext="+comp.sign_ext+
                                   ",start_bit="+comp.start_bit+")";
@@ -773,7 +777,7 @@ public class H4SDS extends ScalarDS
                 int[] cflag = {HDFConstants.HDF_NONE};
 
                 try {
-                    boolean status = HDFLibrary.SDgetchunkinfo(id, chunkInfo, cflag);
+                    HDFLibrary.SDgetchunkinfo(id, chunkInfo, cflag);
                 }
                 catch (Throwable ex) {
                     ex.printStackTrace();
@@ -781,11 +785,16 @@ public class H4SDS extends ScalarDS
 
                 if (cflag[0] == HDFConstants.HDF_NONE) {
                     chunkSize = null;
+                    storage_layout = "NONE";
                 }
                 else {
                     chunkSize = new long[rank];
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
+                    }
+                    storage_layout = "CHUNKED: " + String.valueOf(chunkSize[0]);
+                    for (int i = 1; i < rank; i++) {
+                        storage_layout += " X " + chunkSize[i];
                     }
                 }
             }
@@ -803,6 +812,8 @@ public class H4SDS extends ScalarDS
         isUnsigned = H4Datatype.isUnsigned(datatypeID);
 
         if (idims == null) {
+            log.debug("init(): idims is null");
+            log.trace("init(): finish");
             return;
         }
 
@@ -838,7 +849,7 @@ public class H4SDS extends ScalarDS
                 selectedDims[1] = dims[1];
             }
         }
-        
+
         log.trace("init(): finish");
     }
 
@@ -878,12 +889,12 @@ public class H4SDS extends ScalarDS
         Object data) throws Exception
     {
         log.trace("create(): start");
-        
+
         H4SDS dataset = null;
         if ((pgroup == null) ||
             (name == null)||
             (dims == null)) {
-            log.trace("create(): Parent group, name or dims was null");
+            log.trace("create(): Parent group, name or dims is null");
             log.trace("create(): finish");
             return null;
         }
@@ -891,7 +902,7 @@ public class H4SDS extends ScalarDS
         H4File file = (H4File)pgroup.getFileFormat();
 
         if (file == null) {
-            log.trace("create(): Parent group FileFormat was null");
+            log.trace("create(): Parent group FileFormat is null");
             log.trace("create(): finish");
             return null;
         }
@@ -901,14 +912,14 @@ public class H4SDS extends ScalarDS
             path = pgroup.getPath()+pgroup.getName()+HObject.separator;
         }
         // prepare the dataspace
-        int tsize = 1;
+        // int tsize = 1;
         int rank = dims.length;
         int idims[] = new int[rank];
         int start[] = new int [rank];
         for (int i=0; i<rank; i++) {
             idims[i] = (int)dims[i];
             start[i] = 0;
-            tsize *= idims[i];
+            // tsize *= idims[i];
         }
 
         // only the first element of the SDcreate parameter dim_sizes (i.e.,
@@ -929,14 +940,16 @@ public class H4SDS extends ScalarDS
 
         // unlimted cannot be used with chunking or compression for HDF 4.2.6 or earlier.
         if (idims[0] == 0 && (ichunks != null || gzip>0)) {
-            throw new HDFException("Unlimted cannot be used with chunking or compression");
+            log.debug("create(): Unlimited cannot be used with chunking or compression");
+            log.trace("create(): finish");
+            throw new HDFException("Unlimited cannot be used with chunking or compression");
         }
 
-        int sdid = (file).getSDAccessID();
-        int sdsid = -1;
-        int vgid = -1;
+        long sdid = (file).getSDAccessID();
+        long sdsid = -1;
+        long vgid = -1;
         // datatype
-        int tid = type.toNative();
+        long tid = type.toNative();
 
         if(tid >= 0) {
             try {
@@ -966,11 +979,15 @@ public class H4SDS extends ScalarDS
 
             }
             catch (Exception ex) {
+                log.debug("create(): failure: ", ex);
+                log.trace("create(): finish");
                 throw (ex);
             }
         }
 
         if (sdsid < 0) {
+            log.debug("create(): Dataset creation failed");
+            log.trace("create(): finish");
             throw (new HDFException("Unable to create the new dataset."));
         }
 
@@ -997,7 +1014,9 @@ public class H4SDS extends ScalarDS
                 HDFLibrary.SDsetchunk (sdsid, chunkInfo, flag);
             }
             catch (Throwable err) {
+                log.debug("create(): SDsetchunk failure: ", err);
                 err.printStackTrace();
+                log.trace("create(): finish");
                 throw new HDFException("SDsetchunk failed.");
             }
         }
@@ -1016,6 +1035,8 @@ public class H4SDS extends ScalarDS
                 if (sdsid > 0) {
                     HDFLibrary.SDendaccess(sdsid);
                 }
+                log.debug("create(): Invalid Parent Group ID");
+                log.trace("create(): finish");
                 throw (new HDFException("Unable to open the parent group."));
             }
 
@@ -1041,7 +1062,6 @@ public class H4SDS extends ScalarDS
         }
 
         log.trace("create(): finish");
-        
         return dataset;
     }
 
@@ -1061,15 +1081,16 @@ public class H4SDS extends ScalarDS
     /**
      * copy attributes from one SDS to another SDS
      */
-    private void copyAttribute(int srcdid, int dstdid)
+    private void copyAttribute(long srcdid, long dstdid)
     {
+        log.trace("copyAttribute(): start: srcdid={} dstdid={}", srcdid, dstdid);
         try {
             String[] objName = {""};
             int[] sdInfo = {0, 0, 0};
             int[] tmpDim = new int[HDFConstants.MAX_VAR_DIMS];
             HDFLibrary.SDgetinfo(srcdid, objName, tmpDim, sdInfo);
             int numberOfAttributes = sdInfo[2];
-            log.trace("copyAttribute(): srcdid={} dstdid={} numberOfAttributes={}", srcdid, dstdid, numberOfAttributes);
+            log.trace("copyAttribute(): numberOfAttributes={}", numberOfAttributes);
 
             boolean b = false;
             String[] attrName = new String[1];
@@ -1080,7 +1101,7 @@ public class H4SDS extends ScalarDS
                     b = HDFLibrary.SDattrinfo(srcdid, i, attrName, attrInfo);
                 }
                 catch (HDFException ex) {
-                    log.debug("copyAttribute(): SDattrinfo failure: ", ex);
+                    log.debug("copyAttribute(): attribute[{}] SDattrinfo failure: ", i, ex);
                     b = false;
                 }
 
@@ -1094,11 +1115,13 @@ public class H4SDS extends ScalarDS
                     HDFLibrary.SDreadattr(srcdid, i, attrBuff);
                 }
                 catch (HDFException ex) {
-                    log.debug("copyAttribute(): SDreadattr failure: ", ex);
+                    log.debug("copyAttribute(): attribute[{}] SDreadattr failure: ", i, ex);
                     attrBuff = null;
                 }
 
                 if (attrBuff == null) {
+                    log.debug("copyAttribute(): attrBuff[{}] is null", i);
+                    log.trace("copyAttribute(): continue");
                     continue;
                 }
 
@@ -1109,11 +1132,12 @@ public class H4SDS extends ScalarDS
         catch (Exception ex) {
             log.debug("copyAttribute(): failure: ", ex);
         }
-        
+
         log.trace("copyAttribute(): finish");
     }
 
     //Implementing DataFormat
+    @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

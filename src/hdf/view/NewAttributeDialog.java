@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -40,7 +41,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -61,7 +61,7 @@ public class NewAttributeDialog extends Dialog {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 
     private Shell             shell;
-    
+
     private Font              curFont;
 
     /** the default length of a string attribute */
@@ -112,7 +112,7 @@ public class NewAttributeDialog extends Dialog {
      */
     public NewAttributeDialog(Shell parent, HObject obj, List<HObject> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -357,7 +357,7 @@ public class NewAttributeDialog extends Dialog {
 
             objChoice.add(hobj.getFullName());
         }
-        
+
         // Add label to take up extra space when resizing dialog
         label = new Label(content, SWT.LEFT);
         label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -405,7 +405,7 @@ public class NewAttributeDialog extends Dialog {
         objChoice.select(0);
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -421,11 +421,10 @@ public class NewAttributeDialog extends Dialog {
 
         shell.open();
 
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed())
             if (!display.readAndDispatch())
                 display.sleep();
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -507,20 +506,14 @@ public class NewAttributeDialog extends Dialog {
             }
             torder = Datatype.NATIVE;
 
-            MessageBox warn = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-            warn.setText(shell.getText());
-            warn.setMessage("Multi-dimensional Variable Length Integer Attributes will be created without data.");
-            warn.open();
+            MessageDialog.openWarning(shell, shell.getText(), "Multi-dimensional Variable Length Integer Attributes will be created without data.");
         }
         else if (idx == 6) {;
             isVLen = true;
             tclass = Datatype.CLASS_FLOAT;
             torder = Datatype.NATIVE;
 
-            MessageBox warn = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-            warn.setText(shell.getText());
-            warn.setMessage("Multi-dimensional Variable Length Float Attributes will be created without data.");
-            warn.open();
+            MessageDialog.openWarning(shell, shell.getText(), "Multi-dimensional Variable Length Float Attributes will be created without data.");
         }
         else if (idx == 7) {
             isVLen = true;
@@ -899,9 +892,9 @@ public class NewAttributeDialog extends Dialog {
                         while(scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
-                        
+
                         browser.setText(buffer.toString());
-                        
+
                         scan.close();
                         in.close();
                     }

@@ -200,13 +200,13 @@ public class NC2Dataset extends ScalarDS {
 
     // Implementing HObject
     @Override
-    public int open() {
+    public long open() {
         return -1;
     }
 
     // Implementing HObject
     @Override
-    public void close(int did) {
+    public void close(long did) {
     }
 
     /**

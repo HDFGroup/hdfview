@@ -22,7 +22,7 @@ import java.util.Vector;
  * A scalar dataset is a multiple dimension array of scalar points. The Datatype of a scalar dataset must be an atomic
  * datatype. Common datatypes of scalar datasets include char, byte, short, int, long, float, double and string.
  * <p>
- * A ScalarDS can be an image or spreadsheet data. ScalarDS defines few methods to deal with both images and
+ * A ScalarDS can be an image or spreadsheet data. ScalarDS defines methods to deal with both images and
  * spreadsheets.
  * <p>
  * ScalarDS is an abstract class. Current implementing classes are the H4SDS, H5GRImage and H5ScalarDS.
@@ -31,16 +31,16 @@ import java.util.Vector;
  * @author Peter X. Cao
  */
 public abstract class ScalarDS extends Dataset {
-    /**
-     *
-     */
     private static final long serialVersionUID = 8925371455928203981L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDS.class);
 
-    // The following constant strings are copied from
-    // http://hdf.uiuc.edu/HDF5/doc/ADGuide/ImageSpec.html
-    // to make the definition consistent with the image specs.
+    /************************************************************
+     * The following constant strings are copied from           *
+     * https://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html *
+     * to make the definition consistent with the image specs.  *
+     ************************************************************/
+
     /**
      * Indicates that the pixel RGB values are contiguous.
      */
@@ -102,11 +102,11 @@ public abstract class ScalarDS extends Dataset {
 
     private List<Number> filteredImageValues;
 
-    /** Flag to indicate if the dataset is displayed as an image */
+    /** Flag to indicate if the dataset is displayed as an image. */
     protected boolean isImageDisplay;
 
     /**
-     * Flag to indicate if the dataset is displayed as an image with default order of dimensions
+     * Flag to indicate if the dataset is displayed as an image with default order of dimensions.
      */
     protected boolean isDefaultImageOrder;
 
@@ -161,7 +161,7 @@ public abstract class ScalarDS extends Dataset {
         isImageDisplay = false;
         isDefaultImageOrder = true;
         isFillValueConverted = false;
-        filteredImageValues = new Vector<Number>();
+        filteredImageValues = new Vector<>();
     }
 
     /*
@@ -184,11 +184,11 @@ public abstract class ScalarDS extends Dataset {
      * @return the converted data buffer.
      */
     public Object convertFromUnsignedC() {
+        log.trace("convertFromUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        log.trace("convertFromUnsignedC: start");
         if ((data != null) && isUnsigned && !unsignedConverted) {
-            log.trace("convertFromUnsignedC: convert");
+            log.trace("convertFromUnsignedC(): convert");
             originalBuf = data;
             convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
             data = convertedBuf;
@@ -203,7 +203,7 @@ public abstract class ScalarDS extends Dataset {
 
         }
 
-        log.trace("convertFromUnsignedC: finish");
+        log.trace("convertFromUnsignedC(): finish");
         return data;
     }
 
@@ -217,31 +217,34 @@ public abstract class ScalarDS extends Dataset {
      * @return the converted data buffer.
      */
     public Object convertToUnsignedC() {
+        log.trace("convertToUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
         if ((data != null) && isUnsigned) {
+            log.trace("convertToUnsignedC(): convert");
             convertedBuf = data;
             originalBuf = convertToUnsignedC(convertedBuf, originalBuf);
             data = originalBuf;
         }
 
+        log.trace("convertToUnsignedC(): finish");
         return data;
     }
 
     /**
      * Returns the palette of this scalar dataset or null if palette does not exist.
      * <p>
-     * Scalar dataset can be displayed as spreadsheet data or image. When a scalar dataset is chosen to display as an
+     * A Scalar dataset can be displayed as spreadsheet data or an image. When a scalar dataset is displayed as an
      * image, the palette or color table may be needed to translate a pixel value to color components (for example, red,
      * green, and blue). Some scalar datasets have no palette and some datasets have one or more than one palettes. If
-     * an associated palette exists but not loaded, this interface retrieves the palette from the file and returns the
-     * palette. If the palette is loaded, it returnd the palette. It returns null if there is no palette assciated with
+     * an associated palette exists but is not loaded, this interface retrieves the palette from the file and returns the
+     * palette. If the palette is loaded, it returns the palette. It returns null if there is no palette associated with
      * the dataset.
      * <p>
      * Current implementation only supports palette model of indexed RGB with 256 colors. Other models such as
      * YUV", "CMY", "CMYK", "YCbCr", "HSV will be supported in the future.
      * <p>
-     * The palette values are stored in a two-dimensional byte array and arrange by color components of red, green and
+     * The palette values are stored in a two-dimensional byte array and are arranges by color components of red, green and
      * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
      * components respectively.
      * <p>
@@ -309,7 +312,7 @@ public abstract class ScalarDS extends Dataset {
      * Returns true if this dataset is an image.
      * <p>
      * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For more
-     * details, read <a href="http://hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification
+     * details, read <a href="https://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification
      * </a>
      *
      * @return true if the dataset is an image; otherwise, returns false.
@@ -321,7 +324,7 @@ public abstract class ScalarDS extends Dataset {
     /**
      * Returns true if this dataset is displayed as an image.
      * <p>
-     * A ScalarDS can be displayed as an image or table.
+     * A ScalarDS can be displayed as an image or a spreadsheet in a table.
      *
      * @return true if this dataset is displayed as an image; otherwise, returns false.
      */
@@ -349,10 +352,6 @@ public abstract class ScalarDS extends Dataset {
      */
     public final void setIsImageDisplay(boolean b) {
         isImageDisplay = b;
-
-        if (isImageDisplay) {
-            enumConverted = false;
-        }
     }
 
     /**
@@ -363,10 +362,6 @@ public abstract class ScalarDS extends Dataset {
      */
     public final void setIsImage(boolean b) {
         isImage = b;
-
-        if (isImage) {
-            enumConverted = false;
-        }
     }
 
     /**
@@ -389,13 +384,12 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
-     * Add a value that will be filtered out in image
+     * Add a value that will be filtered out in an image.
      *
      * @param x
      *            value to be filtered
      */
     public void addFilteredImageValue(Number x) {
-
         Iterator<Number> it = filteredImageValues.iterator();
         while (it.hasNext()) {
             if (it.next().toString().equals(x.toString()))
@@ -406,7 +400,7 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
-     * get a list of values that will be filtered out in image
+     * Get a list of values that will be filtered out in an image.
      *
      * @return the list of Image values
      */
@@ -450,9 +444,9 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
-     * Returns true if the original C data are unsigned integers.
+     * Returns true if the original C data is unsigned integers.
      *
-     * @return true if the original C data are unsigned integers.
+     * @return true if the original C data is unsigned integers.
      */
     public final boolean isUnsigned() {
         return isUnsigned;
@@ -475,5 +469,4 @@ public abstract class ScalarDS extends Dataset {
     public final Object getFillValue() {
         return fillValue;
     }
-
 }

@@ -55,7 +55,7 @@ import hdf.object.ScalarDS;
 public class NewImageDialog extends Dialog {
 
     private Shell       shell;
-    
+
     private Font        curFont;
 
     private Text        nameField, widthField, heightField;
@@ -89,7 +89,7 @@ public class NewImageDialog extends Dialog {
      */
     public NewImageDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -276,7 +276,7 @@ public class NewImageDialog extends Dialog {
         checkInterlacePlane.setEnabled(false);
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -292,11 +292,10 @@ public class NewImageDialog extends Dialog {
 
         shell.open();
 
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed())
             if (!display.readAndDispatch())
                 display.sleep();
-        }
     }
 
     private Dataset createHDFimage() {

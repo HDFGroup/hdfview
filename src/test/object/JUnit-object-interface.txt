@@ -1,0 +1,8 @@
+JUnit version 4.11
+........................................................................................................................................................
+Time:  XXXX
+
+OK (152 tests)
+
+[main] INFO hdf.hdf5lib.H5 - HDF5 library: jhdf5
+[main] INFO hdf.hdf5lib.H5 -  successfully loaded from java.library.path

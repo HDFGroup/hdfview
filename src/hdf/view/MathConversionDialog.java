@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Text;
  */
 public class MathConversionDialog extends Dialog {
     private Shell       shell;
-    
+
     private Font        curFont;
 
     private Text        aField, bField;
@@ -71,7 +71,7 @@ public class MathConversionDialog extends Dialog {
      */
     public MathConversionDialog(Shell parent, Object data) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -226,7 +226,7 @@ public class MathConversionDialog extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();

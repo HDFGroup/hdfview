@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -36,7 +37,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -54,7 +54,7 @@ import hdf.object.HObject;
 public class NewGroupDialog extends Dialog {
 
     private Shell       shell;
-    
+
     private Font        curFont;
 
     /* Used to restore original size after click "less" button */
@@ -106,7 +106,7 @@ public class NewGroupDialog extends Dialog {
      */
     public NewGroupDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
-        
+
         try {
             curFont = new Font(
                     Display.getCurrent(),
@@ -251,7 +251,7 @@ public class NewGroupDialog extends Dialog {
         });
 
         shell.pack();
-        
+
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
@@ -269,17 +269,16 @@ public class NewGroupDialog extends Dialog {
 
         shell.open();
 
-        Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed())
             if (!display.readAndDispatch())
                 display.sleep();
-        }
     }
 
     private HObject create() {
         String name = null;
         Group pgroup = null;
-        int gcpl = 0;
+        long gcpl = 0;
 
         name = nameField.getText();
         if (name == null || name.length() == 0) {
@@ -375,10 +374,7 @@ public class NewGroupDialog extends Dialog {
                         + "now be explicitly tracked and indexed in the order that they were created. \n\n"
                         + "The default order in which links in a group are listed is alphanumeric-by-name. \n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(msg);
-                info.open();
+                MessageDialog.openInformation(shell, shell.getText(), msg);
             }
         });
 
@@ -439,10 +435,7 @@ public class NewGroupDialog extends Dialog {
                         + "Groups which are in indexed format and in which the number of links falls    \n"
                         + "below this threshold are automatically converted to compact format. \n\n\n";
 
-                MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-                info.setText(shell.getText());
-                info.setMessage(msg);
-                info.open();
+                MessageDialog.openInformation(shell, shell.getText(), msg);
             }
         });
 
