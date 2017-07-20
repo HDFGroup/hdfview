@@ -1,4 +1,4 @@
-The current HDF-View products can be downloaded at:
+The current HDFView products can be downloaded at:
         http://www.hdfgroup.org/downloads/
 
 

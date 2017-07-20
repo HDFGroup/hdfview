@@ -185,7 +185,6 @@ public class DefaultTreeView implements TreeView {
     /** Flag to indicate if TreeItems are being moved */
     private boolean                       moveFlag = false;
 
-    /** Flag to indicate if */
     private boolean                       isApplyBitmaskOnly  = false;
 
     private int                           currentIndexType;
