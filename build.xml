@@ -427,6 +427,10 @@
     <javac srcdir="${test.dir}" destdir="${classes.dir}"
       includes="**/*.java"
       includeantruntime="false">
+
+      <compilerarg value="-Xlint:deprecation"/>
+      <compilerarg value="-Xlint:unchecked"/>
+
       <classpath>
         <path refid="project-classpath" />
         <path refid="unit-classpath" />
