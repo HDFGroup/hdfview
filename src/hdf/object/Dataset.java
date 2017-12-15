@@ -210,7 +210,7 @@ public abstract class Dataset extends HObject {
     public Dataset(FileFormat theFile, String name, String path, long[] oid) {
         super(theFile, name, path, oid);
 
-        rank = 0;
+        rank = -1;
         data = null;
         dims = null;
         maxDims = null;

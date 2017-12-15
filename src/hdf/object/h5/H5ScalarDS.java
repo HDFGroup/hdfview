@@ -1726,7 +1726,8 @@ public class H5ScalarDS extends ScalarDS {
 
         try {
             // try to find attribute name
-            aid = H5.H5Aopen_by_name(oid, ".", aname, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            if(H5.H5Aexists_by_name(oid, ".", aname, HDF5Constants.H5P_DEFAULT))
+                aid = H5.H5Aopen_by_name(oid, ".", aname, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (HDF5LibraryException ex5) {
             log.debug("getAttrValue(): Failed to find attribute {} : Expected", aname);
@@ -2227,7 +2228,8 @@ public class H5ScalarDS extends ScalarDS {
         byte[] ref_buf = null;
 
         try {
-            aid = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT))
+                aid = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             sid = H5.H5Aget_space(aid);
             rank = H5.H5Sget_simple_extent_ndims(sid);
             size = 1;
