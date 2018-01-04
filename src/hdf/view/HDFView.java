@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -100,6 +101,16 @@ import hdf.object.h5.H5Link;
 public class HDFView implements ViewManager {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
+
+    //public final static String S3FILE_ACCESS_URL = "http://minio.ad.hdfgroup.org:9000/shakespeare/t1.h5";
+    //public final static String S3FILE_ACCESS_REGION = "us-east-1";
+    //public final static String S3FILE_ACCESS_ID = "HDFGROUP0";
+    //public final static String S3FILE_ACCESS_KEY = "HDFGROUP0";
+
+    public final static String S3FILE_ACCESS_URL = "https://s3.us-east-2.amazonaws.com/hdf5ros3/GMODO-SVM01.h5";
+    public final static String S3FILE_ACCESS_REGION = "";
+    public final static String S3FILE_ACCESS_ID = "";
+    public final static String S3FILE_ACCESS_KEY = "";
 
     private static Display             display;
     private static Shell               mainWindow;
@@ -247,11 +258,9 @@ public class HDFView implements ViewManager {
         paletteViews = ViewProperties.getPaletteViewList();
         helpViews = ViewProperties.getHelpViewList();
 
-        int n = treeViews.size();
         Class<?> theClass = null;
-        for (int i = 0; i < n; i++) {
+        for (String className : treeViews) {
             // Use the first available treeview
-            String className = treeViews.get(i);
 
             // Enables use of JHDF5 in JNLP (Web Start) applications, the system
             // class loader with reflection first.
@@ -332,25 +341,14 @@ public class HDFView implements ViewManager {
         // opening any files
         mainWindow.pack();
 
-        int nfiles = flist.size();
-        File theFile = null;
-        for (int i = 0; i < nfiles; i++) {
-            theFile = flist.get(i);
-
+        /*
+        for (File theFile : flist) {
             if (theFile.isFile()) {
                 currentDir = theFile.getParentFile().getAbsolutePath();
                 currentFile = theFile.getAbsolutePath();
-
                 try {
                     treeView.openFile(currentFile, FileFormat.WRITE);
-
-                    try {
-                        url_bar.remove(currentFile);
-                    }
-                    catch (Exception ex) {}
-
-                    url_bar.add(currentFile, 0);
-                    url_bar.select(0);
+                    this.updateMostRecentFileURL(currentFile);
                 }
                 catch (Exception ex) {
                     showStatus(ex.toString());
@@ -359,8 +357,24 @@ public class HDFView implements ViewManager {
             else {
                 currentDir = theFile.getAbsolutePath();
             }
-
             log.info("CurrentDir is {}", currentDir);
+        }
+        */
+
+        /* TODO: very hardcoded */
+        currentDir = "";
+        currentFile = S3FILE_ACCESS_URL;
+        try {
+            Map<String, String> s3acc = new java.util.HashMap<>(4);
+            s3acc.put("url", S3FILE_ACCESS_URL);
+            s3acc.put("region", S3FILE_ACCESS_REGION);
+            s3acc.put("id", S3FILE_ACCESS_ID);
+            s3acc.put("key", S3FILE_ACCESS_KEY);
+
+            this.openS3ReadOnly(s3acc);
+        }
+        catch (Exception ex) {
+            showStatus(ex.toString());
         }
 
         if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null)
@@ -515,6 +529,23 @@ public class HDFView implements ViewManager {
                     openLocalFile(null, FileFormat.READ);
                 }
             });
+
+            item = new MenuItem(fileMenu, SWT.PUSH);
+            item.setText("Open S3 Read-Only");
+            item.addSelectionListener(new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    S3ResourceChooserDialog d = 
+                            new S3ResourceChooserDialog(shell);
+                    d.open();
+                    try {
+                        openS3ReadOnly(d.getInput());
+                    } catch (Exception ex) {
+                        log.debug(
+                                "unable to open S3 file with given credentials",
+                                ex);
+                    }
+                }
+            });
         }
 
         // boolean isSrbSupported = true;
@@ -587,14 +618,7 @@ public class HDFView implements ViewManager {
                 try {
                     treeView.openFile(filename, FileFormat.WRITE);
                     currentFile = filename;
-
-                    try {
-                        url_bar.remove(filename);
-                    }
-                    catch (Exception ex) {}
-
-                    url_bar.add(filename, 0);
-                    url_bar.select(0);
+                    updateMostRecentFileURL(filename);
                 }
                 catch (Exception ex) {
                     display.beep();
@@ -651,14 +675,7 @@ public class HDFView implements ViewManager {
                 try {
                     treeView.openFile(filename, FileFormat.WRITE);
                     currentFile = filename;
-
-                    try {
-                        url_bar.remove(filename);
-                    }
-                    catch (Exception ex) {}
-
-                    url_bar.add(filename, 0);
-                    url_bar.select(0);
+                    updateMostRecentFileURL(filename);
                 }
                 catch (Exception ex) {
                     display.beep();
@@ -2131,10 +2148,6 @@ public class HDFView implements ViewManager {
 
     /**
      * Bring window to the front.
-     * <p>
-     *
-     * @param name
-     *               the name of the window to show.
      */
     private void showWindow(final Shell shell) {
         shell.getDisplay().asyncExec(new Runnable() {
@@ -2254,14 +2267,7 @@ public class HDFView implements ViewManager {
             else {
                 currentFile = filename;
             }
-
-            try {
-                url_bar.remove(filename);
-            }
-            catch (Exception ex) {}
-
-            url_bar.add(filename, 0);
-            url_bar.select(0);
+            this.updateMostRecentFileURL(filename);
 
             try {
                 treeView.openFile(filename, accessMode);
@@ -2310,14 +2316,7 @@ public class HDFView implements ViewManager {
                     else {
                         currentDir = chosenFiles[i].getParent();
                     }
-
-                    try {
-                        url_bar.remove(chosenFiles[i].getAbsolutePath());
-                    }
-                    catch (Exception ex) {}
-
-                    url_bar.add(chosenFiles[i].getAbsolutePath(), 0);
-                    url_bar.select(0);
+                    this.updateMostRecentFileURL(chosenFiles[i].getPath());
 
                     log.trace("openLocalFile treeView.openFile(chosenFiles[{}]: {}",i,chosenFiles[i].getAbsolutePath());
                     try {
@@ -2355,13 +2354,7 @@ public class HDFView implements ViewManager {
                     currentDir = chosenFile.getParent();
                 }
 
-                try {
-                    url_bar.remove(chosenFile.getAbsolutePath());
-                }
-                catch (Exception ex) {}
-
-                url_bar.add(chosenFile.getAbsolutePath(), 0);
-                url_bar.select(0);
+                this.updateMostRecentFileURL(chosenFile.getAbsolutePath());
 
                 log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}",chosenFile.getAbsolutePath());
                 try {
@@ -2484,6 +2477,63 @@ public class HDFView implements ViewManager {
         return localFile;
     }
 
+    /**
+     * Given a string, try to find the resource it points to and open it
+     * Do _not_ load file into local filesystem--let HDF5 do that for us.
+     * Only available for HDF5 files
+     *
+     * @param s3Access map of key:value strings for file access:
+     *                 url : path/url to file
+     * (unimplemented) authenticate : "true" | "", whether to authenticate
+     *                 region : AWS region for authentication
+     *                 id : Access ID for authentication
+     *                 key : Access "Secret" Key for authentication
+     */
+    private void openS3ReadOnly(Map<String, String> s3Access) throws Exception {
+        String fileUrl = s3Access.get("url");
+        String region  = s3Access.get("region");
+        String id      = s3Access.get("id");
+        String key     = s3Access.get("key");
+
+        if (fileUrl.equals(""))
+            throw new Exception("invalid url");
+
+        log.info("ready to open S3 File: " + fileUrl + ", " + region + ", " +
+                 id + ", " + key);
+
+        this.updateMostRecentFileURL(fileUrl);
+
+        try {
+            this.treeView.openFile(fileUrl, FileFormat.READ);
+        }
+        catch (Throwable ex) {
+            display.beep();
+            this.url_bar.deselectAll();
+            Tools.showError(mainWindow,
+                    "Failed to open file " + fileUrl + "\n" + ex,
+                    mainWindow.getText());
+            this.currentFile = null;
+        }
+    }
+
+    /**
+     * Update view of "recently used" files
+     *
+     * @param filename file name/url to set as most recent
+     */
+    private void updateMostRecentFileURL(String filename) {
+        try {
+            /* if already present, remove from current location */
+            url_bar.remove(filename);
+        }
+        catch (Exception e) {
+            log.debug("filename \"{}\" not in recent file paths", filename);
+        }
+        /* insert at top of list and select */
+        url_bar.add(filename, 0);
+        url_bar.select(0);
+    }
+
     /** Open file from SRB server */
     /*private void openFromSRB() throws Exception {
         if (ctrSrbFileDialog == null) {
@@ -2542,13 +2592,7 @@ public class HDFView implements ViewManager {
             try {
                 treeView.openFile(filename, FileFormat.WRITE);
 
-                try {
-                    url_bar.remove(filename);
-                }
-                catch (Exception ex) {}
-
-                url_bar.add(filename, 0);
-                url_bar.select(0);
+                this.updateMostRecentFileURL(filename);
             }
             catch (Exception ex) {
                 showStatus(ex.toString());

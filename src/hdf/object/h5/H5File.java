@@ -27,6 +27,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
+import hdf.hdf5lib.structs.H5FD_ros3_fapl_t;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
@@ -37,6 +38,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.HDFView;
 
 /**
  * H5File is an implementation of the FileFormat class for HDF5 files.
@@ -1012,7 +1014,8 @@ public class H5File extends FileFormat {
      */
     @Override
     public long open() throws Exception {
-        return open(true);
+        /* return open(true); */
+        return openS3(true); /* TODO: very hard-coded */
     }
 
     /**
@@ -2053,6 +2056,29 @@ public class H5File extends FileFormat {
     }
 
     /**
+     * Open a file using S3 remote hosting
+     * Currently is hard-wired to get credentials from static variables in DefaultTreeView.java
+     *
+     * @param loadFullHeirarcy
+     * @return file_id
+     * @throws Exception
+     */
+    private long openS3(boolean loadFullHeirarcy) throws Exception {
+        long fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+
+        H5FD_ros3_fapl_t fa = new H5FD_ros3_fapl_t(
+                hdf.view.HDFView.S3FILE_ACCESS_REGION,
+                hdf.view.HDFView.S3FILE_ACCESS_ID,
+                hdf.view.HDFView.S3FILE_ACCESS_KEY);
+        H5.H5Pset_fapl_ros3(fapl_id, fa);
+
+        long file_id = open(loadFullHeirarcy, fapl_id);
+        H5.H5Pclose(fapl_id);
+
+        return file_id;
+    }
+
+    /**
      * Opens access to this file.
      *
      * @param loadFullHierarchy
@@ -2095,27 +2121,40 @@ public class H5File extends FileFormat {
             H5.H5Fclose(fid);
             flag = HDF5Constants.H5F_ACC_RDWR;
         }
-        else if (!exists()) {
-            log.debug("open(): File {} does not exist", fullFileName);
-            log.trace("open(): finish");
-            throw new HDF5Exception("File does not exist -- " + fullFileName);
-        }
+//        else if (!exists()) { // TODO: where does this live?
+//            log.debug("open(): File {} does not exist", fullFileName);
+//            log.trace("open(): finish");
+//            throw new HDF5Exception("File does not exist -- " + fullFileName);
+//        }
         else if (((flag == HDF5Constants.H5F_ACC_RDWR) || (flag == HDF5Constants.H5F_ACC_CREAT)) && !canWrite()) {
             log.debug("open(): Cannot write file {}", fullFileName);
             log.trace("open(): finish");
             throw new HDF5Exception("Cannot write file, try opening as read-only -- " + fullFileName);
         }
-        else if ((flag == HDF5Constants.H5F_ACC_RDONLY) && !canRead()) {
-            log.debug("open(): Cannot read file {}", fullFileName);
-            log.trace("open(): finish");
-            throw new HDF5Exception("Cannot read file -- " + fullFileName);
-        }
+//        else if ((flag == HDF5Constants.H5F_ACC_RDONLY) && !canRead()) { // TODO: where does canRead() live?
+//            log.debug("open(): Cannot read file {}", fullFileName);
+//            log.trace("open(): finish");
+//            throw new HDF5Exception("Cannot read file -- " + fullFileName);
+//        }
 
         try {
             log.trace("open(): open file");
-            fid = H5.H5Fopen(fullFileName, flag, plist);
+
+            // s3 hardwiring debugging info
+            //log.debug(H5.H5Pget_fapl_ros3(plist).toString());
+            //if (flag == HDF5Constants.H5F_ACC_RDONLY)
+            //   log.debug("IS READ ONLY");
+            //else
+            //    log.debug("IS NOT READ ONLY");
+            //log.debug(fullFileName);
+            //log.debug(HDFView.S3FILE_ACCESS_URL);
+
+            //fid = H5.H5Fopen(fullFileName, flag, plist);
+            fid = H5.H5Fopen(HDFView.S3FILE_ACCESS_URL, flag, plist);
         }
         catch (Exception ex) {
+            log.debug("open: open failed", ex);
+            /*
             try {
                 log.debug("open(): open failed, attempting to open file read-only");
                 fid = H5.H5Fopen(fullFileName, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
@@ -2175,7 +2214,8 @@ public class H5File extends FileFormat {
                 } catch (Exception ex3) {
                     log.debug("open(): open failed: ", ex3);
                 }
-            } /* catch (Exception ex) { */
+                */
+            //}
         }
 
         if ((fid >= 0) && loadFullHierarchy) {
