@@ -2316,7 +2316,7 @@ public class HDFView implements ViewManager {
                     else {
                         currentDir = chosenFiles[i].getParent();
                     }
-                    this.updateMostRecentFileURL(chosenFiles[i].getPath());
+                    this.updateMostRecentFileURL(chosenFiles[i].getAbsolutePath());
 
                     log.trace("openLocalFile treeView.openFile(chosenFiles[{}]: {}",i,chosenFiles[i].getAbsolutePath());
                     try {
