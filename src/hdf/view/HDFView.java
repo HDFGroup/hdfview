@@ -1248,7 +1248,7 @@ public class HDFView implements ViewManager {
         List<?> attrList = null;
         int numAttributes = 0;
         try {
-            attrList = hObject.getMetadata();
+            attrList = obj.getMetadata();
             numAttributes = attrList.size();
         }
         catch (Exception ex) {
