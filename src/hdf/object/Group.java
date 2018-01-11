@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -182,7 +182,7 @@ public abstract class Group extends HObject {
             Object uObj = null;
             while (it.hasNext()) {
                 uObj = it.next();
-                
+
                 if (uObj instanceof Group) {
                     g = (Group) uObj;
                     if (g.getPath() != null) // add this check to get rid of null exception

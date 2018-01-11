@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -126,8 +126,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * A default color table is provided for images without palette attached to it.
  * Current choice of default palettes include Gray, Rainbow, Nature and Wave.
  * For more infomation on palette,
- * read <a href="http://hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and
- * Palette Specification </a>
+ * read <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html">HDF5 Image and Palette Specification</a>
  *
  * @author Jordan T. Henderson
  * @version 2.4 2//2016

@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -33,7 +33,7 @@ import hdf.object.Datatype;
 public class H4Datatype extends Datatype
 {
     private static final long serialVersionUID = -1342029403385521874L;
-    
+
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Datatype.class);
 
     /**
