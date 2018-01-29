@@ -1,5 +1,5 @@
 The current HDFView products can be downloaded at:
-        http://www.hdfgroup.org/downloads/
+        https://www.hdfgroup.org/downloads/hdfview/
 
 
 HDF Libraries

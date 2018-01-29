@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -609,8 +609,8 @@ public class H5File extends FileFormat {
      * attributes to an HDF5 image dataset with a single call. The {@link #writeAttribute(HObject, Attribute, boolean)}
      * method may be used to write image attributes that are not handled by this method.
      * <p>
-     * For more information about HDF5 image attributes, see the <a
-     * href="https://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>.
+     * For more information about HDF5 image attributes, see the
+     * <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>.
      * <p>
      * This method can be called to create attributes for 24-bit true color and indexed images. The
      * <code>selectionFlag</code> parameter controls whether this will be an indexed or true color image. If

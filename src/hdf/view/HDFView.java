@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -155,7 +155,7 @@ public class HDFView implements ViewManager {
     private static final String        HDF4_VERSION = HDFVersions.HDF4_VERSION;
     private static final String        HDF5_VERSION = HDFVersions.HDF5_VERSION;
     private static final String        HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
-    private static final String        HDFVIEW_USERSGUIDE_URL = "http://www.hdfgroup.org/products/java/hdfview/UsersGuide/index.html";
+    private static final String        HDFVIEW_USERSGUIDE_URL = "https://support.hdfgroup.org/products/java/hdfview/index.html";
     private static final String        JAVA_COMPILER = "jdk 1.7";
     private static final String        JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
 
@@ -1245,11 +1245,14 @@ public class HDFView implements ViewManager {
         log.trace("showMetaData: start");
 
         // Get the metadata information before adding GUI components */
+        List<?> attrList = null;
         int numAttributes = 0;
         try {
-            numAttributes = obj.getMetadata().size();
+            attrList = obj.getMetadata();
+            numAttributes = attrList.size();
         }
         catch (Exception ex) {
+            attrList = null;
             log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
         }
 
@@ -1464,10 +1467,10 @@ public class HDFView implements ViewManager {
                     typeStr = "HDF5 Group";
                 }
                 else if (obj instanceof ScalarDS) {
-                    typeStr = "HDF5 Scalar Dataset";
+                    typeStr = "HDF5 Dataset";
                 }
                 else if (obj instanceof CompoundDS) {
-                    typeStr = "HDF5 Compound Dataset";
+                    typeStr = "HDF5 Dataset";
                 }
                 else if (obj instanceof Datatype) {
                     typeStr = "HDF5 Named Datatype";
@@ -1495,10 +1498,10 @@ public class HDFView implements ViewManager {
                     typeStr = "Group";
                 }
                 else if (obj instanceof ScalarDS) {
-                    typeStr = "Scalar Dataset";
+                    typeStr = "Dataset";
                 }
                 else if (obj instanceof CompoundDS) {
-                    typeStr = "Compound Dataset";
+                    typeStr = "Dataset";
                 }
             }
 

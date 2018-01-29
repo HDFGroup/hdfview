@@ -949,7 +949,7 @@
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
     <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_VERSION_STRING@" value="${hdfjava.version}" />
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X ${mac.uname}" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${mac.uname}" />
     <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
     <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
     <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />

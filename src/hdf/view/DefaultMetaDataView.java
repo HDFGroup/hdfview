@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -134,13 +134,6 @@ public class DefaultMetaDataView implements MetaDataView {
         shell.setText(sb.toString());
 
         // Get the metadata information before adding GUI components */
-        try {
-            hObject.getMetadata();
-        }
-        catch (Exception ex) {
-            log.debug("Error retrieving metadata of object " + hObject.getName() + ":", ex);
-        }
-
         // Create main content
         Composite content = createAttributesComposite(shell);
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
