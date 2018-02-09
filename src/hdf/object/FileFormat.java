@@ -15,12 +15,7 @@
 package hdf.object;
 
 import java.io.File;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * FileFormat defines general interfaces for working with files whose data is
@@ -142,24 +137,24 @@ public abstract class FileFormat extends File {
     public static final String                   FILE_OBJ_SEP       = "://";
 
     /**
-     * FileList keeps a list of supported FileFormats. This list can be updated
-     * and queried at runtime.
+     * FORMAT_MAP maintains supported FileFormats. Available formats can be
+     * updated and queried at runtime.
      *
      * @see #addFileFormat(String,FileFormat)
      * @see #getFileFormat(String)
      * @see #getFileFormatKeys()
-     * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    private static final Map<String, FileFormat> FileList = new Hashtable<String, FileFormat>(10);
+    private static final Map<String, FileFormat> FORMAT_MAP =
+            new Hashtable<>(10);
 
     /**
-     * A list of file extensions for the supported file formats. This list of
+     * A set of file extensions for the supported file formats. This set of
      * file extensions is not integrated with the supported file formats kept in
-     * FileList, but is provided as a convenience for applications who may
+     * FORMAT_MAP, but is provided as a convenience for applications who may
      * choose to process only those files with recognized extensions.
      */
-    private static String extensions         = "hdf, h4, hdf5, h5, nc, fits";
+    private static final Set<String> RECOGNIZED_EXTENSIONS = new HashSet<>();
 
     /***************************************************************************
      * Sizing information and class metadata
@@ -317,23 +312,11 @@ public abstract class FileFormat extends File {
 
     /**
      * Adds a FileFormat with specified key to the list of supported formats.
-     * <p>
+     *
      * This method allows a new FileFormat, tagged with an identifying key, to
      * be added dynamically to the list of supported File Formats. Using it,
      * applications can add new File Formats at runtime.
-     * <p>
-     * For example, to add a new File Format with the key "xyz" that is
-     * implemented by the class xyzFile in the package companyC.files, an
-     * application would make the following calls:
      *
-     * <pre>
-     *    Class fileClass = Class.forName( "companyC.files.xyzFile" );
-     *    FileFormat ff = (FileFormat) fileClass.newInstance();
-     *    if ( ff != null ) {
-     *       ff.addFileFormat ("xyz", ff )
-     *    }
-     * </pre>
-     * <p>
      * If either <code>key</code> or <code>fileformat</code> are
      * <code>null</code>, or if <code>key</code> is already in use, the method
      * returns without updating the list of supported File Formats.
@@ -344,121 +327,65 @@ public abstract class FileFormat extends File {
      *            An instance of the FileFormat to be added.
      * @see #getFileFormat(String)
      * @see #getFileFormatKeys()
-     * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    public static final void addFileFormat(String key, FileFormat fileformat) {
+    public static void addFileFormat(String key, FileFormat fileformat) {
         if ((fileformat == null) || (key == null)) {
             return;
         }
 
         key = key.trim();
 
-        if (!FileList.containsKey(key)) {
-            FileList.put(key, fileformat);
+        if (!FORMAT_MAP.containsKey(key)) {
+            FORMAT_MAP.put(key, fileformat);
         }
     }
 
     /**
-     * Returns the FileFormat with specified key from the list of supported
-     * formats.
-     * <p>
-     * This method returns a FileFormat instance, as identified by an
-     * identifying key, from the list of supported File Formats.
-     * <p>
-     * If the specified key is in the list of supported formats, the instance of
-     * the associated FileFormat object is returned. If the specified key is not
-     * in the list of supported formats, <code>null</code> is returned.
+     * Get the FileFormat associated with the specified key, if it exists.
      *
      * @param key
      *            A string that identifies the FileFormat.
      * @return The FileFormat that matches the given key, or <code>null</code>
-     *         if the key is not found in the list of supported File Formats.
+     *         if the key is not a key for a supported File Format.
      * @see #addFileFormat(String,FileFormat)
      * @see #getFileFormatKeys()
-     * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    public static final FileFormat getFileFormat(String key) {
-        return FileList.get(key);
+    public static FileFormat getFileFormat(String key) {
+        return FORMAT_MAP.get(key);
     }
 
     /**
-     * Returns an Enumeration of keys for all supported formats.
-     * <p>
-     * This method returns an Enumeration containing the unique keys (Strings)
-     * for the all File Formats in the list of supported File Formats.
+     * Get a Set view of all keys for supported formats.
      *
      * @return An Enumeration of keys that are in the list of supported formats.
      * @see #addFileFormat(String,FileFormat)
      * @see #getFileFormat(String)
-     * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
     @SuppressWarnings("rawtypes")
-    public static final Enumeration getFileFormatKeys() {
-        return ((Hashtable) FileList).keys();
+    public static Set<String> getFileFormatKeys() {
+        return FORMAT_MAP.keySet();
     }
 
     /**
-     * Returns an array of supported FileFormat instances.
-     * <p>
-     * This method returns an array of FileFormat instances that appear in the
-     * list of supported File Formats.
-     * <p>
-     * If the list of supported formats is empty, <code>null</code> is returned.
-     *
-     * @return An array of all FileFormat instances in the list of supported
-     *         File Formats, or <code>null</code> if the list is empty.
-     * @see #addFileFormat(String,FileFormat)
-     * @see #getFileFormat(String)
-     * @see #getFileFormatKeys()
-     * @see #removeFileFormat(String)
-     */
-    @SuppressWarnings("rawtypes")
-    public static final FileFormat[] getFileFormats() {
-        int n = FileList.size();
-        if (n <= 0) {
-            return null;
-        }
-
-        int i = 0;
-        FileFormat[] fileformats = new FileFormat[n];
-        Enumeration<?> local_enum = ((Hashtable) FileList).elements();
-        while (local_enum.hasMoreElements()) {
-            fileformats[i++] = (FileFormat) local_enum.nextElement();
-        }
-
-        return fileformats;
-    }
-
-    /**
-     * Removes a FileFormat from the list of supported formats.
-     * <p>
-     * This method removes a FileFormat, as identified by the specified key,
-     * from the list of supported File Formats.
-     * <p>
-     * If the specified key is in the list of supported formats, the instance of
-     * the FileFormat object that is being removed from the list is returned. If
-     * the key is not in the list of supported formats, <code>null</code> is
-     * returned.
+     * Remove FileFormat associated with given key from supported formats.
      *
      * @param key
      *            A string that identifies the FileFormat to be removed.
      * @return The FileFormat that is removed, or <code>null</code> if the key
-     *         is not found in the list of supported File Formats.
+     *         is not a key for a supported File Format.
      * @see #addFileFormat(String,FileFormat)
      * @see #getFileFormat(String)
      * @see #getFileFormatKeys()
-     * @see #getFileFormats()
      */
-    public static final FileFormat removeFileFormat(String key) {
-        return FileList.remove(key);
+    public static FileFormat removeFileFormat(String key) {
+        return FORMAT_MAP.remove(key);
     }
 
     /**
-     * Adds file extension(s) to the list of file extensions for supported file
-     * formats.
+     * Set the supported file extensions, e.g. hdf5, h4
      * <p>
      * Multiple extensions can be included in the single parameter if they are
      * separated by commas.
@@ -471,52 +398,52 @@ public abstract class FileFormat extends File {
      * <p>
      * By default, the file extensions list includes: "hdf, h4, hdf5, h5"
      *
-     * @param extension
-     *            The file extension(s) to add.
+     * @param formatted_string
+     *            Comma-separated list of the file extension(s) to use.
      * @see #addFileFormat(String,FileFormat)
      * @see #getFileExtensions()
      */
-    public static final void addFileExtension(String extension) {
-        if ((extensions == null) || (extensions.length() <= 0)) {
-            extensions = extension;
-        }
-
-        StringTokenizer currentExt = new StringTokenizer(extensions, ",");
-        Vector<String> tokens = new Vector<String>(currentExt.countTokens() + 5);
-
-        while (currentExt.hasMoreTokens()) {
-            tokens.add(currentExt.nextToken().trim().toLowerCase());
-        }
-
-        currentExt = new StringTokenizer(extension, ",");
-        String ext = null;
-        while (currentExt.hasMoreTokens()) {
-            ext = currentExt.nextToken().trim().toLowerCase();
-            if (tokens.contains(ext)) {
-                continue;
-            }
-
-            extensions = extensions + ", " + ext;
-        }
-
-        tokens.setSize(0);
+    public static void setFileExtensions(String formatted_string) {
+        clearFileExtensions();
+        addFileExtensions(formatted_string);
     }
 
     /**
-     * Returns a list of file extensions for all supported file formats.
-     * <p>
-     * The extensions in the returned String are separates by commas:
-     * "hdf, h4, hdf5, h5"
+     * Remove all filename extensions from recognized set.
+     */
+    public static void clearFileExtensions() {
+        RECOGNIZED_EXTENSIONS.clear();
+    }
+
+    /**
+     * Add the given formats to those already recognized.
+     * @param formatted_string Comma-separated list of filename extensions
+     */
+    public static void addFileExtensions(String formatted_string) {
+        if (formatted_string == null)
+            return;
+        StringTokenizer t = new StringTokenizer(formatted_string, ",");
+        while (t.hasMoreTokens()) {
+            String extension = t.nextToken().trim().toLowerCase();
+            while (extension.startsWith("."))
+                extension = extension.substring(1);
+            RECOGNIZED_EXTENSIONS.add("." + extension);
+        }
+    }
+
+    /**
+     * Get a set of all recognized file extensions.
      * <p>
      * It is the responsibility of the application to update the file extension
-     * list using {@link #addFileExtension(String)} when new FileFormat
+     * list using {@link #setFileExtensions(String)} when new FileFormat
      * implementations are added.
      *
-     * @return A list of file extensions for all supported file formats.
-     * @see #addFileExtension(String)
+     * @return A Set of Strings, each a recognized file extensions beginning
+     *         with a period ('.'), e.g. ".hdf5".
+     * @see #setFileExtensions(String)
      */
-    public static final String getFileExtensions() {
-        return extensions;
+    public static Set<String> getFileExtensions() {
+        return new HashSet<> (RECOGNIZED_EXTENSIONS);
     }
 
     /**
@@ -545,10 +472,9 @@ public abstract class FileFormat extends File {
      *             If there are problems creating the new instance.
      * @see #createFile(String, int)
      * @see #createInstance(String, int)
-     * @see #getFileFormats()
      */
     @SuppressWarnings("rawtypes")
-    public static final FileFormat getInstance(String filename) throws Exception {
+    public static FileFormat getInstance(String filename) throws Exception {
         if ((filename == null) || (filename.length() <= 0)) {
             throw new IllegalArgumentException("Invalid file name: " + filename);
         }
@@ -558,18 +484,11 @@ public abstract class FileFormat extends File {
         }
 
         FileFormat fileFormat = null;
-        FileFormat knownFormat = null;
-        Enumeration<?> elms = ((Hashtable) FileList).elements();
 
-        while (elms.hasMoreElements()) {
-            knownFormat = (FileFormat) elms.nextElement();
+        for (FileFormat knownFormat: FORMAT_MAP.values()) {
             if (knownFormat.isThisType(filename)) {
-                try {
-                    fileFormat = knownFormat.createInstance(filename, WRITE);
-                }
-                catch (Exception ex) {
-                    log.debug("File {} createInstance failure: ", filename, ex);
-                }
+                // createInstance may throw an exception
+                fileFormat = knownFormat.createInstance(filename, WRITE);
                 break;
             }
         }

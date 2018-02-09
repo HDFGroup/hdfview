@@ -1144,7 +1144,7 @@ public class ViewProperties extends Properties {
         propVal = (String) get("file.extension");
         if ((propVal != null) && (propVal.length() > 0)) {
             fileExt = propVal;
-            FileFormat.addFileExtension(fileExt);
+            FileFormat.addFileExtensions(fileExt);
         }
 
         propVal = (String) get("font.size");
@@ -1402,10 +1402,7 @@ public class ViewProperties extends Properties {
         }
 
         // save the current supported fileformat
-        Enumeration<?> keys = FileFormat.getFileFormatKeys();
-        String theKey = null;
-        while (keys.hasMoreElements()) {
-            theKey = (String) keys.nextElement();
+        for (String theKey : FileFormat.getFileFormatKeys()) {
             FileFormat theformat = FileFormat.getFileFormat(theKey);
             put("module.fileformat." + theKey, theformat.getClass().getName());
         }

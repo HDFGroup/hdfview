@@ -1,278 +1,328 @@
-/**
- * 
- */
 package test.object;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.Enumeration;
+import static org.junit.Assert.*;
 
 import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.FileFormat;
+import hdf.object.h4.H4File;
 import hdf.object.h5.H5File;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+
+import java.util.*;
 
 /**
- * @author rsinha
+ * @author rsinha, jacob smith
  * 
  */
 public class FileFormatTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormatTest.class);
-    private static final H5File H5FILE = new H5File();
-
+    private static Map<String, FileFormat> A_PRIORI_FORMATS = new HashMap<>(5);
+    private static String A_PRIORI_EXTENSIONS = "";
     private FileFormat testFile = null;
 
     @BeforeClass
-    public static void createFile() throws Exception {
-        try {
-            int openID = H5.getOpenIDCount();
-            if (openID > 0)
-                System.out.println("FileFormatTest BeforeClass: Number of IDs still open: " + openID);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        try {
-            H5TestFile.createTestFile(null);
-        }
-        catch (final Exception ex) {
-            System.out.println("*** Unable to create HDF5 test file. " + ex);
-            System.exit(-1);
-        }
+    public static void initializeConstantState() throws Exception {
+        assert(0 == H5.getOpenIDCount());
+        H5TestFile.createTestFile(null);
+
+        for (String k : FileFormat.getFileFormatKeys())
+            A_PRIORI_FORMATS.put(k, FileFormat.getFileFormat(k));
+
+        StringBuilder builder = new StringBuilder();
+        for (String s : FileFormat.getFileExtensions())
+            builder.append(s);
+        A_PRIORI_EXTENSIONS = builder.toString();
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
-        try {
-            int openID = H5.getOpenIDCount();
-            if (openID > 0)
-                System.out.println("FileFormatTest AfterClass: Number of IDs still open: " + openID);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    public static void afterTestBackout() {
+        FileFormat.setFileExtensions(A_PRIORI_EXTENSIONS);
+        removeAllFormats();
+        repopulateFormats(A_PRIORI_FORMATS);
 
+        H5File file = new H5File(
+                H5TestFile.NAME_FILE_H5, FileFormat.FILE_CREATE_DELETE);
+        file.delete();
+        assert(0 == H5.getOpenIDCount());
     }
 
     @Before
-    public void openFiles() throws Exception {
-        try {
-            int openID = H5.getOpenIDCount();
-            if (openID > 0)
-                log.debug("Before: Number of IDs still open: " + openID);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        testFile = H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
-        assertNotNull(testFile);
+    public void setup() throws Exception {
+        assert(0 == H5.getOpenIDCount());
+
+        testFile = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         testFile.open();
+
+        removeAllFormats();
+        FileFormat.clearFileExtensions();
     }
 
     @After
-    public void removeFiles() throws Exception {
-        if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-            }
-            testFile = null;
-        }
-        try {
-            int openID = H5.getOpenIDCount();
-            if (openID > 0)
-                log.debug("After: Number of IDs still open: " + openID);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    public void teardown() throws Exception {
+        testFile.close();
+        testFile = null;
+
+        removeAllFormats();
+        repopulateFormats(A_PRIORI_FORMATS);
+
+        assert(0 == H5.getOpenIDCount());
+    }
+
+    private static void removeAllFormats() {
+        // funky temporary storage to side-step concurrent modification
+        Object[] l = FileFormat.getFileFormatKeys().toArray();
+        for (Object o : l)
+            FileFormat.removeFileFormat((String) o);
+    }
+
+    private static void repopulateFormats(Map<String, FileFormat> map) {
+        for (String k : map.keySet())
+            FileFormat.addFileFormat(k, map.get(k));
     }
 
     /**
-     * Test method for {@link hdf.object.FileFormat#create(java.lang.String, int)}.
-     * <p>
-     * What to test:
-     * <ul>
-     * <li>Create a file that is already created with option FILE_CREATE_OPEN.
-     * <li>Create a file that is already created and opened with option FILE_CREATE_DELETE.
-     * <li>Create a file that is already created and not opened with FILE_CREATE_DELETE.
-     * <li>Create a file that is new with FILE_CREATE_DELETE.
-     * <li>Create a file that is new with FILE_CREATE_OPEN.
-     * </ul>
-     * 
+     * populate FileFormat supported format with subset of pre-loaded
+     *
+     * re-adds key/format elements into FileFormat's Formats
+     * @param keys array of format keys--each key must exist in FileFormat
+     *             on startup, prior to tests
      */
-    /*
-     * RUTH - come back and update this with new method, createInstance public final void testCreateStringInt() {
-     * FileFormat f = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-     * 
-     * try { f.create(H5TestFile.NAME_FILE_H5, FileFormat.FILE_CREATE_OPEN); } catch (Exception ex) {
-     * fail("Create Failed " + ex.getMessage()); } try { f.create(H5TestFile.NAME_FILE_H5,
-     * FileFormat.FILE_CREATE_DELETE); } catch (Exception ex) { ; //Expected to fail. } try { f.create("simpleFile",
-     * FileFormat.FILE_CREATE_DELETE); } catch (Exception ex) { fail("Create failed " + ex.getMessage()); } try {
-     * f.create("testFile", FileFormat.FILE_CREATE_DELETE); } catch (Exception ex) { fail("Create failed " +
-     * ex.getMessage()); } try { f.create("testFile", FileFormat.FILE_CREATE_OPEN); } catch (Exception ex) {
-     * fail("Create failed " + ex.getMessage()); } }
-     */
-    /**
-     * Test method for {@link hdf.object.FileFormat#getNumberOfMembers()}.
-     * <p>
-     * <ul>
-     * <li>Test the number of compements.
-     * </ul>
-     */
+    private void withAPrioriFormats(String[] keys) {
+        for (String key : keys) {
+            assert (A_PRIORI_FORMATS.containsKey(key));
+            FileFormat.addFileFormat(key, A_PRIORI_FORMATS.get(key));
+        }
+    }
+
     @Test
     public void testGetNumberOfMembers() {
-        log.debug("testGetNumberOfMembers");
         assertEquals(testFile.getNumberOfMembers(), 21);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
-    /**
-     * Test method for {@link hdf.object.FileFormat#getFileFormat(java.lang.String)}.
-     * <p>
-     * <ul>
-     * <li>Test for HDF5.
-     * </ul>
-     */
-    @Test
-    public void testGetFileFormat() {
-        log.debug("testGetFileFormat");
-        FileFormat f = FileFormat.getFileFormat("HDF5");
-        assertNotNull(f);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
-    }
-
-    /**
-     * Test method for {@link hdf.object.FileFormat#getFileFormatKeys()}.
-     * <p>
-     * <ul>
-     * <li>current file formats are HDF5, HDF.
-     * </ul>
-     */
-    @Test
-    public void testGetFileFormatKeys() {
-        log.debug("testGetFileFormatKeys");
-
-        Enumeration<String> e = FileFormat.getFileFormatKeys();
-
-        while (e.hasMoreElements())
-            assertNotNull(FileFormat.getFileFormat((String) e.nextElement()));
-
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
-    }
-
-    /**
-     * Test method for {@link hdf.object.FileFormat#getFID()}.
-     * <p>
-     * <ul>
-     * <li>Make sure the fid is not -1.
-     * </ul>
-     */
     @Test
     public void testGetFID() {
-        log.debug("testGetFID");
         assertTrue((testFile.getFID() != -1));
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
+    }
+
+    @Test
+    public void testModifySupportedFormats() throws Exception {
+        final String h5 = "H5_FORMAT_KEY";
+        final FileFormat h5Instance = H5File.class.newInstance();
+
+        assertNull("not yet supported", FileFormat.getFileFormat(h5));
+
+        FileFormat.addFileFormat(h5, h5Instance);
+        assertTrue(FileFormat.getFileFormatKeys().contains(h5));
+
+        assertNotNull(FileFormat.getFileFormat(h5));
+
+        FileFormat.removeFileFormat(h5);
+
+        assertNull("again unsupported", FileFormat.getFileFormat(h5));
+    }
+
+    @Test
+    public void testAddFileFormatNullKey() throws Exception {
+        assertTrue("sanity check", FileFormat.getFileFormatKeys().isEmpty());
+        FileFormat.addFileFormat(null, H5File.class.newInstance());
+        assertTrue("should still be empty", FileFormat.getFileFormatKeys().isEmpty());
+    }
+
+    @Test
+    public void testAddFileFormatNullFormat() throws Exception {
+        assertTrue("sanity check", FileFormat.getFileFormatKeys().isEmpty());
+        FileFormat.addFileFormat("key", null);
+        assertTrue("should still be empty", FileFormat.getFileFormatKeys().isEmpty());
+    }
+
+    @Test
+    public void testAddFileFormatEmptyKey() throws Exception {
+        assertTrue("sanity check", FileFormat.getFileFormatKeys().isEmpty());
+        FileFormat.addFileFormat("", H5File.class.newInstance());
+        assertFalse("should have an entry", FileFormat.getFileFormatKeys().isEmpty());
+        assertNotNull("should get entry with empty key", FileFormat.getFileFormat(""));
+    }
+
+    @Test
+    public void testAddFileFormatWhiespace() throws Exception {
+        FileFormat.addFileFormat("   \t", H5File.class.newInstance());
+        assertNotNull("trimmed whitespace is empty string key", FileFormat.getFileFormat(""));
+    }
+
+    @Test
+    public void testAddFileFormatTrimmed() throws Exception {
+        FileFormat.addFileFormat("  key \t", H5File.class.newInstance());
+        assertNotNull("trimmed key", FileFormat.getFileFormat("key"));
+    }
+
+    @Ignore("format types are equivalent!")
+    @Test
+    public void testAddFileFormatNoOverwrite() throws Exception {
+        final FileFormat h5Type = H5File.class.newInstance();
+        final FileFormat h4Type = H4File.class.newInstance();
+        assert(!Objects.equals(h5Type, h4Type)); // assertion error -- whoops?
+        final String key = "KEY";
+        FileFormat.addFileFormat(key, h4Type);
+        assertEquals("should be H4", h4Type, FileFormat.getFileFormat(key));
+        FileFormat.addFileFormat(key, h5Type);
+        assertEquals("H4 not overwritten", h4Type, FileFormat.getFileFormat(key));
+        assertNotEquals("H5 not set", h5Type, FileFormat.getFileFormat(key));
+    }
+
+    @Test
+    public void testGetFileFormatKeysEmpty() {
+        Set<String> keyset = FileFormat.getFileFormatKeys();
+        assertNotNull(keyset);
+        assertTrue("FileFormat should not have keys", keyset.isEmpty());
+    }
+
+    @Test
+    public void testGetFileFormatKeys() {
+        String[] format_keys = new String[] {"HDF5", "HDF4", "Fits"};
+        withAPrioriFormats(format_keys);
+
+        Set<String> keyset = FileFormat.getFileFormatKeys();
+        assertNotNull(keyset);
+        assertFalse("FileFormat should have keys", keyset.isEmpty());
+        for (String key : format_keys) {
+            assertTrue("should have  key " + key, keyset.contains(key));
         }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
+    }
+
+    @Test
+    public void testGetInstance() throws Exception {
+        withAPrioriFormats(new String[] {"HDF5"});
+
+        H5File file = (H5File) FileFormat.getInstance(H5TestFile.NAME_FILE_H5);
+        assertNotNull(file);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetInstanceMissingFile() throws Exception {
+        FileFormat.getInstance("missing_file.h5"); // no such file
+    }
+
+    @Test
+    public void testGetInstanceUnsupported() throws Exception {
+        assertNull(
+                "unsupported format returns null",
+                FileFormat.getInstance(H5TestFile.NAME_FILE_H5));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetInstanceNull() throws Exception {
+        FileFormat.getInstance(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetInstanceEmpty() throws Exception {
+        FileFormat.getInstance("");
+    }
+
+    @Test
+    public void testGetFileExtensionsEmpty() {
+        verifyExtensionsMembership(null);
+    }
+
+    @Test
+    public void testSetFileExtensions() {
+        FileFormat.setFileExtensions("h5, hdf4");
+        verifyExtensionsMembership(new String[] {".h5", ".hdf4"});
+    }
+
+    @Test
+    public void testSetFileExtensionsDuplicateIgnored() {
+        FileFormat.setFileExtensions("h5, h5");
+        verifyExtensionsMembership(new String[] {".h5"});
+    }
+
+    @Test
+    public void testSetFileExtensionsPeriodStripped() {
+        FileFormat.setFileExtensions(".h5,fits");
+        verifyExtensionsMembership(new String[] {".fits", ".h5"});
+    }
+
+    @Test
+    public void testAddFileExtensions() {
+        FileFormat.addFileExtensions("h5, lulu");
+        verifyExtensionsMembership(new String[] {".lulu", ".h5"});
+    }
+
+    @Test
+    public void testAddFileExtensionsAppend() {
+        FileFormat.setFileExtensions("h5, hdf5, h4");
+        assertFalse(FileFormat.getFileFormatKeys().contains(".hdf4"));
+        FileFormat.addFileExtensions("hdf4");
+        verifyExtensionsMembership(
+                new String[] {".h4", ".h5", ".hdf5", ".hdf4"});
+    }
+
+    @Test
+    public void testAddFileExtensionsNoEffect() {
+        FileFormat.setFileExtensions("h5, hdf5, h4");
+        FileFormat.addFileExtensions(null);
+        FileFormat.addFileExtensions("");
+        verifyExtensionsMembership(new String[] {".h4", ".h5", ".hdf5"});
+    }
+
+    @Test
+    public void testSetFileExtensionsNullClears() {
+        FileFormat.setFileExtensions("h5, hdf5, h4");
+        verifyExtensionsMembership(new String[] {".h4", ".h5", ".hdf5"});
+
+        FileFormat.setFileExtensions(null);
+        verifyExtensionsMembership(null);
+    }
+
+    @Test
+    public void testSetFileExtensionsEmptyClears() {
+        FileFormat.setFileExtensions("h5, hdf5, h4");
+        verifyExtensionsMembership(new String[] {".h4", ".h5", ".hdf5"});
+
+        FileFormat.setFileExtensions("");
+        verifyExtensionsMembership(null);
+    }
+
+    @Test
+    public void testSetFileExtensionsSingle() {
+        FileFormat.setFileExtensions("h5");
+        verifyExtensionsMembership(new String[] {".h5"});
+    }
+
+    @Test
+    public void testSetFileExtensionsSemicolonSep() {
+        //TODO: sanitize string inputs?
+        FileFormat.setFileExtensions("h5; uluru");
+        verifyExtensionsMembership(new String[] {".h5; uluru"});
+    }
+
+    @Test
+    public void testAddFileExtensionsSemicolonSep() {
+        //TODO: sanitize string inputs?
+        FileFormat.addFileExtensions("h5; uluru");
+        verifyExtensionsMembership(new String[] {".h5; uluru"});
     }
 
     /**
-     * Test method for {@link hdf.object.FileFormat#getInstance(java.lang.String)}.
-     * <p>
-     * <ul>
-     * <li>Open an non existing file.
-     * <li>Open an exisiting file.
-     * </ul>
+     * compare the set returned by FileFormat.getFileExtensions() against an
+     * arrays of strings that should comprise the set
+     * @param contains array of formats to require.
+     *                 If null, set should be empty.
      */
-    @Test
-    public void testGetInstance() {
-        log.debug("testGetInstance");
-        H5File f = null;
-        try {
-            f = (H5File) FileFormat.getInstance("test_hdf5.h5");
+    private void verifyExtensionsMembership(String[] contains) {
+        Set<String> extensions = FileFormat.getFileExtensions();
+        assertNotNull("set must exist", extensions);
+        if (contains == null || contains.length == 0) {
+            assertTrue("set should be empty", extensions.isEmpty());
+            return;
         }
-        catch (Exception ex) {
-            ;
+        else {
+            assertFalse("set should not be empty", extensions.isEmpty());
         }
-        assertNull(f);
-
-        try {
-            f = (H5File) FileFormat.getInstance(H5TestFile.NAME_FILE_H5);
-        }
-        catch (Exception ex) {
-            fail("getInstance() failed" + ex.getMessage());
-        }
-        assertNotNull(f);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
-    }
-
-    /**
-     * Test method for {@link hdf.object.FileFormat#getFileFormats()}.
-     * <p>
-     * <ul>
-     * <li>Test that the FileFormat object is formed for HDF5.
-     * </ul>
-     */
-    @Test
-    public void testGetFileFormats() {
-        log.debug("testGetFileFormats");
-        FileFormat f = FileFormat.getFileFormat("HDF5");
-        assertNotNull(f);
-        FileFormat f1 = FileFormat.getFileFormat("ALL");
-        assertNull(f1);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
+        assertEquals(contains.length, extensions.size());
+        for (String s : contains)
+            assertTrue("should contain " + s,
+                    extensions.contains(s));
     }
 
 }

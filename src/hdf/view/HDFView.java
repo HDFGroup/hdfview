@@ -341,7 +341,6 @@ public class HDFView implements ViewManager {
         // opening any files
         mainWindow.pack();
 
-        /*
         for (File theFile : flist) {
             if (theFile.isFile()) {
                 currentDir = theFile.getParentFile().getAbsolutePath();
@@ -359,9 +358,9 @@ public class HDFView implements ViewManager {
             }
             log.info("CurrentDir is {}", currentDir);
         }
-        */
 
         /* TODO: very hardcoded */
+        /*
         currentDir = "";
         currentFile = S3FILE_ACCESS_URL;
         try {
@@ -376,6 +375,7 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             showStatus(ex.toString());
         }
+        */
 
         if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null)
             setEnabled(h4GUIs, false);
@@ -2521,7 +2521,7 @@ public class HDFView implements ViewManager {
      *
      * @param filename file name/url to set as most recent
      */
-    private void updateMostRecentFileURL(String filename) {
+    protected void updateMostRecentFileURL(String filename) {
         try {
             /* if already present, remove from current location */
             url_bar.remove(filename);
@@ -2630,11 +2630,8 @@ public class HDFView implements ViewManager {
         String extension = str.substring(idx2 + 1);
 
         // Check if the file format has been registered or the key is taken.
-        String theKey = null;
         String theClassName = null;
-        Enumeration<?> local_enum = FileFormat.getFileFormatKeys();
-        while (local_enum.hasMoreElements()) {
-            theKey = (String) local_enum.nextElement();
+        for (String theKey : FileFormat.getFileFormatKeys()) {
             if (theKey.endsWith(key)) {
                 Tools.showError(mainWindow, "Invalid key: " + key + " is taken.", "Register File Format");
                 return;
@@ -2687,11 +2684,9 @@ public class HDFView implements ViewManager {
     }
 
     private void unregisterFileFormat() {
-        Enumeration<?> keys = FileFormat.getFileFormatKeys();
         ArrayList<Object> keyList = new ArrayList<>();
 
-        while (keys.hasMoreElements())
-            keyList.add((Object) keys.nextElement());
+        keyList.addAll(FileFormat.getFileFormatKeys());
 
         String theKey = new UnregisterFileFormatDialog(mainWindow, SWT.NONE, keyList).open();
 
@@ -2854,12 +2849,9 @@ public class HDFView implements ViewManager {
             dialog.setText("Supported File Formats");
             dialog.setLayout(new GridLayout(2, false));
 
-            Enumeration<?> formatKeys = FileFormat.getFileFormatKeys();
-
             String formats = "\nSupported File Formats: \n";
-            while (formatKeys.hasMoreElements()) {
-                formats += "    " + formatKeys.nextElement() + "\n";
-            }
+            for (String key : FileFormat.getFileFormatKeys())
+                formats += "    " + key + "\n";
             formats += "\n";
 
             Image HDFImage = ViewProperties.getLargeHdfIcon();

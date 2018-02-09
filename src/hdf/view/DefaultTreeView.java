@@ -389,18 +389,12 @@ public class DefaultTreeView implements TreeView {
                 }
 
                 // Set this file to the most recently selected file in the recent files bar
-                Combo recentFilesCombo = ((HDFView) viewer).getUrlBar();
-                String filename = selectedFile.getAbsolutePath();
-
-                try {
-                    recentFilesCombo.remove(filename);
+                if (viewer instanceof  HDFView) {
+                    HDFView _viewer = (HDFView) viewer;
+                    _viewer.updateMostRecentFileURL(
+                            selectedFile.getAbsolutePath());
+                    _viewer.showMetaData(selectedObject);
                 }
-                catch (Exception ex) {}
-
-                recentFilesCombo.add(filename, 0);
-                recentFilesCombo.select(0);
-
-                ((HDFView) viewer).showMetaData(selectedObject);
             }
         });
 
@@ -2300,98 +2294,53 @@ public class DefaultTreeView implements TreeView {
     @Override
     public FileFormat openFile(String filename, int accessID) throws Exception {
         log.trace("openFile: {},{}", filename, accessID);
-        FileFormat fileFormat = null;
-        TreeItem fileRoot = null;
         boolean isNewFile = (FileFormat.OPEN_NEW == (accessID & FileFormat.OPEN_NEW));
         if (isNewFile)
             accessID = accessID - FileFormat.OPEN_NEW;
 
         if (isFileOpen(filename)) {
-            ((HDFView) viewer).showStatus("File is in use.");
+            (viewer).showStatus("File is in use.");
             return null;
         }
-/*
+
         File tmpFile = new File(filename);
-        if (!tmpFile.exists()) {
+        if (!tmpFile.exists())
             throw new FileNotFoundException("File does not exist.");
-        }
-
-        if (!tmpFile.canWrite()) {
+        if (!tmpFile.canWrite())
             accessID = FileFormat.READ;
-        }
-*/
 
-/*
-        Enumeration<?> keys = FileFormat.getFileFormatKeys();
+        FileFormat fileFormat = null;
+        String successfulFormatKey = null;
 
-        String theKey = null;
-        while (keys.hasMoreElements()) {
-            theKey = (String) keys.nextElement();
-            if (theKey.equals(FileFormat.FILE_TYPE_HDF4)) {
-                log.trace("openFile: {} FILE_TYPE_HDF4", filename);
+        for (String formatKey : FileFormat.getFileFormatKeys()) {
+            log.trace("openFile: {} {}", filename, formatKey);
+
+            FileFormat theFormat = FileFormat.getFileFormat(formatKey);
+            if (theFormat.isThisType(filename)) {
                 try {
-                    FileFormat h4format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
-                    if ((h4format != null) && h4format.isThisType(filename)) {
-                        fileFormat = h4format.createInstance(filename, accessID);
-                        break;
-                    }
+                    fileFormat = theFormat.createInstance(filename, accessID);
+                    successfulFormatKey = formatKey;
+                    break;
                 }
                 catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
-                }
-                continue;
-            }
-            else if (theKey.equals(FileFormat.FILE_TYPE_HDF5)) {
-*/
-                log.trace("openFile: {} FILE_TYPE_HDF5", filename);
-                //try { // nothing thrown in try block?
-                    FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-                    //if ((h5format != null) && h5format.isThisType(filename)) {
-
-                    // isThisType() ...H5Fis_hdf5()... does the perfectly sensible thing and tries
-                    // to open a local file with the given filename to check
-                    // its signature. Only it isn't sensible because it
-                    // uses the default file driver only and will always fail for S3
-                        fileFormat = h5format.createInstance(filename, accessID);
-                        //break;
-                    //}
-                //}
-                //catch (Throwable err) {
-                //    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
-                //}
-/*
-                continue;
-            }
-            else {
-                log.trace("openFile: {} Other", filename);
-                try {
-                    FileFormat theformat = FileFormat.getFileFormat(theKey);
-                    if (theformat.isThisType(filename)) {
-                        fileFormat = theformat.createInstance(filename, accessID);
-                        break;
-                    }
-                }
-                catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
+                    log.debug("openFile: Error retrieving structure of {}: {}", filename, err);
                 }
             }
         }
-*/
-
-        //log.debug("ME: before first fileFormat null check");
 
         if (fileFormat == null)
             throw new java.io.IOException(
                     "Unsupported fileformat - " + filename);
-        //log.debug("ME: found fileformat");
+        assert(successfulFormatKey != null);
 
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
 
         try {
             fileFormat.setMaxMembers(ViewProperties.getMaxMembers());
             fileFormat.setStartMembers(ViewProperties.getStartMembers());
-            if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                if(isNewFile) {
+            //if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
+            if (successfulFormatKey.equals(FileFormat.FILE_TYPE_HDF5)) {
+                if (isNewFile) {
                     currentIndexType = fileFormat.getIndexType(ViewProperties.getIndexType());
                     currentIndexOrder = fileFormat.getIndexOrder(ViewProperties.getIndexOrder());
                 }
@@ -2408,33 +2357,24 @@ public class DefaultTreeView implements TreeView {
         finally {
             shell.setCursor(null);
         }
-        //log.debug("ME: fileformat opened?");
 
-        if (fileFormat == null) {
-            throw new java.io.IOException("openFile: Failed to open file - " + filename);
-        }
-        else  {
-            fileRoot = populateTree(fileFormat);
+        if (fileFormat == null)
+            throw new java.io.IOException(
+                    "openFile: Failed to open file - " + filename);
 
-            if (fileRoot != null) {
-                /* Expand top level items of root object */
-                int currentRowCount = tree.getItemCount();
-                if (currentRowCount > 0) {
-                    tree.getItem(currentRowCount - 1).setExpanded(true);
-                }
-
-                // If this is the first file opened, initialize the breadth-first
-                // list of TreeItems
-                //if(breadthFirstItems == null)
-                //    breadthFirstItems = getItemsBreadthFirst(fileRoot);
-
-                fileList.add(fileFormat);
+        TreeItem fileRoot = populateTree(fileFormat);
+        if (fileRoot != null) {
+            /* Expand top level items of root object */
+            int currentRowCount = tree.getItemCount();
+            if (currentRowCount > 0) {
+                tree.getItem(currentRowCount - 1).setExpanded(true);
             }
 
-            tree.setItemCount(fileList.size());
+            fileList.add(fileFormat);
         }
 
-        //log.debug("ME: DefaultTreeView.openFile done");
+        tree.setItemCount(fileList.size());
+
         return fileFormat;
     }
 
