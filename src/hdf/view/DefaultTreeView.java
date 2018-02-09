@@ -23,16 +23,7 @@ import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Vector;
+import java.util.*;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -398,18 +389,12 @@ public class DefaultTreeView implements TreeView {
                 }
 
                 // Set this file to the most recently selected file in the recent files bar
-                Combo recentFilesCombo = ((HDFView) viewer).getUrlBar();
-                String filename = selectedFile.getAbsolutePath();
-
-                try {
-                    recentFilesCombo.remove(filename);
+                if (viewer instanceof  HDFView) {
+                    HDFView _viewer = (HDFView) viewer;
+                    _viewer.updateMostRecentFileURL(
+                            selectedFile.getAbsolutePath());
+                    _viewer.showMetaData(selectedObject);
                 }
-                catch (Exception ex) {}
-
-                recentFilesCombo.add(filename, 0);
-                recentFilesCombo.select(0);
-
-                ((HDFView) viewer).showMetaData(selectedObject);
             }
         });
 
@@ -1083,7 +1068,9 @@ public class DefaultTreeView implements TreeView {
                 boolean isReadOnly = selectedObject.getFileFormat().isReadOnly();
                 boolean isWritable = !isReadOnly;
 
-                setEnabled(editGUIs, !isReadOnly);
+                for (MenuItem item : editGUIs) {
+                    item.setEnabled(!isReadOnly);
+                }
 
                 if (selectedObject instanceof Group) {
                     boolean state = !(((Group) selectedObject).isRoot());
@@ -1799,57 +1786,40 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Checks if a file is already open.
+     * Check openness by looking in this TreeView's `fileList` for `filename`.
      *
      * @param filename the file to query
      *
      * @return true if the file is open
      */
     private boolean isFileOpen(String filename) {
-        boolean isOpen = false;
-
-        // Find the file by matching its file name from the list of open files
-        FileFormat theFile = null;
-        Iterator<FileFormat> iterator = fileList.iterator();
-        while (iterator.hasNext()) {
-            theFile = iterator.next();
+        for (FileFormat theFile : this.fileList) {
             if (theFile.getFilePath().equals(filename)) {
-                isOpen = true;
-                break;
+                return true;
             }
         }
-
-        return isOpen;
+        return false;
     }
 
     /**
-     * Checks if an object is already open.
+     * Checks if an object is already open in this TreeView.
      */
     private boolean isObjectOpen(HObject obj) {
-        boolean isOpen = false;
-
         if (obj instanceof Group) {
             Group g = (Group) obj;
             List<?> members = g.getMemberList();
-            if ((members == null) || (members.size() == 0)) {
-                isOpen = false;
-            }
-            else {
-                int n = members.size();
-                for (int i = 0; i < n; i++) {
-                    HObject theObj = (HObject) members.get(i);
-                    isOpen = (((HDFView) viewer).getDataView(theObj) != null);
-                    if (isOpen) {
-                        break;
-                    }
-                }
+            if ((members == null) || (members.size() == 0))
+                return false;
+            for (Object member : members) {
+                HObject hObject = (HObject) member;
+                if ((viewer).getDataView(hObject) != null)
+                    return true;
             }
         }
         else {
-            return !(((HDFView) viewer).getDataView(obj) == null);
+            return !((viewer).getDataView(obj) == null);
         }
-
-        return isOpen;
+        return false; /* fall-through default */
     }
 
     /**
@@ -1857,7 +1827,7 @@ public class DefaultTreeView implements TreeView {
      * current Tree that are children of the specified
      * TreeItem in a breadth-first manner.
      *
-     * @param the current Tree item
+     * @param item the current Tree item
      *
      * @return list of TreeItems
      */
@@ -1896,15 +1866,15 @@ public class DefaultTreeView implements TreeView {
      */
     private final List<Object> breadthFirstUserObjects(TreeItem item) {
         if (item == null) return null;
+        // TODO: instead, return empty list?
+        // TODO: avoid passing in null to begin with!
+        //if (item == null)
+        //    return Collections.emptyList();
 
         Vector<Object> list = new Vector<>();
-        list.add(item.getData()); // Add this item to the list first
+        list.add(item.getData());
 
-        Iterator<TreeItem> it = getItemsBreadthFirst(item).iterator();
-        TreeItem theItem = null;
-
-        while (it.hasNext()) {
-            theItem = it.next();
+        for (TreeItem theItem : getItemsBreadthFirst(item)) {
             list.add(theItem.getData());
         }
 
@@ -2265,19 +2235,10 @@ public class DefaultTreeView implements TreeView {
         }
         if(filename == null) return;
 
-        // Check if the file is in use
-        List<?> fileList = viewer.getTreeView().getCurrentFiles();
-        if (fileList != null) {
-            FileFormat theFile = null;
-            Iterator<?> iterator = fileList.iterator();
-            while (iterator.hasNext()) {
-                theFile = (FileFormat) iterator.next();
-                if (theFile.getFilePath().equals(filename)) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, "Unable to save data to file \"" + filename + "\". \nThe file is being used.", "Export Dataset");
-                    return;
-                }
-            }
+        if (isFileOpen(filename)) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Unable to save data to file \"" + filename + "\". \nThe file is being used.", "Export Dataset");
+            return;
         }
 
         chosenFile = new File(filename);
@@ -2304,16 +2265,6 @@ public class DefaultTreeView implements TreeView {
         }
 
         ((HDFView) viewer).showStatus("Data saved to: " + filename);
-    }
-
-    /** enable/disable GUI components */
-    private static void setEnabled(List<MenuItem> list, boolean b) {
-        if (list == null) return;
-
-        Iterator<MenuItem> it = list.iterator();
-        while (it.hasNext()) {
-            it.next().setEnabled(b);
-        }
     }
 
     /**
@@ -2343,82 +2294,53 @@ public class DefaultTreeView implements TreeView {
     @Override
     public FileFormat openFile(String filename, int accessID) throws Exception {
         log.trace("openFile: {},{}", filename, accessID);
-        FileFormat fileFormat = null;
-        TreeItem fileRoot = null;
         boolean isNewFile = (FileFormat.OPEN_NEW == (accessID & FileFormat.OPEN_NEW));
-        if (isNewFile) accessID = accessID - FileFormat.OPEN_NEW;
+        if (isNewFile)
+            accessID = accessID - FileFormat.OPEN_NEW;
 
         if (isFileOpen(filename)) {
-            ((HDFView) viewer).showStatus("File is in use.");
+            (viewer).showStatus("File is in use.");
             return null;
         }
 
         File tmpFile = new File(filename);
-        if (!tmpFile.exists()) {
+        if (!tmpFile.exists())
             throw new FileNotFoundException("File does not exist.");
-        }
-
-        if (!tmpFile.canWrite()) {
+        if (!tmpFile.canWrite())
             accessID = FileFormat.READ;
-        }
 
-        Enumeration<?> keys = FileFormat.getFileFormatKeys();
+        FileFormat fileFormat = null;
+        String successfulFormatKey = null;
 
-        String theKey = null;
-        while (keys.hasMoreElements()) {
-            theKey = (String) keys.nextElement();
-            if (theKey.equals(FileFormat.FILE_TYPE_HDF4)) {
-                log.trace("openFile: {} FILE_TYPE_HDF4", filename);
+        for (String formatKey : FileFormat.getFileFormatKeys()) {
+            log.trace("openFile: {} {}", filename, formatKey);
+
+            FileFormat theFormat = FileFormat.getFileFormat(formatKey);
+            if (theFormat.isThisType(filename)) {
                 try {
-                    FileFormat h4format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
-                    if ((h4format != null) && h4format.isThisType(filename)) {
-                        fileFormat = h4format.createInstance(filename, accessID);
-                        break;
-                    }
+                    fileFormat = theFormat.createInstance(filename, accessID);
+                    successfulFormatKey = formatKey;
+                    break;
                 }
                 catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
-                }
-                continue;
-            }
-            else if (theKey.equals(FileFormat.FILE_TYPE_HDF5)) {
-                log.trace("openFile: {} FILE_TYPE_HDF5", filename);
-                try {
-                    FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-                    if ((h5format != null) && h5format.isThisType(filename)) {
-                        fileFormat = h5format.createInstance(filename, accessID);
-                        break;
-                    }
-                }
-                catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
-                }
-                continue;
-            }
-            else {
-                log.trace("openFile: {} Other", filename);
-                try {
-                    FileFormat theformat = FileFormat.getFileFormat(theKey);
-                    if (theformat.isThisType(filename)) {
-                        fileFormat = theformat.createInstance(filename, accessID);
-                        break;
-                    }
-                }
-                catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
+                    log.debug("openFile: Error retrieving structure of {}: {}", filename, err);
                 }
             }
         }
 
-        if (fileFormat == null) throw new java.io.IOException("Unsupported fileformat - " + filename);
+        if (fileFormat == null)
+            throw new java.io.IOException(
+                    "Unsupported fileformat - " + filename);
+        assert(successfulFormatKey != null);
 
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
 
         try {
             fileFormat.setMaxMembers(ViewProperties.getMaxMembers());
             fileFormat.setStartMembers(ViewProperties.getStartMembers());
-            if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                if(isNewFile) {
+            //if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
+            if (successfulFormatKey.equals(FileFormat.FILE_TYPE_HDF5)) {
+                if (isNewFile) {
                     currentIndexType = fileFormat.getIndexType(ViewProperties.getIndexType());
                     currentIndexOrder = fileFormat.getIndexOrder(ViewProperties.getIndexOrder());
                 }
@@ -2436,29 +2358,22 @@ public class DefaultTreeView implements TreeView {
             shell.setCursor(null);
         }
 
-        if (fileFormat == null) {
-            throw new java.io.IOException("openFile: Failed to open file - " + filename);
-        }
-        else  {
-            fileRoot = populateTree(fileFormat);
+        if (fileFormat == null)
+            throw new java.io.IOException(
+                    "openFile: Failed to open file - " + filename);
 
-            if (fileRoot != null) {
-                /* Expand top level items of root object */
-                int currentRowCount = tree.getItemCount();
-                if (currentRowCount > 0) {
-                    tree.getItem(currentRowCount - 1).setExpanded(true);
-                }
-
-                // If this is the first file opened, initialize the breadth-first
-                // list of TreeItems
-                //if(breadthFirstItems == null)
-                //    breadthFirstItems = getItemsBreadthFirst(fileRoot);
-
-                fileList.add(fileFormat);
+        TreeItem fileRoot = populateTree(fileFormat);
+        if (fileRoot != null) {
+            /* Expand top level items of root object */
+            int currentRowCount = tree.getItemCount();
+            if (currentRowCount > 0) {
+                tree.getItem(currentRowCount - 1).setExpanded(true);
             }
 
-            tree.setItemCount(fileList.size());
+            fileList.add(fileFormat);
         }
+
+        tree.setItemCount(fileList.size());
 
         return fileFormat;
     }
@@ -2590,24 +2505,12 @@ public class DefaultTreeView implements TreeView {
             }
         }
 
-        TreeItem theItem = null;
-        HObject theObj = null;
         List<TreeItem> breadthFirstItems = getItemsBreadthFirst(rootItem);
-
         if (breadthFirstItems != null) {
-            Iterator<TreeItem> it = getItemsBreadthFirst(rootItem).iterator();
-
-            while(it.hasNext()) {
-                theItem = it.next();
-                theObj = (HObject) theItem.getData();
-
-                if (theObj == null) {
-                    continue;
-                }
-
-                if(theObj.equals(obj)) {
+            for (TreeItem theItem : breadthFirstItems) {
+                HObject theObj = (HObject) theItem.getData();
+                if ((theObj != null) && (theObj.equals(obj)))
                     return theItem;
-                }
             }
         }
 

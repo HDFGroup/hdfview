@@ -2543,33 +2543,28 @@ public final class Tools {
             String type, List<FileFormat> openFiles) throws Exception {
         File f = new File(filename);
 
-        String fname = f.getAbsolutePath();
-        if (fname == null) return null;
+        String fname = f.getAbsolutePath().trim();
 
-        fname = fname.trim();
-        if ((fname == null) || (fname.length() == 0)) {
+        if (fname.length() == 0) {
             throw new Exception("Invalid file name.");
         }
 
-        String extensions = FileFormat.getFileExtensions();
         boolean noExtension = true;
-        if ((extensions != null) && (extensions.length() > 0)) {
-            java.util.StringTokenizer currentExt = new java.util.StringTokenizer(extensions, ",");
-            String extension = "";
-            String tmpFilename = fname.toLowerCase();
-            while (currentExt.hasMoreTokens() && noExtension) {
-                extension = currentExt.nextToken().trim().toLowerCase();
-                noExtension = !tmpFilename.endsWith("." + extension);
+        String tmpFilename = fname.toLowerCase();
+        for (String extension : FileFormat.getFileExtensions()) {
+            if (tmpFilename.endsWith(extension)) {
+                noExtension = false;
+                break;
             }
         }
 
         if (noExtension) {
-            if (type == FileFormat.FILE_TYPE_HDF4) {
+            if (type.equals(FileFormat.FILE_TYPE_HDF4)) {
                 fname += ".hdf";
                 f = new File(fname);
                 //setSelectedFile(f);
             }
-            else if (type == FileFormat.FILE_TYPE_HDF5) {
+            else if (type.equals(FileFormat.FILE_TYPE_HDF5)) {
                 fname += ".h5";
                 f = new File(fname);
                 //setSelectedFile(f);

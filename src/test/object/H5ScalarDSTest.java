@@ -349,7 +349,7 @@ public class H5ScalarDSTest {
     }
 
     /**
-     * Test method for {@link hdf.object.h5.H5ScalarDS#close(int)}.
+     * Test method for {@link hdf.object.h5.H5ScalarDS#close(long)}.
      * <p>
      * What to test:
      * <ul>
@@ -1377,18 +1377,6 @@ public class H5ScalarDSTest {
             dset = null;
         }
 
-        // test a non-existing dataset
-        final H5ScalarDS dset = new H5ScalarDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
-        dset.init();
-        dset.clearData();
-        data = null;
-        try {
-            data = (int[]) dset.getData();
-        }
-        catch (final Exception ex) {
-            data = null; // Expected - intentional
-        }
-        assertNull(data);
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -1397,6 +1385,13 @@ public class H5ScalarDSTest {
             fail("H5.H5Fget_obj_count() failed. " + ex);
         }
         assertEquals(1, nObjs); // file id should be the only one left open
+    }
+
+    @Test(expected=NegativeArraySizeException.class)
+    public void testNonExtantDataset() {
+        final H5File file = (H5File) testDataset.getFileFormat();
+        final H5ScalarDS dataset = new H5ScalarDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
+        dataset.init();
     }
 
     /**
@@ -1415,6 +1410,7 @@ public class H5ScalarDSTest {
      * <li>Construct an H5ScalarDS object that does not exist in file
      * </ul>
      */
+    @Ignore("deprecated constructor")
     @Test
     public void testH5ScalarDSFileFormatStringStringLongArray() {
         log.debug("testH5ScalarDSFileFormatStringStringLongArray");
