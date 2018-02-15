@@ -190,6 +190,7 @@ public class Attribute implements Metadata {
      * @return the value of the attribute, or null if failed to retrieve data
      *         from file.
      */
+    @Override
     public Object getValue() {
         return value;
     }
@@ -235,6 +236,7 @@ public class Attribute implements Metadata {
      * @param theValue
      *            The value of the attribute to set
      */
+    @Override
     public void setValue(Object theValue) {
         value = theValue;
     }
@@ -325,6 +327,29 @@ public class Attribute implements Metadata {
      * @return the string representation of the data values.
      */
     public String toString(String delimiter) {
+        return toString(delimiter, -1);
+    }
+
+    /**
+     * Returns a string representation of the data value of the attribute. For
+     * example, "0, 255".
+     * <p>
+     * For a compound datatype, it will be a 1D array of strings with field
+     * members separated by the delimiter. For example,
+     * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+     * float} of three data points.
+     * <p>
+     *
+     * @param delimiter
+     *            The delimiter used to separate individual data points. It
+     *            can be a comma, semicolon, tab or space. For example,
+     *            toString(",") will separate data by commas.
+     * @param maxItems
+     *            The maximum number of Array values to return
+     *
+     * @return the string representation of the data values.
+     */
+    public String toString(String delimiter, int maxItems) {
         log.trace("toString(): start");
 
         if (value == null) {
@@ -336,13 +361,21 @@ public class Attribute implements Metadata {
         Class<? extends Object> valClass = value.getClass();
 
         if (!valClass.isArray()) {
-            log.trace("toString(): finish");
-            return value.toString();
+            log.trace("toString(): finish - not array");
+            String strValue = value.toString();
+            if (maxItems > 0 && strValue.length() > maxItems) {
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            }
+            return strValue;
         }
 
         // attribute value is an array
         StringBuffer sb = new StringBuffer();
         int n = Array.getLength(value);
+        if (maxItems > 0)
+            if (n > maxItems)
+                n = maxItems;
 
         boolean is_unsigned = (this.getType().getDatatypeSign() == Datatype.SIGN_NONE);
         boolean is_enum = (this.getType().getDatatypeClass() == Datatype.CLASS_ENUM);
@@ -425,7 +458,7 @@ public class Attribute implements Metadata {
                     break;
                 case 'J':
                     long[] larray = (long[]) value;
-                    Long l = (Long) larray[0];
+                    Long l = larray[0];
                     theValue = Long.toString(l);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
@@ -434,7 +467,7 @@ public class Attribute implements Metadata {
                         sb.append(theValue);
                     for (int i = 1; i < n; i++) {
                         sb.append(delimiter);
-                        l = (Long) larray[i];
+                        l = larray[i];
                         theValue = Long.toString(l);
                         if (map.containsKey(theValue)) {
                             sb.append(map.get(theValue));
@@ -508,7 +541,7 @@ public class Attribute implements Metadata {
                     break;
                 case 'J':
                     long[] larray = (long[]) value;
-                    Long l = (Long) larray[0];
+                    Long l = larray[0];
                     String theValue = Long.toString(l);
                     if (l < 0) {
                         l = (l << 1) >>> 1;
@@ -520,7 +553,7 @@ public class Attribute implements Metadata {
                     sb.append(theValue);
                     for (int i = 1; i < n; i++) {
                         sb.append(delimiter);
-                        l = (Long) larray[i];
+                        l = larray[i];
                         theValue = Long.toString(l);
                         if (l < 0) {
                             l = (l << 1) >>> 1;
@@ -533,19 +566,40 @@ public class Attribute implements Metadata {
                     }
                     break;
                 default:
-                    sb.append(Array.get(value, 0));
+                    String strValue = Array.get(value, 0).toString();
+                    if (maxItems > 0 && strValue.length() > maxItems) {
+                        // truncate the extra characters
+                        strValue = strValue.substring(0, maxItems);
+                    }
+                    sb.append(strValue);
                     for (int i = 1; i < n; i++) {
                         sb.append(delimiter);
-                        sb.append(Array.get(value, i));
+                        strValue = Array.get(value, i).toString();
+                        if (maxItems > 0 && strValue.length() > maxItems) {
+                            // truncate the extra characters
+                            strValue = strValue.substring(0, maxItems);
+                        }
+                        sb.append(strValue);
                     }
                     break;
             }
         }
         else {
-            sb.append(Array.get(value, 0));
+            log.trace("toString: not enum or unsigned");
+            String strValue = Array.get(value, 0).toString();
+            if (maxItems > 0 && strValue.length() > maxItems) {
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            }
+            sb.append(strValue);
             for (int i = 1; i < n; i++) {
                 sb.append(delimiter);
-                sb.append(Array.get(value, i));
+                strValue = Array.get(value, i).toString();
+                if (maxItems > 0 && strValue.length() > maxItems) {
+                    // truncate the extra characters
+                    strValue = strValue.substring(0, maxItems);
+                }
+                sb.append(strValue);
             }
         }
 
