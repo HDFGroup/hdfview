@@ -60,12 +60,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -74,6 +78,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import hdf.HDFVersions;
+import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -170,8 +175,8 @@ public class HDFView implements ViewManager {
     /* GUI component: The text area for showing status messages */
     private Text                       status;
 
-    /* GUI component: The area for quick attribute view */
-    private Composite                  attributeArea;
+    /* GUI component: The area for quick general view */
+    private ScrolledComposite          generalArea;
 
     /* GUI component: To add and display URLs */
     private Combo                      url_bar;
@@ -380,7 +385,7 @@ public class HDFView implements ViewManager {
         }
 
         if (width <= 300) {
-            winDim.x = (int) (0.9 * (double) mainWindow.getSize().y);
+            winDim.x = (int) (0.9 * mainWindow.getSize().y);
         }
 
         // TEST
@@ -444,6 +449,7 @@ public class HDFView implements ViewManager {
         shell.setText("HDFView " + HDFVIEW_VERSION);
         shell.setLayout(new GridLayout(3, false));
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 ViewProperties.setRecentFiles(new Vector<>(Arrays.asList(url_bar.getItems())));
 
@@ -501,6 +507,7 @@ public class HDFView implements ViewManager {
         item.setText("&Open\tCtrl-O");
         item.setAccelerator(SWT.MOD1 + 'O');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 openLocalFile(null, FileFormat.WRITE);
             }
@@ -511,6 +518,7 @@ public class HDFView implements ViewManager {
             item.setText("Open &Read-Only");
             item.setAccelerator(SWT.MOD1 + 'R');
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     openLocalFile(null, FileFormat.READ);
                 }
@@ -543,6 +551,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&4");
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (currentDir != null) {
                     currentDir += File.separator;
@@ -607,6 +616,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&5");
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (currentDir != null) {
                     currentDir += File.separator;
@@ -672,6 +682,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("&Close");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeFile(treeView.getSelectedFile());
             }
@@ -680,6 +691,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("Close &All");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeAllWindows();
 
@@ -693,7 +705,7 @@ public class HDFView implements ViewManager {
 
                 currentFile = null;
 
-                for (Control control : attributeArea.getChildren()) control.dispose();
+                for (Control control : generalArea.getChildren()) control.dispose();
 
                 url_bar.setText("");
             }
@@ -704,6 +716,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("&Save");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
                     Tools.showError(mainWindow, "No files currently open.", shell.getText());
@@ -723,6 +736,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("S&ave As");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
                     Tools.showError(mainWindow, "No files currently open.", shell.getText());
@@ -750,6 +764,7 @@ public class HDFView implements ViewManager {
         item.setText("E&xit\tCtrl-Q");
         item.setAccelerator(SWT.MOD1 + 'Q');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 mainWindow.dispose();
             }
@@ -764,6 +779,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("&Cascade");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 cascadeWindows();
             }
@@ -772,6 +788,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("&Tile");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 tileWindows();
             }
@@ -782,6 +799,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("Close &All");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeAllWindows();
             }
@@ -804,6 +822,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(convertMenu, SWT.PUSH);
         item.setText("HDF4");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF4);
             }
@@ -813,6 +832,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(convertMenu, SWT.PUSH);
         item.setText("HDF5");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF5);
             }
@@ -824,6 +844,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(toolsMenu, SWT.PUSH);
         item.setText("User &Options");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 userOptionDialog = new UserOptionsDialog(shell, rootDir);
 
@@ -852,6 +873,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(toolsMenu, SWT.PUSH);
         item.setText("&Register File Format");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 registerFileFormat();
             }
@@ -860,6 +882,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(toolsMenu, SWT.PUSH);
         item.setText("&Unregister File Format");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 unregisterFileFormat();
             }
@@ -874,6 +897,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("&User's Guide");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 org.eclipse.swt.program.Program.launch(HDFVIEW_USERSGUIDE_URL);
             }
@@ -895,6 +919,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&4 Library Version");
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
@@ -904,6 +929,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&5 Library Version");
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
@@ -912,6 +938,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("&Java Version");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new JavaVersionDialog(mainWindow).open();
             }
@@ -922,6 +949,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("Supported Fi&le Formats");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new SupportedFileFormatsDialog(mainWindow).open();
             }
@@ -932,6 +960,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("&About...");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new AboutDialog(mainWindow).open();
             }
@@ -951,6 +980,7 @@ public class HDFView implements ViewManager {
         openItem.setToolTipText("Open");
         openItem.setImage(ViewProperties.getFileopenIcon());
         openItem.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 openLocalFile(null, FileFormat.WRITE);
             }
@@ -962,6 +992,7 @@ public class HDFView implements ViewManager {
         closeItem.setImage(ViewProperties.getFilecloseIcon());
         closeItem.setToolTipText("Close");
         closeItem.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeFile(treeView.getSelectedFile());
             }
@@ -1008,6 +1039,7 @@ public class HDFView implements ViewManager {
         hdf4Item.setImage(ViewProperties.getH4Icon());
         hdf4Item.setToolTipText("HDF4 Library Version");
         hdf4Item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
@@ -1023,6 +1055,7 @@ public class HDFView implements ViewManager {
         hdf5Item.setImage(ViewProperties.getH5Icon());
         hdf5Item.setToolTipText("HDF5 Library Version");
         hdf5Item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
@@ -1048,6 +1081,7 @@ public class HDFView implements ViewManager {
         recentFilesButton.setToolTipText("List of recent files");
         recentFilesButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         recentFilesButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 url_bar.setListVisible(true);
             }
@@ -1061,6 +1095,7 @@ public class HDFView implements ViewManager {
         url_bar.deselectAll();
         url_bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         url_bar.addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent e) {
                 if(e.keyCode == SWT.CR) {
                     String filename = url_bar.getText();
@@ -1080,6 +1115,7 @@ public class HDFView implements ViewManager {
             }
         });
         url_bar.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String filename = url_bar.getText();
 
@@ -1100,6 +1136,7 @@ public class HDFView implements ViewManager {
         clearTextButton.setText("Clear Text");
         clearTextButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         clearTextButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 url_bar.setText("");
                 url_bar.deselectAll();
@@ -1130,9 +1167,18 @@ public class HDFView implements ViewManager {
         treeArea.setExpandHorizontal(true);
         treeArea.setExpandVertical(true);
 
-        attributeArea = new Composite(contentArea, SWT.BORDER);
-        attributeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-        attributeArea.setLayout(new GridLayout(1, true));
+        generalArea = new ScrolledComposite(contentArea, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        generalArea.setExpandHorizontal(true);
+        generalArea.setExpandVertical(true);
+        generalArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+        generalArea.setMinHeight(contentArea.getSize().y - 2);
+
+        contentArea.addListener(SWT.Resize, new Listener() {
+            @Override
+            public void handleEvent(Event arg0) {
+                generalArea.setMinHeight(contentArea.getSize().y - 2);
+            }
+        });
 
         // Could not load user's treeview, use default treeview.
         if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
@@ -1144,13 +1190,19 @@ public class HDFView implements ViewManager {
         final FileTransfer fileTransfer = FileTransfer.getInstance();
         target.setTransfer(new Transfer[] { fileTransfer });
         target.addDropListener(new DropTargetListener() {
+            @Override
             public void dragEnter(DropTargetEvent e) {
                 e.detail = DND.DROP_COPY;
             }
+            @Override
             public void dragOver(DropTargetEvent e) {}
+            @Override
             public void dragOperationChanged(DropTargetEvent e) { }
+            @Override
             public void dragLeave(DropTargetEvent e) {}
+            @Override
             public void dropAccept(DropTargetEvent e) {}
+            @Override
             public void drop(DropTargetEvent e) {
                 if (fileTransfer.isSupportedType(e.currentDataType)) {
                     String[] files = (String[]) e.data;
@@ -1218,6 +1270,7 @@ public class HDFView implements ViewManager {
         return paletteViews;
     }
 
+    @Override
     public TreeView getTreeView() {
         return treeView;
     }
@@ -1232,13 +1285,14 @@ public class HDFView implements ViewManager {
      * @param msg
      *            the message to display.
      */
+    @Override
     public void showStatus(String msg) {
         status.append(msg);
         status.append("\n");
     }
 
     public void showMetaData(final HObject obj) {
-        for (Control control : attributeArea.getChildren()) control.dispose();
+        for (Control control : generalArea.getChildren()) control.dispose();
 
         if (obj == null) return;
 
@@ -1249,642 +1303,52 @@ public class HDFView implements ViewManager {
         int numAttributes = 0;
         try {
             attrList = obj.getMetadata();
-            numAttributes = attrList.size();
+            if (attrList != null)
+                numAttributes = attrList.size();
         }
         catch (Exception ex) {
             attrList = null;
             log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
         }
 
-        boolean isRoot = ((obj instanceof Group) && ((Group) obj).isRoot());
-        boolean isH4 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
-        boolean isH5 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        FileFormat theFile = obj.getFileFormat();
-        String typeStr = "Unknown";
-        String fileInfo = "";
+        // If the object in question doesn't have any attributes and is either not a group
+        // or is an empty group, we only need to directly show the general object info pane.
+        // Otherwise, we set up a tabbed pane to hold the other information.
+        int groupNumMembers = (obj instanceof Group) ? ((Group) obj).getNumberOfMembersInFile() : 0;
+        boolean needTabbedPane = (numAttributes > 0) || (groupNumMembers > 0);
 
-        org.eclipse.swt.widgets.Group generalInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-        generalInfoGroup.setFont(currentFont);
-        generalInfoGroup.setText("General Object Info");
-        generalInfoGroup.setLayout(new GridLayout(2, false));
-        generalInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        if (needTabbedPane) {
+            Composite generalInfoPane = null;
+            Composite attributeInfoPane = null;
+        	TabFolder tabFolder = new TabFolder(generalArea, SWT.NONE);
 
-        Label label;
-
-        if(isRoot) {
-            log.trace("showMetaData: isRoot");
-            long size = 0;
-            try {
-                size = (new File(obj.getFile())).length();
+        	// Add the general object info pane to a tab
+        	generalInfoPane = createGeneralObjectInfoPane(tabFolder, obj);
+            if (generalInfoPane != null) {
+            	TabItem generalInfoItem = new TabItem(tabFolder, SWT.None);
+                generalInfoItem.setText("General Object Info");
+                generalInfoItem.setControl(generalInfoPane);
             }
-            catch (Exception ex) {
-                size = -1;
-            }
-            size /= 1024;
 
-            int groupCount = 0, datasetCount = 0;
-
-            HObject root = theFile.getRootObject();
-            HObject theObj = null;
-            Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
-
-            while(it.hasNext()) {
-                theObj = it.next();
-
-                if(theObj instanceof Group) {
-                    groupCount++;
-                } else {
-                    datasetCount++;
+            if (numAttributes > 0) {
+                attributeInfoPane = createAttributeInfoPane(tabFolder, obj);
+                if (attributeInfoPane != null) {
+                    TabItem attributeInfoItem = new TabItem(tabFolder, SWT.None);
+                    attributeInfoItem.setText("Object Attribute Info");
+                    attributeInfoItem.setControl(attributeInfoPane);
                 }
             }
 
-            fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("File Name: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(obj.getName());
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("File Path: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText((new File(obj.getFile())).getParent());
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("File Type: ");
-
-            if (isH5) {
-                typeStr = "HDF5,  " + fileInfo;
-            }
-            else if (isH4) {
-                typeStr = "HDF4,  " + fileInfo;
-            }
-            else {
-                typeStr = fileInfo;
-            }
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(typeStr);
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Number of Attributes: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(String.valueOf(numAttributes));
-
-            if (isH5) {
-                int[] libver = null;
-
-                try {
-                    libver = obj.getFileFormat().getLibBounds();
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
-                    label = new Label(generalInfoGroup, SWT.LEFT);
-                    label.setFont(currentFont);
-                    label.setText("Library version: ");
-                }
-
-                String libversion = null;
-                if ((libver[0] == 0) && (libver[1] == 1))
-                    libversion = "Earliest and Latest";
-                else if ((libver[0] == 1) && (libver[1] == 1)) libversion = "Latest and Latest";
-                else {
-                    libversion = "";
-                }
-
-                if (libversion.length() > 0) {
-                    label = new Label(generalInfoGroup, SWT.RIGHT);
-                    label.setFont(currentFont);
-                    label.setText(libversion);
-                }
-
-                Button userBlockButton = new Button(generalInfoGroup, SWT.PUSH);
-                userBlockButton.setText("Show User Block");
-                userBlockButton.addSelectionListener(new SelectionAdapter() {
-                    public void widgetSelected(SelectionEvent e) {
-                        new UserBlockDialog(mainWindow, SWT.NONE, obj).open();
-                    }
-                });
-            }
+            generalArea.setContent(tabFolder);
         }
         else {
-            log.trace("showMetaData: is not root");
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Name: ");
+            Composite generalInfoPane = createGeneralObjectInfoPane(generalArea, obj);
 
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(obj.getName());
-
-            if(isH5) {
-                if (obj.getLinkTargetObjName() != null) {
-                    final HObject theObj = obj;
-
-                    label = new Label(generalInfoGroup, SWT.LEFT);
-                    label.setFont(currentFont);
-                    label.setText("Link To Target: ");
-
-                    final Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
-                    linkTarget.setFont(currentFont);
-                    linkTarget.setText(obj.getLinkTargetObjName());
-                    linkTarget.addTraverseListener(new TraverseListener() {
-                        public void keyTraversed(TraverseEvent e) {
-                            if (e.detail == SWT.TRAVERSE_RETURN) {
-                                Group pgroup = null;
-                                try {
-                                    pgroup = (Group) theObj.getFileFormat().get(theObj.getPath());
-                                }
-                                catch (Exception ex) {
-                                    log.debug("parent group:", ex);
-                                }
-                                if (pgroup == null) {
-                                    Tools.showError(mainWindow, "Parent group is null.", mainWindow.getText());
-                                    return;
-                                }
-
-                                String target_name = linkTarget.getText();
-                                if (target_name != null) target_name = target_name.trim();
-
-                                int linkType = Group.LINK_TYPE_SOFT;
-                                if (theObj.getLinkTargetObjName().contains(FileFormat.FILE_OBJ_SEP))
-                                    linkType = Group.LINK_TYPE_EXTERNAL;
-                                else if (target_name.equals("/")) { // do not allow to link to the root
-                                    Tools.showError(mainWindow, "Link to root not allowed.", mainWindow.getText());
-                                    return;
-                                }
-
-                                // no change
-                                if (target_name.equals(theObj.getLinkTargetObjName())) return;
-
-                                // invalid name
-                                if (target_name == null || target_name.length() < 1) return;
-
-                                try {
-                                    theObj.getFileFormat().createLink(pgroup, theObj.getName(), target_name, linkType);
-                                    theObj.setLinkTargetObjName(target_name);
-                                }
-                                catch (Exception ex) {
-                                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
-                                    return;
-                                }
-
-                                MessageDialog.openInformation(mainWindow, mainWindow.getText(), "Link target changed.");
-                            }
-                        }
-                    });
-                }
-            }
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Path: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(obj.getPath());
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Type: ");
-
-            if(isH5) {
-                if (obj instanceof Group) {
-                    typeStr = "HDF5 Group";
-                }
-                else if (obj instanceof ScalarDS) {
-                    typeStr = "HDF5 Dataset";
-                }
-                else if (obj instanceof CompoundDS) {
-                    typeStr = "HDF5 Dataset";
-                }
-                else if (obj instanceof Datatype) {
-                    typeStr = "HDF5 Named Datatype";
-                }
-            }
-            else if(isH4) {
-                if (obj instanceof Group) {
-                    typeStr = "HDF4 Group";
-                }
-                else if (obj instanceof ScalarDS) {
-                    ScalarDS ds = (ScalarDS) obj;
-                    if (ds.isImage()) {
-                        typeStr = "HDF4 Raster Image";
-                    }
-                    else {
-                        typeStr = "HDF4 SDS";
-                    }
-                }
-                else if (obj instanceof CompoundDS) {
-                    typeStr = "HDF4 Vdata";
-                }
-            }
-            else {
-                if (obj instanceof Group) {
-                    typeStr = "Group";
-                }
-                else if (obj instanceof ScalarDS) {
-                    typeStr = "Dataset";
-                }
-                else if (obj instanceof CompoundDS) {
-                    typeStr = "Dataset";
-                }
-            }
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(typeStr);
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Number of Attributes: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(String.valueOf(numAttributes));
-
-            if (isH5) {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Object Ref:       ");
-            }
-            else {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Tag, Ref:        ");
-            }
-
-            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
-            String oidStr = null;
-            long[] OID = obj.getOID();
-            if (OID != null) {
-                oidStr = String.valueOf(OID[0]);
-                if (isH4) oidStr += ", " + OID[1];
-            }
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(oidStr);
-        }
-
-        log.trace("showMetaData: object extra info");
-        // Add any extra information depending on object type
-        if (obj instanceof Group) {
-            log.trace("showMetaData: group object extra info");
-            Group g = (Group) obj;
-            List<?> mlist = g.getMemberList();
-            int n = mlist.size();
-
-            if (mlist != null && n > 0) {
-                org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-                groupInfoGroup.setFont(currentFont);
-                groupInfoGroup.setText("Group Members");
-                groupInfoGroup.setLayout(new GridLayout(1, true));
-                groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-                if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
-                    label = new Label(groupInfoGroup, SWT.RIGHT);
-                    label.setFont(currentFont);
-                    label.setText("Number of members: " + n);
-                }
-                else {
-                    label = new Label(groupInfoGroup, SWT.RIGHT);
-                    label.setFont(currentFont);
-                    label.setText("Number of members: " + n + " (in memory),"
-                            + "" + g.getNumberOfMembersInFile() + " (in file)");
-                }
-
-                String rowData[][] = new String[n][2];
-                for (int i = 0; i < n; i++) {
-                    HObject theObj = (HObject) mlist.get(i);
-                    rowData[i][0] = theObj.getName();
-                    if (theObj instanceof Group) {
-                        rowData[i][1] = "Group";
-                    }
-                    else if (theObj instanceof Dataset) {
-                        rowData[i][1] = "Dataset";
-                    }
-                    else if (theObj instanceof Datatype) {
-                        rowData[i][1] = "Datatype";
-                    }
-                    else if (theObj instanceof H5Link) {
-                        rowData[i][1] = "Link";
-                    }
-                    else
-                        rowData[i][1] = "Unknown";
-                }
-
-                String[] columnNames = { "Name", "Type" };
-
-                Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
-                memberTable.setLinesVisible(true);
-                memberTable.setHeaderVisible(true);
-                memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-                memberTable.setFont(currentFont);
-
-                for(int i = 0; i < columnNames.length; i++) {
-                    TableColumn column = new TableColumn(memberTable, SWT.NONE);
-                    column.setText(columnNames[i]);
-                    column.setMoveable(false);
-                }
-
-                for(int i = 0; i < rowData.length; i++) {
-                    TableItem item = new TableItem(memberTable, SWT.NONE);
-                    item.setFont(currentFont);
-                    item.setText(0, rowData[i][0]);
-                    item.setText(1, rowData[i][1]);
-                }
-
-                for(int i = 0; i < columnNames.length; i++) {
-                    memberTable.getColumn(i).pack();
-                }
-
-                // set cell height for large fonts
-                //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
-                //table.setRowHeight(cellRowHeight);
+            // Directly add the general object info to the ScrolledComposite
+            if (generalInfoPane != null) {
+                generalArea.setContent(generalInfoPane);
             }
         }
-        else if (obj instanceof Dataset) {
-            log.trace("showMetaData: Dataset object extra info");
-            Dataset d = (Dataset) obj;
-            if (d.getRank() <= 0) {
-                d.init();
-            }
-
-            org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-            datasetInfoGroup.setFont(currentFont);
-            datasetInfoGroup.setText("Dataspace and Datatype");
-            datasetInfoGroup.setLayout(new GridLayout(1, true));
-            datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            // Create composite for displaying dataset dimensions, dimension size,
-            // max dimension size, and data type
-            Composite dimensionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
-            dimensionComposite.setLayout(new GridLayout(2, false));
-            dimensionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("No. of Dimension(s): ");
-
-            Text text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText("" + d.getRank());
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Dimension Size(s): ");
-
-            // Set Dimension Size
-            String dimStr = null;
-            String maxDimStr = null;
-            long dims[] = d.getDims();
-            long maxDims[] = d.getMaxDims();
-            if (dims != null) {
-                String[] dimNames = d.getDimNames();
-                boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
-                StringBuffer sb = new StringBuffer();
-                StringBuffer sb2 = new StringBuffer();
-
-                sb.append(dims[0]);
-                if (hasDimNames) {
-                    sb.append(" (");
-                    sb.append(dimNames[0]);
-                    sb.append(")");
-                }
-
-                if (maxDims[0] < 0)
-                    sb2.append("Unlimited");
-                else
-                    sb2.append(maxDims[0]);
-
-                for (int i = 1; i < dims.length; i++) {
-                    sb.append(" x ");
-                    sb.append(dims[i]);
-                    if (hasDimNames) {
-                        sb.append(" (");
-                        sb.append(dimNames[i]);
-                        sb.append(")");
-                    }
-
-                    sb2.append(" x ");
-                    if (maxDims[i] < 0)
-                        sb2.append("Unlimited");
-                    else
-                        sb2.append(maxDims[i]);
-
-                }
-                dimStr = sb.toString();
-                maxDimStr = sb2.toString();
-            }
-
-            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText((dimStr == null) ? "null" : dimStr);
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Max Dimension Size(s): ");
-
-            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText((maxDimStr == null) ? "null" : maxDimStr);
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Data Type: ");
-
-            String type = null;
-            if (d instanceof ScalarDS) {
-                ScalarDS sd = (ScalarDS) d;
-                Datatype t = sd.getDatatype();
-                type = (t == null) ? "null" : t.getDatatypeDescription();
-            }
-            else if (d instanceof CompoundDS) {
-                if (isH4) {
-                    type = "Vdata";
-                }
-                else {
-                    type = "Compound";
-                }
-            }
-
-            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText(type);
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-
-            // Create composite for possible compound dataset info
-            if (d instanceof CompoundDS) {
-                log.trace("showMetaData: dataset Compound object extra info");
-                CompoundDS compound = (CompoundDS) d;
-
-                int n = compound.getMemberCount();
-                if (n > 0) {
-                    String rowData[][] = new String[n][3];
-                    String names[] = compound.getMemberNames();
-                    Datatype types[] = compound.getMemberTypes();
-                    int orders[] = compound.getMemberOrders();
-
-                    for (int i = 0; i < n; i++) {
-                        rowData[i][0] = new String(names[i]);
-
-                        if (rowData[i][0].contains(CompoundDS.separator)) {
-                            rowData[i][0] = rowData[i][0].replaceAll(CompoundDS.separator, "->");
-                        }
-
-                        int mDims[] = compound.getMemberDims(i);
-                        if (mDims == null) {
-                            rowData[i][2] = String.valueOf(orders[i]);
-
-                            if (isH4 && types[i].getDatatypeClass() == Datatype.CLASS_STRING) {
-                                rowData[i][2] = String.valueOf(types[i].getDatatypeSize());
-                            }
-                        }
-                        else {
-                            String mStr = String.valueOf(mDims[0]);
-                            int m = mDims.length;
-                            for (int j = 1; j < m; j++) {
-                                mStr += " x " + mDims[j];
-                            }
-                            rowData[i][2] = mStr;
-                        }
-                        rowData[i][1] = (types[i] == null) ? "null" : types[i].getDatatypeDescription();
-                    }
-
-                    String[] columnNames = { "Name", "Type", "Array Size" };
-
-                    Table memberTable = new Table(datasetInfoGroup, SWT.BORDER);
-                    memberTable.setLinesVisible(true);
-                    memberTable.setHeaderVisible(true);
-                    memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-                    memberTable.setFont(currentFont);
-
-                    for(int i = 0; i < columnNames.length; i++) {
-                        TableColumn column = new TableColumn(memberTable, SWT.NONE);
-                        column.setText(columnNames[i]);
-                        column.setMoveable(false);
-                    }
-
-                    for(int i = 0; i < rowData.length; i++) {
-                        TableItem item = new TableItem(memberTable, SWT.NONE);
-                        item.setFont(currentFont);
-                        item.setText(0, rowData[i][0]);
-                        item.setText(1, rowData[i][1]);
-                        item.setText(2, rowData[i][2]);
-                    }
-
-                    for(int i = 0; i < columnNames.length; i++) {
-                        memberTable.getColumn(i).pack();
-                    }
-
-                    // set cell height for large fonts
-                    //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
-                    //table.setRowHeight(cellRowHeight);
-                } // if (n > 0)
-            } // if (d instanceof Compound)
-
-
-            // Create composite for displaying dataset storage layout, compression, filters,
-            // storage type, and fill value
-            Composite compressionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
-            compressionComposite.setLayout(new GridLayout(2, false));
-            compressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            // Add compression and data layout information
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Storage Layout: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getStorageLayout());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Compression: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getCompression());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Filters: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getFilters());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Storage: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getStorage());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Fill value: ");
-
-            Object fillValue = null;
-            String fillValueInfo = "NONE";
-            if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
-            if (fillValue != null) {
-                if (fillValue.getClass().isArray()) {
-                    int len = Array.getLength(fillValue);
-                    fillValueInfo = Array.get(fillValue, 0).toString();
-                    for (int i = 1; i < len; i++) {
-                        fillValueInfo += ", ";
-                        fillValueInfo += Array.get(fillValue, i).toString();
-                    }
-                }
-                else
-                    fillValueInfo = fillValue.toString();
-            }
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(fillValueInfo);
-        }
-        else if (obj instanceof Datatype) {
-            log.trace("showMetaData: Datatype object extra info");
-            org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-            datatypeInfoGroup.setFont(currentFont);
-            datatypeInfoGroup.setText("Type");
-            datatypeInfoGroup.setLayout(new FillLayout());
-            datatypeInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            Text infoArea = new Text(datatypeInfoGroup, SWT.MULTI);
-            infoArea.setFont(currentFont);
-            infoArea.setText(((Datatype) obj).getDatatypeDescription());
-            infoArea.setEditable(false);
-        }
-
-        attributeArea.layout();
 
         log.trace("showMetaData: finish");
     }
@@ -1917,7 +1381,7 @@ public class HDFView implements ViewManager {
 
         int index = url_bar.getSelectionIndex();
         if (index >= 0) {
-            String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
+            String fName = url_bar.getItem(url_bar.getSelectionIndex());
             if (theFile.getFilePath().equals(fName)) {
                 currentFile = null;
                 url_bar.setText("");
@@ -1931,7 +1395,7 @@ public class HDFView implements ViewManager {
 
         theFile = null;
 
-        for (Control control : attributeArea.getChildren()) control.dispose();
+        for (Control control : generalArea.getChildren()) control.dispose();
 
         System.gc();
     }
@@ -1997,6 +1461,7 @@ public class HDFView implements ViewManager {
         }
     }
 
+    @Override
     public void addDataView(DataView dataView) {
         if (dataView == null || dataView instanceof MetaDataView) {
             return;
@@ -2006,7 +1471,7 @@ public class HDFView implements ViewManager {
         Shell[] shellList = display.getShells();
         if (shellList != null) {
             for (int i = 0; i < shellList.length; i++) {
-                if (dataView.equals((DataView) shellList[i].getData())
+                if (dataView.equals(shellList[i].getData())
                         && shellList[i].isVisible()) {
                     showWindow(shellList[i]);
                     return;
@@ -2025,6 +1490,7 @@ public class HDFView implements ViewManager {
         MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText(fullPath);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 Shell[] sList = display.getShells();
 
@@ -2045,6 +1511,7 @@ public class HDFView implements ViewManager {
         mainWindow.setCursor(null);
     }
 
+    @Override
     public void removeDataView(DataView dataView) {
         if (mainWindow.isDisposed()) return;
 
@@ -2064,6 +1531,7 @@ public class HDFView implements ViewManager {
         }
     }
 
+    @Override
     public DataView getDataView(HObject dataObject) {
         Shell[] openShells = display.getShells();
         DataView view = null;
@@ -2141,6 +1609,7 @@ public class HDFView implements ViewManager {
      */
     private void showWindow(final Shell shell) {
         shell.getDisplay().asyncExec(new Runnable() {
+            @Override
             public void run() {
                 shell.forceActive();
             }
@@ -2650,13 +2119,838 @@ public class HDFView implements ViewManager {
         ArrayList<Object> keyList = new ArrayList<>();
 
         while (keys.hasMoreElements())
-            keyList.add((Object) keys.nextElement());
+            keyList.add(keys.nextElement());
 
         String theKey = new UnregisterFileFormatDialog(mainWindow, SWT.NONE, keyList).open();
 
         if (theKey == null) return;
 
         FileFormat.removeFileFormat(theKey);
+    }
+
+    private Composite createGeneralObjectInfoPane(Composite parent, HObject obj) {
+        if (parent == null || obj == null) return null;
+
+        log.trace("createGeneralObjectInfoPane: start");
+
+        FileFormat theFile = obj.getFileFormat();
+        boolean isRoot = ((obj instanceof Group) && ((Group) obj).isRoot());
+        boolean isH4 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
+        boolean isH5 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+
+        // Get the metadata information before adding GUI components */
+        List<?> attrList = null;
+        int numAttributes = 0;
+        try {
+            attrList = obj.getMetadata();
+            if (attrList != null)
+                numAttributes = attrList.size();
+        }
+        catch (Exception ex) {
+            attrList = null;
+            log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
+        }
+
+        org.eclipse.swt.widgets.Group generalInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
+        generalInfoGroup.setFont(currentFont);
+        generalInfoGroup.setText("General Object Info");
+        generalInfoGroup.setLayout(new GridLayout(2, false));
+        generalInfoGroup.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+
+        String typeStr = "Unknown";
+        Label label;
+
+        if (isRoot) {
+            log.trace("createGeneralObjectInfoPane: isRoot");
+
+            long size = 0;
+            try {
+                size = (new File(obj.getFile())).length();
+            }
+            catch (Exception ex) {
+                size = -1;
+            }
+            size /= 1024;
+
+            // Retrieve the number of subgroups and datasets in the root group
+            HObject root = theFile.getRootObject();
+            HObject theObj = null;
+            Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
+            int groupCount = 0, datasetCount = 0;
+
+            while(it.hasNext()) {
+                theObj = it.next();
+
+                if(theObj instanceof Group) {
+                    groupCount++;
+                }
+                else {
+                    datasetCount++;
+                }
+            }
+
+            // Append all of the file's information to the general object info pane
+            String fileInfo = "";
+
+            fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("File Name: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(obj.getName());
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("File Path: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText((new File(obj.getFile())).getParent());
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("File Type: ");
+
+            if (isH5) {
+                typeStr = "HDF5,  " + fileInfo;
+            }
+            else if (isH4) {
+                typeStr = "HDF4,  " + fileInfo;
+            }
+            else {
+                typeStr = fileInfo;
+            }
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(typeStr);
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Number of Attributes: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(String.valueOf(numAttributes));
+
+
+            // Append the Library Version bounds information
+            if (isH5) {
+                int[] libver = null;
+
+                try {
+                    libver = obj.getFileFormat().getLibBounds();
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
+                    label = new Label(generalInfoGroup, SWT.LEFT);
+                    label.setFont(currentFont);
+                    label.setText("Library version: ");
+                }
+
+                String libversion = null;
+                if ((libver[0] == 0) && (libver[1] == 1))
+                    libversion = "Earliest and Latest";
+                else if ((libver[0] == 1) && (libver[1] == 1))
+                    libversion = "Latest and Latest";
+                else {
+                    libversion = "";
+                }
+
+                if (libversion.length() > 0) {
+                    label = new Label(generalInfoGroup, SWT.RIGHT);
+                    label.setFont(currentFont);
+                    label.setText(libversion);
+                }
+
+                Button userBlockButton = new Button(generalInfoGroup, SWT.PUSH);
+                userBlockButton.setText("Show User Block");
+                userBlockButton.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        new UserBlockDialog(mainWindow, SWT.NONE, obj).open();
+                    }
+                });
+            }
+        }
+        else {
+            log.trace("createGeneralObjectInfoPane: isNotRoot");
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Name: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(obj.getName());
+
+            // For HDF5 links, add a box to allow changing of the link target
+            if (isH5) {
+                if (obj.getLinkTargetObjName() != null) {
+                    final HObject theObj = obj;
+
+                    label = new Label(generalInfoGroup, SWT.LEFT);
+                    label.setFont(currentFont);
+                    label.setText("Link To Target: ");
+
+                    final Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
+                    linkTarget.setFont(currentFont);
+                    linkTarget.setText(obj.getLinkTargetObjName());
+                    linkTarget.addTraverseListener(new TraverseListener() {
+                        @Override
+                        public void keyTraversed(TraverseEvent e) {
+                            if (e.detail == SWT.TRAVERSE_RETURN) {
+                                Group pgroup = null;
+                                try {
+                                    pgroup = (Group) theObj.getFileFormat().get(theObj.getPath());
+                                }
+                                catch (Exception ex) {
+                                    log.debug("parent group:", ex);
+                                }
+                                if (pgroup == null) {
+                                    Tools.showError(mainWindow, "Parent group is null.", mainWindow.getText());
+                                    return;
+                                }
+
+                                String target_name = linkTarget.getText();
+                                if (target_name != null) target_name = target_name.trim();
+
+                                int linkType = Group.LINK_TYPE_SOFT;
+                                if (theObj.getLinkTargetObjName().contains(FileFormat.FILE_OBJ_SEP))
+                                    linkType = Group.LINK_TYPE_EXTERNAL;
+                                else if (target_name.equals("/")) { // do not allow to link to the root
+                                    Tools.showError(mainWindow, "Link to root not allowed.", mainWindow.getText());
+                                    return;
+                                }
+
+                                // no change
+                                if (target_name.equals(theObj.getLinkTargetObjName())) return;
+
+                                // invalid name
+                                if (target_name == null || target_name.length() < 1) return;
+
+                                try {
+                                    theObj.getFileFormat().createLink(pgroup, theObj.getName(), target_name, linkType);
+                                    theObj.setLinkTargetObjName(target_name);
+                                }
+                                catch (Exception ex) {
+                                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+                                    return;
+                                }
+
+                                MessageDialog.openInformation(mainWindow, mainWindow.getText(), "Link target changed.");
+                            }
+                        }
+                    });
+                }
+            }
+
+
+            // Append information about the type of the object
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Path: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(obj.getPath());
+
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Type: ");
+
+            if(isH5) {
+                if (obj instanceof Group) {
+                    typeStr = "HDF5 Group";
+                }
+                else if (obj instanceof ScalarDS) {
+                    typeStr = "HDF5 Dataset";
+                }
+                else if (obj instanceof CompoundDS) {
+                    typeStr = "HDF5 Dataset";
+                }
+                else if (obj instanceof Datatype) {
+                    typeStr = "HDF5 Named Datatype";
+                }
+            }
+            else if(isH4) {
+                if (obj instanceof Group) {
+                    typeStr = "HDF4 Group";
+                }
+                else if (obj instanceof ScalarDS) {
+                    ScalarDS ds = (ScalarDS) obj;
+                    if (ds.isImage()) {
+                        typeStr = "HDF4 Raster Image";
+                    }
+                    else {
+                        typeStr = "HDF4 SDS";
+                    }
+                }
+                else if (obj instanceof CompoundDS) {
+                    typeStr = "HDF4 Vdata";
+                }
+            }
+            else {
+                if (obj instanceof Group) {
+                    typeStr = "Group";
+                }
+                else if (obj instanceof ScalarDS) {
+                    typeStr = "Dataset";
+                }
+                else if (obj instanceof CompoundDS) {
+                    typeStr = "Dataset";
+                }
+            }
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(typeStr);
+
+
+            // Append information about the number of attributes
+            // attached to the object
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Number of Attributes: ");
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(String.valueOf(numAttributes));
+
+
+            // Append object ID information about the object
+            if (isH5) {
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(currentFont);
+                label.setText("Object Ref:       ");
+            }
+            else {
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(currentFont);
+                label.setText("Tag, Ref:        ");
+            }
+
+            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
+            String oidStr = null;
+            long[] OID = obj.getOID();
+            if (OID != null) {
+                oidStr = String.valueOf(OID[0]);
+                if (isH4) oidStr += ", " + OID[1];
+            }
+
+            label = new Label(generalInfoGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(oidStr);
+        }
+
+        // Add a dummy label to take up some vertical space between sections
+        label = new Label(generalInfoGroup, SWT.LEFT);
+        label.setText("");
+        label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+
+        // Add any extra information depending on object type
+        log.trace("createGeneralObjectInfoPane: show extra object info");
+
+        if (obj instanceof Group) {
+            log.trace("showMetaData: group object extra info");
+            Group g = (Group) obj;
+            List<?> mlist = g.getMemberList();
+            int n = mlist.size();
+
+            if (mlist != null && n > 0) {
+                org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(generalInfoGroup, SWT.NONE);
+                groupInfoGroup.setFont(currentFont);
+                groupInfoGroup.setText("Group Members");
+                groupInfoGroup.setLayout(new GridLayout(1, true));
+                groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+                if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
+                    label = new Label(groupInfoGroup, SWT.RIGHT);
+                    label.setFont(currentFont);
+                    label.setText("Number of members: " + n);
+                }
+                else {
+                    label = new Label(groupInfoGroup, SWT.RIGHT);
+                    label.setFont(currentFont);
+                    label.setText("Number of members: " + n + " (in memory),"
+                            + "" + g.getNumberOfMembersInFile() + " (in file)");
+                }
+
+                String rowData[][] = new String[n][2];
+                for (int i = 0; i < n; i++) {
+                    HObject theObj = (HObject) mlist.get(i);
+                    rowData[i][0] = theObj.getName();
+                    if (theObj instanceof Group) {
+                        rowData[i][1] = "Group";
+                    }
+                    else if (theObj instanceof Dataset) {
+                        rowData[i][1] = "Dataset";
+                    }
+                    else if (theObj instanceof Datatype) {
+                        rowData[i][1] = "Datatype";
+                    }
+                    else if (theObj instanceof H5Link) {
+                        rowData[i][1] = "Link";
+                    }
+                    else
+                        rowData[i][1] = "Unknown";
+                }
+
+                String[] columnNames = { "Name", "Type" };
+
+                Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
+                memberTable.setLinesVisible(true);
+                memberTable.setHeaderVisible(true);
+                memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+                memberTable.setFont(currentFont);
+
+                for(int i = 0; i < columnNames.length; i++) {
+                    TableColumn column = new TableColumn(memberTable, SWT.NONE);
+                    column.setText(columnNames[i]);
+                    column.setMoveable(false);
+                }
+
+                for(int i = 0; i < rowData.length; i++) {
+                    TableItem item = new TableItem(memberTable, SWT.NONE);
+                    item.setFont(currentFont);
+                    item.setText(0, rowData[i][0]);
+                    item.setText(1, rowData[i][1]);
+                }
+
+                for(int i = 0; i < columnNames.length; i++) {
+                    memberTable.getColumn(i).pack();
+                }
+
+                // set cell height for large fonts
+                //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
+                //table.setRowHeight(cellRowHeight);
+            }
+        }
+        else if (obj instanceof Dataset) {
+            log.trace("showMetaData: Dataset object extra info");
+            Dataset d = (Dataset) obj;
+            if (d.getRank() <= 0) {
+                d.init();
+            }
+
+            org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(generalInfoGroup, SWT.NONE);
+            datasetInfoGroup.setFont(currentFont);
+            datasetInfoGroup.setText("Dataset Dataspace and Datatype");
+            datasetInfoGroup.setLayout(new GridLayout(2, false));
+            datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+            label = new Label(datasetInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("No. of Dimension(s): ");
+
+            Text text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(currentFont);
+            text.setText("" + d.getRank());
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            label = new Label(datasetInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Dimension Size(s): ");
+
+            // Set Dimension Size
+            String dimStr = null;
+            String maxDimStr = null;
+            long dims[] = d.getDims();
+            long maxDims[] = d.getMaxDims();
+            if (dims != null) {
+                String[] dimNames = d.getDimNames();
+                boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
+                StringBuffer sb = new StringBuffer();
+                StringBuffer sb2 = new StringBuffer();
+
+                sb.append(dims[0]);
+                if (hasDimNames) {
+                    sb.append(" (");
+                    sb.append(dimNames[0]);
+                    sb.append(")");
+                }
+
+                if (maxDims[0] < 0)
+                    sb2.append("Unlimited");
+                else
+                    sb2.append(maxDims[0]);
+
+                for (int i = 1; i < dims.length; i++) {
+                    sb.append(" x ");
+                    sb.append(dims[i]);
+                    if (hasDimNames) {
+                        sb.append(" (");
+                        sb.append(dimNames[i]);
+                        sb.append(")");
+                    }
+
+                    sb2.append(" x ");
+                    if (maxDims[i] < 0)
+                        sb2.append("Unlimited");
+                    else
+                        sb2.append(maxDims[i]);
+
+                }
+                dimStr = sb.toString();
+                maxDimStr = sb2.toString();
+            }
+
+            text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(currentFont);
+            text.setText((dimStr == null) ? "null" : dimStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            label = new Label(datasetInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Max Dimension Size(s): ");
+
+            text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(currentFont);
+            text.setText((maxDimStr == null) ? "null" : maxDimStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            label = new Label(datasetInfoGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Data Type: ");
+
+            String type = null;
+            if (d instanceof ScalarDS) {
+                ScalarDS sd = (ScalarDS) d;
+                Datatype t = sd.getDatatype();
+                type = (t == null) ? "null" : t.getDatatypeDescription();
+            }
+            else if (d instanceof CompoundDS) {
+                if (isH4) {
+                    type = "Vdata";
+                }
+                else {
+                    type = "Compound";
+                }
+            }
+
+            text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(currentFont);
+            text.setText(type);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+
+            // Add a dummy label to take up some vertical space between sections
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setText("");
+            label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+
+            // Display dataset storage layout, compression, filters,
+            // storage type, and fill value
+            org.eclipse.swt.widgets.Group datasetLayoutGroup = new org.eclipse.swt.widgets.Group(generalInfoGroup, SWT.NONE);
+            datasetLayoutGroup.setFont(currentFont);
+            datasetLayoutGroup.setText("Miscellaneous Dataset Information");
+            datasetLayoutGroup.setLayout(new GridLayout(2, false));
+            datasetLayoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+            // Add compression and data layout information
+            label = new Label(datasetLayoutGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Storage Layout: ");
+
+            label = new Label(datasetLayoutGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(d.getStorageLayout());
+
+            label = new Label(datasetLayoutGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Compression: ");
+
+            label = new Label(datasetLayoutGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(d.getCompression());
+
+            label = new Label(datasetLayoutGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Filters: ");
+
+            label = new Label(datasetLayoutGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(d.getFilters());
+
+            label = new Label(datasetLayoutGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Storage: ");
+
+            label = new Label(datasetLayoutGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(d.getStorage());
+
+            label = new Label(datasetLayoutGroup, SWT.LEFT);
+            label.setFont(currentFont);
+            label.setText("Fill value: ");
+
+            Object fillValue = null;
+            String fillValueInfo = "NONE";
+            if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
+            if (fillValue != null) {
+                if (fillValue.getClass().isArray()) {
+                    int len = Array.getLength(fillValue);
+                    fillValueInfo = Array.get(fillValue, 0).toString();
+                    for (int i = 1; i < len; i++) {
+                        fillValueInfo += ", ";
+                        fillValueInfo += Array.get(fillValue, i).toString();
+                    }
+                }
+                else
+                    fillValueInfo = fillValue.toString();
+            }
+
+            label = new Label(datasetLayoutGroup, SWT.RIGHT);
+            label.setFont(currentFont);
+            label.setText(fillValueInfo);
+
+
+            // Create composite for possible compound dataset info
+            if (d instanceof CompoundDS) {
+                log.trace("showMetaData: dataset Compound object extra info");
+                CompoundDS compound = (CompoundDS) d;
+
+                int n = compound.getMemberCount();
+                if (n > 0) {
+                    String rowData[][] = new String[n][3];
+                    String names[] = compound.getMemberNames();
+                    Datatype types[] = compound.getMemberTypes();
+                    int orders[] = compound.getMemberOrders();
+
+                    // Add a dummy label to take up some vertical space between sections
+                    label = new Label(generalInfoGroup, SWT.LEFT);
+                    label.setText("");
+                    label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+                    org.eclipse.swt.widgets.Group compoundMembersGroup = new org.eclipse.swt.widgets.Group(generalInfoGroup, SWT.NONE);
+                    compoundMembersGroup.setFont(currentFont);
+                    compoundMembersGroup.setText("Compound Dataset Members");
+                    compoundMembersGroup.setLayout(new FillLayout(SWT.VERTICAL));
+                    compoundMembersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+                    for (int i = 0; i < n; i++) {
+                        rowData[i][0] = new String(names[i]);
+
+                        if (rowData[i][0].contains(CompoundDS.separator)) {
+                            rowData[i][0] = rowData[i][0].replaceAll(CompoundDS.separator, "->");
+                        }
+
+                        int mDims[] = compound.getMemberDims(i);
+                        if (mDims == null) {
+                            rowData[i][2] = String.valueOf(orders[i]);
+
+                            if (isH4 && types[i].getDatatypeClass() == Datatype.CLASS_STRING) {
+                                rowData[i][2] = String.valueOf(types[i].getDatatypeSize());
+                            }
+                        }
+                        else {
+                            String mStr = String.valueOf(mDims[0]);
+                            int m = mDims.length;
+                            for (int j = 1; j < m; j++) {
+                                mStr += " x " + mDims[j];
+                            }
+                            rowData[i][2] = mStr;
+                        }
+                        rowData[i][1] = (types[i] == null) ? "null" : types[i].getDatatypeDescription();
+                    }
+
+                    String[] columnNames = { "Name", "Type", "Array Size" };
+
+                    Table memberTable = new Table(compoundMembersGroup, SWT.BORDER);
+                    memberTable.setLinesVisible(true);
+                    memberTable.setHeaderVisible(true);
+                    memberTable.setFont(currentFont);
+
+                    for(int i = 0; i < columnNames.length; i++) {
+                        TableColumn column = new TableColumn(memberTable, SWT.NONE);
+                        column.setText(columnNames[i]);
+                        column.setMoveable(false);
+                    }
+
+                    for(int i = 0; i < rowData.length; i++) {
+                        TableItem item = new TableItem(memberTable, SWT.NONE);
+                        item.setFont(currentFont);
+                        item.setText(0, rowData[i][0]);
+                        item.setText(1, rowData[i][1]);
+                        item.setText(2, rowData[i][2]);
+                    }
+
+                    for(int i = 0; i < columnNames.length; i++) {
+                        memberTable.getColumn(i).pack();
+                    }
+
+                    // set cell height for large fonts
+                    //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
+                    //table.setRowHeight(cellRowHeight);
+
+                    // Prevent conflict from equal vertical grabbing
+                    datasetLayoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+                } // if (n > 0)
+            } // if (d instanceof Compound)
+        }
+        else if (obj instanceof Datatype) {
+            log.trace("showMetaData: Datatype object extra info");
+            org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(generalInfoGroup, SWT.NONE);
+            datatypeInfoGroup.setFont(currentFont);
+            datatypeInfoGroup.setText("Type");
+            datatypeInfoGroup.setLayout(new FillLayout());
+            datatypeInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            Text infoArea = new Text(datatypeInfoGroup, SWT.MULTI);
+            infoArea.setFont(currentFont);
+            infoArea.setText(((Datatype) obj).getDatatypeDescription());
+            infoArea.setEditable(false);
+        }
+
+        log.trace("createGeneralObjectInfoPane: finish");
+
+        return generalInfoGroup;
+    }
+
+    private Composite createAttributeInfoPane(Composite parent, HObject obj) {
+        log.trace("createAttributeInfoPane: start");
+
+        org.eclipse.swt.widgets.Group attributeInfoGroup = null;
+
+        // Get the metadata information before adding GUI components */
+        List<?> attrList = null;
+        int numAttributes = 0;
+        try {
+            attrList = obj.getMetadata();
+            if (attrList != null)
+                numAttributes = attrList.size();
+        }
+        catch (Exception ex) {
+            attrList = null;
+            log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
+        }
+
+        if (numAttributes > 0) {
+            Table                      attrTable; // table to hold a list of attributes
+            Label                      attrNumberLabel;
+
+            attributeInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
+            attributeInfoGroup.setFont(currentFont);
+            attributeInfoGroup.setText("Object Attribute Info");
+            attributeInfoGroup.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+            attributeInfoGroup.setLayout(new GridLayout(2, false));
+            attributeInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+            log.trace("createAttributeInfoPane:  numAttributes={}", numAttributes);
+
+            attrNumberLabel = new Label(attributeInfoGroup, SWT.RIGHT);
+            attrNumberLabel.setFont(currentFont);
+            attrNumberLabel.setText("Number of attributes = 0");
+
+            // button to open MetaDataView Dialog
+            Button showAttrButton = new Button(attributeInfoGroup, SWT.PUSH);
+            showAttrButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
+            showAttrButton.setText("Show Attributes");
+            showAttrButton.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    try {
+                        getTreeView().showMetaData(obj);
+                    }
+                    catch (Exception ex) {
+                        display.beep();
+                        Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+                    }
+                }
+            });
+
+            String[] columnNames = { "Name", "Type", "Array Size", "Value" };
+
+            attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER);
+            attrTable.setLinesVisible(true);
+            attrTable.setHeaderVisible(true);
+            attrTable.setFont(currentFont);
+            attrTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+            for(int i = 0; i < columnNames.length; i++) {
+                TableColumn column = new TableColumn(attrTable, SWT.NONE);
+                column.setText(columnNames[i]);
+                column.setMoveable(false);
+                if (i == columnNames.length -1)
+                    column.setWidth(200);
+                else
+                    column.setWidth(50);
+            }
+
+            if (attrList == null) {
+                log.trace("createAttributeInfoPane:  attrList == null");
+            }
+            else {
+                attrNumberLabel.setText("Number of attributes = " + numAttributes);
+
+                Attribute attr = null;
+                String name, type, size;
+                for (int i = 0; i < numAttributes; i++) {
+                    attr = (Attribute) attrList.get(i);
+                    name = attr.getName();
+                    type = attr.getType().getDatatypeDescription();
+                    log.trace("createAttributeInfoPane:  attr[{}] is {} as {}", i, name, type);
+
+                    if (name == null) name = "null";
+                    if (type == null) type = "null";
+
+                    if (attr.isScalar()) {
+                        size = "Scalar";
+                    }
+                    else {
+                        long dims[] = attr.getDataDims();
+                        size = String.valueOf(dims[0]);
+                        for (int j = 1; j < dims.length; j++) {
+                            size += " x " + dims[j];
+                        }
+
+                        if (size == null) size = "null";
+                    }
+
+                    TableItem item = new TableItem(attrTable, SWT.NONE);
+                    item.setFont(currentFont);
+
+                    if (attr.getProperty("field") != null) {
+                        String fieldInfo = " {Field: "+attr.getProperty("field")+"}";
+                        item.setText(0, (name + fieldInfo == null) ? "null" : name + fieldInfo);
+                    }
+                    else {
+                        item.setText(0, (name == null) ? "null" : name);
+                    }
+
+                    String value = attr.toString(", ", 50);
+                    if (value == null) value = "null";
+
+                    item.setText(1, type);
+                    item.setText(2, size);
+                    item.setText(3, value);
+                } // for (int i=0; i<n; i++)
+            }
+
+            for(int i = 0; i < columnNames.length; i++) {
+                attrTable.getColumn(i).pack();
+            }
+
+            // Prevent attributes with many values, such as array types, from making
+            // the window too wide
+            attrTable.getColumn(3).setWidth(200);
+        }
+
+        log.trace("createAttributeInfoPane: finish");
+
+        return attributeInfoGroup;
     }
 
     private class LibraryVersionDialog extends Dialog {
@@ -2732,6 +3026,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             shell.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
@@ -2774,6 +3069,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     dialog.dispose();
                 }
@@ -2845,6 +3141,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     dialog.dispose();
                 }
@@ -2908,6 +3205,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     dialog.dispose();
                 }
@@ -2967,6 +3265,7 @@ public class HDFView implements ViewManager {
             formatChoiceCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
             formatChoiceCombo.select(0);
             formatChoiceCombo.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     formatChoice = formatChoiceCombo.getItem(formatChoiceCombo.getSelectionIndex());
                 }
@@ -2981,6 +3280,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
@@ -2991,6 +3291,7 @@ public class HDFView implements ViewManager {
             cancelButton.setText(" &Cancel ");
             cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
@@ -3055,11 +3356,12 @@ public class HDFView implements ViewManager {
             userBlockDisplayChoice.setItems(displayChoices);
             userBlockDisplayChoice.select(0);
             userBlockDisplayChoice.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     Combo source = (Combo) e.widget;
                     int type = 0;
 
-                    String typeName = (String) source.getItem(source.getSelectionIndex());
+                    String typeName = source.getItem(source.getSelectionIndex());
 
                     jamButton.setEnabled(false);
                     userBlockArea.setEditable(false);
@@ -3100,6 +3402,7 @@ public class HDFView implements ViewManager {
             jamButton.setText("Save User Block");
             jamButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             jamButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     writeUserBlock();
                 }
@@ -3120,6 +3423,7 @@ public class HDFView implements ViewManager {
             closeButton.setText(" &Close ");
             closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 5, 1));
             closeButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
@@ -3162,7 +3466,7 @@ public class HDFView implements ViewManager {
             if ((radix == 2) || (radix == 8) || (radix == 16) || (radix == 10)) {
                 StringBuffer sb = new StringBuffer();
                 for (headerSize = 0; headerSize < userBlock.length; headerSize++) {
-                    int intValue = (int) userBlock[headerSize];
+                    int intValue = userBlock[headerSize];
                     if (intValue < 0) {
                         intValue += 256;
                     }
@@ -3471,6 +3775,7 @@ public class HDFView implements ViewManager {
         final int the_X = X, the_Y = Y, the_W = W, the_H = H;
 
         display.syncExec(new Runnable() {
+            @Override
             public void run() {
                 HDFView app = new HDFView(the_rootDir);
 

@@ -104,6 +104,7 @@ public class DefaultMetaDataView implements MetaDataView {
         shell.setFont(curFont);
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
 
@@ -146,6 +147,7 @@ public class DefaultMetaDataView implements MetaDataView {
         closeButton.setText("   &Close   ");
         closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         closeButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 shell.dispose();
             }
@@ -159,6 +161,7 @@ public class DefaultMetaDataView implements MetaDataView {
     }
 
     /** Add an attribute to a data object. */
+    @Override
     public Attribute addAttribute(HObject obj) {
         if (obj == null) {
             return null;
@@ -199,6 +202,7 @@ public class DefaultMetaDataView implements MetaDataView {
     }
 
     /** Delete an attribute from a data object. */
+    @Override
     public Attribute deleteAttribute(HObject obj) {
         if (obj == null) {
             return null;
@@ -246,6 +250,7 @@ public class DefaultMetaDataView implements MetaDataView {
     }
 
     /** Returns the data object displayed in this data viewer */
+    @Override
     public HObject getDataObject() {
         return hObject;
     }
@@ -263,7 +268,7 @@ public class DefaultMetaDataView implements MetaDataView {
     private void updateAttributeValue(String newValue, int row, int col) {
         log.trace("updateAttributeValue:start value={}[{},{}]", newValue, row, col);
 
-        String attrName = (String) attrTable.getItem(row).getText(0);
+        String attrName = attrTable.getItem(row).getText(0);
         List<?> attrList = null;
         try {
             attrList = hObject.getMetadata();
@@ -393,7 +398,7 @@ public class DefaultMetaDataView implements MetaDataView {
                                 Array.setLong(data, i, lvalue);
                             }
                             else
-                                Array.set(data, i, (Object)theToken);
+                                Array.set(data, i, theToken);
                         }
                         else {
                             min = Long.MIN_VALUE;
@@ -414,7 +419,7 @@ public class DefaultMetaDataView implements MetaDataView {
                         Array.setDouble(data, i, d);
                         break;
                     default:
-                        Array.set(data, i, (Object)theToken);
+                        Array.set(data, i, theToken);
                         break;
                 }
             }
@@ -499,6 +504,7 @@ public class DefaultMetaDataView implements MetaDataView {
         addButton.setEnabled(!theFile.isReadOnly());
         addButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         addButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 addAttribute(hObject);
             }
@@ -512,6 +518,7 @@ public class DefaultMetaDataView implements MetaDataView {
             delButton.setEnabled(!theFile.isReadOnly());
             delButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             delButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     deleteAttribute(hObject);
                 }
@@ -533,6 +540,7 @@ public class DefaultMetaDataView implements MetaDataView {
         attrTable.addListener(SWT.MouseDoubleClick, attrTableCellEditor);
 
         attrTable.addListener(SWT.MouseDown, new Listener() {
+            @Override
             public void handleEvent(Event e) {
                 Point location = new Point(e.x, e.y);
                 TableItem item = attrTable.getItem(location);
@@ -591,7 +599,8 @@ public class DefaultMetaDataView implements MetaDataView {
                 if (attr.getProperty("field") != null) {
                     String fieldInfo = " {Field: "+attr.getProperty("field")+"}";
                     item.setText(0, (name + fieldInfo == null) ? "null" : name + fieldInfo);
-                } else {
+                }
+                else {
                     item.setText(0, (name == null) ? "null" : name);
                 }
 
@@ -634,6 +643,7 @@ public class DefaultMetaDataView implements MetaDataView {
         MenuItem item = new MenuItem(menuBar, SWT.PUSH);
         item.setText("Close");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 shell.dispose();
             }
@@ -644,6 +654,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
     // Listener to allow user to only change attribute name or value
     private Listener attrTableCellEditor = new Listener() {
+        @Override
         public void handleEvent(Event event) {
             final TableEditor editor = new TableEditor(attrTable);
             editor.horizontalAlignment = SWT.LEFT;
@@ -674,6 +685,7 @@ public class DefaultMetaDataView implements MetaDataView {
                         text.setFont(curFont);
 
                         Listener textListener = new Listener() {
+                            @Override
                             public void handleEvent(final Event e) {
                                 switch (e.type) {
                                 case SWT.FocusOut:
@@ -711,7 +723,8 @@ public class DefaultMetaDataView implements MetaDataView {
                     }
                 }
 
-                if (!visible) return;
+                if (!visible)
+                    return;
 
                 index++;
             }
