@@ -2548,7 +2548,7 @@ public class HDFView implements ViewManager {
             datasetInfoGroup.setText("Dataset Dataspace and Datatype");
             datasetInfoGroup.setLayout(new GridLayout(2, false));
             datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-            String labelinfo = "NONE";
+            String labelinfo;
 
             log.trace("showMetaData: Dataset object extra info - dimesions");
             label = new Label(datasetInfoGroup, SWT.LEFT);
@@ -2559,8 +2559,6 @@ public class HDFView implements ViewManager {
             text.setEditable(false);
             text.setFont(currentFont);
             labelinfo = "" + d.getRank();
-            if (labelinfo == null)
-                labelinfo = "UNKNOWN";
             text.setText(labelinfo);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -3693,19 +3691,19 @@ public class HDFView implements ViewManager {
 
         String rootDir = System.getProperty("hdfview.workdir");
         log.trace("main: rootDir = {} ", rootDir);
-        if(rootDir == null) rootDir = System.getProperty("user.dir");
+        if(rootDir == null)
+            rootDir = System.getProperty("user.dir");
 
         File tmpFile = null;
         Monitor primaryMonitor = display.getPrimaryMonitor();
         Point margin = new Point(primaryMonitor.getBounds().width,
                 primaryMonitor.getBounds().height);
 
-
         int j = args.length;
-        int W = margin.x / 2,
-                H = margin.y,
-                X = 0,
-                Y = 0;
+        int W = margin.x / 2;
+        int H = margin.y;
+        int X = 0;
+        int Y = 0;
 
         for(int i = 0; i < args.length; i++) {
             if ("-root".equalsIgnoreCase(args[i])) {
@@ -3714,12 +3712,10 @@ public class HDFView implements ViewManager {
                     j--;
                     tmpFile = new File(args[++i]);
 
-                    if(tmpFile.isDirectory()) {
+                    if(tmpFile.isDirectory())
                         rootDir = tmpFile.getPath();
-                    }
-                    else if(tmpFile.isFile()) {
+                    else if(tmpFile.isFile())
                         rootDir = tmpFile.getParent();
-                    }
                 }
                 catch (Exception ex) {}
             }
