@@ -165,9 +165,9 @@ public class HDFView implements ViewManager {
     private static final String        JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
 
     private static final String        aboutHDFView = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
-    + "For " + System.getProperty("os.name") + "\n\n"
-    + "Copyright " + '\u00a9' + " 2006-2017 The HDF Group.\n"
-    + "All rights reserved.";
+            + "For " + System.getProperty("os.name") + "\n\n"
+            + "Copyright " + '\u00a9' + " 2006-2017 The HDF Group.\n"
+            + "All rights reserved.";
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
     private ToolBar                    toolBar;
@@ -195,9 +195,9 @@ public class HDFView implements ViewManager {
 
     private UserOptionsDialog          userOptionDialog;
 
-//    private Constructor<?>             ctrSrbFileDialog     = null;
-//
-//    private Dialog                     srbFileDialog         = null;
+    //    private Constructor<?>             ctrSrbFileDialog     = null;
+    //
+    //    private Dialog                     srbFileDialog         = null;
 
     /**
      * Constructs HDFView with a given root directory, where the HDFView is
@@ -414,12 +414,12 @@ public class HDFView implements ViewManager {
             // not break the main UI loop
             // ===================================================
             try {
-               if (!display.readAndDispatch()) {
-                  display.sleep();
-               }
+                if (!display.readAndDispatch()) {
+                    display.sleep();
+                }
             }
             catch (Exception e) {
-               e.printStackTrace();
+                e.printStackTrace();
             }
         }
 
@@ -1158,7 +1158,7 @@ public class HDFView implements ViewManager {
         Composite statusArea = new Composite(content, SWT.NONE);
         statusArea.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-        SashForm contentArea = new SashForm(container, SWT.HORIZONTAL);
+        final SashForm contentArea = new SashForm(container, SWT.HORIZONTAL);
         contentArea.setSashWidth(10);
 
         // Add TreeView and DataView to content area pane
@@ -1320,12 +1320,12 @@ public class HDFView implements ViewManager {
         if (needTabbedPane) {
             Composite generalInfoPane = null;
             Composite attributeInfoPane = null;
-        	TabFolder tabFolder = new TabFolder(generalArea, SWT.NONE);
+            TabFolder tabFolder = new TabFolder(generalArea, SWT.NONE);
 
-        	// Add the general object info pane to a tab
-        	generalInfoPane = createGeneralObjectInfoPane(tabFolder, obj);
+            // Add the general object info pane to a tab
+            generalInfoPane = createGeneralObjectInfoPane(tabFolder, obj);
             if (generalInfoPane != null) {
-            	TabItem generalInfoItem = new TabItem(tabFolder, SWT.None);
+                TabItem generalInfoItem = new TabItem(tabFolder, SWT.None);
                 generalInfoItem.setText("General Object Info");
                 generalInfoItem.setControl(generalInfoPane);
             }
@@ -2030,11 +2030,11 @@ public class HDFView implements ViewManager {
 
     private void registerFileFormat() {
         String msg = "Register a new file format by \nKEY:FILE_FORMAT:FILE_EXTENSION\n"
-            + "where, KEY: the unique identifier for the file format"
-            + "\n           FILE_FORMAT: the full class name of the file format"
-            + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
-            + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
-            + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
+                + "where, KEY: the unique identifier for the file format"
+                + "\n           FILE_FORMAT: the full class name of the file format"
+                + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
+                + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
+                + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
 
         // TODO:Add custom HDFLarge icon to dialog
         InputDialog dialog = new InputDialog(mainWindow, "Register a file format", msg, SWT.ICON_INFORMATION);
@@ -2128,7 +2128,7 @@ public class HDFView implements ViewManager {
         FileFormat.removeFileFormat(theKey);
     }
 
-    private Composite createGeneralObjectInfoPane(Composite parent, HObject obj) {
+    private Composite createGeneralObjectInfoPane(Composite parent, final HObject obj) {
         if (parent == null || obj == null) return null;
 
         log.trace("createGeneralObjectInfoPane: start");
@@ -2189,6 +2189,7 @@ public class HDFView implements ViewManager {
                 }
             }
 
+            log.trace("createGeneralObjectInfoPane: isRoot get fileinfo");
             // Append all of the file's information to the general object info pane
             String fileInfo = "";
 
@@ -2236,7 +2237,7 @@ public class HDFView implements ViewManager {
             label.setFont(currentFont);
             label.setText(String.valueOf(numAttributes));
 
-
+            log.trace("createGeneralObjectInfoPane: isRoot get version bounds");
             // Append the Library Version bounds information
             if (isH5) {
                 int[] libver = null;
@@ -2295,6 +2296,7 @@ public class HDFView implements ViewManager {
                 if (obj.getLinkTargetObjName() != null) {
                     final HObject theObj = obj;
 
+                    log.trace("createGeneralObjectInfoPane: isNotRoot H5 get link target");
                     label = new Label(generalInfoGroup, SWT.LEFT);
                     label.setFont(currentFont);
                     label.setText("Link To Target: ");
@@ -2351,7 +2353,7 @@ public class HDFView implements ViewManager {
                 }
             }
 
-
+            log.trace("createGeneralObjectInfoPane: isNotRoot get type of object");
             // Append information about the type of the object
             label = new Label(generalInfoGroup, SWT.LEFT);
             label.setFont(currentFont);
@@ -2412,7 +2414,7 @@ public class HDFView implements ViewManager {
             label.setFont(currentFont);
             label.setText(typeStr);
 
-
+            log.trace("createGeneralObjectInfoPane: isNotRoot get attributes");
             // Append information about the number of attributes
             // attached to the object
             label = new Label(generalInfoGroup, SWT.LEFT);
@@ -2464,6 +2466,7 @@ public class HDFView implements ViewManager {
             List<?> mlist = g.getMemberList();
             int n = mlist.size();
 
+            log.trace("showMetaData: group object extra info mlist = {}",n);
             if (mlist != null && n > 0) {
                 org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(generalInfoGroup, SWT.NONE);
                 groupInfoGroup.setFont(currentFont);
@@ -2545,7 +2548,9 @@ public class HDFView implements ViewManager {
             datasetInfoGroup.setText("Dataset Dataspace and Datatype");
             datasetInfoGroup.setLayout(new GridLayout(2, false));
             datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+            String labelinfo;
 
+            log.trace("showMetaData: Dataset object extra info - dimesions");
             label = new Label(datasetInfoGroup, SWT.LEFT);
             label.setFont(currentFont);
             label.setText("No. of Dimension(s): ");
@@ -2553,7 +2558,8 @@ public class HDFView implements ViewManager {
             Text text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(currentFont);
-            text.setText("" + d.getRank());
+            labelinfo = "" + d.getRank();
+            text.setText(labelinfo);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(datasetInfoGroup, SWT.LEFT);
@@ -2619,6 +2625,7 @@ public class HDFView implements ViewManager {
             text.setText((maxDimStr == null) ? "null" : maxDimStr);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+            log.trace("showMetaData: Dataset object extra info - datatype");
             label = new Label(datasetInfoGroup, SWT.LEFT);
             label.setFont(currentFont);
             label.setText("Data Type: ");
@@ -2644,13 +2651,12 @@ public class HDFView implements ViewManager {
             text.setText(type);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-
             // Add a dummy label to take up some vertical space between sections
             label = new Label(generalInfoGroup, SWT.LEFT);
             label.setText("");
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
-
+            log.trace("showMetaData: Dataset object extra info - storage");
             // Display dataset storage layout, compression, filters,
             // storage type, and fill value
             org.eclipse.swt.widgets.Group datasetLayoutGroup = new org.eclipse.swt.widgets.Group(generalInfoGroup, SWT.NONE);
@@ -2666,7 +2672,10 @@ public class HDFView implements ViewManager {
 
             label = new Label(datasetLayoutGroup, SWT.RIGHT);
             label.setFont(currentFont);
-            label.setText(d.getStorageLayout());
+            labelinfo = d.getStorageLayout();
+            if (labelinfo == null)
+                labelinfo = "UNKNOWN";
+            label.setText(labelinfo);
 
             label = new Label(datasetLayoutGroup, SWT.LEFT);
             label.setFont(currentFont);
@@ -2674,15 +2683,22 @@ public class HDFView implements ViewManager {
 
             label = new Label(datasetLayoutGroup, SWT.RIGHT);
             label.setFont(currentFont);
-            label.setText(d.getCompression());
+            labelinfo = d.getCompression();
+            if (labelinfo == null)
+                labelinfo = "UNKNOWN";
+            label.setText(labelinfo);
 
+            log.trace("showMetaData: Dataset object extra info - filters");
             label = new Label(datasetLayoutGroup, SWT.LEFT);
             label.setFont(currentFont);
             label.setText("Filters: ");
 
             label = new Label(datasetLayoutGroup, SWT.RIGHT);
             label.setFont(currentFont);
-            label.setText(d.getFilters());
+            labelinfo = d.getFilters();
+            if (labelinfo == null)
+                labelinfo = "UNKNOWN";
+            label.setText(labelinfo);
 
             label = new Label(datasetLayoutGroup, SWT.LEFT);
             label.setFont(currentFont);
@@ -2690,8 +2706,12 @@ public class HDFView implements ViewManager {
 
             label = new Label(datasetLayoutGroup, SWT.RIGHT);
             label.setFont(currentFont);
-            label.setText(d.getStorage());
+            labelinfo = d.getStorage();
+            if (labelinfo == null)
+                labelinfo = "UNKNOWN";
+            label.setText(labelinfo);
 
+            log.trace("showMetaData: Dataset object extra info fill value");
             label = new Label(datasetLayoutGroup, SWT.LEFT);
             label.setFont(currentFont);
             label.setText("Fill value: ");
@@ -2716,7 +2736,6 @@ public class HDFView implements ViewManager {
             label.setFont(currentFont);
             label.setText(fillValueInfo);
 
-
             // Create composite for possible compound dataset info
             if (d instanceof CompoundDS) {
                 log.trace("showMetaData: dataset Compound object extra info");
@@ -2724,6 +2743,7 @@ public class HDFView implements ViewManager {
 
                 int n = compound.getMemberCount();
                 if (n > 0) {
+                    log.trace("showMetaData: dataset Compound object extra info members={}",n);
                     String rowData[][] = new String[n][3];
                     String names[] = compound.getMemberNames();
                     Datatype types[] = compound.getMemberTypes();
@@ -2819,7 +2839,7 @@ public class HDFView implements ViewManager {
         return generalInfoGroup;
     }
 
-    private Composite createAttributeInfoPane(Composite parent, HObject obj) {
+    private Composite createAttributeInfoPane(Composite parent, final HObject obj) {
         log.trace("createAttributeInfoPane: start");
 
         org.eclipse.swt.widgets.Group attributeInfoGroup = null;
@@ -3305,7 +3325,7 @@ public class HDFView implements ViewManager {
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
@@ -3446,7 +3466,7 @@ public class HDFView implements ViewManager {
             shell.setSize(shellSize);
 
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
@@ -3557,12 +3577,12 @@ public class HDFView implements ViewManager {
                 // must rewrite the whole file
                 MessageDialog confirm = new MessageDialog(shell, shell.getText(), null,
                         "The user block to write is " + blkSize1 + " (bytes),\n"
-                        + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
-                        + "To expand the user block, the file must be rewriten.\n\n"
-                        + "Do you want to replace the current file? Click "
-                        + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
-                        + "\n\"Cancel\" to quit without saving the change.\n\n ",
-                        MessageDialog.QUESTION_WITH_CANCEL, new String[] { "Yes", "No", "Cancel" }, 0);
+                                + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
+                                + "To expand the user block, the file must be rewriten.\n\n"
+                                + "Do you want to replace the current file? Click "
+                                + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
+                                + "\n\"Cancel\" to quit without saving the change.\n\n ",
+                                MessageDialog.QUESTION_WITH_CANCEL, new String[] { "Yes", "No", "Cancel" }, 0);
                 int op = confirm.open();
 
                 if(op == 2) return;
@@ -3671,19 +3691,19 @@ public class HDFView implements ViewManager {
 
         String rootDir = System.getProperty("hdfview.workdir");
         log.trace("main: rootDir = {} ", rootDir);
-        if(rootDir == null) rootDir = System.getProperty("user.dir");
+        if(rootDir == null)
+            rootDir = System.getProperty("user.dir");
 
         File tmpFile = null;
         Monitor primaryMonitor = display.getPrimaryMonitor();
         Point margin = new Point(primaryMonitor.getBounds().width,
-                          primaryMonitor.getBounds().height);
-
+                primaryMonitor.getBounds().height);
 
         int j = args.length;
-        int W = margin.x / 2,
-            H = margin.y,
-            X = 0,
-            Y = 0;
+        int W = margin.x / 2;
+        int H = margin.y;
+        int X = 0;
+        int Y = 0;
 
         for(int i = 0; i < args.length; i++) {
             if ("-root".equalsIgnoreCase(args[i])) {
@@ -3692,12 +3712,10 @@ public class HDFView implements ViewManager {
                     j--;
                     tmpFile = new File(args[++i]);
 
-                    if(tmpFile.isDirectory()) {
+                    if(tmpFile.isDirectory())
                         rootDir = tmpFile.getPath();
-                    }
-                    else if(tmpFile.isFile()) {
+                    else if(tmpFile.isFile())
                         rootDir = tmpFile.getParent();
-                    }
                 }
                 catch (Exception ex) {}
             }

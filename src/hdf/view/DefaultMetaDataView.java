@@ -525,7 +525,6 @@ public class DefaultMetaDataView implements MetaDataView {
             });
         }
 
-
         SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 
