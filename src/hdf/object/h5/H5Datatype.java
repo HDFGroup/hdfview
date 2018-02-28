@@ -194,6 +194,7 @@ public class H5Datatype extends Datatype {
      *
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute() {
         obj_info.num_attrs = nAttributes;
 
@@ -876,10 +877,10 @@ public class H5Datatype extends Datatype {
                     memval = HDFNativeData.shortToByte(new Short((short) 0));
                 }
                 else if (datatypeSize == 4) {
-                    memval = HDFNativeData.intToByte(new Integer((int) 0));
+                    memval = HDFNativeData.intToByte(new Integer(0));
                 }
                 else if (datatypeSize == 8) {
-                    memval = HDFNativeData.longToByte(new Long((long) 0));
+                    memval = HDFNativeData.longToByte(new Long(0));
                 }
                 StringTokenizer token;
 
@@ -1478,7 +1479,7 @@ public class H5Datatype extends Datatype {
                 log.trace("isUnsigned(): tclass = {}", tclass);
                 if (tclass != HDF5Constants.H5T_FLOAT && tclass != HDF5Constants.H5T_STRING
                         && tclass != HDF5Constants.H5T_REFERENCE && tclass != HDF5Constants.H5T_BITFIELD
-                        && tclass != HDF5Constants.H5T_OPAQUE
+                        && tclass != HDF5Constants.H5T_OPAQUE && tclass != HDF5Constants.H5T_VLEN
                         && tclass != HDF5Constants.H5T_COMPOUND) {
                     int tsign = H5.H5Tget_sign(tid);
                     if (tsign == HDF5Constants.H5T_SGN_NONE) {
@@ -1668,6 +1669,7 @@ public class H5Datatype extends Datatype {
         log.trace("removeMetadata(): finish");
     }
 
+    @Override
     public void setName(String newName) throws Exception {
         H5File.renameObject(this, newName);
         super.setName(newName);
