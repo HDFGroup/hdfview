@@ -677,6 +677,7 @@ public class H5CompoundDS extends CompoundDS {
                 log.trace("read(): foreach nMembers={}", n);
                 for (int i = 0; i < n; i++) {
                     boolean isVL = false;
+                    boolean isVLstr = false;
                     member_base_class = -1;
 
                     if (!isMemberSelected[i]) {
@@ -720,7 +721,7 @@ public class H5CompoundDS extends CompoundDS {
                             tmptid = H5.H5Tget_super(atom_tid);
                             member_base_class = H5.H5Tget_class(tmptid);
 
-                            isVL = isVL || H5.H5Tis_variable_str(tmptid);
+                            isVLstr = isVLstr || H5.H5Tis_variable_str(tmptid);
                             isVL = isVL || H5.H5Tdetect_class(tmptid, HDF5Constants.H5T_VLEN);
 
                             if (member_base_class == HDF5Constants.H5T_COMPOUND) {
@@ -785,7 +786,7 @@ public class H5CompoundDS extends CompoundDS {
                         try {
                             // See BUG#951 isVL = H5.H5Tdetect_class(atom_tid,
                             // HDF5Constants.H5T_VLEN);
-                            isVL = isVL || H5.H5Tis_variable_str(atom_tid);
+                            isVLstr = isVLstr || H5.H5Tis_variable_str(atom_tid);
                             isVL = isVL || H5.H5Tdetect_class(atom_tid, HDF5Constants.H5T_VLEN);
                         }
                         catch (Exception ex) {
@@ -796,8 +797,12 @@ public class H5CompoundDS extends CompoundDS {
                             log.trace("read(): H5Dread({}) did={} spaceIDs[0]={} spaceIDs[1]={}", comp_tid, did,
                                     spaceIDs[0], spaceIDs[1]);
                             if (isVL) {
-                                H5.H5Dread_VLStrings(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
-                                        (Object[]) member_data);
+                                if (isVLstr)
+                                    H5.H5Dread_VLStrings(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                            (Object[]) member_data);
+                                else
+                                    H5.H5DreadVL(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                            (Object[]) member_data);
                             }
                             else if (member_base_class == HDF5Constants.H5T_COMPOUND) {
                                 H5.H5Dread(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
@@ -831,27 +836,27 @@ public class H5CompoundDS extends CompoundDS {
                             }
                         }
 
-                        if (!isVL) {
+                        if (!isVL && !isVLstr) {
                             String cname = member_data.getClass().getName();
                             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-                            log.trace("read(!isVL): {} Member[{}] is cname {} of dname={} convert={}", member_name, i,
+                            log.trace("read(!isVL && !isVLstr): {} Member[{}] is cname {} of dname={} convert={}", member_name, i,
                                     cname, dname, convertByteToString);
 
                             if ((member_class == HDF5Constants.H5T_STRING) && convertByteToString) {
                                 if (dname == 'B') {
                                     member_data = byteToString((byte[]) member_data, member_size / memberOrders[i]);
-                                    log.trace("read(!isVL): convertByteToString: {} Member[{}]", member_name, i);
+                                    log.trace("read(!isVL && !isVLstr): convertByteToString: {} Member[{}]", member_name, i);
                                 }
                             }
                             else if (member_class == HDF5Constants.H5T_REFERENCE) {
                                 if (dname == 'B') {
                                     member_data = HDFNativeData.byteToLong((byte[]) member_data);
-                                    log.trace("read(!isVL): convertByteToLong: {} Member[{}]", member_name, i);
+                                    log.trace("read(!isVL && !isVLstr): convertByteToLong: {} Member[{}]", member_name, i);
                                 }
                             }
                             else if (compInfo[2] != 0) {
                                 member_data = Dataset.convertFromUnsignedC(member_data, null);
-                                log.trace("read(!isVL): convertFromUnsignedC: {} Member[{}]", member_name, i);
+                                log.trace("read(!isVL && !isVLstr): convertFromUnsignedC: {} Member[{}]", member_name, i);
                             }
                             else if (member_class == HDF5Constants.H5T_ARRAY
                                     && member_base_class == HDF5Constants.H5T_COMPOUND) {
@@ -1056,9 +1061,11 @@ public class H5CompoundDS extends CompoundDS {
                     }
 
                     boolean isVL = false;
+                    boolean isVLstr = false;
                     try {
-                        isVL = (H5.H5Tget_class(atom_tid) == HDF5Constants.H5T_VLEN || H5.H5Tis_variable_str(atom_tid));
-                        log.trace("write(): Member[{}] isVL={}", i, isVL);
+                        isVLstr = H5.H5Tis_variable_str(atom_tid);
+                        isVL = H5.H5Tget_class(atom_tid) == HDF5Constants.H5T_VLEN;
+                        log.trace("write(): Member[{}] isVL={} isVLstr={}", i, isVL, isVLstr);
                     }
                     catch (Exception ex) {
                         log.debug("write(): isVL: ", ex);
@@ -1082,9 +1089,12 @@ public class H5CompoundDS extends CompoundDS {
                         tid = createCompoundFieldType(atom_tid, member_name, compInfo);
                         log.trace("write(): {} Member[{}] compInfo[class]={} compInfo[size]={} compInfo[unsigned]={}",
                                 member_name, i, compInfo[0], compInfo[1], compInfo[2]);
-                        if (isVL) {
+                        if (isVLstr) {
                             H5.H5Dwrite_string(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
                                     (String[]) tmpData);
+                        }
+                        else if (isVL) {
+                            throw new HDF5Exception("Write of VL non strings is not currently supported.");
                         }
                         else {
                             if (compInfo[2] != 0) {
