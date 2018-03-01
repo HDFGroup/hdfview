@@ -1332,7 +1332,7 @@ public class H5ScalarDSTest {
      * <p>
      * What to test:
      * <ul>
-     * <li>Construct an H5ScalarDS object that exits in file
+     * <li>Construct an H5ScalarDS object that exists in file
      * <ul>
      * <li>new H5ScalarDS (file, null, fullpath)
      * <li>new H5ScalarDS (file, fullname, null)
