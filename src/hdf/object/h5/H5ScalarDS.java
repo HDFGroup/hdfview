@@ -392,14 +392,14 @@ public class H5ScalarDS extends ScalarDS {
             }
 
             close(did);
+
+            startDims = new long[rank];
+            selectedDims = new long[rank];
+            resetSelection();
         }
         else {
             log.debug("init(): failed to open dataset");
         }
-
-        startDims = new long[rank];
-        selectedDims = new long[rank];
-        resetSelection();
         log.trace("init(): rank={}, startDims={}, selectedDims={}", rank, startDims, selectedDims);
         log.trace("init(): finish");
     }
@@ -2077,6 +2077,7 @@ public class H5ScalarDS extends ScalarDS {
         if (did >= 0) {
             try {
                 pal_id = H5.H5Rdereference(getFID(), HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_OBJECT, ref_buf);
+                log.trace("readPalette(): H5Rdereference: {}", pal_id);
                 tid = H5.H5Dget_type(pal_id);
 
                 // support only 3*256 byte palette data
