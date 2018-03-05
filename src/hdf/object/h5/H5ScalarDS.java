@@ -392,14 +392,14 @@ public class H5ScalarDS extends ScalarDS {
             }
 
             close(did);
+
+            startDims = new long[rank];
+            selectedDims = new long[rank];
+            resetSelection();
         }
         else {
             log.debug("init(): failed to open dataset");
         }
-
-        startDims = new long[rank];
-        selectedDims = new long[rank];
-        resetSelection();
         log.trace("init(): rank={}, startDims={}, selectedDims={}", rank, startDims, selectedDims);
         log.trace("init(): finish");
     }
@@ -2077,6 +2077,7 @@ public class H5ScalarDS extends ScalarDS {
         if (did >= 0) {
             try {
                 pal_id = H5.H5Rdereference(getFID(), HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_OBJECT, ref_buf);
+                log.trace("readPalette(): H5Rdereference: {}", pal_id);
                 tid = H5.H5Dget_type(pal_id);
 
                 // support only 3*256 byte palette data
@@ -2228,26 +2229,27 @@ public class H5ScalarDS extends ScalarDS {
         byte[] ref_buf = null;
 
         try {
-            if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT))
+            if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
                 aid = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            sid = H5.H5Aget_space(aid);
-            rank = H5.H5Sget_simple_extent_ndims(sid);
-            size = 1;
-            if (rank > 0) {
-                long[] dims = new long[rank];
-                H5.H5Sget_simple_extent_dims(sid, dims, null);
-                log.trace("getPaletteRefs(): rank={}, dims={}", rank, dims);
-                for (int i = 0; i < rank; i++) {
-                    size *= (int) dims[i];
+                sid = H5.H5Aget_space(aid);
+                rank = H5.H5Sget_simple_extent_ndims(sid);
+                size = 1;
+                if (rank > 0) {
+                    long[] dims = new long[rank];
+                    H5.H5Sget_simple_extent_dims(sid, dims, null);
+                    log.trace("getPaletteRefs(): rank={}, dims={}", rank, dims);
+                    for (int i = 0; i < rank; i++) {
+                        size *= (int) dims[i];
+                    }
                 }
+
+                if ((size * 8) < Integer.MIN_VALUE || (size * 8) > Integer.MAX_VALUE) throw new HDF5Exception("Invalid int size");
+
+                ref_buf = new byte[size * 8];
+                atype = H5.H5Aget_type(aid);
+
+                H5.H5Aread(aid, atype, ref_buf);
             }
-
-            if ((size * 8) < Integer.MIN_VALUE || (size * 8) > Integer.MAX_VALUE) throw new HDF5Exception("Invalid int size");
-
-            ref_buf = new byte[size * 8];
-            atype = H5.H5Aget_type(aid);
-
-            H5.H5Aread(aid, atype, ref_buf);
         }
         catch (HDF5Exception ex) {
             log.debug("getPaletteRefs(): Palette attribute search failed: Expected", ex);
