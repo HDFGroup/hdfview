@@ -478,7 +478,7 @@ public class DefaultTreeView implements TreeView {
 
                 // Process any remaining SetData events and then allow
                 // the tree to redraw once all are finished
-//                while(tree.getDisplay().readAndDispatch());
+                //                while(tree.getDisplay().readAndDispatch());
 
                 tree.setRedraw(true);
             }
@@ -1094,7 +1094,7 @@ public class DefaultTreeView implements TreeView {
                     popupMenu.getItem(4).setEnabled(isWritable); // "New" menuitem
                     popupMenu.getItem(6).setEnabled(
                             (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
-                           && state && isWritable); // "Cut" menuitem
+                            && state && isWritable); // "Cut" menuitem
                     popupMenu.getItem(7).setEnabled(state); // "Copy" menuitem
                     popupMenu.getItem(8).setEnabled(isWritable); // "Paste" menuitem
                     popupMenu.getItem(9).setEnabled(state && isWritable); // "Delete" menuitem
@@ -1202,43 +1202,43 @@ public class DefaultTreeView implements TreeView {
         HObject obj = null;
 
         switch(type) {
-            case GROUP:
-                NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
-                        breadthFirstUserObjects(rootItem));
-                groupDialog.open();
-                obj = (HObject) groupDialog.getObject();
-                parentItem = findTreeItem(groupDialog.getParentGroup());
-                break;
-            case DATASET:
-                NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                datasetDialog.open();
-                obj = (HObject) datasetDialog.getObject();
-                parentItem = findTreeItem(datasetDialog.getParentGroup());
-                break;
-            case IMAGE:
-                NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                imageDialog.open();
-                obj = (HObject) imageDialog.getObject();
-                parentItem = findTreeItem(imageDialog.getParentGroup());
-                break;
-            case TABLE:
-                NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                tableDialog.open();
-                obj = (HObject) tableDialog.getObject();
-                parentItem = findTreeItem(tableDialog.getParentGroup());
-                break;
-            case DATATYPE:
-                NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                datatypeDialog.open();
-                obj = (HObject) datatypeDialog.getObject();
-                parentItem = findTreeItem(datatypeDialog.getParentGroup());
-                break;
-            case LINK:
-                NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
-                linkDialog.open();
-                obj = (HObject) linkDialog.getObject();
-                parentItem = findTreeItem(linkDialog.getParentGroup());
-                break;
+        case GROUP:
+            NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
+                    breadthFirstUserObjects(rootItem));
+            groupDialog.open();
+            obj = (HObject) groupDialog.getObject();
+            parentItem = findTreeItem(groupDialog.getParentGroup());
+            break;
+        case DATASET:
+            NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            datasetDialog.open();
+            obj = (HObject) datasetDialog.getObject();
+            parentItem = findTreeItem(datasetDialog.getParentGroup());
+            break;
+        case IMAGE:
+            NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            imageDialog.open();
+            obj = (HObject) imageDialog.getObject();
+            parentItem = findTreeItem(imageDialog.getParentGroup());
+            break;
+        case TABLE:
+            NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            tableDialog.open();
+            obj = (HObject) tableDialog.getObject();
+            parentItem = findTreeItem(tableDialog.getParentGroup());
+            break;
+        case DATATYPE:
+            NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            datatypeDialog.open();
+            obj = (HObject) datatypeDialog.getObject();
+            parentItem = findTreeItem(datatypeDialog.getParentGroup());
+            break;
+        case LINK:
+            NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
+            linkDialog.open();
+            obj = (HObject) linkDialog.getObject();
+            parentItem = findTreeItem(linkDialog.getParentGroup());
+            break;
         }
 
         if (obj == null) return;
@@ -1317,7 +1317,7 @@ public class DefaultTreeView implements TreeView {
     private void copyObject() {
         if (moveFlag == true) {
             if(!MessageDialog.openConfirm(shell,
-                        "Copy object", "Do you want to copy all the selected object(s) instead of move?"))
+                    "Copy object", "Do you want to copy all the selected object(s) instead of move?"))
                 return;
         }
         moveFlag = false;
@@ -1329,7 +1329,7 @@ public class DefaultTreeView implements TreeView {
     private void cutObject() {
         if (moveFlag == true) {
             if(!MessageDialog.openConfirm(shell,
-                        "Delete object", "Do you want to delete all the selected object(s) instead of move?"))
+                    "Delete object", "Do you want to delete all the selected object(s) instead of move?"))
                 return;
         }
         moveFlag = false;
@@ -1506,7 +1506,7 @@ public class DefaultTreeView implements TreeView {
     private void renameObject() {
         if (moveFlag == true) {
             if(!MessageDialog.openConfirm(shell,
-                        "Rename object", "Do you want to rename all the selected object(s) instead of move?"))
+                    "Rename object", "Do you want to rename all the selected object(s) instead of move?"))
                 return;
         }
         moveFlag = false;
@@ -1530,7 +1530,7 @@ public class DefaultTreeView implements TreeView {
 
         String oldName = selectedObject.getName();
         String newName = (new InputDialog(shell, "Rename Object",
-                          "Rename \"" + oldName + "\" to:", oldName)).open();
+                "Rename \"" + oldName + "\" to:", oldName)).open();
 
         if (newName == null) return;
 
@@ -1568,7 +1568,7 @@ public class DefaultTreeView implements TreeView {
         }
         if (moveFlag != true) {
             if(!MessageDialog.openConfirm(shell,
-                        "Remove object", "Do you want to remove all the selected object(s) ?"))
+                    "Remove object", "Do you want to remove all the selected object(s) ?"))
                 return;
         }
 
@@ -1579,9 +1579,9 @@ public class DefaultTreeView implements TreeView {
 
             // Cannot delete a root object
             if (theObj instanceof Group && ((Group) theObj).isRoot()) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, "Unsupported operation: cannot delete the file root.", "Delete Objects");
-                    return;
+                shell.getDisplay().beep();
+                Tools.showError(shell, "Unsupported operation: cannot delete the file root.", "Delete Objects");
+                return;
             }
 
             if (moveFlag != true) {
@@ -2615,6 +2615,14 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
+     * change the display option.
+     */
+    @Override
+    public void setDefaultDisplayMode(boolean displaymode) {
+        isDefaultDisplay = displaymode;
+    }
+
+    /**
      * Gets the selected file. When multiple files are open, we need to know
      * which file is currently selected.
      *
@@ -3061,7 +3069,7 @@ public class DefaultTreeView implements TreeView {
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
@@ -3175,7 +3183,7 @@ public class DefaultTreeView implements TreeView {
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
