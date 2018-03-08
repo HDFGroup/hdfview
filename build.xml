@@ -524,7 +524,7 @@
       </classpath>
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-      <test name="test.object.AllH5ObjectTests" todir="${report.dir}" outfile="TEST-AllH5ObjectTests">
+      <test name="test.object.H5ScalarDSTest" todir="${report.dir}" outfile="TEST-H5ScalarDSTest">
         <formatter type="plain" />
       </test>
     </junit>
@@ -742,7 +742,7 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
-    <untar src="${docs.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">
@@ -815,7 +815,7 @@
       <fileset dir="${docs.dir}" />
     </copy>
 <!--
-      <untar src="${docs.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
+      <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
 -->
 
     <!-- Copy the samples -->
@@ -850,7 +850,7 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
-    <untar src="${docs.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">

@@ -216,8 +216,8 @@ public class DefaultMetaDataView implements MetaDataView {
 
         int answer = SWT.NO;
         if(MessageDialog.openConfirm(shell,
-                    shell.getText(), "Do you want to delete the selected attribute?"))
-                answer = SWT.YES;
+                shell.getText(), "Do you want to delete the selected attribute?"))
+            answer = SWT.YES;
         if (answer == SWT.NO) return null;
 
         List<?> attrList = null;
@@ -325,102 +325,102 @@ public class DefaultMetaDataView implements MetaDataView {
                 }
 
                 switch (NT) {
-                    case 'B': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 255;
-                        }
-                        else {
-                            min = Byte.MIN_VALUE;
-                            max = Byte.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            Tools.showError(shell, "Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken, shell.getText());
-                        }
-                        else {
-                            Array.setByte(data, i, (byte) d);
-                        }
-                        break;
+                case 'B': {
+                    if (isUnsigned) {
+                        min = 0;
+                        max = 255;
                     }
-                    case 'S': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 65535;
-                        }
-                        else {
-                            min = Short.MIN_VALUE;
-                            max = Short.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            Tools.showError(shell, "Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken, shell.getText());
-                        }
-                        else {
-                            Array.setShort(data, i, (short) d);
-                        }
-                        break;
+                    else {
+                        min = Byte.MIN_VALUE;
+                        max = Byte.MAX_VALUE;
                     }
-                    case 'I': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 4294967295L;
-                        }
-                        else {
-                            min = Integer.MIN_VALUE;
-                            max = Integer.MAX_VALUE;
-                        }
 
-                        if ((d > max) || (d < min)) {
-                            Tools.showError(shell, "Data is out of range[" + min + ", " + max
-                                    + "]: " + theToken, shell.getText());
-                        }
-                        else {
-                            Array.setInt(data, i, (int) d);
-                        }
-                        break;
+                    if ((d > max) || (d < min)) {
+                        Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                + "]: " + theToken, shell.getText());
                     }
-                    case 'J':
-                        long lvalue = 0;
-                        if (isUnsigned) {
-                            if (theToken != null) {
-                                String theValue = theToken;
-                                BigInteger Jmax = new BigInteger("18446744073709551615");
-                                BigInteger big = new BigInteger(theValue);
-                                if ((big.compareTo(Jmax)>0) || (big.compareTo(BigInteger.ZERO)<0)) {
-                                    Tools.showError(shell, "Data is out of range[" + min + ", " + max
-                                            + "]: " + theToken, shell.getText());
-                                }
-                                lvalue = big.longValue();
-                                log.trace("updateAttributeValue: big.longValue={}", lvalue);
-                                Array.setLong(data, i, lvalue);
-                            }
-                            else
-                                Array.set(data, i, theToken);
-                        }
-                        else {
-                            min = Long.MIN_VALUE;
-                            max = Long.MAX_VALUE;
-                            if ((d > max) || (d < min)) {
+                    else {
+                        Array.setByte(data, i, (byte) d);
+                    }
+                    break;
+                }
+                case 'S': {
+                    if (isUnsigned) {
+                        min = 0;
+                        max = 65535;
+                    }
+                    else {
+                        min = Short.MIN_VALUE;
+                        max = Short.MAX_VALUE;
+                    }
+
+                    if ((d > max) || (d < min)) {
+                        Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                + "]: " + theToken, shell.getText());
+                    }
+                    else {
+                        Array.setShort(data, i, (short) d);
+                    }
+                    break;
+                }
+                case 'I': {
+                    if (isUnsigned) {
+                        min = 0;
+                        max = 4294967295L;
+                    }
+                    else {
+                        min = Integer.MIN_VALUE;
+                        max = Integer.MAX_VALUE;
+                    }
+
+                    if ((d > max) || (d < min)) {
+                        Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                + "]: " + theToken, shell.getText());
+                    }
+                    else {
+                        Array.setInt(data, i, (int) d);
+                    }
+                    break;
+                }
+                case 'J':
+                    long lvalue = 0;
+                    if (isUnsigned) {
+                        if (theToken != null) {
+                            String theValue = theToken;
+                            BigInteger Jmax = new BigInteger("18446744073709551615");
+                            BigInteger big = new BigInteger(theValue);
+                            if ((big.compareTo(Jmax)>0) || (big.compareTo(BigInteger.ZERO)<0)) {
                                 Tools.showError(shell, "Data is out of range[" + min + ", " + max
                                         + "]: " + theToken, shell.getText());
                             }
-                            lvalue = (long)d;
-                            log.trace("updateAttributeValue: longValue={}", lvalue);
+                            lvalue = big.longValue();
+                            log.trace("updateAttributeValue: big.longValue={}", lvalue);
                             Array.setLong(data, i, lvalue);
                         }
-                        break;
-                    case 'F':
-                        Array.setFloat(data, i, (float) d);
-                        break;
-                    case 'D':
-                        Array.setDouble(data, i, d);
-                        break;
-                    default:
-                        Array.set(data, i, theToken);
-                        break;
+                        else
+                            Array.set(data, i, theToken);
+                    }
+                    else {
+                        min = Long.MIN_VALUE;
+                        max = Long.MAX_VALUE;
+                        if ((d > max) || (d < min)) {
+                            Tools.showError(shell, "Data is out of range[" + min + ", " + max
+                                    + "]: " + theToken, shell.getText());
+                        }
+                        lvalue = (long)d;
+                        log.trace("updateAttributeValue: longValue={}", lvalue);
+                        Array.setLong(data, i, lvalue);
+                    }
+                    break;
+                case 'F':
+                    Array.setFloat(data, i, (float) d);
+                    break;
+                case 'D':
+                    Array.setDouble(data, i, d);
+                    break;
+                default:
+                    Array.set(data, i, theToken);
+                    break;
                 }
             }
 
@@ -462,6 +462,7 @@ public class DefaultMetaDataView implements MetaDataView {
         else {
             log.trace("updateAttributeValue: hObject is not instanceof ScalarDS");
         }
+        log.trace("updateAttributeValue:exit");
     }
 
     private Composite createAttributesComposite(Shell parent) {
