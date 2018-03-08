@@ -93,6 +93,11 @@ public abstract interface TreeView {
     public abstract void saveFile(FileFormat file) throws Exception;
 
     /**
+     * change the display option.
+     */
+    public abstract void setDefaultDisplayMode(boolean displaymode);
+
+    /**
      * Gets the selected the file. When multiple files are open, we need to know
      * which file is currently selected.
      *

@@ -88,6 +88,7 @@ import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Link;
 
+
 /**
  * HDFView is the main class of this HDF visual tool. It is used to layout the
  * graphical components of the hdfview. The major GUI components of the HDFView
@@ -2723,6 +2724,24 @@ public class HDFView implements ViewManager {
             label = new Label(datasetLayoutGroup, SWT.RIGHT);
             label.setFont(currentFont);
             label.setText(fillValueInfo);
+
+            // button to open Data Option Dialog
+            Button showDataOptionButton = new Button(datasetInfoGroup, SWT.PUSH);
+            showDataOptionButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
+            showDataOptionButton.setText("Show Data with Options");
+            showDataOptionButton.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    try {
+                        getTreeView().setDefaultDisplayMode(false);
+                        getTreeView().showDataContent(obj);
+                    }
+                    catch (Exception ex) {
+                        display.beep();
+                        Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+                    }
+                }
+            });
 
             // Create composite for possible compound dataset info
             if (d instanceof CompoundDS) {
