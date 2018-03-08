@@ -170,7 +170,7 @@ public class DefaultTableView implements TableView {
     // The main HDFView
     private final ViewManager               viewer;
 
-    private NatTable                        table; // The NatTable to display data in
+    private NatTable                        dsetTable; // The NatTable to display data in
 
     // The Dataset (Scalar or Compound) to be displayed in the Table
     private Dataset                         dataset;
@@ -312,7 +312,7 @@ public class DefaultTableView implements TableView {
                     }
 
                     dataValue = null;
-                    table = null;
+                    dsetTable = null;
                 }
 
                 if (curFont != null) curFont.dispose();
@@ -460,7 +460,7 @@ public class DefaultTableView implements TableView {
 
             isDataTransposed = false; // Disable transpose for compound dataset
             shell.setImage(ViewProperties.getTableIcon());
-            table = createTable(content, (CompoundDS) dataset);
+            dsetTable = createTable(content, (CompoundDS) dataset);
 
             shell.setMenuBar(createMenuBar());
         }
@@ -477,7 +477,7 @@ public class DefaultTableView implements TableView {
             }
 
             shell.setImage(ViewProperties.getDatasetIcon());
-            table = createTable(content, (ScalarDS) dataset);
+            dsetTable = createTable(content, (ScalarDS) dataset);
 
             /**
              * Menu bar must be created and set here before the CLASS_BITFIELD checks below or
@@ -499,14 +499,14 @@ public class DefaultTableView implements TableView {
             log.trace("createTable((ScalarDS) dataset): isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
         }
 
-        if (table == null) {
+        if (dsetTable == null) {
             viewer.showStatus("Creating table failed - " + dataset.getName());
             dataset = null;
             shell.dispose();
             return;
         }
 
-        table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        dsetTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         StringBuffer sb = new StringBuffer(hObject.getName());
         sb.append("  at  ");
@@ -567,7 +567,7 @@ public class DefaultTableView implements TableView {
     // Implementing TableView
     @Override
     public NatTable getTable() {
-        return table;
+        return dsetTable;
     }
 
     // Implementing DataView
@@ -1185,7 +1185,7 @@ public class DefaultTableView implements TableView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    table.doCommand(new SelectAllCommand());
+                    dsetTable.doCommand(new SelectAllCommand());
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
@@ -1284,7 +1284,7 @@ public class DefaultTableView implements TableView {
                         numberFormat = normalFormat;
                     }
 
-                    table.doCommand(new VisualRefreshCommand());
+                    dsetTable.doCommand(new VisualRefreshCommand());
                 }
             });
 
@@ -1307,7 +1307,7 @@ public class DefaultTableView implements TableView {
                         numberFormat = normalFormat;
                     }
 
-                    table.doCommand(new VisualRefreshCommand());
+                    dsetTable.doCommand(new VisualRefreshCommand());
                 }
             });
         }
@@ -1357,7 +1357,7 @@ public class DefaultTableView implements TableView {
                         numberFormat = normalFormat;
                     }
 
-                    table.doCommand(new VisualRefreshCommand());
+                    dsetTable.doCommand(new VisualRefreshCommand());
                 }
             });
 
@@ -1378,7 +1378,7 @@ public class DefaultTableView implements TableView {
                         numberFormat = normalFormat;
                     }
 
-                    table.doCommand(new VisualRefreshCommand());
+                    dsetTable.doCommand(new VisualRefreshCommand());
                 }
             });
         }
@@ -1619,7 +1619,7 @@ public class DefaultTableView implements TableView {
             shell.setCursor(null);
         }
 
-        table.doCommand(new VisualRefreshCommand());
+        dsetTable.doCommand(new VisualRefreshCommand());
     }
 
     /**
@@ -1706,10 +1706,10 @@ public class DefaultTableView implements TableView {
 
         int i = 0;
         if (isDataTransposed) {
-            i = col * (table.getPreferredRowCount() - 1) + row;
+            i = col * (dsetTable.getPreferredRowCount() - 1) + row;
         }
         else {
-            i = row * (table.getPreferredColumnCount() - 1) + col;
+            i = row * (dsetTable.getPreferredColumnCount() - 1) + col;
         }
 
         log.trace("updateScalarData({}, {}): {} NT={}", row, col, cellValue, NT);
@@ -1780,7 +1780,7 @@ public class DefaultTableView implements TableView {
         int orders[] = compDS.getSelectedMemberOrders();
         Datatype types[] = compDS.getSelectedMemberTypes();
         int nFields = cdata.size();
-        int nSubColumns = (table.getPreferredColumnCount() - 1) / nFields;
+        int nSubColumns = (dsetTable.getPreferredColumnCount() - 1) / nFields;
         int column = col;
         int offset = 0;
         int morder = 1;
@@ -2094,7 +2094,7 @@ public class DefaultTableView implements TableView {
         log.trace("DefaultTableView getSelectedScalarData: {}", size);
 
         // the whole table is selected
-        if ((table.getPreferredColumnCount() - 1 == selectedCols.length) && (table.getPreferredRowCount() - 1 == selectedRows.length)) {
+        if ((dsetTable.getPreferredColumnCount() - 1 == selectedCols.length) && (dsetTable.getPreferredRowCount() - 1 == selectedRows.length)) {
             return dataValue;
         }
 
@@ -2136,7 +2136,7 @@ public class DefaultTableView implements TableView {
         }
         log.trace("DefaultTableView getSelectedScalarData: selectedData is type {}", NT);
 
-        int w = table.getPreferredColumnCount() - 1;
+        int w = dsetTable.getPreferredColumnCount() - 1;
         log.trace("DefaultTableView getSelectedScalarData: getColumnCount={}", w);
         int idx_src = 0;
         int idx_dst = 0;
@@ -2281,7 +2281,7 @@ public class DefaultTableView implements TableView {
                 int r0 = selectedRowPos.toArray(new Integer[0])[0];
                 int c0 = selectionLayer.getSelectedColumnPositions()[0];
 
-                int w = table.getPreferredColumnCount() - 1;
+                int w = dsetTable.getPreferredColumnCount() - 1;
                 int idx_src = 0;
                 int idx_dst = 0;
 
@@ -3094,7 +3094,7 @@ public class DefaultTableView implements TableView {
             }
         }
 
-        table.doCommand(new StructuralRefreshCommand());
+        dsetTable.doCommand(new StructuralRefreshCommand());
     }
 
     /** Save data as text.
@@ -3470,8 +3470,8 @@ public class DefaultTableView implements TableView {
             return;
         }
 
-        int nrow = table.getPreferredRowCount() - 1;
-        int ncol = table.getPreferredColumnCount() - 1;
+        int nrow = dsetTable.getPreferredRowCount() - 1;
+        int ncol = dsetTable.getPreferredColumnCount() - 1;
 
         log.trace("DefaultTableView showLineplot: {} - {}", nrow, ncol);
         LinePlotOption lpo = new LinePlotOption(shell, SWT.NONE, nrow, ncol);
@@ -4239,7 +4239,7 @@ public class DefaultTableView implements TableView {
                 log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 CellSelectionEvent event = (CellSelectionEvent) e;
-                Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                Object val = dsetTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
                 String strVal = null;
 
                 String[] columnNames = ((ScalarDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNames;
@@ -4247,8 +4247,8 @@ public class DefaultTableView implements TableView {
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
 
                 cellLabel.setText(String.valueOf(rowStart + indexBase
-                        + table.getRowIndexByPosition(event.getRowPosition()) * rowStride)
-                        + ", " + columnNames[table.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
+                        + dsetTable.getRowIndexByPosition(event.getRowPosition()) * rowStride)
+                        + ", " + columnNames[dsetTable.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
 
                 if (isRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
@@ -4969,7 +4969,7 @@ public class DefaultTableView implements TableView {
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
                 CellSelectionEvent event = (CellSelectionEvent) e;
-                Object val = table.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                Object val = dsetTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
 
                 if (val == null) return;
 
@@ -4978,21 +4978,21 @@ public class DefaultTableView implements TableView {
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
 
-                int rowIndex = rowStart + indexBase + table.getRowIndexByPosition(event.getRowPosition()) * rowStride;
-                Object fieldName = columnHeaderDataProvider.getDataValue(table.getColumnIndexByPosition(event.getColumnPosition()), 0);
+                int rowIndex = rowStart + indexBase + dsetTable.getRowIndexByPosition(event.getRowPosition()) * rowStride;
+                Object fieldName = columnHeaderDataProvider.getDataValue(dsetTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
 
                 String colIndex = "";
                 int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
 
                 if (numGroups > 1) {
                     int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
-                    colIndex = "[" + String.valueOf((table.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
+                    colIndex = "[" + String.valueOf((dsetTable.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
                 }
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
 
-                ILayerCell cell = table.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
-                cellValueField.setText(displayConverter.canonicalToDisplayValue(cell, table.getConfigRegistry(), val).toString());
+                ILayerCell cell = dsetTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
+                cellValueField.setText(displayConverter.canonicalToDisplayValue(cell, dsetTable.getConfigRegistry(), val).toString());
 
                 log.trace("NATTable CellSelected finish");
             }

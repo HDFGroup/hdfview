@@ -1315,40 +1315,28 @@ public class HDFView implements ViewManager {
         // or is an empty group, we only need to directly show the general object info pane.
         // Otherwise, we set up a tabbed pane to hold the other information.
         int groupNumMembers = (obj instanceof Group) ? ((Group) obj).getNumberOfMembersInFile() : 0;
-        boolean needTabbedPane = (numAttributes > 0) || (groupNumMembers > 0);
+        Composite generalInfoPane = null;
+        Composite attributeInfoPane = null;
+        TabFolder tabFolder = new TabFolder(generalArea, SWT.NONE);
 
-        if (needTabbedPane) {
-            Composite generalInfoPane = null;
-            Composite attributeInfoPane = null;
-            TabFolder tabFolder = new TabFolder(generalArea, SWT.NONE);
-
-            // Add the general object info pane to a tab
-            generalInfoPane = createGeneralObjectInfoPane(tabFolder, obj);
-            if (generalInfoPane != null) {
-                TabItem generalInfoItem = new TabItem(tabFolder, SWT.None);
-                generalInfoItem.setText("General Object Info");
-                generalInfoItem.setControl(generalInfoPane);
-            }
-
-            if (numAttributes > 0) {
-                attributeInfoPane = createAttributeInfoPane(tabFolder, obj);
-                if (attributeInfoPane != null) {
-                    TabItem attributeInfoItem = new TabItem(tabFolder, SWT.None);
-                    attributeInfoItem.setText("Object Attribute Info");
-                    attributeInfoItem.setControl(attributeInfoPane);
-                }
-            }
-
-            generalArea.setContent(tabFolder);
+        // Add the general object info pane to a tab
+        generalInfoPane = createGeneralObjectInfoPane(tabFolder, obj);
+        if (generalInfoPane != null) {
+            TabItem generalInfoItem = new TabItem(tabFolder, SWT.None);
+            generalInfoItem.setText("General Object Info");
+            generalInfoItem.setControl(generalInfoPane);
         }
-        else {
-            Composite generalInfoPane = createGeneralObjectInfoPane(generalArea, obj);
 
-            // Directly add the general object info to the ScrolledComposite
-            if (generalInfoPane != null) {
-                generalArea.setContent(generalInfoPane);
+        if (numAttributes > 0) {
+            attributeInfoPane = createAttributeInfoPane(tabFolder, obj);
+            if (attributeInfoPane != null) {
+                TabItem attributeInfoItem = new TabItem(tabFolder, SWT.None);
+                attributeInfoItem.setText("Object Attribute Info");
+                attributeInfoItem.setControl(attributeInfoPane);
             }
         }
+
+        generalArea.setContent(tabFolder);
 
         log.trace("showMetaData: finish");
     }

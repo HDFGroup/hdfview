@@ -1390,7 +1390,9 @@ public class H5Datatype extends Datatype {
 
                 for (int i = 0; i < n; i++) {
                     mtid = H5.H5Tget_member_type(tid, i);
-                    description += getDatatypeDescription(mtid) + ", ";
+                    if (i > 0)
+                        description += ",\n";
+                    description += getDatatypeDescription(mtid);
                     try {
                         H5.H5Tclose(mtid);
                     }
