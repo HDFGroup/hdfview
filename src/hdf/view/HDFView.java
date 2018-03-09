@@ -2900,7 +2900,7 @@ public class HDFView implements ViewManager {
 
             String[] columnNames = { "Name", "Type", "Array Size", "Value" };
 
-            attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER);
+            attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
             attrTable.setLinesVisible(true);
             attrTable.setHeaderVisible(true);
             attrTable.setFont(currentFont);
