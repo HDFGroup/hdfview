@@ -24,7 +24,7 @@
     </filterchain>
   </loadfile>
 
-  <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings">
+  <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings" failonerror="false">
     <filterchain>
       <tokenfilter>
         <linetokenizer />
