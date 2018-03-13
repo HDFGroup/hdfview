@@ -7,13 +7,6 @@
   <property file="build.properties" />
   <property file="package.properties" />
 
-
-  <taskdef resource="net/sf/antcontrib/antlib.xml">
-    <classpath>
-      <pathelement location="${antextension.dir}/ant-contrib.jar" />
-    </classpath>
-  </taskdef>
-
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
     <filterchain>
