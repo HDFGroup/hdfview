@@ -14,10 +14,6 @@
 
 package hdf.view;
 
-import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
-import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-
 /**
  *
  * The table view interface for displaying data in table form
@@ -27,7 +23,7 @@ import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
  */
 public abstract interface TableView extends DataView {
     /** @return the table */
-    public abstract NatTable getTable();
+    public abstract Object getTable();
 
     /** @return array of selected data */
     public abstract Object getSelectedData();
@@ -38,9 +34,4 @@ public abstract interface TableView extends DataView {
 
     /** Write the change of a dataset into file. */
     public abstract void updateValueInFile();
-
-    public abstract SelectionLayer getSelectionLayer();
-
-    public abstract DataLayer getDataLayer();
-
 }
