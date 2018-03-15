@@ -220,6 +220,7 @@
      HDF4 version:     ${hdf4.version}
      HDF5 version:     ${hdf5.version}
      Operating System: ${os.name} ${os.version} ${os.arch}
+     Debug Build:      ${build.debug}
   </echo>
 
   <target name="clean" description="Cleans up the build directory">
@@ -262,12 +263,14 @@
     <javac srcdir="${build.dir}" destdir="${classes.dir}"
       includes="HDFVersions.java"
       includeantruntime="false"
+      debug="${build.debug}"
     />
 
     <javac srcdir="${src.dir}" destdir="${classes.dir}"
       classpathref="project-classpath"
       excludes="examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
       includeantruntime="false"
+      debug="${build.debug}"
     />
 
     <copy todir="${classes.dir}">
