@@ -599,12 +599,10 @@ public class DefaultTableView implements TableView {
         return selectionLayer.getSelectedColumnPositions().length;
     }
 
-    @Override
     public SelectionLayer getSelectionLayer() {
         return selectionLayer;
     }
 
-    @Override
     public DataLayer getDataLayer() {
         return dataLayer;
     }

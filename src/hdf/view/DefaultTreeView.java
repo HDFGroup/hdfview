@@ -76,8 +76,6 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
-import hdf.object.h5.H5CompoundDS;
-import hdf.object.h5.H5ScalarDS;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
 
 /**
@@ -745,94 +743,6 @@ public class DefaultTreeView implements TreeView {
 
         new MenuItem(menu, SWT.SEPARATOR);
 
-        item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Show Attributes");
-        item.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                isDefaultDisplay = true;
-
-                try {
-                    showMetaData(selectedObject);
-
-                    // Update icon for object since an attribute may have been added/deleted
-                    if (selectedObject != null) {
-                        if (selectedObject instanceof Group) {
-                            if (!(((Group) selectedObject).isRoot())) {
-                                if (selectedItem.getExpanded()) {
-                                    if (selectedObject.hasAttribute()) {
-                                        selectedItem.setImage(folderOpenIconA);
-                                    }
-                                    else {
-                                        selectedItem.setImage(folderOpenIcon);
-                                    }
-                                }
-                                else {
-                                    if (selectedObject.hasAttribute()) {
-                                        selectedItem.setImage(folderCloseIconA);
-                                    }
-                                    else {
-                                        selectedItem.setImage(folderCloseIcon);
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            selectedItem.setImage(getObjectTypeImage(selectedObject));
-                        }
-                    }
-                }
-                catch (Exception ex) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
-                }
-            }
-        });
-
-        item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Show Attributes As");
-        item.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                isDefaultDisplay = false;
-
-                try {
-                    showMetaData(selectedObject);
-
-                    // Update icon for object since an attribute may have been added/deleted
-                    if (selectedObject != null) {
-                        if (selectedObject instanceof Group) {
-                            if (!(((Group) selectedObject).isRoot())) {
-                                if (selectedItem.getExpanded()) {
-                                    if (selectedObject.hasAttribute()) {
-                                        selectedItem.setImage(folderOpenIconA);
-                                    }
-                                    else {
-                                        selectedItem.setImage(folderOpenIcon);
-                                    }
-                                }
-                                else {
-                                    if (selectedObject.hasAttribute()) {
-                                        selectedItem.setImage(folderCloseIconA);
-                                    }
-                                    else {
-                                        selectedItem.setImage(folderCloseIcon);
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            selectedItem.setImage(getObjectTypeImage(selectedObject));
-                        }
-                    }
-                }
-                catch (Exception ex) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
-                }
-            }
-        });
-
         changeIndexItem = new MenuItem(menu, SWT.PUSH);
         changeIndexItem.setText("Change file indexing");
         changeIndexItem.addSelectionListener(new SelectionAdapter() {
@@ -866,16 +776,6 @@ public class DefaultTreeView implements TreeView {
                 find(currentSearchPhrase, selectedItem);
             }
         });
-
-        // item = new MenuItem(menu, SWT.PUSH);
-        // item.setText("Find Next");
-        // item.setMnemonic(KeyEvent.VK_N);
-        // item.addActionListener(this);
-        // item.addSelectionListener(new SelectionAdapter() {
-        //  public void widgetSelected(SelectionEvent e) {
-        //      find(currentSearchPhrase, selectedTreePath, tree);
-        //  }
-        // });
 
         new MenuItem(menu, SWT.SEPARATOR);
 
