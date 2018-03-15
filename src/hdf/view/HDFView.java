@@ -1279,6 +1279,7 @@ public class HDFView implements ViewManager {
 
     public void showMetaData(final HObject obj) {
         for (Control control : generalArea.getChildren()) control.dispose();
+        generalArea.setContent(null);
 
         if (obj == null) return;
 
