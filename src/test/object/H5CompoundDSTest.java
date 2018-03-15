@@ -41,10 +41,10 @@ import org.junit.Test;
  * This class tests all the public methods in H5CompoundDS class.
  * <p>
  * The test file contains the following objects.
- * 
+ *
  * <pre>
- * 
- * 
+ *
+ *
  *         /dataset_byte            Dataset {50, 10}
  *         /dataset_comp            Dataset {50, 10}
  *         /dataset_enum            Dataset {50, 10}
@@ -61,7 +61,7 @@ import org.junit.Test;
  *         /g0/g00                  Group
  *         /g0/g00/dataset_float    Dataset {50, 10}
  *         /g0_attr                 Group
- * 
+ *
  * </pre>
  * <p>
  * We use the following template to test all the methods:
@@ -81,7 +81,7 @@ import org.junit.Test;
  * <li>
  * </ul>
  * </ul>
- * 
+ *
  * @author Peter Cao, The HDF Group
  */
 public class H5CompoundDSTest {
@@ -203,20 +203,24 @@ public class H5CompoundDSTest {
         final String newName = "tmpName";
 
         // test set name to null
+        H5.H5error_off();
         try {
             testDataset.setName(null);
         }
         catch (final Exception ex) {
             ; // Expected - intentional
         }
+        H5.H5error_on();
 
         // set an existing name
+        H5.H5error_off();
         try {
             testDataset.setName(DNAME_SUB);
         }
         catch (final Exception ex) {
             ; // Expected - intentional
         }
+        H5.H5error_on();
 
         try {
             testDataset.setName(newName);
@@ -238,7 +242,9 @@ public class H5CompoundDSTest {
         // test the old name
         H5CompoundDS tmpDset = null;
         try {
+            H5.H5error_off();
             tmpDset = (H5CompoundDS) testFile.get(DNAME);
+            H5.H5error_on();
         }
         catch (Exception ex) {
             fail("setName() get(oldname) failed. " + ex);
@@ -382,6 +388,7 @@ public class H5CompoundDSTest {
             }
 
             // dataset is closed, expect to fail
+            H5.H5error_off();
             try {
                 tid = H5.H5Dget_type(did);
             }
@@ -397,6 +404,7 @@ public class H5CompoundDSTest {
                 sid = -1; // Expected - intentional
             }
             assertTrue(sid < 0);
+            H5.H5error_on();
         }
         long nObjs = 0;
         try {
@@ -1295,6 +1303,7 @@ public class H5CompoundDSTest {
 
         // test a non-existing dataset
         H5CompoundDS nodset = null;
+        H5.H5error_off();
         try {
             nodset = new H5CompoundDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
         }
@@ -1323,6 +1332,7 @@ public class H5CompoundDSTest {
             data = null; // Expected - intentional
         }
         assertNull(data);
+        H5.H5error_on();
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -1407,6 +1417,7 @@ public class H5CompoundDSTest {
         }
 
         // test a non-existing dataset
+        H5.H5error_off();
         H5CompoundDS dset = null;
         try {
             dset = new H5CompoundDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
@@ -1434,6 +1445,7 @@ public class H5CompoundDSTest {
             data = null; // Expected - intentional
         }
         assertNull(data);
+        H5.H5error_on();
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -1724,7 +1736,7 @@ public class H5CompoundDSTest {
      * .
      * <p>
      * Create a simple compound dataset, i.e. compound members can be either a scalar data or 1D array.
-     * 
+     *
      * <pre>
      * public static Dataset create(
      *             String name,
@@ -2011,7 +2023,7 @@ public class H5CompoundDSTest {
      * .
      * <p>
      * Create a simple compound dataset, i.e. compound members can be multiple-dimensional array.
-     * 
+     *
      * <pre>
      * public static Dataset create(
      *             String name,
@@ -2060,7 +2072,7 @@ public class H5CompoundDSTest {
         compData.add(expectedFloats);
         try {
             dset = (H5CompoundDS) H5CompoundDS.create(compName, rootGrp, dims, null, null, 0, new String[] { "int",
-                    "float" }, new H5Datatype[] { typeInt, typeFloat }, memberRanks, memberDims, compData);
+            "float" }, new H5Datatype[] { typeInt, typeFloat }, memberRanks, memberDims, compData);
         }
         catch (final Exception ex) {
             ex.printStackTrace();
@@ -2129,7 +2141,7 @@ public class H5CompoundDSTest {
      * <p>
      * Create a simple compound dataset with compression options, i.e. compound members can be multiple-dimensional
      * array.
-     * 
+     *
      * <pre>
      * public static Dataset create(
      *             String name,

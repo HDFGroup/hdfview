@@ -35,10 +35,10 @@ import org.junit.Test;
  * This class tests all the public methods in H5ScalarDS class.
  * <p>
  * The test file contains the following objects.
- * 
+ *
  * <pre>
- * 
- * 
+ *
+ *
  *         /dataset_byte            Dataset {50, 10}
  *         /dataset_comp            Dataset {50, 10}
  *         /dataset_enum            Dataset {50, 10}
@@ -74,7 +74,7 @@ import org.junit.Test;
  * <li>
  * </ul>
  * </ul>
- * 
+ *
  * @author Peter Cao, The HDF Group
  */
 public class H5DatatypeTest {
@@ -262,6 +262,7 @@ public class H5DatatypeTest {
             assertEquals(4, tsize);
             assertEquals(HDF5Constants.H5T_INTEGER, tclass);
 
+            H5.H5error_off();
             try {
                 H5.H5Tclose(tid);
             }
@@ -274,6 +275,7 @@ public class H5DatatypeTest {
             catch (final Exception ex) {
                 ; // Expected - intentional
             }
+            H5.H5error_on();
         }
         long nObjs = 0;
         try {
@@ -392,7 +394,9 @@ public class H5DatatypeTest {
     public void testFromNative() {
         log.debug("testFromNative");
         long tid = -1;
+        H5.H5error_off();
         H5Datatype type = new H5Datatype(-1);
+        H5.H5error_on();
 
         assertFalse(Datatype.CLASS_INTEGER == type.getDatatypeClass());
         assertFalse(type.getDatatypeSize() == 4);

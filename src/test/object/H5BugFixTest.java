@@ -26,10 +26,10 @@ import org.junit.Test;
  * This class tests all the public methods in H5CompoundDS class.
  * <p>
  * The test file contains the following objects.
- * 
+ *
  * <pre>
- * 
- * 
+ *
+ *
  *         /dataset_byte            Dataset {50, 10}
  *         /dataset_comp            Dataset {50, 10}
  *         /dataset_enum            Dataset {50, 10}
@@ -46,9 +46,9 @@ import org.junit.Test;
  *         /g0/g00                  Group
  *         /g0/g00/dataset_float    Dataset {50, 10}
  *         /g0_attr                 Group
- * 
+ *
  * </pre>
- * 
+ *
  * @author Peter Cao, The HDF Group
  */
 public class H5BugFixTest {
@@ -139,7 +139,7 @@ public class H5BugFixTest {
      * The following program fails because dataset.init() does not reset the selection of dataspace.
      * <p>
      * The bug appears on hdf-java 2.4 beta04 or earlier version. It is fixed at later version.
-     * 
+     *
      * <pre>
      * 1)  read the table cell (using dataset selection to select only that row of the table)
      *           2)  re-initialize the Dataset
@@ -282,18 +282,18 @@ public class H5BugFixTest {
      * The following operation causes memory leak because a group is left open at file.get().
      * <p>
      * The bug appears on hdf-java 2.4 beta05 or earlier version. It is fixed at later version.
-     * 
+     *
      * <pre>
      * while (true) {
      *     H5File file = new H5File(H5TestFile.NAME_FILE_H5, H5File.READ);
      *     // file.open();
      *     file.get(&quot;/Table0&quot;);
      *     file.get(&quot;/Group0&quot;);
-     * 
+     *
      *     int n = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
      *     if (n &gt; 1)
      *         System.out.println(&quot;*** Possible memory leak!!!&quot;);
-     * 
+     *
      *     file.close();
      * }
      * </pre>
@@ -363,7 +363,7 @@ public class H5BugFixTest {
                 }
 
                 assertTrue(nObjs <= 1); // file id should be the only this left
-                                        // open
+                // open
             } // for (int i=0; i<NLOOPS; i++)
         } // for (int openOption=0; openOption<2; openOption++)
     }

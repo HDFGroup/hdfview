@@ -37,7 +37,7 @@ import org.junit.Test;
 
 /**
  * @author xcao
- * 
+ *
  */
 public class H5GroupTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5GroupTest.class);
@@ -157,6 +157,7 @@ public class H5GroupTest {
         final String newName = "tmpName";
 
         // test set name to null
+        H5.H5error_off();
         try {
             testGroup.setName(null);
         }
@@ -171,6 +172,7 @@ public class H5GroupTest {
         catch (final Exception ex) {
             ; // Expected - intentional
         }
+        H5.H5error_on();
 
         try {
             testGroup.setName(newName);
@@ -192,7 +194,9 @@ public class H5GroupTest {
         // test the old name
         H5Group tmpDset = null;
         try {
+            H5.H5error_off();
             tmpDset = (H5Group) testFile.get(GNAME);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("setName() get(oldname) failed. " + ex);
@@ -234,7 +238,9 @@ public class H5GroupTest {
         final String newPath = "tmpName";
 
         try {
+            H5.H5error_off();
             testGroup.setPath(newPath);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("setPath() failed. " + ex);
@@ -397,8 +403,10 @@ public class H5GroupTest {
             grp.close(gid);
         }
 
+        H5.H5error_off();
         final H5Group grp = new H5Group(file, "NO_SUCH_DATASET", "NO_SUCH_PATH", pgroup);
         final long gid = grp.open();
+        H5.H5error_on();
         assertTrue(gid <= 0);
         long nObjs = 0;
         try {
@@ -428,20 +436,12 @@ public class H5GroupTest {
      */
     @Test
     public void testH5GroupFileFormatStringStringGroupLongArray() {
-        // RISHI SINHA Why are we testing a deprecated API.
         log.debug("testH5GroupFileFormatStringStringGroupLongArray");
         Group pgroup = null;
         final String[] names = { null, GNAME_SUB, GNAME_SUB.substring(4) };
         final String[] paths = { GNAME_SUB, null, H5TestFile.NAME_GROUP };
 
-        final H5File file = (H5File) testGroup.getFileFormat(); // RISHI SINHA
-                                                                // Why
-                                                                // recreating
-                                                                // these objects
-                                                                // as we have
-                                                                // these objects
-                                                                // in this class
-                                                                // already.
+        final H5File file = (H5File) testGroup.getFileFormat();
         assertNotNull(file);
 
         try {
@@ -454,7 +454,6 @@ public class H5GroupTest {
 
         long[] oid = null;
         for (int idx = 0; idx < names.length; idx++) {
-
             try {
                 final byte[] ref_buf = H5.H5Rcreate(file.getFID(), GNAME_SUB, HDF5Constants.H5R_OBJECT, -1);
                 final long l = HDFNativeData.byteToLong(ref_buf, 0);
@@ -474,8 +473,10 @@ public class H5GroupTest {
         }
 
         // test a non-existing dataset
+        H5.H5error_off();
         final H5Group grp = new H5Group(file, "NO_SUCH_DATASET", "NO_SUCH_PATH", pgroup, null);
         final long gid = grp.open();
+        H5.H5error_on();
         assertTrue(gid <= 0);
         long nObjs = 0;
         try {
@@ -741,7 +742,7 @@ public class H5GroupTest {
         assertNotNull(attrs);
         assertFalse(attrs.size() > 0);
 
-        // restor to the original
+        // restore to the original
         try {
             testGroup.writeMetadata(H5TestFile.ATTRIBUTE_STR);
             testGroup.writeMetadata(H5TestFile.ATTRIBUTE_INT_ARRAY);
@@ -817,7 +818,9 @@ public class H5GroupTest {
 
         grp = null;
         try {
+            H5.H5error_off();
             grp = (Group) testFile.get(nameNew);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("testFile.get(deleted_newname) failed. " + ex);
@@ -871,6 +874,7 @@ public class H5GroupTest {
             fail("H5.H5Pcreate() failed. " + ex);
         }
 
+        H5.H5error_off();
         try {
             final Group rootGrp = (Group) testFile.get("/");
             grp = H5Group.create(nameNew, rootGrp, gcpl);
@@ -878,6 +882,7 @@ public class H5GroupTest {
         catch (final Exception ex) {
             ; // Expected -intentional as the order of gplist is invalid.
         }
+        H5.H5error_on();
         assertNull(grp);
 
         try {
@@ -900,11 +905,13 @@ public class H5GroupTest {
         assertNotNull(grp2);
         assertNotNull(grp3);
 
+        H5.H5error_off();
         try {
             H5.H5Pclose(gcpl);
         }
         catch (final Exception ex) {
         }
+        H5.H5error_on();
 
         try {
             testFile.close(); // Close and reopen file.
@@ -960,7 +967,9 @@ public class H5GroupTest {
 
         grp = null;
         try {
+            H5.H5error_off();
             grp = (Group) testFile.get(nameNew);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("testFile.get(deleted_newgroup) failed. " + ex);

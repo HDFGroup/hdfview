@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.object;
 
@@ -27,7 +27,7 @@ import org.junit.Test;
 
 /**
  * @author Rishi R Sinha
- * 
+ *
  */
 public class GroupTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupTest.class);
@@ -154,7 +154,9 @@ public class GroupTest {
         testGroup.addToMemberList(null);
         assertEquals(testGroup.getMemberList().size(), previous_size);
 
+        H5.H5error_off();
         Group tmp = new H5Group(testFile, "tmp", "/grp0/", testGroup);
+        H5.H5error_on();
         testGroup.addToMemberList((HObject) testGroup.getMemberList().get(0));
 
         if (testGroup.getMemberList().size() != previous_size) {
@@ -203,6 +205,7 @@ public class GroupTest {
         int previous_size = testGroup.getMemberList().size();
         List memberList = testGroup.getMemberList();
 
+        H5.H5error_off();
         testGroup.removeFromMemberList(null);
         if (testGroup.getMemberList().size() != previous_size) {
             fail("removeFromMemberList removes a null from the member list.");
@@ -213,6 +216,7 @@ public class GroupTest {
         if (testGroup.getMemberList().size() != previous_size) {
             fail("removeFromMemberList removes a non existing member from the member list.");
         }
+        H5.H5error_on();
 
         Iterator it = memberList.iterator();
         HObject obj = (HObject) it.next();
@@ -283,7 +287,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#isRoot()}.
-     * 
+     *
      * <ul>
      * <li>Test for not root.
      * </ul>
@@ -304,7 +308,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#getNumberOfMembersInFile()}.
-     * 
+     *
      * <ul>
      * <li>Test for the number of members in the file.
      * <ul>
