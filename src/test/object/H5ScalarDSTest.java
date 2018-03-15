@@ -221,6 +221,7 @@ public class H5ScalarDSTest {
         log.debug("testSetName");
         final String newName = "tmpName";
 
+        H5.H5error_off();
         // test set name to null
         try {
             testDataset.setName(null);
@@ -236,6 +237,7 @@ public class H5ScalarDSTest {
         catch (final Exception ex) {
             ; // Expected - intentional
         }
+        H5.H5error_on();
 
         try {
             testDataset.setName(newName);
@@ -256,12 +258,14 @@ public class H5ScalarDSTest {
 
         // test the old name
         H5ScalarDS tmpDset = null;
+        H5.H5error_off();
         try {
             tmpDset = (H5ScalarDS) testFile.get(DNAME);
         }
         catch (final Exception ex) {
             fail("setName() get(oldname) failed. " + ex);
         }
+        H5.H5error_on();
         assertNull("The dataset should be null because it has been renamed", tmpDset);
 
         // set back the original name
@@ -400,6 +404,7 @@ public class H5ScalarDSTest {
                 fail("close() failed. " + ex);
             }
 
+            H5.H5error_off();
             // dataset is closed, expect to fail
             try {
                 tid = H5.H5Dget_type(did);
@@ -416,6 +421,7 @@ public class H5ScalarDSTest {
                 sid = -1; // Expected - intentional
             }
             assertTrue(sid < 0);
+            H5.H5error_on();
         }
         long nObjs = 0;
         try {
@@ -1107,7 +1113,7 @@ public class H5ScalarDSTest {
                     nObjs = 0;
                     if (openOption == 0) {
                         try {
-                            testFile.open(); // opent the full tree
+                            testFile.open(); // open the full tree
                         }
                         catch (final Exception ex) {
                             System.err.println("file.open(). " + ex);
@@ -1378,6 +1384,7 @@ public class H5ScalarDSTest {
         }
 
         // test a non-existing dataset
+        H5.H5error_off();
         final H5ScalarDS dset = new H5ScalarDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
         dset.init();
         dset.clearData();
@@ -1388,6 +1395,7 @@ public class H5ScalarDSTest {
         catch (final Exception ex) {
             data = null; // Expected - intentional
         }
+        H5.H5error_on();
         assertNull(data);
         long nObjs = 0;
         try {
@@ -1465,6 +1473,7 @@ public class H5ScalarDSTest {
         }
 
         // test a non-existing dataset
+        H5.H5error_off();
         final H5ScalarDS dset = new H5ScalarDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH", null);
         dset.init();
         dset.clearData();
@@ -1475,6 +1484,7 @@ public class H5ScalarDSTest {
         catch (final Exception ex) {
             data = null; // Expected - intentional
         }
+        H5.H5error_on();
         assertNull(data);
         long nObjs = 0;
         try {
@@ -1740,7 +1750,7 @@ public class H5ScalarDSTest {
         assertNotNull(attrs);
         assertFalse(attrs.size() > 0);
 
-        // restor to the original
+        // restore to the original
         try {
             testDataset.writeMetadata(H5TestFile.ATTRIBUTE_STR);
             testDataset.writeMetadata(H5TestFile.ATTRIBUTE_INT_ARRAY);

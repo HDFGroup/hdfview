@@ -20,7 +20,7 @@ import org.junit.Test;
 
 /**
  * @author Rishi R. Sinha
- * 
+ *
  */
 public class HObjectTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObjectTest.class);
@@ -213,6 +213,7 @@ public class HObjectTest {
         final String newName = "tmpName";
 
         // test set name to null
+        H5.H5error_off();
         try {
             testObj.setName(null);
         }
@@ -227,6 +228,7 @@ public class HObjectTest {
         catch (final Exception ex) {
             ; // Expected - intentional
         }
+        H5.H5error_on();
 
         try {
             testObj.setName(newName);
@@ -247,12 +249,14 @@ public class HObjectTest {
 
         HObject tmpObj = null;
         // test the old name
+        H5.H5error_off();
         try {
             tmpObj = testFile.get(GNAME);
         }
         catch (final Exception ex) {
             fail("testFile.get(GNAME) failed. " + ex);
         }
+        H5.H5error_on();
         assertNull("The dataset should be null because it has been renamed", tmpObj);
 
         // set back the original name
