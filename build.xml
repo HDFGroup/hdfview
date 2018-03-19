@@ -387,10 +387,9 @@
   <path id="example-classes" location="${exclasses.dir}" />
 
   <target name="run-examples" depends="compile-examples" description="Runs the examples">
-    <foreach target="run-one-example" param="exfile">
-      <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
-    </foreach>
+    <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
   </target>
+
   <target name="run-one-example">
     <dirname property="exfile.dir" file="${exfile}" />
     <basename property="exdir.name" file="${exfile.dir}" />
