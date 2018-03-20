@@ -3040,7 +3040,7 @@ public class DefaultTreeView implements TreeView {
                     }
                     catch (Throwable err) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Error when setting lib version bounds", "HDFView");
+                        Tools.showError(shell, "Error when setting lib version bounds", "HDFView Error");
                         return;
                     }
 

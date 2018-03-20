@@ -374,7 +374,8 @@
   <target name="compile-examples" depends="jar,compile">
     <mkdir dir="${exclasses.dir}" />
     <javac srcdir="${examples.dir}" destdir="${classes.dir}"
-      includeantruntime="false">
+      includeantruntime="false"
+      debug="${build.debug}">
       <classpath>
         <path refid="project-classpath" />
         <path refid="application" />
@@ -421,7 +422,8 @@
     <mkdir dir="${testclasses.dir}" />
     <javac srcdir="${test.dir}" destdir="${classes.dir}"
       includes="**/*.java"
-      includeantruntime="false">
+      includeantruntime="false"
+      debug="${build.debug}">
 
       <compilerarg value="-Xlint:deprecation"/>
       <compilerarg value="-Xlint:unchecked"/>

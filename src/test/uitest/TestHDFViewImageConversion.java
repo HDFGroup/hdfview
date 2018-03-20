@@ -54,15 +54,15 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             items[0].getNode(0).click();
 
             // Test metadata
-			val = bot.labelInGroup("General Object Info", 1).getText();
+            val = bot.labelInGroup("General Object Info", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image name", JPGFILE, val),
                     val.equals(JPGFILE));       // Test dataset name
 
-			val = bot.textInGroup("Dataspace and Datatype", 0).getText();
+            val = bot.textInGroup("Dataspace and Datatype", 0).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image rank", "2", val),
                     val.equals("2"));           // Test rank
 
-			val = bot.textInGroup("Dataspace and Datatype", 1).getText();
+            val = bot.textInGroup("Dataspace and Datatype", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image dimension sizes", "533 x 533", val),
                     val.equals("533 x 533"));   // Test dimension sizes
 
@@ -136,19 +136,18 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             assertTrue("convertImageToHDF5() filetree is missing image '" + JPGFILE + "'",
                     items[0].getNode(0).getText().compareTo(JPGFILE) == 0);
 
-
             // Test metadata
             items[0].getNode(0).click();
 
-			val = bot.labelInGroup("General Object Info", 1).getText();
+            val = bot.labelInGroup("General Object Info", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image name", JPGFILE, val),
                     val.equals(JPGFILE));           // Test dataset name
 
-			val = bot.textInGroup("Dataspace and Datatype", 0).getText();
+            val = bot.textInGroup("Dataspace and Datatype", 0).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image rank", "3", val),
                     val.equals("3"));               // Test rank
 
-			val = bot.textInGroup("Dataspace and Datatype", 1).getText();
+            val = bot.textInGroup("Dataspace and Datatype", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image dimension sizes", "533 x 533 x 3", val),
                     val.equals("533 x 533 x 3"));   // Test dimension sizes
 
