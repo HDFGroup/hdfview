@@ -38,6 +38,7 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
+
 /**
  * H5File is an implementation of the FileFormat class for HDF5 files.
  * <p>
@@ -111,6 +112,10 @@ public class H5File extends FileFormat {
      * The library version bounds
      */
     private int[] libver;
+    public static final int LIBVER_LATEST = HDF5Constants.H5F_LIBVER_LATEST;
+    public static final int LIBVER_EARLIEST = HDF5Constants.H5F_LIBVER_EARLIEST;
+    public static final int LIBVER_V18 = HDF5Constants.H5F_LIBVER_V18;
+    public static final int LIBVER_V110 = HDF5Constants.H5F_LIBVER_V110;
 
     private boolean attrFlag;
 
@@ -1030,15 +1035,15 @@ public class H5File extends FileFormat {
     /**
      * Sets the bounds of library versions.
      *
-     * @param low
+     * @param lowStr
      *            The earliest version of the library.
-     * @param high
+     * @param highStr
      *            The latest version of the library.
      *
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
-    public void setLibBounds(int low, int high) throws Exception {
+    public void setLibBounds(String lowStr, String highStr) throws Exception {
         long fapl = HDF5Constants.H5P_DEFAULT;
 
         if (fid < 0)
@@ -1047,11 +1052,42 @@ public class H5File extends FileFormat {
         fapl = H5.H5Fget_access_plist(fid);
 
         try {
-            if (low < 0)
-                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            int low = -1, high = -1;
 
-            if (high < 0)
+            if (lowStr == null) {
+                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            }
+            else if(lowStr.equals("Earliest")) {
+                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            }
+            else if(lowStr.equals("V18")) {
+                low = HDF5Constants.H5F_LIBVER_V18;
+            }
+            else if(lowStr.equals("V110")) {
+                low = HDF5Constants.H5F_LIBVER_V110;
+            }
+            else if(lowStr.equals("Latest")) {
+                low = HDF5Constants.H5F_LIBVER_LATEST;
+            }
+            else {
+                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            }
+
+            if (highStr == null) {
                 high = HDF5Constants.H5F_LIBVER_LATEST;
+            }
+            else if(highStr.equals("V18")) {
+                high = HDF5Constants.H5F_LIBVER_V18;
+            }
+            else if(highStr.equals("V110")) {
+                high = HDF5Constants.H5F_LIBVER_V110;
+            }
+            else if(highStr.equals("Latest")) {
+                high = HDF5Constants.H5F_LIBVER_LATEST;
+            }
+            else {
+                high = HDF5Constants.H5F_LIBVER_LATEST;
+            }
 
             H5.H5Pset_libver_bounds(fapl, low, high);
             H5.H5Pget_libver_bounds(fapl, libver);
@@ -1076,6 +1112,41 @@ public class H5File extends FileFormat {
      */
     public int[] getLibBounds() throws Exception {
         return libver;
+    }
+
+    /**
+     * Gets the bounds of library versions as text.
+     *
+     * @return libversion The earliest and latest version of the library.
+     */
+    public String getLibBoundsDescription() {
+        String libversion = "";
+
+        if (libver[0] == HDF5Constants.H5F_LIBVER_EARLIEST) {
+            libversion = "Earliest and ";
+        }
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_V18) {
+            libversion = "V18 and ";
+        }
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_V110) {
+            libversion = "V110 and ";
+        }
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_LATEST) {
+            libversion = "Latest and ";
+        }
+        if (libver[1] == HDF5Constants.H5F_LIBVER_EARLIEST) {
+            libversion += "Earliest";
+        }
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_V18) {
+            libversion += "V18";
+        }
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_V110) {
+            libversion += "V110";
+        }
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_LATEST) {
+            libversion += "Latest";
+        }
+        return libversion;
     }
 
     /**

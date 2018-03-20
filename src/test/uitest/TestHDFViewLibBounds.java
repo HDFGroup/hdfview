@@ -55,7 +55,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             bot.waitUntil(shellCloses(libVersionShell));
 
-			val = bot.labelInGroup("General Object Info", 9).getText();
+            val = bot.labelInGroup("General Object Info", 9).getText();
             assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and Latest", val),
                     val.equals("Earliest and Latest"));
 
@@ -70,7 +70,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             bot.waitUntil(shellCloses(libVersionShell));
 
-			val = bot.labelInGroup("General Object Info", 9).getText();
+            val = bot.labelInGroup("General Object Info", 9).getText();
             assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Latest and Latest", val),
                     val.equals("Latest and Latest"));
         }
