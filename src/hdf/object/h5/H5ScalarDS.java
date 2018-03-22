@@ -269,6 +269,7 @@ public class H5ScalarDS extends ScalarDS {
                         isArrayOfVLEN = (baseclass == HDF5Constants.H5T_VLEN);
                         isVLEN = isVLEN || ((baseclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(basetid));
                         isVLEN = isVLEN || H5.H5Tdetect_class(basetid, HDF5Constants.H5T_VLEN);
+                        isUnsigned = H5Datatype.isUnsigned(basetid);
                     }
                     catch (Exception ex) {
                         log.debug("init():  use the base datatype to define the array: ", ex);
@@ -282,11 +283,12 @@ public class H5ScalarDS extends ScalarDS {
                         }
                     }
                 }
+                else
+                    isUnsigned = H5Datatype.isUnsigned(tid);
 
                 isText = (tclass == HDF5Constants.H5T_STRING);
                 isVLEN = isVLEN || ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
                 isEnum = (tclass == HDF5Constants.H5T_ENUM);
-                isUnsigned = H5Datatype.isUnsigned(tid);
                 isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
                 log.trace(
                         "init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
