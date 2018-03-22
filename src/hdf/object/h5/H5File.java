@@ -2004,10 +2004,6 @@ public class H5File extends FileFormat {
                             long size = H5.H5Tget_size(tid);
                             int len = ((String[]) attrValue).length;
                             byte[] bval = Dataset.stringToByte((String[]) attrValue, (int)size);
-                            if (bval != null && bval.length == (int)size * len) {
-                                bval[bval.length - 1] = 0;
-                                attrValue = bval;
-                            }
                             log.trace("writeAttribute(): Array", name);
                         }
 
