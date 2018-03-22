@@ -275,7 +275,7 @@ public class H5ScalarDS extends ScalarDS {
                     }
                     finally {
                         try {
-                            H5.H5Pclose(basetid);
+                            H5.H5Tclose(basetid);
                         }
                         catch (Exception ex) {
                             log.debug("init(): H5Pclose(basetid {}) failure: ", basetid, ex);
