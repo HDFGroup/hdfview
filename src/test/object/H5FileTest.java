@@ -1449,8 +1449,8 @@ public class H5FileTest {
     @Test
     public void testSetLibBounds() {
         log.debug("testSetLibBounds");
-        int low = HDF5Constants.H5F_LIBVER_LATEST;
-        int high = HDF5Constants.H5F_LIBVER_LATEST;
+        String low = "Latest";
+        String high = "Latest";
 
         final H5File file = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
 
@@ -1470,8 +1470,8 @@ public class H5FileTest {
             fail("testFile.getLibBounds() failed. " + ex);
         }
 
-        assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[0]);
-        assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
+        assertEquals(file.LIBVER_LATEST, libver[0]);
+        assertEquals(file.LIBVER_LATEST, libver[1]);
 
         try {
             file.close();
@@ -1479,7 +1479,7 @@ public class H5FileTest {
         catch (Exception ex) {
         }
         try {
-            testFile.setLibBounds(-1, -1);
+            testFile.setLibBounds(null, null);
         }
         catch (final Exception ex) {
             fail("testFile.setLibBounds() failed. " + ex);

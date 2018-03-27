@@ -5,10 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.junit.Test;
 
 public class TestHDFViewLibBounds extends AbstractWindowTest {
@@ -55,9 +57,12 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             bot.waitUntil(shellCloses(libVersionShell));
 
-			val = bot.labelInGroup("General Object Info", 9).getText();
-            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and Latest", val),
-                    val.equals("Earliest and Latest"));
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.textWithLabel("Library version bounds: ").getText();
+            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and V18", val),
+                    val.equals("Earliest and V18"));
 
             items[0].contextMenu("Set Lib version bounds").click();
 
@@ -68,11 +73,13 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             libVersionShell.bot().button("   &OK   ").click();
 
-            bot.waitUntil(shellCloses(libVersionShell));
+            bot.waitUntil(Conditions.shellIsActive("HDFView Error"));
+            SWTBotShell libVersionErrorShell = bot.shell("HDFView Error");
+            libVersionErrorShell.activate();
+            libVersionErrorShell.bot().button("OK").click();
 
-			val = bot.labelInGroup("General Object Info", 9).getText();
-            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Latest and Latest", val),
-                    val.equals("Latest and Latest"));
+            libVersionShell.bot().button(" &Cancel ").click();
+            bot.waitUntil(shellCloses(libVersionShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();

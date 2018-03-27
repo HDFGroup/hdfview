@@ -24,6 +24,7 @@ import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
@@ -156,29 +157,30 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             items[0].getNode(10).setFocus();
             items[0].getNode(10).click();
-            org.hamcrest.Matcher<Shell> shellMatcher=org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withText("Dataspace and Datatype");
-            bot.waitUntil(Conditions.waitForWidget(shellMatcher));
-            SWTBotLabel label = bot.label("Storage Layout: ");
-            assertFalse("label is null", label == null);
-            Widget widget = SWTUtils.nextWidget(label.widget);
-            SWTBotLabel data = new SWTBotLabel((Label)widget, null);
-            String val = data.getText();
+
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            String val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
+            assertTrue("label matches", val.equals("Storage Layout: "));
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
             assertTrue(constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val),
                     val.equals("CHUNKED: 10 X 5"));
-            label = bot.label("Filters: ");
-            widget = SWTUtils.nextWidget(label.widget);
-            data = new SWTBotLabel((Label)widget, null);
-            val = data.getText();
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
+            assertTrue("label matches", val.equals("Filters: "));
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(constructWrongValueMessage("checkHDF5Filters()", "wrong data", "USERDEFINED myfilter(405): 5, 6", val),
                     val.equals("USERDEFINED myfilter(405): 5, 6"));
 
             items[0].getNode(14).setFocus();
             items[0].getNode(14).click();
-            bot.waitUntil(Conditions.waitForWidget(shellMatcher));
-            label = bot.label("Storage Layout: ");
-            widget = SWTUtils.nextWidget(label.widget);
-            data = new SWTBotLabel((Label)widget, null);
-            val = data.getText();
+
+            tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
+            assertTrue("label matches", val.equals("Storage Layout: "));
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
             assertTrue(constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val),
                     val.equals("CHUNKED: 10 X 5"));
         }

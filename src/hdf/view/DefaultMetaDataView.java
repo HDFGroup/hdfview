@@ -470,31 +470,12 @@ public class DefaultMetaDataView implements MetaDataView {
 
             // Append the Library Version bounds information
             if (isH5) {
-                int[] libver = null;
-
-                try {
-                    libver = obj.getFileFormat().getLibBounds();
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
+                String libversion = obj.getFileFormat().getLibBoundsDescription();
+                if (libversion.length() > 0) {
                     label = new Label(generalInfoGroup, SWT.LEFT);
                     label.setFont(curFont);
-                    label.setText("Library version: ");
-                }
+                    label.setText("Library version bounds: ");
 
-                String libversion = null;
-                if ((libver[0] == 0) && (libver[1] == 1))
-                    libversion = "Earliest and Latest";
-                else if ((libver[0] == 1) && (libver[1] == 1))
-                    libversion = "Latest and Latest";
-                else {
-                    libversion = "";
-                }
-
-                if (libversion.length() > 0) {
                     text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
                     text.setEditable(false);
                     text.setFont(curFont);
