@@ -36,7 +36,7 @@ import java.util.Vector;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Dataset extends HObject {
+public abstract class Dataset extends HObject implements MetaDataFormat, DataFormat {
     private static final long serialVersionUID    = -3360885430038261178L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
@@ -728,6 +728,7 @@ public abstract class Dataset extends HObject {
      * @throws Exception if object can not be read
      * @throws OutOfMemoryError if memory is exhausted
      */
+    @Override
     public final Object getData() throws Exception, OutOfMemoryError {
         if (!isDataLoaded) {
             log.trace("getData: read");
@@ -754,6 +755,7 @@ public abstract class Dataset extends HObject {
      *
      * @param d  the object data
      */
+    @Override
     @Deprecated
     public final void setData(Object d) {
         data = d;

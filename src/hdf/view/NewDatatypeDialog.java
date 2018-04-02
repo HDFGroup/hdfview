@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.DataFormat;
+import hdf.object.MetaDataFormat;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -523,7 +523,7 @@ public class NewDatatypeDialog extends Dialog {
     }
 
     /** @return the new dataset created. */
-    public DataFormat getObject() {
+    public MetaDataFormat getObject() {
         return newObject;
     }
 

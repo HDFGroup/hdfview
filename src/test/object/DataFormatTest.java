@@ -12,7 +12,7 @@ import java.util.List;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
-import hdf.object.DataFormat;
+import hdf.object.MetaDataFormat;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
@@ -33,7 +33,7 @@ public class DataFormatTest {
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;
-    private DataFormat testGroup = null;
+    private MetaDataFormat testGroup = null;
 
     @BeforeClass
     public static void createFile() throws Exception {
@@ -104,7 +104,7 @@ public class DataFormatTest {
     }
 
     /**
-     * Test method for {@link hdf.object.DataFormat#getFile()}.
+     * Test method for {@link hdf.object.MetaDataFormat#getFile()}.
      * <ul>
      * <li>Test if the file name is correct
      * </ul>
@@ -126,7 +126,7 @@ public class DataFormatTest {
     }
 
     /**
-     * Test method for {@link hdf.object.DataFormat#getMetadata()}.
+     * Test method for {@link hdf.object.MetaDataFormat#getMetadata()}.
      * <ul>
      * <li>Reading the attributes
      * <li>Checking the values of attributes
@@ -182,7 +182,7 @@ public class DataFormatTest {
     }
 
     /**
-     * Test method for {@link hdf.object.DataFormat#writeMetadata(java.lang.Object)}.
+     * Test method for {@link hdf.object.MetaDataFormat#writeMetadata(java.lang.Object)}.
      * <ul>
      * <li>Writing new attributes
      * <li>Checking that the new attributes are written in file
@@ -264,7 +264,7 @@ public class DataFormatTest {
     }
 
     /**
-     * Test method for {@link hdf.object.DataFormat#removeMetadata(java.lang.Object)}.
+     * Test method for {@link hdf.object.MetaDataFormat#removeMetadata(java.lang.Object)}.
      * <ul>
      * <li>Remove an attribute
      * </ul>

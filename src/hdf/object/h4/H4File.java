@@ -522,7 +522,15 @@ public class H4File extends FileFormat {
         }
 
         log.trace("writeAttribute(): count={}", count);
-        Object attrValue = attr.getValue();
+
+        Object attrValue;
+        try {
+            attrValue = attr.getData();
+        } catch (Exception ex) {
+            attrValue = null;
+            log.trace("writeAttribute(): getData() failure {}", ex);
+        }
+
         if (Array.get(attrValue, 0) instanceof String) {
             String strValue = (String) Array.get(attrValue, 0);
 
@@ -653,7 +661,7 @@ public class H4File extends FileFormat {
         if ((members != null) && (members.size() > 0)) {
             Iterator<HObject> iterator = members.iterator();
             while (iterator.hasNext()) {
-                HObject mObj = (HObject) iterator.next();
+                HObject mObj = iterator.next();
                 try {
                     copy(mObj, group, mObj.getName());
                 }
@@ -951,7 +959,7 @@ public class H4File extends FileFormat {
                 if ((vgroup != null) && (parentGroup != null)) {
                     // check for loops
                     boolean looped = false;
-                    H4Group theGroup = (H4Group) parentGroup;
+                    H4Group theGroup = parentGroup;
                     while ((theGroup != null) && !looped) {
                         long[] oid = { tag, ref };
                         if (theGroup.equalsOID(oid)) {
@@ -1475,7 +1483,7 @@ public class H4File extends FileFormat {
                             Attribute newAttr = new Attribute(annName + " #" + i,
                                     new H4Datatype(HDFConstants.DFNT_CHAR), attrDims);
                             attrList.add(newAttr);
-                            newAttr.setValue(str[0]);
+                            newAttr.setData(str[0]);
                         }
                     }
 
@@ -1573,7 +1581,7 @@ public class H4File extends FileFormat {
                         buf = Dataset.byteToString((byte[]) buf, attrInfo[1]);
                     }
 
-                    attr.setValue(buf);
+                    attr.setData(buf);
                 }
 
             } // for (int i=0; i<numberOfAttributes; i++)
@@ -1653,7 +1661,7 @@ public class H4File extends FileFormat {
                         buf = Dataset.byteToString((byte[]) buf, attrInfo[1]);
                     }
 
-                    attr.setValue(buf);
+                    attr.setData(buf);
                 }
 
             } // for (int i=0; i<numberOfAttributes; i++)

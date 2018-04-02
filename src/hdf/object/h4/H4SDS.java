@@ -156,6 +156,7 @@ public class H4SDS extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
@@ -501,6 +502,7 @@ public class H4SDS extends ScalarDS
     }
 
     // Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
@@ -567,7 +569,7 @@ public class H4SDS extends ScalarDS
                         fillValue = buf;
                     }
 
-                    attr.setValue(buf);
+                    attr.setData(buf);
                 }
 
             } // for (int i=0; i<n; i++)
@@ -594,6 +596,7 @@ public class H4SDS extends ScalarDS
     }
 
     // To do: implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
@@ -624,11 +627,13 @@ public class H4SDS extends ScalarDS
     }
 
     // To do: implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws HDFException {
         log.trace("removeMetadata(): disabled");
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
     }

@@ -40,7 +40,8 @@ import java.util.List;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Datatype extends HObject {
+public abstract class Datatype extends HObject implements MetaDataFormat {
+
     private static final long serialVersionUID = -581324710549963177L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
@@ -616,6 +617,7 @@ public abstract class Datatype extends HObject {
      *
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
         return null;
@@ -626,8 +628,9 @@ public abstract class Datatype extends HObject {
      *
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
+    @Override
     public void writeMetadata(Object info) throws Exception {
-        log.trace("writeMetadata(): disabled");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 
     /*
@@ -635,8 +638,9 @@ public abstract class Datatype extends HObject {
      *
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
+    @Override
     public void removeMetadata(Object info) throws Exception {
-        log.trace("removeMetadata(): disabled");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 
     /*
@@ -644,7 +648,8 @@ public abstract class Datatype extends HObject {
      *
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
+    @Override
     public void updateMetadata(Object info) throws Exception {
-        log.trace("updateMetadata(): disabled");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 }

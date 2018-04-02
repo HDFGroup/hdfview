@@ -60,7 +60,8 @@ import java.util.Map;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class Attribute implements Metadata {
+public class Attribute extends HObject implements DataFormat {
+
     private static final long serialVersionUID = 2072473407027648309L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
@@ -191,8 +192,20 @@ public class Attribute implements Metadata {
      *         from file.
      */
     @Override
-    public Object getValue() {
+    public Object getData() throws Exception, OutOfMemoryError {
         return value;
+    }
+
+    /**
+     * Sets the value of the attribute. It returns null if it failed to retrieve
+     * the name from file.
+     *
+     * @param theValue
+     *            The value of the attribute to set
+     */
+    @Override
+    public void setData(Object data) {
+        value = data;
     }
 
     /**
@@ -230,22 +243,11 @@ public class Attribute implements Metadata {
 
 
     /**
-     * Sets the value of the attribute. It returns null if it failed to
-     * retrieve the name from file.
-     *
-     * @param theValue
-     *            The value of the attribute to set
-     */
-    @Override
-    public void setValue(Object theValue) {
-        value = theValue;
-    }
-
-    /**
      * Returns the name of the attribute.
      *
      * @return the name of the attribute.
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -605,5 +607,17 @@ public class Attribute implements Metadata {
 
         log.trace("toString: finish");
         return sb.toString();
+    }
+
+    @Override
+    public long open() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public void close(long id) {
+        // TODO Auto-generated method stub
+
     }
 }

@@ -31,7 +31,7 @@ import java.util.Vector;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Group extends HObject {
+public abstract class Group extends HObject implements MetaDataFormat {
 
     private static final long serialVersionUID = 3913174542591568052L;
 

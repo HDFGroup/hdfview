@@ -411,6 +411,7 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute() {
         obj_info.num_attrs = nAttributes;
 
@@ -981,6 +982,7 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @Override
     public List<Attribute> getMetadata() throws HDF5Exception {
         return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
     }
@@ -1277,6 +1279,7 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
+    @Override
     public void writeMetadata(Object info) throws Exception {
         log.trace("writeMetadata(): start");
         // only attribute metadata is supported.
@@ -1311,6 +1314,7 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
+    @Override
     public void removeMetadata(Object info) throws HDF5Exception {
         log.trace("removeMetadata(): start");
         // only attribute metadata is supported.
@@ -1342,6 +1346,7 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
+    @Override
     public void updateMetadata(Object info) throws HDF5Exception {
         log.trace("updateMetadata(): start");
         // only attribute metadata is supported.
@@ -1998,6 +2003,7 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @see hdf.object.ScalarDS#getPaletteName(int)
      */
+    @Override
     public String getPaletteName(int idx) {
         log.trace("getPaletteName(): start");
 
