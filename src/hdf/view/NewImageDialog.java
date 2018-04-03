@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -142,6 +141,7 @@ public class NewImageDialog extends Dialog {
         parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
@@ -202,6 +202,7 @@ public class NewImageDialog extends Dialog {
         checkIndex.setText("Indexed colormap");
         checkIndex.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkIndex.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 checkInterlacePixel.setSelection(true);
                 checkInterlacePlane.setSelection(false);
@@ -215,6 +216,7 @@ public class NewImageDialog extends Dialog {
         checkTrueColor.setText("24-bit truecolor");
         checkTrueColor.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkTrueColor.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 checkInterlacePixel.setEnabled(true);
                 checkInterlacePlane.setEnabled(true);
@@ -250,6 +252,7 @@ public class NewImageDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = createHDFimage();
                 if (newObject != null) {
@@ -263,6 +266,7 @@ public class NewImageDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
                 shell.dispose();
@@ -278,6 +282,7 @@ public class NewImageDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -317,7 +322,7 @@ public class NewImageDialog extends Dialog {
             return null;
         }
 
-        Group pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+        Group pgroup = groupList.get(parentChoice.getSelectionIndex());
 
         if (pgroup == null) {
             shell.getDisplay().beep();
@@ -397,7 +402,7 @@ public class NewImageDialog extends Dialog {
     }
 
     /** @return the new dataset created. */
-    public DataFormat getObject() {
+    public HObject getObject() {
         return newObject;
     }
 

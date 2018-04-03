@@ -49,9 +49,9 @@ import java.io.Serializable;
  * should check the OID of the data object to avoid duplicate copies of the same
  * object.</b>
  * <p>
- * HDF4 objects are uniquely identified by the OID (tag_id, ref_id) pair.
- * The ref_id is the object reference count. The tag_id is a pre-defined number
- * to identify the type of object. For example, DFTAG_RI is for raster image,
+ * HDF4 objects are uniquely identified by the OID (tag_id, ref_id) pair. The
+ * ref_id is the object reference count. The tag_id is a pre-defined number to
+ * identify the type of object. For example, DFTAG_RI is for raster image,
  * DFTAG_SD is for scientific dataset, and DFTAG_VG is for Vgroup.
  * <p>
  * HDF5 objects are uniquely identified by the OID containing just the object
@@ -64,16 +64,16 @@ import java.io.Serializable;
  *     byte[] ref_buf = H5.H5Rcreate(h5file.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
  *     long[] oid = new long[1];
  *     oid[0] = HDFNativeData.byteToLong(ref_buf, 0);
- * }
- * catch (Exception ex) {
+ * } catch (Exception ex) {
  * }
  * </pre>
  *
- * @version 1.1 9/4/2007
- * @author Peter X. Cao
+ * @version 2.0 4/2/2018
+ * @author Peter X. Cao, Jordan T. Henderson
  * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
  */
-public abstract class HObject implements Serializable, DataFormat {
+public abstract class HObject implements Serializable {
+
     /**
      * The serialVersionUID is a universal version identifier for a Serializable
      * class. Deserialization uses this number to ensure that a loaded class

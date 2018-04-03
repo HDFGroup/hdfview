@@ -59,6 +59,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Link;
 
@@ -122,7 +123,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
         /* Get the metadata information before adding GUI components */
         try {
-            attrList = hObject.getMetadata();
+            attrList = ((MetaDataContainer) hObject).getMetadata();
             if (attrList != null)
                 numAttributes = attrList.size();
         }
@@ -179,11 +180,11 @@ public class DefaultMetaDataView implements MetaDataView {
         String rowData[] = new String[4]; // name, value, type, size
 
         rowData[0] = attr.getName();
-        rowData[2] = attr.getType().getDatatypeDescription();
+        rowData[2] = attr.getDatatype().getDatatypeDescription();
 
         rowData[1] = attr.toString(", ");
 
-        long dims[] = attr.getDataDims();
+        long dims[] = attr.getDims();
 
         rowData[3] = String.valueOf(dims[0]);
         for (int j = 1; j < dims.length; j++) {
@@ -222,7 +223,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
         Attribute attr = (Attribute) attrList.get(idx);
         try {
-            obj.removeMetadata(attr);
+            ((MetaDataContainer) obj).removeMetadata(attr);
         }
         catch (Exception ex) {
             log.debug("delete an attribute from a data object:", ex);
@@ -319,7 +320,7 @@ public class DefaultMetaDataView implements MetaDataView {
             for (int i = 0; i < numAttributes; i++) {
                 attr = (Attribute) attrList.get(i);
                 name = attr.getName();
-                type = attr.getType().getDatatypeDescription();
+                type = attr.getDatatype().getDatatypeDescription();
                 log.trace("createAttributeInfoPane:  attr[{}] is {} as {}", i, name, type);
 
                 if (name == null) name = "null";
@@ -329,7 +330,7 @@ public class DefaultMetaDataView implements MetaDataView {
                     size = "Scalar";
                 }
                 else {
-                    long dims[] = attr.getDataDims();
+                    long dims[] = attr.getDims();
                     size = String.valueOf(dims[0]);
                     for (int j = 1; j < dims.length; j++) {
                         size += " x " + dims[j];
@@ -1174,7 +1175,7 @@ public class DefaultMetaDataView implements MetaDataView {
         String attrName = attrTable.getItem(row).getText(0);
         List<?> attrList = null;
         try {
-            attrList = hObject.getMetadata();
+            attrList = ((MetaDataContainer) hObject).getMetadata();
         }
         catch (Exception ex) {
             Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
@@ -1184,8 +1185,17 @@ public class DefaultMetaDataView implements MetaDataView {
         Attribute attr = (Attribute) attrList.get(row);
 
         if (col == 1) { // To change attribute value
+            Object data;
+
             log.trace("updateAttributeValue: change attribute value");
-            Object data = attr.getValue();
+
+            try {
+                data = attr.getData();
+            } catch (Exception ex) {
+                log.trace("updateAttributeValue(): getData() failure: {}", ex);
+                return;
+            }
+
             if (data == null) {
                 return;
             }

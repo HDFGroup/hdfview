@@ -6,17 +6,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.object.h5.H5File;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.object.h5.H5File;
 
 /**
  * @author Rishi R. Sinha
@@ -498,12 +500,12 @@ public class HObjectTest {
     public void testHasAttribute() {
         log.debug("testHasAttribute");
         try {
-            assertTrue(testFile.get(H5TestFile.NAME_DATASET_IMAGE).hasAttribute());
+            assertTrue(((MetaDataContainer) testFile.get(H5TestFile.NAME_DATASET_IMAGE)).hasAttribute());
         }
         catch (Exception e) {
             fail("get() fails.");
         }
-        assertFalse(testObj.hasAttribute());
+        assertFalse(((MetaDataContainer) testObj).hasAttribute());
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

@@ -5,12 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.FileFormat;
-import hdf.object.ScalarDS;
-import hdf.object.h5.H5File;
-import hdf.object.h5.H5Group;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,9 +12,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.FileFormat;
+import hdf.object.ScalarDS;
+import hdf.object.h5.H5File;
+import hdf.object.h5.H5Group;
+
 /**
  * @author rsinha
- * 
+ *
  */
 public class ScalarDSTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDSTest.class);
@@ -69,6 +70,7 @@ public class ScalarDSTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void openFiles() throws Exception {
         try {
@@ -131,7 +133,7 @@ public class ScalarDSTest {
     }
 
     /**
-     * 
+     *
      * What to test:
      * <ul>
      * <li>Test for general functionality

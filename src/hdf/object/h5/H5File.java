@@ -575,7 +575,7 @@ public class H5File extends FileFormat {
                     }
                 }
 
-                attr.setValue(value);
+                attr.setData(value);
 
             }
             catch (HDF5Exception ex) {
@@ -679,14 +679,14 @@ public class H5File extends FileFormat {
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
         Attribute attr = new Attribute(attrName, attrType, null);
-        attr.setValue(classValue);
+        attr.setData(classValue);
         dataset.writeMetadata(attr);
 
         attrName = "IMAGE_VERSION";
         String[] versionValue = { "1.2" };
         attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, -1, -1);
         attr = new Attribute(attrName, attrType, null);
-        attr.setValue(versionValue);
+        attr.setData(versionValue);
         dataset.writeMetadata(attr);
 
         long[] attrDims = { 2 };
@@ -694,14 +694,14 @@ public class H5File extends FileFormat {
         byte[] attrValueInt = { 0, (byte) 255 };
         attrType = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
         attr = new Attribute(attrName, attrType, attrDims);
-        attr.setValue(attrValueInt);
+        attr.setData(attrValueInt);
         dataset.writeMetadata(attr);
 
         attrName = "IMAGE_SUBCLASS";
         String[] subclassValue = { subclass };
         attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, -1, -1);
         attr = new Attribute(attrName, attrType, null);
-        attr.setValue(subclassValue);
+        attr.setData(subclassValue);
         dataset.writeMetadata(attr);
 
         if ((selectionFlag == ScalarDS.INTERLACE_PIXEL) || (selectionFlag == ScalarDS.INTERLACE_PLANE)) {
@@ -709,7 +709,7 @@ public class H5File extends FileFormat {
             String[] interlaceValue = { interlaceMode };
             attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, -1, -1);
             attr = new Attribute(attrName, attrType, null);
-            attr.setValue(interlaceValue);
+            attr.setData(interlaceValue);
             dataset.writeMetadata(attr);
         }
         else {
@@ -717,7 +717,7 @@ public class H5File extends FileFormat {
             long[] palRef = { 0 }; // set ref to null
             attrType = new H5Datatype(Datatype.CLASS_REFERENCE, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
             attr = new Attribute(attrName, attrType, null);
-            attr.setValue(palRef);
+            attr.setData(palRef);
             dataset.writeMetadata(attr);
         }
         log.trace("createImageAttributes(): finish");
@@ -1043,6 +1043,7 @@ public class H5File extends FileFormat {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
+    @Override
     public void setLibBounds(String lowStr, String highStr) throws Exception {
         long fapl = HDF5Constants.H5P_DEFAULT;
 
@@ -1110,6 +1111,7 @@ public class H5File extends FileFormat {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
+    @Override
     public int[] getLibBounds() throws Exception {
         return libver;
     }
@@ -1119,6 +1121,7 @@ public class H5File extends FileFormat {
      *
      * @return libversion The earliest and latest version of the library.
      */
+    @Override
     public String getLibBoundsDescription() {
         String libversion = "";
 
@@ -1605,6 +1608,7 @@ public class H5File extends FileFormat {
      * @see hdf.object.h5.H5Group#create(java.lang.String, hdf.object.Group, long...)
      *
      */
+    @Override
     public Group createGroup(String name, Group pgroup, long... gplist) throws Exception {
         // create new group at the root
         if (pgroup == null) {
@@ -1620,6 +1624,7 @@ public class H5File extends FileFormat {
      * @see hdf.object.FileFormat#createGcpl(int, int, int)
      *
      */
+    @Override
     public long createGcpl(int creationorder, int maxcompact, int mindense) throws Exception {
         log.trace("createGcpl(): start");
         long gcpl = -1;
@@ -1683,6 +1688,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
+    @Override
     public HObject createLink(Group parentGroup, String name, HObject currentObj, int lType) throws Exception {
         log.trace("createLink(): start: name={}", name);
         HObject obj = null;
@@ -1780,6 +1786,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
+    @Override
     public HObject createLink(Group parentGroup, String name, String currentObj, int lType) throws Exception {
         log.trace("createLink(): start: name={}", name);
         HObject obj = null;
@@ -1882,7 +1889,7 @@ public class H5File extends FileFormat {
         List<HObject> members = dstGroup.getMemberList();
         int n = members.size();
         for (int i = 0; i < n; i++) {
-            HObject obj = (HObject) members.get(i);
+            HObject obj = members.get(i);
             String name = obj.getName();
             while (name.equals(dstName))
                 dstName += "~copy";
@@ -1946,13 +1953,13 @@ public class H5File extends FileFormat {
             return;
         }
 
-        if ((tid = attr.getType().toNative()) >= 0) {
+        if ((tid = attr.getDatatype().toNative()) >= 0) {
             log.trace("writeAttribute(): tid {} from toNative", tid);
             try {
                 if (attr.isScalar())
                     sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
                 else
-                    sid = H5.H5Screate_simple(attr.getRank(), attr.getDataDims(), null);
+                    sid = H5.H5Screate_simple(attr.getRank(), attr.getDims(), null);
 
                 if (attrExisted) {
                     aid = H5.H5Aopen_by_name(objID, obj_name, name, HDF5Constants.H5P_DEFAULT,
@@ -1964,7 +1971,14 @@ public class H5File extends FileFormat {
                 log.trace("writeAttribute(): aid {} opened/created", aid);
 
                 // update value of the attribute
-                Object attrValue = attr.getValue();
+                Object attrValue;
+                try {
+                    attrValue = attr.getData();
+                } catch (Exception ex) {
+                    attrValue = null;
+                    log.trace("writeAttribute(): getData() failure {}", ex);
+                }
+
                 log.trace("writeAttribute(): getValue");
                 if (attrValue != null) {
                     boolean isVlen = (H5.H5Tget_class(tid) == HDF5Constants.H5T_VLEN || H5.H5Tis_variable_str(tid));
@@ -1983,7 +1997,7 @@ public class H5File extends FileFormat {
                                 log.debug("writeAttribute(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                             }
                             log.trace("writeAttribute(): H5.H5AwriteVL", name);
-                            if ((attrValue instanceof String) || (attr.getDataDims().length == 1)) {
+                            if ((attrValue instanceof String) || (attr.getDims().length == 1)) {
                                 H5.H5AwriteVL(aid, tid, (String[]) attrValue);
                             }
                             else {
@@ -1995,7 +2009,8 @@ public class H5File extends FileFormat {
                         }
                     }
                     else {
-                        if (attr.getType().getDatatypeClass() == Datatype.CLASS_REFERENCE && attrValue instanceof String) {
+                        if (attr.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE
+                                && attrValue instanceof String) {
                             // reference is a path+name to the object
                             attrValue = H5.H5Rcreate(getFID(), (String) attrValue, HDF5Constants.H5R_OBJECT, -1);
                             log.trace("writeAttribute(): Attribute class is CLASS_REFERENCE");
@@ -2277,6 +2292,7 @@ public class H5File extends FileFormat {
      * @param parentObject
      *            the parent object.
      */
+    @SuppressWarnings("deprecation")
     private int depth_first(HObject parentObject, int nTotal) {
         log.trace("depth_first({}): start", parentObject);
 
@@ -2942,6 +2958,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *            If there is a failure.
      */
+    @Override
     public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order)
             throws Exception {
         H5.H5export_dataset(file_export_name, file_name, object_path, binary_order);
@@ -2960,6 +2977,7 @@ public class H5File extends FileFormat {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
+    @Override
     public void renameAttribute(HObject obj, String oldAttrName, String newAttrName) throws Exception {
         log.trace("renameAttribute(): rename {} to {}", oldAttrName, newAttrName);
         if (!attrFlag) {
@@ -3021,6 +3039,7 @@ public class H5File extends FileFormat {
         return HDF5Constants.H5_ITER_UNKNOWN;
     }
 
+    @Override
     public int getIndexType(String strtype) {
         if (strtype != null) {
             if (strtype.compareTo("H5_INDEX_NAME") == 0)
@@ -3036,10 +3055,12 @@ public class H5File extends FileFormat {
         return indexType;
     }
 
+    @Override
     public void setIndexType(int indexType) {
         this.indexType = indexType;
     }
 
+    @Override
     public int getIndexOrder(String strorder) {
         if (strorder != null) {
             if (strorder.compareTo("H5_ITER_INC") == 0)
@@ -3059,6 +3080,7 @@ public class H5File extends FileFormat {
         return indexOrder;
     }
 
+    @Override
     public void setIndexOrder(int indexOrder) {
         this.indexOrder = indexOrder;
     }

@@ -52,6 +52,7 @@ public class H5Link extends HObject {
        this (theFile, name, path, null);
     }
 
+    @SuppressWarnings("deprecation")
     public H5Link(FileFormat theFile, String theName, String thePath,
             long[] oid) {
         super(theFile, theName, thePath, oid);

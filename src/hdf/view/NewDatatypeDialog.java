@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -131,6 +130,7 @@ public class NewDatatypeDialog extends Dialog {
         nameField.setFont(curFont);
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         nameField.addTraverseListener(new TraverseListener() {
+            @Override
             public void keyTraversed(TraverseEvent e) {
                 if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
                     e.doit = true;
@@ -146,6 +146,7 @@ public class NewDatatypeDialog extends Dialog {
         parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
@@ -204,6 +205,7 @@ public class NewDatatypeDialog extends Dialog {
         classChoice.setFont(curFont);
         classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         classChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 int idx = classChoice.getSelectionIndex();
                 sizeChoice.select(0);
@@ -277,6 +279,7 @@ public class NewDatatypeDialog extends Dialog {
         sizeChoice.setFont(curFont);
         sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         sizeChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (classChoice.getSelectionIndex() == 0) {
                     checkUnsigned.setEnabled(true);
@@ -327,6 +330,7 @@ public class NewDatatypeDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = createDatatype();
 
@@ -341,6 +345,7 @@ public class NewDatatypeDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
                 shell.dispose();
@@ -356,6 +361,7 @@ public class NewDatatypeDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -394,7 +400,7 @@ public class NewDatatypeDialog extends Dialog {
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+        pgroup = groupList.get(parentChoice.getSelectionIndex());
 
         if (pgroup == null) {
             shell.getDisplay().beep();
@@ -523,7 +529,7 @@ public class NewDatatypeDialog extends Dialog {
     }
 
     /** @return the new dataset created. */
-    public DataFormat getObject() {
+    public HObject getObject() {
         return newObject;
     }
 

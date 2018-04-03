@@ -75,6 +75,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
 
@@ -1618,9 +1619,13 @@ public class DefaultTreeView implements TreeView {
      * @return the image for the specified HObject
      */
     private Image getObjectTypeImage(HObject obj) {
-        if (obj ==null) return null;
+        if (obj == null)
+            return null;
 
-        boolean hasAttribute = obj.hasAttribute();
+        // Should be safe to cast to a MetaDataFormat here because the
+        // TreeView should never be able to select an object that does
+        // not implement the MetaDataFormat interface
+        boolean hasAttribute = ((MetaDataContainer) obj).hasAttribute();
 
         if(obj instanceof Dataset) {
             if (obj instanceof ScalarDS) {

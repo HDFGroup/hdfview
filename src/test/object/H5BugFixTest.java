@@ -7,18 +7,18 @@ import static org.junit.Assert.fail;
 
 import java.util.Vector;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Dataset;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * TestCase for bug fixes.
@@ -101,6 +101,7 @@ public class H5BugFixTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void openFiles() throws Exception {
         try {
@@ -157,6 +158,7 @@ public class H5BugFixTest {
      * </pre>
      * <p>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testBug847() throws Exception {
         log.debug("testBug847");

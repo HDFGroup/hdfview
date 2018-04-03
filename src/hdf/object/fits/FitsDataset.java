@@ -77,6 +77,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute () { return false; }
 
     /*
@@ -144,6 +145,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @Override
     public List getMetadata() throws Exception {
         if (attributeList != null) {
             return attributeList;
@@ -177,7 +179,7 @@ public class FitsDataset extends ScalarDS
             if (tvalue != null) {
                 value += " / " + tvalue;
             }
-            attr.setValue(value);
+            attr.setData(value);
             attributeList.add(attr);
         }
 
@@ -188,6 +190,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
+    @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
@@ -197,6 +200,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
+    @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
@@ -206,6 +210,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
+    @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");

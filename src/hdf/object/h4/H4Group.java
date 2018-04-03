@@ -68,6 +68,7 @@ public class H4Group extends Group
      * @param parent the parent of this group.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4Group(
         FileFormat theFile,
         String name,
@@ -82,6 +83,7 @@ public class H4Group extends Group
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
@@ -107,6 +109,7 @@ public class H4Group extends Group
     }
 
     // Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
@@ -176,7 +179,7 @@ public class H4Group extends Group
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                         }
 
-                        attr.setValue(buf);
+                        attr.setData(buf);
                     }
                 }
             }
@@ -193,6 +196,7 @@ public class H4Group extends Group
     }
 
     // To do: implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
@@ -224,11 +228,13 @@ public class H4Group extends Group
 
 
     // To do: implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws HDFException {
         log.trace("removeMetadata(): disabled");
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
     }
