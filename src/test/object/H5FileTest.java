@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,7 +15,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -32,13 +36,6 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 import hdf.object.h5.H5ScalarDS;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 
 /**
  * TestCase for H5File.
@@ -747,6 +744,7 @@ public class H5FileTest {
      * <li>close/delete the new file
      * </ul>
      */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     @Test
     public void testCopyHObjectGroup() {
         log.debug("testCopyHObjectGroup");
@@ -845,6 +843,7 @@ public class H5FileTest {
      * <li>close/delete the new file
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testDeleteHObject() {
         log.debug("testDeleteHObject");
@@ -1289,6 +1288,7 @@ public class H5FileTest {
      * <li>close/delete the new file
      * </ul>
      */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     @Test
     public void testUpdateReferenceDataset() {
         log.debug("testUpdateReferenceDataset");
@@ -1851,6 +1851,7 @@ public class H5FileTest {
      * <li>close/delete the files
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testCreateAttribute() {
         log.debug("testCreateAttribute");

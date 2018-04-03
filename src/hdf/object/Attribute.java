@@ -592,14 +592,12 @@ public class Attribute extends HObject implements DataFormat {
 
     @Override
     public long open() {
-        // TODO Auto-generated method stub
-        return 0;
+        return -1;
     }
 
     @Override
     public void close(long id) {
-        // TODO Auto-generated method stub
-
+        return;
     }
 
     @Override

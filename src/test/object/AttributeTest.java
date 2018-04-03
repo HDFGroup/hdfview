@@ -68,6 +68,7 @@ public class AttributeTest {
         }
     }
 
+    @SuppressWarnings({ "deprecation", "rawtypes" })
     @Before
     public void openFiles() throws Exception {
         try {
@@ -173,18 +174,42 @@ public class AttributeTest {
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#getValue()}.
+     * Test method for {@link hdf.object.Attribute#getData()}.
      *
      * Here we test:
      * <ul>
-     * <li>Getting the value for the two attributes (the string attribute and the int array attribute).
+     * <li>Getting the value for the two attributes (the string attribute and
+     * the int array attribute).
      * </ul>
      */
     @Test
-    public void testGetValue() {
-        log.debug("testGetValue");
-        assertEquals(((String[]) strAttr.getData())[0], "String attribute.");
-        assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
+    public void testGetData() {
+        log.debug("testGetData");
+
+        try {
+            assertEquals(((String[]) strAttr.getData())[0], "String attribute.");
+        }
+        catch (Exception ex) {
+            log.trace("testGetData(): getData() failure: {}", ex);
+            fail("getData() failure " + ex);
+        }
+        catch (OutOfMemoryError e) {
+            log.trace("testGetData(): Out of memory");
+            fail("Out of memory");
+        }
+
+        try {
+            assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
+        }
+        catch (Exception ex) {
+            log.trace("testGetData(): getData() failure: {}", ex);
+            fail("getData() failure " + ex);
+        }
+        catch (OutOfMemoryError e) {
+            log.trace("testGetData(): Out of memory");
+            fail("Out of memory");
+        }
+
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -196,24 +221,69 @@ public class AttributeTest {
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#setValue(java.lang.Object)}.
+     * Test method for {@link hdf.object.Attribute#setData(java.lang.Object)}.
      * <p>
      * Here we test:
      * <ul>
-     * <li>Setting new value for the two attributes (the string attribute and the int array attribute).
+     * <li>Setting new value for the two attributes (the string attribute and
+     * the int array attribute).
      * </ul>
      */
     @Test
-    public void testSetValue() {
-        log.debug("testSetValue");
-        String[] prevValue = (String[]) strAttr.getData();
+    public void testSetData() {
+        String[] prevValue = null;
+
+        log.debug("testSetData");
+
+        try {
+            prevValue = (String[]) strAttr.getData();
+        } catch (Exception ex) {
+            log.trace("testSetData(): getData() failure: {}", ex);
+            fail("getData() failure " + ex);
+        } catch (OutOfMemoryError e) {
+            log.trace("testSetData(): Out of memory");
+            fail("Out of memory");
+        }
+
         strAttr.setData("Temp String Value");
-        assertEquals((strAttr.getData()), "Temp String Value");
+
+        try {
+            assertEquals((strAttr.getData()), "Temp String Value");
+        } catch (Exception ex) {
+            log.trace("testSetData(): getData() failure: {}", ex);
+            fail("getData() failure " + ex);
+        } catch (OutOfMemoryError e) {
+            log.trace("testSetData(): Out of memory");
+            fail("Out of memory");
+        }
+
         strAttr.setData(prevValue);
 
-        int[] intPrevValue = (int[]) arrayIntAttr.getData();
+        int[] intPrevValue = null;
+
+        try {
+            intPrevValue = (int[]) arrayIntAttr.getData();
+        } catch (Exception ex) {
+            log.trace("testSetData(): getData() failure: {}", ex);
+            fail("getData() failure " + ex);
+        } catch (OutOfMemoryError e) {
+            log.trace("testSetData(): Out of memory");
+            fail("Out of memory");
+        }
+
         arrayIntAttr.setData(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-        assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+
+        try {
+            assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+        }
+        catch (Exception ex) {
+            log.trace("testSetData(): getData() failure: {}", ex);
+            fail("getData() failure " + ex);
+        } catch (OutOfMemoryError e) {
+            log.trace("testSetData(): Out of memory");
+            fail("Out of memory");
+        }
+
         arrayIntAttr.setData(intPrevValue);
         long nObjs = 0;
         try {
@@ -282,8 +352,8 @@ public class AttributeTest {
     @Test
     public void testGetDataDims() {
         log.debug("testGetDataDims");
-        assertEquals(strAttr.getDataDims()[0], 1);
-        assertEquals(arrayIntAttr.getDataDims()[0], 10);
+        assertEquals(strAttr.getDims()[0], 1);
+        assertEquals(arrayIntAttr.getDims()[0], 10);
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

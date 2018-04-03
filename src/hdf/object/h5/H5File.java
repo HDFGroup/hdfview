@@ -2292,6 +2292,7 @@ public class H5File extends FileFormat {
      * @param parentObject
      *            the parent object.
      */
+    @SuppressWarnings("deprecation")
     private int depth_first(HObject parentObject, int nTotal) {
         log.trace("depth_first({}): start", parentObject);
 

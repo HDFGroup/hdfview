@@ -224,6 +224,7 @@ public class DebugHDF {
     	file.close();
 	}
 
+    @SuppressWarnings("deprecation")
     private static void testH5VlenAttr( String fname) throws Exception
     {
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
@@ -966,6 +967,7 @@ public class DebugHDF {
 
 
 
+    @SuppressWarnings("deprecation")
     private static void readDatatype() throws Exception {
     	String fname = "g:\\temp\\t1.h5";
 
@@ -1048,6 +1050,7 @@ public class DebugHDF {
         testFile.close();
     }
 
+    @SuppressWarnings("deprecation")
     private static final void createINF(String fname)  throws Exception {
         final long[] dims2D = {5, 2};
         final float[] data = new float[(int)dims2D[0]*(int)dims2D[1]];
@@ -1311,6 +1314,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public static void launchBrowser(String url) throws Exception {
     	String os = System.getProperty("os.name");
     	Runtime runtime=Runtime.getRuntime();
@@ -1387,6 +1391,7 @@ public class DebugHDF {
 		dataset.close(dsId);
 	}
 
+    @SuppressWarnings("deprecation")
     private static Object getData( Dataset ds, int startRow, int numRows ) throws IOException
     {
     	Object o = null;
@@ -1452,6 +1457,7 @@ public class DebugHDF {
     	return o;
     }
 
+    @SuppressWarnings("deprecation")
     private static void testBEAttr(String fname) throws Exception
     {
         long[] dims2D = {20, 10};
@@ -1544,6 +1550,7 @@ public class DebugHDF {
 
     }
 
+    @SuppressWarnings("rawtypes")
     private static void testTofwerkReaderBug1213 (final String filename) throws IOException
     {
         Object data = null;
@@ -1638,6 +1645,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void testH5Compound2000Fields(final String filename) throws Exception
     {
         int ncols = 12;
@@ -1832,6 +1840,7 @@ public class DebugHDF {
         testFile.close();
      }
 
+    @SuppressWarnings("deprecation")
     private static void testH5WriteFloats(final String filename) throws Exception
     {
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
@@ -2036,6 +2045,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static void testH5Bug847(final String filename)  throws Exception
     {
         List list=null;
@@ -2139,6 +2149,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static void testCreateLongPath(final String fname) throws Exception {
         final int n = 5;
         H5File file=null;
@@ -2178,6 +2189,7 @@ public class DebugHDF {
         try { file.close(); } catch (final Exception ex) {}
      }
 
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     private static void testCompressedStrings(final String fname) throws Exception {
         H5File file=null;
 
@@ -2290,6 +2302,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static void testGetOneRow (final String filename, final String objName) throws Exception
     {
         List data=null;
@@ -2427,6 +2440,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void testHDF5Copy (final String filename, final String objName) throws Exception
     {
         String newFilename = filename+"_copy.h5";
@@ -2570,6 +2584,7 @@ public class DebugHDF {
         System.out.println(group.isRoot());
     }
 
+    @SuppressWarnings("rawtypes")
     public static void  testHDF5Write(final String filename)
     {
         try
@@ -2780,6 +2795,7 @@ public class DebugHDF {
         return s_runtime.totalMemory () - s_runtime.freeMemory ();
     }
 
+    @SuppressWarnings({ "deprecation", "rawtypes" })
     private static void testHDFvector( final String fileName ) throws Exception
     {
 
@@ -2831,6 +2847,7 @@ public class DebugHDF {
 
     }
 
+    @SuppressWarnings("rawtypes")
     public static void putData(final FileFormat testFile, final Group root, final String name,
         final Vector value, final boolean flag, final long[] extended_dims)throws Exception
     {
@@ -2866,6 +2883,7 @@ public class DebugHDF {
        }
     }
 
+    @SuppressWarnings("rawtypes")
     public static Vector getData(final Group root, final String name )throws Exception
     {
         final Vector v = new Vector();
@@ -2881,6 +2899,7 @@ public class DebugHDF {
         return v;
     }
 
+    @SuppressWarnings("deprecation")
     private static void testHDFgenotype(final String fileName) throws Exception {
         // retrieve an instance of H5File
 

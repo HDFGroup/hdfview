@@ -11,6 +11,12 @@ import static org.junit.Assert.fail;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.FileFormat;
@@ -18,12 +24,6 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * @author Rishi R Sinha
@@ -67,6 +67,7 @@ public class GroupTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void openFiles() throws Exception {
         try {
@@ -157,7 +158,7 @@ public class GroupTest {
         H5.H5error_off();
         Group tmp = new H5Group(testFile, "tmp", "/grp0/", testGroup);
         H5.H5error_on();
-        testGroup.addToMemberList((HObject) testGroup.getMemberList().get(0));
+        testGroup.addToMemberList(testGroup.getMemberList().get(0));
 
         if (testGroup.getMemberList().size() != previous_size) {
             fail("addToMemberList adds an existing member to the member list.");
@@ -199,6 +200,7 @@ public class GroupTest {
      * </ul>
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testRemoveFromMemberList() {
         log.debug("testRemoveFromMemberList");
@@ -242,6 +244,7 @@ public class GroupTest {
      * <li>testing the member list for the root group.
      * <ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testGetMemberList() {
         log.debug("testGetMemberList");

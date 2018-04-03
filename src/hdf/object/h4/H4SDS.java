@@ -141,6 +141,7 @@ public class H4SDS extends ScalarDS
      * @param path the full path of this H4SDS.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4SDS(
         FileFormat theFile,
         String name,
@@ -446,6 +447,7 @@ public class H4SDS extends ScalarDS
     }
 
     // Implementing DataFormat
+    @SuppressWarnings("deprecation")
     @Override
     public void write(Object buf) throws HDFException
     {
@@ -680,6 +682,7 @@ public class H4SDS extends ScalarDS
     /**
      * Initializes the H4SDS such as dimension size of this dataset.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void init()
     {

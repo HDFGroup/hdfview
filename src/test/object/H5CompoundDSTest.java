@@ -1359,6 +1359,7 @@ public class H5CompoundDSTest {
      * <li>Construct an H5CompoundDS object that does not exist in file
      * </ul>
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testH5CompoundDSFileFormatStringStringLongArray() {
         log.debug("testH5CompoundDSFileFormatStringStringLongArray");
@@ -1484,17 +1485,34 @@ public class H5CompoundDSTest {
             final Attribute attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
-                assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
-                assertTrue(((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0].equals(((String[]) attr.getData())[0]));
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
+                    assertTrue(
+                            ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0].equals(((String[]) attr.getData())[0]));
+                } catch (Exception ex) {
+                    log.trace("testGetMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testGetMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
-                assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
-                final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
-                assertNotNull(expected);
-                final int[] ints = (int[]) attr.getData();
-                assertNotNull(ints);
-                for (int j = 0; j < expected.length; j++) {
-                    assertEquals(expected[j], ints[j]);
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
+                    final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
+                    assertNotNull(expected);
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < expected.length; j++) {
+                        assertEquals(expected[j], ints[j]);
+                    }
+                } catch (Exception ex) {
+                    log.trace("testGetMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testGetMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
         } // for (int i=0; i<n; i++) {
@@ -1540,14 +1558,30 @@ public class H5CompoundDSTest {
             attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
-                final String[] strs = (String[]) attr.getData();
-                strs[0] = TEST_VALUE_STR;
+                try {
+                    final String[] strs = (String[]) attr.getData();
+                    strs[0] = TEST_VALUE_STR;
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
-                final int[] ints = (int[]) attr.getData();
-                assertNotNull(ints);
-                for (int j = 0; j < ints.length; j++) {
-                    ints[j] = TEST_VALUE_INT;
+                try {
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < ints.length; j++) {
+                        ints[j] = TEST_VALUE_INT;
+                    }
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
             try {
@@ -1594,21 +1628,45 @@ public class H5CompoundDSTest {
             attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
-                assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
-                assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
+                    assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
-                assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
-                final int[] ints = (int[]) attr.getData();
-                assertNotNull(ints);
-                for (int j = 0; j < ints.length; j++) {
-                    assertEquals(TEST_VALUE_INT, ints[j]);
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < ints.length; j++) {
+                        assertEquals(TEST_VALUE_INT, ints[j]);
+                    }
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_FLOAT) {
-                newAttr = attr;
-                final float[] floats = (float[]) attr.getData();
-                assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
+                try {
+                    newAttr = attr;
+                    final float[] floats = (float[]) attr.getData();
+                    assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
         } // for (int i=0; i<n; i++) {
 
@@ -1626,15 +1684,31 @@ public class H5CompoundDSTest {
             attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
-                final String[] strs = (String[]) attr.getData();
-                strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0];
+                try {
+                    final String[] strs = (String[]) attr.getData();
+                    strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0];
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
-                final int[] ints = (int[]) attr.getData();
-                assertNotNull(ints);
-                for (int j = 0; j < ints.length; j++) {
-                    final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
-                    ints[j] = expected[j];
+                try {
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < ints.length; j++) {
+                        final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
+                        ints[j] = expected[j];
+                    }
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
             try {

@@ -68,6 +68,7 @@ public class H4Group extends Group
      * @param parent the parent of this group.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4Group(
         FileFormat theFile,
         String name,
