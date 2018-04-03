@@ -36,7 +36,7 @@ import java.util.Vector;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Dataset extends HObject implements MetaDataFormat, DataFormat {
+public abstract class Dataset extends HObject implements MetaDataContainer, DataFormat {
     private static final long serialVersionUID    = -3360885430038261178L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
@@ -298,8 +298,10 @@ public abstract class Dataset extends HObject implements MetaDataFormat, DataFor
      *
      * @return the number of dimensions of the dataset.
      */
+    @Override
     public final int getRank() {
-        if (rank < 0) init();
+        if (rank < 0)
+            init();
 
         return rank;
     }
@@ -309,6 +311,7 @@ public abstract class Dataset extends HObject implements MetaDataFormat, DataFor
      *
      * @return the dimension sizes of the dataset.
      */
+    @Override
     public final long[] getDims() {
         if (rank < 0) init();
 
@@ -476,99 +479,6 @@ public abstract class Dataset extends HObject implements MetaDataFormat, DataFor
     }
 
     /**
-     * Reads the data from file.
-     * <p>
-     * read() reads the data from file to a memory buffer and returns the memory
-     * buffer. The dataset object does not hold the memory buffer. To store the
-     * memory buffer in the dataset object, one must call getData().
-     * <p>
-     * By default, the whole dataset is read into memory. Users can also select
-     * a subset to read. Subsetting is done in an implicit way.
-     * <p>
-     * <b>How to Select a Subset</b>
-     * <p>
-     * A selection is specified by three arrays: start, stride and count.
-     * <ol>
-     * <li>start: offset of a selection
-     * <li>stride: determines how many elements to move in each dimension
-     * <li>count: number of elements to select in each dimension
-     * </ol>
-     * getStartDims(), getStride() and getSelectedDims() returns the start,
-     * stride and count arrays respectively. Applications can make a selection
-     * by changing the values of the arrays.
-     * <p>
-     * The following example shows how to make a subset. In the example, the
-     * dataset is a 4-dimensional array of [200][100][50][10], i.e. dims[0]=200;
-     * dims[1]=100; dims[2]=50; dims[3]=10; <br>
-     * We want to select every other data point in dims[1] and dims[2]
-     *
-     * <pre>
-     * int rank = dataset.getRank(); // number of dimensions of the dataset
-     * long[] dims = dataset.getDims(); // the dimension sizes of the dataset
-     * long[] selected = dataset.getSelectedDims(); // the selected size of the dataset
-     * long[] start = dataset.getStartDims(); // the offset of the selection
-     * long[] stride = dataset.getStride(); // the stride of the dataset
-     * int[] selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for display
-     *
-     * // select dim1 and dim2 as 2D data for display, and slice through dim0
-     * selectedIndex[0] = 1;
-     * selectedIndex[1] = 2;
-     * selectedIndex[1] = 0;
-     *
-     * // reset the selection arrays
-     * for (int i = 0; i &lt; rank; i++) {
-     *     start[i] = 0;
-     *     selected[i] = 1;
-     *     stride[i] = 1;
-     * }
-     *
-     * // set stride to 2 on dim1 and dim2 so that every other data point is
-     * // selected.
-     * stride[1] = 2;
-     * stride[2] = 2;
-     *
-     * // set the selection size of dim1 and dim2
-     * selected[1] = dims[1] / stride[1];
-     * selected[2] = dims[1] / stride[2];
-     *
-     * // when dataset.getData() is called, the selection above will be used since
-     * // the dimension arrays are passed by reference. Changes of these arrays
-     * // outside the dataset object directly change the values of these array
-     * // in the dataset object.
-     * </pre>
-     * <p>
-     * For ScalarDS, the memory data buffer is a one-dimensional array of byte,
-     * short, int, float, double or String type based on the datatype of the
-     * dataset.
-     * <p>
-     * For CompoundDS, the memory data object is an java.util.List object. Each
-     * element of the list is a data array that corresponds to a compound field.
-     * <p>
-     * For example, if compound dataset "comp" has the following nested
-     * structure, and member datatypes
-     *
-     * <pre>
-     * comp --&gt; m01 (int)
-     * comp --&gt; m02 (float)
-     * comp --&gt; nest1 --&gt; m11 (char)
-     * comp --&gt; nest1 --&gt; m12 (String)
-     * comp --&gt; nest1 --&gt; nest2 --&gt; m21 (long)
-     * comp --&gt; nest1 --&gt; nest2 --&gt; m22 (double)
-     * </pre>
-     *
-     * getData() returns a list of six arrays: {int[], float[], char[],
-     * String[], long[] and double[]}.
-     *
-     * @return the data read from file.
-     *
-     * @see #getData()
-     *
-     * @throws Exception if object can not be read
-     * @throws OutOfMemoryError if memory is exhausted
-     */
-    public abstract Object read() throws Exception, OutOfMemoryError;
-
-    /**
      * Reads the raw data of the dataset from file to a byte array.
      * <p>
      * readBytes() reads raw data to an array of bytes instead of array of its
@@ -585,16 +495,6 @@ public abstract class Dataset extends HObject implements MetaDataFormat, DataFor
      * @throws Exception if data can not be read
      */
     public abstract byte[] readBytes() throws Exception;
-
-    /**
-     * Writes a memory buffer to the dataset in file.
-     *
-     * @param buf
-     *            the data to write
-     *
-     * @throws Exception if data can not be written
-     */
-    public abstract void write(Object buf) throws Exception;
 
     /**
      * Writes the memory buffer of this dataset to file.
@@ -631,13 +531,6 @@ public abstract class Dataset extends HObject implements MetaDataFormat, DataFor
      * @throws Exception if dataset can not be copied
      */
     public abstract Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception;
-
-    /**
-     * Returns the datatype object of the dataset.
-     *
-     * @return the datatype object of the dataset.
-     */
-    public abstract Datatype getDatatype();
 
     /**
      * Returns the data buffer of the dataset in memory.

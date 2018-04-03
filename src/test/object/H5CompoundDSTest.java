@@ -17,6 +17,12 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.util.Vector;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
@@ -28,12 +34,6 @@ import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * TestCase for H5CompoundDS.
@@ -782,7 +782,7 @@ public class H5CompoundDSTest {
         byte[] data = null;
 
         try {
-            data = (byte[]) testDataset.readBytes();
+            data = testDataset.readBytes();
         }
         catch (final Exception ex) {
             fail("readBytes() failed. " + ex);
@@ -1482,16 +1482,16 @@ public class H5CompoundDSTest {
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
             final Attribute attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
                 assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
-                assertTrue(((String[]) H5TestFile.ATTRIBUTE_STR.getValue())[0].equals(((String[]) attr.getValue())[0]));
+                assertTrue(((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0].equals(((String[]) attr.getData())[0]));
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
                 assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
-                final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getValue();
+                final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
                 assertNotNull(expected);
-                final int[] ints = (int[]) attr.getValue();
+                final int[] ints = (int[]) attr.getData();
                 assertNotNull(ints);
                 for (int j = 0; j < expected.length; j++) {
                     assertEquals(expected[j], ints[j]);
@@ -1538,13 +1538,13 @@ public class H5CompoundDSTest {
         int n = attrs.size();
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
-                final String[] strs = (String[]) attr.getValue();
+                final String[] strs = (String[]) attr.getData();
                 strs[0] = TEST_VALUE_STR;
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
-                final int[] ints = (int[]) attr.getValue();
+                final int[] ints = (int[]) attr.getData();
                 assertNotNull(ints);
                 for (int j = 0; j < ints.length; j++) {
                     ints[j] = TEST_VALUE_INT;
@@ -1592,14 +1592,14 @@ public class H5CompoundDSTest {
         Attribute newAttr = null;
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
                 assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
-                assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getValue())[0]));
+                assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
                 assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
-                final int[] ints = (int[]) attr.getValue();
+                final int[] ints = (int[]) attr.getData();
                 assertNotNull(ints);
                 for (int j = 0; j < ints.length; j++) {
                     assertEquals(TEST_VALUE_INT, ints[j]);
@@ -1607,7 +1607,7 @@ public class H5CompoundDSTest {
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_FLOAT) {
                 newAttr = attr;
-                final float[] floats = (float[]) attr.getValue();
+                final float[] floats = (float[]) attr.getData();
                 assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
             }
         } // for (int i=0; i<n; i++) {
@@ -1624,16 +1624,16 @@ public class H5CompoundDSTest {
         n = attrs.size();
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
             if (dtype.getDatatypeClass() == H5Datatype.CLASS_STRING) {
-                final String[] strs = (String[]) attr.getValue();
-                strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getValue())[0];
+                final String[] strs = (String[]) attr.getData();
+                strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0];
             }
             else if (dtype.getDatatypeClass() == H5Datatype.CLASS_INTEGER) {
-                final int[] ints = (int[]) attr.getValue();
+                final int[] ints = (int[]) attr.getData();
                 assertNotNull(ints);
                 for (int j = 0; j < ints.length; j++) {
-                    final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getValue();
+                    final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
                     ints[j] = expected[j];
                 }
             }

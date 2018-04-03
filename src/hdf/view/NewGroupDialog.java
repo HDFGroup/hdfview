@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.MetaDataFormat;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -161,6 +160,7 @@ public class NewGroupDialog extends Dialog {
         parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
@@ -202,6 +202,7 @@ public class NewGroupDialog extends Dialog {
             moreButton.setText("   More   ");
             moreButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
             moreButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     moreOptionsEnabled = !moreOptionsEnabled;
 
@@ -231,6 +232,7 @@ public class NewGroupDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = create();
                 if (newObject != null) {
@@ -244,6 +246,7 @@ public class NewGroupDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
                 shell.dispose();
@@ -253,6 +256,7 @@ public class NewGroupDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -304,7 +308,7 @@ public class NewGroupDialog extends Dialog {
         Group obj = null;
 
         if (orderFlags != null && orderFlags.isEnabled()) {
-            String order = (String) orderFlags.getItem(orderFlags.getSelectionIndex());
+            String order = orderFlags.getItem(orderFlags.getSelectionIndex());
             if (order.equals("Tracked"))
                 creationOrder = Group.CRT_ORDER_TRACKED;
             else if (order.equals("Tracked+Indexed"))
@@ -364,6 +368,7 @@ public class NewGroupDialog extends Dialog {
         creationOrderHelpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
         creationOrderHelpButton.setToolTipText("Help on Creation Order");
         creationOrderHelpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Use Creation Order allows the user to set the creation order \n"
                         + "of links in a group, so that tracking, indexing, and iterating over links\n"
@@ -382,6 +387,7 @@ public class NewGroupDialog extends Dialog {
         useCreationOrder.setFont(curFont);
         useCreationOrder.setText("Use Creation Order");
         useCreationOrder.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean isOrder = useCreationOrder.getSelection();
 
@@ -415,6 +421,7 @@ public class NewGroupDialog extends Dialog {
         storageTypeHelpButton.setToolTipText("Help on set Link Storage");
         storageTypeHelpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
         storageTypeHelpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Set Link Storage allows the users to explicitly set the storage  \n"
                         + "type of a group to be Compact or Indexed. \n\n"
@@ -443,6 +450,7 @@ public class NewGroupDialog extends Dialog {
         setLinkStorage.setFont(curFont);
         setLinkStorage.setText("Set Link Storage");
         setLinkStorage.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (setLinkStorage.getSelection()) {
                     compactField.setEnabled(true);
@@ -476,6 +484,7 @@ public class NewGroupDialog extends Dialog {
         indexedField.setTextLimit(5);
         indexedField.setEnabled(false);
         indexedField.addVerifyListener(new VerifyListener() {
+            @Override
             public void verifyText(VerifyEvent e) {
                 String input = e.text;
 
@@ -497,6 +506,7 @@ public class NewGroupDialog extends Dialog {
         compactField.setTextLimit(5);
         compactField.setEnabled(false);
         compactField.addVerifyListener(new VerifyListener() {
+            @Override
             public void verifyText(VerifyEvent e) {
                 String input = e.text;
 
@@ -543,7 +553,7 @@ public class NewGroupDialog extends Dialog {
     }
 
     /** @return the new group created. */
-    public MetaDataFormat getObject() {
+    public HObject getObject() {
         return newObject;
     }
 

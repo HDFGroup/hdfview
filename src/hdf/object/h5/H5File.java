@@ -1953,13 +1953,13 @@ public class H5File extends FileFormat {
             return;
         }
 
-        if ((tid = attr.getType().toNative()) >= 0) {
+        if ((tid = attr.getDatatype().toNative()) >= 0) {
             log.trace("writeAttribute(): tid {} from toNative", tid);
             try {
                 if (attr.isScalar())
                     sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
                 else
-                    sid = H5.H5Screate_simple(attr.getRank(), attr.getDataDims(), null);
+                    sid = H5.H5Screate_simple(attr.getRank(), attr.getDims(), null);
 
                 if (attrExisted) {
                     aid = H5.H5Aopen_by_name(objID, obj_name, name, HDF5Constants.H5P_DEFAULT,
@@ -1997,7 +1997,7 @@ public class H5File extends FileFormat {
                                 log.debug("writeAttribute(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                             }
                             log.trace("writeAttribute(): H5.H5AwriteVL", name);
-                            if ((attrValue instanceof String) || (attr.getDataDims().length == 1)) {
+                            if ((attrValue instanceof String) || (attr.getDims().length == 1)) {
                                 H5.H5AwriteVL(aid, tid, (String[]) attrValue);
                             }
                             else {
@@ -2009,7 +2009,8 @@ public class H5File extends FileFormat {
                         }
                     }
                     else {
-                        if (attr.getType().getDatatypeClass() == Datatype.CLASS_REFERENCE && attrValue instanceof String) {
+                        if (attr.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE
+                                && attrValue instanceof String) {
                             // reference is a path+name to the object
                             attrValue = H5.H5Rcreate(getFID(), (String) attrValue, HDF5Constants.H5R_OBJECT, -1);
                             log.trace("writeAttribute(): Attribute class is CLASS_REFERENCE");

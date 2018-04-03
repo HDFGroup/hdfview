@@ -6,6 +6,12 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
@@ -14,12 +20,6 @@ import hdf.object.FileFormat;
 import hdf.object.Metadata;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * @author Rishi R. Sinha This has to be removed because both the methods tested here are actually abstract methods and
@@ -68,12 +68,12 @@ public class MetadataTest {
         List testAttrs = testGroup.getMetadata();
         assertNotNull(testAttrs);
         Attribute attrobj = (Attribute) testAttrs.get(0);
-        if(attrobj.getType().getDatatypeClass()==Datatype.CLASS_STRING)
+        if (attrobj.getDatatype().getDatatypeClass() == Datatype.CLASS_STRING)
             strAttr = attrobj;
         else
             arrayIntAttr = attrobj;
         attrobj = (Attribute) testAttrs.get(1);
-        if(attrobj.getType().getDatatypeClass()==Datatype.CLASS_STRING)
+        if (attrobj.getDatatype().getDatatypeClass() == Datatype.CLASS_STRING)
             strAttr = attrobj;
         else
             arrayIntAttr = attrobj;

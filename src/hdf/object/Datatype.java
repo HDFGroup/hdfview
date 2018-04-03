@@ -40,7 +40,7 @@ import java.util.List;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Datatype extends HObject implements MetaDataFormat {
+public abstract class Datatype extends HObject implements MetaDataContainer {
 
     private static final long serialVersionUID = -581324710549963177L;
 

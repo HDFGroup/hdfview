@@ -512,8 +512,8 @@ public class H4File extends FileFormat {
         log.trace("writeAttribute(): start: obj={} attribute={} isSDglobalAttr={}", obj, attr, isSDglobalAttr);
 
         String attrName = attr.getName();
-        long attrType = attr.getType().toNative();
-        long[] dims = attr.getDataDims();
+        long attrType = attr.getDatatype().toNative();
+        long[] dims = attr.getDims();
         int count = 1;
         if (dims != null) {
             for (int i = 0; i < dims.length; i++) {

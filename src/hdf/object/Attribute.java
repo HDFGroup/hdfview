@@ -27,8 +27,9 @@ import java.util.Map;
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
  * <p>
- * For more details on attributes,
- * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+ * For more details on attributes, <a href=
+ * "https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5
+ * User's Guide</a>
  * <p>
  *
  * The following code is an example of an attribute with 1D integer array of two
@@ -52,22 +53,19 @@ import java.util.Map;
  * // Set the attribute value
  * dataRange.setValue(value);
  * // See FileFormat.writeAttribute() for how to attach an attribute to an object,
- * @see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
+ * &#64;see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
  * </pre>
  *
  * @see hdf.object.Datatype
  *
- * @version 1.1 9/4/2007
- * @author Peter X. Cao
+ * @version 2.0 4/2/2018
+ * @author Peter X. Cao, Jordan T. Henderson
  */
 public class Attribute extends HObject implements DataFormat {
 
     private static final long serialVersionUID = 2072473407027648309L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
-
-    /** The name of the attribute. */
-    private final String      name;
 
     /** The datatype of the attribute. */
     private final Datatype    type;
@@ -155,9 +153,10 @@ public class Attribute extends HObject implements DataFormat {
      *
      * @see hdf.object.Datatype
      */
-    @SuppressWarnings({"rawtypes","unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     public Attribute(String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
-        name = attrName;
+        super(null, attrName, null, null);
+
         type = attrType;
         dims = attrDims;
         value = null;
@@ -241,17 +240,6 @@ public class Attribute extends HObject implements DataFormat {
         return properties.keySet();
     }
 
-
-    /**
-     * Returns the name of the attribute.
-     *
-     * @return the name of the attribute.
-     */
-    @Override
-    public String getName() {
-        return name;
-    }
-
     /**
      * Returns the rank (number of dimensions) of the attribute. It returns a
      * negative number if it failed to retrieve the dimension information from
@@ -259,7 +247,8 @@ public class Attribute extends HObject implements DataFormat {
      *
      * @return the number of dimensions of the attribute.
      */
-    public int getRank() {
+    @Override
+    public final int getRank() {
         return rank;
     }
 
@@ -269,7 +258,8 @@ public class Attribute extends HObject implements DataFormat {
      *
      * @return the dimension sizes of the attribute.
      */
-    public long[] getDataDims() {
+    @Override
+    public final long[] getDims() {
         return dims;
     }
 
@@ -279,7 +269,8 @@ public class Attribute extends HObject implements DataFormat {
      *
      * @return the datatype of the attribute.
      */
-    public Datatype getType() {
+    @Override
+    public Datatype getDatatype() {
         return type;
     }
 
@@ -299,16 +290,6 @@ public class Attribute extends HObject implements DataFormat {
      */
     public boolean isUnsigned() {
         return isUnsigned;
-    }
-
-    /**
-     * Return the name of the attribute.
-     *
-     * @see #toString(String delimiter)
-     */
-    @Override
-    public String toString() {
-        return name;
     }
 
     /**
@@ -379,15 +360,15 @@ public class Attribute extends HObject implements DataFormat {
             if (n > maxItems)
                 n = maxItems;
 
-        boolean is_unsigned = (this.getType().getDatatypeSign() == Datatype.SIGN_NONE);
-        boolean is_enum = (this.getType().getDatatypeClass() == Datatype.CLASS_ENUM);
+        boolean is_unsigned = (this.getDatatype().getDatatypeSign() == Datatype.SIGN_NONE);
+        boolean is_enum = (this.getDatatype().getDatatypeClass() == Datatype.CLASS_ENUM);
         log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", is_enum, is_unsigned, n);
         if(is_enum) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
 
-            String enum_members = this.getType().getEnumMembers();
+            String enum_members = this.getDatatype().getEnumMembers();
             log.trace("toString: is_enum enum_members={}", enum_members);
             Map<String,String> map = new HashMap<String,String>();
             String[] entries = enum_members.split(",");
@@ -619,5 +600,15 @@ public class Attribute extends HObject implements DataFormat {
     public void close(long id) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public Object read() throws Exception, OutOfMemoryError {
+        throw new UnsupportedOperationException("Unsupported operation.");
+    }
+
+    @Override
+    public void write(Object buf) throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation.");
     }
 }

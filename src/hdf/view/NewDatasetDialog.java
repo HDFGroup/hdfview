@@ -44,7 +44,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.MetaDataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -197,6 +196,7 @@ public class NewDatasetDialog extends Dialog {
         parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
@@ -255,6 +255,7 @@ public class NewDatasetDialog extends Dialog {
             classChoice.setFont(curFont);
             classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             classChoice.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     int idx = classChoice.getSelectionIndex();
                     sizeChoice.select(0);
@@ -335,6 +336,7 @@ public class NewDatasetDialog extends Dialog {
             sizeChoice.setFont(curFont);
             sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             sizeChoice.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (classChoice.getSelectionIndex() == 0) {
                         checkUnsigned.setEnabled(true);
@@ -401,6 +403,7 @@ public class NewDatasetDialog extends Dialog {
             rankChoice.setFont(curFont);
             rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             rankChoice.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     int rank = rankChoice.getSelectionIndex() + 1;
                     String currentSizeStr = "1";
@@ -446,6 +449,7 @@ public class NewDatasetDialog extends Dialog {
             setMaxSizeButton.setText("Set Max Size");
             setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
             setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (maxSize == null || maxSize.length() < 1)
                         maxSize = currentSizeField.getText();
@@ -481,6 +485,7 @@ public class NewDatasetDialog extends Dialog {
             checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             checkContiguous.setSelection(true);
             checkContiguous.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     chunkSizeField.setEnabled(false);
                 }
@@ -497,6 +502,7 @@ public class NewDatasetDialog extends Dialog {
             checkChunked.setText("Chunked (size) ");
             checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             checkChunked.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     chunkSizeField.setEnabled(true);
                     String chunkStr = "";
@@ -526,6 +532,7 @@ public class NewDatasetDialog extends Dialog {
             checkCompression.setText("gzip (level) ");
             checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             checkCompression.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     boolean isCompressed = checkCompression.getSelection();
 
@@ -580,6 +587,7 @@ public class NewDatasetDialog extends Dialog {
                 checkFillValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
                 checkFillValue.setSelection(false);
                 checkFillValue.addSelectionListener(new SelectionAdapter() {
+                    @Override
                     public void widgetSelected(SelectionEvent e) {
                         fillValueField.setEnabled(checkFillValue.getSelection());
                     }
@@ -615,6 +623,7 @@ public class NewDatasetDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (dataView instanceof TableView) {
                     newObject = createFromTable();
@@ -638,6 +647,7 @@ public class NewDatasetDialog extends Dialog {
         cancelButton.setLayoutData(new GridData((dataView == null) ? SWT.CENTER : SWT.BEGINNING, SWT.FILL,
                 (dataView == null) ? false : true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
                 shell.dispose();
@@ -651,6 +661,7 @@ public class NewDatasetDialog extends Dialog {
             helpButton.setText(" &Help ");
             helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             helpButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     new HelpDialog(shell).open();
                 }
@@ -660,6 +671,7 @@ public class NewDatasetDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -780,7 +792,7 @@ public class NewDatasetDialog extends Dialog {
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+        pgroup = groupList.get(parentChoice.getSelectionIndex());
 
         if (pgroup == null) {
             shell.getDisplay().beep();
@@ -1074,7 +1086,7 @@ public class NewDatasetDialog extends Dialog {
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+        pgroup = groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Parent group is null.", shell.getText());
@@ -1128,7 +1140,7 @@ public class NewDatasetDialog extends Dialog {
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+        pgroup = groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Parent group is null.", shell.getText());
@@ -1288,6 +1300,7 @@ public class NewDatasetDialog extends Dialog {
                 okButton.setText("   &OK   ");
                 okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
                 okButton.addSelectionListener(new SelectionAdapter() {
+                    @Override
                     public void widgetSelected(SelectionEvent e) {
                         helpShell.dispose();
                     }
@@ -1326,7 +1339,7 @@ public class NewDatasetDialog extends Dialog {
     }
 
     /** @return the new dataset created. */
-    public MetaDataFormat getObject() {
+    public HObject getObject() {
         return newObject;
     }
 

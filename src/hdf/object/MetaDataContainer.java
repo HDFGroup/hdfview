@@ -18,8 +18,8 @@ import java.util.List;
 
 /**
  * An interface that provides general I/O operations for object metadata
- * attached to a data object. For example, reading metadata content from the
- * file into memory or writing metadata content from memory into the file.
+ * attached to an object. For example, reading metadata content from the file
+ * into memory or writing metadata content from memory into the file.
  * <p>
  *
  * @see hdf.object.HObject
@@ -28,9 +28,9 @@ import java.util.List;
  * @author Peter X. Cao, Jordan T. Henderson
  */
 @SuppressWarnings("rawtypes")
-public interface MetaDataFormat {
+public interface MetaDataContainer {
     /**
-     * Retrieves the metadata, such as attributes, from the file.
+     * Retrieves the object's metadata, such as attributes, from the file.
      * <p>
      * Metadata, such as attributes, is stored in a List.
      *
@@ -61,7 +61,7 @@ public interface MetaDataFormat {
     public abstract void writeMetadata(Object metadata) throws Exception;
 
     /**
-     * Deletes an existing piece of metadata from this data object.
+     * Deletes an existing piece of metadata from this object.
      *
      * @param metadata
      *            the metadata to delete.
@@ -72,7 +72,7 @@ public interface MetaDataFormat {
     public abstract void removeMetadata(Object metadata) throws Exception;
 
     /**
-     * Updates an existing piece of metadata attached to this data object.
+     * Updates an existing piece of metadata attached to this object.
      *
      * @param metadata
      *            the metadata to update.
@@ -83,7 +83,7 @@ public interface MetaDataFormat {
     public abstract void updateMetadata(Object metadata) throws Exception;
 
     /**
-     * Check if the data object has any attributes attached.
+     * Check if the object has any attributes attached.
      *
      * @return true if it has any attributes, false otherwise.
      */

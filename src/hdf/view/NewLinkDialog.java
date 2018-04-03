@@ -45,7 +45,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.MetaDataFormat;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -158,8 +157,9 @@ public class NewLinkDialog extends Dialog {
         parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
-                parentGroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+                parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
@@ -176,6 +176,7 @@ public class NewLinkDialog extends Dialog {
         helpButton.setToolTipText("Help on Links");
         helpButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "The Type of Link specifies which type of link the user wants to create. \n"
                         + "It could be hard, soft or external links. \n\n"
@@ -209,6 +210,7 @@ public class NewLinkDialog extends Dialog {
         hardLink.setText("Hard Link");
         hardLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         hardLink.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
@@ -228,6 +230,7 @@ public class NewLinkDialog extends Dialog {
         softLink.setText("Soft Link");
         softLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         softLink.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
@@ -247,6 +250,7 @@ public class NewLinkDialog extends Dialog {
         externalLink.setText("External Link");
         externalLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         externalLink.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 targetFile.setEnabled(true);
                 targetFileButton.setEnabled(true);
@@ -274,6 +278,7 @@ public class NewLinkDialog extends Dialog {
         targetFile.setEnabled(false);
         targetFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         targetFile.addTraverseListener(new TraverseListener() {
+            @Override
             public void keyTraversed(TraverseEvent e) {
                 if (e.detail == SWT.TRAVERSE_RETURN) {
                     String filename = targetFile.getText();
@@ -316,6 +321,7 @@ public class NewLinkDialog extends Dialog {
         targetFileButton.setEnabled(false);
         targetFileButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
         targetFileButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String filename = null;
                 filename = openTargetFile();
@@ -396,6 +402,7 @@ public class NewLinkDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = createLink();
 
@@ -410,6 +417,7 @@ public class NewLinkDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
                 shell.dispose();
@@ -423,6 +431,7 @@ public class NewLinkDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -461,7 +470,7 @@ public class NewLinkDialog extends Dialog {
             return null;
         }
 
-        pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+        pgroup = groupList.get(parentChoice.getSelectionIndex());
 
         if (pgroup == null) {
             shell.getDisplay().beep();
@@ -761,7 +770,7 @@ public class NewLinkDialog extends Dialog {
     }
 
     /** @return the new dataset created. */
-    public MetaDataFormat getObject() {
+    public HObject getObject() {
         return newObject;
     }
 

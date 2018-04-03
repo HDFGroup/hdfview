@@ -9,6 +9,12 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
@@ -18,15 +24,9 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 /**
  * @author Rishi R. Sinha
- * 
+ *
  */
 public class AttributeTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AttributeTest.class);
@@ -119,7 +119,7 @@ public class AttributeTest {
      * <li>Creating a new attribute with no value.
      * <li>Setting the attribute value.
      * </ul>
-     * 
+     *
      */
     @Test
     public void testAttributeStringDatatypeLongArray() {
@@ -129,7 +129,7 @@ public class AttributeTest {
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
         Attribute attr = new Attribute(attrName, attrType, attrDims);
-        attr.setValue(classValue);
+        attr.setData(classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
         long nObjs = 0;
@@ -174,7 +174,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attribute#getValue()}.
-     * 
+     *
      * Here we test:
      * <ul>
      * <li>Getting the value for the two attributes (the string attribute and the int array attribute).
@@ -183,8 +183,8 @@ public class AttributeTest {
     @Test
     public void testGetValue() {
         log.debug("testGetValue");
-        assertEquals(((String[]) strAttr.getValue())[0], "String attribute.");
-        assertTrue(Arrays.equals((int[]) arrayIntAttr.getValue(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
+        assertEquals(((String[]) strAttr.getData())[0], "String attribute.");
+        assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -206,15 +206,15 @@ public class AttributeTest {
     @Test
     public void testSetValue() {
         log.debug("testSetValue");
-        String[] prevValue = (String[]) strAttr.getValue();
-        strAttr.setValue("Temp String Value");
-        assertEquals(((String) strAttr.getValue()), "Temp String Value");
-        strAttr.setValue(prevValue);
+        String[] prevValue = (String[]) strAttr.getData();
+        strAttr.setData("Temp String Value");
+        assertEquals((strAttr.getData()), "Temp String Value");
+        strAttr.setData(prevValue);
 
-        int[] intPrevValue = (int[]) arrayIntAttr.getValue();
-        arrayIntAttr.setValue(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-        assertTrue(Arrays.equals((int[]) arrayIntAttr.getValue(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
-        arrayIntAttr.setValue(intPrevValue);
+        int[] intPrevValue = (int[]) arrayIntAttr.getData();
+        arrayIntAttr.setData(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+        arrayIntAttr.setData(intPrevValue);
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -305,8 +305,8 @@ public class AttributeTest {
     @Test
     public void testGetType() {
         log.debug("testGetType");
-        assertTrue(strAttr.getType().getDatatypeDescription().equals("String, length = 20"));
-        assertTrue(arrayIntAttr.getType().getDatatypeDescription().equals("32-bit integer"));
+        assertTrue(strAttr.getDatatype().getDatatypeDescription().equals("String, length = 20"));
+        assertTrue(arrayIntAttr.getDatatype().getDatatypeDescription().equals("32-bit integer"));
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
