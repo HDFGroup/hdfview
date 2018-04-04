@@ -199,7 +199,7 @@ public class Attribute extends HObject implements DataFormat {
      * Sets the value of the attribute. It returns null if it failed to retrieve
      * the name from file.
      *
-     * @param theValue
+     * @param data
      *            The value of the attribute to set
      */
     @Override
@@ -379,93 +379,93 @@ public class Attribute extends HObject implements DataFormat {
             }
             String theValue = null;
             switch (dname) {
-                case 'B':
-                    byte[] barray = (byte[]) value;
-                    short sValue = barray[0];
+            case 'B':
+                byte[] barray = (byte[]) value;
+                short sValue = barray[0];
+                theValue = String.valueOf(sValue);
+                if (map.containsKey(theValue)) {
+                    sb.append(map.get(theValue));
+                }
+                else
+                    sb.append(sValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    sValue = barray[i];
                     theValue = String.valueOf(sValue);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(sValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sValue = barray[i];
-                        theValue = String.valueOf(sValue);
-                        if (map.containsKey(theValue)) {
-                            sb.append(map.get(theValue));
-                        }
-                        else
-                            sb.append(sValue);
-                    }
-                    break;
-                case 'S':
-                    short[] sarray = (short[]) value;
-                    int iValue = sarray[0];
+                }
+                break;
+            case 'S':
+                short[] sarray = (short[]) value;
+                int iValue = sarray[0];
+                theValue = String.valueOf(iValue);
+                if (map.containsKey(theValue)) {
+                    sb.append(map.get(theValue));
+                }
+                else
+                    sb.append(iValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    iValue = sarray[i];
                     theValue = String.valueOf(iValue);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(iValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        iValue = sarray[i];
-                        theValue = String.valueOf(iValue);
-                        if (map.containsKey(theValue)) {
-                            sb.append(map.get(theValue));
-                        }
-                        else
-                            sb.append(iValue);
-                    }
-                    break;
-                case 'I':
-                    int[] iarray = (int[]) value;
-                    long lValue = iarray[0];
+                }
+                break;
+            case 'I':
+                int[] iarray = (int[]) value;
+                long lValue = iarray[0];
+                theValue = String.valueOf(lValue);
+                if (map.containsKey(theValue)) {
+                    sb.append(map.get(theValue));
+                }
+                else
+                    sb.append(lValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    lValue = iarray[i];
                     theValue = String.valueOf(lValue);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(lValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        lValue = iarray[i];
-                        theValue = String.valueOf(lValue);
-                        if (map.containsKey(theValue)) {
-                            sb.append(map.get(theValue));
-                        }
-                        else
-                            sb.append(lValue);
-                    }
-                    break;
-                case 'J':
-                    long[] larray = (long[]) value;
-                    Long l = larray[0];
+                }
+                break;
+            case 'J':
+                long[] larray = (long[]) value;
+                Long l = larray[0];
+                theValue = Long.toString(l);
+                if (map.containsKey(theValue)) {
+                    sb.append(map.get(theValue));
+                }
+                else
+                    sb.append(theValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    l = larray[i];
                     theValue = Long.toString(l);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(theValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        l = larray[i];
-                        theValue = Long.toString(l);
-                        if (map.containsKey(theValue)) {
-                            sb.append(map.get(theValue));
-                        }
-                        else
-                            sb.append(theValue);
-                    }
-                    break;
-                default:
-                    sb.append(Array.get(value, 0));
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sb.append(Array.get(value, i));
-                    }
-                    break;
+                }
+                break;
+            default:
+                sb.append(Array.get(value, 0));
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    sb.append(Array.get(value, i));
+                }
+                break;
             }
         }
         else if (is_unsigned) {
@@ -474,58 +474,70 @@ public class Attribute extends HObject implements DataFormat {
             log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {
-                case 'B':
-                    byte[] barray = (byte[]) value;
-                    short sValue = barray[0];
+            case 'B':
+                byte[] barray = (byte[]) value;
+                short sValue = barray[0];
+                if (sValue < 0) {
+                    sValue += 256;
+                }
+                sb.append(sValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    sValue = barray[i];
                     if (sValue < 0) {
                         sValue += 256;
                     }
                     sb.append(sValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sValue = barray[i];
-                        if (sValue < 0) {
-                            sValue += 256;
-                        }
-                        sb.append(sValue);
-                    }
-                    break;
-                case 'S':
-                    short[] sarray = (short[]) value;
-                    int iValue = sarray[0];
+                }
+                break;
+            case 'S':
+                short[] sarray = (short[]) value;
+                int iValue = sarray[0];
+                if (iValue < 0) {
+                    iValue += 65536;
+                }
+                sb.append(iValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    iValue = sarray[i];
                     if (iValue < 0) {
                         iValue += 65536;
                     }
                     sb.append(iValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        iValue = sarray[i];
-                        if (iValue < 0) {
-                            iValue += 65536;
-                        }
-                        sb.append(iValue);
-                    }
-                    break;
-                case 'I':
-                    int[] iarray = (int[]) value;
-                    long lValue = iarray[0];
+                }
+                break;
+            case 'I':
+                int[] iarray = (int[]) value;
+                long lValue = iarray[0];
+                if (lValue < 0) {
+                    lValue += 4294967296L;
+                }
+                sb.append(lValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    lValue = iarray[i];
                     if (lValue < 0) {
                         lValue += 4294967296L;
                     }
                     sb.append(lValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        lValue = iarray[i];
-                        if (lValue < 0) {
-                            lValue += 4294967296L;
-                        }
-                        sb.append(lValue);
-                    }
-                    break;
-                case 'J':
-                    long[] larray = (long[]) value;
-                    Long l = larray[0];
-                    String theValue = Long.toString(l);
+                }
+                break;
+            case 'J':
+                long[] larray = (long[]) value;
+                Long l = larray[0];
+                String theValue = Long.toString(l);
+                if (l < 0) {
+                    l = (l << 1) >>> 1;
+                    BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                    BigInteger big2 = new BigInteger(l.toString());
+                    BigInteger big = big1.add(big2);
+                    theValue = big.toString();
+                }
+                sb.append(theValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    l = larray[i];
+                    theValue = Long.toString(l);
                     if (l < 0) {
                         l = (l << 1) >>> 1;
                         BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
@@ -534,37 +546,25 @@ public class Attribute extends HObject implements DataFormat {
                         theValue = big.toString();
                     }
                     sb.append(theValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        l = larray[i];
-                        theValue = Long.toString(l);
-                        if (l < 0) {
-                            l = (l << 1) >>> 1;
-                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                            BigInteger big2 = new BigInteger(l.toString());
-                            BigInteger big = big1.add(big2);
-                            theValue = big.toString();
-                        }
-                        sb.append(theValue);
-                    }
-                    break;
-                default:
-                    String strValue = Array.get(value, 0).toString();
+                }
+                break;
+            default:
+                String strValue = Array.get(value, 0).toString();
+                if (maxItems > 0 && strValue.length() > maxItems) {
+                    // truncate the extra characters
+                    strValue = strValue.substring(0, maxItems);
+                }
+                sb.append(strValue);
+                for (int i = 1; i < n; i++) {
+                    sb.append(delimiter);
+                    strValue = Array.get(value, i).toString();
                     if (maxItems > 0 && strValue.length() > maxItems) {
                         // truncate the extra characters
                         strValue = strValue.substring(0, maxItems);
                     }
                     sb.append(strValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        strValue = Array.get(value, i).toString();
-                        if (maxItems > 0 && strValue.length() > maxItems) {
-                            // truncate the extra characters
-                            strValue = strValue.substring(0, maxItems);
-                        }
-                        sb.append(strValue);
-                    }
-                    break;
+                }
+                break;
             }
         }
         else {
