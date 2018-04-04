@@ -1954,7 +1954,7 @@ public class H5File extends FileFormat {
         }
 
         if ((tid = attr.getDatatype().toNative()) >= 0) {
-            log.trace("writeAttribute(): tid {} from toNative", tid);
+            log.trace("writeAttribute(): tid {} from toNative :{}", tid, H5Datatype.getDatatypeDescription(tid));
             try {
                 if (attr.isScalar())
                     sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
@@ -1974,7 +1974,8 @@ public class H5File extends FileFormat {
                 Object attrValue;
                 try {
                     attrValue = attr.getData();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     attrValue = null;
                     log.trace("writeAttribute(): getData() failure {}", ex);
                 }
@@ -1996,7 +1997,7 @@ public class H5File extends FileFormat {
                             catch (Exception ex) {
                                 log.debug("writeAttribute(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                             }
-                            log.trace("writeAttribute(): H5.H5AwriteVL", name);
+                            log.trace("writeAttribute(): H5.H5AwriteVL, {} : {}", name, H5Datatype.getDatatypeDescription(tid));
                             if ((attrValue instanceof String) || (attr.getDims().length == 1)) {
                                 H5.H5AwriteVL(aid, tid, (String[]) attrValue);
                             }
@@ -2019,7 +2020,11 @@ public class H5File extends FileFormat {
                             long size = H5.H5Tget_size(tid);
                             int len = ((String[]) attrValue).length;
                             byte[] bval = Dataset.stringToByte((String[]) attrValue, (int)size);
-                            log.trace("writeAttribute(): Array", name);
+                            if (bval != null && bval.length == size * len) {
+                                bval[bval.length - 1] = 0;
+                                attrValue = bval;
+                            }
+                            log.trace("writeAttribute(): String={}: {}", attrValue, name);
                         }
 
                         try {
@@ -2034,7 +2039,7 @@ public class H5File extends FileFormat {
                             catch (Exception ex) {
                                 log.debug("writeAttribute(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                             }
-                            log.trace("writeAttribute(): H5.H5Awrite");
+                            log.trace("writeAttribute(): H5.H5Awrite, {} :{}", name, H5Datatype.getDatatypeDescription(tid));
                             H5.H5Awrite(aid, tid, attrValue);
                         }
                         catch (Exception ex) {
