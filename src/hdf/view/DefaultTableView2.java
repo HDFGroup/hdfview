@@ -159,9 +159,9 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * @author Jordan T. Henderson
  * @version 2.4 //
  */
-public class DefaultTableView implements TableView {
+public class DefaultTableView2 implements TableView {
 
-    private final static org.slf4j.Logger   log       = org.slf4j.LoggerFactory.getLogger(DefaultTableView.class);
+    private final static org.slf4j.Logger   log       = org.slf4j.LoggerFactory.getLogger(DefaultTableView2.class);
 
     private final Display                   display = Display.getDefault();
     private final Shell                     shell;
@@ -266,7 +266,7 @@ public class DefaultTableView implements TableView {
      * @param theView
      *             the main HDFView.
      */
-    public DefaultTableView(ViewManager theView) {
+    public DefaultTableView2(ViewManager theView) {
         this(theView, null);
     }
 
@@ -282,7 +282,7 @@ public class DefaultTableView implements TableView {
      *          ViewProperties.DATA_VIEW_KEY.
      */
     @SuppressWarnings("rawtypes")
-    public DefaultTableView(ViewManager theView, HashMap map) {
+    public DefaultTableView2(ViewManager theView, HashMap map) {
         log.trace("DefaultTableView start");
 
         shell = new Shell(display, SWT.SHELL_TRIM);
@@ -317,7 +317,7 @@ public class DefaultTableView implements TableView {
 
                 if (curFont != null) curFont.dispose();
 
-                viewer.removeDataView(DefaultTableView.this);
+                viewer.removeDataView(DefaultTableView2.this);
             }
         });
 
@@ -1139,7 +1139,7 @@ public class DefaultTableView implements TableView {
                 while(it.hasNext()) list.add(it.next());
                 list.add(root);
 
-                NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, DefaultTableView.this);
+                NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, DefaultTableView2.this);
                 dialog.open();
 
                 HObject obj = (HObject) dialog.getObject();
