@@ -3856,6 +3856,7 @@ public class DefaultTableView implements TableView {
         private final long         colCount;
 
         public ScalarDSDataProvider(ScalarDS theDataset) {
+            log.trace("ScalarDSDataProvider:NT={} start",NT);
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
@@ -3864,8 +3865,12 @@ public class DefaultTableView implements TableView {
             dims = theDataset.getSelectedDims();
 
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
+            log.trace("ScalarDSDataProvider:isArray={} start",isArray);
             isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
-            isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
+            if (isArray)
+                isUINT64 = (btype.isUnsigned() && (NT == 'J'));
+            else
+                isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
             isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
 
             isNaturalOrder = (theDataset.getRank() == 1 || (theDataset.getSelectedIndex()[0] < theDataset
@@ -3913,6 +3918,7 @@ public class DefaultTableView implements TableView {
                 rowCount = (int) dims[0];
                 colCount = 1;
             }
+            log.trace("ScalarDSDataProvider) finish");
         }
 
         @Override
@@ -4043,6 +4049,7 @@ public class DefaultTableView implements TableView {
         private final boolean      isBitfieldOrOpaque;
 
         public ScalarDSDataDisplayConverter(final ScalarDS theDataset) {
+            log.trace("ScalarDSDataDisplayConverter:NT={} start",NT);
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
@@ -4051,8 +4058,12 @@ public class DefaultTableView implements TableView {
             typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
+            log.trace("ScalarDSDisplayConverter:isArray={} start",isArray);
             isEnum = dtype.getDatatypeClass() == Datatype.CLASS_ENUM;
-            isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
+            if (isArray)
+                isUINT64 = (btype.isUnsigned() && (NT == 'J'));
+            else
+                isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
             isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
             log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
         }
@@ -4066,7 +4077,7 @@ public class DefaultTableView implements TableView {
 
             if (isArray) {
                 int len = Array.getLength(value);
-                log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isEnum={} isBitfieldOrOpaque={}", isArray, isEnum, isBitfieldOrOpaque);
+                log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isEnum={} isBitfieldOrOpaque={} isUINT64={}", isArray, isEnum, isBitfieldOrOpaque, isUINT64);
 
                 if (showAsHex) {
                     if (isUINT64) {
@@ -4148,7 +4159,10 @@ public class DefaultTableView implements TableView {
                     // Default case if no special display type is chosen
                     for (int i = 0; i < len; i++) {
                         if (i > 0) buffer.append(", ");
-                        buffer.append(((Object[]) value)[i]);
+                        if (isUINT64)
+                            buffer.append((BigInteger) ((Object[]) value)[i]);
+                        else
+                            buffer.append(((Object[]) value)[i]);
                     }
                 }
             }
@@ -4606,7 +4620,11 @@ public class DefaultTableView implements TableView {
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isString = (typeClass == Datatype.CLASS_STRING);
-                log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} isString={}", isArray, isString);
+                if (cIndex >= 0) {
+                    cName.charAt(cIndex + 1);
+                    if (dtype.isUnsigned()) isUINT64 = (cName.charAt(cIndex + 1) == 'J');
+                }
+                log.trace("**CompoundDSDataProvider:getDataValue(): isArray={} isString={} isUINT64={}", isArray, isString, isUINT64);
 
                 if (typeClass == Datatype.CLASS_COMPOUND) {
                     int numberOfMembers = dtype.getCompoundMemberNames().size();

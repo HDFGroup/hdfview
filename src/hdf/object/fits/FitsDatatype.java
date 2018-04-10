@@ -69,6 +69,7 @@ public class FitsDatatype extends Datatype
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute () { return false; }
 
     /**
@@ -240,7 +241,7 @@ public class FitsDatatype extends Datatype
     @Override
     public void close(long id) {;}
 
-  //Implementing DataFormat
+    // Implementing DataFormat
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

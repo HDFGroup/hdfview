@@ -51,7 +51,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hdf.object.CompoundDS;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -181,6 +180,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         parentChoice.setFont(curFont);
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
@@ -221,6 +221,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         templateChoice.setFont(curFont);
         templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         templateChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 CompoundDS dset = null;
                 String name = templateChoice.getItem(templateChoice.getSelectionIndex());
@@ -407,8 +408,9 @@ public class NewCompoundDatasetDialog extends Dialog {
         rankChoice.setFont(curFont);
         rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         rankChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
-                int rank = (int) rankChoice.getSelectionIndex() + 1;
+                int rank = rankChoice.getSelectionIndex() + 1;
                 String currentSizeStr = "1";
                 String maxSizeStr = "0";
 
@@ -471,6 +473,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         checkContiguous.setText("Contiguous");
         checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkContiguous.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 chunkSizeField.setEnabled(false);
             }
@@ -489,6 +492,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         checkChunked.setText("Chunked");
         checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkChunked.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 chunkSizeField.setEnabled(true);
 
@@ -496,7 +500,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 int idx = currentStr.lastIndexOf("x");
                 String chunkStr = "1";
 
-                int rank = (int)rankChoice.getSelectionIndex() + 1;
+                int rank = rankChoice.getSelectionIndex() + 1;
                 if (rank <= 1) {
                     chunkStr = currentStr;
                 }
@@ -532,6 +536,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         checkCompression.setText("gzip");
         checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkCompression.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean isCompressed = checkCompression.getSelection();
 
@@ -541,7 +546,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                         int idx = currentStr.lastIndexOf("x");
                         String chunkStr = "1";
 
-                        int rank = (int) rankChoice.getSelectionIndex() + 1;
+                        int rank = rankChoice.getSelectionIndex() + 1;
                         if (rank <= 1) {
                             chunkStr = currentStr;
                         }
@@ -611,11 +616,13 @@ public class NewCompoundDatasetDialog extends Dialog {
         nFieldBox.setFont(curFont);
         nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         nFieldBox.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 updateMemberTableItems();
             }
         });
         nFieldBox.addTraverseListener(new TraverseListener() {
+            @Override
             public void keyTraversed(TraverseEvent e) {
                 if (e.detail == SWT.TRAVERSE_RETURN) updateMemberTableItems();
             }
@@ -657,6 +664,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
         // Last table column always expands to fill remaining table size
         table.addListener(SWT.Resize, new Listener() {
+            @Override
             public void handleEvent(Event e) {
                 Table table = (Table) e.widget;
                 Rectangle area = table.getClientArea();
@@ -677,6 +685,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
         // Disable table selection highlighting
         table.addListener(SWT.EraseItem, new Listener() {
+            @Override
             public void handleEvent(Event e) {
                 if ((e.detail & SWT.SELECTED) != 0) {
                     e.detail &= ~SWT.SELECTED;
@@ -694,6 +703,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     newObject = createCompoundDS();
@@ -713,6 +723,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newObject = null;
                 shell.dispose();
@@ -732,6 +743,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         table.getColumn(1).setWidth(table.getClientArea().width / 3);
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -763,7 +775,7 @@ public class NewCompoundDatasetDialog extends Dialog {
             throw new IllegalArgumentException("Dataset name is empty");
         }
 
-        Group pgroup = (Group) groupList.get(parentChoice.getSelectionIndex());
+        Group pgroup = groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             throw new IllegalArgumentException("Invalid parent group");
         }
@@ -848,7 +860,7 @@ public class NewCompoundDatasetDialog extends Dialog {
             mDatatypes[i] = type;
         } // for (int i=0; i<n; i++)
 
-        rank = (int)rankChoice.getSelectionIndex() + 1;
+        rank = rankChoice.getSelectionIndex() + 1;
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
@@ -988,7 +1000,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         int n = 0;
 
         try {
-            n = Integer.valueOf((String) nFieldBox.getItem(nFieldBox.getSelectionIndex())).intValue();
+            n = Integer.valueOf(nFieldBox.getItem(nFieldBox.getSelectionIndex())).intValue();
         }
         catch (Exception ex) {
             log.debug("Change number of members:", ex);
@@ -1044,6 +1056,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         editor[0].setEditor(nameText, item, 0);
 
         nameText.addModifyListener(new ModifyListener() {
+            @Override
             public void modifyText(ModifyEvent e) {
                 Text text = (Text) e.widget;
                 item.setData("MemberName", text.getText());
@@ -1061,6 +1074,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         editor[1].setEditor(typeCombo, item, 1);
 
         typeCombo.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 CCombo combo = (CCombo) e.widget;
                 item.setData("MemberType", combo.getItem(combo.getSelectionIndex()));
@@ -1077,6 +1091,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         editor[2].setEditor(sizeText, item, 2);
 
         sizeText.addModifyListener(new ModifyListener() {
+            @Override
             public void modifyText(ModifyEvent e) {
                 Text text = (Text) e.widget;
                 item.setData("MemberSize", text.getText());
@@ -1088,6 +1103,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         item.setData("MemberSize", "");
 
         item.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 editor[0].dispose();
                 editor[1].dispose();
@@ -1102,7 +1118,7 @@ public class NewCompoundDatasetDialog extends Dialog {
     }
 
     /** @return the new dataset created. */
-    public DataFormat getObject() {
+    public HObject getObject() {
         return newObject;
     }
 

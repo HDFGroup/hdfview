@@ -6,11 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.object.h5.H5File;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,9 +13,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.object.h5.H5File;
+
 /**
  * @author Rishi R. Sinha
- * 
+ *
  */
 public class HObjectTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObjectTest.class);
@@ -213,6 +215,7 @@ public class HObjectTest {
         final String newName = "tmpName";
 
         // test set name to null
+        H5.H5error_off();
         try {
             testObj.setName(null);
         }
@@ -227,6 +230,7 @@ public class HObjectTest {
         catch (final Exception ex) {
             ; // Expected - intentional
         }
+        H5.H5error_on();
 
         try {
             testObj.setName(newName);
@@ -247,12 +251,14 @@ public class HObjectTest {
 
         HObject tmpObj = null;
         // test the old name
+        H5.H5error_off();
         try {
             tmpObj = testFile.get(GNAME);
         }
         catch (final Exception ex) {
             fail("testFile.get(GNAME) failed. " + ex);
         }
+        H5.H5error_on();
         assertNull("The dataset should be null because it has been renamed", tmpObj);
 
         // set back the original name
@@ -494,12 +500,12 @@ public class HObjectTest {
     public void testHasAttribute() {
         log.debug("testHasAttribute");
         try {
-            assertTrue(testFile.get(H5TestFile.NAME_DATASET_IMAGE).hasAttribute());
+            assertTrue(((MetaDataContainer) testFile.get(H5TestFile.NAME_DATASET_IMAGE)).hasAttribute());
         }
         catch (Exception e) {
             fail("get() fails.");
         }
-        assertFalse(testObj.hasAttribute());
+        assertFalse(((MetaDataContainer) testObj).hasAttribute());
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

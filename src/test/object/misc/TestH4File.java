@@ -18,8 +18,8 @@ import java.util.List;
 
 import hdf.hdflib.HDFConstants;
 import hdf.object.Attribute;
-import hdf.object.HObject;
 import hdf.object.Group;
+import hdf.object.HObject;
 import hdf.object.h4.H4File;
 import hdf.object.h4.H4GRImage;
 import hdf.object.h4.H4Group;
@@ -89,6 +89,7 @@ public class TestH4File
     /**
      * Test H4Group.
      */
+    @SuppressWarnings("rawtypes")
     private static void testH4Group(String fileName)
     {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_WRITE);
@@ -145,6 +146,7 @@ public class TestH4File
     /**
      * Test H4SDS.
      */
+    @SuppressWarnings("rawtypes")
     private static void testH4SDS(String fileName)
     {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
@@ -223,6 +225,7 @@ public class TestH4File
     /**
      * Test H4Vdata.
      */
+    @SuppressWarnings("rawtypes")
     private static void testH4Vdata(String fileName)
     {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
@@ -322,6 +325,7 @@ public class TestH4File
     /**
      * Test H4GRImage.
      */
+    @SuppressWarnings("rawtypes")
     private static void testH4GRImage(String fileName)
     {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);

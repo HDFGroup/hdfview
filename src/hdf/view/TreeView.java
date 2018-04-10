@@ -94,6 +94,9 @@ public abstract interface TreeView {
 
     /**
      * change the display option.
+     *
+     * @param displaymode
+     *            the default displaymode
      */
     public abstract void setDefaultDisplayMode(boolean displaymode);
 

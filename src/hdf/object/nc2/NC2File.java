@@ -18,10 +18,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Iterator;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -205,7 +201,6 @@ public class NC2File extends FileFormat {
 
         Iterator it = ncFile.getVariables().iterator();
         Variable ncDataset = null;
-        DefaultMutableTreeNode node = null;
         NC2Dataset d = null;
         while (it.hasNext()) {
             ncDataset = (Variable) it.next();
@@ -361,7 +356,7 @@ public class NC2File extends FileFormat {
         long[] attrDims = { netcdfAttr.getLength() };
         Datatype attrType = new NC2Datatype(netcdfAttr.getDataType());
         ncsaAttr = new hdf.object.Attribute(attrName, attrType, attrDims);
-        ncsaAttr.setValue(netcdfAttr.getValues());
+        ncsaAttr.setData(netcdfAttr.getValues());
 
         return ncsaAttr;
     }

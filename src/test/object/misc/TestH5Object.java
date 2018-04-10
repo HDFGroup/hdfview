@@ -204,7 +204,7 @@ public class TestH5Object
             final String[] attrValue = {"Test for group attribute"};
             final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, -1, -1);
             final Attribute attr = new Attribute(attrName, attrType, attrDims);
-            attr.setValue(attrValue);
+            attr.setData(attrValue);
             g1.writeMetadata(attr);
         } catch (final Exception ex) { failed(message, ex, file); return null; }
 
@@ -597,6 +597,7 @@ public class TestH5Object
      * @param fname the name of the file to open
      * @return zero if successful; otherwise returns one
      */
+    @SuppressWarnings("rawtypes")
     private int test_H5File_createCompoundDS(final String fname)
     {
         H5File file = null;
@@ -797,6 +798,7 @@ public class TestH5Object
      * @param fname the name of the file to open
      * @return zero if successful; otherwise returns one
      */
+    @SuppressWarnings("deprecation")
     private int test_H5File_getHObject(final String fname)
     {
         String message = "";
@@ -1304,6 +1306,7 @@ public class TestH5Object
      * @param fname the name of the file to open
      * @return zero if successful; otherwise returns one
      */
+    @SuppressWarnings("rawtypes")
     private int test_H5CompoundDS_write(final String fname)
     {
         H5File file = null;
@@ -1363,6 +1366,7 @@ public class TestH5Object
      * @param fname the name of the file to open
      * @return zero if successful; otherwise returns one
      */
+    @SuppressWarnings("rawtypes")
     private int test_H5CompoundDS_write_row_by_row(final String fname)
     {
         List list = null;

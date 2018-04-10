@@ -126,6 +126,7 @@ public class H4Vdata extends CompoundDS
      * @param path the full path of this H4Vdata.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4Vdata(
         FileFormat theFile,
         String name,
@@ -142,6 +143,7 @@ public class H4Vdata extends CompoundDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
@@ -232,7 +234,7 @@ public class H4Vdata extends CompoundDS
     }
 
     // Implementing DataFormat
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     @Override
     public Object read() throws HDFException
     {
@@ -397,6 +399,7 @@ public class H4Vdata extends CompoundDS
     }
 
     // Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
@@ -473,7 +476,7 @@ public class H4Vdata extends CompoundDS
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                         }
 
-                        attr.setValue(buf);
+                        attr.setData(buf);
                         nleft--;
                     }
                 } // for (int i=0; i<n; i++)
@@ -493,6 +496,7 @@ public class H4Vdata extends CompoundDS
     }
 
     // To do: Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
@@ -523,12 +527,14 @@ public class H4Vdata extends CompoundDS
     }
 
     // To do: Implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws HDFException
     {
         log.trace("removeMetadata(): disabled");
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
     }
@@ -687,6 +693,7 @@ public class H4Vdata extends CompoundDS
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 
+    @Override
     public Dataset copy(Group pgroup, String name, long[] dims, Object data)
             throws Exception {
         throw new UnsupportedOperationException(

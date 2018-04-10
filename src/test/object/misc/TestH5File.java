@@ -18,8 +18,8 @@ import java.util.List;
 
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
-import hdf.object.HObject;
 import hdf.object.Group;
+import hdf.object.HObject;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
@@ -87,6 +87,7 @@ public class TestH5File
     /**
      * Test H5CompoundDS.
      */
+    @SuppressWarnings("rawtypes")
     private static void testH5CompoundDS(String fileName)
     {
         H5File h5file = new H5File(fileName, HDF5Constants.H5F_ACC_RDONLY);
@@ -184,6 +185,7 @@ public class TestH5File
     /**
      * Test H5ScalarDS.
      */
+    @SuppressWarnings("rawtypes")
     private static void testH5ScalarDS(String fileName)
     {
         H5File h5file = new H5File(fileName, HDF5Constants.H5F_ACC_RDONLY);
@@ -261,6 +263,7 @@ public class TestH5File
     /**
      * Test H5Group.
      */
+    @SuppressWarnings("rawtypes")
     private static void testH5Group(String fileName)
     {
         H5File h5file = new H5File(fileName, HDF5Constants.H5F_ACC_RDONLY);

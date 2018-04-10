@@ -49,6 +49,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 
 /**
  * NewAttributeDialog displays components for adding a new attribute.
@@ -191,6 +192,7 @@ public class NewAttributeDialog extends Dialog {
         classChoice.setFont(curFont);
         classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         classChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 int idx = classChoice.getSelectionIndex();
                 sizeChoice.select(0);
@@ -264,6 +266,7 @@ public class NewAttributeDialog extends Dialog {
         sizeChoice.setFont(curFont);
         sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         sizeChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (classChoice.getSelectionIndex() == 0) {
                     checkUnsigned.setEnabled(true);
@@ -320,6 +323,7 @@ public class NewAttributeDialog extends Dialog {
         objChoice.setEnabled(false);
         objChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         objChoice.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String objName = objChoice.getItem(objChoice.getSelectionIndex());
 
@@ -372,6 +376,7 @@ public class NewAttributeDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (createAttribute()) {
                     shell.dispose();
@@ -384,6 +389,7 @@ public class NewAttributeDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 newAttribute = null;
                 shell.dispose();
@@ -395,6 +401,7 @@ public class NewAttributeDialog extends Dialog {
         helpButton.setText(" &Help ");
         helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new HelpDialog(shell).open();
             }
@@ -407,6 +414,7 @@ public class NewAttributeDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -710,7 +718,7 @@ public class NewAttributeDialog extends Dialog {
                                 Tools.showError(shell, ex.getMessage(), shell.getText());
                                 return false;
                             }
-                            i[j] = (long) lv.longValue();
+                            i[j] = lv.longValue();
                         }
                         value = i;
                     }
@@ -832,7 +840,7 @@ public class NewAttributeDialog extends Dialog {
 
         long[] dims = { arraySize };
         Attribute attr = new Attribute(attrName, datatype, dims);
-        attr.setValue(value);
+        attr.setData(value);
 
         try {
             if (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot() && h4GrAttrRadioButton.getSelection()) {
@@ -840,13 +848,14 @@ public class NewAttributeDialog extends Dialog {
                 // attribute. Use the isExisted to separate the
                 // global attribute is GR or SD
                 hObject.getFileFormat().writeAttribute(hObject, attr, false);
-                if (hObject.getMetadata() == null) {
-                    hObject.getMetadata().add(attr);
+
+                if (((MetaDataContainer) hObject).getMetadata() == null) {
+                    ((MetaDataContainer) hObject).getMetadata().add(attr);
                 }
             }
             else {
                 log.trace("writeMetadata()");
-                hObject.writeMetadata(attr);
+                ((MetaDataContainer) hObject).writeMetadata(attr);
             }
         }
         catch (Exception ex) {
@@ -957,6 +966,7 @@ public class NewAttributeDialog extends Dialog {
                 okButton.setText("   &OK   ");
                 okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
                 okButton.addSelectionListener(new SelectionAdapter() {
+                    @Override
                     public void widgetSelected(SelectionEvent e) {
                         helpShell.dispose();
                     }

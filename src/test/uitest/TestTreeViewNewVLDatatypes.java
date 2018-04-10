@@ -20,6 +20,7 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 
 import org.junit.After;
 import org.junit.Before;
@@ -162,16 +163,11 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
 
             items[0].click();
-            items[0].contextMenu("Show Attributes").click();
 
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("Properties.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
+            tabItem.activate();
 
-            SWTBotShell metaDataShell = bot.shells()[1];
-            metaDataShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            metaDataShell.bot().button("  &Add  ").click();
+            bot.button("Add Attribute").click();
 
             SWTBotShell daShell = bot.shell("New Attribute...");
             daShell.activate();
@@ -184,9 +180,6 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             daShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(daShell));
-
-            metaDataShell.bot().button("   &Close   ").click();
-            bot.waitUntil(Conditions.shellCloses(metaDataShell));
 
             items = filetree.getAllItems();
 

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.object;
 
@@ -11,6 +11,12 @@ import static org.junit.Assert.fail;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.FileFormat;
@@ -19,15 +25,9 @@ import hdf.object.HObject;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 /**
  * @author Rishi R Sinha
- * 
+ *
  */
 public class GroupTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupTest.class);
@@ -67,6 +67,7 @@ public class GroupTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void openFiles() throws Exception {
         try {
@@ -154,8 +155,10 @@ public class GroupTest {
         testGroup.addToMemberList(null);
         assertEquals(testGroup.getMemberList().size(), previous_size);
 
+        H5.H5error_off();
         Group tmp = new H5Group(testFile, "tmp", "/grp0/", testGroup);
-        testGroup.addToMemberList((HObject) testGroup.getMemberList().get(0));
+        H5.H5error_on();
+        testGroup.addToMemberList(testGroup.getMemberList().get(0));
 
         if (testGroup.getMemberList().size() != previous_size) {
             fail("addToMemberList adds an existing member to the member list.");
@@ -197,12 +200,14 @@ public class GroupTest {
      * </ul>
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testRemoveFromMemberList() {
         log.debug("testRemoveFromMemberList");
         int previous_size = testGroup.getMemberList().size();
         List memberList = testGroup.getMemberList();
 
+        H5.H5error_off();
         testGroup.removeFromMemberList(null);
         if (testGroup.getMemberList().size() != previous_size) {
             fail("removeFromMemberList removes a null from the member list.");
@@ -213,6 +218,7 @@ public class GroupTest {
         if (testGroup.getMemberList().size() != previous_size) {
             fail("removeFromMemberList removes a non existing member from the member list.");
         }
+        H5.H5error_on();
 
         Iterator it = memberList.iterator();
         HObject obj = (HObject) it.next();
@@ -238,6 +244,7 @@ public class GroupTest {
      * <li>testing the member list for the root group.
      * <ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testGetMemberList() {
         log.debug("testGetMemberList");
@@ -283,7 +290,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#isRoot()}.
-     * 
+     *
      * <ul>
      * <li>Test for not root.
      * </ul>
@@ -304,7 +311,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#getNumberOfMembersInFile()}.
-     * 
+     *
      * <ul>
      * <li>Test for the number of members in the file.
      * <ul>

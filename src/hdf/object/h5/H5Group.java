@@ -45,6 +45,7 @@ import hdf.object.HObject;
  * @author Peter X. Cao
  */
 public class H5Group extends Group {
+
     private static final long serialVersionUID = -951164512330444150L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
@@ -116,6 +117,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute() {
         obj_info.num_attrs = nAttributes;
 
@@ -182,6 +184,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws HDF5Exception {
         return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
@@ -235,6 +238,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
+    @Override
     @SuppressWarnings("unchecked")
     public void writeMetadata(Object info) throws Exception {
         log.trace("writeMetadata(): start");
@@ -269,6 +273,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public void removeMetadata(Object info) throws HDF5Exception {
         log.trace("removeMetadata(): start");
@@ -305,6 +310,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
+    @Override
     public void updateMetadata(Object info) throws HDF5Exception {
         log.trace("updateMetadata(): start");
         // only attribute metadata is supported.

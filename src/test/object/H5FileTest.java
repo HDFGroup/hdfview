@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,7 +15,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -33,23 +37,16 @@ import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 import hdf.object.h5.H5ScalarDS;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
 /**
  * TestCase for H5File.
  * <p>
  * This class tests all the public methods in H5ScalarDS class.
  * <p>
  * The test file contains the following objects.
- * 
+ *
  * <pre>
- * 
- * 
+ *
+ *
  *         /dataset_byte            Dataset {50, 10}
  *         /dataset_comp            Dataset {50, 10}
  *         /dataset_enum            Dataset {50, 10}
@@ -85,7 +82,7 @@ import org.junit.Test;
  * <li>
  * </ul>
  * </ul>
- * 
+ *
  * @author Peter Cao, The HDF Group
  */
 public class H5FileTest {
@@ -232,8 +229,8 @@ public class H5FileTest {
                 fail("H5.H5Fget_obj_count() failed. " + ex);
             }
             assertTrue(nObjs <= 1); // file id should be the only this left
-                                    // open. IS THIS BECAUSE THE ONLY THING WE
-                                    // HAVE DONE IS OPEN THE FILE?
+            // open. IS THIS BECAUSE THE ONLY THING WE
+            // HAVE DONE IS OPEN THE FILE?
 
             try {
                 file.close();
@@ -462,12 +459,14 @@ public class H5FileTest {
         catch (final Exception ex) {
             fail("H5.H5Pcreate() failed. " + ex);
         }
+        H5.H5error_off();
         try {
             grp = file.createGroup("Group1/Group2/Group3", null, gcpl, lcpl);
         }
         catch (final Exception ex) {
             ; // Expected -intentional as the order of gplist is invalid.
         }
+        H5.H5error_on();
         assertNull(grp);
 
         try {
@@ -506,12 +505,14 @@ public class H5FileTest {
         }
 
         grp.close(gid);
+        H5.H5error_off();
         try {
             H5.H5Pclose(lcpl);
             H5.H5Pclose(gcpl);
         }
         catch (final Exception ex) {
         }
+        H5.H5error_on();
         try {
             file.close();
         }
@@ -696,7 +697,9 @@ public class H5FileTest {
     public void testIsThisTypeString() {
         log.debug("testIsThisTypeString");
         assertTrue(H5FILE.isThisType(H5TestFile.NAME_FILE_H5));
+        H5.H5error_off();
         assertFalse(H5FILE.isThisType("No such file"));
+        H5.H5error_on();
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -741,6 +744,7 @@ public class H5FileTest {
      * <li>close/delete the new file
      * </ul>
      */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     @Test
     public void testCopyHObjectGroup() {
         log.debug("testCopyHObjectGroup");
@@ -839,6 +843,7 @@ public class H5FileTest {
      * <li>close/delete the new file
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testDeleteHObject() {
         log.debug("testDeleteHObject");
@@ -889,7 +894,9 @@ public class H5FileTest {
             }
 
             try {
+                H5.H5error_off();
                 obj = file.get(obj.getFullName());
+                H5.H5error_on();
             }
             catch (final Exception ex) {
                 fail("file.get(getFullName) failed. " + ex);
@@ -939,7 +946,9 @@ public class H5FileTest {
 
         // get object that does not exist in file
         try {
+            H5.H5error_off();
             obj = file.get("/_INVALID_OBJECT_PATH_SHOULD_RETURN_NULL_");
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("file.get() failed on invalid path. " + ex);
@@ -1014,7 +1023,9 @@ public class H5FileTest {
 
         // get object that does not exist in file
         try {
+            H5.H5error_off();
             obj = file.get("/_INVALID_OBJECT_PATH_SHOULD_RETURN_NULL_");
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("file.get() failed on invalid path. " + ex);
@@ -1102,12 +1113,14 @@ public class H5FileTest {
         assertNotNull(dset);
 
         boolean isWrittenFailed = false;
+        H5.H5error_off();
         try {
             dset.write();
         }
         catch (final Exception ex) {
             isWrittenFailed = true; // Expected.
         }
+        H5.H5error_on();
         assertTrue(isWrittenFailed);
 
         try {
@@ -1158,6 +1171,7 @@ public class H5FileTest {
             fail("new H5File(nameNewFile, H5File.READ) failed. " + ex);
         }
 
+        H5.H5error_off();
         try {
             dset = (Dataset) file.get(H5TestFile.NAME_DATASET_FLOAT);
             dset.getData();
@@ -1165,6 +1179,7 @@ public class H5FileTest {
         catch (final Exception ex) {
             ; // Expected. The file is empty.
         }
+        H5.H5error_on();
 
         try {
             file.close();
@@ -1197,7 +1212,6 @@ public class H5FileTest {
 
         long nObjs = 0;
         long plist = -1;
-        ;
 
         final H5File file = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
 
@@ -1210,7 +1224,7 @@ public class H5FileTest {
         }
 
         try {
-            file.open(plist); // opent the full tree
+            file.open(plist); // open the full tree
         }
         catch (final Exception ex) {
             fail("file.open() failed. " + ex);
@@ -1274,6 +1288,7 @@ public class H5FileTest {
      * <li>close/delete the new file
      * </ul>
      */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     @Test
     public void testUpdateReferenceDataset() {
         log.debug("testUpdateReferenceDataset");
@@ -1434,8 +1449,8 @@ public class H5FileTest {
     @Test
     public void testSetLibBounds() {
         log.debug("testSetLibBounds");
-        int low = HDF5Constants.H5F_LIBVER_LATEST;
-        int high = HDF5Constants.H5F_LIBVER_LATEST;
+        String low = "Latest";
+        String high = "Latest";
 
         final H5File file = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
 
@@ -1455,8 +1470,8 @@ public class H5FileTest {
             fail("testFile.getLibBounds() failed. " + ex);
         }
 
-        assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[0]);
-        assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
+        assertEquals(file.LIBVER_LATEST, libver[0]);
+        assertEquals(file.LIBVER_LATEST, libver[1]);
 
         try {
             file.close();
@@ -1464,7 +1479,7 @@ public class H5FileTest {
         catch (Exception ex) {
         }
         try {
-            testFile.setLibBounds(-1, -1);
+            testFile.setLibBounds(null, null);
         }
         catch (final Exception ex) {
             fail("testFile.setLibBounds() failed. " + ex);
@@ -1576,6 +1591,7 @@ public class H5FileTest {
         // Create a Dangling Link to object.
         Group grplink = new H5Group(null, "DGroup", "/Group1", null);
         assertNotNull(grplink);
+        H5.H5error_off();
         try {
             obj = file.createLink(grp1, "NAME_SOFT_LINK_DANGLE", grplink, Group.LINK_TYPE_SOFT);
         }
@@ -1583,6 +1599,7 @@ public class H5FileTest {
             ex.printStackTrace();
             fail("file.createLink() failed. " + ex);
         }
+        H5.H5error_on();
         assertNotNull(obj);
 
         // Create the object to which a dangling link is created
@@ -1754,6 +1771,7 @@ public class H5FileTest {
         String d1fullName = d1.getFile() + FileFormat.FILE_OBJ_SEP + d1.getFullName();
         assertEquals(d1fullName, linkTargetObjName);
 
+        H5.H5error_off();
         // Create a Dangling Link to object.
         Group grplink = new H5Group(file1, "DGroup", null, null);
         assertNotNull(grplink);
@@ -1774,6 +1792,7 @@ public class H5FileTest {
             fail("file.createGroup() failed. " + ex);
         }
         assertNotNull(grplink);
+        H5.H5error_on();
 
         // Retrieve Link information
         long gid = -1;
@@ -1832,6 +1851,7 @@ public class H5FileTest {
      * <li>close/delete the files
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testCreateAttribute() {
         log.debug("testCreateAttribute");
@@ -1889,12 +1909,8 @@ public class H5FileTest {
         }
         List attributeList = null;
         try {
-            attributeList = H5File.getAttribute(gid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC);// Retrieve
-                                                                                                                  // attributes
-                                                                                                                  // in
-                                                                                                                  // increasing
-                                                                                                                  // creation
-                                                                                                                  // order.
+            attributeList = H5File.getAttribute(gid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC);
+            // Retrieve attributes in increasing creation order.
             assertEquals(attr2.getName(), attributeList.get(1).toString());
         }
         catch (final Exception ex) {
@@ -1902,7 +1918,8 @@ public class H5FileTest {
         }
 
         try {
-            attributeList = H5File.getAttribute(gid); // Retrieve attributes in increasing alphabetical order.
+            attributeList = H5File.getAttribute(gid);
+            // Retrieve attributes in increasing alphabetical order.
             assertEquals(attr2.getName(), attributeList.get(2).toString());
         }
         catch (final Exception ex) {
@@ -1962,8 +1979,8 @@ public class H5FileTest {
         assertTrue(fid > 0);
 
         try {
-            d1 = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE, "NATIVE_INT"); // create
-                                                                                                                      // Datatype.
+            d1 = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE, "NATIVE_INT");
+            // create Datatype.
         }
         catch (final Exception ex) {
             fail("file.createDatatype() failed. " + ex);

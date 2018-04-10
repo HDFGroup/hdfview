@@ -75,6 +75,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
 
@@ -1618,9 +1619,13 @@ public class DefaultTreeView implements TreeView {
      * @return the image for the specified HObject
      */
     private Image getObjectTypeImage(HObject obj) {
-        if (obj ==null) return null;
+        if (obj == null)
+            return null;
 
-        boolean hasAttribute = obj.hasAttribute();
+        // Should be safe to cast to a MetaDataFormat here because the
+        // TreeView should never be able to select an object that does
+        // not implement the MetaDataFormat interface
+        boolean hasAttribute = ((MetaDataContainer) obj).hasAttribute();
 
         if(obj instanceof Dataset) {
             if (obj instanceof ScalarDS) {
@@ -2981,9 +2986,6 @@ public class DefaultTreeView implements TreeView {
     }
 
     private class ChangeLibVersionDialog extends Dialog {
-
-        private Combo earliestCombo;
-
         public ChangeLibVersionDialog(Shell parent, int style) {
             super(parent, style);
         }
@@ -2996,8 +2998,8 @@ public class DefaultTreeView implements TreeView {
             shell.setImage(ViewProperties.getHdfIcon());
             shell.setLayout(new GridLayout(1, true));
 
-            String[] lowValues = { "Earliest", "Latest" };
-            String[] highValues = { "Latest" };
+            String[] lowValues = { "Earliest", "V18", "V110", "Latest" };
+            String[] highValues = { "V18", "V110", "Latest" };
 
             // Dummy label
             new Label(shell, SWT.LEFT);
@@ -3006,7 +3008,7 @@ public class DefaultTreeView implements TreeView {
             label.setFont(curFont);
             label.setText("Earliest Version: ");
 
-            earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+            Combo earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
             earliestCombo.setFont(curFont);
             earliestCombo.setItems(lowValues);
             earliestCombo.select(0);
@@ -3038,21 +3040,12 @@ public class DefaultTreeView implements TreeView {
             okButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    int low = -1, high = 1;
-
-                    if(earliestCombo.getItem(earliestCombo.getSelectionIndex()).equals("Earliest")) {
-                        low = 0;
-                    }
-                    else {
-                        low = 1;
-                    }
-
                     try {
-                        selectedObject.getFileFormat().setLibBounds(low, high);
+                        selectedObject.getFileFormat().setLibBounds(earliestCombo.getItem(earliestCombo.getSelectionIndex()), latestCombo.getItem(latestCombo.getSelectionIndex()));
                     }
                     catch (Throwable err) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Error when setting lib version bounds", "HDFView");
+                        Tools.showError(shell, "Error when setting lib version bounds", "HDFView Error");
                         return;
                     }
 

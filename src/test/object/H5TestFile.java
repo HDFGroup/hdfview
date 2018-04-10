@@ -13,9 +13,9 @@ import hdf.object.h5.H5File;
 
 /**
  * Creates an HDF5 file for unit tests.
- * 
+ *
  * @author xcao
- * 
+ *
  */
 public class H5TestFile {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5TestFile.class);
@@ -94,7 +94,7 @@ public class H5TestFile {
      * Creates an HDF5 test file.
      * <p>
      * The test file contains the following objects:
-     * 
+     *
      * <pre>
      * /dataset_byte            Dataset {50, 10}
      *           /dataset_comp            Dataset {50, 10}
@@ -109,9 +109,10 @@ public class H5TestFile {
      *           /g0/g00/dataset_float    Dataset {50, 10}
      *           /g0_attr                 Group
      * </pre>
-     * 
+     *
      * @throws Exception
      */
+    @SuppressWarnings("rawtypes")
     public static final H5File createTestFile(String fileName) throws Exception {
         log.debug("createTestFile {}", fileName);
         H5File file = null;
@@ -143,7 +144,7 @@ public class H5TestFile {
         DATA_COMP.add(1, DATA_FLOAT);
         DATA_COMP.add(2, DATA_STR);
         DATA_COMP.add(3, DATA_LONG);
-        
+
         log.debug("filename: " + fileName);
 
         file = new H5File(fileName, FileFormat.CREATE);
@@ -185,7 +186,7 @@ public class H5TestFile {
         for (int i = 0; i < n; i++) {
             final Attribute attr = (Attribute) attrs.get(i);
             if ("PALETTE".equals(attr.getName())) {
-                attr.setValue(oid);
+                attr.setData(oid);
                 dsets[7].writeMetadata(attr);
             }
         }
@@ -240,7 +241,7 @@ public class H5TestFile {
      * The palette values are stored in a two-dimensional byte array and arrange by color components of red, green and
      * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
      * components respectively.
-     * 
+     *
      * @return the wave palette in the form of byte[3][256]
      */
     private static final byte[] createWavePalette() {

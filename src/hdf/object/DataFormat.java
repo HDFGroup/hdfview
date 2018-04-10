@@ -14,87 +14,92 @@
 
 package hdf.object;
 
-import java.util.List;
+/* TODO: Update comments */
 
 /**
- * An interface that provides general I/O operations for read/write object data.
- * For example, reading data content or data attribute from file into memory or
- * writing data content or data attribute from memory into file.
+ * An interface that provides general I/O operations for object data. For
+ * example, reading data content from the file into memory or writing data
+ * content from memory into the file.
  * <p>
  *
  * @see hdf.object.HObject
  *
- * @version 1.1 9/4/2007
- * @author Peter X. Cao
+ * @version 1.0 4/2/2018
+ * @author Jordan T. Henderson
  */
-@SuppressWarnings("rawtypes")
 public interface DataFormat {
     /**
-     * Returns the full path of the file that contains this data object.
+     * Retrieves the object's data from the file.
+     *
+     * @return the object's data.
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
+    public abstract Object getData() throws Exception, OutOfMemoryError;
+
+    /**
+     *
+     *
+     * @param data
+     *            the data to write.
+     */
+    public abstract void setData(Object data);
+
+    /**
+     * Reads the data from file.
      * <p>
-     * The file name is necessary because data objects are uniquely identified
-     * by object reference and file name when mutilple files are opened at the
-     * same time.
-     *
-     * @return the full path of the file.
-     */
-    public abstract String getFile();
-
-    /**
-     * Retrieves the metadata such as attributes from file.
+     * read() reads the data from file to a memory buffer and returns the memory
+     * buffer. The dataset object does not hold the memory buffer. To store the
+     * memory buffer in the dataset object, one must call getData().
      * <p>
-     * Metadata such as attributes are stored in a List.
+     * By default, the whole dataset is read into memory. Users can also select
+     * a subset to read. Subsetting is done in an implicit way.
      *
-     * @return the list of metadata objects.
+     * @return the data read from file.
      *
-     * @throws Exception if the metadata can not be retrieved
+     * @see #getData()
+     *
+     * @throws Exception
+     *             if object can not be read
+     * @throws OutOfMemoryError
+     *             if memory is exhausted
      */
-    public abstract List getMetadata() throws Exception;
+    public abstract Object read() throws Exception, OutOfMemoryError;
 
     /**
-     * Writes a specific metadata (such as attribute) into file.
+     * Writes a memory buffer to the object in the file.
      *
-     * If an HDF(4&amp;5) attribute exists in file, the method updates its value.
-     * If the attribute does not exists in file, it creates the attribute in
-     * file and attaches it to the object.
-     * It will fail to write a new attribute to the object where an attribute
-     * with the same name already exists.
-     * To update the value of an existing attribute in file, one needs to get
-     * the instance of the attribute by getMetadata(), change its values,
-     * and use writeMetadata() to write the value.
+     * @param buf
+     *            the data to write
      *
-     * @param info
-     *            the metadata to write.
-     *
-     * @throws Exception if the metadata can not be written
+     * @throws Exception
+     *             if data can not be written
      */
-    public abstract void writeMetadata(Object info) throws Exception;
+    public abstract void write(Object buf) throws Exception;
 
     /**
-     * Deletes an existing metadata from this data object.
+     * Returns the datatype of the data object.
      *
-     * @param info
-     *            the metadata to delete.
-     *
-     * @throws Exception if the metadata can not be removed
+     * @return the datatype of the data object.
      */
-    public abstract void removeMetadata(Object info) throws Exception;
+    public abstract Datatype getDatatype();
 
     /**
-     * Updates an existing metadata from this data object.
+     * Returns the rank (number of dimensions) of the data object. It returns a
+     * negative number if it failed to retrieve the dimension information from
+     * the file.
      *
-     * @param info
-     *            the metadata to update.
-     *
-     * @throws Exception if the metadata can not be updated
+     * @return the number of dimensions of the data object.
      */
-    public abstract void updateMetadata(Object info) throws Exception;
+    public abstract int getRank();
 
     /**
-     * Check if the object has any attributes attached.
+     * Returns the array that contains the dimension sizes of the data value of
+     * the data object. It returns null if it failed to retrieve the dimension
+     * information from the file.
      *
-     * @return true if it has any attribute(s), false otherwise.
+     * @return the dimension sizes of the data object.
      */
-    public abstract boolean hasAttribute();
-
+    public abstract long[] getDims();
 }

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+
 /**
  * FileFormat defines general interfaces for working with files whose data is
  * organized according to a supported format.
@@ -305,7 +306,7 @@ public abstract class FileFormat extends File {
             }
             catch (Exception ex) {
                 log.debug("File {} getAbsolutePath failure: ", filename, ex);
-           }
+            }
         }
         isReadOnly = false;
         log.trace("fullFileName={} isReadOnly={}", fullFileName, isReadOnly);
@@ -1349,13 +1350,13 @@ public abstract class FileFormat extends File {
      */
     public Dataset createCompoundDS(String name, Group pgroup, long[] dims, long[] maxdims, long[] chunks, int gzip,
             String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception
-            // REVIEW DOCS for createCompoundDS(). Check and document exceptions.
-            {
-                // If the implementing subclass doesn't have this method then that
-                // format doesn't support Compound DataSets and we throw an
-                // exception.
-                throw new UnsupportedOperationException("Dataset FileFormat.createCompoundDS(...) is not implemented.");
-            }
+    // REVIEW DOCS for createCompoundDS(). Check and document exceptions.
+    {
+        // If the implementing subclass doesn't have this method then that
+        // format doesn't support Compound DataSets and we throw an
+        // exception.
+        throw new UnsupportedOperationException("Dataset FileFormat.createCompoundDS(...) is not implemented.");
+    }
 
     /**
      * Creates a new image in a file.
@@ -2019,15 +2020,15 @@ public abstract class FileFormat extends File {
     /**
      * Sets the bounds of library versions.
      *
-     * @param low
+     * @param lowStr
      *            The earliest version of the library.
-     * @param high
+     * @param highStr
      *            The latest version of the library.
      *
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setLibBounds(int low, int high) throws Exception {
+    public void setLibBounds(String lowStr, String highStr) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 
@@ -2040,6 +2041,10 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public int[] getLibBounds() throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+    }
+
+    public String getLibBoundsDescription() {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 

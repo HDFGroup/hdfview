@@ -141,6 +141,7 @@ public class H4GRImage extends ScalarDS
      * @param path the full path of this H4GRImage.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4GRImage(
         FileFormat theFile,
         String name,
@@ -158,6 +159,7 @@ public class H4GRImage extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
@@ -238,7 +240,7 @@ public class H4GRImage extends ScalarDS
         }
 
         int ncomp = grInfo[0];
-        long tid = (long)grInfo[1];
+        long tid = grInfo[1];
         int interlace = grInfo[2];
         int numberOfAttributes = grInfo[3];
         dstdid = HDFLibrary.GRcreate(
@@ -431,6 +433,7 @@ public class H4GRImage extends ScalarDS
     }
 
     // Implementing DataFormat
+    @SuppressWarnings("deprecation")
     @Override
     public void write(Object buf) throws HDFException
     {
@@ -486,6 +489,7 @@ public class H4GRImage extends ScalarDS
     }
 
     // ***** need to implement from DataFormat *****
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
@@ -549,7 +553,7 @@ public class H4GRImage extends ScalarDS
                         buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                     }
 
-                    attr.setValue(buf);
+                    attr.setData(buf);
                 }
             } // for (int i=0; i<n; i++)
         }
@@ -565,6 +569,7 @@ public class H4GRImage extends ScalarDS
     }
 
     // ***** need to implement from DataFormat *****
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
@@ -595,11 +600,13 @@ public class H4GRImage extends ScalarDS
     }
 
     // ***** need to implement from DataFormat *****
+    @Override
     public void removeMetadata(Object info) throws HDFException {
         log.trace("removeMetadata(): disabled");
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
     }
