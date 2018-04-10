@@ -1,34 +1,10 @@
-/*****************************************************************************
- * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of the HDF Java Products distribution.                  *
- * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
- * If you do not have access to either file, you may request a copy from     *
- * help@hdfgroup.org.                                                        *
- ****************************************************************************/
-
 package hdf.view;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -54,7 +30,6 @@ import java.util.Vector;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
@@ -185,10 +160,6 @@ public class DefaultTableView2 implements TableView {
     private enum ViewType { TABLE, IMAGE, TEXT };
     private      ViewType                   viewType = ViewType.TABLE;
 
-    /**
-     * Numerical data type. B = byte array, S = short array, I = int array, J = long array, F =
-     * float array, and D = double array.
-     */
     private char                            NT               = ' ';
 
     private static final int                FLOAT_BUFFER_SIZE       = 524288;
@@ -199,7 +170,7 @@ public class DefaultTableView2 implements TableView {
     private static final int                BYTE_BUFFER_SIZE        = 2097152;
 
     // Changed to use normalized scientific notation (1 <= coefficient < 10).
-    // private final DecimalFormat scientificFormat = new DecimalFormat("###.#####E0#");
+
     private final DecimalFormat             scientificFormat = new DecimalFormat("0.0###E0###");
     private DecimalFormat                   customFormat     = new DecimalFormat("###.#####");
     private final NumberFormat              normalFormat     = null; // NumberFormat.getInstance();
@@ -259,27 +230,13 @@ public class DefaultTableView2 implements TableView {
     // Label to indicate the current cell location.
     private Label                           cellLabel;
 
-
     /**
      * Constructs a TableView.
      *
      * @param theView
-     *             the main HDFView.
-     */
-    public DefaultTableView2(ViewManager theView) {
-        this(theView, null);
-    }
-
-    /**
-     * Constructs a TableView.
-     *
-     * @param theView
-     *             the main HDFView.
+     *            the main HDFView.
      * @param map
-     *             the properties on how to show the data. The map is used to allow applications to
-     *          pass properties on how to display the data, such as, transposing data, showing
-     *          data as character, applying bitmask, and etc. Predefined keys are listed at
-     *          ViewProperties.DATA_VIEW_KEY.
+     * 
      */
     @SuppressWarnings("rawtypes")
     public DefaultTableView2(ViewManager theView, HashMap map) {
@@ -568,12 +525,6 @@ public class DefaultTableView2 implements TableView {
     @Override
     public NatTable getTable() {
         return dsetTable;
-    }
-
-    // Implementing DataView
-    @Override
-    public HObject getDataObject() {
-        return dataset;
     }
 
     /**
@@ -1142,7 +1093,7 @@ public class DefaultTableView2 implements TableView {
                 NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, DefaultTableView2.this);
                 dialog.open();
 
-                HObject obj = (HObject) dialog.getObject();
+                HObject obj = dialog.getObject();
                 if (obj != null) {
                     Group pgroup = dialog.getParentGroup();
                     try {
@@ -1510,116 +1461,6 @@ public class DefaultTableView2 implements TableView {
         return toolbar;
     }
 
-    // Flip to previous page of Table
-    private void previousPage() {
-        // Only valid operation if dataset has 3 or more dimensions
-        if (dataset.getRank() < 3) return;
-
-        long[] start = dataset.getStartDims();
-        int[] selectedIndex = dataset.getSelectedIndex();
-        long idx = start[selectedIndex[2]];
-        if (idx == 0) {
-            return; // current page is the first page
-        }
-
-        gotoPage(idx - 1);
-    }
-
-    // Flip to next page of Table
-    private void nextPage() {
-        // Only valid operation if dataset has 3 or more dimensions
-        if (dataset.getRank() < 3) return;
-
-        long[] start = dataset.getStartDims();
-        int[] selectedIndex = dataset.getSelectedIndex();
-        long[] dims = dataset.getDims();
-        long idx = start[selectedIndex[2]];
-        if (idx == dims[selectedIndex[2]] - 1) {
-            return; // current page is the last page
-        }
-
-        gotoPage(idx + 1);
-    }
-
-    // Flip to first page of Table
-    private void firstPage() {
-        // Only valid operation if dataset has 3 or more dimensions
-        if (dataset.getRank() < 3) return;
-
-        long[] start = dataset.getStartDims();
-        int[] selectedIndex = dataset.getSelectedIndex();
-        long idx = start[selectedIndex[2]];
-        if (idx == 0) {
-            return; // current page is the first page
-        }
-
-        gotoPage(0);
-    }
-
-    // Flip to last page of Table
-    private void lastPage() {
-        // Only valid operation if dataset has 3 or more dimensions
-        if (dataset.getRank() < 3) return;
-
-        long[] start = dataset.getStartDims();
-        int[] selectedIndex = dataset.getSelectedIndex();
-        long[] dims = dataset.getDims();
-        long idx = start[selectedIndex[2]];
-        if (idx == dims[selectedIndex[2]] - 1) {
-            return; // current page is the last page
-        }
-
-        gotoPage(dims[selectedIndex[2]] - 1);
-    }
-
-    // Flip to specified page of Table
-    private void gotoPage (long idx) {
-        // Only valid operation if dataset has 3 or more dimensions
-        if (dataset.getRank() < 3 || idx == (curFrame - indexBase)) {
-            return;
-        }
-
-        if (isValueChanged) {
-            updateValueInFile();
-        }
-
-        long[] start = dataset.getStartDims();
-        int[] selectedIndex = dataset.getSelectedIndex();
-        long[] dims = dataset.getDims();
-
-        if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Frame number must be between " + indexBase + " and " + (dims[selectedIndex[2]] - 1 + indexBase), shell.getText());
-            return;
-        }
-
-        start[selectedIndex[2]] = idx;
-        curFrame = idx + indexBase;
-        frameField.setText(String.valueOf(curFrame));
-
-        dataset.clearData();
-
-        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
-
-        try {
-            dataValue = dataset.getData();
-            if (dataset instanceof ScalarDS) {
-                ((ScalarDS) dataset).convertFromUnsignedC();
-                dataValue = dataset.getData();
-            }
-        }
-        catch (Exception ex) {
-            dataValue = null;
-            Tools.showError(shell, ex.getMessage(), shell.getText());
-            return;
-        }
-        finally {
-            shell.setCursor(null);
-        }
-
-        dsetTable.doCommand(new VisualRefreshCommand());
-    }
-
     /**
      * Update dataset value in file. The changes will go to the file.
      */
@@ -1719,44 +1560,44 @@ public class DefaultTableView2 implements TableView {
         log.trace("updateScalarData({}, {}): isUnsigned={} cname={} dname={}", row, col, isUnsigned, cname, dname);
 
         switch (NT) {
-        case 'B':
-            byte bvalue = 0;
-            bvalue = Byte.parseByte(cellValue);
-            Array.setByte(dataValue, i, bvalue);
-            break;
-        case 'S':
-            short svalue = 0;
-            svalue = Short.parseShort(cellValue);
-            Array.setShort(dataValue, i, svalue);
-            break;
-        case 'I':
-            int ivalue = 0;
-            ivalue = Integer.parseInt(cellValue);
-            Array.setInt(dataValue, i, ivalue);
-            break;
-        case 'J':
-            long lvalue = 0;
-            if (dname == 'J') {
-                BigInteger big = new BigInteger(cellValue);
-                lvalue = big.longValue();
-            }
-            else
-                lvalue = Long.parseLong(cellValue);
-            Array.setLong(dataValue, i, lvalue);
-            break;
-        case 'F':
-            float fvalue = 0;
-            fvalue = Float.parseFloat(cellValue);
-            Array.setFloat(dataValue, i, fvalue);
-            break;
-        case 'D':
-            double dvalue = 0;
-            dvalue = Double.parseDouble(cellValue);
-            Array.setDouble(dataValue, i, dvalue);
-            break;
-        default:
-            Array.set(dataValue, i, cellValue);
-            break;
+            case 'B':
+                byte bvalue = 0;
+                bvalue = Byte.parseByte(cellValue);
+                Array.setByte(dataValue, i, bvalue);
+                break;
+            case 'S':
+                short svalue = 0;
+                svalue = Short.parseShort(cellValue);
+                Array.setShort(dataValue, i, svalue);
+                break;
+            case 'I':
+                int ivalue = 0;
+                ivalue = Integer.parseInt(cellValue);
+                Array.setInt(dataValue, i, ivalue);
+                break;
+            case 'J':
+                long lvalue = 0;
+                if (dname == 'J') {
+                    BigInteger big = new BigInteger(cellValue);
+                    lvalue = big.longValue();
+                }
+                else
+                    lvalue = Long.parseLong(cellValue);
+                Array.setLong(dataValue, i, lvalue);
+                break;
+            case 'F':
+                float fvalue = 0;
+                fvalue = Float.parseFloat(cellValue);
+                Array.setFloat(dataValue, i, fvalue);
+                break;
+            case 'D':
+                double dvalue = 0;
+                dvalue = Double.parseDouble(cellValue);
+                Array.setDouble(dataValue, i, dvalue);
+                break;
+            default:
+                Array.set(dataValue, i, cellValue);
+                break;
         }
 
         isValueChanged = true;
@@ -1845,181 +1686,61 @@ public class DefaultTableView2 implements TableView {
         String token = "";
         isValueChanged = true;
         switch (mNT) {
-        case 'B':
-            byte bvalue = 0;
-            for (int i = 0; i < morder; i++) {
-                token = st.nextToken().trim();
-                bvalue = Byte.parseByte(token);
-                Array.setByte(mdata, offset + i, bvalue);
-            }
-            break;
-        case 'S':
-            short svalue = 0;
-            for (int i = 0; i < morder; i++) {
-                token = st.nextToken().trim();
-                svalue = Short.parseShort(token);
-                Array.setShort(mdata, offset + i, svalue);
-            }
-            break;
-        case 'I':
-            int ivalue = 0;
-            for (int i = 0; i < morder; i++) {
-                token = st.nextToken().trim();
-                ivalue = Integer.parseInt(token);
-                Array.setInt(mdata, offset + i, ivalue);
-            }
-            break;
-        case 'J':
-            long lvalue = 0;
-            for (int i = 0; i < morder; i++) {
-                token = st.nextToken().trim();
-                BigInteger big = new BigInteger(token);
-                lvalue = big.longValue();
-                // lvalue = Long.parseLong(token);
-                Array.setLong(mdata, offset + i, lvalue);
-            }
-            break;
-        case 'F':
-            float fvalue = 0;
-            for (int i = 0; i < morder; i++) {
-                token = st.nextToken().trim();
-                fvalue = Float.parseFloat(token);
-                Array.setFloat(mdata, offset + i, fvalue);
-            }
-            break;
-        case 'D':
-            double dvalue = 0;
-            for (int i = 0; i < morder; i++) {
-                token = st.nextToken().trim();
-                dvalue = Double.parseDouble(token);
-                Array.setDouble(mdata, offset + i, dvalue);
-            }
-            break;
-        default:
-            isValueChanged = false;
+            case 'B':
+                byte bvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    bvalue = Byte.parseByte(token);
+                    Array.setByte(mdata, offset + i, bvalue);
+                }
+                break;
+            case 'S':
+                short svalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    svalue = Short.parseShort(token);
+                    Array.setShort(mdata, offset + i, svalue);
+                }
+                break;
+            case 'I':
+                int ivalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    ivalue = Integer.parseInt(token);
+                    Array.setInt(mdata, offset + i, ivalue);
+                }
+                break;
+            case 'J':
+                long lvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    BigInteger big = new BigInteger(token);
+                    lvalue = big.longValue();
+                    // lvalue = Long.parseLong(token);
+                    Array.setLong(mdata, offset + i, lvalue);
+                }
+                break;
+            case 'F':
+                float fvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    fvalue = Float.parseFloat(token);
+                    Array.setFloat(mdata, offset + i, fvalue);
+                }
+                break;
+            case 'D':
+                double dvalue = 0;
+                for (int i = 0; i < morder; i++) {
+                    token = st.nextToken().trim();
+                    dvalue = Double.parseDouble(token);
+                    Array.setDouble(mdata, offset + i, dvalue);
+                }
+                break;
+            default:
+                isValueChanged = false;
         }
 
         log.trace("updateCompoundData({}, {}): finish", row, col);
-    }
-
-    /**
-     * Copy data from the spreadsheet to the system clipboard.
-     */
-    private void copyData() {
-        StringBuffer sb = new StringBuffer();
-
-        Rectangle selection = selectionLayer.getLastSelectedRegion();
-        if (selection == null) {
-            Tools.showError(shell, "Select data to copy.", shell.getText());
-            return;
-        }
-
-        int r0 = selectionLayer.getLastSelectedRegion().y; // starting row
-        int c0 = selectionLayer.getLastSelectedRegion().x; // starting column
-
-        if ((r0 < 0) || (c0 < 0)) {
-            return;
-        }
-
-        int nr = selectionLayer.getSelectedRowCount();
-        int nc = selectionLayer.getSelectedColumnPositions().length;
-        int r1 = r0 + nr; // finish row
-        int c1 = c0 + nc; // finishing column
-
-        try {
-            for (int i = r0; i < r1; i++) {
-                sb.append(selectionLayer.getDataValueByPosition(c0, i).toString());
-                for (int j = c0 + 1; j < c1; j++) {
-                    sb.append("\t");
-                    sb.append(selectionLayer.getDataValueByPosition(j, i).toString());
-                }
-                sb.append("\n");
-            }
-        }
-        catch (java.lang.OutOfMemoryError err) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Copying data to system clipboard failed. \nUse \"export/import data\" for copying/pasting large data.", shell.getText());
-            return;
-        }
-
-        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-        StringSelection contents = new StringSelection(sb.toString());
-        cb.setContents(contents, null);
-    }
-
-    /**
-     * Paste data from the system clipboard to the spreadsheet.
-     */
-    private void pasteData() {
-        if(!MessageDialog.openConfirm(shell, "Clipboard Data", "Do you want to paste selected data?"))
-            return;
-
-        int cols = selectionLayer.getPreferredColumnCount();
-        int rows = selectionLayer.getPreferredRowCount();
-        int r0 = 0;
-        int c0 = 0;
-
-        Rectangle selection = selectionLayer.getLastSelectedRegion();
-        if (selection != null) {
-            r0 = selection.y;
-            c0 = selection.x;
-        }
-
-        if (c0 < 0) {
-            c0 = 0;
-        }
-        if (r0 < 0) {
-            r0 = 0;
-        }
-        int r = r0;
-        int c = c0;
-
-        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-        String line = "";
-        try {
-            String s = (String) cb.getData(DataFlavor.stringFlavor);
-
-            StringTokenizer st = new StringTokenizer(s, "\n");
-            // read line by line
-            while (st.hasMoreTokens() && (r < rows)) {
-                line = st.nextToken();
-
-                if (fixedDataLength < 1) {
-                    // separate by delimiter
-                    StringTokenizer lt = new StringTokenizer(line, "\t");
-                    while (lt.hasMoreTokens() && (c < cols)) {
-                        try {
-                            updateValueInMemory(lt.nextToken(), r, c);
-                        }
-                        catch (Exception ex) {
-                            continue;
-                        }
-                        c++;
-                    }
-                    r = r + 1;
-                    c = c0;
-                }
-                else {
-                    // the data has fixed length
-                    int n = line.length();
-                    String theVal;
-                    for (int i = 0; i < n; i = i + fixedDataLength) {
-                        try {
-                            theVal = line.substring(i, i + fixedDataLength);
-                            updateValueInMemory(theVal, r, c);
-                        }
-                        catch (Exception ex) {
-                            continue;
-                        }
-                        c++;
-                    }
-                }
-            }
-        }
-        catch (Throwable ex) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
-        }
     }
 
     /**
@@ -2103,27 +1824,27 @@ public class DefaultTableView2 implements TableView {
         }
         else {
             switch (NT) {
-            case 'B':
-                selectedData = new byte[size];
-                break;
-            case 'S':
-                selectedData = new short[size];
-                break;
-            case 'I':
-                selectedData = new int[size];
-                break;
-            case 'J':
-                selectedData = new long[size];
-                break;
-            case 'F':
-                selectedData = new float[size];
-                break;
-            case 'D':
-                selectedData = new double[size];
-                break;
-            default:
-                selectedData = null;
-                break;
+                case 'B':
+                    selectedData = new byte[size];
+                    break;
+                case 'S':
+                    selectedData = new short[size];
+                    break;
+                case 'I':
+                    selectedData = new int[size];
+                    break;
+                case 'J':
+                    selectedData = new long[size];
+                    break;
+                case 'F':
+                    selectedData = new float[size];
+                    break;
+                case 'D':
+                    selectedData = new double[size];
+                    break;
+                default:
+                    selectedData = null;
+                    break;
             }
         }
 
@@ -2349,17 +2070,17 @@ public class DefaultTableView2 implements TableView {
         String viewName = null;
 
         switch (viewType) {
-        case TEXT:
-            viewName = (String) HDFView.getListOfTextViews().get(0);
-            break;
-        case IMAGE:
-            viewName = HDFView.getListOfImageViews().get(0);
-            break;
-        case TABLE:
-            viewName = (String) HDFView.getListOfTableViews().get(0);
-            break;
-        default:
-            viewName = null;
+            case TEXT:
+                viewName = (String) HDFView.getListOfTextViews().get(0);
+                break;
+            case IMAGE:
+                viewName = HDFView.getListOfImageViews().get(0);
+                break;
+            case TABLE:
+                viewName = (String) HDFView.getListOfTableViews().get(0);
+                break;
+            default:
+                viewName = null;
         }
 
         try {
@@ -2378,17 +2099,17 @@ public class DefaultTableView2 implements TableView {
         if (theClass == null) {
             log.trace("showObjRefData(): Using default dataview");
             switch (viewType) {
-            case TEXT:
-                viewName = "hdf.view.DefaultTextView";
-                break;
-            case IMAGE:
-                viewName = "hdf.view.DefaultImageView";
-                break;
-            case TABLE:
-                viewName = "hdf.view.DefaultTableView";
-                break;
-            default:
-                viewName = null;
+                case TEXT:
+                    viewName = "hdf.view.DefaultTextView";
+                    break;
+                case IMAGE:
+                    viewName = "hdf.view.DefaultImageView";
+                    break;
+                case TABLE:
+                    viewName = "hdf.view.DefaultTableView";
+                    break;
+                default:
+                    viewName = null;
             }
 
             try {
@@ -2585,17 +2306,17 @@ public class DefaultTableView2 implements TableView {
             String viewName = null;
 
             switch (viewType) {
-            case TEXT:
-                viewName = (String) HDFView.getListOfTextViews().get(0);
-                break;
-            case IMAGE:
-                viewName = HDFView.getListOfImageViews().get(0);
-                break;
-            case TABLE:
-                viewName = (String) HDFView.getListOfTableViews().get(0);
-                break;
-            default:
-                viewName = null;
+                case TEXT:
+                    viewName = (String) HDFView.getListOfTextViews().get(0);
+                    break;
+                case IMAGE:
+                    viewName = HDFView.getListOfImageViews().get(0);
+                    break;
+                case TABLE:
+                    viewName = (String) HDFView.getListOfTableViews().get(0);
+                    break;
+                default:
+                    viewName = null;
             }
 
             try {
@@ -2614,17 +2335,17 @@ public class DefaultTableView2 implements TableView {
             if (theClass == null) {
                 log.trace("showRegRefData(): Using default dataview");
                 switch (viewType) {
-                case TEXT:
-                    viewName = "hdf.view.DefaultTextView";
-                    break;
-                case IMAGE:
-                    viewName = "hdf.view.DefaultImageView";
-                    break;
-                case TABLE:
-                    viewName = "hdf.view.DefaultTableView";
-                    break;
-                default:
-                    viewName = null;
+                    case TEXT:
+                        viewName = "hdf.view.DefaultTextView";
+                        break;
+                    case IMAGE:
+                        viewName = "hdf.view.DefaultImageView";
+                        break;
+                    case TABLE:
+                        viewName = "hdf.view.DefaultTableView";
+                        break;
+                    default:
+                        viewName = null;
                 }
 
                 try {
@@ -2655,445 +2376,6 @@ public class DefaultTableView2 implements TableView {
 
         log.trace("showRegRefData(): finish");
     } // private void showRegRefData(String reg)
-
-    /**
-     * Import data values from text file.
-     *
-     * @param fname  the file to import text from
-     */
-    private void importTextData (String fname) {
-        int cols = selectionLayer.getPreferredColumnCount();
-        int rows = selectionLayer.getPreferredRowCount();
-        int r0;
-        int c0;
-
-        Rectangle lastSelection = selectionLayer.getLastSelectedRegion();
-        if(lastSelection != null) {
-            r0 = lastSelection.y;
-            c0 = lastSelection.x;
-
-            if (c0 < 0) {
-                c0 = 0;
-            }
-            if (r0 < 0) {
-                r0 = 0;
-            }
-        }
-        else {
-            r0 = 0;
-            c0 = 0;
-        }
-
-        // Start at the first column for compound datasets
-        if (dataset instanceof CompoundDS) c0 = 0;
-
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new FileReader(fname));
-        }
-        catch (FileNotFoundException ex) {
-            log.debug("import data values from text file {}:", fname, ex);
-            return;
-        }
-
-        String line = null;
-        StringTokenizer tokenizer1 = null;
-
-        try {
-            line = in.readLine();
-        }
-        catch (IOException ex) {
-            try {
-                in.close();
-            }
-            catch (IOException ex2) {
-                log.debug("close text file {}:", fname, ex2);
-            }
-            log.debug("read text file {}:", fname, ex);
-            return;
-        }
-
-        String delName = ViewProperties.getDataDelimiter();
-        String delimiter = "";
-
-        // delimiter must include a tab to be consistent with copy/paste for
-        // compound fields
-        if (dataset instanceof CompoundDS)
-            delimiter = "\t";
-        else {
-            if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB)) {
-                delimiter = "\t";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE)) {
-                delimiter = " " + delimiter;
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA)) {
-                delimiter = ",";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON)) {
-                delimiter = ":";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON)) {
-                delimiter = ";";
-            }
-        }
-        String token = null;
-        int r = r0;
-        int c = c0;
-        while ((line != null) && (r < rows)) {
-            if (fixedDataLength > 0) {
-                // the data has fixed length
-                int n = line.length();
-                String theVal;
-                for (int i = 0; i < n; i = i + fixedDataLength) {
-                    try {
-                        theVal = line.substring(i, i + fixedDataLength);
-                        updateValueInMemory(theVal, r, c);
-                    }
-                    catch (Exception ex) {
-                        continue;
-                    }
-                    c++;
-                }
-            }
-            else {
-                try {
-                    tokenizer1 = new StringTokenizer(line, delimiter);
-                    while (tokenizer1.hasMoreTokens() && (c < cols)) {
-                        token = tokenizer1.nextToken();
-                        if (dataset instanceof ScalarDS) {
-                            StringTokenizer tokenizer2 = new StringTokenizer(token);
-                            while (tokenizer2.hasMoreTokens() && (c < cols)) {
-                                updateValueInMemory(tokenizer2.nextToken(), r, c);
-                                c++;
-                            }
-                        }
-                        else {
-                            updateValueInMemory(token, r, c);
-                            c++;
-                        }
-                    } // while (tokenizer1.hasMoreTokens() && index < size)
-                }
-                catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
-
-                    try {
-                        in.close();
-                    }
-                    catch (IOException ex2) {
-                        log.debug("close text file {}:", fname, ex2);
-                    }
-                    return;
-                }
-            }
-
-            try {
-                line = in.readLine();
-            }
-            catch (IOException ex) {
-                log.debug("read text file {}:", fname, ex);
-                line = null;
-            }
-
-            // Start at the first column for compound datasets
-            if (dataset instanceof CompoundDS) {
-                c = 0;
-            }
-            else {
-                c = c0;
-            }
-
-            r++;
-        } // while ((line != null) && (r < rows))
-
-        try {
-            in.close();
-        }
-        catch (IOException ex) {
-            log.debug("close text file {}:", fname, ex);
-        }
-    }
-
-    /**
-     * Import data values from binary file.
-     */
-    private void importBinaryData() {
-        String currentDir = dataset.getFileFormat().getParent();
-
-        String filename = null;
-        if (((HDFView) viewer).getTestState()) {
-            filename = currentDir + File.separator + new InputDialog(shell, "Enter a file name", "").open();
-        }
-        else {
-            FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
-            fChooser.setFilterPath(currentDir);
-
-            DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
-            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-            fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-            fChooser.setFilterIndex(1);
-
-            filename = fChooser.open();
-        }
-
-        if (filename == null) return;
-
-        File chosenFile = new File(filename);
-        if (!chosenFile.exists()) {
-            Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Binary File");
-            return;
-        }
-
-        if(!MessageDialog.openConfirm(shell, "Import Data", "Do you want to paste selected data?"))
-            return;
-
-        getBinaryDataFromFile(chosenFile.getAbsolutePath());
-    }
-
-    /** Reads data from a binary file into a buffer and updates table.
-     *
-     * @param filename the file to read binary data from
-     */
-    private void getBinaryDataFromFile (String fileName) {
-        String fname = fileName;
-        FileInputStream inputFile = null;
-        BufferedInputStream in = null;
-        ByteBuffer byteBuffer = null;
-
-        try {
-            inputFile = new FileInputStream(fname);
-            long fileSize = inputFile.getChannel().size();
-            in = new BufferedInputStream(inputFile);
-
-            Object data = dataset.getData();
-            int datasetSize = Array.getLength(data);
-            String cname = data.getClass().getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-
-            if (dname == 'B') {
-                long datasetByteSize = datasetSize;
-                byteBuffer = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
-                int bufferSize = (int) Math.min(fileSize, datasetByteSize);
-
-                int remainingSize = bufferSize - (BYTE_BUFFER_SIZE);
-                int allocValue = 0;
-                int iterationNumber = 0;
-                byte[] byteArray = new byte[BYTE_BUFFER_SIZE];
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + (BYTE_BUFFER_SIZE);
-                    }
-                    else {
-                        allocValue = (BYTE_BUFFER_SIZE);
-                    }
-
-                    in.read(byteBuffer.array(), 0, allocValue);
-
-                    byteBuffer.get(byteArray, 0, allocValue);
-                    System.arraycopy(byteArray, 0, dataValue, (iterationNumber * BYTE_BUFFER_SIZE), allocValue);
-                    byteBuffer.clear();
-                    remainingSize = remainingSize - (BYTE_BUFFER_SIZE);
-                    iterationNumber++;
-                } while (remainingSize > -(BYTE_BUFFER_SIZE));
-
-                isValueChanged = true;
-            }
-            else if (dname == 'S') {
-                long datasetShortSize = datasetSize * 2;
-                byteBuffer = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
-                int bufferSize = (int) Math.min(fileSize, datasetShortSize);
-                int remainingSize = bufferSize - (SHORT_BUFFER_SIZE * 2);
-                int allocValue = 0;
-                int iterationNumber = 0;
-                ShortBuffer sb = byteBuffer.asShortBuffer();
-                short[] shortArray = new short[SHORT_BUFFER_SIZE];
-
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + (SHORT_BUFFER_SIZE * 2);
-                    }
-                    else {
-                        allocValue = (SHORT_BUFFER_SIZE * 2);
-                    }
-                    in.read(byteBuffer.array(), 0, allocValue);
-                    sb.get(shortArray, 0, allocValue / 2);
-                    System.arraycopy(shortArray, 0, dataValue, (iterationNumber * SHORT_BUFFER_SIZE), allocValue / 2);
-                    byteBuffer.clear();
-                    sb.clear();
-                    remainingSize = remainingSize - (SHORT_BUFFER_SIZE * 2);
-                    iterationNumber++;
-                } while (remainingSize > -(SHORT_BUFFER_SIZE * 2));
-
-                isValueChanged = true;
-            }
-            else if (dname == 'I') {
-                long datasetIntSize = datasetSize * 4;
-                byteBuffer = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
-                int bufferSize = (int) Math.min(fileSize, datasetIntSize);
-                int remainingSize = bufferSize - (INT_BUFFER_SIZE * 4);
-                int allocValue = 0;
-                int iterationNumber = 0;
-                int[] intArray = new int[INT_BUFFER_SIZE];
-                byte[] tmpBuf = byteBuffer.array();
-                IntBuffer ib = byteBuffer.asIntBuffer();
-
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + (INT_BUFFER_SIZE * 4);
-                    }
-                    else {
-                        allocValue = (INT_BUFFER_SIZE * 4);
-                    }
-                    in.read(tmpBuf, 0, allocValue);
-                    ib.get(intArray, 0, allocValue / 4);
-                    System.arraycopy(intArray, 0, dataValue, (iterationNumber * INT_BUFFER_SIZE), allocValue / 4);
-                    byteBuffer.clear();
-                    ib.clear();
-                    remainingSize = remainingSize - (INT_BUFFER_SIZE * 4);
-                    iterationNumber++;
-                } while (remainingSize > -(INT_BUFFER_SIZE * 4));
-
-                isValueChanged = true;
-            }
-            else if (dname == 'J') {
-                long datasetLongSize = datasetSize * 8;
-                byteBuffer = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
-
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
-                int bufferSize = (int) Math.min(fileSize, datasetLongSize);
-                int remainingSize = bufferSize - (LONG_BUFFER_SIZE * 8);
-                int allocValue = 0;
-                int iterationNumber = 0;
-                long[] longArray = new long[LONG_BUFFER_SIZE];
-                LongBuffer lb = byteBuffer.asLongBuffer();
-
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + (LONG_BUFFER_SIZE * 8);
-                    }
-                    else {
-                        allocValue = (LONG_BUFFER_SIZE * 8);
-                    }
-
-                    in.read(byteBuffer.array(), 0, allocValue);
-                    lb.get(longArray, 0, allocValue / 8);
-                    System.arraycopy(longArray, 0, dataValue, (iterationNumber * LONG_BUFFER_SIZE), allocValue / 8);
-                    byteBuffer.clear();
-                    lb.clear();
-                    remainingSize = remainingSize - (LONG_BUFFER_SIZE * 8);
-                    iterationNumber++;
-                } while (remainingSize > -(LONG_BUFFER_SIZE * 8));
-
-                isValueChanged = true;
-            }
-            else if (dname == 'F') {
-                long datasetFloatSize = datasetSize * 4;
-                byteBuffer = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
-                int bufferSize = (int) Math.min(fileSize, datasetFloatSize);
-                int remainingSize = bufferSize - (FLOAT_BUFFER_SIZE * 4);
-                int allocValue = 0;
-                int iterationNumber = 0;
-                FloatBuffer fb = byteBuffer.asFloatBuffer();
-                float[] floatArray = new float[FLOAT_BUFFER_SIZE];
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + (FLOAT_BUFFER_SIZE * 4);
-                    }
-                    else {
-                        allocValue = (FLOAT_BUFFER_SIZE * 4);
-                    }
-
-                    in.read(byteBuffer.array(), 0, allocValue);
-                    fb.get(floatArray, 0, allocValue / 4);
-                    System.arraycopy(floatArray, 0, dataValue, (iterationNumber * FLOAT_BUFFER_SIZE), allocValue / 4);
-                    byteBuffer.clear();
-                    fb.clear();
-                    remainingSize = remainingSize - (FLOAT_BUFFER_SIZE * 4);
-                    iterationNumber++;
-                } while (remainingSize > -(FLOAT_BUFFER_SIZE * 4));
-
-                isValueChanged = true;
-            }
-            else if (dname == 'D') {
-                long datasetDoubleSize = datasetSize * 8;
-                byteBuffer = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
-                int bufferSize = (int) Math.min(fileSize, datasetDoubleSize);
-                int remainingSize = bufferSize - (DOUBLE_BUFFER_SIZE * 8);
-                int allocValue = 0;
-                int iterationNumber = 0;
-                DoubleBuffer db = byteBuffer.asDoubleBuffer();
-                double[] doubleArray = new double[DOUBLE_BUFFER_SIZE];
-
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + (DOUBLE_BUFFER_SIZE * 8);
-                    }
-                    else {
-                        allocValue = (DOUBLE_BUFFER_SIZE * 8);
-                    }
-
-                    in.read(byteBuffer.array(), 0, allocValue);
-                    db.get(doubleArray, 0, allocValue / 8);
-                    System.arraycopy(doubleArray, 0, dataValue, (iterationNumber * DOUBLE_BUFFER_SIZE), allocValue / 8);
-                    byteBuffer.clear();
-                    db.clear();
-                    remainingSize = remainingSize - (DOUBLE_BUFFER_SIZE * 8);
-                    iterationNumber++;
-                } while (remainingSize > -(DOUBLE_BUFFER_SIZE * 8));
-
-                isValueChanged = true;
-            }
-        }
-        catch (Exception es) {
-            es.printStackTrace();
-        }
-        finally {
-            try {
-                in.close();
-                inputFile.close();
-            }
-            catch (IOException ex) {
-                log.debug("close binary file {}:", fname, ex);
-            }
-        }
-
-        dsetTable.doCommand(new StructuralRefreshCommand());
-    }
 
     /** Save data as text.
      *
@@ -3681,136 +2963,136 @@ public class DefaultTableView2 implements TableView {
         //TODO: Add validation for array types when array editing is added
 
         switch(cname.charAt(cname.lastIndexOf("[") + 1)) {
-        case 'B':
-            if (isUnsigned) {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidUByte(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+            case 'B':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidUByte(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
 
-                        return true;
-                    }
-                };
-            }
-            else {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidByte(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            }
-        case 'S':
-            if (isUnsigned) {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidUShort(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            }
-            else {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidShort(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            }
-        case 'I':
-            if (isUnsigned) {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidUInt(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            }
-            else {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidInt(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            }
-        case 'J':
-            if (isUnsigned) {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidULong(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            }
-            else {
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidLong(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            }
-        case 'F':
-            return new DataValidator() {
-                @Override
-                public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                    if (!Tools.checkValidFloat(newValue.toString()))
-                        throw new ValidationFailedException("Failed to update value at "
-                                + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                    return true;
+                            return true;
+                        }
+                    };
                 }
-            };
-        case 'D':
-            return new DataValidator() {
-                @Override
-                public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                    if (!Tools.checkValidDouble(newValue.toString()))
-                        throw new ValidationFailedException("Failed to update value at "
-                                + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidByte(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
 
-                    return true;
+                            return true;
+                        }
+                    };
                 }
-            };
-        default:
-            // Default: never validate
-            return new DataValidator() {
-                @Override
-                public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                    return false;
+            case 'S':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidUShort(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
                 }
-            };
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidShort(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+            case 'I':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidUInt(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidInt(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+            case 'J':
+                if (isUnsigned) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidULong(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+                else {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            if (!Tools.checkValidLong(newValue.toString()))
+                                throw new ValidationFailedException("Failed to update value at "
+                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                            return true;
+                        }
+                    };
+                }
+            case 'F':
+                return new DataValidator() {
+                    @Override
+                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                        if (!Tools.checkValidFloat(newValue.toString()))
+                            throw new ValidationFailedException("Failed to update value at "
+                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                        return true;
+                    }
+                };
+            case 'D':
+                return new DataValidator() {
+                    @Override
+                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                        if (!Tools.checkValidDouble(newValue.toString()))
+                            throw new ValidationFailedException("Failed to update value at "
+                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
+
+                        return true;
+                    }
+                };
+            default:
+                // Default: never validate
+                return new DataValidator() {
+                    @Override
+                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                        return false;
+                    }
+                };
         }
     }
 
@@ -4160,7 +3442,7 @@ public class DefaultTableView2 implements TableView {
                     for (int i = 0; i < len; i++) {
                         if (i > 0) buffer.append(", ");
                         if (isUINT64)
-                            buffer.append((BigInteger) ((Object[]) value)[i]);
+                            buffer.append(((Object[]) value)[i]);
                         else
                             buffer.append(((Object[]) value)[i]);
                     }
@@ -4416,70 +3698,58 @@ public class DefaultTableView2 implements TableView {
                                             int n = Array.getLength(dbuf);
                                             if (is_unsigned) {
                                                 switch (NT) {
-                                                case 'B':
-                                                    byte[] barray = (byte[]) dbuf;
-                                                    short sValue = barray[0];
-                                                    if (sValue < 0) {
-                                                        sValue += 256;
-                                                    }
-                                                    strvalSB.append(sValue);
-                                                    for (int i = 1; i < n; i++) {
-                                                        strvalSB.append(',');
-                                                        sValue = barray[i];
+                                                    case 'B':
+                                                        byte[] barray = (byte[]) dbuf;
+                                                        short sValue = barray[0];
                                                         if (sValue < 0) {
                                                             sValue += 256;
                                                         }
                                                         strvalSB.append(sValue);
-                                                    }
-                                                    break;
-                                                case 'S':
-                                                    short[] sarray = (short[]) dbuf;
-                                                    int iValue = sarray[0];
-                                                    if (iValue < 0) {
-                                                        iValue += 65536;
-                                                    }
-                                                    strvalSB.append(iValue);
-                                                    for (int i = 1; i < n; i++) {
-                                                        strvalSB.append(',');
-                                                        iValue = sarray[i];
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            sValue = barray[i];
+                                                            if (sValue < 0) {
+                                                                sValue += 256;
+                                                            }
+                                                            strvalSB.append(sValue);
+                                                        }
+                                                        break;
+                                                    case 'S':
+                                                        short[] sarray = (short[]) dbuf;
+                                                        int iValue = sarray[0];
                                                         if (iValue < 0) {
                                                             iValue += 65536;
                                                         }
                                                         strvalSB.append(iValue);
-                                                    }
-                                                    break;
-                                                case 'I':
-                                                    int[] iarray = (int[]) dbuf;
-                                                    long lValue = iarray[0];
-                                                    if (lValue < 0) {
-                                                        lValue += 4294967296L;
-                                                    }
-                                                    strvalSB.append(lValue);
-                                                    for (int i = 1; i < n; i++) {
-                                                        strvalSB.append(',');
-                                                        lValue = iarray[i];
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            iValue = sarray[i];
+                                                            if (iValue < 0) {
+                                                                iValue += 65536;
+                                                            }
+                                                            strvalSB.append(iValue);
+                                                        }
+                                                        break;
+                                                    case 'I':
+                                                        int[] iarray = (int[]) dbuf;
+                                                        long lValue = iarray[0];
                                                         if (lValue < 0) {
                                                             lValue += 4294967296L;
                                                         }
                                                         strvalSB.append(lValue);
-                                                    }
-                                                    break;
-                                                case 'J':
-                                                    long[] larray = (long[]) dbuf;
-                                                    Long l = larray[0];
-                                                    String theValue = Long.toString(l);
-                                                    if (l < 0) {
-                                                        l = (l << 1) >>> 1;
-                                                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                                        BigInteger big2 = new BigInteger(l.toString());
-                                                        BigInteger big = big1.add(big2);
-                                                        theValue = big.toString();
-                                                    }
-                                                    strvalSB.append(theValue);
-                                                    for (int i = 1; i < n; i++) {
-                                                        strvalSB.append(',');
-                                                        l = larray[i];
-                                                        theValue = Long.toString(l);
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            lValue = iarray[i];
+                                                            if (lValue < 0) {
+                                                                lValue += 4294967296L;
+                                                            }
+                                                            strvalSB.append(lValue);
+                                                        }
+                                                        break;
+                                                    case 'J':
+                                                        long[] larray = (long[]) dbuf;
+                                                        Long l = larray[0];
+                                                        String theValue = Long.toString(l);
                                                         if (l < 0) {
                                                             l = (l << 1) >>> 1;
                                                             BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
@@ -4488,15 +3758,27 @@ public class DefaultTableView2 implements TableView {
                                                             theValue = big.toString();
                                                         }
                                                         strvalSB.append(theValue);
-                                                    }
-                                                    break;
-                                                default:
-                                                    strvalSB.append(Array.get(dbuf, 0));
-                                                    for (int i = 1; i < n; i++) {
-                                                        strvalSB.append(',');
-                                                        strvalSB.append(Array.get(dbuf, i));
-                                                    }
-                                                    break;
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            l = larray[i];
+                                                            theValue = Long.toString(l);
+                                                            if (l < 0) {
+                                                                l = (l << 1) >>> 1;
+                                                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                                                                BigInteger big2 = new BigInteger(l.toString());
+                                                                BigInteger big = big1.add(big2);
+                                                                theValue = big.toString();
+                                                            }
+                                                            strvalSB.append(theValue);
+                                                        }
+                                                        break;
+                                                    default:
+                                                        strvalSB.append(Array.get(dbuf, 0));
+                                                        for (int i = 1; i < n; i++) {
+                                                            strvalSB.append(',');
+                                                            strvalSB.append(Array.get(dbuf, i));
+                                                        }
+                                                        break;
                                                 }
                                             }
                                             else {
