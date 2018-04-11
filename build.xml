@@ -188,12 +188,14 @@
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
       <path refid="slf4j-classpath" />
+      <path refid="log-classpath" />
   </path>
   <path id="jar-classpath">
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
       <path refid="slf4j-classpath" />
+      <path refid="nop-classpath" />
   </path>
 
   <property name="main-class" value="hdf.view.HDFView" />
