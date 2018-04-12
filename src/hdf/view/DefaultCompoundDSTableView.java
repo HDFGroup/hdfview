@@ -17,6 +17,7 @@ package hdf.view;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -58,8 +59,32 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundDSTableView.class);
 
-    public DefaultCompoundDSTableView() {
-        super();
+    /**
+     * Constructs a CompoundDS TableView with no additional data properties.
+     *
+     * @param theView
+     *            the main HDFView.
+     */
+    public DefaultCompoundDSTableView(ViewManager theView) {
+        this(theView, null);
+    }
+
+    /**
+     * Constructs a CompoundDS TableView with the specified data properties.
+     *
+     * @param theView
+     *            the main HDFView.
+     *
+     * @param dataPropertiesMap
+     *            the properties on how to show the data. The map is used to allow
+     *            applications to pass properties on how to display the data, such
+     *            as: transposing data, showing data as characters, applying a
+     *            bitmask, and etc. Predefined keys are listed at
+     *            ViewProperties.DATA_VIEW_KEY.
+     */
+    @SuppressWarnings("rawtypes")
+    public DefaultCompoundDSTableView(ViewManager theView, HashMap dataPropertiesMap) {
+        super(theView, dataPropertiesMap);
 
         isDataTransposed = false; // Disable transpose for compound datasets
 

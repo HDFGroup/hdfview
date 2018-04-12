@@ -29,13 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
-import java.nio.ShortBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.BitSet;
@@ -449,7 +443,6 @@ public abstract class DefaultBaseTableView implements TableView {
         dataTable = createTable(content, dataObject);
         if (dataTable == null) {
             viewer.showStatus("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
-            dataObject = null;
             shell.dispose();
             return;
         }
@@ -1588,209 +1581,20 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dataObject instanceof ScalarDS) {
             ((ScalarDS) dataObject).convertToUnsignedC();
             Object data = dataObject.getData();
-            String cname = data.getClass().getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-            ByteBuffer bb = null;
+            ByteOrder bo = ByteOrder.nativeOrder();
 
-            int size = Array.getLength(data);
+            if (binaryOrder == 1)
+                bo = ByteOrder.nativeOrder();
+            else if (binaryOrder == 2)
+                bo = ByteOrder.LITTLE_ENDIAN;
+            else if (binaryOrder == 3) bo = ByteOrder.BIG_ENDIAN;
 
-            if (dname == 'B') {
-                byte[] bdata = new byte[size];
-                bdata = (byte[]) data;
+            Tools.saveAsBinary(out, data, bo);
 
-                bb = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
-                if (binaryOrder == 1)
-                    bb.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) bb.order(ByteOrder.BIG_ENDIAN);
-
-                int remainingSize = size - BYTE_BUFFER_SIZE;
-                int allocValue = 0;
-                int iterationNumber = 0;
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + BYTE_BUFFER_SIZE;
-                    }
-                    else {
-                        allocValue = BYTE_BUFFER_SIZE;
-                    }
-                    bb.clear();
-                    bb.put(bdata, (iterationNumber * BYTE_BUFFER_SIZE), allocValue);
-                    out.write(bb.array(), 0, allocValue);
-                    remainingSize = remainingSize - BYTE_BUFFER_SIZE;
-                    iterationNumber++;
-                } while (remainingSize > -BYTE_BUFFER_SIZE);
-
-                out.flush();
-                out.close();
-            }
-            else if (dname == 'S') {
-                short[] sdata = new short[size];
-                sdata = (short[]) data;
-                bb = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
-                if (binaryOrder == 1)
-                    bb.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) bb.order(ByteOrder.BIG_ENDIAN);
-
-                ShortBuffer sb = bb.asShortBuffer();
-                int remainingSize = size - SHORT_BUFFER_SIZE;
-                int allocValue = 0;
-                int iterationNumber = 0;
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + SHORT_BUFFER_SIZE;
-                    }
-                    else {
-                        allocValue = SHORT_BUFFER_SIZE;
-                    }
-                    bb.clear();
-                    sb.clear();
-                    sb.put(sdata, (iterationNumber * SHORT_BUFFER_SIZE), allocValue);
-                    out.write(bb.array(), 0, allocValue * 2);
-                    remainingSize = remainingSize - SHORT_BUFFER_SIZE;
-                    iterationNumber++;
-                } while (remainingSize > -SHORT_BUFFER_SIZE);
-
-                out.flush();
-                out.close();
-            }
-            else if (dname == 'I') {
-                int[] idata = new int[size];
-                idata = (int[]) data;
-                bb = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
-                if (binaryOrder == 1)
-                    bb.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) bb.order(ByteOrder.BIG_ENDIAN);
-
-                IntBuffer ib = bb.asIntBuffer();
-                int remainingSize = size - INT_BUFFER_SIZE;
-                int allocValue = 0;
-                int iterationNumber = 0;
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + INT_BUFFER_SIZE;
-                    }
-                    else {
-                        allocValue = INT_BUFFER_SIZE;
-                    }
-                    bb.clear();
-                    ib.clear();
-                    ib.put(idata, (iterationNumber * INT_BUFFER_SIZE), allocValue);
-                    out.write(bb.array(), 0, allocValue * 4);
-                    remainingSize = remainingSize - INT_BUFFER_SIZE;
-                    iterationNumber++;
-                } while (remainingSize > -INT_BUFFER_SIZE);
-
-                out.flush();
-                out.close();
-            }
-            else if (dname == 'J') {
-                long[] ldata = new long[size];
-                ldata = (long[]) data;
-
-                bb = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
-                if (binaryOrder == 1)
-                    bb.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) bb.order(ByteOrder.BIG_ENDIAN);
-
-                LongBuffer lb = bb.asLongBuffer();
-                int remainingSize = size - LONG_BUFFER_SIZE;
-                int allocValue = 0;
-                int iterationNumber = 0;
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + LONG_BUFFER_SIZE;
-                    }
-                    else {
-                        allocValue = LONG_BUFFER_SIZE;
-                    }
-                    bb.clear();
-                    lb.clear();
-                    lb.put(ldata, (iterationNumber * LONG_BUFFER_SIZE), allocValue);
-                    out.write(bb.array(), 0, allocValue * 8);
-                    remainingSize = remainingSize - LONG_BUFFER_SIZE;
-                    iterationNumber++;
-                } while (remainingSize > -LONG_BUFFER_SIZE);
-
-                out.flush();
-                out.close();
-            }
-            else if (dname == 'F') {
-                float[] fdata = new float[size];
-                fdata = (float[]) data;
-
-                bb = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
-                if (binaryOrder == 1)
-                    bb.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) bb.order(ByteOrder.BIG_ENDIAN);
-
-                FloatBuffer fb = bb.asFloatBuffer();
-                int remainingSize = size - FLOAT_BUFFER_SIZE;
-                int allocValue = 0;
-                int iterationNumber = 0;
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + FLOAT_BUFFER_SIZE;
-                    }
-                    else {
-                        allocValue = FLOAT_BUFFER_SIZE;
-                    }
-                    bb.clear();
-                    fb.clear();
-                    fb.put(fdata, (iterationNumber * FLOAT_BUFFER_SIZE), allocValue);
-                    out.write(bb.array(), 0, allocValue * 4);
-                    remainingSize = remainingSize - FLOAT_BUFFER_SIZE;
-                    iterationNumber++;
-                } while (remainingSize > -FLOAT_BUFFER_SIZE);
-
-                out.flush();
-                out.close();
-            }
-            else if (dname == 'D') {
-                double[] ddata = new double[size];
-                ddata = (double[]) data;
-
-                bb = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
-                if (binaryOrder == 1)
-                    bb.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) bb.order(ByteOrder.BIG_ENDIAN);
-
-                DoubleBuffer db = bb.asDoubleBuffer();
-                int remainingSize = size - DOUBLE_BUFFER_SIZE;
-                int allocValue = 0;
-                int iterationNumber = 0;
-                do {
-                    if (remainingSize <= 0) {
-                        allocValue = remainingSize + DOUBLE_BUFFER_SIZE;
-                    }
-                    else {
-                        allocValue = DOUBLE_BUFFER_SIZE;
-                    }
-                    bb.clear();
-                    db.clear();
-                    db.put(ddata, (iterationNumber * DOUBLE_BUFFER_SIZE), allocValue);
-                    out.write(bb.array(), 0, allocValue * 8);
-                    remainingSize = remainingSize - DOUBLE_BUFFER_SIZE;
-                    iterationNumber++;
-                } while (remainingSize > -DOUBLE_BUFFER_SIZE);
-
-                out.flush();
-                out.close();
-            }
+            viewer.showStatus("Data saved to: " + fname);
         }
-
-        viewer.showStatus("Data saved to: " + fname);
+        else
+            viewer.showStatus("Data not saved - not a ScalarDS");
     }
 
     /**
@@ -1984,9 +1788,26 @@ public abstract class DefaultBaseTableView implements TableView {
 
         if (!MessageDialog.openConfirm(shell, "Import Data", "Do you want to paste selected data?")) return;
 
-        Tools.getBinaryDataFromFile(chosenFile.getAbsolutePath());
+        ByteOrder bo = ByteOrder.nativeOrder();
+        if (binaryOrder == 1)
+            bo = ByteOrder.nativeOrder();
+        else if (binaryOrder == 2)
+            bo = ByteOrder.LITTLE_ENDIAN;
+        else if (binaryOrder == 2) bo = ByteOrder.BIG_ENDIAN;
 
-        dataTable.doCommand(new StructuralRefreshCommand());
+        try {
+            if (Tools.getBinaryDataFromFile(dataValue, chosenFile.getAbsolutePath(), bo)) isValueChanged = true;
+
+            dataTable.doCommand(new StructuralRefreshCommand());
+        }
+        catch (Exception ex) {
+            log.trace("DefaultBaseTableView: importBinaryData(): {}", ex);
+            return;
+        }
+        catch (OutOfMemoryError e) {
+            log.trace("DefaultBaseTableView: importBinaryData(): Out of memory");
+            return;
+        }
     }
 
     /**

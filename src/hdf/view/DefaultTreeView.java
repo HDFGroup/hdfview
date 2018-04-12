@@ -70,6 +70,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import hdf.object.CompoundDS;
+import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -1103,43 +1104,43 @@ public class DefaultTreeView implements TreeView {
         HObject obj = null;
 
         switch(type) {
-        case GROUP:
-            NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
-                    breadthFirstUserObjects(rootItem));
-            groupDialog.open();
-            obj = (HObject) groupDialog.getObject();
-            parentItem = findTreeItem(groupDialog.getParentGroup());
-            break;
-        case DATASET:
-            NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            datasetDialog.open();
-            obj = (HObject) datasetDialog.getObject();
-            parentItem = findTreeItem(datasetDialog.getParentGroup());
-            break;
-        case IMAGE:
-            NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            imageDialog.open();
-            obj = (HObject) imageDialog.getObject();
-            parentItem = findTreeItem(imageDialog.getParentGroup());
-            break;
-        case TABLE:
-            NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            tableDialog.open();
-            obj = (HObject) tableDialog.getObject();
-            parentItem = findTreeItem(tableDialog.getParentGroup());
-            break;
-        case DATATYPE:
-            NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            datatypeDialog.open();
-            obj = (HObject) datatypeDialog.getObject();
-            parentItem = findTreeItem(datatypeDialog.getParentGroup());
-            break;
-        case LINK:
-            NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
-            linkDialog.open();
-            obj = (HObject) linkDialog.getObject();
-            parentItem = findTreeItem(linkDialog.getParentGroup());
-            break;
+            case GROUP:
+                NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
+                        breadthFirstUserObjects(rootItem));
+                groupDialog.open();
+                obj = groupDialog.getObject();
+                parentItem = findTreeItem(groupDialog.getParentGroup());
+                break;
+            case DATASET:
+                NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                datasetDialog.open();
+                obj = datasetDialog.getObject();
+                parentItem = findTreeItem(datasetDialog.getParentGroup());
+                break;
+            case IMAGE:
+                NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                imageDialog.open();
+                obj = imageDialog.getObject();
+                parentItem = findTreeItem(imageDialog.getParentGroup());
+                break;
+            case TABLE:
+                NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                tableDialog.open();
+                obj = tableDialog.getObject();
+                parentItem = findTreeItem(tableDialog.getParentGroup());
+                break;
+            case DATATYPE:
+                NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                datatypeDialog.open();
+                obj = datatypeDialog.getObject();
+                parentItem = findTreeItem(datatypeDialog.getParentGroup());
+                break;
+            case LINK:
+                NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
+                linkDialog.open();
+                obj = linkDialog.getObject();
+                parentItem = findTreeItem(linkDialog.getParentGroup());
+                break;
         }
 
         if (obj == null) return;
@@ -2576,11 +2577,11 @@ public class DefaultTreeView implements TreeView {
     public DataView showDataContent(HObject dataObject) throws Exception {
         log.trace("showDataContent({}): start", dataObject.getName());
 
-        if ((dataObject == null) || !(dataObject instanceof Dataset)) {
+        if ((dataObject == null) || !(dataObject instanceof DataFormat)) {
             return null; // can only display dataset
         }
 
-        Dataset d = (Dataset) dataObject;
+        DataFormat d = (DataFormat) dataObject;
 
         if (d.getRank() <= 0) d.init();
 
@@ -2594,7 +2595,7 @@ public class DefaultTreeView implements TreeView {
 
         log.trace("showDataContent: inited");
 
-        DataView existingView = ((HDFView) viewer).getDataView(d);
+        DataView existingView = ((HDFView) viewer).getDataView((HObject) d);
 
         if (isDefaultDisplay) {
             if (existingView != null) {
@@ -2625,7 +2626,7 @@ public class DefaultTreeView implements TreeView {
             }
         }
         else {
-            DataOptionDialog dialog = new DataOptionDialog(shell, d);
+            DataOptionDialog dialog = new DataOptionDialog(shell, (HObject) d);
             dialog.open();
 
             if (dialog.isCancelled()) {

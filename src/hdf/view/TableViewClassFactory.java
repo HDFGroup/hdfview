@@ -14,7 +14,10 @@
 
 package hdf.view;
 
+import hdf.object.Attribute;
+import hdf.object.CompoundDS;
 import hdf.object.HObject;
+import hdf.object.ScalarDS;
 
 public class TableViewClassFactory {
 
@@ -24,6 +27,16 @@ public class TableViewClassFactory {
         if (dataObject == null) return null;
 
         log.trace("getTableView(): start");
+
+        if (dataObject instanceof ScalarDS) {
+
+        }
+        else if (dataObject instanceof CompoundDS) {
+
+        }
+        else if (dataObject instanceof Attribute) {
+
+        }
 
         return null;
     }

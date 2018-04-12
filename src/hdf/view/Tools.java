@@ -26,6 +26,7 @@ import java.awt.image.PixelGrabber;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -1784,36 +1785,213 @@ public final class Tools {
         return retval;
     }
 
+    public static void saveAsBinary(DataOutputStream out, Object data, ByteOrder order) throws Exception {
+        String cname = data.getClass().getName();
+        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        ByteBuffer bb = null;
+
+        int size = Array.getLength(data);
+
+        if (dname == 'B') {
+            byte[] bdata = new byte[size];
+            bdata = (byte[]) data;
+
+            bb = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
+            bb.order(order);
+
+            int remainingSize = size - BYTE_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + BYTE_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = BYTE_BUFFER_SIZE;
+                }
+                bb.clear();
+                bb.put(bdata, (iterationNumber * BYTE_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue);
+                remainingSize = remainingSize - BYTE_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -BYTE_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'S') {
+            short[] sdata = new short[size];
+            sdata = (short[]) data;
+            bb = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
+            bb.order(order);
+
+            ShortBuffer sb = bb.asShortBuffer();
+            int remainingSize = size - SHORT_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + SHORT_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = SHORT_BUFFER_SIZE;
+                }
+                bb.clear();
+                sb.clear();
+                sb.put(sdata, (iterationNumber * SHORT_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 2);
+                remainingSize = remainingSize - SHORT_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -SHORT_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'I') {
+            int[] idata = new int[size];
+            idata = (int[]) data;
+            bb = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
+            bb.order(order);
+
+            IntBuffer ib = bb.asIntBuffer();
+            int remainingSize = size - INT_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + INT_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = INT_BUFFER_SIZE;
+                }
+                bb.clear();
+                ib.clear();
+                ib.put(idata, (iterationNumber * INT_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 4);
+                remainingSize = remainingSize - INT_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -INT_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'J') {
+            long[] ldata = new long[size];
+            ldata = (long[]) data;
+
+            bb = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
+            bb.order(order);
+
+            LongBuffer lb = bb.asLongBuffer();
+            int remainingSize = size - LONG_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + LONG_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = LONG_BUFFER_SIZE;
+                }
+                bb.clear();
+                lb.clear();
+                lb.put(ldata, (iterationNumber * LONG_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 8);
+                remainingSize = remainingSize - LONG_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -LONG_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'F') {
+            float[] fdata = new float[size];
+            fdata = (float[]) data;
+
+            bb = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
+            bb.order(order);
+
+            FloatBuffer fb = bb.asFloatBuffer();
+            int remainingSize = size - FLOAT_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + FLOAT_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = FLOAT_BUFFER_SIZE;
+                }
+                bb.clear();
+                fb.clear();
+                fb.put(fdata, (iterationNumber * FLOAT_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 4);
+                remainingSize = remainingSize - FLOAT_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -FLOAT_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'D') {
+            double[] ddata = new double[size];
+            ddata = (double[]) data;
+
+            bb = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
+            bb.order(order);
+
+            DoubleBuffer db = bb.asDoubleBuffer();
+            int remainingSize = size - DOUBLE_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + DOUBLE_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = DOUBLE_BUFFER_SIZE;
+                }
+                bb.clear();
+                db.clear();
+                db.put(ddata, (iterationNumber * DOUBLE_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 8);
+                remainingSize = remainingSize - DOUBLE_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -DOUBLE_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+    }
+
     /**
      * Reads data from a binary file into a buffer.
      *
      * @param filename
      *            the file to read binary data from
      */
-    public static void getBinaryDataFromFile(String fileName) {
+    public static boolean getBinaryDataFromFile(Object dataOut, String fileName, ByteOrder order) {
+        if (dataOut == null) return false;
+
         String fname = fileName;
         FileInputStream inputFile = null;
         BufferedInputStream in = null;
         ByteBuffer byteBuffer = null;
+        boolean valChanged = false;
 
         try {
             inputFile = new FileInputStream(fname);
             long fileSize = inputFile.getChannel().size();
             in = new BufferedInputStream(inputFile);
 
-            Object data = dataset.getData();
-            int datasetSize = Array.getLength(data);
-            String cname = data.getClass().getName();
+            int datasetSize = Array.getLength(dataOut);
+            String cname = dataOut.getClass().getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
 
             if (dname == 'B') {
                 long datasetByteSize = datasetSize;
                 byteBuffer = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
+                byteBuffer.order(order);
 
                 int bufferSize = (int) Math.min(fileSize, datasetByteSize);
 
@@ -1832,22 +2010,18 @@ public final class Tools {
                     in.read(byteBuffer.array(), 0, allocValue);
 
                     byteBuffer.get(byteArray, 0, allocValue);
-                    System.arraycopy(byteArray, 0, dataValue, (iterationNumber * BYTE_BUFFER_SIZE), allocValue);
+                    System.arraycopy(byteArray, 0, dataOut, (iterationNumber * BYTE_BUFFER_SIZE), allocValue);
                     byteBuffer.clear();
                     remainingSize = remainingSize - (BYTE_BUFFER_SIZE);
                     iterationNumber++;
                 } while (remainingSize > -(BYTE_BUFFER_SIZE));
 
-                isValueChanged = true;
+                valChanged = true;
             }
             else if (dname == 'S') {
                 long datasetShortSize = datasetSize * 2;
                 byteBuffer = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
+                byteBuffer.order(order);
 
                 int bufferSize = (int) Math.min(fileSize, datasetShortSize);
                 int remainingSize = bufferSize - (SHORT_BUFFER_SIZE * 2);
@@ -1865,23 +2039,19 @@ public final class Tools {
                     }
                     in.read(byteBuffer.array(), 0, allocValue);
                     sb.get(shortArray, 0, allocValue / 2);
-                    System.arraycopy(shortArray, 0, dataValue, (iterationNumber * SHORT_BUFFER_SIZE), allocValue / 2);
+                    System.arraycopy(shortArray, 0, dataOut, (iterationNumber * SHORT_BUFFER_SIZE), allocValue / 2);
                     byteBuffer.clear();
                     sb.clear();
                     remainingSize = remainingSize - (SHORT_BUFFER_SIZE * 2);
                     iterationNumber++;
                 } while (remainingSize > -(SHORT_BUFFER_SIZE * 2));
 
-                isValueChanged = true;
+                valChanged = true;
             }
             else if (dname == 'I') {
                 long datasetIntSize = datasetSize * 4;
                 byteBuffer = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
+                byteBuffer.order(order);
 
                 int bufferSize = (int) Math.min(fileSize, datasetIntSize);
                 int remainingSize = bufferSize - (INT_BUFFER_SIZE * 4);
@@ -1900,24 +2070,19 @@ public final class Tools {
                     }
                     in.read(tmpBuf, 0, allocValue);
                     ib.get(intArray, 0, allocValue / 4);
-                    System.arraycopy(intArray, 0, dataValue, (iterationNumber * INT_BUFFER_SIZE), allocValue / 4);
+                    System.arraycopy(intArray, 0, dataOut, (iterationNumber * INT_BUFFER_SIZE), allocValue / 4);
                     byteBuffer.clear();
                     ib.clear();
                     remainingSize = remainingSize - (INT_BUFFER_SIZE * 4);
                     iterationNumber++;
                 } while (remainingSize > -(INT_BUFFER_SIZE * 4));
 
-                isValueChanged = true;
+                valChanged = true;
             }
             else if (dname == 'J') {
                 long datasetLongSize = datasetSize * 8;
                 byteBuffer = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
-
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
+                byteBuffer.order(order);
 
                 int bufferSize = (int) Math.min(fileSize, datasetLongSize);
                 int remainingSize = bufferSize - (LONG_BUFFER_SIZE * 8);
@@ -1936,23 +2101,19 @@ public final class Tools {
 
                     in.read(byteBuffer.array(), 0, allocValue);
                     lb.get(longArray, 0, allocValue / 8);
-                    System.arraycopy(longArray, 0, dataValue, (iterationNumber * LONG_BUFFER_SIZE), allocValue / 8);
+                    System.arraycopy(longArray, 0, dataOut, (iterationNumber * LONG_BUFFER_SIZE), allocValue / 8);
                     byteBuffer.clear();
                     lb.clear();
                     remainingSize = remainingSize - (LONG_BUFFER_SIZE * 8);
                     iterationNumber++;
                 } while (remainingSize > -(LONG_BUFFER_SIZE * 8));
 
-                isValueChanged = true;
+                valChanged = true;
             }
             else if (dname == 'F') {
                 long datasetFloatSize = datasetSize * 4;
                 byteBuffer = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
+                byteBuffer.order(order);
 
                 int bufferSize = (int) Math.min(fileSize, datasetFloatSize);
                 int remainingSize = bufferSize - (FLOAT_BUFFER_SIZE * 4);
@@ -1970,23 +2131,19 @@ public final class Tools {
 
                     in.read(byteBuffer.array(), 0, allocValue);
                     fb.get(floatArray, 0, allocValue / 4);
-                    System.arraycopy(floatArray, 0, dataValue, (iterationNumber * FLOAT_BUFFER_SIZE), allocValue / 4);
+                    System.arraycopy(floatArray, 0, dataOut, (iterationNumber * FLOAT_BUFFER_SIZE), allocValue / 4);
                     byteBuffer.clear();
                     fb.clear();
                     remainingSize = remainingSize - (FLOAT_BUFFER_SIZE * 4);
                     iterationNumber++;
                 } while (remainingSize > -(FLOAT_BUFFER_SIZE * 4));
 
-                isValueChanged = true;
+                valChanged = true;
             }
             else if (dname == 'D') {
                 long datasetDoubleSize = datasetSize * 8;
                 byteBuffer = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
-                if (binaryOrder == 1)
-                    byteBuffer.order(ByteOrder.nativeOrder());
-                else if (binaryOrder == 2)
-                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                else if (binaryOrder == 3) byteBuffer.order(ByteOrder.BIG_ENDIAN);
+                byteBuffer.order(order);
 
                 int bufferSize = (int) Math.min(fileSize, datasetDoubleSize);
                 int remainingSize = bufferSize - (DOUBLE_BUFFER_SIZE * 8);
@@ -2005,14 +2162,14 @@ public final class Tools {
 
                     in.read(byteBuffer.array(), 0, allocValue);
                     db.get(doubleArray, 0, allocValue / 8);
-                    System.arraycopy(doubleArray, 0, dataValue, (iterationNumber * DOUBLE_BUFFER_SIZE), allocValue / 8);
+                    System.arraycopy(doubleArray, 0, dataOut, (iterationNumber * DOUBLE_BUFFER_SIZE), allocValue / 8);
                     byteBuffer.clear();
                     db.clear();
                     remainingSize = remainingSize - (DOUBLE_BUFFER_SIZE * 8);
                     iterationNumber++;
                 } while (remainingSize > -(DOUBLE_BUFFER_SIZE * 8));
 
-                isValueChanged = true;
+                valChanged = true;
             }
         }
         catch (Exception es) {
@@ -2027,6 +2184,8 @@ public final class Tools {
                 log.debug("close binary file {}:", fname, ex);
             }
         }
+
+        return valChanged;
     }
 
     /**
@@ -2918,6 +3077,22 @@ public final class Tools {
                 || val == Double.NEGATIVE_INFINITY || val == Double.POSITIVE_INFINITY) return true;
 
         return false;
+    }
+
+    /**
+     * Since Java does not allow array indices to be larger than int type, check the
+     * given value to see if it is within the valid range of a Java int.
+     *
+     * @param value
+     *            The value to check
+     *
+     * @return false if the value is outside the range of a Java int, true
+     *         otherwise.
+     */
+    public static boolean checkValidJavaArrayIndex(final long value) {
+        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) return false;
+
+        return true;
     }
 
     public static boolean checkValidByte(String value) {

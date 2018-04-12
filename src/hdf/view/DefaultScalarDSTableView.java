@@ -62,8 +62,32 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarDSTableView.class);
 
-    public DefaultScalarDSTableView() {
-        super();
+    /**
+     * Constructs a ScalarDS TableView with no additional data properties.
+     *
+     * @param theView
+     *            the main HDFView.
+     */
+    public DefaultScalarDSTableView(ViewManager theView) {
+        this(theView, null);
+    }
+
+    /**
+     * Constructs a ScalarDS TableView with the specified data properties.
+     *
+     * @param theView
+     *            the main HDFView.
+     *
+     * @param dataPropertiesMap
+     *            the properties on how to show the data. The map is used to allow
+     *            applications to pass properties on how to display the data, such
+     *            as: transposing data, showing data as characters, applying a
+     *            bitmask, and etc. Predefined keys are listed at
+     *            ViewProperties.DATA_VIEW_KEY.
+     */
+    @SuppressWarnings("rawtypes")
+    public DefaultScalarDSTableView(ViewManager theView, HashMap dataPropertiesMap) {
+        super(theView, dataPropertiesMap);
 
         if (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE) {
             if (dataObject.getDatatype().getDatatypeSize() > 8) {

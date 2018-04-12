@@ -233,6 +233,12 @@ public class Attribute extends HObject implements DataFormat {
         value = data;
     }
 
+    @Override
+    public void clearData() {
+        /* Currently not implemented for Attributes */
+        return;
+    }
+
     /**
      * set a property for the attribute.
      *

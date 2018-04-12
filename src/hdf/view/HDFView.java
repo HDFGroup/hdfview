@@ -1319,7 +1319,7 @@ public class HDFView implements ViewManager {
                 DataView view = (DataView) views[i].getData();
 
                 if (view != null) {
-                    HObject obj = view.getDataObject();
+                    HObject obj = (HObject) view.getDataObject();
 
                     if (obj == null) continue;
 
@@ -1396,12 +1396,12 @@ public class HDFView implements ViewManager {
 
                     if (theView instanceof TableView) {
                         TableView tableView = (TableView) theView;
-                        FileFormat file = tableView.getDataObject().getFileFormat();
+                        FileFormat file = ((HObject) tableView.getDataObject()).getFileFormat();
                         if (file.equals(theFile)) tableView.updateValueInFile();
                     }
                     else if (theView instanceof TextView) {
                         TextView textView = (TextView) theView;
-                        FileFormat file = textView.getDataObject().getFileFormat();
+                        FileFormat file = ((HObject) textView.getDataObject()).getFileFormat();
                         if (file.equals(theFile)) textView.updateValueInFile();
                     }
                 }
@@ -1436,7 +1436,7 @@ public class HDFView implements ViewManager {
             setEnabled(Arrays.asList(windowMenu.getItems()), true);
         }
 
-        HObject obj = dataView.getDataObject();
+        HObject obj = (HObject) dataView.getDataObject();
         String fullPath = obj.getPath() + obj.getName();
 
         MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
@@ -1450,7 +1450,7 @@ public class HDFView implements ViewManager {
                     DataView view = (DataView) sList[i].getData();
 
                     if (view != null) {
-                        HObject obj = view.getDataObject();
+                        HObject obj = (HObject) view.getDataObject();
 
                         if (obj.getFullName().equals(((MenuItem) e.widget).getText())) {
                             showWindow(sList[i]);
@@ -1467,7 +1467,7 @@ public class HDFView implements ViewManager {
     public void removeDataView(DataView dataView) {
         if (mainWindow.isDisposed()) return;
 
-        HObject obj = dataView.getDataObject();
+        HObject obj = (HObject) dataView.getDataObject();
         if (obj == null) return;
 
         MenuItem[] items = windowMenu.getItems();
@@ -1494,7 +1494,7 @@ public class HDFView implements ViewManager {
             view = (DataView) openShells[i].getData();
 
             if (view != null) {
-                currentObj = view.getDataObject();
+                currentObj = (HObject) view.getDataObject();
                 currentFile = currentObj.getFileFormat();
 
                 if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))

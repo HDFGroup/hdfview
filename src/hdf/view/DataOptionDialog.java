@@ -625,7 +625,11 @@ public class DataOptionDialog extends Dialog {
         for (int i = 0; i < n; i++) {
             long selectedSize = ((n1[i] - n0[i]) / n2[i]) + 1;
 
-            if (!Tools.checkValidInt(selectedSize)) {
+            /*
+             * Since Java does not allow array indices to be larger than int type, check the
+             * given value to see if it is within the valid range of a Java int.
+             */
+            if (!Tools.checkValidJavaArrayIndex(selectedSize)) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Subset selection too large to display.", shell.getText());
                 return false;
