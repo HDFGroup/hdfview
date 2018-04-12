@@ -798,6 +798,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the string representation of compression information.
      */
+    @Override
     public final String getCompression() {
         if (rank < 0) init();
 

@@ -476,6 +476,11 @@ public class H5CompoundDS extends CompoundDS {
         return datatype;
     }
 
+    @Override
+    public Object getFillValue() {
+        return null;
+    }
+
     /*
      * (non-Javadoc)
      *

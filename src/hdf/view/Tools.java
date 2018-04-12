@@ -81,6 +81,13 @@ public final class Tools {
     public static final long       MAX_INT64       = 9223372036854775807L;
     public static final BigInteger MAX_UINT64      = new BigInteger("18446744073709551615");
 
+    private static final int       FLOAT_BUFFER_SIZE = 524288;
+    private static final int       INT_BUFFER_SIZE = 524288;
+    private static final int       SHORT_BUFFER_SIZE = 1048576;
+    private static final int       LONG_BUFFER_SIZE = 262144;
+    private static final int       DOUBLE_BUFFER_SIZE = 262144;
+    private static final int       BYTE_BUFFER_SIZE = 2097152;
+
     /** Key for JPEG image file type. */
     public static final String     FILE_TYPE_JPEG  = "JPEG";
 
