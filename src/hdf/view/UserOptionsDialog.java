@@ -86,9 +86,6 @@ public class UserOptionsDialog extends Dialog {
     /** A list of Table view implementations. */
     private static Vector<String> tableViews;
 
-    /** A list of Text view implementations. */
-    private static Vector<String> textViews;
-
     /** A list of metadata view implementations. */
     private static Vector<String> metaDataViews;
 
@@ -125,7 +122,6 @@ public class UserOptionsDialog extends Dialog {
         log.trace("UserOptionsDialog: workDir={}", workDir);
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
-        textViews = ViewProperties.getTextViewList();
         tableViews = ViewProperties.getTableViewList();
         imageViews = ViewProperties.getImageViewList();
         paletteViews = ViewProperties.getPaletteViewList();
@@ -322,7 +318,7 @@ public class UserOptionsDialog extends Dialog {
         }
 
         @SuppressWarnings("rawtypes")
-        Vector[] moduleList = { treeViews, metaDataViews, textViews, tableViews, imageViews, paletteViews };
+        Vector[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
         Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTableView,
                 choiceImageView, choicePaletteView };
         for (int i = 0; i < 5; i++) {
@@ -819,12 +815,6 @@ public class UserOptionsDialog extends Dialog {
         choiceMetaDataView.setFont(curFont);
         choiceMetaDataView.setItems(metaDataViews.toArray(new String[0]));
         choiceMetaDataView.select(0);
-
-        org.eclipse.swt.widgets.Group textViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        textViewGroup.setLayout(new FillLayout());
-        textViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        textViewGroup.setFont(curFont);
-        textViewGroup.setText("TextView");
 
         org.eclipse.swt.widgets.Group tableViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         tableViewGroup.setLayout(new FillLayout());

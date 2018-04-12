@@ -254,6 +254,7 @@ public class ViewProperties extends Properties {
     }
 
     /* the properties are sorted by keys */
+    @Override
     @SuppressWarnings("unchecked")
     public synchronized Enumeration<Object> keys() {
         Enumeration<?> keysEnum = super.keys();
@@ -1536,11 +1537,6 @@ public class ViewProperties extends Properties {
     /** @return a list of metadataview modules */
     public static Vector<String> getMetaDataViewList() {
         return moduleListMetaDataView;
-    }
-
-    /** @return a list of textview modules */
-    public static Vector<String> getTextViewList() {
-        return moduleListTextView;
     }
 
     /** @return a list of tableview modules */

@@ -2578,7 +2578,7 @@ public class DefaultTreeView implements TreeView {
         log.trace("showDataContent({}): start", dataObject.getName());
 
         if ((dataObject == null) || !(dataObject instanceof DataFormat)) {
-            return null; // can only display dataset
+            return null; // can only display objects with data
         }
 
         DataFormat d = (DataFormat) dataObject;
