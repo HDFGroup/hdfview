@@ -2583,9 +2583,8 @@ public class DefaultTreeView implements TreeView {
 
         DataFormat d = (DataFormat) dataObject;
 
-        if (d.getRank() <= 0) d.init();
+        if (d.getRank() <= 0 && (d instanceof Dataset)) ((Dataset) d).init();
 
-        boolean isText = ((d instanceof ScalarDS) && ((ScalarDS) d).isText());
         boolean isImage = ((d instanceof ScalarDS) && ((ScalarDS) d).isImage());
         boolean isDisplayTypeChar = false;
         boolean isTransposed = false;
@@ -2615,10 +2614,7 @@ public class DefaultTreeView implements TreeView {
                 }
             }
 
-            if (isText) {
-                dataViewName = (String) HDFView.getListOfTextViews().get(0);
-            }
-            else if (isImage) {
+            if (isImage) {
                 dataViewName = HDFView.getListOfImageViews().get(0);
             }
             else {
@@ -2626,7 +2622,7 @@ public class DefaultTreeView implements TreeView {
             }
         }
         else {
-            DataOptionDialog dialog = new DataOptionDialog(shell, (HObject) d);
+            DataOptionDialog dialog = new DataOptionDialog(shell, d);
             dialog.open();
 
             if (dialog.isCancelled()) {
@@ -2662,9 +2658,7 @@ public class DefaultTreeView implements TreeView {
         // Use default dataview
         if (theClass == null) {
             log.trace("showDataContent: Using default dataview");
-            if (isText)
-                dataViewName = "hdf.view.DefaultTextView";
-            else if (isImage)
+            if (isImage)
                 dataViewName = "hdf.view.DefaultImageView";
             else
                 dataViewName = "hdf.view.DefaultTableView";
@@ -2684,30 +2678,34 @@ public class DefaultTreeView implements TreeView {
             map.put(ViewProperties.DATA_VIEW_KEY.BITMASK, bitmask);
             if (isApplyBitmaskOnly) map.put(ViewProperties.DATA_VIEW_KEY.BITMASKOP, ViewProperties.BITMASK_OP.AND);
 
-            // Create a copy of the dataset
-            ScalarDS d_copy = null;
-            Constructor<? extends Dataset> constructor = null;
+            // Create a copy of the data object
+            DataFormat d_copy = null;
+            Constructor<? extends DataFormat> constructor = null;
             Object[] paramObj = null;
             try {
                 Class<?>[] paramClass = { FileFormat.class, String.class, String.class, long[].class };
                 constructor = d.getClass().getConstructor(paramClass);
 
-                paramObj = new Object[] { d.getFileFormat(), d.getName(), d.getPath(), d.getOID() };
+                paramObj = new Object[] { ((HObject) d).getFileFormat(), ((HObject) d).getName(),
+                        ((HObject) d).getPath(), ((HObject) d).getOID() };
             }
             catch (Exception ex) {
                 constructor = null;
             }
 
             try {
-                d_copy = (ScalarDS) constructor.newInstance(paramObj);
+                d_copy = constructor.newInstance(paramObj);
             }
             catch (Exception ex) {
                 d_copy = null;
             }
             if (d_copy != null) {
                 try {
-                    d_copy.init();
-                    log.trace("showDataContent: d_copy inited");
+                    if (d_copy instanceof Dataset) {
+                        ((Dataset) d_copy).init();
+                        log.trace("showDataContent: d_copy inited");
+                    }
+
                     int rank = d.getRank();
                     System.arraycopy(d.getDims(), 0, d_copy.getDims(), 0, rank);
                     System.arraycopy(d.getStartDims(), 0, d_copy.getStartDims(), 0, rank);
@@ -2719,9 +2717,10 @@ public class DefaultTreeView implements TreeView {
                     ex.printStackTrace();
                 }
 
-                map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, d_copy);
+                map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, (HObject) d_copy);
             }
         }
+
         if (dataViewName.startsWith("hdf.view.DefaultTableView")) {
             map.put(ViewProperties.DATA_VIEW_KEY.CHAR, new Boolean(isDisplayTypeChar));
             map.put(ViewProperties.DATA_VIEW_KEY.TRANSPOSED, new Boolean(isTransposed));
@@ -2738,6 +2737,10 @@ public class DefaultTreeView implements TreeView {
             shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
 
             theView = Tools.newInstance(theClass, initargs);
+
+            if (theView == null)
+                viewer.showStatus("No suitable class found to display data of '" + dataObject.getName() + "' with.");
+
             log.trace("showDataContent: Tools.newInstance");
         } catch (Exception ex) {
             log.trace("showDataContent: Error instantiating class {}", theClass);

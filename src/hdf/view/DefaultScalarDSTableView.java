@@ -111,7 +111,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         log.trace("DefaultScalarDSTableView: isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
 
-        shell.setImage(ViewProperties.getDatasetIcon());
+        if (((ScalarDS) dataObject).isText())
+            shell.setImage(ViewProperties.getTextIcon());
+        else
+            shell.setImage(ViewProperties.getDatasetIcon());
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
@@ -762,9 +765,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         String viewName = null;
 
         switch (viewType) {
-            case TEXT:
-                viewName = (String) HDFView.getListOfTextViews().get(0);
-                break;
             case IMAGE:
                 viewName = HDFView.getListOfImageViews().get(0);
                 break;
@@ -791,14 +791,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (theClass == null) {
             log.trace("DefaultScalarDSTableView: showObjRefData(): Using default dataview");
             switch (viewType) {
-                case TEXT:
-                    viewName = "hdf.view.DefaultTextView";
-                    break;
                 case IMAGE:
                     viewName = "hdf.view.DefaultImageView";
                     break;
                 case TABLE:
-                    viewName = "hdf.view.DefaultTableView";
+                    viewName = "hdf.view.DefaultScalarDSTableView";
                     break;
                 default:
                     viewName = null;
@@ -1003,9 +1000,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             String viewName = null;
 
             switch (viewType) {
-                case TEXT:
-                    viewName = (String) HDFView.getListOfTextViews().get(0);
-                    break;
                 case IMAGE:
                     viewName = HDFView.getListOfImageViews().get(0);
                     break;
@@ -1032,14 +1026,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             if (theClass == null) {
                 log.trace("DefaultScalarDSTableView: showRegRefData(): Using default dataview");
                 switch (viewType) {
-                    case TEXT:
-                        viewName = "hdf.view.DefaultTextView";
-                        break;
                     case IMAGE:
                         viewName = "hdf.view.DefaultImageView";
                         break;
                     case TABLE:
-                        viewName = "hdf.view.DefaultTableView";
+                        viewName = "hdf.view.DefaultScalarDSTableView";
                         break;
                     default:
                         viewName = null;

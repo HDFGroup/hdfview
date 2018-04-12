@@ -119,9 +119,6 @@ public class HDFView implements ViewManager {
     /* A list of tree table implementations. */
     private static List<?>             tableViews;
 
-    /* A list of Text view implementations. */
-    private static List<String>        textViews;
-
     /* A list of metadata view implementations. */
     private static List<?>             metaDataViews;
 
@@ -232,7 +229,6 @@ public class HDFView implements ViewManager {
 
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
-        textViews = ViewProperties.getTextViewList();
         tableViews = ViewProperties.getTableViewList();
         imageViews = ViewProperties.getImageViewList();
         paletteViews = ViewProperties.getPaletteViewList();
@@ -1236,13 +1232,6 @@ public class HDFView implements ViewManager {
     }
 
     /**
-     * @return a list of textview implementations.
-     */
-    public static final List<?> getListOfTextViews() {
-        return textViews;
-    }
-
-    /**
      * @return a list of metaDataview implementations.
      */
     public static final List<?> getListOfMetaDataViews() {
@@ -1398,11 +1387,6 @@ public class HDFView implements ViewManager {
                         TableView tableView = (TableView) theView;
                         FileFormat file = ((HObject) tableView.getDataObject()).getFileFormat();
                         if (file.equals(theFile)) tableView.updateValueInFile();
-                    }
-                    else if (theView instanceof TextView) {
-                        TextView textView = (TextView) theView;
-                        FileFormat file = ((HObject) textView.getDataObject()).getFileFormat();
-                        if (file.equals(theFile)) textView.updateValueInFile();
                     }
                 }
             }

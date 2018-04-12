@@ -59,7 +59,7 @@ public class UserOptionsDialog extends Dialog {
 
     private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField;
     private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
-    private Combo                 choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView, choiceImageView, choicePaletteView;
+    private Combo                 choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
     private String                rootDir, workDir;
     private Button                checkCurrentUserDir, checkAutoContrast, checkConvertEnum, checkShowValues, checkShowRegRefValues;
     private Button                currentDirButton;
@@ -162,7 +162,7 @@ public class UserOptionsDialog extends Dialog {
             item.setText("SRB Connection");
             item.setControl(createSrbConnectionPanel());
         } catch (Exception ex) {;}
-        */
+         */
 
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
@@ -174,6 +174,7 @@ public class UserOptionsDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 setUserOptions();
                 shell.dispose();
@@ -185,6 +186,7 @@ public class UserOptionsDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 isFontChanged = false;
                 shell.dispose();
@@ -194,6 +196,7 @@ public class UserOptionsDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -263,8 +266,8 @@ public class UserOptionsDialog extends Dialog {
 
         // set font size and type
         try {
-            String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
-            int fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
+            String ftype = fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
+            int fsize = Integer.parseInt(fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
 
             if (ViewProperties.getFontSize() != fsize) {
                 ViewProperties.setFontSize(fsize);
@@ -282,8 +285,8 @@ public class UserOptionsDialog extends Dialog {
 
 
         // set data delimiter
-        ViewProperties.setDataDelimiter((String) delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
-        ViewProperties.setImageOrigin((String) imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
+        ViewProperties.setDataDelimiter(delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
+        ViewProperties.setImageOrigin(imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
 
         // set index type
         if (checkIndexType.getSelection())
@@ -320,9 +323,9 @@ public class UserOptionsDialog extends Dialog {
 
         @SuppressWarnings("rawtypes")
         Vector[] moduleList = { treeViews, metaDataViews, textViews, tableViews, imageViews, paletteViews };
-        Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView,
+        Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTableView,
                 choiceImageView, choicePaletteView };
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             Object theModule = choiceList[i].getItem(choiceList[i].getSelectionIndex());
             moduleList[i].remove(theModule);
             moduleList[i].add(0, theModule);
@@ -360,6 +363,7 @@ public class UserOptionsDialog extends Dialog {
         checkCurrentUserDir.setText("\"Current Working Directory\" or");
         checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkCurrentUserDir.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean isCheckCurrentUserDirSelected = checkCurrentUserDir.getSelection();
                 workField.setEnabled(!isCheckCurrentUserDirSelected);
@@ -377,6 +381,7 @@ public class UserOptionsDialog extends Dialog {
         currentDirButton.setText("Browse...");
         currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         currentDirButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final DirectoryDialog dChooser = new DirectoryDialog(shell);
                 dChooser.setFilterPath(workDir);
@@ -415,6 +420,7 @@ public class UserOptionsDialog extends Dialog {
         browseButton.setText("Browse...");
         browseButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         browseButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(rootDir);
@@ -561,6 +567,7 @@ public class UserOptionsDialog extends Dialog {
         helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Auto Contrast");
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Auto Contrast does the following to compute a gain/bias \n"
                         + "that will stretch the pixels in the image to fit the pixel \n"
@@ -629,6 +636,7 @@ public class UserOptionsDialog extends Dialog {
         helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Convert Enum");
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Convert enum data to strings. \n"
                         + "For example, a dataset of an enum type of (R=0, G=, B=2) \n"
@@ -705,6 +713,7 @@ public class UserOptionsDialog extends Dialog {
         checkReadAll.setSelection((nMax<=0) || (nMax==Integer.MAX_VALUE));
         checkReadAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkReadAll.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 startMemberField.setEnabled(!checkReadAll.getSelection());
                 maxMemberField.setEnabled(!checkReadAll.getSelection());
@@ -816,11 +825,6 @@ public class UserOptionsDialog extends Dialog {
         textViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         textViewGroup.setFont(curFont);
         textViewGroup.setText("TextView");
-
-        choiceTextView = new Combo(textViewGroup, SWT.SINGLE | SWT.READ_ONLY);
-        choiceTextView.setFont(curFont);
-        choiceTextView.setItems(textViews.toArray(new String[0]));
-        choiceTextView.select(0);
 
         org.eclipse.swt.widgets.Group tableViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         tableViewGroup.setLayout(new FillLayout());
@@ -947,18 +951,18 @@ public class UserOptionsDialog extends Dialog {
      * srbFields[i].setText(""); } }
      */
 
-/*
- * public void valueChanged(ListSelectionEvent e) { Object src =
- * e.getSource();
- *
- * if (!src.equals(srbJList)) { return; }
- *
- * int n = srbJList.getSelectedIndex(); if ( n<0 ) { return; }
- *
- * String srbaccount[] = (String[])srbVector.get(n); if (srbaccount == null)
- * { return; }
- *
- * n = Math.min(7, srbaccount.length); for (int i=0; i<n; i++) {
- * srbFields[i].setText(srbaccount[i]); } }
- */
+    /*
+     * public void valueChanged(ListSelectionEvent e) { Object src =
+     * e.getSource();
+     *
+     * if (!src.equals(srbJList)) { return; }
+     *
+     * int n = srbJList.getSelectedIndex(); if ( n<0 ) { return; }
+     *
+     * String srbaccount[] = (String[])srbVector.get(n); if (srbaccount == null)
+     * { return; }
+     *
+     * n = Math.min(7, srbaccount.length); for (int i=0; i<n; i++) {
+     * srbFields[i].setText(srbaccount[i]); } }
+     */
 }

@@ -154,7 +154,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected Object                        fillValue;
 
-    protected enum ViewType { TABLE, IMAGE, TEXT };
+    protected enum ViewType { TABLE, IMAGE };
     protected      ViewType                 viewType = ViewType.TABLE;
 
     /**
@@ -1521,6 +1521,110 @@ public abstract class DefaultBaseTableView implements TableView {
 
         viewer.showStatus("Data saved to: " + fname);
     }
+
+    /** Save data as text (from TextView). */
+    // private void saveAsTextTextView() throws Exception {
+    // FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
+    // fChooser.setText("Save Current Data To Text File --- " + dataset.getName());
+    // fChooser.setFilterPath(dataset.getFileFormat().getParent());
+    //
+    // DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
+    // fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+    // fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
+    // fChooser.setFilterIndex(1);
+    //
+    // // fchooser.changeToParentDirectory();
+    // fChooser.setFileName(dataset.getName() + ".txt");
+    // fChooser.setOverwrite(true);
+    //
+    // String filename = fChooser.open();
+    //
+    // if (filename == null) return;
+    //
+    // File chosenFile = new File(filename);
+    //
+    // // check if the file is in use
+    // String fname = chosenFile.getAbsolutePath();
+    // List<FileFormat> fileList = viewer.getTreeView().getCurrentFiles();
+    // if (fileList != null) {
+    // FileFormat theFile = null;
+    // Iterator<FileFormat> iterator = fileList.iterator();
+    // while (iterator.hasNext()) {
+    // theFile = iterator.next();
+    // if (theFile.getFilePath().equals(fname)) {
+    // Tools.showError(shell, "Unable to save data to file \"" + fname
+    // + "\". \nThe file is being used.", shell.getText());
+    // return;
+    // }
+    // }
+    // }
+    //
+    // PrintWriter out = new PrintWriter(new BufferedWriter(new
+    // FileWriter(chosenFile)));
+    //
+    // int rows = text.length;
+    // for (int i = 0; i < rows; i++) {
+    // out.print(text[i].trim());
+    // out.println();
+    // out.println();
+    // }
+    //
+    // out.flush();
+    // out.close();
+    //
+    // viewer.showStatus("Data save to: " + fname);
+    //
+    // try {
+    // RandomAccessFile rf = new RandomAccessFile(chosenFile, "r");
+    // long size = rf.length();
+    // rf.close();
+    // viewer.showStatus("File size (bytes): " + size);
+    // }
+    // catch (Exception ex) {
+    // log.debug("raf file size:", ex);
+    // }
+    // }
+
+    // print the table (from TextView)
+    // private void print() {
+    // // StreamPrintServiceFactory[] spsf = StreamPrintServiceFactory
+    // // .lookupStreamPrintServiceFactories(null, null);
+    // // for (int i = 0; i < spsf.length; i++) {
+    // // System.out.println(spsf[i]);
+    // // }
+    // // DocFlavor[] docFlavors = spsf[0].getSupportedDocFlavors();
+    // // for (int i = 0; i < docFlavors.length; i++) {
+    // // System.out.println(docFlavors[i]);
+    // // }
+    //
+    // // TODO: windows url
+    // // Get a text DocFlavor
+    // InputStream is = null;
+    // try {
+    // is = new BufferedInputStream(new java.io.FileInputStream(
+    // "e:\\temp\\t.html"));
+    // }
+    // catch (Exception ex) {
+    // log.debug("Get a text DocFlavor:", ex);
+    // }
+    // DocFlavor flavor = DocFlavor.STRING.TEXT_HTML;
+    //
+    // // Get all available print services
+    // PrintService[] services = PrintServiceLookup.lookupPrintServices(null,
+    // null);
+    //
+    // // Print it
+    // try {
+    // // Print this job on the first print server
+    // DocPrintJob job = services[0].createPrintJob();
+    // Doc doc = new SimpleDoc(is, flavor, null);
+    //
+    // job.print(doc, null);
+    // }
+    // catch (Exception ex) {
+    // log.debug("print(): failure: ", ex);
+    // }
+    // }
 
     /**
      * Save data as binary.
