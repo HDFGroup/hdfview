@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.io.File;
 import java.util.Iterator;
@@ -48,6 +48,9 @@ import org.eclipse.swt.widgets.Text;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.view.DefaultFileFilter;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * NewLinkDialog shows a message dialog requesting user input for creating

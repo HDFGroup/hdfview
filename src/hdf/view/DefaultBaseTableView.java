@@ -126,6 +126,9 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.MathConversionDialog;
+import hdf.view.dialog.NewDatasetDialog;
 
 /**
  * TODO:

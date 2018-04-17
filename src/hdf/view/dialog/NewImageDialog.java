@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +43,8 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * NewImageDialog shows a message dialog requesting user input for creating a

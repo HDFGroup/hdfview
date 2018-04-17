@@ -101,6 +101,7 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.dialog.NewDatasetDialog;
 
 /**
  * ImageView displays an HDF dataset as an image.

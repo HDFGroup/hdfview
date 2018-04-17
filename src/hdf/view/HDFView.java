@@ -72,6 +72,9 @@ import org.eclipse.swt.widgets.ToolItem;
 import hdf.HDFVersions;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
+import hdf.view.dialog.ImageConversionDialog;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.UserOptionsDialog;
 
 
 /**

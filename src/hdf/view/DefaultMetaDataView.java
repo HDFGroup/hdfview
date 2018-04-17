@@ -63,6 +63,7 @@ import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Link;
+import hdf.view.dialog.NewAttributeDialog;
 
 /**
  * DefaultMetaDataView is a default implementation of the MetaDataView which

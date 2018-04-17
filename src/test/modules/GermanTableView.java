@@ -154,15 +154,15 @@ import hdf.object.h5.H5Datatype;
 import hdf.view.Chart;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
-import hdf.view.InputDialog;
-import hdf.view.MathConversionDialog;
-import hdf.view.NewDatasetDialog;
 import hdf.view.TableView;
 import hdf.view.Tools;
 import hdf.view.TreeView;
 import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.MathConversionDialog;
+import hdf.view.dialog.NewDatasetDialog;
 
 /**
  * TableView displays an HDF dataset as a two-dimensional table.

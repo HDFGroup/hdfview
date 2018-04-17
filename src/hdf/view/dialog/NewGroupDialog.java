@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Text;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * NewGroupDialog shows a message dialog requesting user input for creating a new HDF4/5 group.

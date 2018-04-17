@@ -79,6 +79,14 @@ import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
+import hdf.view.dialog.DataOptionDialog;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.NewCompoundDatasetDialog;
+import hdf.view.dialog.NewDatasetDialog;
+import hdf.view.dialog.NewDatatypeDialog;
+import hdf.view.dialog.NewGroupDialog;
+import hdf.view.dialog.NewImageDialog;
+import hdf.view.dialog.NewLinkDialog;
 
 /**
  * <p>

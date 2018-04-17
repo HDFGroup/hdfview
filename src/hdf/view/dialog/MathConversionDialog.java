@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.lang.reflect.Array;
 
@@ -34,6 +34,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * MathConversionDialog shows a message dialog requesting user input for math

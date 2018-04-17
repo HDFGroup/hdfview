@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -64,6 +64,9 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.HDFView;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * DataOptionDialog is an dialog window used to select display options. Display options include
