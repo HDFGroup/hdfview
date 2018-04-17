@@ -32,9 +32,6 @@ public abstract interface DataView {
     /** The image view type */
     public final static int DATAVIEW_IMAGE = 2;
 
-    /** The text view type */
-    public final static int DATAVIEW_TEXT = 3;
-
     /** @return the data object displayed in this data viewer */
     public abstract DataFormat getDataObject();
 }
