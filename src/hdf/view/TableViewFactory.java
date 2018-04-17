@@ -19,14 +19,14 @@ import hdf.object.CompoundDS;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
-public class TableViewClassFactory {
+public class TableViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TableViewClassFactory.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TableViewFactory.class);
 
     public TableView getTableView(HObject dataObject) {
         if (dataObject == null) return null;
 
-        log.trace("getTableView(): start");
+        log.trace("TableViewFactory: getTableView(): start");
 
         if (dataObject instanceof ScalarDS) {
 
@@ -37,6 +37,8 @@ public class TableViewClassFactory {
         else if (dataObject instanceof Attribute) {
 
         }
+
+        log.trace("TableViewFactory: getTableView(): finish");
 
         return null;
     }
