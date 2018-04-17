@@ -181,10 +181,6 @@ public class HDFView implements ViewManager {
 
     private UserOptionsDialog          userOptionDialog;
 
-    //    private Constructor<?>             ctrSrbFileDialog     = null;
-    //
-    //    private Dialog                     srbFileDialog         = null;
-
     /**
      * Constructs HDFView with a given root directory, where the HDFView is
      * installed, and opens the given files in the viewer.
@@ -509,20 +505,6 @@ public class HDFView implements ViewManager {
                 }
             });
         }
-
-        // boolean isSrbSupported = true;
-        // try {
-        // Class.forName("hdf.srb.H5SRB");
-        // Class.forName("hdf.srb.SRBFileDialog");
-        // } catch (Throwable ex) {isSrbSupported = false;}
-        //
-        // if (isSrbSupported) {
-        // item = new JMenuItem( "Open from iRODS");
-        // item.setMnemonic(KeyEvent.VK_S);
-        // item.addActionListener(this);
-        // item.setActionCommand("Open from irods");
-        // fileMenu.add(item);
-        // }
 
         new MenuItem(fileMenu, SWT.SEPARATOR);
 
@@ -1894,47 +1876,6 @@ public class HDFView implements ViewManager {
 
         return localFile;
     }
-
-    /** Open file from SRB server */
-    /*private void openFromSRB() throws Exception {
-        if (ctrSrbFileDialog == null) {
-            Class<?> theClass = null;
-
-            try {
-                theClass = Class.forName("hdf.srb.SRBFileDialog");
-            }
-            catch (Exception ex) {
-                theClass = null;
-                showStatus(ex.toString());
-                throw (new ClassNotFoundException("Cannot find SRBFileDialog"));
-            }
-
-            try {
-                @SuppressWarnings("rawtypes")
-                Class[] paramClass = { Class.forName("java.awt.Frame") };
-                ctrSrbFileDialog = theClass.getConstructor(paramClass);
-            }
-            catch (Exception ex) {
-                ctrSrbFileDialog = null;
-                throw (new InstantiationException("Cannot construct SRBFileDialog"));
-            }
-        }
-
-        if (srbFileDialog == null) {
-            //try {
-            //    Object[] paramObj = { (java.awt.Frame) this };
-            //   srbFileDialog = (JDialog) ctrSrbFileDialog.newInstance(paramObj);
-            //}
-            //catch (Exception ex) {
-            //    throw ex;
-            //}
-        }
-        else {
-            //srbFileDialog.setVisible(true);
-        }
-
-        // currentFile = srbFileDialog.getName();
-    }*/
 
     private void convertFile(String typeFrom, String typeTo) {
         ImageConversionDialog dialog = new ImageConversionDialog(mainWindow, typeFrom, typeTo,

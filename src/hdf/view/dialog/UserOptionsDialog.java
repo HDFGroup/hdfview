@@ -94,10 +94,6 @@ public class UserOptionsDialog extends Dialog {
     /** A list of palette view implementations. */
     private static Vector<String> paletteViews;
 
-    // private JList srbJList;
-    // private JTextField srbFields[];
-    // private Vector srbVector;
-
     public UserOptionsDialog(Shell parent, String viewRoot) {
         super(parent, SWT.APPLICATION_MODAL);
 
@@ -116,7 +112,6 @@ public class UserOptionsDialog extends Dialog {
         isFontChanged = false;
         isUserGuideChanged = false;
         isWorkDirChanged = false;
-        // srbJList = null;
         workDir = ViewProperties.getWorkDir();
         if (workDir == null) {
             workDir = rootDir;
@@ -127,7 +122,6 @@ public class UserOptionsDialog extends Dialog {
         tableViews = ViewProperties.getTableViewList();
         imageViews = ViewProperties.getImageViewList();
         paletteViews = ViewProperties.getPaletteViewList();
-        // srbVector = ViewProperties.getSrbAccount();
         indexType = ViewProperties.getIndexType();
         indexOrder = ViewProperties.getIndexOrder();
     }
@@ -153,14 +147,6 @@ public class UserOptionsDialog extends Dialog {
         item = new TabItem(folder, SWT.NONE);
         item.setText("Default Modules");
         item.setControl(createDefaultModulesRegion(folder));
-
-        /*
-        try { Class.forName("hdf.srb.SRBFileDialog");
-            item = new TabItem(folder, SWT.NONE);
-            item.setText("SRB Connection");
-            item.setControl(createSrbConnectionPanel());
-        } catch (Exception ex) {;}
-         */
 
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
@@ -853,108 +839,4 @@ public class UserOptionsDialog extends Dialog {
 
         return composite;
     }
-
-    /*
-     * private JPanel createSrbConnectionPanel() { JPanel p = new JPanel();
-     * p.setLayout(new BorderLayout(5,5)); TitledBorder tborder = new
-     * TitledBorder("SRB Connections"); tborder.setTitleColor(Color.darkGray);
-     * p.setBorder(tborder);
-     *
-     * DefaultListModel listModel = new DefaultListModel(); srbJList = new
-     * JList(listModel);
-     * srbJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-     * srbJList.addListSelectionListener(this);
-     *
-     * srbFields = new JTextField[7];
-     *
-     * if (srbVector!= null) { int n=srbVector.size();
-     *
-     * String srbaccount[] = null; for (int i=0; i<n; i++) { srbaccount =
-     * (String[])srbVector.get(i); if (srbaccount != null) {
-     * listModel.addElement(srbaccount[0]); } } }
-     *
-     * JPanel cp = new JPanel(); cp.setLayout(new BorderLayout(5,5));
-     *
-     * JPanel cpc = new JPanel(); cpc.setLayout(new GridLayout(7,1,5,5));
-     * cpc.add(srbFields[0] = new JTextField()); cpc.add(srbFields[1] = new
-     * JTextField()); cpc.add(srbFields[2] = new JTextField());
-     * cpc.add(srbFields[3] = new JTextField()); cpc.add(srbFields[4] = new
-     * JTextField()); cpc.add(srbFields[5] = new JTextField());
-     * cpc.add(srbFields[6] = new JTextField()); cp.add(cpc,
-     * BorderLayout.CENTER);
-     *
-     * JPanel cpl = new JPanel(); cpl.setLayout(new GridLayout(7,1,5,5));
-     * cpl.add(new JLabel("Host Machine: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Port Number: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("User Name: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Password: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Home Directory: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Domain Name/Zone: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel(" Default Storage Resource: ", SwingConstants.RIGHT)); cp.add(cpl,
-     * BorderLayout.WEST);
-     *
-     * JPanel lp = new JPanel(); lp.setLayout(new BorderLayout(5,5)); JPanel lpb
-     * = new JPanel(); JButton add = new JButton("Save");
-     * add.addActionListener(this); add.setActionCommand("Add srb connsction");
-     * lpb.add(add); JButton del = new JButton("Delete");
-     * del.addActionListener(this);
-     * del.setActionCommand("Delete srb connsction"); lpb.add(del); lp.add(lpb,
-     * BorderLayout.SOUTH); JScrollPane listScroller = new
-     * JScrollPane(srbJList); int w = 120 +
-     * (ViewProperties.getFontSize()-12)*10; int h = 200 +
-     * (ViewProperties.getFontSize()-12)*15; listScroller.setPreferredSize(new
-     * Dimension(w, h)); lp.add(listScroller, BorderLayout.CENTER);
-     *
-     * JPanel sp = new JPanel(); sp.setLayout(new GridLayout(3,1,5,15));
-     * sp.add(new JLabel(" "));
-     *
-     * p.add(cp, BorderLayout.CENTER); p.add(lp, BorderLayout.WEST); p.add(sp,
-     * BorderLayout.SOUTH);
-     *
-     * if ((srbVector !=null) && (srbVector.size()>0)) {
-     * srbJList.setSelectedIndex(0); }
-     *
-     * return p; }
-     */
-
-    /*
-     * else if (cmd.equals("Add srb connection")) { String srbaccount[] =
-     * new String[7]; for (int i=0; i<7; i++) { srbaccount[i] =
-     * srbFields[i].getText(); if (srbaccount[i] == null) { return; } }
-     * DefaultListModel lm = (DefaultListModel)srbJList.getModel();
-     *
-     * if (lm.contains(srbaccount[0])) { int n =
-     * srbJList.getSelectedIndex(); if ( n<0 ) return; String
-     * srbaccountOld[] = (String[])srbVector.get(n); for (int i=0; i<7; i++)
-     * srbaccountOld[i] = srbaccount[i]; } else { srbVector.add(srbaccount);
-     * lm.addElement(srbaccount[0]);
-     * srbJList.setSelectedValue(srbaccount[0], true); } } else if
-     * (cmd.equals("Delete srb connsction")) { int n =
-     * srbJList.getSelectedIndex(); if (n<0) { return; }
-     *
-     * int resp = JOptionPane.showConfirmDialog(this,
-     * "Are you sure you want to delete the following SRB connection?\n"+
-     * "            \""+srbJList.getSelectedValue()+"\"",
-     * "Delete SRB Connection", JOptionPane.YES_NO_OPTION); if (resp ==
-     * JOptionPane.NO_OPTION) { return; }
-     *
-     * DefaultListModel lm = (DefaultListModel)srbJList.getModel();
-     * lm.removeElementAt(n); srbVector.remove(n); for (int i=0; i<7; i++) {
-     * srbFields[i].setText(""); } }
-     */
-
-    /*
-     * public void valueChanged(ListSelectionEvent e) { Object src =
-     * e.getSource();
-     *
-     * if (!src.equals(srbJList)) { return; }
-     *
-     * int n = srbJList.getSelectedIndex(); if ( n<0 ) { return; }
-     *
-     * String srbaccount[] = (String[])srbVector.get(n); if (srbaccount == null)
-     * { return; }
-     *
-     * n = Math.min(7, srbaccount.length); for (int i=0; i<n; i++) {
-     * srbFields[i].setText(srbaccount[i]); } }
-     */
 }
