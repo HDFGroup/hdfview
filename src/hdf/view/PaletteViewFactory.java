@@ -22,16 +22,16 @@ import org.eclipse.swt.widgets.Shell;
 import hdf.object.DataFormat;
 
 /**
- * A Factory class to return instances of classes implementing the MetaDataView
- * interface, depending on the "currently selected" MetaDataView class in the
- * list maintained by the ViewProperties class.
+ * A Factory class to return instances of classes implementing the PaletteView
+ * interface, depending on the "current selected" PaletteView class in the list
+ * maintained by the ViewProperties class.
  *
  * @author jhenderson
  * @version 1.0 4/18/2018
  */
-public class MetaDataViewFactory extends DataViewFactory {
+public class PaletteViewFactory extends DataViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MetaDataViewFactory.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PaletteViewFactory.class);
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -47,32 +47,27 @@ public class MetaDataViewFactory extends DataViewFactory {
 
     @Override
     PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
-        return null;
-    }
+        String dataViewName = ViewProperties.getPaletteViewList().get(0);
+        Object[] initargs = { parent, viewer, theImageView };
+        PaletteView theView = null;
 
-    @Override
-    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj) {
-        String dataViewName = ViewProperties.getMetaDataViewList().get(0);
-        Object[] initargs = { parentObj, viewer, theObj };
-        MetaDataView theView = null;
+        log.trace("PaletteViewFactory: getPaletteView(): start");
 
-        log.trace("MetaDataViewFactory: getMetaDataView(): start");
-
-        /* TODO: Currently no support for other modules; return DefaultMetaDataView */
+        /* TODO: Currently no support for other modules; return DefaultImageView */
 
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
-            log.trace("MetaDataViewFactory: getMetaDataView(): Class.forName({})", dataViewName);
+            log.trace("PaletteViewFactory: getPaletteView(): Class.forName({})", dataViewName);
 
             /* Attempt to load the class by the given name */
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("MetaDataViewFactory: getMetaDataView(): Class.forName({}) failure: {}", dataViewName, ex);
+            log.debug("PaletteViewFactory: getPaletteView(): Class.forName({}) failure: {}", dataViewName, ex);
 
             try {
-                log.trace("MetaDataViewFactory: getMetaDataView(): ViewProperties.loadExtClass().loadClass({})",
+                log.trace("PaletteViewFactory: getPaletteView(): ViewProperties.loadExtClass().loadClass({})",
                         dataViewName);
 
                 /* Attempt to load the class as an external module */
@@ -80,20 +75,19 @@ public class MetaDataViewFactory extends DataViewFactory {
             }
             catch (Exception ex2) {
                 log.debug(
-                        "MetaDataViewFactory: getMetaDataView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                        "PaletteViewFactory: getPaletteView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
                         dataViewName, ex);
 
-                /* No loadable class found; use the default MetaDataView */
-                dataViewName = "hdf.view.DefaultMetaDataView";
+                /* No loadable class found; use the default PaletteView */
+                dataViewName = "hdf.view.DefaultPaletteView";
 
                 try {
-                    log.trace("MetaDataViewFactory: getMetaDataView(): Class.forName({})", dataViewName);
+                    log.trace("PaletteViewFactory: getPaletteView(): Class.forName({})", dataViewName);
 
                     theClass = Class.forName(dataViewName);
                 }
                 catch (Exception ex3) {
-                    log.debug("MetaDataViewFactory: getMetaDataView(): Class.forName({}) failure: {}", dataViewName,
-                            ex);
+                    log.debug("PaletteViewFactory: getPaletteView(): Class.forName({}) failure: {}", dataViewName, ex);
 
                     theClass = null;
                 }
@@ -101,17 +95,22 @@ public class MetaDataViewFactory extends DataViewFactory {
         }
 
         try {
-            theView = (MetaDataView) Tools.newInstance(theClass, initargs);
+            theView = (PaletteView) Tools.newInstance(theClass, initargs);
 
-            log.trace("MetaDataViewFactory: getMetaDataView(): returning MetaDataView instance {}", theView);
+            log.trace("PaletteViewFactory: getPaletteView(): returning PaletteView instance {}", theView);
         }
         catch (Exception ex) {
-            log.trace("MetaDataViewFactory: getMetaDataView(): Error instantiating class: {}", ex);
+            log.trace("PaletteViewFactory: getPaletteView(): Error instantiating class: {}", ex);
         }
 
-        log.trace("MetaDataViewFactory: getMetaDataView(): finish");
+        log.trace("PaletteViewFactory: getPaletteView(): finish");
 
         return theView;
+    }
+
+    @Override
+    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj) {
+        return null;
     }
 
 }

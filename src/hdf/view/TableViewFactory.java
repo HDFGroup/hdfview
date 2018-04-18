@@ -17,6 +17,7 @@ package hdf.view;
 import java.util.HashMap;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
@@ -24,6 +25,14 @@ import hdf.object.DataFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
+/**
+ * A Factory class to return instances of classes implementing the TableView
+ * interface, depending on the "current selected" TableView class in the list
+ * maintained by the ViewProperties class.
+ *
+ * @author jhenderson
+ * @version 1.0 4/18/2018
+ */
 public class TableViewFactory extends DataViewFactory {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TableViewFactory.class);
@@ -31,6 +40,8 @@ public class TableViewFactory extends DataViewFactory {
     @SuppressWarnings("rawtypes")
     @Override
     public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
+        String dataViewName = ViewProperties.getTableViewList().get(0);
+        Object[] initargs = { viewer, dataPropertiesMap };
         TableView theView = null;
         HObject dataObject = null;
 
@@ -47,14 +58,48 @@ public class TableViewFactory extends DataViewFactory {
          * TODO: Currently no support for other modules; return DefaultBaseTableView
          * subclasses
          */
-        if (dataObject instanceof ScalarDS) {
 
+        /* Attempt to load the class by name */
+        Class<?> theClass = null;
+        try {
+            log.trace("TableViewFactory: getTableView(): Class.forName({})", dataViewName);
+
+            /* Attempt to load the class by the given name */
+            theClass = Class.forName(dataViewName);
         }
-        else if (dataObject instanceof CompoundDS) {
+        catch (Exception ex) {
+            log.debug("TableViewFactory: getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
 
-        }
-        else if (dataObject instanceof Attribute) {
+            try {
+                log.trace("TableViewFactory: getTableView(): ViewProperties.loadExtClass().loadClass({})",
+                        dataViewName);
 
+                /* Attempt to load the class as an external module */
+                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
+            }
+            catch (Exception ex2) {
+                log.debug("TableViewFactory: getTableView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                        dataViewName, ex);
+
+                /* No loadable class found; use the default TableView */
+                if (dataObject instanceof ScalarDS)
+                    dataViewName = "hdf.view.DefaultScalarDSTableView";
+                else if (dataObject instanceof CompoundDS)
+                    dataViewName = "hdf.view.DefaultCompoundDSTableView";
+                else if (dataObject instanceof Attribute)
+                    dataViewName = "hdf.view.DefaultAttributeTableView";
+
+                try {
+                    log.trace("TableViewFactory: getTableView(): Class.forName({})", dataViewName);
+
+                    theClass = Class.forName(dataViewName);
+                }
+                catch (Exception ex3) {
+                    log.debug("TableViewFactory: getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
+
+                    theClass = null;
+                }
+            }
         }
 
         log.trace("TableViewFactory: getTableView(): finish");
@@ -65,6 +110,11 @@ public class TableViewFactory extends DataViewFactory {
     @SuppressWarnings("rawtypes")
     @Override
     ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+        return null;
+    }
+
+    @Override
+    PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
         return null;
     }
 

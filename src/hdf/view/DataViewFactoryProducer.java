@@ -43,6 +43,12 @@ public class DataViewFactoryProducer {
 
             return new ImageViewFactory();
         }
+        else if (viewType == DataViewType.PALETTE) {
+            log.trace("DataViewFactoryProducer: getFactory(): returning PaletteView factory instance");
+            log.trace("DataViewFactoryProducer: getFactory(): finish");
+
+            return new PaletteViewFactory();
+        }
         else if (viewType == DataViewType.METADATA) {
             log.trace("DataViewFactoryProducer: getFactory(): returning MetaDataView factory instance");
             log.trace("DataViewFactoryProducer: getFactory(): finish");

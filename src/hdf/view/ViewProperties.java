@@ -78,7 +78,7 @@ public class ViewProperties extends Properties {
      * Used to create different DataViews for a given HObject.
      */
     public static enum DataViewType {
-        TABLE, IMAGE, METADATA
+        TABLE, IMAGE, PALETTE, METADATA
     }
 
     /**
