@@ -14,26 +14,47 @@
 
 package hdf.view;
 
-import hdf.object.HObject;
+import java.util.HashMap;
+
+import org.eclipse.swt.widgets.Composite;
+
+import hdf.object.DataFormat;
 
 public class MetaDataViewFactory extends DataViewFactory {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MetaDataViewFactory.class);
 
+    @SuppressWarnings("rawtypes")
     @Override
-    TableView getTableView(HObject dataObject) {
+    TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
+        return null;
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
     @Override
-    ImageView getImageView(HObject dataObject) {
-        return null;
-    }
+    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj) {
+        MetaDataView theView = null;
 
-    @Override
-    MetaDataView getMetaDataView(HObject dataObject) {
-        // TODO Auto-generated method stub
-        return null;
+        log.trace("MetaDataViewFactory: getMetaDataView(): start");
+
+        /* TODO: Currently no support for other modules; return DefaultMetaDataView */
+        try {
+            theView = (MetaDataView) Tools.newInstance(DefaultMetaDataView.class,
+                    new Object[] { parentObj, viewer, theObj });
+            log.trace("MetaDataViewFactory: getMetaDataView(): returning DefaultMetaDataView instance");
+        }
+        catch (Exception ex) {
+            log.trace("MetaDataViewFactory: getMetaDataView(): Error instantiating class: {}", ex);
+        }
+
+        log.trace("MetaDataViewFactory: getMetaDataView(): finish");
+
+        return theView;
     }
 
 }

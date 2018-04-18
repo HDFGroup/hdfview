@@ -14,25 +14,45 @@
 
 package hdf.view;
 
-import hdf.object.HObject;
+import java.util.HashMap;
+
+import org.eclipse.swt.widgets.Composite;
+
+import hdf.object.DataFormat;
 
 public class ImageViewFactory extends DataViewFactory {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImageViewFactory.class);
 
+    @SuppressWarnings("rawtypes")
     @Override
-    TableView getTableView(HObject dataObject) {
+    TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    ImageView getImageView(HObject dataObject) {
-        // TODO Auto-generated method stub
-        return null;
+    ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+        ImageView theView = null;
+
+        log.trace("ImageViewFactory: getImageView(): start");
+
+        /* TODO: Currently no support for other modules; return DefaultImageView */
+        try {
+            theView = (ImageView) Tools.newInstance(DefaultImageView.class, new Object[] { viewer, dataPropertiesMap });
+            log.trace("ImageViewFactory: getImageView(): returning DefaultImageView instance");
+        }
+        catch (Exception ex) {
+            log.trace("ImageViewFactory: getImageView(): Error instantiating class: {}", ex);
+        }
+
+        log.trace("ImageViewFactory: getImageView(): finish");
+
+        return theView;
     }
 
     @Override
-    MetaDataView getMetaDataView(HObject dataObject) {
+    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj) {
         return null;
     }
 

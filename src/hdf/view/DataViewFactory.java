@@ -14,15 +14,21 @@
 
 package hdf.view;
 
-import hdf.object.HObject;
+import java.util.HashMap;
+
+import org.eclipse.swt.widgets.Composite;
+
+import hdf.object.DataFormat;
 
 public abstract class DataViewFactory {
-    /* Get an instance of TableView for this HObject */
-    abstract TableView    getTableView(HObject dataObject);
+    /* Get an instance of TableView given the appropriate constructor parameters */
+    abstract TableView    getTableView(ViewManager viewer, HashMap dataPropertiesMap);
 
-    /* Get an instance of ImageView for this HObject */
-    abstract ImageView    getImageView(HObject dataObject);
+    /* Get an instance of ImageView given the appropriate constructor parameters */
+    abstract ImageView    getImageView(ViewManager viewer, HashMap dataPropertiesMap);
 
-    /* Get an instance of MetaDataView for this HObject */
-    abstract MetaDataView getMetaDataView(HObject dataObject);
+    /*
+     * Get an instance of MetaDataView given the appropriate constructor parameters
+     */
+    abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj);
 }
