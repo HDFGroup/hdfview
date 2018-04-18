@@ -75,10 +75,17 @@ public class ViewProperties extends Properties {
     public static final String  DELIMITER_SEMI_COLON = "Semi-Colon";
 
     /**
+     * Used to create different DataViews for a given HObject.
+     */
+    public static enum DataViewType {
+        TABLE, IMAGE, PALETTE, METADATA
+    }
+
+    /**
      * Property keys control how the data is displayed.
      */
     public static enum DATA_VIEW_KEY {
-        CHAR, CONVERTBYTE, TRANSPOSED, READONLY, OBJECT, BITMASK, BITMASKOP, BORDER, INFO, INDEXBASE1
+        CHAR, CONVERTBYTE, TRANSPOSED, READONLY, OBJECT, BITMASK, BITMASKOP, BORDER, INFO, INDEXBASE1, VIEW_NAME
     }
 
     /**
@@ -125,9 +132,6 @@ public class ViewProperties extends Properties {
     private static String           fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
 
     private static ClassLoader      extClassLoader         = null;
-
-    /** a list of srb accounts */
-    private static Vector<String[]> srbAccountList         = new Vector<String[]>(5);
 
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
@@ -183,9 +187,6 @@ public class ViewProperties extends Properties {
 
     /** a list of metaview modules */
     private static Vector<String>   moduleListMetaDataView = new Vector<String>(5);
-
-    /** a list of textview modules */
-    private static Vector<String>   moduleListTextView     = new Vector<String>(5);
 
     /** a list of tableview modules */
     private static Vector<String>   moduleListTableView    = new Vector<String>(5);
@@ -254,6 +255,7 @@ public class ViewProperties extends Properties {
     }
 
     /* the properties are sorted by keys */
+    @Override
     @SuppressWarnings("unchecked")
     public synchronized Enumeration<Object> keys() {
         Enumeration<?> keysEnum = super.keys();
@@ -394,11 +396,6 @@ public class ViewProperties extends Properties {
                             else if ("hdf.view.MetaDataView".equals(interfaceName)
                                     && !moduleListMetaDataView.contains(theName)) {
                                 moduleListMetaDataView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.TextView".equals(interfaceName)
-                                    && !moduleListTextView.contains(theName)) {
-                                moduleListTextView.add(theName);
                                 break;
                             }
                             else if ("hdf.view.TableView".equals(interfaceName)
@@ -991,13 +988,12 @@ public class ViewProperties extends Properties {
         String propVal = null;
 
         // add default module.
-        String[] moduleKeys = { "module.treeview", "module.metadataview", "module.textview", "module.tableview",
+        String[] moduleKeys = { "module.treeview", "module.metadataview", "module.tableview",
                 "module.imageview", "module.paletteview" };
-        Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTextView, moduleListTableView,
+        Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
                 moduleListImageView, moduleListPaletteView };
         String[] moduleNames = { "hdf.view.DefaultTreeView", "hdf.view.DefaultMetaDataView",
-                "hdf.view.DefaultTextView", "hdf.view.DefaultTableView", "hdf.view.DefaultImageView",
-        "hdf.view.DefaultPaletteView" };
+                "hdf.view.DefaultTableView", "hdf.view.DefaultImageView", "hdf.view.DefaultPaletteView" };
 
         // add default implementation of modules
         for (int i = 0; i < 6; i++) {
@@ -1202,35 +1198,6 @@ public class ViewProperties extends Properties {
             }
         }
 
-        // load srb account
-        propVal = null;
-        String srbaccount[] = new String[7];
-        for (int i = 0; i < MAX_RECENT_FILES; i++) {
-            if (null == (srbaccount[0] = getProperty("srbaccount" + i + ".host"))) {
-                continue;
-            }
-            if (null == (srbaccount[1] = getProperty("srbaccount" + i + ".port"))) {
-                continue;
-            }
-            if (null == (srbaccount[2] = getProperty("srbaccount" + i + ".user"))) {
-                continue;
-            }
-            if (null == (srbaccount[3] = getProperty("srbaccount" + i + ".password"))) {
-                continue;
-            }
-            if (null == (srbaccount[4] = getProperty("srbaccount" + i + ".home"))) {
-                continue;
-            }
-            if (null == (srbaccount[5] = getProperty("srbaccount" + i + ".domain"))) {
-                continue;
-            }
-            if (null == (srbaccount[6] = getProperty("srbaccount" + i + ".resource"))) {
-                continue;
-            }
-            srbAccountList.add(srbaccount);
-            srbaccount = new String[7];
-        }
-
         // set default modules from user property files
         for (int i = 0; i < 6; i++) {
             String moduleName = (String) get(moduleKeys[i]);
@@ -1351,25 +1318,6 @@ public class ViewProperties extends Properties {
             }
         }
 
-        // save srb account
-        String srbaccount[] = null;
-        size = srbAccountList.size();
-        minSize = Math.min(size, MAX_RECENT_FILES);
-        for (int i = 0; i < minSize; i++) {
-            srbaccount = srbAccountList.get(i);
-            if ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] != null)
-                    && (srbaccount[3] != null) && (srbaccount[4] != null) && (srbaccount[5] != null)
-                    && (srbaccount[6] != null)) {
-                put("srbaccount" + i + ".host", srbaccount[0]);
-                put("srbaccount" + i + ".port", srbaccount[1]);
-                put("srbaccount" + i + ".user", srbaccount[2]);
-                put("srbaccount" + i + ".password", srbaccount[3]);
-                put("srbaccount" + i + ".home", srbaccount[4]);
-                put("srbaccount" + i + ".domain", srbaccount[5]);
-                put("srbaccount" + i + ".resource", srbaccount[6]);
-            }
-        }
-
         // save default modules
         String moduleName = moduleListTreeView.elementAt(0);
         if ((moduleName != null) && (moduleName.length() > 0)) {
@@ -1379,11 +1327,6 @@ public class ViewProperties extends Properties {
         moduleName = moduleListMetaDataView.elementAt(0);
         if ((moduleName != null) && (moduleName.length() > 0)) {
             put("module.metadataview", moduleName);
-        }
-
-        moduleName = moduleListTextView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) {
-            put("module.textview", moduleName);
         }
 
         moduleName = moduleListTableView.elementAt(0);
@@ -1524,10 +1467,6 @@ public class ViewProperties extends Properties {
         return paletteList;
     }
 
-    public static Vector<String[]> getSrbAccount() {
-        return srbAccountList;
-    }
-
     /** @return a list of treeview modules */
     public static Vector<String> getTreeViewList() {
         return moduleListTreeView;
@@ -1536,11 +1475,6 @@ public class ViewProperties extends Properties {
     /** @return a list of metadataview modules */
     public static Vector<String> getMetaDataViewList() {
         return moduleListMetaDataView;
-    }
-
-    /** @return a list of textview modules */
-    public static Vector<String> getTextViewList() {
-        return moduleListTextView;
     }
 
     /** @return a list of tableview modules */

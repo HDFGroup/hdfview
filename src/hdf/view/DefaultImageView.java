@@ -95,11 +95,13 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeItem;
 
+import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.dialog.NewDatasetDialog;
 
 /**
  * ImageView displays an HDF dataset as an image.
@@ -292,6 +294,7 @@ public class DefaultImageView implements ImageView {
      *            applying bitmask, and etc. Predefined keys are listed at
      *            ViewProperties.DATA_VIEW_KEY.
      */
+    @SuppressWarnings("rawtypes")
     public DefaultImageView(ViewManager theView, HashMap map) {
         shell = new Shell(display, SWT.SHELL_TRIM);
 
@@ -582,21 +585,21 @@ public class DefaultImageView implements ImageView {
         /*
          * ImageIO does not support tiff by default
          */
-//        item = new MenuItem(saveAsMenu, SWT.PUSH);
-//        item.setText("TIFF");
-//        item.addSelectionListener(new SelectionAdapter() {
-//            public void widgetSelected(SelectionEvent e) {
-//                String filetype = Tools.FILE_TYPE_TIFF;
-//
-//                try {
-//                    saveImageAs(filetype);
-//                }
-//                catch (Exception ex) {
-//                    shell.getDisplay().beep();
-//                    Tools.showError(shell, ex.getMessage(), shell.getText());
-//                }
-//            }
-//        });
+        //        item = new MenuItem(saveAsMenu, SWT.PUSH);
+        //        item.setText("TIFF");
+        //        item.addSelectionListener(new SelectionAdapter() {
+        //            public void widgetSelected(SelectionEvent e) {
+        //                String filetype = Tools.FILE_TYPE_TIFF;
+        //
+        //                try {
+        //                    saveImageAs(filetype);
+        //                }
+        //                catch (Exception ex) {
+        //                    shell.getDisplay().beep();
+        //                    Tools.showError(shell, ex.getMessage(), shell.getText());
+        //                }
+        //            }
+        //        });
 
         item = new MenuItem(saveAsMenu, SWT.PUSH);
         item.setText("PNG");
@@ -733,8 +736,8 @@ public class DefaultImageView implements ImageView {
                 if (chosenFile.exists()) {
                     int answer = SWT.NO;
                     if(MessageDialog.openConfirm(shell,
-                                shell.getText(), "File exists. Do you want to replace it ?"))
-                            answer = SWT.YES;
+                            shell.getText(), "File exists. Do you want to replace it ?"))
+                        answer = SWT.YES;
 
                     if (answer == SWT.NO) return;
                 }
@@ -1009,9 +1012,9 @@ public class DefaultImageView implements ImageView {
                     Tools.findMinMax(theData, minmax, dataset.getFillValue());
                     if (Tools.computeStatistics(theData, stat, dataset.getFillValue()) > 0) {
                         String statistics = "Min                      = "
-                            + minmax[0] + "\nMax                      = "
-                            + minmax[1] + "\nMean                     = "
-                            + stat[0] + "\nStandard deviation = " + stat[1];
+                                + minmax[0] + "\nMax                      = "
+                                + minmax[1] + "\nMean                     = "
+                                + stat[0] + "\nStandard deviation = " + stat[1];
 
                         MessageDialog.openInformation(shell, "Statistics", statistics);
                     }
@@ -1428,7 +1431,7 @@ public class DefaultImageView implements ImageView {
             data = dataset.convertFromUnsignedC();
             isUnsignedConverted = true;
             doAutoGainContrast = doAutoGainContrast ||
-            (ViewProperties.isAutoContrast() && noPalette && isLocalFile);
+                    (ViewProperties.isAutoContrast() && noPalette && isLocalFile);
         }
         else
             doAutoGainContrast = false;
@@ -1652,8 +1655,8 @@ public class DefaultImageView implements ImageView {
         // double[] xRange = {0, 255};
 
         Chart cv = new Chart(shell, "Histogram - " + dataset.getPath()
-                + dataset.getName() + " - by pixel index", Chart.HISTOGRAM,
-                chartData, xRange, null);
+        + dataset.getName() + " - by pixel index", Chart.HISTOGRAM,
+        chartData, xRange, null);
         cv.open();
     }
 
@@ -1862,12 +1865,12 @@ public class DefaultImageView implements ImageView {
 
         /*
         // fchooser.changeToParentDirectory();
-        */
+         */
     }
 
     // Implementing DataView.
     @Override
-    public HObject getDataObject() {
+    public DataFormat getDataObject() {
         return dataset;
     }
 
@@ -2195,37 +2198,37 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-    * Creates a true color image.
-    * <p>
-    * The data may be arranged in one of two ways: by pixel or by plane. In
-    * both cases, the dataset will have a dataspace with three dimensions,
-    * height, width, and components.
-    * <p>
-    * For HDF4, the interlace modes specify orders for the dimensions as:
-    *
-    * <pre>
-    * INTERLACE_PIXEL = [width][height][pixel components]
-    *            INTERLACE_PLANE = [pixel components][width][height]
-    * </pre>
-    * <p>
-    * For HDF5, the interlace modes specify orders for the dimensions as:
-    *
-    * <pre>
-    * INTERLACE_PIXEL = [height][width][pixel components]
-    *            INTERLACE_PLANE = [pixel components][height][width]
-    * </pre>
-    *
-    * @param imageData
-    *            the byte array of the image data.
-    * @param planeInterlace
-    *            flag if the image is plane intelace.
-    * @param w
-    *            the width of the image.
-    * @param h
-    *            the height of the image.
-    *
-    * @return the image.
-    */
+     * Creates a true color image.
+     * <p>
+     * The data may be arranged in one of two ways: by pixel or by plane. In
+     * both cases, the dataset will have a dataspace with three dimensions,
+     * height, width, and components.
+     * <p>
+     * For HDF4, the interlace modes specify orders for the dimensions as:
+     *
+     * <pre>
+     * INTERLACE_PIXEL = [width][height][pixel components]
+     *            INTERLACE_PLANE = [pixel components][width][height]
+     * </pre>
+     * <p>
+     * For HDF5, the interlace modes specify orders for the dimensions as:
+     *
+     * <pre>
+     * INTERLACE_PIXEL = [height][width][pixel components]
+     *            INTERLACE_PLANE = [pixel components][height][width]
+     * </pre>
+     *
+     * @param imageData
+     *            the byte array of the image data.
+     * @param planeInterlace
+     *            flag if the image is plane intelace.
+     * @param w
+     *            the width of the image.
+     * @param h
+     *            the height of the image.
+     *
+     * @return the image.
+     */
     private Image createTrueColorImage(byte[] imageData, boolean planeInterlace,
             int w, int h)
     {
@@ -2326,7 +2329,7 @@ public class DefaultImageView implements ImageView {
         NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, this);
         dialog.open();
 
-        HObject obj = (HObject) dialog.getObject();
+        HObject obj = dialog.getObject();
         if (obj != null) {
             Group pgroup = dialog.getParentGroup();
             try {
@@ -2608,10 +2611,10 @@ public class DefaultImageView implements ImageView {
 
                     /*if (((y <= 0) && (wr < 0))
                             || (y + jb.getVisibleAmount() * wr >= zoomFactor
-                                    * originalSize.y)) {
+                     * originalSize.y)) {
                         return;
                     }
-                    */
+                     */
 
                     //yMousePosition += n;
                     //jb.setSelection(jb.getSelection() + n);
@@ -2659,16 +2662,16 @@ public class DefaultImageView implements ImageView {
         }
 
         /**
-        * Create an image using multiple step bilinear, see details at
-        * http://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
-        *
-        * @param img          the original image to be scaled
-        * @param targetWidth  the desired width of the scaled instance
-        * @param targetHeight the desired height of the scaled instance
-        * @param highquality  the quality desired
-        *
-        * @return a scaled version of the original
-        */
+         * Create an image using multiple step bilinear, see details at
+         * http://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
+         *
+         * @param img          the original image to be scaled
+         * @param targetWidth  the desired width of the scaled instance
+         * @param targetHeight the desired height of the scaled instance
+         * @param highquality  the quality desired
+         *
+         * @return a scaled version of the original
+         */
         private Image multiBilinear(Image img, int targetWidth, int targetHeight, boolean highquality)
         {
             Image ret = img;
@@ -2843,10 +2846,10 @@ public class DefaultImageView implements ImageView {
             if ((w > 0) && (h > 0)) {
                 // use fixed selected area to reduce the rounding error
                 selectedArea.setBounds(
-                 (int) (originalSelectedArea.x * zoomFactor),
-                 (int) (originalSelectedArea.y * zoomFactor),
-                 (int) (originalSelectedArea.width * zoomFactor),
-                 (int) (originalSelectedArea.height * zoomFactor));
+                        (int) (originalSelectedArea.x * zoomFactor),
+                        (int) (originalSelectedArea.y * zoomFactor),
+                        (int) (originalSelectedArea.width * zoomFactor),
+                        (int) (originalSelectedArea.height * zoomFactor));
             }
 
             redraw();
@@ -3280,9 +3283,9 @@ public class DefaultImageView implements ImageView {
                         imageWidth);
             } // for (int y = 0; y < imageHeight; y++) {
 
-                // complete ?
-                consumer.imageComplete(status);
-            }
+            // complete ?
+            consumer.imageComplete(status);
+        }
 
         /**
          * draw a contour line based on the current parameter---level, color
@@ -3645,7 +3648,7 @@ public class DefaultImageView implements ImageView {
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
@@ -3700,7 +3703,7 @@ public class DefaultImageView implements ImageView {
         final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
 
         public DataRangeDialog(Shell parent, int style, double[] minmaxCurrent,
-                               double[] minmaxOriginal, final int[] dataDist) {
+                double[] minmaxOriginal, final int[] dataDist) {
 
             super(parent, style);
 
@@ -3969,7 +3972,7 @@ public class DefaultImageView implements ImageView {
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
@@ -4165,7 +4168,7 @@ public class DefaultImageView implements ImageView {
             org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 

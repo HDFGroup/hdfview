@@ -76,6 +76,14 @@ public class Attribute extends HObject implements DataFormat {
     /** The dimension sizes of the attribute. */
     private long[]            dims;
 
+    private long[]            selectedDims;
+
+    private long[]            startDims;
+
+    private long[]            selectedStride;
+
+    private final int[]       selectedIndex;
+
     /** The value of the attribute. */
     private Object            value;
 
@@ -157,26 +165,36 @@ public class Attribute extends HObject implements DataFormat {
     public Attribute(String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
         super(null, attrName, null, null);
 
+        log.trace("Attribute: start");
+
         type = attrType;
         dims = attrDims;
-        value = null;
+        value = attrValue;
         properties = new HashMap();
         rank = 0;
-        log.trace("Attribute: {}, attrValue={}", attrName, attrValue);
 
-        if (dims != null) {
-            rank = dims.length;
-        }
-        else {
+        if (dims == null) {
             isScalar = true;
             rank = 1;
             dims = new long[] { 1 };
         }
-        if (attrValue != null) {
-            value = attrValue;
-        }
+        else
+            rank = dims.length;
 
         isUnsigned = (type.getDatatypeSign() == Datatype.SIGN_NONE);
+
+        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName, type,
+                value, rank, isUnsigned, isScalar);
+
+        selectedDims = null;
+        startDims = null;
+        selectedStride = null;
+
+        selectedIndex = new int[3];
+        selectedIndex[0] = 0;
+        selectedIndex[1] = 1;
+        selectedIndex[2] = 2;
+
         log.trace("Attribute: finish");
     }
 
@@ -195,6 +213,14 @@ public class Attribute extends HObject implements DataFormat {
         return value;
     }
 
+    @Override
+    public Object getFillValue() {
+        /*
+         * Currently, Attributes do not support fill values.
+         */
+        return null;
+    }
+
     /**
      * Sets the value of the attribute. It returns null if it failed to retrieve
      * the name from file.
@@ -205,6 +231,12 @@ public class Attribute extends HObject implements DataFormat {
     @Override
     public void setData(Object data) {
         value = data;
+    }
+
+    @Override
+    public void clearData() {
+        /* Currently not implemented for Attributes */
+        return;
     }
 
     /**
@@ -275,6 +307,16 @@ public class Attribute extends HObject implements DataFormat {
     }
 
     /**
+     * At the current time, Attributes do not support compression.
+     *
+     * @return null
+     */
+    @Override
+    public final String getCompression() {
+        return null;
+    }
+
+    /**
      * @return true if the data is a single scalar point; otherwise, returns
      *         false.
      */
@@ -290,6 +332,93 @@ public class Attribute extends HObject implements DataFormat {
      */
     public boolean isUnsigned() {
         return isUnsigned;
+    }
+
+    @Override
+    public long open() {
+        return -1;
+    }
+
+    @Override
+    public void close(long id) {
+        return;
+    }
+
+    @Override
+    public Object read() throws Exception, OutOfMemoryError {
+        throw new UnsupportedOperationException("Unsupported operation.");
+    }
+
+    @Override
+    public void write(Object buf) throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation.");
+    }
+
+    @Override
+    public long[] getSelectedDims() {
+        /*
+         * Currently, Attributes do not support subsetting.
+         */
+        return dims;
+    }
+
+    @Override
+    public long[] getStartDims() {
+        if (rank < 0) return null;
+
+        /*
+         * Currently, Attributes do not support subsetting.
+         */
+
+        if (startDims == null) {
+            startDims = new long[rank];
+            for (int i = 0; i < rank; i++) {
+                startDims[i] = 0;
+            }
+        }
+
+        return startDims;
+    }
+
+    @Override
+    public long[] getStride() {
+        if (rank <= 0) return null;
+
+        /*
+         * Currently, Attributes do not support subsetting.
+         */
+
+        if (selectedStride == null) {
+            selectedStride = new long[rank];
+            for (int i = 0; i < rank; i++) {
+                selectedStride[i] = 1;
+            }
+        }
+
+        return selectedStride;
+    }
+
+    @Override
+    public int[] getSelectedIndex() {
+        if (rank < 0) return null;
+
+        return selectedIndex;
+    }
+
+    @Override
+    public long getHeight() {
+        if ((selectedDims == null) || (selectedIndex == null)) return 0;
+
+        return selectedDims[selectedIndex[0]];
+    }
+
+    @Override
+    public long getWidth() {
+        if ((selectedDims == null) || (selectedIndex == null)) return 0;
+
+        if ((selectedDims.length < 2) || (selectedIndex.length < 2)) return 1;
+
+        return selectedDims[selectedIndex[1]];
     }
 
     /**
@@ -379,93 +508,93 @@ public class Attribute extends HObject implements DataFormat {
             }
             String theValue = null;
             switch (dname) {
-            case 'B':
-                byte[] barray = (byte[]) value;
-                short sValue = barray[0];
-                theValue = String.valueOf(sValue);
-                if (map.containsKey(theValue)) {
-                    sb.append(map.get(theValue));
-                }
-                else
-                    sb.append(sValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    sValue = barray[i];
+                case 'B':
+                    byte[] barray = (byte[]) value;
+                    short sValue = barray[0];
                     theValue = String.valueOf(sValue);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(sValue);
-                }
-                break;
-            case 'S':
-                short[] sarray = (short[]) value;
-                int iValue = sarray[0];
-                theValue = String.valueOf(iValue);
-                if (map.containsKey(theValue)) {
-                    sb.append(map.get(theValue));
-                }
-                else
-                    sb.append(iValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    iValue = sarray[i];
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        theValue = String.valueOf(sValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) value;
+                    int iValue = sarray[0];
                     theValue = String.valueOf(iValue);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(iValue);
-                }
-                break;
-            case 'I':
-                int[] iarray = (int[]) value;
-                long lValue = iarray[0];
-                theValue = String.valueOf(lValue);
-                if (map.containsKey(theValue)) {
-                    sb.append(map.get(theValue));
-                }
-                else
-                    sb.append(lValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    lValue = iarray[i];
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        theValue = String.valueOf(iValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) value;
+                    long lValue = iarray[0];
                     theValue = String.valueOf(lValue);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(lValue);
-                }
-                break;
-            case 'J':
-                long[] larray = (long[]) value;
-                Long l = larray[0];
-                theValue = Long.toString(l);
-                if (map.containsKey(theValue)) {
-                    sb.append(map.get(theValue));
-                }
-                else
-                    sb.append(theValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    l = larray[i];
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        theValue = String.valueOf(lValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) value;
+                    Long l = larray[0];
                     theValue = Long.toString(l);
                     if (map.containsKey(theValue)) {
                         sb.append(map.get(theValue));
                     }
                     else
                         sb.append(theValue);
-                }
-                break;
-            default:
-                sb.append(Array.get(value, 0));
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    sb.append(Array.get(value, i));
-                }
-                break;
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = larray[i];
+                        theValue = Long.toString(l);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(theValue);
+                    }
+                    break;
+                default:
+                    sb.append(Array.get(value, 0));
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sb.append(Array.get(value, i));
+                    }
+                    break;
             }
         }
         else if (is_unsigned) {
@@ -474,70 +603,58 @@ public class Attribute extends HObject implements DataFormat {
             log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {
-            case 'B':
-                byte[] barray = (byte[]) value;
-                short sValue = barray[0];
-                if (sValue < 0) {
-                    sValue += 256;
-                }
-                sb.append(sValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    sValue = barray[i];
+                case 'B':
+                    byte[] barray = (byte[]) value;
+                    short sValue = barray[0];
                     if (sValue < 0) {
                         sValue += 256;
                     }
                     sb.append(sValue);
-                }
-                break;
-            case 'S':
-                short[] sarray = (short[]) value;
-                int iValue = sarray[0];
-                if (iValue < 0) {
-                    iValue += 65536;
-                }
-                sb.append(iValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    iValue = sarray[i];
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        if (sValue < 0) {
+                            sValue += 256;
+                        }
+                        sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) value;
+                    int iValue = sarray[0];
                     if (iValue < 0) {
                         iValue += 65536;
                     }
                     sb.append(iValue);
-                }
-                break;
-            case 'I':
-                int[] iarray = (int[]) value;
-                long lValue = iarray[0];
-                if (lValue < 0) {
-                    lValue += 4294967296L;
-                }
-                sb.append(lValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    lValue = iarray[i];
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        if (iValue < 0) {
+                            iValue += 65536;
+                        }
+                        sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) value;
+                    long lValue = iarray[0];
                     if (lValue < 0) {
                         lValue += 4294967296L;
                     }
                     sb.append(lValue);
-                }
-                break;
-            case 'J':
-                long[] larray = (long[]) value;
-                Long l = larray[0];
-                String theValue = Long.toString(l);
-                if (l < 0) {
-                    l = (l << 1) >>> 1;
-                    BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                    BigInteger big2 = new BigInteger(l.toString());
-                    BigInteger big = big1.add(big2);
-                    theValue = big.toString();
-                }
-                sb.append(theValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    l = larray[i];
-                    theValue = Long.toString(l);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        if (lValue < 0) {
+                            lValue += 4294967296L;
+                        }
+                        sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) value;
+                    Long l = larray[0];
+                    String theValue = Long.toString(l);
                     if (l < 0) {
                         l = (l << 1) >>> 1;
                         BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
@@ -546,25 +663,37 @@ public class Attribute extends HObject implements DataFormat {
                         theValue = big.toString();
                     }
                     sb.append(theValue);
-                }
-                break;
-            default:
-                String strValue = Array.get(value, 0).toString();
-                if (maxItems > 0 && strValue.length() > maxItems) {
-                    // truncate the extra characters
-                    strValue = strValue.substring(0, maxItems);
-                }
-                sb.append(strValue);
-                for (int i = 1; i < n; i++) {
-                    sb.append(delimiter);
-                    strValue = Array.get(value, i).toString();
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = larray[i];
+                        theValue = Long.toString(l);
+                        if (l < 0) {
+                            l = (l << 1) >>> 1;
+                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                            BigInteger big2 = new BigInteger(l.toString());
+                            BigInteger big = big1.add(big2);
+                            theValue = big.toString();
+                        }
+                        sb.append(theValue);
+                    }
+                    break;
+                default:
+                    String strValue = Array.get(value, 0).toString();
                     if (maxItems > 0 && strValue.length() > maxItems) {
                         // truncate the extra characters
                         strValue = strValue.substring(0, maxItems);
                     }
                     sb.append(strValue);
-                }
-                break;
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        strValue = Array.get(value, i).toString();
+                        if (maxItems > 0 && strValue.length() > maxItems) {
+                            // truncate the extra characters
+                            strValue = strValue.substring(0, maxItems);
+                        }
+                        sb.append(strValue);
+                    }
+                    break;
             }
         }
         else {
@@ -588,25 +717,5 @@ public class Attribute extends HObject implements DataFormat {
 
         log.trace("toString: finish");
         return sb.toString();
-    }
-
-    @Override
-    public long open() {
-        return -1;
-    }
-
-    @Override
-    public void close(long id) {
-        return;
-    }
-
-    @Override
-    public Object read() throws Exception, OutOfMemoryError {
-        throw new UnsupportedOperationException("Unsupported operation.");
-    }
-
-    @Override
-    public void write(Object buf) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation.");
     }
 }

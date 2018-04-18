@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -44,6 +44,8 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import hdf.view.ViewProperties;
+
 /**
  * UserOptionsDialog displays components for choosing user options.
  *
@@ -59,7 +61,7 @@ public class UserOptionsDialog extends Dialog {
 
     private Text                  UGField, workField, fileExtField, maxMemberField, startMemberField;
     private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
-    private Combo                 choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView, choiceImageView, choicePaletteView;
+    private Combo                 choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
     private String                rootDir, workDir;
     private Button                checkCurrentUserDir, checkAutoContrast, checkConvertEnum, checkShowValues, checkShowRegRefValues;
     private Button                currentDirButton;
@@ -86,18 +88,11 @@ public class UserOptionsDialog extends Dialog {
     /** A list of Table view implementations. */
     private static Vector<String> tableViews;
 
-    /** A list of Text view implementations. */
-    private static Vector<String> textViews;
-
     /** A list of metadata view implementations. */
     private static Vector<String> metaDataViews;
 
     /** A list of palette view implementations. */
     private static Vector<String> paletteViews;
-
-    // private JList srbJList;
-    // private JTextField srbFields[];
-    // private Vector srbVector;
 
     public UserOptionsDialog(Shell parent, String viewRoot) {
         super(parent, SWT.APPLICATION_MODAL);
@@ -117,7 +112,6 @@ public class UserOptionsDialog extends Dialog {
         isFontChanged = false;
         isUserGuideChanged = false;
         isWorkDirChanged = false;
-        // srbJList = null;
         workDir = ViewProperties.getWorkDir();
         if (workDir == null) {
             workDir = rootDir;
@@ -125,11 +119,9 @@ public class UserOptionsDialog extends Dialog {
         log.trace("UserOptionsDialog: workDir={}", workDir);
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
-        textViews = ViewProperties.getTextViewList();
         tableViews = ViewProperties.getTableViewList();
         imageViews = ViewProperties.getImageViewList();
         paletteViews = ViewProperties.getPaletteViewList();
-        // srbVector = ViewProperties.getSrbAccount();
         indexType = ViewProperties.getIndexType();
         indexOrder = ViewProperties.getIndexOrder();
     }
@@ -156,14 +148,6 @@ public class UserOptionsDialog extends Dialog {
         item.setText("Default Modules");
         item.setControl(createDefaultModulesRegion(folder));
 
-        /*
-        try { Class.forName("hdf.srb.SRBFileDialog");
-            item = new TabItem(folder, SWT.NONE);
-            item.setText("SRB Connection");
-            item.setControl(createSrbConnectionPanel());
-        } catch (Exception ex) {;}
-        */
-
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
@@ -174,6 +158,7 @@ public class UserOptionsDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 setUserOptions();
                 shell.dispose();
@@ -185,6 +170,7 @@ public class UserOptionsDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 isFontChanged = false;
                 shell.dispose();
@@ -194,6 +180,7 @@ public class UserOptionsDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -263,8 +250,8 @@ public class UserOptionsDialog extends Dialog {
 
         // set font size and type
         try {
-            String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
-            int fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
+            String ftype = fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
+            int fsize = Integer.parseInt(fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
 
             if (ViewProperties.getFontSize() != fsize) {
                 ViewProperties.setFontSize(fsize);
@@ -282,8 +269,8 @@ public class UserOptionsDialog extends Dialog {
 
 
         // set data delimiter
-        ViewProperties.setDataDelimiter((String) delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
-        ViewProperties.setImageOrigin((String) imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
+        ViewProperties.setDataDelimiter(delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
+        ViewProperties.setImageOrigin(imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
 
         // set index type
         if (checkIndexType.getSelection())
@@ -319,10 +306,10 @@ public class UserOptionsDialog extends Dialog {
         }
 
         @SuppressWarnings("rawtypes")
-        Vector[] moduleList = { treeViews, metaDataViews, textViews, tableViews, imageViews, paletteViews };
-        Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView,
+        Vector[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
+        Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTableView,
                 choiceImageView, choicePaletteView };
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             Object theModule = choiceList[i].getItem(choiceList[i].getSelectionIndex());
             moduleList[i].remove(theModule);
             moduleList[i].add(0, theModule);
@@ -360,6 +347,7 @@ public class UserOptionsDialog extends Dialog {
         checkCurrentUserDir.setText("\"Current Working Directory\" or");
         checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkCurrentUserDir.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean isCheckCurrentUserDirSelected = checkCurrentUserDir.getSelection();
                 workField.setEnabled(!isCheckCurrentUserDirSelected);
@@ -377,6 +365,7 @@ public class UserOptionsDialog extends Dialog {
         currentDirButton.setText("Browse...");
         currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         currentDirButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final DirectoryDialog dChooser = new DirectoryDialog(shell);
                 dChooser.setFilterPath(workDir);
@@ -415,6 +404,7 @@ public class UserOptionsDialog extends Dialog {
         browseButton.setText("Browse...");
         browseButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         browseButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(rootDir);
@@ -561,6 +551,7 @@ public class UserOptionsDialog extends Dialog {
         helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Auto Contrast");
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Auto Contrast does the following to compute a gain/bias \n"
                         + "that will stretch the pixels in the image to fit the pixel \n"
@@ -629,6 +620,7 @@ public class UserOptionsDialog extends Dialog {
         helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Convert Enum");
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Convert enum data to strings. \n"
                         + "For example, a dataset of an enum type of (R=0, G=, B=2) \n"
@@ -705,6 +697,7 @@ public class UserOptionsDialog extends Dialog {
         checkReadAll.setSelection((nMax<=0) || (nMax==Integer.MAX_VALUE));
         checkReadAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkReadAll.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 startMemberField.setEnabled(!checkReadAll.getSelection());
                 maxMemberField.setEnabled(!checkReadAll.getSelection());
@@ -811,17 +804,6 @@ public class UserOptionsDialog extends Dialog {
         choiceMetaDataView.setItems(metaDataViews.toArray(new String[0]));
         choiceMetaDataView.select(0);
 
-        org.eclipse.swt.widgets.Group textViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        textViewGroup.setLayout(new FillLayout());
-        textViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        textViewGroup.setFont(curFont);
-        textViewGroup.setText("TextView");
-
-        choiceTextView = new Combo(textViewGroup, SWT.SINGLE | SWT.READ_ONLY);
-        choiceTextView.setFont(curFont);
-        choiceTextView.setItems(textViews.toArray(new String[0]));
-        choiceTextView.select(0);
-
         org.eclipse.swt.widgets.Group tableViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         tableViewGroup.setLayout(new FillLayout());
         tableViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -857,108 +839,4 @@ public class UserOptionsDialog extends Dialog {
 
         return composite;
     }
-
-    /*
-     * private JPanel createSrbConnectionPanel() { JPanel p = new JPanel();
-     * p.setLayout(new BorderLayout(5,5)); TitledBorder tborder = new
-     * TitledBorder("SRB Connections"); tborder.setTitleColor(Color.darkGray);
-     * p.setBorder(tborder);
-     *
-     * DefaultListModel listModel = new DefaultListModel(); srbJList = new
-     * JList(listModel);
-     * srbJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-     * srbJList.addListSelectionListener(this);
-     *
-     * srbFields = new JTextField[7];
-     *
-     * if (srbVector!= null) { int n=srbVector.size();
-     *
-     * String srbaccount[] = null; for (int i=0; i<n; i++) { srbaccount =
-     * (String[])srbVector.get(i); if (srbaccount != null) {
-     * listModel.addElement(srbaccount[0]); } } }
-     *
-     * JPanel cp = new JPanel(); cp.setLayout(new BorderLayout(5,5));
-     *
-     * JPanel cpc = new JPanel(); cpc.setLayout(new GridLayout(7,1,5,5));
-     * cpc.add(srbFields[0] = new JTextField()); cpc.add(srbFields[1] = new
-     * JTextField()); cpc.add(srbFields[2] = new JTextField());
-     * cpc.add(srbFields[3] = new JTextField()); cpc.add(srbFields[4] = new
-     * JTextField()); cpc.add(srbFields[5] = new JTextField());
-     * cpc.add(srbFields[6] = new JTextField()); cp.add(cpc,
-     * BorderLayout.CENTER);
-     *
-     * JPanel cpl = new JPanel(); cpl.setLayout(new GridLayout(7,1,5,5));
-     * cpl.add(new JLabel("Host Machine: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Port Number: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("User Name: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Password: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Home Directory: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel("Domain Name/Zone: ", SwingConstants.RIGHT)); cpl.add(new
-     * JLabel(" Default Storage Resource: ", SwingConstants.RIGHT)); cp.add(cpl,
-     * BorderLayout.WEST);
-     *
-     * JPanel lp = new JPanel(); lp.setLayout(new BorderLayout(5,5)); JPanel lpb
-     * = new JPanel(); JButton add = new JButton("Save");
-     * add.addActionListener(this); add.setActionCommand("Add srb connsction");
-     * lpb.add(add); JButton del = new JButton("Delete");
-     * del.addActionListener(this);
-     * del.setActionCommand("Delete srb connsction"); lpb.add(del); lp.add(lpb,
-     * BorderLayout.SOUTH); JScrollPane listScroller = new
-     * JScrollPane(srbJList); int w = 120 +
-     * (ViewProperties.getFontSize()-12)*10; int h = 200 +
-     * (ViewProperties.getFontSize()-12)*15; listScroller.setPreferredSize(new
-     * Dimension(w, h)); lp.add(listScroller, BorderLayout.CENTER);
-     *
-     * JPanel sp = new JPanel(); sp.setLayout(new GridLayout(3,1,5,15));
-     * sp.add(new JLabel(" "));
-     *
-     * p.add(cp, BorderLayout.CENTER); p.add(lp, BorderLayout.WEST); p.add(sp,
-     * BorderLayout.SOUTH);
-     *
-     * if ((srbVector !=null) && (srbVector.size()>0)) {
-     * srbJList.setSelectedIndex(0); }
-     *
-     * return p; }
-     */
-
-    /*
-     * else if (cmd.equals("Add srb connection")) { String srbaccount[] =
-     * new String[7]; for (int i=0; i<7; i++) { srbaccount[i] =
-     * srbFields[i].getText(); if (srbaccount[i] == null) { return; } }
-     * DefaultListModel lm = (DefaultListModel)srbJList.getModel();
-     *
-     * if (lm.contains(srbaccount[0])) { int n =
-     * srbJList.getSelectedIndex(); if ( n<0 ) return; String
-     * srbaccountOld[] = (String[])srbVector.get(n); for (int i=0; i<7; i++)
-     * srbaccountOld[i] = srbaccount[i]; } else { srbVector.add(srbaccount);
-     * lm.addElement(srbaccount[0]);
-     * srbJList.setSelectedValue(srbaccount[0], true); } } else if
-     * (cmd.equals("Delete srb connsction")) { int n =
-     * srbJList.getSelectedIndex(); if (n<0) { return; }
-     *
-     * int resp = JOptionPane.showConfirmDialog(this,
-     * "Are you sure you want to delete the following SRB connection?\n"+
-     * "            \""+srbJList.getSelectedValue()+"\"",
-     * "Delete SRB Connection", JOptionPane.YES_NO_OPTION); if (resp ==
-     * JOptionPane.NO_OPTION) { return; }
-     *
-     * DefaultListModel lm = (DefaultListModel)srbJList.getModel();
-     * lm.removeElementAt(n); srbVector.remove(n); for (int i=0; i<7; i++) {
-     * srbFields[i].setText(""); } }
-     */
-
-/*
- * public void valueChanged(ListSelectionEvent e) { Object src =
- * e.getSource();
- *
- * if (!src.equals(srbJList)) { return; }
- *
- * int n = srbJList.getSelectedIndex(); if ( n<0 ) { return; }
- *
- * String srbaccount[] = (String[])srbVector.get(n); if (srbaccount == null)
- * { return; }
- *
- * n = Math.min(7, srbaccount.length); for (int i=0; i<n; i++) {
- * srbFields[i].setText(srbaccount[i]); } }
- */
 }

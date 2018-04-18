@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -50,6 +50,8 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * NewAttributeDialog displays components for adding a new attribute.

@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -50,6 +50,11 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.DataView;
+import hdf.view.ImageView;
+import hdf.view.TableView;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * NewDatasetDialog shows a message dialog requesting user input for creating a

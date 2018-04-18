@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +69,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import hdf.object.CompoundDS;
+import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -78,6 +78,15 @@ import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
+import hdf.view.ViewProperties.DataViewType;
+import hdf.view.dialog.DataOptionDialog;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.NewCompoundDatasetDialog;
+import hdf.view.dialog.NewDatasetDialog;
+import hdf.view.dialog.NewDatatypeDialog;
+import hdf.view.dialog.NewGroupDialog;
+import hdf.view.dialog.NewImageDialog;
+import hdf.view.dialog.NewLinkDialog;
 
 /**
  * <p>
@@ -1103,43 +1112,43 @@ public class DefaultTreeView implements TreeView {
         HObject obj = null;
 
         switch(type) {
-        case GROUP:
-            NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
-                    breadthFirstUserObjects(rootItem));
-            groupDialog.open();
-            obj = (HObject) groupDialog.getObject();
-            parentItem = findTreeItem(groupDialog.getParentGroup());
-            break;
-        case DATASET:
-            NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            datasetDialog.open();
-            obj = (HObject) datasetDialog.getObject();
-            parentItem = findTreeItem(datasetDialog.getParentGroup());
-            break;
-        case IMAGE:
-            NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            imageDialog.open();
-            obj = (HObject) imageDialog.getObject();
-            parentItem = findTreeItem(imageDialog.getParentGroup());
-            break;
-        case TABLE:
-            NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            tableDialog.open();
-            obj = (HObject) tableDialog.getObject();
-            parentItem = findTreeItem(tableDialog.getParentGroup());
-            break;
-        case DATATYPE:
-            NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-            datatypeDialog.open();
-            obj = (HObject) datatypeDialog.getObject();
-            parentItem = findTreeItem(datatypeDialog.getParentGroup());
-            break;
-        case LINK:
-            NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
-            linkDialog.open();
-            obj = (HObject) linkDialog.getObject();
-            parentItem = findTreeItem(linkDialog.getParentGroup());
-            break;
+            case GROUP:
+                NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
+                        breadthFirstUserObjects(rootItem));
+                groupDialog.open();
+                obj = groupDialog.getObject();
+                parentItem = findTreeItem(groupDialog.getParentGroup());
+                break;
+            case DATASET:
+                NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                datasetDialog.open();
+                obj = datasetDialog.getObject();
+                parentItem = findTreeItem(datasetDialog.getParentGroup());
+                break;
+            case IMAGE:
+                NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                imageDialog.open();
+                obj = imageDialog.getObject();
+                parentItem = findTreeItem(imageDialog.getParentGroup());
+                break;
+            case TABLE:
+                NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                tableDialog.open();
+                obj = tableDialog.getObject();
+                parentItem = findTreeItem(tableDialog.getParentGroup());
+                break;
+            case DATATYPE:
+                NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+                datatypeDialog.open();
+                obj = datatypeDialog.getObject();
+                parentItem = findTreeItem(datatypeDialog.getParentGroup());
+                break;
+            case LINK:
+                NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
+                linkDialog.open();
+                obj = linkDialog.getObject();
+                parentItem = findTreeItem(linkDialog.getParentGroup());
+                break;
         }
 
         if (obj == null) return;
@@ -2281,6 +2290,11 @@ public class DefaultTreeView implements TreeView {
                         break;
                     }
                 }
+                catch (UnsatisfiedLinkError e) {
+                    log.debug("openFile({}): HDF4 library link error: {}", filename, e);
+                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
+                            + "': HDF4 library linking error - see log for more info");
+                }
                 catch (Throwable err) {
                     log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
                 }
@@ -2294,6 +2308,11 @@ public class DefaultTreeView implements TreeView {
                         fileFormat = h5format.createInstance(filename, accessID);
                         break;
                     }
+                }
+                catch (UnsatisfiedLinkError e) {
+                    log.debug("openFile({}): HDF5 library link error: {}", filename, e);
+                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
+                            + "': HDF5 library linking error - see log for more info");
                 }
                 catch (Throwable err) {
                     log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
@@ -2409,7 +2428,7 @@ public class DefaultTreeView implements TreeView {
                     theFile.close();
                 }
                 catch (Exception ex) {
-                    log.debug("DefaultTreeView: closeFile({}): {}:", theFile.getFilePath(), ex);
+                    log.debug("closeFile({}): {}:", theFile.getFilePath(), ex);
                 }
 
                 fileList.remove(theFile);
@@ -2574,17 +2593,18 @@ public class DefaultTreeView implements TreeView {
      */
     @Override
     public DataView showDataContent(HObject dataObject) throws Exception {
+        /* Can only display objects with data */
+        if ((dataObject == null) || !(dataObject instanceof DataFormat)) return null;
+
         log.trace("showDataContent({}): start", dataObject.getName());
 
-        if ((dataObject == null) || !(dataObject instanceof Dataset)) {
-            return null; // can only display dataset
-        }
+        /* Set up the default display properties passed to the DataView instance */
+        DataView theView = null;
+        DataFormat d = (DataFormat) dataObject;
+        HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<>(8);
 
-        Dataset d = (Dataset) dataObject;
+        if (d.getRank() <= 0 && (d instanceof Dataset)) ((Dataset) d).init();
 
-        if (d.getRank() <= 0) d.init();
-
-        boolean isText = ((d instanceof ScalarDS) && ((ScalarDS) d).isText());
         boolean isImage = ((d instanceof ScalarDS) && ((ScalarDS) d).isImage());
         boolean isDisplayTypeChar = false;
         boolean isTransposed = false;
@@ -2592,11 +2612,16 @@ public class DefaultTreeView implements TreeView {
         BitSet bitmask = null;
         String dataViewName = null;
 
-        log.trace("showDataContent: inited");
+        log.trace("showDataContent(): inited");
+        log.trace("isDefaultDisplay? {}", isDefaultDisplay);
 
-        DataView existingView = ((HDFView) viewer).getDataView(d);
+        if (isDefaultDisplay) { /* Displaying a data object using the default display options */
+            DataView existingView = ((HDFView) viewer).getDataView((HObject) d);
 
-        if (isDefaultDisplay) {
+            /*
+             * Check to make sure this data object isn't already opened in an existing
+             * DataView. If it is, just bring that DataView to focus.
+             */
             if (existingView != null) {
                 Shell[] shells = Display.getDefault().getShells();
 
@@ -2607,24 +2632,20 @@ public class DefaultTreeView implements TreeView {
                         if (view != null) {
                             if (view.equals(existingView)) {
                                 shells[i].forceActive();
+
+                                log.trace(
+                                        "showDataContent(): found existing DataView for data object {}",
+                                        dataObject.getName());
+                                log.trace("showDataContent(): finish");
+
                                 return view;
                             }
                         }
                     }
                 }
             }
-
-            if (isText) {
-                dataViewName = (String) HDFView.getListOfTextViews().get(0);
-            }
-            else if (isImage) {
-                dataViewName = HDFView.getListOfImageViews().get(0);
-            }
-            else {
-                dataViewName = (String) HDFView.getListOfTableViews().get(0);
-            }
         }
-        else {
+        else { /* Open Dialog to allow user to choose different data display options */
             DataOptionDialog dialog = new DataOptionDialog(shell, d);
             dialog.open();
 
@@ -2641,112 +2662,52 @@ public class DefaultTreeView implements TreeView {
             isApplyBitmaskOnly = dialog.isApplyBitmaskOnly();
         }
 
-        log.trace("showDataContent: {}", dataViewName);
+        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dataObject);
+        map.put(ViewProperties.DATA_VIEW_KEY.VIEW_NAME, dataViewName);
+        map.put(ViewProperties.DATA_VIEW_KEY.CHAR, isDisplayTypeChar);
+        map.put(ViewProperties.DATA_VIEW_KEY.TRANSPOSED, isTransposed);
+        map.put(ViewProperties.DATA_VIEW_KEY.INDEXBASE1, isIndexBase1);
+        map.put(ViewProperties.DATA_VIEW_KEY.BITMASK, bitmask);
+        if (isApplyBitmaskOnly) map.put(ViewProperties.DATA_VIEW_KEY.BITMASKOP, ViewProperties.BITMASK_OP.AND);
 
-        // Enables use of JHDF5 in JNLP (Web Start) applications, the system
-        // class loader with reflection first.
-        Class<?> theClass = null;
-        try {
-            theClass = Class.forName(dataViewName);
-        }
-        catch (Exception ex) {
-            try {
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                theClass = null;
-            }
-        }
+        log.trace(
+                "showDataContent(): object={} dataViewName={} isDisplayTypeChar={} isTransposed={} isIndexBase1={} bitmask={}",
+                dataObject, dataViewName, isDisplayTypeChar, isTransposed, isIndexBase1, bitmask);
 
-        // Use default dataview
-        if (theClass == null) {
-            log.trace("showDataContent: Using default dataview");
-            if (isText)
-                dataViewName = "hdf.view.DefaultTextView";
-            else if (isImage)
-                dataViewName = "hdf.view.DefaultImageView";
+        shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
+
+        if (isImage) {
+            DataViewFactory imageViewFactory = DataViewFactoryProducer.getFactory(DataViewType.IMAGE);
+            if (imageViewFactory != null) {
+                theView = imageViewFactory.getImageView(viewer, map);
+                if (theView == null) {
+                    log.debug("showDataContent(): ImageView is null");
+                    viewer.showStatus(
+                            "Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
+                }
+            }
             else
-                dataViewName = "hdf.view.DefaultTableView";
-            try {
-                theClass = Class.forName(dataViewName);
-            }
-            catch (Exception ex) {
-                log.debug("Class.forName {} failure: ", dataViewName, ex);
-            }
+                log.trace("showDataContent(): imageViewFactory is null");
         }
-
-        Object theView = null;
-        Object[] initargs = { viewer };
-        HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<>(8);
-        map.put(ViewProperties.DATA_VIEW_KEY.INDEXBASE1, new Boolean(isIndexBase1));
-        if (bitmask != null) {
-            map.put(ViewProperties.DATA_VIEW_KEY.BITMASK, bitmask);
-            if (isApplyBitmaskOnly) map.put(ViewProperties.DATA_VIEW_KEY.BITMASKOP, ViewProperties.BITMASK_OP.AND);
-
-            // Create a copy of the dataset
-            ScalarDS d_copy = null;
-            Constructor<? extends Dataset> constructor = null;
-            Object[] paramObj = null;
-            try {
-                Class<?>[] paramClass = { FileFormat.class, String.class, String.class, long[].class };
-                constructor = d.getClass().getConstructor(paramClass);
-
-                paramObj = new Object[] { d.getFileFormat(), d.getName(), d.getPath(), d.getOID() };
-            }
-            catch (Exception ex) {
-                constructor = null;
-            }
-
-            try {
-                d_copy = (ScalarDS) constructor.newInstance(paramObj);
-            }
-            catch (Exception ex) {
-                d_copy = null;
-            }
-            if (d_copy != null) {
-                try {
-                    d_copy.init();
-                    log.trace("showDataContent: d_copy inited");
-                    int rank = d.getRank();
-                    System.arraycopy(d.getDims(), 0, d_copy.getDims(), 0, rank);
-                    System.arraycopy(d.getStartDims(), 0, d_copy.getStartDims(), 0, rank);
-                    System.arraycopy(d.getSelectedDims(), 0, d_copy.getSelectedDims(), 0, rank);
-                    System.arraycopy(d.getStride(), 0, d_copy.getStride(), 0, rank);
-                    System.arraycopy(d.getSelectedIndex(), 0, d_copy.getSelectedIndex(), 0, 3);
+        else {
+            DataViewFactory tableViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TABLE);
+            if (tableViewFactory != null) {
+                theView = tableViewFactory.getTableView(viewer, map);
+                if (theView == null) {
+                    log.debug("showDataContent(): TableView is null");
+                    viewer.showStatus(
+                            "Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
                 }
-                catch (Throwable ex) {
-                    ex.printStackTrace();
-                }
-
-                map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, d_copy);
             }
-        }
-        if (dataViewName.startsWith("hdf.view.DefaultTableView")) {
-            map.put(ViewProperties.DATA_VIEW_KEY.CHAR, new Boolean(isDisplayTypeChar));
-            map.put(ViewProperties.DATA_VIEW_KEY.TRANSPOSED, new Boolean(isTransposed));
-            Object[] tmpargs = { viewer, map };
-            initargs = tmpargs;
-        }
-        else if (dataViewName.startsWith("hdf.view.DefaultImageView")) {
-            map.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, new Boolean((bitmask != null)));
-            Object[] tmpargs = { viewer, map };
-            initargs = tmpargs;
+            else
+                log.trace("showDataContent(): tableViewFactory is null");
         }
 
-        try {
-            shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
-
-            theView = Tools.newInstance(theClass, initargs);
-            log.trace("showDataContent: Tools.newInstance");
-        } catch (Exception ex) {
-            log.trace("showDataContent: Error instantiating class {}", theClass);
-        }
-        finally {
-            if (!shell.isDisposed()) shell.setCursor(null);
-        }
+        if (!shell.isDisposed()) shell.setCursor(null);
 
         log.trace("showDataContent({}): finish", dataObject.getName());
-        return (DataView) theView;
+
+        return theView;
     }
 
     /**
@@ -2761,39 +2722,54 @@ public class DefaultTreeView implements TreeView {
      */
     @Override
     public MetaDataView showMetaData(HObject dataObject) throws Exception {
-        if (dataObject == null) {
+        if (dataObject == null) return null;
+
+        log.trace("showMetaData({}): start", dataObject.getName());
+
+        DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        if (metaDataViewFactory == null) return null;
+
+        /* TODO: initargs needs access to MetaDataView parent composite */
+        MetaDataView theView = metaDataViewFactory.getMetaDataView(null, viewer, (DataFormat) dataObject);
+        if (theView == null) {
+            viewer.showStatus("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
             return null;
         }
 
-        List<?> metaDataViewList = HDFView.getListOfMetaDataViews();
-        if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
-            return null;
-        }
-
-        int n = metaDataViewList.size();
-        String className = (String) metaDataViewList.get(0);
-
-        if (!isDefaultDisplay && (n > 1)) {
-            //className = (new InputDialog(shell, "HDFView", "Select MetaDataView")).open();
-
-            //className = (String) JOptionPane.showInputDialog(this, "Select MetaDataView", "HDFView",
-            //        JOptionPane.INFORMATION_MESSAGE, null, metaDataViewList.toArray(), className);
-        }
+        // List<?> metaDataViewList = HDFView.getListOfMetaDataViews();
+        // if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
+        // return null;
+        // }
+        //
+        // int n = metaDataViewList.size();
+        // String className = (String) metaDataViewList.get(0);
+        //
+        // if (!isDefaultDisplay && (n > 1)) {
+        // //className = (new InputDialog(shell, "HDFView", "Select
+        // MetaDataView")).open();
+        //
+        // //className = (String) JOptionPane.showInputDialog(this, "Select
+        // MetaDataView", "HDFView",
+        // // JOptionPane.INFORMATION_MESSAGE, null, metaDataViewList.toArray(),
+        // className);
+        // }
 
         // Enables use of JHDF5 in JNLP (Web Start) applications, the system
         // class loader with reflection first.
-        Class<?> theClass = null;
-        try {
-            theClass = Class.forName(className);
-        }
-        catch (Exception ex) {
-            theClass = ViewProperties.loadExtClass().loadClass(className);
-        }
+        // Class<?> theClass = null;
+        // try {
+        // theClass = Class.forName(className);
+        // }
+        // catch (Exception ex) {
+        // theClass = ViewProperties.loadExtClass().loadClass(className);
+        // }
 
-        Object[] initargs = { viewer, dataObject };
-        MetaDataView dataView = (MetaDataView) Tools.newInstance(theClass, initargs);
+        // Object[] initargs = { null, viewer, dataObject };
+        // MetaDataView dataView = (MetaDataView) Tools.newInstance(theClass, initargs);
 
-        return dataView;
+        log.trace("showMetaData({}): finish", dataObject.getName());
+
+        return theView;
     }
 
     public void updateFont(Font font) {

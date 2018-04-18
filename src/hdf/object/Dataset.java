@@ -360,6 +360,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the dimension sizes of the selected subset.
      */
+    @Override
     public final long[] getSelectedDims() {
         if (rank < 0) init();
 
@@ -392,6 +393,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the starting position of a selected subset.
      */
+    @Override
     public final long[] getStartDims() {
         if (rank < 0) init();
 
@@ -425,6 +427,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the selectedStride of the selected dataset.
      */
+    @Override
     public final long[] getStride() {
         if (rank < 0) init();
 
@@ -666,6 +669,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @see #getData()
      * @see #read()
      */
+    @Override
     public void clearData() {
         isDataLoaded = false;
     }
@@ -700,6 +704,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the size of dimension of the vertical axis.
      */
+    @Override
     public final long getHeight() {
         if (rank < 0) init();
 
@@ -740,6 +745,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the size of dimension of the horizontal axis.
      */
+    @Override
     public final long getWidth() {
         if (rank < 0) init();
 
@@ -784,6 +790,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the array of the indices of display order.
      */
+    @Override
     public final int[] getSelectedIndex() {
         if (rank < 0) init();
 
@@ -798,6 +805,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the string representation of compression information.
      */
+    @Override
     public final String getCompression() {
         if (rank < 0) init();
 

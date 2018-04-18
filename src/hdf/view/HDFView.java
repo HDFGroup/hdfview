@@ -70,8 +70,13 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import hdf.HDFVersions;
+import hdf.object.DataFormat;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
+import hdf.view.ViewProperties.DataViewType;
+import hdf.view.dialog.ImageConversionDialog;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.UserOptionsDialog;
 
 
 /**
@@ -118,9 +123,6 @@ public class HDFView implements ViewManager {
 
     /* A list of tree table implementations. */
     private static List<?>             tableViews;
-
-    /* A list of Text view implementations. */
-    private static List<String>        textViews;
 
     /* A list of metadata view implementations. */
     private static List<?>             metaDataViews;
@@ -181,10 +183,6 @@ public class HDFView implements ViewManager {
 
     private UserOptionsDialog          userOptionDialog;
 
-    //    private Constructor<?>             ctrSrbFileDialog     = null;
-    //
-    //    private Dialog                     srbFileDialog         = null;
-
     /**
      * Constructs HDFView with a given root directory, where the HDFView is
      * installed, and opens the given files in the viewer.
@@ -198,8 +196,6 @@ public class HDFView implements ViewManager {
         if (display == null || display.isDisposed()) display = new Display();
 
         rootDir = root;
-        //userOptionsDialog = null;
-        //ctrSrbFileDialog = null;
 
         //editGUIs = new Vector<Object>();
 
@@ -232,7 +228,6 @@ public class HDFView implements ViewManager {
 
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
-        textViews = ViewProperties.getTextViewList();
         tableViews = ViewProperties.getTableViewList();
         imageViews = ViewProperties.getImageViewList();
         paletteViews = ViewProperties.getPaletteViewList();
@@ -374,13 +369,6 @@ public class HDFView implements ViewManager {
             winDim.x = (int) (0.9 * mainWindow.getSize().y);
         }
 
-        // TEST
-        //if (treeView.getClass().getName().startsWith("ext.erdc")) {
-        //    topSplitPane.setDividerLocation(500);
-        //    winDim.x = (int) (0.9 * mainWindow.getSize().x);
-        //    winDim.y = (int) (winDim.x * 0.618);
-        //}
-
         mainWindow.setLocation(x, y);
         mainWindow.setSize(winDim.x + 200, winDim.y);
 
@@ -510,20 +498,6 @@ public class HDFView implements ViewManager {
                 }
             });
         }
-
-        // boolean isSrbSupported = true;
-        // try {
-        // Class.forName("hdf.srb.H5SRB");
-        // Class.forName("hdf.srb.SRBFileDialog");
-        // } catch (Throwable ex) {isSrbSupported = false;}
-        //
-        // if (isSrbSupported) {
-        // item = new JMenuItem( "Open from iRODS");
-        // item.setMnemonic(KeyEvent.VK_S);
-        // item.addActionListener(this);
-        // item.setActionCommand("Open from irods");
-        // fileMenu.add(item);
-        // }
 
         new MenuItem(fileMenu, SWT.SEPARATOR);
 
@@ -1236,13 +1210,6 @@ public class HDFView implements ViewManager {
     }
 
     /**
-     * @return a list of textview implementations.
-     */
-    public static final List<?> getListOfTextViews() {
-        return textViews;
-    }
-
-    /**
      * @return a list of metaDataview implementations.
      */
     public static final List<?> getListOfMetaDataViews() {
@@ -1283,26 +1250,35 @@ public class HDFView implements ViewManager {
 
         if (obj == null) return;
 
-        log.trace("showMetaData: start");
+        log.trace("showMetaData(): start");
 
-        String viewName = (String) HDFView.getListOfMetaDataViews().get(0);
+        DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        if (metaDataViewFactory == null) return;
 
-        try {
-            Class<?> theClass = Class.forName(viewName);
-            if ("hdf.view.DefaultMetaDataView".equals(viewName)) {
-                Object[] initargs = { generalArea, this, obj };
-                Tools.newInstance(theClass, initargs);
-            }
-            else {
-                Object[] initargs = { this, obj };
-                Tools.newInstance(theClass, initargs);
-            }
-        }
-        catch (Exception ex) {
-            this.showStatus(ex.toString());
+        MetaDataView theView = metaDataViewFactory.getMetaDataView(generalArea, this, (DataFormat) obj);
+        if (theView == null) {
+            this.showStatus("Unable to find suitable MetaDataView class for object '" + obj.getName() + "'");
+            return;
         }
 
-        log.trace("showMetaData: finish");
+        // String viewName = (String) HDFView.getListOfMetaDataViews().get(0);
+        //
+        // try {
+        // Class<?> theClass = Class.forName(viewName);
+        // if ("hdf.view.DefaultMetaDataView".equals(viewName)) {
+        // Object[] initargs = { generalArea, this, obj };
+        // Tools.newInstance(theClass, initargs);
+        // }
+        // else {
+        // Object[] initargs = { this, obj };
+        // Tools.newInstance(theClass, initargs);
+        // }
+        // }
+        // catch (Exception ex) {
+        // this.showStatus(ex.toString());
+        // }
+
+        log.trace("showMetaData(): finish");
     }
 
     public void closeFile(FileFormat theFile) {
@@ -1319,7 +1295,7 @@ public class HDFView implements ViewManager {
                 DataView view = (DataView) views[i].getData();
 
                 if (view != null) {
-                    HObject obj = view.getDataObject();
+                    HObject obj = (HObject) view.getDataObject();
 
                     if (obj == null) continue;
 
@@ -1396,13 +1372,8 @@ public class HDFView implements ViewManager {
 
                     if (theView instanceof TableView) {
                         TableView tableView = (TableView) theView;
-                        FileFormat file = tableView.getDataObject().getFileFormat();
+                        FileFormat file = ((HObject) tableView.getDataObject()).getFileFormat();
                         if (file.equals(theFile)) tableView.updateValueInFile();
-                    }
-                    else if (theView instanceof TextView) {
-                        TextView textView = (TextView) theView;
-                        FileFormat file = textView.getDataObject().getFileFormat();
-                        if (file.equals(theFile)) textView.updateValueInFile();
                     }
                 }
             }
@@ -1436,7 +1407,7 @@ public class HDFView implements ViewManager {
             setEnabled(Arrays.asList(windowMenu.getItems()), true);
         }
 
-        HObject obj = dataView.getDataObject();
+        HObject obj = (HObject) dataView.getDataObject();
         String fullPath = obj.getPath() + obj.getName();
 
         MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
@@ -1450,7 +1421,7 @@ public class HDFView implements ViewManager {
                     DataView view = (DataView) sList[i].getData();
 
                     if (view != null) {
-                        HObject obj = view.getDataObject();
+                        HObject obj = (HObject) view.getDataObject();
 
                         if (obj.getFullName().equals(((MenuItem) e.widget).getText())) {
                             showWindow(sList[i]);
@@ -1467,7 +1438,7 @@ public class HDFView implements ViewManager {
     public void removeDataView(DataView dataView) {
         if (mainWindow.isDisposed()) return;
 
-        HObject obj = dataView.getDataObject();
+        HObject obj = (HObject) dataView.getDataObject();
         if (obj == null) return;
 
         MenuItem[] items = windowMenu.getItems();
@@ -1494,7 +1465,9 @@ public class HDFView implements ViewManager {
             view = (DataView) openShells[i].getData();
 
             if (view != null) {
-                currentObj = view.getDataObject();
+                currentObj = (HObject) view.getDataObject();
+                if (currentObj == null) continue;
+
                 currentFile = currentObj.getFileFormat();
 
                 if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))
@@ -1907,47 +1880,6 @@ public class HDFView implements ViewManager {
 
         return localFile;
     }
-
-    /** Open file from SRB server */
-    /*private void openFromSRB() throws Exception {
-        if (ctrSrbFileDialog == null) {
-            Class<?> theClass = null;
-
-            try {
-                theClass = Class.forName("hdf.srb.SRBFileDialog");
-            }
-            catch (Exception ex) {
-                theClass = null;
-                showStatus(ex.toString());
-                throw (new ClassNotFoundException("Cannot find SRBFileDialog"));
-            }
-
-            try {
-                @SuppressWarnings("rawtypes")
-                Class[] paramClass = { Class.forName("java.awt.Frame") };
-                ctrSrbFileDialog = theClass.getConstructor(paramClass);
-            }
-            catch (Exception ex) {
-                ctrSrbFileDialog = null;
-                throw (new InstantiationException("Cannot construct SRBFileDialog"));
-            }
-        }
-
-        if (srbFileDialog == null) {
-            //try {
-            //    Object[] paramObj = { (java.awt.Frame) this };
-            //   srbFileDialog = (JDialog) ctrSrbFileDialog.newInstance(paramObj);
-            //}
-            //catch (Exception ex) {
-            //    throw ex;
-            //}
-        }
-        else {
-            //srbFileDialog.setVisible(true);
-        }
-
-        // currentFile = srbFileDialog.getName();
-    }*/
 
     private void convertFile(String typeFrom, String typeTo) {
         ImageConversionDialog dialog = new ImageConversionDialog(mainWindow, typeFrom, typeTo,

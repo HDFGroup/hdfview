@@ -14,18 +14,29 @@
 
 package hdf.view;
 
-/**
- *
- * The text view interface for displaying text data
- *
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
- */
-public abstract interface TextView extends DataView {
-    /** @return array of the text in this textview */
-    public abstract String[] getContents();
+import java.util.HashMap;
 
-    /** Write the change of a dataset into file. */
-    public abstract void updateValueInFile();
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
+import hdf.object.DataFormat;
+
+public abstract class DataViewFactory {
+    /* Get an instance of TableView given the appropriate constructor parameters */
+    @SuppressWarnings("rawtypes")
+    abstract TableView    getTableView(ViewManager viewer, HashMap dataPropertiesMap);
+
+    /* Get an instance of ImageView given the appropriate constructor parameters */
+    @SuppressWarnings("rawtypes")
+    abstract ImageView    getImageView(ViewManager viewer, HashMap dataPropertiesMap);
+
+    /*
+     * Get an instance of PaletteView given the appropriate constructor parameters
+     */
+    abstract PaletteView  getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView);
+
+    /*
+     * Get an instance of MetaDataView given the appropriate constructor parameters
+     */
+    abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj);
 }

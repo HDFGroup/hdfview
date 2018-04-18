@@ -128,10 +128,10 @@ public class H4Vdata extends CompoundDS
      */
     @SuppressWarnings("deprecation")
     public H4Vdata(
-        FileFormat theFile,
-        String name,
-        String path,
-        long[] oid)
+            FileFormat theFile,
+            String name,
+            String path,
+            long[] oid)
     {
         super (theFile, name, path, oid);
         numberOfRecords = 0;
@@ -178,6 +178,11 @@ public class H4Vdata extends CompoundDS
         return datatype;
     }
 
+    @Override
+    public Object getFillValue() {
+        return null;
+    }
+
     // Implementing Dataset
     @Override
     public byte[] readBytes() throws HDFException
@@ -217,10 +222,10 @@ public class H4Vdata extends CompoundDS
             int size =recordSize[0] * (int)selectedDims[0];
             theData = new byte[size];
             HDFLibrary.VSread(
-                id,
-                theData,
-                (int)selectedDims[0],
-                HDFConstants.FULL_INTERLACE);
+                    id,
+                    theData,
+                    (int)selectedDims[0],
+                    HDFConstants.FULL_INTERLACE);
         }
         catch (Exception ex) {
             log.debug("readBytes(): failure: ", ex);
@@ -296,12 +301,12 @@ public class H4Vdata extends CompoundDS
 
             try {
                 HDFLibrary.VSread(
-                    id,
-                    member_data,
-                    (int)selectedDims[0],
-                    HDFConstants.FULL_INTERLACE);
+                        id,
+                        member_data,
+                        (int)selectedDims[0],
+                        HDFConstants.FULL_INTERLACE);
                 if ((memberTIDs[i] == HDFConstants.DFNT_CHAR) ||
-                    (memberTIDs[i] ==  HDFConstants.DFNT_UCHAR8)) {
+                        (memberTIDs[i] ==  HDFConstants.DFNT_UCHAR8)) {
                     // convert characters to string
                     log.trace("read(): convert characters to string");
                     member_data = Dataset.byteToString((byte[])member_data, memberOrders[i]);
@@ -342,7 +347,7 @@ public class H4Vdata extends CompoundDS
         //first write, the user must read all the fields to a buffer, update
         //the buffer, then write the entire record back to the vdata.
         log.trace("write(): disabled");
-/*
+        /*
         if (buf == null || numberOfMembers <= 0 || !(buf instanceof List))
             return; // no data to write
 
@@ -395,7 +400,7 @@ public class H4Vdata extends CompoundDS
         } // for (int i=0; i<numberOfMembers; i++)
 
         close(vid);
-*/
+         */
     }
 
     // Implementing DataFormat
@@ -472,7 +477,7 @@ public class H4Vdata extends CompoundDS
 
                     if (buf != null) {
                         if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
-                            (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
+                                (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                         }
 
@@ -611,12 +616,12 @@ public class H4Vdata extends CompoundDS
             numberOfRecords = 0;
         }
 
-//        Still need to get information if there is no record, see bug 1738
-//        if ((numberOfMembers <=0) || (numberOfRecords <= 0)) {
-//            // no table field is defined or no records
-//            close(id);
-//            return;
-//        }
+        //        Still need to get information if there is no record, see bug 1738
+        //        if ((numberOfMembers <=0) || (numberOfRecords <= 0)) {
+        //            // no table field is defined or no records
+        //            close(id);
+        //            return;
+        //        }
 
         // a Vdata table is an one dimension array of records.
         // each record has the same fields
