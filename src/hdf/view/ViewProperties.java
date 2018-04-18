@@ -74,17 +74,10 @@ public class ViewProperties extends PreferenceStore {
     public static final String  DELIMITER_SEMI_COLON = "Semi-Colon";
 
     /**
-     * Used to create different DataViews for a given HObject.
-     */
-    public static enum DataViewType {
-        TABLE, IMAGE, PALETTE, METADATA
-    }
-
-    /**
      * Property keys control how the data is displayed.
      */
     public static enum DATA_VIEW_KEY {
-        CHAR, CONVERTBYTE, TRANSPOSED, READONLY, OBJECT, BITMASK, BITMASKOP, BORDER, INFO, INDEXBASE1, VIEW_NAME
+        CHAR, CONVERTBYTE, TRANSPOSED, READONLY, OBJECT, BITMASK, BITMASKOP, BORDER, INFO, INDEXBASE1
     }
 
     /**
@@ -133,7 +126,7 @@ public class ViewProperties extends PreferenceStore {
     private static ClassLoader      extClassLoader         = null;
 
     /** a list of srb accounts */
-    private static Vector<String[]> srbAccountList = new Vector<String[]>(5);
+    private static Vector<String[]> srbAccountList         = new Vector<String[]>(5);
 
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
@@ -151,9 +144,9 @@ public class ViewProperties extends PreferenceStore {
      */
     private static boolean          isReadOnly             = false;
 
-    private static String EarlyLib = "Latest";
+    private static String          EarlyLib             = "Latest";
 
-    private static String LateLib = "Latest";
+    private static String          LateLib             = "Latest";
 
     /** a list of palette files */
     private static Vector<String>   paletteList            = new Vector<String>(5);
@@ -191,6 +184,9 @@ public class ViewProperties extends PreferenceStore {
 
     /** a list of metaview modules */
     private static Vector<String>   moduleListMetaDataView = new Vector<String>(5);
+
+    /** a list of textview modules */
+    private static Vector<String>   moduleListTextView     = new Vector<String>(5);
 
     /** a list of tableview modules */
     private static Vector<String>   moduleListTableView    = new Vector<String>(5);
@@ -390,6 +386,11 @@ public class ViewProperties extends PreferenceStore {
                             else if ("hdf.view.MetaDataView".equals(interfaceName)
                                     && !moduleListMetaDataView.contains(theName)) {
                                 moduleListMetaDataView.add(theName);
+                                break;
+                            }
+                            else if ("hdf.view.TextView".equals(interfaceName)
+                                    && !moduleListTextView.contains(theName)) {
+                                moduleListTextView.add(theName);
                                 break;
                             }
                             else if ("hdf.view.TableView".equals(interfaceName)
@@ -972,7 +973,6 @@ public class ViewProperties extends PreferenceStore {
     /** Load user properties from property file
      * @throws Exception if a failure occurred
      */
-    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void load() throws IOException {
         super.load();
@@ -986,17 +986,19 @@ public class ViewProperties extends PreferenceStore {
 
         // add default module.
         log.trace("load user properties: add default module");
-        String[] moduleKeys = { "module.treeview", "module.metadataview", "module.tableview",
+        String[] moduleKeys = { "module.treeview", "module.metadataview", "module.textview", "module.tableview",
                 "module.imageview", "module.paletteview" };
-        Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
+        Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTextView, moduleListTableView,
                 moduleListImageView, moduleListPaletteView };
         String[] moduleNames = { "hdf.view.DefaultTreeView", "hdf.view.DefaultMetaDataView",
-                "hdf.view.DefaultTableView", "hdf.view.DefaultImageView", "hdf.view.DefaultPaletteView" };
+                "hdf.view.DefaultTextView", "hdf.view.DefaultTableView", "hdf.view.DefaultImageView",
+        "hdf.view.DefaultPaletteView" };
 
         // add default implementation of modules
         log.trace("load user properties: modules");
         for (int i = 0; i < 6; i++) {
-            if (!moduleList[i].contains(moduleNames[i])) moduleList[i].addElement(moduleNames[i]);
+            if (!moduleList[i].contains(moduleNames[i]))
+                moduleList[i].addElement(moduleNames[i]);
             log.trace("load: add default moduleList[{}] is {}", i, moduleNames[i]);
             log.trace("load: add default moduleList[{}] is {}", i, Arrays.toString(moduleList[i].toArray()));
         }
@@ -1012,7 +1014,8 @@ public class ViewProperties extends PreferenceStore {
             if (propVal != null) {
                 // set default to the module specified in property file
                 if (theList.size() > 1) {
-                    if (theList.contains(propVal)) theList.remove(propVal);
+                    if (theList.contains(propVal))
+                        theList.remove(propVal);
                     theList.add(0, propVal);
                 }
                 log.trace("load user properties: module[{}]={}", i, propVal);
@@ -1020,7 +1023,8 @@ public class ViewProperties extends PreferenceStore {
             else {
                 // use default module
                 if (theList.size() > 1) {
-                    if (theList.contains(moduleNames[i])) theList.remove(moduleNames[i]);
+                    if (theList.contains(moduleNames[i]))
+                        theList.remove(moduleNames[i]);
                     theList.add(0, moduleNames[i]);
                 }
                 log.trace("load user properties: default module[{}]={}", i, moduleNames[i]);
@@ -1031,7 +1035,7 @@ public class ViewProperties extends PreferenceStore {
         log.trace("load user properties: fileformat modules");
         String[] local_enum = this.preferenceNames();
         String fExt = null;
-        for (String theKey : local_enum) {
+        for (String theKey:local_enum) {
             log.trace("load: add file format {}", theKey);
             if (theKey.startsWith("module.fileformat")) {
                 fExt = theKey.substring(18);
@@ -1134,9 +1138,9 @@ public class ViewProperties extends PreferenceStore {
                     recentFiles.addElement(theFile);
                 }
             }
-            // else {
-            // this.remove("recent.file" + i);
-            // }
+            //            else {
+            //                this.remove("recent.file" + i);
+            //            }
         }
 
         // load the most recent palette file list from the property file
@@ -1151,40 +1155,40 @@ public class ViewProperties extends PreferenceStore {
                     paletteList.addElement(theFile);
                 }
             }
-            // else {
-            // this.remove("palette.file" + i);
-            // }
+            //            else {
+            //                this.remove("palette.file" + i);
+            //            }
         }
 
         // load srb account
-        // log.trace("load user properties: srb account");
-        // propVal = null;
-        // String srbaccount[] = new String[7];
-        // for (int i = 0; i < MAX_RECENT_FILES; i++) {
-        // if (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
-        // continue;
+        //        log.trace("load user properties: srb account");
+        //        propVal = null;
+        //        String srbaccount[] = new String[7];
+        //        for (int i = 0; i < MAX_RECENT_FILES; i++) {
+        //            if (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
+        //                continue;
         //
-        // if (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
-        // continue;
+        //            if (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
+        //                continue;
         //
-        // if (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
-        // continue;
+        //            if (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
+        //                continue;
         //
-        // if (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
-        // continue;
+        //            if (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
+        //                continue;
         //
-        // if (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
-        // continue;
+        //            if (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
+        //                continue;
         //
-        // if (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
-        // continue;
+        //            if (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
+        //                continue;
         //
-        // if (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
-        // continue;
+        //            if (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
+        //                continue;
         //
-        // srbAccountList.add(srbaccount);
-        // srbaccount = new String[7];
-        // }
+        //            srbAccountList.add(srbaccount);
+        //            srbaccount = new String[7];
+        //        }
 
         // set default modules from user property files
         log.trace("load user properties: default modules");
@@ -1199,13 +1203,9 @@ public class ViewProperties extends PreferenceStore {
         log.trace("load: finish");
     }
 
-    /**
-     * Save user properties into property file
-     *
-     * @throws Exception
-     *             if a failure occurred
+    /** Save user properties into property file
+     * @throws Exception if a failure occurred
      */
-    @Override
     public void save() throws IOException {
         log.trace("save user properties: begin");
         if (propertyFile == null)
@@ -1223,21 +1223,28 @@ public class ViewProperties extends PreferenceStore {
         else
             setValue("image.origin", origin);
 
-        if (indexType != null) setValue("h5file.indexType", indexType);
+        if (indexType != null)
+            setValue("h5file.indexType", indexType);
 
-        if (indexOrder != null) setValue("h5file.indexOrder", indexOrder);
+        if (indexOrder != null)
+            setValue("h5file.indexOrder", indexOrder);
 
-        if (usersGuide != null) setValue("users.guide", usersGuide);
+        if (usersGuide != null)
+            setValue("users.guide", usersGuide);
 
-        if (workDir != null) setValue("work.dir", workDir);
+        if (workDir != null)
+            setValue("work.dir", workDir);
 
-        if (fileExt != null) setValue("file.extension", fileExt);
+        if (fileExt != null)
+            setValue("file.extension", fileExt);
 
-        if (h4toh5 != null) setValue("h4toh5.converter", h4toh5);
+        if (h4toh5 != null)
+            setValue("h4toh5.converter", h4toh5);
 
         setValue("font.size", fontSize);
 
-        if (fontType != null) setValue("font.type", fontType);
+        if (fontType != null)
+            setValue("font.type", fontType);
 
         setValue("max.members", max_members);
 
@@ -1253,7 +1260,7 @@ public class ViewProperties extends PreferenceStore {
         else
             setValue("file.mode", "rw");
 
-        log.trace("save user properties: lib.lowversion={}", EarlyLib);
+        log.trace("save user properties: lib.lowversion={}",EarlyLib);
         setValue("lib.lowversion", EarlyLib);
         log.trace("save user properties: lib.highversion={}", LateLib);
         setValue("lib.highversion", LateLib);
@@ -1270,7 +1277,8 @@ public class ViewProperties extends PreferenceStore {
         log.trace("save user properties: most recent files size={}", size);
         for (int i = 0; i < minSize; i++) {
             theFile = recentFiles.elementAt(i);
-            if ((theFile != null) && (theFile.length() > 0)) setValue("recent.file" + i, theFile);
+            if ((theFile != null) && (theFile.length() > 0))
+                setValue("recent.file" + i, theFile);
         }
 
         // save the list of most recent palette files
@@ -1279,51 +1287,60 @@ public class ViewProperties extends PreferenceStore {
         minSize = Math.min(size, MAX_RECENT_FILES);
         for (int i = 0; i < minSize; i++) {
             theFile = paletteList.elementAt(i);
-            if ((theFile != null) && (theFile.length() > 0)) setValue("palette.file" + i, theFile);
+            if ((theFile != null) && (theFile.length() > 0))
+                setValue("palette.file" + i, theFile);
         }
 
         // save srb account
-        // log.trace("save user properties: srb account");
-        // String srbaccount[] = null;
-        // size = srbAccountList.size();
-        // minSize = Math.min(size, MAX_RECENT_FILES);
-        // for (int i = 0; i < minSize; i++) {
-        // srbaccount = srbAccountList.get(i);
-        // if ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] !=
-        // null)
-        // && (srbaccount[3] != null) && (srbaccount[4] != null) && (srbaccount[5] !=
-        // null)
-        // && (srbaccount[6] != null)) {
-        // setValue("srbaccount" + i + ".host", srbaccount[0]);
-        // setValue("srbaccount" + i + ".port", srbaccount[1]);
-        // setValue("srbaccount" + i + ".user", srbaccount[2]);
-        // setValue("srbaccount" + i + ".password", srbaccount[3]);
-        // setValue("srbaccount" + i + ".home", srbaccount[4]);
-        // setValue("srbaccount" + i + ".domain", srbaccount[5]);
-        // setValue("srbaccount" + i + ".resource", srbaccount[6]);
-        // }
-        // }
+        //        log.trace("save user properties: srb account");
+        //        String srbaccount[] = null;
+        //        size = srbAccountList.size();
+        //        minSize = Math.min(size, MAX_RECENT_FILES);
+        //        for (int i = 0; i < minSize; i++) {
+        //            srbaccount = srbAccountList.get(i);
+        //            if ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] != null)
+        //                    && (srbaccount[3] != null) && (srbaccount[4] != null) && (srbaccount[5] != null)
+        //                    && (srbaccount[6] != null)) {
+        //                setValue("srbaccount" + i + ".host", srbaccount[0]);
+        //                setValue("srbaccount" + i + ".port", srbaccount[1]);
+        //                setValue("srbaccount" + i + ".user", srbaccount[2]);
+        //                setValue("srbaccount" + i + ".password", srbaccount[3]);
+        //                setValue("srbaccount" + i + ".home", srbaccount[4]);
+        //                setValue("srbaccount" + i + ".domain", srbaccount[5]);
+        //                setValue("srbaccount" + i + ".resource", srbaccount[6]);
+        //            }
+        //        }
 
         // save default modules
         log.trace("save user properties: default modules");
         String moduleName = moduleListTreeView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.treeview", moduleName);
+        if ((moduleName != null) && (moduleName.length() > 0))
+            setValue("module.treeview", moduleName);
         log.trace("save user properties: module.treeview={}", moduleName);
 
         moduleName = moduleListMetaDataView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.metadataview", moduleName);
+        if ((moduleName != null) && (moduleName.length() > 0))
+            setValue("module.metadataview", moduleName);
         log.trace("save user properties: module.metadataview={}", moduleName);
 
+        moduleName = moduleListTextView.elementAt(0);
+        if ((moduleName != null) && (moduleName.length() > 0))
+            setValue("module.textview", moduleName);
+        log.trace("save user properties: module.textview={}", moduleName);
+
         moduleName = moduleListTableView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.tableview", moduleName);
+        if ((moduleName != null) && (moduleName.length() > 0))
+            setValue("module.tableview", moduleName);
         log.trace("save user properties: module.tableview={}", moduleName);
 
         moduleName = moduleListImageView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.imageview", moduleName);
+        if ((moduleName != null) && (moduleName.length() > 0))
+            setValue("module.imageview", moduleName);
         log.trace("save user properties: module.imageview={}", moduleName);
 
         moduleName = moduleListPaletteView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.paletteview", moduleName);
+        if ((moduleName != null) && (moduleName.length() > 0))
+            setValue("module.paletteview", moduleName);
         log.trace("save user properties: module.paletteview={}", moduleName);
 
         // save the current supported fileformat
@@ -1456,6 +1473,11 @@ public class ViewProperties extends PreferenceStore {
     /** @return a list of metadataview modules */
     public static Vector<String> getMetaDataViewList() {
         return moduleListMetaDataView;
+    }
+
+    /** @return a list of textview modules */
+    public static Vector<String> getTextViewList() {
+        return moduleListTextView;
     }
 
     /** @return a list of tableview modules */

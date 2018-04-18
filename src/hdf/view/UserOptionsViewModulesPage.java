@@ -117,7 +117,6 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
         ScrolledComposite scroller = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
         scroller.setExpandHorizontal(true);
         scroller.setExpandVertical(true);
-        scroller.setMinSize(shell.getSize());
 
         Composite composite = new Composite(scroller, SWT.NONE);
         composite.setLayout(new GridLayout(1, true));
@@ -125,7 +124,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group treeViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         treeViewGroup.setLayout(new FillLayout());
-        treeViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        treeViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         treeViewGroup.setFont(curFont);
         treeViewGroup.setText("TreeView");
 
@@ -134,7 +133,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group metadataViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         metadataViewGroup.setLayout(new FillLayout());
-        metadataViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        metadataViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         metadataViewGroup.setFont(curFont);
         metadataViewGroup.setText("MetaDataView");
 
@@ -143,7 +142,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group textViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         textViewGroup.setLayout(new FillLayout());
-        textViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        textViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         textViewGroup.setFont(curFont);
         textViewGroup.setText("TextView");
 
@@ -152,7 +151,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group tableViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         tableViewGroup.setLayout(new FillLayout());
-        tableViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        tableViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         tableViewGroup.setFont(curFont);
         tableViewGroup.setText("TableView");
 
@@ -161,7 +160,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group imageViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         imageViewGroup.setLayout(new FillLayout());
-        imageViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        imageViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         imageViewGroup.setFont(curFont);
         imageViewGroup.setText("ImageView");
 
@@ -170,7 +169,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group paletteViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         paletteViewGroup.setLayout(new FillLayout());
-        paletteViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        paletteViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         paletteViewGroup.setFont(curFont);
         paletteViewGroup.setText("PaletteView");
 
