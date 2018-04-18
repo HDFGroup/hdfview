@@ -289,7 +289,7 @@ public class DefaultMetaDataView implements MetaDataView {
             addButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false, 2, 1));
         }
 
-        String[] columnNames = { "Name", "Type", "Array Size", "Value" };
+        String[] columnNames = { "Name", "Type", "Array Size", "Value[50](...)" };
 
         attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         attrTable.setLinesVisible(true);
