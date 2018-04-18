@@ -2290,6 +2290,11 @@ public class DefaultTreeView implements TreeView {
                         break;
                     }
                 }
+                catch (UnsatisfiedLinkError e) {
+                    log.debug("openFile({}): HDF4 library link error: {}", filename, e);
+                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
+                            + "': HDF4 library linking error - see log for more info");
+                }
                 catch (Throwable err) {
                     log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
                 }
@@ -2303,6 +2308,11 @@ public class DefaultTreeView implements TreeView {
                         fileFormat = h5format.createInstance(filename, accessID);
                         break;
                     }
+                }
+                catch (UnsatisfiedLinkError e) {
+                    log.debug("openFile({}): HDF5 library link error: {}", filename, e);
+                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
+                            + "': HDF5 library linking error - see log for more info");
                 }
                 catch (Throwable err) {
                     log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);

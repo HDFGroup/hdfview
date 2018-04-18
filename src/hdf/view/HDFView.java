@@ -196,8 +196,6 @@ public class HDFView implements ViewManager {
         if (display == null || display.isDisposed()) display = new Display();
 
         rootDir = root;
-        //userOptionsDialog = null;
-        //ctrSrbFileDialog = null;
 
         //editGUIs = new Vector<Object>();
 
@@ -370,13 +368,6 @@ public class HDFView implements ViewManager {
         if (width <= 300) {
             winDim.x = (int) (0.9 * mainWindow.getSize().y);
         }
-
-        // TEST
-        //if (treeView.getClass().getName().startsWith("ext.erdc")) {
-        //    topSplitPane.setDividerLocation(500);
-        //    winDim.x = (int) (0.9 * mainWindow.getSize().x);
-        //    winDim.y = (int) (winDim.x * 0.618);
-        //}
 
         mainWindow.setLocation(x, y);
         mainWindow.setSize(winDim.x + 200, winDim.y);
