@@ -15,6 +15,7 @@
 package hdf.view;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -52,11 +53,19 @@ public class MetaDataViewFactory extends DataViewFactory {
 
     @Override
     MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj) {
-        String dataViewName = ViewProperties.getMetaDataViewList().get(0);
+        String dataViewName = null;
         Object[] initargs = { parentObj, viewer, theObj };
         MetaDataView theView = null;
 
         log.trace("MetaDataViewFactory: getMetaDataView(): start");
+
+        /* Retrieve the "currently selected" MetaDataView class to use */
+        List<?> metaDataViewList = ViewProperties.getMetaDataViewList();
+        if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
+            return null;
+        }
+
+        dataViewName = (String) metaDataViewList.get(0);
 
         /* TODO: Currently no support for other modules; return DefaultMetaDataView */
 

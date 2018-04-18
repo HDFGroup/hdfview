@@ -15,6 +15,7 @@
 package hdf.view;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -52,6 +53,14 @@ public class PaletteViewFactory extends DataViewFactory {
         PaletteView theView = null;
 
         log.trace("PaletteViewFactory: getPaletteView(): start");
+
+        /* Retrieve the "currently selected" PaletteView class to use */
+        List<?> paletteViewList = ViewProperties.getPaletteViewList();
+        if ((paletteViewList == null) || (paletteViewList.size() <= 0)) {
+            return null;
+        }
+
+        dataViewName = (String) paletteViewList.get(0);
 
         /* TODO: Currently no support for other modules; return DefaultImageView */
 

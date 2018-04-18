@@ -14,7 +14,10 @@
 
 package hdf.view;
 
+import java.lang.reflect.Constructor;
+import java.util.BitSet;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -22,6 +25,8 @@ import org.eclipse.swt.widgets.Shell;
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
+import hdf.object.Dataset;
+import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
@@ -37,16 +42,32 @@ public class TableViewFactory extends DataViewFactory {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TableViewFactory.class);
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
-        String dataViewName = ViewProperties.getTableViewList().get(0);
+        String dataViewName = null;
         Object[] initargs = { viewer, dataPropertiesMap };
         TableView theView = null;
         HObject dataObject = null;
 
         log.trace("TableViewFactory: getTableView(): start");
 
+        /*
+         * If the name of a specific TableView class to use has been passed in via the
+         * data options map, retrieve its name now, otherwise grab the
+         * "currently selected" TableView class from the ViewProperties-managed list.
+         */
+        dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
+        if (dataViewName == null) {
+            List<?> tableViewList = ViewProperties.getTableViewList();
+            if ((tableViewList == null) || (tableViewList.size() <= 0)) {
+                return null;
+            }
+
+            dataViewName = (String) tableViewList.get(0);
+        }
+
+        /* Retrieve the data object to be displayed */
         if (dataPropertiesMap != null)
             dataObject = (HObject) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.OBJECT);
 
@@ -100,6 +121,66 @@ public class TableViewFactory extends DataViewFactory {
                     theClass = null;
                 }
             }
+        }
+
+        /* Check to see if there is a bitmask to be applied to the data */
+        BitSet bitmask = (BitSet) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
+        if (bitmask != null) {
+            /*
+             * Create a copy of the data object in order to apply the bitmask
+             * non-destructively
+             */
+            HObject d_copy = null;
+            Constructor<? extends HObject> constructor = null;
+            Object[] paramObj = null;
+
+            try {
+                Class<?>[] paramClass = { FileFormat.class, String.class, String.class, long[].class };
+                constructor = dataObject.getClass().getConstructor(paramClass);
+
+                paramObj = new Object[] { dataObject.getFileFormat(), dataObject.getName(), dataObject.getPath(),
+                        dataObject.getOID() };
+            }
+            catch (Exception ex) {
+                constructor = null;
+            }
+
+            try {
+                d_copy = constructor.newInstance(paramObj);
+            }
+            catch (Exception ex) {
+                d_copy = null;
+            }
+
+            if (d_copy != null) {
+                try {
+                    if (d_copy instanceof Dataset) {
+                        ((Dataset) d_copy).init();
+                        log.trace("TableViewFactory: getTableView(): d_copy inited");
+                    }
+
+                    int rank = ((DataFormat) dataObject).getRank();
+                    System.arraycopy(((DataFormat) dataObject).getDims(), 0, ((DataFormat) d_copy).getDims(), 0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getStartDims(), 0, ((DataFormat) d_copy).getStartDims(),0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getSelectedDims(), 0, ((DataFormat) d_copy).getSelectedDims(), 0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getStride(), 0, ((DataFormat) d_copy).getStride(), 0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getSelectedIndex(), 0, ((DataFormat) d_copy).getSelectedIndex(), 0, 3);
+                }
+                catch (Throwable ex) {
+                    ex.printStackTrace();
+                }
+
+                dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.OBJECT, d_copy);
+            }
+        }
+
+        try {
+            theView = (TableView) Tools.newInstance(theClass, initargs);
+
+            log.trace("TableViewFactory: getTableView(): returning TableView instance {}", theView);
+        }
+        catch (Exception ex) {
+            log.trace("TableViewFactory: getTableView(): Error instantiating class: {}", ex);
         }
 
         log.trace("TableViewFactory: getTableView(): finish");

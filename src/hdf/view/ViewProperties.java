@@ -85,7 +85,7 @@ public class ViewProperties extends Properties {
      * Property keys control how the data is displayed.
      */
     public static enum DATA_VIEW_KEY {
-        CHAR, CONVERTBYTE, TRANSPOSED, READONLY, OBJECT, BITMASK, BITMASKOP, BORDER, INFO, INDEXBASE1
+        CHAR, CONVERTBYTE, TRANSPOSED, READONLY, OBJECT, BITMASK, BITMASKOP, BORDER, INFO, INDEXBASE1, VIEW_NAME
     }
 
     /**

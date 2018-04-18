@@ -14,7 +14,9 @@
 
 package hdf.view;
 
+import java.util.BitSet;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -39,14 +41,29 @@ public class ImageViewFactory extends DataViewFactory {
         return null;
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
-        String dataViewName = ViewProperties.getImageViewList().get(0);
+        String dataViewName = null;
         Object[] initargs = { viewer, dataPropertiesMap };
         ImageView theView = null;
 
         log.trace("ImageViewFactory: getImageView(): start");
+
+        /*
+         * If the name of a specific ImageView class to use has been passed in via the
+         * data options map, retrieve its name now, otherwise grab the
+         * "currently selected" ImageView class from the ViewProperties-managed list.
+         */
+        dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
+        if (dataViewName == null) {
+            List<?> imageViewList = ViewProperties.getImageViewList();
+            if ((imageViewList == null) || (imageViewList.size() <= 0)) {
+                return null;
+            }
+
+            dataViewName = (String) imageViewList.get(0);
+        }
 
         /* TODO: Currently no support for other modules; return DefaultImageView */
 
@@ -86,6 +103,12 @@ public class ImageViewFactory extends DataViewFactory {
                     theClass = null;
                 }
             }
+        }
+
+        /* Add some data display properties if using the default ImageView */
+        if (dataViewName.startsWith("hdf.view.DefaultImageView")) {
+            BitSet bitmask = (BitSet) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
+            dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, Boolean.valueOf((bitmask != null)));
         }
 
         try {

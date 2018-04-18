@@ -70,8 +70,10 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import hdf.HDFVersions;
+import hdf.object.DataFormat;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
+import hdf.view.ViewProperties.DataViewType;
 import hdf.view.dialog.ImageConversionDialog;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.UserOptionsDialog;
@@ -1257,26 +1259,35 @@ public class HDFView implements ViewManager {
 
         if (obj == null) return;
 
-        log.trace("showMetaData: start");
+        log.trace("HDFView: showMetaData(): start");
 
-        String viewName = (String) HDFView.getListOfMetaDataViews().get(0);
+        DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        if (metaDataViewFactory == null) return;
 
-        try {
-            Class<?> theClass = Class.forName(viewName);
-            if ("hdf.view.DefaultMetaDataView".equals(viewName)) {
-                Object[] initargs = { generalArea, this, obj };
-                Tools.newInstance(theClass, initargs);
-            }
-            else {
-                Object[] initargs = { this, obj };
-                Tools.newInstance(theClass, initargs);
-            }
-        }
-        catch (Exception ex) {
-            this.showStatus(ex.toString());
+        MetaDataView theView = metaDataViewFactory.getMetaDataView(generalArea, this, (DataFormat) obj);
+        if (theView == null) {
+            this.showStatus("Unable to find suitable MetaDataView class for object '" + obj.getName() + "'");
+            return;
         }
 
-        log.trace("showMetaData: finish");
+        // String viewName = (String) HDFView.getListOfMetaDataViews().get(0);
+        //
+        // try {
+        // Class<?> theClass = Class.forName(viewName);
+        // if ("hdf.view.DefaultMetaDataView".equals(viewName)) {
+        // Object[] initargs = { generalArea, this, obj };
+        // Tools.newInstance(theClass, initargs);
+        // }
+        // else {
+        // Object[] initargs = { this, obj };
+        // Tools.newInstance(theClass, initargs);
+        // }
+        // }
+        // catch (Exception ex) {
+        // this.showStatus(ex.toString());
+        // }
+
+        log.trace("HDFView: showMetaData(): finish");
     }
 
     public void closeFile(FileFormat theFile) {
@@ -1464,6 +1475,8 @@ public class HDFView implements ViewManager {
 
             if (view != null) {
                 currentObj = (HObject) view.getDataObject();
+                if (currentObj == null) continue;
+
                 currentFile = currentObj.getFileFormat();
 
                 if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))
