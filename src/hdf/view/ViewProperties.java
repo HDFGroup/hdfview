@@ -75,6 +75,13 @@ public class ViewProperties extends Properties {
     public static final String  DELIMITER_SEMI_COLON = "Semi-Colon";
 
     /**
+     * Used to create different DataViews for a given HObject.
+     */
+    public static enum DataViewType {
+        TABLE, IMAGE, METADATA
+    }
+
+    /**
      * Property keys control how the data is displayed.
      */
     public static enum DATA_VIEW_KEY {

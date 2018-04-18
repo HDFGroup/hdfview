@@ -14,33 +14,14 @@
 
 package hdf.view;
 
-import hdf.object.Attribute;
-import hdf.object.CompoundDS;
 import hdf.object.HObject;
-import hdf.object.ScalarDS;
 
-public class TableViewFactory extends DataViewFactory {
+public class MetaDataViewFactory extends DataViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TableViewFactory.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MetaDataViewFactory.class);
 
     @Override
-    public TableView getTableView(HObject dataObject) {
-        if (dataObject == null) return null;
-
-        log.trace("TableViewFactory: getTableView(): start");
-
-        if (dataObject instanceof ScalarDS) {
-
-        }
-        else if (dataObject instanceof CompoundDS) {
-
-        }
-        else if (dataObject instanceof Attribute) {
-
-        }
-
-        log.trace("TableViewFactory: getTableView(): finish");
-
+    TableView getTableView(HObject dataObject) {
         return null;
     }
 
@@ -51,6 +32,8 @@ public class TableViewFactory extends DataViewFactory {
 
     @Override
     MetaDataView getMetaDataView(HObject dataObject) {
+        // TODO Auto-generated method stub
         return null;
     }
+
 }
