@@ -109,7 +109,6 @@ public class DataOptionDialog extends Dialog {
     private Button                 applyBitmaskButton, extractBitButton;
     private Button[]               bitmaskButtons;
 
-    private Combo                  choiceTextView;
     private Combo                  choiceTableView;
     private Combo                  choiceImageView;
     private Combo                  choicePalette;
@@ -119,8 +118,6 @@ public class DataOptionDialog extends Dialog {
     private boolean                isSelectionCancelled;
 
     private boolean                isTrueColorImage;
-
-    private boolean                isText;
 
     private boolean                isH5;
 
@@ -174,7 +171,6 @@ public class DataOptionDialog extends Dialog {
 
         isSelectionCancelled = true;
         isTrueColorImage = false;
-        isText = false;
         bitmask = null;
         numberOfPalettes = 1;
 
@@ -216,14 +212,7 @@ public class DataOptionDialog extends Dialog {
         shell.setLayout(new GridLayout(1, true));
 
         if (dataObject instanceof ScalarDS) {
-            ScalarDS ds = (ScalarDS) dataObject;
-            isText = ds.isText();
-
-            if(isText) {
-                createTextContents();
-            } else {
-                createScalarDSContents();
-            }
+            createScalarDSContents();
         }
         else if (dataObject instanceof CompoundDS) {
             createCompoundDSContents();
@@ -323,10 +312,7 @@ public class DataOptionDialog extends Dialog {
                     isApplyBitmaskOnly = applyBitmaskButton.getSelection();
                 }
 
-                if (isText) {
-                    dataViewName = choiceTextView.getItem(choiceTextView.getSelectionIndex());
-                }
-                else if (isImageDisplay()) {
+                if (isImageDisplay()) {
                     dataViewName = choiceImageView.getItem(choiceImageView.getSelectionIndex());
                 }
                 else {
@@ -425,11 +411,6 @@ public class DataOptionDialog extends Dialog {
         if (rank > 1) {
             transposeChoice.setEnabled((choices[0].getSelectionIndex() > choices[1]
                     .getSelectionIndex()));
-
-            if (isText) {
-                endFields[1].setEnabled(false);
-                endFields[1].setText(startFields[1].getText());
-            }
 
             if (rank > 2) {
                 endFields[2].setEnabled(false);
@@ -646,11 +627,7 @@ public class DataOptionDialog extends Dialog {
             stride[selectedIndex[i]] = n2[i];
         }
 
-        if ((rank > 1) && isText) {
-            selected[selectedIndex[1]] = 1;
-            stride[selectedIndex[1]] = 1;
-        }
-        else if ((rank > 2) && isTrueColorImage && imageButton.getSelection()) {
+        if ((rank > 2) && isTrueColorImage && imageButton.getSelection()) {
             start[selectedIndex[2]] = 0;
             selected[selectedIndex[2]] = 3;
         }
@@ -1182,16 +1159,6 @@ public class DataOptionDialog extends Dialog {
         choiceTableView.select(0);
     }
 
-    private void createTextContents() {
-        org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
-        dimSubGroup.setFont(curFont);
-        dimSubGroup.setText("Dimension and Subset Selection");
-        dimSubGroup.setLayout(new GridLayout(1, true));
-        dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-        createDimSubSelectionComposite(dimSubGroup);
-    }
-
     private void createDimSubSelectionComposite(Composite parent) {
         String[] dimNames = ((Dataset) dataObject).getDimNames();
 
@@ -1551,29 +1518,24 @@ public class DataOptionDialog extends Dialog {
 
         // update the navigator
         if (rank > 1) {
-            if (isText) {
-                endFields[1].setText(startFields[1].getText());
-            }
-            else {
-                int hIdx = choices[0].getSelectionIndex();
-                int wIdx = choices[1].getSelectionIndex();
-                transposeChoice.select(0);
+            int hIdx = choices[0].getSelectionIndex();
+            int wIdx = choices[1].getSelectionIndex();
+            transposeChoice.select(0);
 
-                // Use transpose option only if the dims are not in original
-                // order
-                if (hIdx < wIdx)
-                    transposeChoice.setEnabled(false);
-                else
-                    transposeChoice.setEnabled(true);
+            // Use transpose option only if the dims are not in original
+            // order
+            if (hIdx < wIdx)
+                transposeChoice.setEnabled(false);
+            else
+                transposeChoice.setEnabled(true);
 
-                long dims[] = dataObject.getDims();
-                int w = (int) dims[wIdx];
-                int h = (int) dims[hIdx];
+            long dims[] = dataObject.getDims();
+            int w = (int) dims[wIdx];
+            int h = (int) dims[hIdx];
 
-                if(navigator != null) {
-                    navigator.setDimensionSize(w, h);
-                    navigator.redraw();
-                }
+            if (navigator != null) {
+                navigator.setDimensionSize(w, h);
+                navigator.redraw();
             }
         }
 

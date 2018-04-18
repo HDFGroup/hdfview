@@ -181,9 +181,6 @@ public class ViewProperties extends Properties {
     /** a list of metaview modules */
     private static Vector<String>   moduleListMetaDataView = new Vector<String>(5);
 
-    /** a list of textview modules */
-    private static Vector<String>   moduleListTextView     = new Vector<String>(5);
-
     /** a list of tableview modules */
     private static Vector<String>   moduleListTableView    = new Vector<String>(5);
 
@@ -392,11 +389,6 @@ public class ViewProperties extends Properties {
                             else if ("hdf.view.MetaDataView".equals(interfaceName)
                                     && !moduleListMetaDataView.contains(theName)) {
                                 moduleListMetaDataView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.TextView".equals(interfaceName)
-                                    && !moduleListTextView.contains(theName)) {
-                                moduleListTextView.add(theName);
                                 break;
                             }
                             else if ("hdf.view.TableView".equals(interfaceName)
@@ -989,13 +981,12 @@ public class ViewProperties extends Properties {
         String propVal = null;
 
         // add default module.
-        String[] moduleKeys = { "module.treeview", "module.metadataview", "module.textview", "module.tableview",
+        String[] moduleKeys = { "module.treeview", "module.metadataview", "module.tableview",
                 "module.imageview", "module.paletteview" };
-        Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTextView, moduleListTableView,
+        Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
                 moduleListImageView, moduleListPaletteView };
         String[] moduleNames = { "hdf.view.DefaultTreeView", "hdf.view.DefaultMetaDataView",
-                "hdf.view.DefaultTextView", "hdf.view.DefaultTableView", "hdf.view.DefaultImageView",
-        "hdf.view.DefaultPaletteView" };
+                "hdf.view.DefaultTableView", "hdf.view.DefaultImageView", "hdf.view.DefaultPaletteView" };
 
         // add default implementation of modules
         for (int i = 0; i < 6; i++) {
@@ -1329,11 +1320,6 @@ public class ViewProperties extends Properties {
         moduleName = moduleListMetaDataView.elementAt(0);
         if ((moduleName != null) && (moduleName.length() > 0)) {
             put("module.metadataview", moduleName);
-        }
-
-        moduleName = moduleListTextView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) {
-            put("module.textview", moduleName);
         }
 
         moduleName = moduleListTableView.elementAt(0);

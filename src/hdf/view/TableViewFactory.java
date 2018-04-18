@@ -28,6 +28,8 @@ public class TableViewFactory {
 
         log.trace("TableViewFactory: getTableView(): start");
 
+        String tableView = ViewProperties.getTableViewList().get(0);
+
         if (dataObject instanceof ScalarDS) {
 
         }

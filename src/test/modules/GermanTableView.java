@@ -2350,9 +2350,6 @@ public class GermanTableView implements TableView {
         String viewName = null;
 
         switch (viewType) {
-            case TEXT:
-                viewName = (String) HDFView.getListOfTextViews().get(0);
-                break;
             case IMAGE:
                 viewName = HDFView.getListOfImageViews().get(0);
                 break;
@@ -2379,9 +2376,6 @@ public class GermanTableView implements TableView {
         if (theClass == null) {
             log.trace("showObjRefData(): Using default dataview");
             switch (viewType) {
-                case TEXT:
-                    viewName = "hdf.view.DefaultTextView";
-                    break;
                 case IMAGE:
                     viewName = "hdf.view.DefaultImageView";
                     break;
@@ -2586,9 +2580,6 @@ public class GermanTableView implements TableView {
             String viewName = null;
 
             switch (viewType) {
-                case TEXT:
-                    viewName = (String) HDFView.getListOfTextViews().get(0);
-                    break;
                 case IMAGE:
                     viewName = HDFView.getListOfImageViews().get(0);
                     break;
@@ -2615,9 +2606,6 @@ public class GermanTableView implements TableView {
             if (theClass == null) {
                 log.trace("showRegRefData(): Using default dataview");
                 switch (viewType) {
-                    case TEXT:
-                        viewName = "hdf.view.DefaultTextView";
-                        break;
                     case IMAGE:
                         viewName = "hdf.view.DefaultImageView";
                         break;
