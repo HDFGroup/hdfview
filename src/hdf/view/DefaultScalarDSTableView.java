@@ -109,7 +109,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             numberFormat = normalFormat;
         }
 
-        log.trace("DefaultScalarDSTableView: isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
+        log.trace("isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
 
         if (((ScalarDS) dataObject).isText())
             shell.setImage(ViewProperties.getTextIcon());
@@ -144,18 +144,18 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @Override
     public NatTable createTable(Composite parent, DataFormat dataObject) {
-        log.trace("DefaultScalarDSTableView: createTable(): start");
+        log.trace("createTable(): start");
 
         if (dataObject.getRank() <= 0) {
             try {
                 ((ScalarDS) dataObject).init();
-                log.trace("DefaultScalarDSTableView: createTable(): dataset inited");
+                log.trace("createTable(): dataset inited");
             }
             catch (Exception ex) {
                 Tools.showError(shell, ex.getMessage(), "createTable:" + shell.getText());
                 dataValue = null;
-                log.debug("DefaultScalarDSTableView: createTable(): ", ex);
-                log.trace("DefaultScalarDSTableView: createTable(): finish");
+                log.debug("createTable(): ", ex);
+                log.trace("createTable(): finish");
                 return null;
             }
         }
@@ -172,12 +172,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             dataValue = dataObject.getData();
             if (dataValue == null) {
                 Tools.showError(shell, "No data read", "ScalarDS createTable:" + shell.getText());
-                log.debug("DefaultScalarDSTableView: createTable(): no data read");
-                log.trace("DefaultScalarDSTableView: createTable(): finish");
+                log.debug("createTable(): no data read");
+                log.trace("createTable(): finish");
                 return null;
             }
 
-            log.trace("DefaultScalarDSTableView: createTable(): dataValue={}", dataValue);
+            log.trace("createTable(): dataValue={}", dataValue);
 
             if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
                 isReadOnly = true;
@@ -195,26 +195,26 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
         catch (Throwable ex) {
             Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
-            log.debug("DefaultScalarDSTableView: createTable(): ", ex);
-            log.trace("DefaultScalarDSTableView: createTable(): finish");
+            log.debug("createTable(): ", ex);
+            log.trace("createTable(): finish");
             dataValue = null;
         }
 
         if (dataValue == null) {
-            log.debug("DefaultScalarDSTableView: createTable(): data value is null");
-            log.trace("DefaultScalarDSTableView: createTable(): finish");
+            log.debug("createTable(): data value is null");
+            log.trace("createTable(): finish");
             return null;
         }
 
         fillValue = dataObject.getFillValue();
-        log.trace("DefaultScalarDSTableView: createTable(): fillValue={}", fillValue);
+        log.trace("createTable(): fillValue={}", fillValue);
 
         String cName = dataValue.getClass().getName();
         int cIndex = cName.lastIndexOf("[");
         if (cIndex >= 0) {
             NT = cName.charAt(cIndex + 1);
         }
-        log.trace("DefaultScalarDSTableView: createTable(): cName={} NT={}", cName, NT);
+        log.trace("createTable(): cName={} NT={}", cName, NT);
 
         // convert numerical data into char
         // only possible cases are byte[] and short[] (converted from unsigned
@@ -248,7 +248,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         dataLayer.setDefaultColumnWidth(80);
 
-        log.trace("DefaultScalarDSTableView: createTable(): rows={} : cols={}", bodyDataProvider.getRowCount(),
+        log.trace("createTable(): rows={} : cols={}", bodyDataProvider.getRowCount(),
                 bodyDataProvider.getColumnCount());
 
         // Create the Column Header layer
@@ -284,7 +284,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         natTable.configure();
 
-        log.trace("DefaultScalarDSTableView: createTable(): finish");
+        log.trace("createTable(): finish");
 
         return natTable;
     }
@@ -313,7 +313,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         int size = selectedCols.length * selectedRows.length;
-        log.trace("DefaultScalarDSTableView: getSelectedData() data size: {}", size);
+        log.trace("getSelectedData() data size: {}", size);
 
         // the whole table is selected
         if ((dataTable.getPreferredColumnCount() - 1 == selectedCols.length)
@@ -357,21 +357,21 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             Tools.showError(shell, "Unsupported data type.", shell.getText());
             return null;
         }
-        log.trace("DefaultScalarDSTableView: getSelectedData(): selectedData is type {}", NT);
+        log.trace("getSelectedData(): selectedData is type {}", NT);
 
         int w = dataTable.getPreferredColumnCount() - 1;
-        log.trace("DefaultScalarDSTableView: getSelectedData(): getColumnCount={}", w);
+        log.trace("getSelectedData(): getColumnCount={}", w);
         int idx_src = 0;
         int idx_dst = 0;
-        log.trace("DefaultScalarDSTableView: getSelectedData(): Rows.length={} Cols.length={}", selectedRows.length,
+        log.trace("getSelectedData(): Rows.length={} Cols.length={}", selectedRows.length,
                 selectedCols.length);
         for (int i = 0; i < selectedRows.length; i++) {
             for (int j = 0; j < selectedCols.length; j++) {
                 idx_src = selectedRows[i] * w + selectedCols[j];
-                log.trace("DefaultScalarDSTableView: getSelectedData()[{},{}]: dataValue[{}]={} from r{} and c{}", i, j,
+                log.trace("getSelectedData()[{},{}]: dataValue[{}]={} from r{} and c{}", i, j,
                         idx_src, Array.get(dataValue, idx_src), selectedRows[i], selectedCols[j]);
                 Array.set(selectedData, idx_dst, Array.get(dataValue, idx_src));
-                log.trace("DefaultScalarDSTableView: getSelectedData()[{},{}]: selectedData[{}]={}", i, j, idx_dst,
+                log.trace("getSelectedData()[{},{}]: selectedData[{}]={}", i, j, idx_dst,
                         Array.get(selectedData, idx_dst));
                 idx_dst++;
             }
@@ -396,22 +396,22 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @Override
     protected void updateValueInMemory(String cellValue, int row, int col) throws Exception {
-        log.trace("DefaultScalarDSTableView: updateValueInMemory({}, {}): start", row, col);
+        log.trace("updateValueInMemory({}, {}): start", row, col);
 
         if ((cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
             log.debug(
-                    "DefaultScalarDSTableView: updateValueInMemory({}, {}): cell value not updated; new value is null",
+                    "updateValueInMemory({}, {}): cell value not updated; new value is null",
                     row, col);
-            log.trace("DefaultScalarDSTableView: updateValueInMemory({}, {}): finish", row, col);
+            log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
 
         // No need to update if values are the same
         if (cellValue.equals(dataLayer.getDataValue(col, row).toString())) {
             log.debug(
-                    "DefaultScalarDSTableView: updateValueInMemory({}, {}): cell value not updated; new value same as old value",
+                    "updateValueInMemory({}, {}): cell value not updated; new value same as old value",
                     row, col);
-            log.trace("DefaultScalarDSTableView: updateValueInMemory({}, {}): finish", row, col);
+            log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
 
@@ -424,13 +424,13 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 i = row * (dataTable.getPreferredColumnCount() - 1) + col;
             }
 
-            log.trace("DefaultScalarDSTableView: updateValueInMemory({}, {}): {} NT={}", row, col, cellValue, NT);
+            log.trace("updateValueInMemory({}, {}): {} NT={}", row, col, cellValue, NT);
 
             ScalarDS sds = (ScalarDS) dataObject;
             boolean isUnsigned = sds.isUnsigned();
             String cname = sds.getOriginalClass().getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-            log.trace("DefaultScalarDSTableView: updateValueInMemory({}, {}): isUnsigned={} cname={} dname={}", row,
+            log.trace("updateValueInMemory({}, {}): isUnsigned={} cname={} dname={}", row,
                     col, isUnsigned, cname, dname);
 
             switch (NT) {
@@ -477,10 +477,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             isValueChanged = true;
         }
         catch (Exception ex) {
-            log.debug("DefaultScalarDSTableView: updateValueInMemory({}, {}): {}", row, col, ex);
+            log.debug("updateValueInMemory({}, {}): {}", row, col, ex);
         }
 
-        log.trace("DefaultScalarDSTableView: updateValueInMemory({}, {}): finish", row, col);
+        log.trace("updateValueInMemory({}, {}): finish", row, col);
     }
 
     /**
@@ -488,29 +488,29 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @Override
     public void updateValueInFile() {
-        log.trace("DefaultScalarDSTableView: updateValueInFile(): start");
+        log.trace("updateValueInFile(): start");
 
         if (isReadOnly || !isValueChanged || showAsBin || showAsHex) {
             log.debug(
-                    "DefaultScalarDSTableView: updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
-            log.trace("DefaultScalarDSTableView: updateValueInFile(): finish");
+                    "updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
+            log.trace("updateValueInFile(): finish");
             return;
         }
 
         try {
-            log.trace("DefaultScalarDSTableView: updateValueInFile(): write");
+            log.trace("updateValueInFile(): write");
             ((ScalarDS) dataObject).write();
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, ex.getMessage(), shell.getText());
-            log.debug("DefaultScalarDSTableView: updateValueInFile(): ", ex);
-            log.trace("DefaultScalarDSTableView: updateValueInFile(): finish");
+            log.debug("updateValueInFile(): ", ex);
+            log.trace("updateValueInFile(): finish");
             return;
         }
 
         isValueChanged = false;
-        log.trace("DefaultScalarDSTableView: updateValueInFile(): finish");
+        log.trace("updateValueInFile(): finish");
     }
 
     /**
@@ -725,13 +725,13 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void showObjRefData(long ref) {
         long[] oid = { ref };
-        log.trace("DefaultScalarDSTableView: showObjRefData(): start: ref={}", ref);
+        log.trace("showObjRefData(): start: ref={}", ref);
 
         HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oid);
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Could not show object reference data: invalid or null data", shell.getText());
-            log.debug("DefaultScalarDSTableView: showObjRefData(): obj is null or not a Scalar Dataset");
-            log.trace("DefaultScalarDSTableView: showObjRefData(): finish");
+            log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
+            log.trace("showObjRefData(): finish");
             return;
         }
 
@@ -751,13 +751,13 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             data = dset_copy.getData();
         }
         catch (Exception ex) {
-            log.debug("DefaultScalarDSTableView: showObjRefData(): couldn't show data: ", ex);
+            log.debug("showObjRefData(): couldn't show data: ", ex);
             Tools.showError(shell, ex.getMessage(), "Object Reference: " + shell.getText());
             data = null;
         }
 
         if (data == null) {
-            log.trace("DefaultScalarDSTableView: showObjRefData(): finish");
+            log.trace("showObjRefData(): finish");
             return;
         }
 
@@ -789,7 +789,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         // Use default dataview
         if (theClass == null) {
-            log.trace("DefaultScalarDSTableView: showObjRefData(): Using default dataview");
+            log.trace("showObjRefData(): Using default dataview");
             switch (viewType) {
                 case IMAGE:
                     viewName = "hdf.view.DefaultImageView";
@@ -805,8 +805,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 theClass = Class.forName(viewName);
             }
             catch (Exception ex) {
-                log.debug("DefaultScalarDSTableView: showObjRefData(): no suitable display class found");
-                log.trace("DefaultScalarDSTableView: showObjRefData(): finish");
+                log.debug("showObjRefData(): no suitable display class found");
+                log.trace("showObjRefData(): finish");
                 Tools.showError(shell, "Could not show reference data: no suitable display class found",
                         shell.getText());
                 return;
@@ -821,11 +821,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             Tools.newInstance(theClass, args);
         }
         catch (Exception ex) {
-            log.debug("DefaultScalarDSTableView: showObjRefData(): Could not show reference data: ", ex);
+            log.debug("showObjRefData(): Could not show reference data: ", ex);
             Tools.showError(shell, "Could not show reference data: " + ex.toString(), shell.getText());
         }
 
-        log.trace("DefaultScalarDSTableView: showObjRefData(): finish");
+        log.trace("showObjRefData(): finish");
     }
 
     /**
@@ -850,12 +850,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void showRegRefData(String reg) {
-        log.trace("DefaultScalarDSTableView: showRegRefData(): start: reg={}", reg);
+        log.trace("showRegRefData(): start: reg={}", reg);
 
         if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
             Tools.showError(shell, "Could not show region reference data: invalid or null data", shell.getText());
-            log.debug("DefaultScalarDSTableView: showRegRefData(): ref is null or invalid");
-            log.trace("DefaultScalarDSTableView: showRegRefData(): finish");
+            log.debug("showRegRefData(): ref is null or invalid");
+            log.trace("showRegRefData(): finish");
             return;
         }
 
@@ -863,15 +863,15 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         // find the object location
         String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf(' '));
-        log.trace("DefaultScalarDSTableView: showRegRefData(): isPointSelection={} oidStr={}", isPointSelection,
+        log.trace("showRegRefData(): isPointSelection={} oidStr={}", isPointSelection,
                 oidStr);
 
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
         if (regStr == null || regStr.length() <= 0) {
             Tools.showError(shell, "Could not show region reference data: no region selection made.", shell.getText());
-            log.debug("DefaultScalarDSTableView: showRegRefData(): no region selection made");
-            log.trace("DefaultScalarDSTableView: showRegRefData(): finish");
+            log.debug("showRegRefData(): no region selection made");
+            log.trace("showRegRefData(): finish");
             return; // no selection
         }
 
@@ -881,17 +881,17 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         int nSelections = st.countTokens();
         if (nSelections <= 0) {
             Tools.showError(shell, "Could not show region reference data: no region selection made.", shell.getText());
-            log.debug("DefaultScalarDSTableView: showRegRefData(): no region selection made");
-            log.trace("DefaultScalarDSTableView: showRegRefData(): finish");
+            log.debug("showRegRefData(): no region selection made");
+            log.trace("showRegRefData(): finish");
             return; // no selection
         }
-        log.trace("DefaultScalarDSTableView: showRegRefData(): nSelections={}", nSelections);
+        log.trace("showRegRefData(): nSelections={}", nSelections);
 
         HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Could not show object reference data: invalid or null data", shell.getText());
-            log.debug("DefaultScalarDSTableView: showRegRefData(): obj is null or not a Scalar Dataset");
-            log.debug("DefaultScalarDSTableView: showRegRefData(): finish");
+            log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
+            log.debug("showRegRefData(): finish");
             return;
         }
 
@@ -907,27 +907,27 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
         }
         catch (Exception ex) {
-            log.debug("DefaultScalarDSTableView: showRegRefData(): constructor failure: ", ex);
+            log.debug("showRegRefData(): constructor failure: ", ex);
             constructor = null;
         }
 
         // load each selection into a separate dataset and display it in
         // a separate spreadsheet
         StringBuffer titleSB = new StringBuffer();
-        log.trace("DefaultScalarDSTableView: showRegRefData(): titleSB created");
+        log.trace("showRegRefData(): titleSB created");
 
         while (st.hasMoreTokens()) {
-            log.trace("DefaultScalarDSTableView: showRegRefData(): st.hasMoreTokens() begin");
+            log.trace("showRegRefData(): st.hasMoreTokens() begin");
             try {
                 dset_copy = constructor.newInstance(paramObj);
             }
             catch (Exception ex) {
-                log.debug("DefaultScalarDSTableView: showRegRefData(): constructor newInstance failure: ", ex);
+                log.debug("showRegRefData(): constructor newInstance failure: ", ex);
                 continue;
             }
 
             if (dset_copy == null) {
-                log.debug("DefaultScalarDSTableView: showRegRefData(): continue after null dataset copy");
+                log.debug("showRegRefData(): continue after null dataset copy");
                 continue;
             }
 
@@ -935,7 +935,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 dset_copy.init();
             }
             catch (Exception ex) {
-                log.debug("DefaultScalarDSTableView: showRegRefData(): continue after copied dataset init failure: ",
+                log.debug("showRegRefData(): continue after copied dataset init failure: ",
                         ex);
                 continue;
             }
@@ -953,7 +953,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             titleSB.setLength(0);
             titleSB.append(token);
             titleSB.append(" at ");
-            log.trace("DefaultScalarDSTableView: showRegRefData(): titleSB={}", titleSB);
+            log.trace("showRegRefData(): titleSB={}", titleSB);
 
             token = token.replace('(', ' ');
             token = token.replace(')', ' ');
@@ -986,13 +986,13 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     idx++;
                 }
             }
-            log.trace("DefaultScalarDSTableView: showRegRefData(): selection inited");
+            log.trace("showRegRefData(): selection inited");
 
             try {
                 dset_copy.getData();
             }
             catch (Exception ex) {
-                log.debug("DefaultScalarDSTableView: showRegRefData(): getData failure: ", ex);
+                log.debug("showRegRefData(): getData failure: ", ex);
                 Tools.showError(shell, ex.getMessage(), "Region Reference: " + shell.getText());
             }
 
@@ -1024,7 +1024,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             // Use default dataview
             if (theClass == null) {
-                log.trace("DefaultScalarDSTableView: showRegRefData(): Using default dataview");
+                log.trace("showRegRefData(): Using default dataview");
                 switch (viewType) {
                     case IMAGE:
                         viewName = "hdf.view.DefaultImageView";
@@ -1040,8 +1040,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     theClass = Class.forName(viewName);
                 }
                 catch (Exception ex) {
-                    log.debug("DefaultScalarDSTableView: showRegRefData(): no suitable display class found");
-                    log.trace("DefaultScalarDSTableView: showRegRefData(): finish");
+                    log.debug("showRegRefData(): no suitable display class found");
+                    log.trace("showRegRefData(): finish");
                     Tools.showError(shell, "Could not show reference data: no suitable display class found",
                             shell.getText());
                     return;
@@ -1056,14 +1056,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 Tools.newInstance(theClass, args);
             }
             catch (Exception ex) {
-                log.debug("DefaultScalarDSTableView: showRegRefData(): Could not show reference data: ", ex);
+                log.debug("showRegRefData(): Could not show reference data: ", ex);
                 Tools.showError(shell, "Could not show reference data: " + ex.toString(), shell.getText());
             }
 
-            log.trace("DefaultScalarDSTableView: showRegRefData(): st.hasMoreTokens() end");
+            log.trace("showRegRefData(): st.hasMoreTokens() end");
         } // while (st.hasMoreTokens())
 
-        log.trace("DefaultScalarDSTableView: showRegRefData(): finish");
+        log.trace("showRegRefData(): finish");
     } // private void showRegRefData(String reg)
 
     /**

@@ -57,7 +57,7 @@ public class MetaDataViewFactory extends DataViewFactory {
         Object[] initargs = { parentObj, viewer, theObj };
         MetaDataView theView = null;
 
-        log.trace("MetaDataViewFactory: getMetaDataView(): start");
+        log.trace("getMetaDataView(): start");
 
         /* Retrieve the "currently selected" MetaDataView class to use */
         List<?> metaDataViewList = ViewProperties.getMetaDataViewList();
@@ -72,16 +72,16 @@ public class MetaDataViewFactory extends DataViewFactory {
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
-            log.trace("MetaDataViewFactory: getMetaDataView(): Class.forName({})", dataViewName);
+            log.trace("getMetaDataView(): Class.forName({})", dataViewName);
 
             /* Attempt to load the class by the given name */
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("MetaDataViewFactory: getMetaDataView(): Class.forName({}) failure: {}", dataViewName, ex);
+            log.debug("getMetaDataView(): Class.forName({}) failure: {}", dataViewName, ex);
 
             try {
-                log.trace("MetaDataViewFactory: getMetaDataView(): ViewProperties.loadExtClass().loadClass({})",
+                log.trace("getMetaDataView(): ViewProperties.loadExtClass().loadClass({})",
                         dataViewName);
 
                 /* Attempt to load the class as an external module */
@@ -89,19 +89,19 @@ public class MetaDataViewFactory extends DataViewFactory {
             }
             catch (Exception ex2) {
                 log.debug(
-                        "MetaDataViewFactory: getMetaDataView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                        "getMetaDataView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
                         dataViewName, ex);
 
                 /* No loadable class found; use the default MetaDataView */
                 dataViewName = "hdf.view.DefaultMetaDataView";
 
                 try {
-                    log.trace("MetaDataViewFactory: getMetaDataView(): Class.forName({})", dataViewName);
+                    log.trace("getMetaDataView(): Class.forName({})", dataViewName);
 
                     theClass = Class.forName(dataViewName);
                 }
                 catch (Exception ex3) {
-                    log.debug("MetaDataViewFactory: getMetaDataView(): Class.forName({}) failure: {}", dataViewName,
+                    log.debug("getMetaDataView(): Class.forName({}) failure: {}", dataViewName,
                             ex);
 
                     theClass = null;
@@ -112,13 +112,13 @@ public class MetaDataViewFactory extends DataViewFactory {
         try {
             theView = (MetaDataView) Tools.newInstance(theClass, initargs);
 
-            log.trace("MetaDataViewFactory: getMetaDataView(): returning MetaDataView instance {}", theView);
+            log.trace("getMetaDataView(): returning MetaDataView instance {}", theView);
         }
         catch (Exception ex) {
-            log.trace("MetaDataViewFactory: getMetaDataView(): Error instantiating class: {}", ex);
+            log.trace("getMetaDataView(): Error instantiating class: {}", ex);
         }
 
-        log.trace("MetaDataViewFactory: getMetaDataView(): finish");
+        log.trace("getMetaDataView(): finish");
 
         return theView;
     }

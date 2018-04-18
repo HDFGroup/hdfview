@@ -48,7 +48,7 @@ public class ImageViewFactory extends DataViewFactory {
         Object[] initargs = { viewer, dataPropertiesMap };
         ImageView theView = null;
 
-        log.trace("ImageViewFactory: getImageView(): start");
+        log.trace("getImageView(): start");
 
         /*
          * If the name of a specific ImageView class to use has been passed in via the
@@ -70,35 +70,35 @@ public class ImageViewFactory extends DataViewFactory {
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
-            log.trace("ImageViewFactory: getImageView(): Class.forName({})", dataViewName);
+            log.trace("getImageView(): Class.forName({})", dataViewName);
 
             /* Attempt to load the class by the given name */
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("ImageViewFactory: getImageView(): Class.forName({}) failure: {}", dataViewName, ex);
+            log.debug("getImageView(): Class.forName({}) failure: {}", dataViewName, ex);
 
             try {
-                log.trace("ImageViewFactory: getImageView(): ViewProperties.loadExtClass().loadClass({})",
+                log.trace("getImageView(): ViewProperties.loadExtClass().loadClass({})",
                         dataViewName);
 
                 /* Attempt to load the class as an external module */
                 theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
             }
             catch (Exception ex2) {
-                log.debug("ImageViewFactory: getImageView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                log.debug("getImageView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
                         dataViewName, ex);
 
                 /* No loadable class found; use the default ImageView */
                 dataViewName = "hdf.view.DefaultImageView";
 
                 try {
-                    log.trace("ImageViewFactory: getImageView(): Class.forName({})", dataViewName);
+                    log.trace("getImageView(): Class.forName({})", dataViewName);
 
                     theClass = Class.forName(dataViewName);
                 }
                 catch (Exception ex3) {
-                    log.debug("ImageViewFactory: getImageView(): Class.forName({}) failure: {}", dataViewName, ex);
+                    log.debug("getImageView(): Class.forName({}) failure: {}", dataViewName, ex);
 
                     theClass = null;
                 }
@@ -114,13 +114,13 @@ public class ImageViewFactory extends DataViewFactory {
         try {
             theView = (ImageView) Tools.newInstance(theClass, initargs);
 
-            log.trace("ImageViewFactory: getImageView(): returning ImageView instance {}", theView);
+            log.trace("getImageView(): returning ImageView instance {}", theView);
         }
         catch (Exception ex) {
-            log.trace("ImageViewFactory: getImageView(): Error instantiating class: {}", ex);
+            log.trace("getImageView(): Error instantiating class: {}", ex);
         }
 
-        log.trace("ImageViewFactory: getImageView(): finish");
+        log.trace("getImageView(): finish");
 
         return theView;
     }

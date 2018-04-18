@@ -254,7 +254,7 @@ public abstract class DefaultBaseTableView implements TableView {
      */
     @SuppressWarnings("rawtypes")
     public DefaultBaseTableView(ViewManager theView, HashMap dataPropertiesMap) {
-        log.trace("DefaultBaseTableView: start");
+        log.trace("start");
 
         shell = new Shell(display, SWT.SHELL_TRIM);
 
@@ -322,7 +322,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         }
 
-        log.trace("DefaultBaseTableView: Index base = {} - Is data transposed = {} - Is display type char = {}",
+        log.trace("Index base = {} - Is data transposed = {} - Is display type char = {}",
                 indexBase, isDataTransposed,
                 isDisplayTypeChar);
 
@@ -335,7 +335,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
 
-        log.trace("DefaultBaseTableView: dataObject({}) isReadOnly={}", dataObject, isReadOnly);
+        log.trace("dataObject({}) isReadOnly={}", dataObject, isReadOnly);
 
         long[] dims = dataObject.getDims();
         long tsize = 1;
@@ -349,7 +349,7 @@ public abstract class DefaultBaseTableView implements TableView {
         for (int i = 0; i < dims.length; i++)
             tsize *= dims[i];
 
-        log.trace("DefaultBaseTableView: Data object Size={} Height={} Width={}", tsize, dataObject.getHeight(),
+        log.trace("Data object Size={} Height={} Width={}", tsize, dataObject.getHeight(),
                 dataObject.getWidth());
 
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
@@ -380,18 +380,18 @@ public abstract class DefaultBaseTableView implements TableView {
          */
         Datatype dtype = dataObject.getDatatype();
 
-        log.trace("DefaultBaseTableView: Data object getDatatypeClass()={}", dtype.getDatatypeClass());
+        log.trace("Data object getDatatypeClass()={}", dtype.getDatatypeClass());
         isDisplayTypeChar = (isDisplayTypeChar
                 && (dtype.getDatatypeSize() == 1 || (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY
                 && dtype.getBasetype().getDatatypeClass() == Datatype.CLASS_CHAR)));
 
         isEnumConverted = ViewProperties.isConvertEnum();
 
-        log.trace("DefaultBaseTableView: Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar,
+        log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar,
                 isEnumConverted);
 
         // Setup subset information
-        log.trace("DefaultBaseTableView: Setup subset information");
+        log.trace("Setup subset information");
 
         int rank = dataObject.getRank();
         int[] selectedIndex = dataObject.getSelectedIndex();
@@ -496,7 +496,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         sb.append(" ] ");
 
-        log.trace("DefaultBaseTableView: subset={}", sb.toString());
+        log.trace("subset={}", sb.toString());
 
         viewer.showStatus(sb.toString());
 
@@ -512,7 +512,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         viewer.addDataView(this);
 
-        log.trace("DefaultBaseTableView: finish");
+        log.trace("finish");
 
         shell.open();
     }
@@ -1459,7 +1459,7 @@ public abstract class DefaultBaseTableView implements TableView {
         File chosenFile = new File(filename);
         String fname = chosenFile.getAbsolutePath();
 
-        log.trace("DefaultBaseTableView: saveAsText: file={}", fname);
+        log.trace("saveAsText: file={}", fname);
 
         // Check if the file is in use and prompt for overwrite
         if (chosenFile.exists()) {
@@ -1659,7 +1659,7 @@ public abstract class DefaultBaseTableView implements TableView {
         File chosenFile = new File(filename);
         String fname = chosenFile.getAbsolutePath();
 
-        log.trace("DefaultBaseTableView: saveAsBinary: file={}", fname);
+        log.trace("saveAsBinary: file={}", fname);
 
         // Check if the file is in use and prompt for overwrite
         if (chosenFile.exists()) {
@@ -1908,11 +1908,11 @@ public abstract class DefaultBaseTableView implements TableView {
             dataTable.doCommand(new StructuralRefreshCommand());
         }
         catch (Exception ex) {
-            log.trace("DefaultBaseTableView: importBinaryData(): {}", ex);
+            log.trace("importBinaryData(): {}", ex);
             return;
         }
         catch (OutOfMemoryError e) {
-            log.trace("DefaultBaseTableView: importBinaryData(): Out of memory");
+            log.trace("importBinaryData(): Out of memory");
             return;
         }
     }

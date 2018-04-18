@@ -1250,7 +1250,7 @@ public class HDFView implements ViewManager {
 
         if (obj == null) return;
 
-        log.trace("HDFView: showMetaData(): start");
+        log.trace("showMetaData(): start");
 
         DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
         if (metaDataViewFactory == null) return;
@@ -1278,7 +1278,7 @@ public class HDFView implements ViewManager {
         // this.showStatus(ex.toString());
         // }
 
-        log.trace("HDFView: showMetaData(): finish");
+        log.trace("showMetaData(): finish");
     }
 
     public void closeFile(FileFormat theFile) {

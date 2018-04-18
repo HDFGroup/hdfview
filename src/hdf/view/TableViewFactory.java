@@ -50,7 +50,7 @@ public class TableViewFactory extends DataViewFactory {
         TableView theView = null;
         HObject dataObject = null;
 
-        log.trace("TableViewFactory: getTableView(): start");
+        log.trace("getTableView(): start");
 
         /*
          * If the name of a specific TableView class to use has been passed in via the
@@ -83,23 +83,23 @@ public class TableViewFactory extends DataViewFactory {
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
-            log.trace("TableViewFactory: getTableView(): Class.forName({})", dataViewName);
+            log.trace("getTableView(): Class.forName({})", dataViewName);
 
             /* Attempt to load the class by the given name */
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("TableViewFactory: getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
+            log.debug("getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
 
             try {
-                log.trace("TableViewFactory: getTableView(): ViewProperties.loadExtClass().loadClass({})",
+                log.trace("getTableView(): ViewProperties.loadExtClass().loadClass({})",
                         dataViewName);
 
                 /* Attempt to load the class as an external module */
                 theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
             }
             catch (Exception ex2) {
-                log.debug("TableViewFactory: getTableView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                log.debug("getTableView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
                         dataViewName, ex);
 
                 /* No loadable class found; use the default TableView */
@@ -111,12 +111,12 @@ public class TableViewFactory extends DataViewFactory {
                     dataViewName = "hdf.view.DefaultAttributeTableView";
 
                 try {
-                    log.trace("TableViewFactory: getTableView(): Class.forName({})", dataViewName);
+                    log.trace("getTableView(): Class.forName({})", dataViewName);
 
                     theClass = Class.forName(dataViewName);
                 }
                 catch (Exception ex3) {
-                    log.debug("TableViewFactory: getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
+                    log.debug("getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
 
                     theClass = null;
                 }
@@ -156,7 +156,7 @@ public class TableViewFactory extends DataViewFactory {
                 try {
                     if (d_copy instanceof Dataset) {
                         ((Dataset) d_copy).init();
-                        log.trace("TableViewFactory: getTableView(): d_copy inited");
+                        log.trace("getTableView(): d_copy inited");
                     }
 
                     int rank = ((DataFormat) dataObject).getRank();
@@ -177,13 +177,13 @@ public class TableViewFactory extends DataViewFactory {
         try {
             theView = (TableView) Tools.newInstance(theClass, initargs);
 
-            log.trace("TableViewFactory: getTableView(): returning TableView instance {}", theView);
+            log.trace("getTableView(): returning TableView instance {}", theView);
         }
         catch (Exception ex) {
-            log.trace("TableViewFactory: getTableView(): Error instantiating class: {}", ex);
+            log.trace("getTableView(): Error instantiating class: {}", ex);
         }
 
-        log.trace("TableViewFactory: getTableView(): finish");
+        log.trace("getTableView(): finish");
 
         return theView;
     }

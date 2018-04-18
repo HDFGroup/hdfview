@@ -101,7 +101,7 @@ public class DefaultMetaDataView implements MetaDataView {
     private boolean                       isH5, isH4;
 
     public DefaultMetaDataView(Composite parentObj, ViewManager theView, DataFormat theObj) {
-        log.trace("DefaultMetaDataView: start");
+        log.trace("start");
 
         this.parent = parentObj;
         this.viewManager = theView;
@@ -134,7 +134,7 @@ public class DefaultMetaDataView implements MetaDataView {
             log.debug("Error retrieving metadata of object " + ((HObject) dataObject).getName() + ":", ex);
         }
 
-        log.trace("DefaultMetaDataView:  isH5={} numAttributes={}", isH5, numAttributes);
+        log.trace("isH5={} numAttributes={}", isH5, numAttributes);
 
 
         Composite generalObjectInfoPane = null;
@@ -158,7 +158,7 @@ public class DefaultMetaDataView implements MetaDataView {
         if (parent instanceof ScrolledComposite)
             ((ScrolledComposite) parent).setContent(tabFolder);
 
-        log.trace("DefaultMetaDataView: finish");
+        log.trace("finish");
     }
 
     @Override

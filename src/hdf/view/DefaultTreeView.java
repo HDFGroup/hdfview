@@ -2428,7 +2428,7 @@ public class DefaultTreeView implements TreeView {
                     theFile.close();
                 }
                 catch (Exception ex) {
-                    log.debug("DefaultTreeView: closeFile({}): {}:", theFile.getFilePath(), ex);
+                    log.debug("closeFile({}): {}:", theFile.getFilePath(), ex);
                 }
 
                 fileList.remove(theFile);
@@ -2596,7 +2596,7 @@ public class DefaultTreeView implements TreeView {
         /* Can only display objects with data */
         if ((dataObject == null) || !(dataObject instanceof DataFormat)) return null;
 
-        log.trace("DefaultTreeView: showDataContent({}): start", dataObject.getName());
+        log.trace("showDataContent({}): start", dataObject.getName());
 
         /* Set up the default display properties passed to the DataView instance */
         DataView theView = null;
@@ -2612,8 +2612,8 @@ public class DefaultTreeView implements TreeView {
         BitSet bitmask = null;
         String dataViewName = null;
 
-        log.trace("DefaultTreeView: showDataContent(): inited");
-        log.trace("DefaultTreeView: isDefaultDisplay? {}", isDefaultDisplay);
+        log.trace("showDataContent(): inited");
+        log.trace("isDefaultDisplay? {}", isDefaultDisplay);
 
         if (isDefaultDisplay) { /* Displaying a data object using the default display options */
             DataView existingView = ((HDFView) viewer).getDataView((HObject) d);
@@ -2634,9 +2634,9 @@ public class DefaultTreeView implements TreeView {
                                 shells[i].forceActive();
 
                                 log.trace(
-                                        "DefaultTreeView: showDataContent(): found existing DataView for data object {}",
+                                        "showDataContent(): found existing DataView for data object {}",
                                         dataObject.getName());
-                                log.trace("DefaultTreeView: showDataContent(): finish");
+                                log.trace("showDataContent(): finish");
 
                                 return view;
                             }
@@ -2671,7 +2671,7 @@ public class DefaultTreeView implements TreeView {
         if (isApplyBitmaskOnly) map.put(ViewProperties.DATA_VIEW_KEY.BITMASKOP, ViewProperties.BITMASK_OP.AND);
 
         log.trace(
-                "DefaultTreeView: showDataContent(): object={} dataViewName={} isDisplayTypeChar={} isTransposed={} isIndexBase1={} bitmask={}",
+                "showDataContent(): object={} dataViewName={} isDisplayTypeChar={} isTransposed={} isIndexBase1={} bitmask={}",
                 dataObject, dataViewName, isDisplayTypeChar, isTransposed, isIndexBase1, bitmask);
 
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
@@ -2681,31 +2681,31 @@ public class DefaultTreeView implements TreeView {
             if (imageViewFactory != null) {
                 theView = imageViewFactory.getImageView(viewer, map);
                 if (theView == null) {
-                    log.debug("DefaultTreeView: showDataContent(): ImageView is null");
+                    log.debug("showDataContent(): ImageView is null");
                     viewer.showStatus(
                             "Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
                 }
             }
             else
-                log.trace("DefaultTreeView: showDataContent(): imageViewFactory is null");
+                log.trace("showDataContent(): imageViewFactory is null");
         }
         else {
             DataViewFactory tableViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TABLE);
             if (tableViewFactory != null) {
                 theView = tableViewFactory.getTableView(viewer, map);
                 if (theView == null) {
-                    log.debug("DefaultTreeView: showDataContent(): TableView is null");
+                    log.debug("showDataContent(): TableView is null");
                     viewer.showStatus(
                             "Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
                 }
             }
             else
-                log.trace("DefaultTreeView: showDataContent(): tableViewFactory is null");
+                log.trace("showDataContent(): tableViewFactory is null");
         }
 
         if (!shell.isDisposed()) shell.setCursor(null);
 
-        log.trace("DefaultTreeView: showDataContent({}): finish", dataObject.getName());
+        log.trace("showDataContent({}): finish", dataObject.getName());
 
         return theView;
     }
@@ -2724,7 +2724,7 @@ public class DefaultTreeView implements TreeView {
     public MetaDataView showMetaData(HObject dataObject) throws Exception {
         if (dataObject == null) return null;
 
-        log.trace("DefaultTreeView: showMetaData({}): start", dataObject.getName());
+        log.trace("showMetaData({}): start", dataObject.getName());
 
         DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
         if (metaDataViewFactory == null) return null;
@@ -2767,7 +2767,7 @@ public class DefaultTreeView implements TreeView {
         // Object[] initargs = { null, viewer, dataObject };
         // MetaDataView dataView = (MetaDataView) Tools.newInstance(theClass, initargs);
 
-        log.trace("DefaultTreeView: showMetaData({}): finish", dataObject.getName());
+        log.trace("showMetaData({}): finish", dataObject.getName());
 
         return theView;
     }

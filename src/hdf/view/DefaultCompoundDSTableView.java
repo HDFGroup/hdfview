@@ -103,7 +103,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     @Override
     public NatTable createTable(Composite parent, DataFormat dataObject) {
-        log.trace("DefaultCompoundDSTableView: createTable(): start");
+        log.trace("createTable(): start");
 
         if (dataObject.getRank() <= 0) ((CompoundDS) dataObject).init();
 
@@ -126,13 +126,13 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         catch (Throwable ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, ex.getMessage(), "TableView " + shell.getText());
-            log.debug("DefaultCompoundDSTableView: createTable(): ", ex);
+            log.debug("createTable(): ", ex);
             dataValue = null;
         }
 
         if ((dataValue == null) || !(dataValue instanceof List)) {
-            log.debug("DefaultCompoundDSTableView: createTable(): data value is null or data not a list");
-            log.trace("DefaultCompoundDSTableView: createTable(): finish");
+            log.debug("createTable(): data value is null or data not a list");
+            log.trace("createTable(): finish");
             return null;
         }
 
@@ -184,7 +184,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         natTable.configure();
 
-        log.trace("DefaultCompoundDSTableView: createTable(): finish");
+        log.trace("createTable(): finish");
 
         return natTable;
     }
@@ -207,7 +207,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             colData = ((List<?>) dataObject.getData()).get(selectionLayer.getSelectedColumnPositions()[0]);
         }
         catch (Exception ex) {
-            log.debug("DefaultCompoundDSTableView: getSelectedData(): ", ex);
+            log.debug("getSelectedData(): ", ex);
             return null;
         }
 
@@ -218,7 +218,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         if (cIndex >= 0) {
             nt = cName.charAt(cIndex + 1);
         }
-        log.trace("DefaultCompoundDSTableView: getSelectedData(): size={} cName={} nt={}", size, cName, nt);
+        log.trace("getSelectedData(): size={} cName={} nt={}", size, cName, nt);
 
         if (nt == 'B') {
             selectedData = new byte[size];
@@ -243,7 +243,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             Tools.showError(shell, "Unsupported data type.", shell.getText());
             return null;
         }
-        log.trace("DefaultCompoundDSTableView: getSelectedData(): selectedData={}", selectedData);
+        log.trace("getSelectedData(): selectedData={}", selectedData);
 
         System.arraycopy(colData, 0, selectedData, 0, size);
 
@@ -278,22 +278,22 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     @Override
     protected void updateValueInMemory(String cellValue, int row, int col) throws Exception {
-        log.trace("DefaultCompoundDSTableView: updateValueInMemory({}, {}): start", row, col);
+        log.trace("updateValueInMemory({}, {}): start", row, col);
 
         if ((cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
             log.debug(
-                    "DefaultCompoundDSTableView: updateValueInMemory({}, {}): cell value not updated; new value is null",
+                    "updateValueInMemory({}, {}): cell value not updated; new value is null",
                     row, col);
-            log.trace("DefaultCompoundDSTableView: updateValueInMemory({}, {}): finish", row, col);
+            log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
 
         // No need to update if values are the same
         if (cellValue.equals(dataLayer.getDataValue(col, row).toString())) {
             log.debug(
-                    "DefaultCompoundDSTableView: updateValueInMemory({}, {}): cell value not updated; new value same as old value",
+                    "updateValueInMemory({}, {}): cell value not updated; new value same as old value",
                     row, col);
-            log.trace("DefaultCompoundDSTableView: updateValueInMemory({}, {}): finish", row, col);
+            log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
 
@@ -327,7 +327,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 Array.set(mdata, offset, cellValue);
                 isValueChanged = true;
 
-                log.trace("DefaultCompoundDSTableView: updateValueInMemory({}, {}): finish", row, col);
+                log.trace("updateValueInMemory({}, {}): finish", row, col);
                 return;
             }
             else if (types[column].getDatatypeClass() == Datatype.CLASS_STRING) {
@@ -346,7 +346,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 }
                 isValueChanged = true;
 
-                log.trace("DefaultCompoundDSTableView: updateValueInMemory({}, {}): finish", row, col);
+                log.trace("updateValueInMemory({}, {}): finish", row, col);
                 return;
             }
 
@@ -362,9 +362,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             if (st.countTokens() < morder) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Number of data points < " + morder + ".", shell.getText());
-                log.debug("DefaultCompoundDSTableView: updateValueInMemory({}, {}): number of data points < {}", row,
+                log.debug("updateValueInMemory({}, {}): number of data points < {}", row,
                         col, morder);
-                log.trace("DefaultCompoundDSTableView: updateValueInMemory({}, {}): finish", row, col);
+                log.trace("updateValueInMemory({}, {}): finish", row, col);
                 return;
             }
 
@@ -426,10 +426,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
         }
         catch (Exception ex) {
-            log.debug("DefaultCompoundDSTableView: updateValueInMemory({}, {}): {}", row, col, ex);
+            log.debug("updateValueInMemory({}, {}): {}", row, col, ex);
         }
 
-        log.trace("DefaultCompoundDSTableView: updateValueInMemory({}, {}): finish", row, col);
+        log.trace("updateValueInMemory({}, {}): finish", row, col);
     }
 
     /**
@@ -437,29 +437,29 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     @Override
     public void updateValueInFile() {
-        log.trace("DefaultCompoundDSTableView: updateValueInFile(): start");
+        log.trace("updateValueInFile(): start");
 
         if (isReadOnly || !isValueChanged || showAsBin || showAsHex) {
             log.debug(
-                    "DefaultCompoundDSTableView: updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
-            log.trace("DefaultCompoundDSTableView: updateValueInFile(): finish");
+                    "updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
+            log.trace("updateValueInFile(): finish");
             return;
         }
 
         try {
-            log.trace("DefaultCompoundDSTableView: updateValueInFile(): write");
+            log.trace("updateValueInFile(): write");
             ((CompoundDS) dataObject).write();
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, ex.getMessage(), shell.getText());
-            log.debug("DefaultCompoundDSTableView: updateValueInFile(): ", ex);
-            log.trace("DefaultCompoundDSTableView: updateValueInFile(): finish");
+            log.debug("updateValueInFile(): ", ex);
+            log.trace("updateValueInFile(): finish");
             return;
         }
 
         isValueChanged = false;
-        log.trace("DefaultCompoundDSTableView: updateValueInFile(): finish");
+        log.trace("updateValueInFile(): finish");
     }
 
     /**
