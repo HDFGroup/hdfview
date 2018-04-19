@@ -74,10 +74,7 @@ import hdf.HDFVersions;
 import hdf.object.DataFormat;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
-<<<<<<< Upstream, based on branch 'hdfview-3' of ssh://byrn@bitbucket.hdfgroup.org:7999/~byrn/hdfview_adb.git
 import hdf.view.ViewProperties.DataViewType;
-=======
->>>>>>> cdd4b35 HDFVIEW-168 Move dialogs to subfolder
 import hdf.view.dialog.ImageConversionDialog;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.UserOptionsDialog;
