@@ -255,6 +255,7 @@ public class ImageConversionDialog extends Dialog {
         Rectangle parentBounds = parent.getBounds();
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+<<<<<<< Upstream, based on branch 'hdfview-3' of ssh://byrn@bitbucket.hdfgroup.org:7999/~byrn/hdfview_adb.git
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.open();
@@ -317,6 +318,70 @@ public class ImageConversionDialog extends Dialog {
             Iterator<FileFormat> iterator = fileList.iterator();
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
+=======
+                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+
+        shell.open();
+
+        Display display = parent.getDisplay();
+        while(!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
+    }
+
+    /** Convert file */
+    private boolean convert() {
+        boolean converted = false;
+        String srcFile = srcFileField.getText();
+        String dstFile = dstFileField.getText();
+
+        if ((srcFile == null) || (dstFile == null)) {
+            return false;
+        }
+
+        srcFile = srcFile.trim();
+        dstFile = dstFile.trim();
+        if ((srcFile == null) || (srcFile.length() <= 0) || (dstFile == null)
+                || (dstFile.length() <= 0)) {
+            return false;
+        }
+
+        // verify the source file
+        File f = new File(srcFile);
+        if (!f.exists()) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Source file does not exist.", shell.getText());
+            return false;
+        }
+        else if (f.isDirectory()) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Source file is a directory.", shell.getText());
+            return false;
+        }
+
+        // verify target file
+        String srcPath = f.getParent();
+        f = new File(dstFile);
+        File pfile = f.getParentFile();
+        if (pfile == null) {
+            dstFile = srcPath + File.separator + dstFile;
+            f = new File(dstFile);
+        }
+        else if (!pfile.exists()) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Destination file path does not exist at\n"
+                    + pfile.getPath(), shell.getText());
+            return false;
+        }
+
+        // check if the file is in use
+        if (fileList != null) {
+            FileFormat theFile = null;
+            Iterator<FileFormat> iterator = fileList.iterator();
+            while (iterator.hasNext()) {
+                theFile = iterator.next();
+>>>>>>> cdd4b35 HDFVIEW-168 Move dialogs to subfolder
                 if (theFile.getFilePath().equals(dstFile)) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "The destination file is being used.", shell.getText());
