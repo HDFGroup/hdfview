@@ -249,14 +249,14 @@ public abstract class FileFormat extends File {
             }
         }
 
-        // add Fits to default modules
-        if (FileFormat.getFileFormat("Fits") == null) {
+        // add FITS to default modules
+        if (FileFormat.getFileFormat("FITS") == null) {
             try {
                 @SuppressWarnings("rawtypes")
                 Class fileclass = Class.forName("hdf.object.fits.FitsFile");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
-                    FileFormat.addFileFormat("Fits", fileformat);
+                    FileFormat.addFileFormat("FITS", fileformat);
                     log.debug("Fits file format added");
                 }
             }
