@@ -400,11 +400,11 @@ public class H5File extends FileFormat {
         if (obj_info.num_attrs <= 0) {
             log.debug("getAttribute(): no attributes");
             log.trace("getAttribute(): finish");
-            return (attributeList = new Vector<Attribute>());
+            return (attributeList = new Vector<>());
         }
 
         int n = (int) obj_info.num_attrs;
-        attributeList = new Vector<Attribute>(n);
+        attributeList = new Vector<>(n);
         log.trace("getAttribute(): num_attrs={}", n);
 
         for (int i = 0; i < n; i++) {
@@ -769,8 +769,8 @@ public class H5File extends FileFormat {
         // the source file and new file
         long tid = -1;
         HObject srcObj, newObj;
-        Hashtable<String, long[]> oidMap = new Hashtable<String, long[]>();
-        List<ScalarDS> refDatasets = new Vector<ScalarDS>();
+        Hashtable<String, long[]> oidMap = new Hashtable<>();
+        List<ScalarDS> refDatasets = new Vector<>();
         while (newIt.hasNext() && srcIt.hasNext()) {
             srcObj = srcIt.next();
             newObj = newIt.next();
@@ -2550,8 +2550,8 @@ public class H5File extends FileFormat {
      * object.
      */
     private static List<HObject> getMembersBreadthFirst(HObject obj) {
-        List<HObject> allMembers = new Vector<HObject>();
-        Queue<HObject> queue = new LinkedList<HObject>();
+        List<HObject> allMembers = new Vector<>();
+        Queue<HObject> queue = new LinkedList<>();
         HObject currentObject = obj;
 
         queue.add(currentObject);
