@@ -972,8 +972,9 @@ public class H5File extends FileFormat {
         if (doCreateFile) {
             long fapl = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
 
-            if ((createFlag & FILE_CREATE_EARLY_LIB) != FILE_CREATE_EARLY_LIB) {
-                H5.H5Pset_libver_bounds(fapl, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST);
+            if ((createFlag & FILE_CREATE_EARLY_LIB) == FILE_CREATE_EARLY_LIB) {
+                int[] newlibver = getLibBounds();
+                H5.H5Pset_libver_bounds(fapl, newlibver[0], newlibver[1]);
             }
 
             long fileid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl);
@@ -1030,6 +1031,59 @@ public class H5File extends FileFormat {
         setIndexType(indexList[0]);
         setIndexOrder(indexList[1]);
         return open(true);
+    }
+
+    /**
+     * Sets the bounds of new library versions.
+     *
+     * @param lowStr
+     *            The earliest version of the library.
+     * @param highStr
+     *            The latest version of the library.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
+     */
+    @Override
+    public void setNewLibBounds(String lowStr, String highStr) throws Exception {
+        int low = -1, high = -1;
+
+        if (lowStr == null) {
+            low = HDF5Constants.H5F_LIBVER_EARLIEST;
+        }
+        else if(lowStr.equals("Earliest")) {
+            low = HDF5Constants.H5F_LIBVER_EARLIEST;
+        }
+        else if(lowStr.equals("V18")) {
+            low = HDF5Constants.H5F_LIBVER_V18;
+        }
+        else if(lowStr.equals("V110")) {
+            low = HDF5Constants.H5F_LIBVER_V110;
+        }
+        else if(lowStr.equals("Latest")) {
+            low = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        else {
+            low = HDF5Constants.H5F_LIBVER_EARLIEST;
+        }
+
+        if (highStr == null) {
+            high = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        else if(highStr.equals("V18")) {
+            high = HDF5Constants.H5F_LIBVER_V18;
+        }
+        else if(highStr.equals("V110")) {
+            high = HDF5Constants.H5F_LIBVER_V110;
+        }
+        else if(highStr.equals("Latest")) {
+            high = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        else {
+            high = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        libver[0] = low;
+        libver[1] = high;
     }
 
     /**

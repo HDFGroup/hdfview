@@ -15,25 +15,24 @@
 package hdf.view;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.graphics.Image;
 
 import hdf.HDFVersions;
 import hdf.object.FileFormat;
 
-public class ViewProperties extends Properties {
+public class ViewProperties extends PreferenceStore {
     private static final long   serialVersionUID     = -6411465283887959066L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
@@ -133,6 +132,9 @@ public class ViewProperties extends Properties {
 
     private static ClassLoader      extClassLoader         = null;
 
+    /** a list of srb accounts */
+    private static Vector<String[]> srbAccountList = new Vector<String[]>(5);
+
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
      * autocontrast by default (2.6 change).
@@ -149,7 +151,9 @@ public class ViewProperties extends Properties {
      */
     private static boolean          isReadOnly             = false;
 
-    private static boolean          isEarlyLib             = false;
+    private static String EarlyLib = "Latest";
+
+    private static String LateLib = "Latest";
 
     /** a list of palette files */
     private static Vector<String>   paletteList            = new Vector<String>(5);
@@ -208,16 +212,6 @@ public class ViewProperties extends Properties {
      */
     public ViewProperties(String viewRoot) {
         super();
-        rootDir = viewRoot;
-        log.trace("rootDir is {}", rootDir);
-        String workPath = System.getProperty("hdfview.workdir");
-        log.trace("hdfview.workdir={}", workPath);
-        if (workPath != null) {
-            workDir = workPath;
-        }
-
-        recentFiles = new Vector<String>(MAX_RECENT_FILES + 5);
-
         // find the property file
         String userHome, userDir, propertyFileName, h5v;
 
@@ -229,12 +223,13 @@ public class ViewProperties extends Properties {
 
         if ((new File(userHome)).exists()) {
             propertyFile = userHome;
+            log.trace("userHome propertyFile is {}", propertyFile);
         }
         else if ((new File(userDir)).exists()) {
             propertyFile = userDir;
+            log.trace("userDir propertyFile is {}", propertyFile);
         }
-        else
-        {
+        else {
             propertyFile = h5v;
             File pFile = new File(h5v);
             try {
@@ -251,21 +246,20 @@ public class ViewProperties extends Properties {
                     propertyFile = null;
                 }
             }
+            log.trace("h5v propertyFile is {}", propertyFile);
         }
-    }
+        setFilename(propertyFile);
+        log.trace("propertyFile is {}", propertyFile);
 
-    /* the properties are sorted by keys */
-    @Override
-    @SuppressWarnings("unchecked")
-    public synchronized Enumeration<Object> keys() {
-        Enumeration<?> keysEnum = super.keys();
-        @SuppressWarnings("rawtypes")
-        Vector keyList = new Vector(50);
-        while (keysEnum.hasMoreElements()) {
-            keyList.add(keysEnum.nextElement());
+        rootDir = viewRoot;
+        log.trace("rootDir is {}", rootDir);
+        String workPath = System.getProperty("hdfview.workdir");
+        log.trace("hdfview.workdir={}", workPath);
+        if (workPath != null) {
+            workDir = workPath;
         }
-        Collections.sort(keyList);
-        return keyList.elements();
+
+        recentFiles = new Vector<String>(MAX_RECENT_FILES + 5);
     }
 
     /**
@@ -978,16 +972,20 @@ public class ViewProperties extends Properties {
     /** Load user properties from property file
      * @throws Exception if a failure occurred
      */
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void load() throws Exception {
-        if (propertyFile == null)
-            return;
+    public void load() throws IOException {
+        super.load();
 
         log.trace("load user properties: begin");
+
+        if (propertyFile == null)
+            return;
 
         String propVal = null;
 
         // add default module.
+        log.trace("load user properties: add default module");
         String[] moduleKeys = { "module.treeview", "module.metadataview", "module.tableview",
                 "module.imageview", "module.paletteview" };
         Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
@@ -996,53 +994,51 @@ public class ViewProperties extends Properties {
                 "hdf.view.DefaultTableView", "hdf.view.DefaultImageView", "hdf.view.DefaultPaletteView" };
 
         // add default implementation of modules
+        log.trace("load user properties: modules");
         for (int i = 0; i < 6; i++) {
+            if (!moduleList[i].contains(moduleNames[i])) moduleList[i].addElement(moduleNames[i]);
             log.trace("load: add default moduleList[{}] is {}", i, moduleNames[i]);
-            if (!moduleList[i].contains(moduleNames[i])) {
-                moduleList[i].addElement(moduleNames[i]);
-            }
+            log.trace("load: add default moduleList[{}] is {}", i, Arrays.toString(moduleList[i].toArray()));
         }
         if (extClassLoader == null) loadExtClass();
 
         // set default selection of data views
+        log.trace("load user properties: set default selection of data views");
         for (int i = 0; i < 6; i++) {
             Vector<String> theList = moduleList[i];
-            propVal = (String) get(moduleKeys[i]);
+            propVal = getString(moduleKeys[i]);
+            log.trace("load: default theList is {}", Arrays.toString(theList.toArray()));
 
             if (propVal != null) {
                 // set default to the module specified in property file
-                theList.remove(propVal);
-                theList.add(0, propVal);
+                if (theList.size() > 1) {
+                    if (theList.contains(propVal)) theList.remove(propVal);
+                    theList.add(0, propVal);
+                }
+                log.trace("load user properties: module[{}]={}", i, propVal);
             }
             else {
                 // use default module
-                theList.remove(moduleNames[i]);
-                theList.add(0, moduleNames[i]);
+                if (theList.size() > 1) {
+                    if (theList.contains(moduleNames[i])) theList.remove(moduleNames[i]);
+                    theList.add(0, moduleNames[i]);
+                }
+                log.trace("load user properties: default module[{}]={}", i, moduleNames[i]);
             }
+            log.trace("load: final theList is {}", Arrays.toString(theList.toArray()));
         }
-
-        try {
-            FileInputStream fis = new FileInputStream(propertyFile);
-            load(fis);
-            fis.close();
-        }
-        catch (Exception e) {
-            log.debug("load: loading propertyFile failed", e);
-        }
-
         // add fileformat modules
-        Enumeration local_enum = this.keys();
-        String theKey = null;
+        log.trace("load user properties: fileformat modules");
+        String[] local_enum = this.preferenceNames();
         String fExt = null;
-        while (local_enum.hasMoreElements()) {
-            theKey = (String) local_enum.nextElement();
+        for (String theKey : local_enum) {
             log.trace("load: add file format {}", theKey);
             if (theKey.startsWith("module.fileformat")) {
                 fExt = theKey.substring(18);
                 try {
                     // enables use of JHDF5 in JNLP (Web Start) applications,
                     // the system class loader with reflection first.
-                    String className = (String) get(theKey);
+                    String className = getString(theKey);
                     Class theClass = null;
                     try {
                         theClass = Class.forName(className);
@@ -1067,125 +1063,87 @@ public class ViewProperties extends Properties {
             }
         }
 
-        propVal = (String) get("users.guide");
-        if (propVal != null) {
+        propVal = getString("users.guide");
+        if (propVal != null)
             usersGuide = propVal;
-        }
 
-        propVal = (String) get("image.contrast");
-        if (propVal != null) {
+        propVal = getString("image.contrast");
+        if (propVal != null)
             isAutoContrast = ("auto".equalsIgnoreCase(propVal));
-        }
 
-        propVal = (String) get("image.showvalues");
-        if (propVal != null) {
-            showImageValues = ("true".equalsIgnoreCase(propVal));
-        }
+        showImageValues = getBoolean("image.showvalues");
 
-        propVal = (String) get("file.mode");
-        if (propVal != null) {
+        propVal = getString("file.mode");
+        if (propVal != null)
             isReadOnly = ("r".equalsIgnoreCase(propVal));
-        }
 
-        propVal = (String) get("lib.version");
-        if (propVal != null) {
-            isEarlyLib = ("early".equalsIgnoreCase(propVal));
-        }
+        EarlyLib = getString("lib.lowversion");
+        LateLib = getString("lib.highversion");
 
-        propVal = (String) get("enum.conversion");
-        if (propVal != null) {
-            convertEnum = ("true".equalsIgnoreCase(propVal));
-        }
+        convertEnum = getBoolean("enum.conversion");
 
-        propVal = (String) get("regref.showvalues");
-        if (propVal != null) {
-            showRegRefValues = ("true".equalsIgnoreCase(propVal));
-        }
+        showRegRefValues = getBoolean("regref.showvalues");
 
-        propVal = (String) get("index.base1");
-        if (propVal != null) {
-            isIndexBase1 = ("true".equalsIgnoreCase(propVal));
-        }
+        isIndexBase1 = getBoolean("index.base1");
 
-        propVal = (String) get("data.delimiter");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        propVal = getString("data.delimiter");
+        if ((propVal != null) && (propVal.length() > 0))
             delimiter = propVal;
-        }
 
-        propVal = (String) get("image.origin");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        propVal = getString("image.origin");
+        if ((propVal != null) && (propVal.length() > 0))
             origin = propVal;
-        }
 
-        propVal = (String) get("h5file.indexType");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        propVal = getString("h5file.indexType");
+        if ((propVal != null) && (propVal.length() > 0))
             indexType = propVal;
-        }
 
-        propVal = (String) get("h5file.indexOrder");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        propVal = getString("h5file.indexOrder");
+        if ((propVal != null) && (propVal.length() > 0))
             indexOrder = propVal;
-        }
 
-        propVal = (String) get("h4toh5.converter");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        propVal = getString("h4toh5.converter");
+        if ((propVal != null) && (propVal.length() > 0))
             h4toh5 = propVal;
-        }
 
-        propVal = (String) get("work.dir");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        propVal = getString("work.dir");
+        if ((propVal != null) && (propVal.length() > 0))
             workDir = propVal;
-        }
 
-        propVal = (String) get("file.extension");
+        propVal = getString("file.extension");
         if ((propVal != null) && (propVal.length() > 0)) {
             fileExt = propVal;
             FileFormat.addFileExtension(fileExt);
         }
 
-        propVal = (String) get("font.size");
-        if ((propVal != null) && (propVal.length() > 0)) {
-            try {
-                fontSize = Integer.parseInt(propVal);
-            }
-            catch (Exception ex) {
-                log.debug("load: load fontSize failed", ex);
-            }
-        }
+        fontSize = getInt("font.size");
 
-        propVal = (String) get("font.type");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        propVal = getString("font.type");
+        if ((propVal != null) && (propVal.length() > 0))
             fontType = propVal.trim();
-        }
 
-        propVal = (String) get("max.members");
-        if ((propVal != null) && (propVal.length() > 0)) {
-            try {
-                max_members = Integer.parseInt(propVal);
-            }
-            catch (Exception ex) {
-                log.debug("load: load max.members failed", ex);
-            }
-        }
+        max_members = getInt("max.members");
 
         // load the most recent file list from the property file
+        log.trace("load user properties: most recent file list");
         String theFile = null;
         for (int i = 0; i < MAX_RECENT_FILES; i++) {
-            theFile = getProperty("recent.file" + i);
+            theFile = getString("recent.file" + i);
             if ((theFile != null) && !recentFiles.contains(theFile)) {
                 if (theFile.startsWith("http://") || theFile.startsWith("ftp://") || (new File(theFile)).exists()) {
                     recentFiles.addElement(theFile);
                 }
             }
-            else {
-                this.remove("recent.file" + i);
-            }
+            // else {
+            // this.remove("recent.file" + i);
+            // }
         }
 
         // load the most recent palette file list from the property file
+        log.trace("load user properties: most recent palette file list");
         theFile = null;
         for (int i = 0; i < MAX_RECENT_FILES; i++) {
-            theFile = getProperty("palette.file" + i);
+            theFile = getString("palette.file" + i);
             if (theFile != null) theFile = theFile.trim();
 
             if ((theFile != null && theFile.length() > 0) && !paletteList.contains(theFile)) {
@@ -1193,14 +1151,45 @@ public class ViewProperties extends Properties {
                     paletteList.addElement(theFile);
                 }
             }
-            else {
-                this.remove("palette.file" + i);
-            }
+            // else {
+            // this.remove("palette.file" + i);
+            // }
         }
 
+        // load srb account
+        // log.trace("load user properties: srb account");
+        // propVal = null;
+        // String srbaccount[] = new String[7];
+        // for (int i = 0; i < MAX_RECENT_FILES; i++) {
+        // if (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
+        // continue;
+        //
+        // if (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
+        // continue;
+        //
+        // if (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
+        // continue;
+        //
+        // if (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
+        // continue;
+        //
+        // if (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
+        // continue;
+        //
+        // if (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
+        // continue;
+        //
+        // if (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
+        // continue;
+        //
+        // srbAccountList.add(srbaccount);
+        // srbaccount = new String[7];
+        // }
+
         // set default modules from user property files
+        log.trace("load user properties: default modules");
         for (int i = 0; i < 6; i++) {
-            String moduleName = (String) get(moduleKeys[i]);
+            String moduleName = getString(moduleKeys[i]);
             log.trace("load: default modules from user property is {}", moduleName);
             if ((moduleName != null) && (moduleName.length() > 0)) {
                 if (moduleList[i].contains(moduleName)) moduleList[i].remove(moduleName);
@@ -1210,157 +1199,145 @@ public class ViewProperties extends Properties {
         log.trace("load: finish");
     }
 
-    /** Save user properties into property file */
-    public void save() {
+    /**
+     * Save user properties into property file
+     *
+     * @throws Exception
+     *             if a failure occurred
+     */
+    @Override
+    public void save() throws IOException {
+        log.trace("save user properties: begin");
         if (propertyFile == null)
             return;
 
-        clear();
-
         // update data saving options
-        if (delimiter == null) {
-            put("data.delimiter", DELIMITER_TAB);
-        }
-        else {
-            put("data.delimiter", delimiter);
-        }
-
-        if (origin == null) {
-            put("image.origin", ORIGIN_UL);
-        }
-        else {
-            put("image.origin", origin);
-        }
-
-        if (indexType != null) {
-            put("h5file.indexType", indexType);
-        }
-
-        if (indexOrder != null) {
-            put("h5file.indexOrder", indexOrder);
-        }
-
-        if (usersGuide != null) {
-            put("users.guide", usersGuide);
-        }
-
-        if (workDir != null) {
-            put("work.dir", workDir);
-        }
-
-        if (fileExt != null) {
-            put("file.extension", fileExt);
-        }
-
-        if (h4toh5 != null) {
-            put("h4toh5.converter", h4toh5);
-        }
-
-        put("font.size", String.valueOf(fontSize));
-
-        if (fontType != null) {
-            put("font.type", fontType);
-        }
-
-        put("max.members", String.valueOf(max_members));
-
-        if (isAutoContrast) {
-            put("image.contrast", "auto");
-        }
-        else {
-            put("image.contrast", "general");
-        }
-
-        if (showImageValues)
-            put("image.showvalues", "true");
+        log.trace("save user properties: update data saving options");
+        if (delimiter == null)
+            setDefault("data.delimiter", DELIMITER_TAB);
         else
-            put("image.showvalues", "false");
+            setValue("data.delimiter", delimiter);
 
-        if (isReadOnly) {
-            put("file.mode", "r");
-        }
-        else {
-            put("file.mode", "rw");
-        }
-
-        if (isEarlyLib) {
-            put("lib.version", "early");
-        }
-        else {
-            put("lib.version", "latest");
-        }
-
-        put("enum.conversion", String.valueOf(convertEnum));
-        if (showRegRefValues)
-            put("regref.showvalues", "true");
+        if (origin == null)
+            setDefault("image.origin", ORIGIN_UL);
         else
-            put("regref.showvalues", "false");
-        put("index.base1", String.valueOf(isIndexBase1));
+            setValue("image.origin", origin);
+
+        if (indexType != null) setValue("h5file.indexType", indexType);
+
+        if (indexOrder != null) setValue("h5file.indexOrder", indexOrder);
+
+        if (usersGuide != null) setValue("users.guide", usersGuide);
+
+        if (workDir != null) setValue("work.dir", workDir);
+
+        if (fileExt != null) setValue("file.extension", fileExt);
+
+        if (h4toh5 != null) setValue("h4toh5.converter", h4toh5);
+
+        setValue("font.size", fontSize);
+
+        if (fontType != null) setValue("font.type", fontType);
+
+        setValue("max.members", max_members);
+
+        if (isAutoContrast)
+            setValue("image.contrast", "auto");
+        else
+            setValue("image.contrast", "general");
+
+        setValue("image.showvalues", showImageValues);
+
+        if (isReadOnly)
+            setValue("file.mode", "r");
+        else
+            setValue("file.mode", "rw");
+
+        log.trace("save user properties: lib.lowversion={}", EarlyLib);
+        setValue("lib.lowversion", EarlyLib);
+        log.trace("save user properties: lib.highversion={}", LateLib);
+        setValue("lib.highversion", LateLib);
+
+        setValue("enum.conversion", convertEnum);
+        setValue("regref.showvalues", showRegRefValues);
+        setValue("index.base1", isIndexBase1);
 
         // save the list of most recent files
+        log.trace("save user properties: most recent files");
         String theFile;
         int size = recentFiles.size();
         int minSize = Math.min(size, MAX_RECENT_FILES);
+        log.trace("save user properties: most recent files size={}", size);
         for (int i = 0; i < minSize; i++) {
             theFile = recentFiles.elementAt(i);
-            if ((theFile != null) && (theFile.length() > 0)) {
-                put("recent.file" + i, theFile);
-            }
+            if ((theFile != null) && (theFile.length() > 0)) setValue("recent.file" + i, theFile);
         }
 
         // save the list of most recent palette files
+        log.trace("save user properties: most recent palette files");
         size = paletteList.size();
         minSize = Math.min(size, MAX_RECENT_FILES);
         for (int i = 0; i < minSize; i++) {
             theFile = paletteList.elementAt(i);
-            if ((theFile != null) && (theFile.length() > 0)) {
-                put("palette.file" + i, theFile);
-            }
+            if ((theFile != null) && (theFile.length() > 0)) setValue("palette.file" + i, theFile);
         }
+
+        // save srb account
+        // log.trace("save user properties: srb account");
+        // String srbaccount[] = null;
+        // size = srbAccountList.size();
+        // minSize = Math.min(size, MAX_RECENT_FILES);
+        // for (int i = 0; i < minSize; i++) {
+        // srbaccount = srbAccountList.get(i);
+        // if ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] !=
+        // null)
+        // && (srbaccount[3] != null) && (srbaccount[4] != null) && (srbaccount[5] !=
+        // null)
+        // && (srbaccount[6] != null)) {
+        // setValue("srbaccount" + i + ".host", srbaccount[0]);
+        // setValue("srbaccount" + i + ".port", srbaccount[1]);
+        // setValue("srbaccount" + i + ".user", srbaccount[2]);
+        // setValue("srbaccount" + i + ".password", srbaccount[3]);
+        // setValue("srbaccount" + i + ".home", srbaccount[4]);
+        // setValue("srbaccount" + i + ".domain", srbaccount[5]);
+        // setValue("srbaccount" + i + ".resource", srbaccount[6]);
+        // }
+        // }
 
         // save default modules
+        log.trace("save user properties: default modules");
         String moduleName = moduleListTreeView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) {
-            put("module.treeview", moduleName);
-        }
+        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.treeview", moduleName);
+        log.trace("save user properties: module.treeview={}", moduleName);
 
         moduleName = moduleListMetaDataView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) {
-            put("module.metadataview", moduleName);
-        }
+        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.metadataview", moduleName);
+        log.trace("save user properties: module.metadataview={}", moduleName);
 
         moduleName = moduleListTableView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) {
-            put("module.tableview", moduleName);
-        }
+        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.tableview", moduleName);
+        log.trace("save user properties: module.tableview={}", moduleName);
 
         moduleName = moduleListImageView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) {
-            put("module.imageview", moduleName);
-        }
+        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.imageview", moduleName);
+        log.trace("save user properties: module.imageview={}", moduleName);
 
         moduleName = moduleListPaletteView.elementAt(0);
-        if ((moduleName != null) && (moduleName.length() > 0)) {
-            put("module.paletteview", moduleName);
-        }
+        if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.paletteview", moduleName);
+        log.trace("save user properties: module.paletteview={}", moduleName);
 
         // save the current supported fileformat
+        log.trace("save user properties: supported fileformat");
         Enumeration<?> keys = FileFormat.getFileFormatKeys();
         String theKey = null;
         while (keys.hasMoreElements()) {
             theKey = (String) keys.nextElement();
             FileFormat theformat = FileFormat.getFileFormat(theKey);
-            put("module.fileformat." + theKey, theformat.getClass().getName());
+            setValue("module.fileformat." + theKey, theformat.getClass().getName());
         }
 
-        try {
-            FileOutputStream fos = new FileOutputStream(propertyFile);
-            store(fos, "User properties modified on ");
-            fos.close();
-        }
-        catch (Exception e) {
-            ;
-        }
+        super.save();
+        log.trace("save user properties: end");
     }
 
     /** @return the name of the user property file */
@@ -1465,6 +1442,10 @@ public class ViewProperties extends Properties {
     /** @return the list of palette files */
     public static Vector<String> getPaletteList() {
         return paletteList;
+    }
+
+    public static Vector<String[]> getSrbAccount() {
+        return srbAccountList;
     }
 
     /** @return a list of treeview modules */
@@ -1687,23 +1668,41 @@ public class ViewProperties extends Properties {
     }
 
     /**
-     * Returns true if default lib version is the earliest.
+     * Returns value of default lib version for the earliest.
      *
-     * @return true if default lib version is the earliest; otherwise, returns
-     *         false.
+     * @return value of default lib version for the earliest.
      */
-    public static boolean isEarlyLib() {
-        return isEarlyLib;
+    public static String getEarlyLib() {
+        return EarlyLib;
     }
 
     /**
-     * Set the flag to indicate if default lib version is the earliest.
+     * Set the value of default lib version for the earliest.
      *
-     * @param b
-     *            the flag to indicate if default lib version is the earliest.
+     * @param vers
+     *            the value of default lib version for the earliest.
      */
-    public static void setEarlyLib(boolean b) {
-        isEarlyLib = b;
+    public static void setEarlyLib(String vers) {
+        EarlyLib = vers;
+    }
+
+    /**
+     * Returns value of default lib version for the latest.
+     *
+     * @return value of default lib version for the latest.
+     */
+    public static String getLateLib() {
+        return LateLib;
+    }
+
+    /**
+     * Set the value of default lib version for the latest.
+     *
+     * @param vers
+     *            the value of default lib version for the latest.
+     */
+    public static void setLateLib(String vers) {
+        LateLib = vers;
     }
 
     /**

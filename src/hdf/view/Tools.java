@@ -3032,8 +3032,10 @@ public final class Tools {
 
         try {
             int aFlag = FileFormat.FILE_CREATE_DELETE;
-            if (ViewProperties.isEarlyLib())
+            if (!ViewProperties.getEarlyLib().equalsIgnoreCase("Latest")) {
                 aFlag = FileFormat.FILE_CREATE_DELETE | FileFormat.FILE_CREATE_EARLY_LIB;
+                FileFormat.getFileFormat(type).setNewLibBounds(ViewProperties.getEarlyLib(), ViewProperties.getLateLib());
+            }
             FileFormat theFile = FileFormat.getFileFormat(type).createFile(fname, aFlag);
             return theFile;
         }
