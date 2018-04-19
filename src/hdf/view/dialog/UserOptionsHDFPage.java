@@ -54,56 +54,67 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     public UserOptionsHDFPage() {
         super("HDF Settings");
     }
+
     /**
-     * Notifies that the OK button of this page's container has been pressed.
+     * Notifies that the OK button if this page's container has been pressed.
      *
-     * @return <code>false</code> to abort the container's OK processing and
-     * <code>true</code> to allow the OK to happen
+     * @return <code>false</code> to abort the container's OK processing and <code>true</code> to allow
+     *         the OK to happen
      */
     public boolean performOk() {
         ViewProperties store = (ViewProperties)getPreferenceStore();
 
-        String ext = fileExtField.getText();
-        if ((ext != null) && (ext.length() > 0)) {
-            ext = ext.trim();
-            ViewProperties.setFileExtension(ext);
+        if (fileExtField != null) {
+            String ext = fileExtField.getText();
+            if ((ext != null) && (ext.length() > 0)) {
+                ext = ext.trim();
+                ViewProperties.setFileExtension(ext);
+            }
         }
 
-        if (earlyLibVersion.getSelection())
-            ViewProperties.setEarlyLib("Earliest");
-        else if (early18LibVersion.getSelection())
-            ViewProperties.setEarlyLib("v18");
-        else if (early110LibVersion.getSelection())
-            ViewProperties.setEarlyLib("v110");
-        else if (earlyLateLibVersion.getSelection())
-            ViewProperties.setEarlyLib("Latest");
-        else
-            ViewProperties.setEarlyLib("Earliest");
+        if (earlyLibVersion != null) {
+            if (earlyLibVersion.getSelection())
+                ViewProperties.setEarlyLib("Earliest");
+            else if (early18LibVersion.getSelection())
+                ViewProperties.setEarlyLib("v18");
+            else if (early110LibVersion.getSelection())
+                ViewProperties.setEarlyLib("v110");
+            else if (earlyLateLibVersion.getSelection())
+                ViewProperties.setEarlyLib("Latest");
+            else
+                ViewProperties.setEarlyLib("Earliest");
+        }
 
-        if (lateLibVersion.getSelection())
-            ViewProperties.setLateLib("Earliest");
-        else if (late18LibVersion.getSelection())
-            ViewProperties.setLateLib("v18");
-        else if (late110LibVersion.getSelection())
-            ViewProperties.setLateLib("v110");
-        else if (lateLateLibVersion.getSelection())
-            ViewProperties.setLateLib("Latest");
-        else
-            ViewProperties.setLateLib("Latest");
+        if (lateLibVersion != null) {
+            if (lateLibVersion.getSelection())
+                ViewProperties.setLateLib("Earliest");
+            else if (late18LibVersion.getSelection())
+                ViewProperties.setLateLib("v18");
+            else if (late110LibVersion.getSelection())
+                ViewProperties.setLateLib("v110");
+            else if (lateLateLibVersion.getSelection())
+                ViewProperties.setLateLib("Latest");
+            else
+                ViewProperties.setLateLib("Latest");
+        }
 
         // set index type
-        if (checkIndexType.getSelection())
-            ViewProperties.setIndexType("H5_INDEX_NAME");
-        else
-            ViewProperties.setIndexType("H5_INDEX_CRT_ORDER");
+        if (checkIndexType != null) {
+            if (checkIndexType.getSelection())
+                ViewProperties.setIndexType("H5_INDEX_NAME");
+            else
+                ViewProperties.setIndexType("H5_INDEX_CRT_ORDER");
+        }
 
         // set index order
-        if (checkIndexOrder.getSelection())
-            ViewProperties.setIndexOrder("H5_ITER_INC");
-        else if (checkIndexNative.getSelection())
-            ViewProperties.setIndexOrder("H5_ITER_NATIVE");
-        else
-            ViewProperties.setIndexOrder("H5_ITER_DEC");
+        if (checkIndexOrder != null) {
+            if (checkIndexOrder.getSelection())
+                ViewProperties.setIndexOrder("H5_ITER_INC");
+            else if (checkIndexNative.getSelection())
+                ViewProperties.setIndexOrder("H5_ITER_NATIVE");
+            else
+                ViewProperties.setIndexOrder("H5_ITER_DEC");
+        }
 
         return true;
     }
