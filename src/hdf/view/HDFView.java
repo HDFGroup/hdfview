@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -77,6 +78,10 @@ import hdf.view.ViewProperties.DataViewType;
 import hdf.view.dialog.ImageConversionDialog;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.UserOptionsDialog;
+import hdf.view.dialog.UserOptionsGeneralPage;
+import hdf.view.dialog.UserOptionsHDFPage;
+import hdf.view.dialog.UserOptionsNode;
+import hdf.view.dialog.UserOptionsViewModulesPage;
 
 
 /**
@@ -806,25 +811,44 @@ public class HDFView implements ViewManager {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                userOptionDialog = new UserOptionsDialog(shell, rootDir);
+                // Create the preference manager
+                PreferenceManager mgr = new PreferenceManager();
 
+                // Create the nodes
+                UserOptionsNode one = new UserOptionsNode("general", new UserOptionsGeneralPage());
+                UserOptionsNode two = new UserOptionsNode("hdf", new UserOptionsHDFPage());
+                UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
+
+                // Add the nodes
+                mgr.addToRoot(one);
+                mgr.addToRoot(two);
+                mgr.addToRoot(three);
+
+                // Create the preferences dialog
+                userOptionDialog = new UserOptionsDialog(shell, mgr, rootDir);
+
+                // Set the preference store
+                userOptionDialog.setPreferenceStore(props);
+                userOptionDialog.create();
+
+                // Open the dialog
                 userOptionDialog.open();
 
-                if (userOptionDialog.isWorkDirChanged())
-                    currentDir = ViewProperties.getWorkDir();
+                //if (userOptionDialog.isWorkDirChanged())
+                currentDir = ViewProperties.getWorkDir();
 
-                if (userOptionDialog.isFontChanged()) {
-                    Font font = null;
+                //if (userOptionDialog.isFontChanged()) {
+                Font font = null;
 
-                    try {
-                        font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
-                    }
-                    catch (Exception ex) {
-                        font = null;
-                    }
-
-                    updateFont(font);
+                try {
+                    font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
                 }
+                catch (Exception ex) {
+                    font = null;
+                }
+
+                updateFont(font);
+                //}
             }
         });
 
@@ -1292,10 +1316,12 @@ public class HDFView implements ViewManager {
         Shell[] views = display.getShells();
         if (views != null) {
             for (int i = 0; i < views.length; i++) {
-                DataView view = (DataView) views[i].getData();
+                Object shellData = views[i].getData();
 
-                if (view != null) {
-                    HObject obj = (HObject) view.getDataObject();
+                if (!(shellData instanceof DataView)) continue;
+
+                if ((DataView) shellData != null) {
+                    HObject obj = (HObject) ((DataView) shellData).getDataObject();
 
                     if (obj == null) continue;
 

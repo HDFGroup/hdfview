@@ -2018,6 +2018,21 @@ public abstract class FileFormat extends File {
     }
 
     /**
+     * Sets the bounds of new library versions.
+     *
+     * @param lowStr
+     *            The earliest version of the library.
+     * @param highStr
+     *            The latest version of the library.
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
+    public void setNewLibBounds(String lowStr, String highStr) throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+    }
+
+    /**
      * Sets the bounds of library versions.
      *
      * @param lowStr
