@@ -152,7 +152,7 @@ public abstract class FileFormat extends File {
      * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    private static final Map<String, FileFormat> FileList = new Hashtable<String, FileFormat>(10);
+    private static final Map<String, FileFormat> FileList = new Hashtable<>(10);
 
     /**
      * A list of file extensions for the supported file formats. This list of
@@ -249,14 +249,14 @@ public abstract class FileFormat extends File {
             }
         }
 
-        // add Fits to default modules
-        if (FileFormat.getFileFormat("Fits") == null) {
+        // add FITS to default modules
+        if (FileFormat.getFileFormat("FITS") == null) {
             try {
                 @SuppressWarnings("rawtypes")
                 Class fileclass = Class.forName("hdf.object.fits.FitsFile");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
-                    FileFormat.addFileFormat("Fits", fileformat);
+                    FileFormat.addFileFormat("FITS", fileformat);
                     log.debug("Fits file format added");
                 }
             }
@@ -483,7 +483,7 @@ public abstract class FileFormat extends File {
         }
 
         StringTokenizer currentExt = new StringTokenizer(extensions, ",");
-        Vector<String> tokens = new Vector<String>(currentExt.countTokens() + 5);
+        Vector<String> tokens = new Vector<>(currentExt.countTokens() + 5);
 
         while (currentExt.hasMoreTokens()) {
             tokens.add(currentExt.nextToken().trim().toLowerCase());

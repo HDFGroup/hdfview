@@ -822,7 +822,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Unregister a file format"));
 
-            botshell.bot().comboBox().setSelection("Fits");
+            botshell.bot().comboBox().setSelection("FITS");
             botshell.bot().button("   &OK   ").click();
 
             fileMenuItem = bot.menu("Help").menu("Supported File Formats");
