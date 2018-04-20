@@ -20,7 +20,7 @@ import java.util.List;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import hdf.object.DataFormat;
+import hdf.object.HObject;
 
 /**
  * A Factory class to return instances of classes implementing the PaletteView
@@ -118,7 +118,7 @@ public class PaletteViewFactory extends DataViewFactory {
     }
 
     @Override
-    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj) {
+    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
         return null;
     }
 

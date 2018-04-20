@@ -54,7 +54,6 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -87,7 +86,7 @@ public class DefaultMetaDataView implements MetaDataView {
     private final ViewManager             viewManager;
 
     /** The HDF data object */
-    private DataFormat                    dataObject;
+    private HObject                       dataObject;
 
     /* The table to hold the list of attributes attached to the HDF object */
     private Table                         attrTable;
@@ -100,7 +99,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
     private boolean                       isH5, isH4;
 
-    public DefaultMetaDataView(Composite parentObj, ViewManager theView, DataFormat theObj) {
+    public DefaultMetaDataView(Composite parentObj, ViewManager theView, HObject theObj) {
         log.trace("start");
 
         this.parent = parentObj;
@@ -109,8 +108,8 @@ public class DefaultMetaDataView implements MetaDataView {
 
         numAttributes = 0;
 
-        isH5 = ((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        isH4 = ((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
+        isH5 = dataObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+        isH4 = dataObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
 
         try {
             curFont = new Font(
@@ -131,7 +130,7 @@ public class DefaultMetaDataView implements MetaDataView {
         }
         catch (Exception ex) {
             attrList = null;
-            log.debug("Error retrieving metadata of object " + ((HObject) dataObject).getName() + ":", ex);
+            log.debug("Error retrieving metadata of object " + dataObject.getName() + ":", ex);
         }
 
         log.trace("isH5={} numAttributes={}", isH5, numAttributes);
@@ -162,7 +161,7 @@ public class DefaultMetaDataView implements MetaDataView {
     }
 
     @Override
-    public DataFormat getDataObject() {
+    public HObject getDataObject() {
         return dataObject;
     }
 
@@ -239,7 +238,7 @@ public class DefaultMetaDataView implements MetaDataView {
         return attr;
     }
 
-    private Composite createAttributeInfoPane(Composite parent, final DataFormat dataObject) {
+    private Composite createAttributeInfoPane(Composite parent, final HObject dataObject) {
         if (parent == null || dataObject == null || attrList == null) return null;
 
         log.trace("createAttributeInfoPane: start");
@@ -262,12 +261,12 @@ public class DefaultMetaDataView implements MetaDataView {
         Button addButton = new Button(attributeInfoGroup, SWT.PUSH);
         addButton.setFont(curFont);
         addButton.setText("Add Attribute");
-        addButton.setEnabled(!(((HObject) dataObject).getFileFormat().isReadOnly()));
+        addButton.setEnabled(!(dataObject.getFileFormat().isReadOnly()));
         addButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         addButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                addAttribute((HObject) dataObject);
+                addAttribute(dataObject);
             }
         });
 
@@ -276,12 +275,12 @@ public class DefaultMetaDataView implements MetaDataView {
             Button delButton = new Button(attributeInfoGroup, SWT.PUSH);
             delButton.setFont(curFont);
             delButton.setText("Delete Attribute");
-            delButton.setEnabled(!(((HObject) dataObject).getFileFormat().isReadOnly()));
+            delButton.setEnabled(!(dataObject.getFileFormat().isReadOnly()));
             delButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             delButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    deleteAttribute((HObject) dataObject);
+                    deleteAttribute(dataObject);
                 }
             });
         }
@@ -375,12 +374,12 @@ public class DefaultMetaDataView implements MetaDataView {
         return attributeInfoGroup;
     }
 
-    private Composite createGeneralObjectInfoPane(Composite parent, final DataFormat dataObject) {
+    private Composite createGeneralObjectInfoPane(Composite parent, final HObject dataObject) {
         if (parent == null || dataObject == null) return null;
 
         log.trace("createGeneralObjectInfoPane: start");
 
-        FileFormat theFile = ((HObject) dataObject).getFileFormat();
+        FileFormat theFile = dataObject.getFileFormat();
         boolean isRoot = ((dataObject instanceof Group) && ((Group) dataObject).isRoot());
         String     typeStr = "Unknown";
         Label      label;
@@ -398,7 +397,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
             long fileSize = 0;
             try {
-                fileSize = (new File(((HObject) dataObject).getFile())).length();
+                fileSize = (new File(dataObject.getFile())).length();
             }
             catch (Exception ex) {
                 fileSize = -1;
@@ -436,7 +435,7 @@ public class DefaultMetaDataView implements MetaDataView {
             text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(curFont);
-            text.setText(((HObject) dataObject).getName());
+            text.setText(dataObject.getName());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(generalInfoGroup, SWT.LEFT);
@@ -446,7 +445,7 @@ public class DefaultMetaDataView implements MetaDataView {
             text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(curFont);
-            text.setText((new File(((HObject) dataObject).getFile())).getParent());
+            text.setText((new File(dataObject.getFile())).getParent());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(generalInfoGroup, SWT.LEFT);
@@ -473,7 +472,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
             // Append the Library Version bounds information
             if (isH5) {
-                String libversion = ((HObject) dataObject).getFileFormat().getLibBoundsDescription();
+                String libversion = dataObject.getFileFormat().getLibBoundsDescription();
                 if (libversion.length() > 0) {
                     label = new Label(generalInfoGroup, SWT.LEFT);
                     label.setFont(curFont);
@@ -491,7 +490,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 userBlockButton.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
-                        new UserBlockDialog(display.getShells()[0], SWT.NONE, (HObject) dataObject).open();
+                        new UserBlockDialog(display.getShells()[0], SWT.NONE, dataObject).open();
                     }
                 });
             }
@@ -506,13 +505,13 @@ public class DefaultMetaDataView implements MetaDataView {
             text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(curFont);
-            text.setText(((HObject) dataObject).getName());
+            text.setText(dataObject.getName());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             // For HDF5 links, add a box to allow changing of the link target
             if (isH5) {
-                if (((HObject) dataObject).getLinkTargetObjName() != null) {
-                    final HObject theObj = (HObject) dataObject;
+                if (dataObject.getLinkTargetObjName() != null) {
+                    final HObject theObj = dataObject;
 
                     log.trace("createGeneralObjectInfoPane: isNotRoot H5 get link target");
                     label = new Label(generalInfoGroup, SWT.LEFT);
@@ -521,7 +520,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
                     final Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
                     linkTarget.setFont(curFont);
-                    linkTarget.setText(((HObject) dataObject).getLinkTargetObjName());
+                    linkTarget.setText(dataObject.getLinkTargetObjName());
                     linkTarget.addTraverseListener(new TraverseListener() {
                         @Override
                         public void keyTraversed(TraverseEvent e) {
@@ -584,7 +583,7 @@ public class DefaultMetaDataView implements MetaDataView {
             text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(curFont);
-            text.setText(((HObject) dataObject).getPath());
+            text.setText(dataObject.getPath());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(generalInfoGroup, SWT.LEFT);
@@ -655,7 +654,7 @@ public class DefaultMetaDataView implements MetaDataView {
 
             // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
             String oidStr = null;
-            long[] OID = ((HObject) dataObject).getOID();
+            long[] OID = dataObject.getOID();
             if (OID != null) {
                 oidStr = String.valueOf(OID[0]);
                 if (isH4) oidStr += ", " + OID[1];
@@ -962,7 +961,7 @@ public class DefaultMetaDataView implements MetaDataView {
                 public void widgetSelected(SelectionEvent e) {
                     try {
                         viewManager.getTreeView().setDefaultDisplayMode(false);
-                        viewManager.getTreeView().showDataContent((HObject) dataObject);
+                        viewManager.getTreeView().showDataContent(dataObject);
                     }
                     catch (Exception ex) {
                         display.beep();
@@ -1340,7 +1339,7 @@ public class DefaultMetaDataView implements MetaDataView {
             }
 
             try {
-                ((HObject) dataObject).getFileFormat().writeAttribute((HObject) dataObject, attr, true);
+                dataObject.getFileFormat().writeAttribute(dataObject, attr, true);
             }
             catch (Exception ex) {
                 Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
@@ -1354,7 +1353,7 @@ public class DefaultMetaDataView implements MetaDataView {
         if ((col == 0) && isH5) { // To change attribute name
             log.trace("updateAttributeValue: change attribute name");
             try {
-                ((HObject) dataObject).getFileFormat().renameAttribute((HObject) dataObject, attrName, newValue);
+                dataObject.getFileFormat().renameAttribute(dataObject, attrName, newValue);
             }
             catch (Exception ex) {
                 Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());

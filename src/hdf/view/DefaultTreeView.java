@@ -1631,9 +1631,9 @@ public class DefaultTreeView implements TreeView {
         if (obj == null)
             return null;
 
-        // Should be safe to cast to a MetaDataFormat here because the
+        // Should be safe to cast to a MetaDataContainer here because the
         // TreeView should never be able to select an object that does
-        // not implement the MetaDataFormat interface
+        // not implement the MetaDataContainer interface
         boolean hasAttribute = ((MetaDataContainer) obj).hasAttribute();
 
         if(obj instanceof Dataset) {
@@ -2730,7 +2730,7 @@ public class DefaultTreeView implements TreeView {
         if (metaDataViewFactory == null) return null;
 
         /* TODO: initargs needs access to MetaDataView parent composite */
-        MetaDataView theView = metaDataViewFactory.getMetaDataView(null, viewer, (DataFormat) dataObject);
+        MetaDataView theView = metaDataViewFactory.getMetaDataView(null, viewer, dataObject);
         if (theView == null) {
             viewer.showStatus("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
             return null;

@@ -143,7 +143,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -587,7 +586,7 @@ public class GermanTableView implements TableView {
 
     // Implementing DataView
     @Override
-    public DataFormat getDataObject() {
+    public HObject getDataObject() {
         return dataset;
     }
 

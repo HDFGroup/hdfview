@@ -1171,8 +1171,8 @@ public abstract class DefaultBaseTableView implements TableView {
     protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
 
     @Override
-    public DataFormat getDataObject() {
-        return dataObject;
+    public HObject getDataObject() {
+        return (HObject) dataObject;
     }
 
     @Override

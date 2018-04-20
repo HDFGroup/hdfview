@@ -200,7 +200,7 @@ public class TableViewFactory extends DataViewFactory {
     }
 
     @Override
-    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj) {
+    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
         return null;
     }
 

@@ -71,7 +71,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import hdf.HDFVersions;
-import hdf.object.DataFormat;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.view.ViewProperties.DataViewType;
@@ -1279,7 +1278,7 @@ public class HDFView implements ViewManager {
         DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
         if (metaDataViewFactory == null) return;
 
-        MetaDataView theView = metaDataViewFactory.getMetaDataView(generalArea, this, (DataFormat) obj);
+        MetaDataView theView = metaDataViewFactory.getMetaDataView(generalArea, this, obj);
         if (theView == null) {
             this.showStatus("Unable to find suitable MetaDataView class for object '" + obj.getName() + "'");
             return;
@@ -1321,7 +1320,7 @@ public class HDFView implements ViewManager {
                 if (!(shellData instanceof DataView)) continue;
 
                 if ((DataView) shellData != null) {
-                    HObject obj = (HObject) ((DataView) shellData).getDataObject();
+                    HObject obj = ((DataView) shellData).getDataObject();
 
                     if (obj == null) continue;
 
@@ -1398,7 +1397,7 @@ public class HDFView implements ViewManager {
 
                     if (theView instanceof TableView) {
                         TableView tableView = (TableView) theView;
-                        FileFormat file = ((HObject) tableView.getDataObject()).getFileFormat();
+                        FileFormat file = tableView.getDataObject().getFileFormat();
                         if (file.equals(theFile)) tableView.updateValueInFile();
                     }
                 }
@@ -1433,7 +1432,7 @@ public class HDFView implements ViewManager {
             setEnabled(Arrays.asList(windowMenu.getItems()), true);
         }
 
-        HObject obj = (HObject) dataView.getDataObject();
+        HObject obj = dataView.getDataObject();
         String fullPath = obj.getPath() + obj.getName();
 
         MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
@@ -1447,7 +1446,7 @@ public class HDFView implements ViewManager {
                     DataView view = (DataView) sList[i].getData();
 
                     if (view != null) {
-                        HObject obj = (HObject) view.getDataObject();
+                        HObject obj = view.getDataObject();
 
                         if (obj.getFullName().equals(((MenuItem) e.widget).getText())) {
                             showWindow(sList[i]);
@@ -1464,7 +1463,7 @@ public class HDFView implements ViewManager {
     public void removeDataView(DataView dataView) {
         if (mainWindow.isDisposed()) return;
 
-        HObject obj = (HObject) dataView.getDataObject();
+        HObject obj = dataView.getDataObject();
         if (obj == null) return;
 
         MenuItem[] items = windowMenu.getItems();
@@ -1491,7 +1490,7 @@ public class HDFView implements ViewManager {
             view = (DataView) openShells[i].getData();
 
             if (view != null) {
-                currentObj = (HObject) view.getDataObject();
+                currentObj = view.getDataObject();
                 if (currentObj == null) continue;
 
                 currentFile = currentObj.getFileFormat();
