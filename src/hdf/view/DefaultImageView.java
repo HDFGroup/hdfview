@@ -95,7 +95,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeItem;
 
-import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -1870,7 +1869,7 @@ public class DefaultImageView implements ImageView {
 
     // Implementing DataView.
     @Override
-    public DataFormat getDataObject() {
+    public HObject getDataObject() {
         return dataset;
     }
 

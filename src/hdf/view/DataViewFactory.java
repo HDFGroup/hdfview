@@ -19,7 +19,7 @@ import java.util.HashMap;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import hdf.object.DataFormat;
+import hdf.object.HObject;
 
 public abstract class DataViewFactory {
     /* Get an instance of TableView given the appropriate constructor parameters */
@@ -38,5 +38,5 @@ public abstract class DataViewFactory {
     /*
      * Get an instance of MetaDataView given the appropriate constructor parameters
      */
-    abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, DataFormat theObj);
+    abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj);
 }

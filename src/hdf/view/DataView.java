@@ -14,7 +14,7 @@
 
 package hdf.view;
 
-import hdf.object.DataFormat;
+import hdf.object.HObject;
 
 /**
  * The data view interface for displaying data objects
@@ -33,5 +33,5 @@ public abstract interface DataView {
     public final static int DATAVIEW_IMAGE = 2;
 
     /** @return the data object displayed in this data viewer */
-    public abstract DataFormat getDataObject();
+    public abstract HObject getDataObject();
 }
