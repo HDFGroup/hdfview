@@ -331,7 +331,11 @@ public abstract class DefaultBaseTableView implements TableView {
         dataObject = (DataFormat) hObject;
 
         /* Only edit objects which actually contain editable data */
-        if ((dataObject == null) || !(dataObject instanceof DataFormat)) return;
+        if ((dataObject == null) || !(dataObject instanceof DataFormat)) {
+            log.debug("data object is null or not an instanceof DataFormat");
+            log.trace("finish");
+            return;
+        }
 
         isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
 
@@ -341,6 +345,8 @@ public abstract class DefaultBaseTableView implements TableView {
         long tsize = 1;
 
         if (dims == null) {
+            log.debug("data object has null dimensions");
+            log.trace("finish");
             Tools.showError(shell, "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has null dimensions.", shell.getText());
             return;
@@ -353,6 +359,8 @@ public abstract class DefaultBaseTableView implements TableView {
                 dataObject.getWidth());
 
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
+            log.debug("data object has dimension of size 0");
+            log.trace("finish");
             Tools.showError(shell, "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has dimension of size 0.", shell.getText());
             return;
@@ -443,10 +451,19 @@ public abstract class DefaultBaseTableView implements TableView {
         shell.setMenuBar(createMenuBar(shell));
 
         /* Create the actual NatTable */
-        dataTable = createTable(content, dataObject);
-        if (dataTable == null) {
-            viewer.showStatus("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
-            shell.dispose();
+        try {
+            dataTable = createTable(content, dataObject);
+            if (dataTable == null) {
+                log.debug("table creation for object '" + ((HObject) dataObject).getName() + "' failed");
+                log.trace("finish");
+                viewer.showStatus("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
+                shell.dispose();
+                return;
+            }
+        }
+        catch (UnsupportedOperationException ex) {
+            log.debug("Subclass does not implement createTable()");
+            log.trace("finish");
             return;
         }
 

@@ -2337,6 +2337,13 @@ public class H5File extends FileFormat {
             return;
         }
 
+        /*
+         * TODO: Root group's name should be changed to 'this.getName()' and all
+         * previous accesses of this field should now use getPath() instead of getName()
+         * to get the root group. The root group actually does have a path of "/". The
+         * depth_first method will have to be changed to setup other object paths
+         * appropriately, as it currently assumes the root path to be null.
+         */
         rootObject = new H5Group(this, "/", null, null);
         depth_first(rootObject, 0);
     }

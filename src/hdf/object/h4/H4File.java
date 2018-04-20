@@ -725,6 +725,13 @@ public class H4File extends FileFormat {
             n = 0;
         }
 
+        /*
+         * TODO: Root group's name should be changed to 'this.getName()' and all
+         * previous accesses of this field should now use getPath() instead of getName()
+         * to get the root group. The root group actually does have a path of "/". The
+         * depth_first method will have to be changed to setup other object paths
+         * appropriately, as it currently assumes the root path to be null.
+         */
         long[] oid = { 0, 0 };
         rootObject = new H4Group(this, "/",
                 null, // root object does not have a parent path
