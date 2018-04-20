@@ -63,6 +63,14 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         isUserGuideChanged = false;
         isWorkDirChanged = false;
     }
+
+    /**
+     * Performs special processing when this page's Defaults button has been pressed.
+     */
+    public void performDefaults() {
+        super.performDefaults();
+    }
+
     /**
      * Notifies that the OK button of this page's container has been pressed.
      *
@@ -72,36 +80,42 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     public boolean performOk() {
         ViewProperties store = (ViewProperties)getPreferenceStore();
 
-        String UGPath = UGField.getText();
-        if ((UGPath != null) && (UGPath.length() > 0)) {
-            UGPath = UGPath.trim();
-            isUserGuideChanged = !UGPath.equals(ViewProperties.getUsersGuide());
-            ViewProperties.setUsersGuide(UGPath);
+        if (UGField != null) {
+            String UGPath = UGField.getText();
+            if ((UGPath != null) && (UGPath.length() > 0)) {
+                UGPath = UGPath.trim();
+                isUserGuideChanged = !UGPath.equals(ViewProperties.getUsersGuide());
+                ViewProperties.setUsersGuide(UGPath);
+            }
         }
 
-        String workPath = workField.getText();
-        if (checkCurrentUserDir.getSelection())
-            workPath = "user.home";
+        if (workField != null) {
+            String workPath = workField.getText();
+            if (checkCurrentUserDir.getSelection())
+                workPath = "user.home";
 
-        if ((workPath != null) && (workPath.length() > 0)) {
-            workPath = workPath.trim();
-            isWorkDirChanged = !workPath.equals(ViewProperties.getWorkDir());
-            ViewProperties.setWorkDir(workPath);
+            if ((workPath != null) && (workPath.length() > 0)) {
+                workPath = workPath.trim();
+                isWorkDirChanged = !workPath.equals(ViewProperties.getWorkDir());
+                ViewProperties.setWorkDir(workPath);
+            }
         }
 
         // set font size and type
         try {
-            String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
-            int fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
+            if (fontTypeChoice != null) {
+                String ftype = fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
+                int fsize = Integer.parseInt(fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
 
-            if (ViewProperties.getFontSize() != fsize) {
-                ViewProperties.setFontSize(fsize);
-                isFontChanged = true;
-            }
+                if (ViewProperties.getFontSize() != fsize) {
+                    ViewProperties.setFontSize(fsize);
+                    isFontChanged = true;
+                }
 
-            if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
-                ViewProperties.setFontType(ftype);
-                isFontChanged = true;
+                if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
+                    ViewProperties.setFontType(ftype);
+                    isFontChanged = true;
+                }
             }
         }
         catch (Exception ex) {
@@ -109,13 +123,15 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         }
 
         // set data delimiter
-        ViewProperties.setDataDelimiter((String) delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
-        ViewProperties.setImageOrigin((String) imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
+        ViewProperties.setDataDelimiter(delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
+        ViewProperties.setImageOrigin(imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
 
-        if (indexBaseChoice.getSelectionIndex() == 0)
-            ViewProperties.setIndexBase1(false);
-        else
-            ViewProperties.setIndexBase1(true);
+        if (indexBaseChoice != null) {
+            if (indexBaseChoice.getSelectionIndex() == 0)
+                ViewProperties.setIndexBase1(false);
+            else
+                ViewProperties.setIndexBase1(true);
+        }
 
         return true;
     }

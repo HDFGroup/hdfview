@@ -89,17 +89,4 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
             this.setButtonLayoutData(defaultsButton);
         }
     }
-
-    /**
-     * Adds the editor to the current preference page. Links it with the
-     * page PreferenceStore and then load stored value.
-     *
-     * @param editor the field editor to setup
-     */
-    public void setupEditor(FieldEditor editor)
-    {
-        editor.setPage(this);
-        editor.setPreferenceStore(getPreferenceStore());
-        editor.load();
-    }
 }

@@ -890,4 +890,24 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             ae.printStackTrace();
         }
     }
+
+    @Test
+    public void verifyUserOptionsDialog() {
+        try {
+            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
+            fileMenuItem.click();
+
+            SWTBotShell botshell = bot.shell("Preferences");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive("Preferences"));
+
+            botshell.bot().button("Cancel").click();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+    }
 }
