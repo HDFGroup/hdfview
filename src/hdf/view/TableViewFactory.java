@@ -109,6 +109,8 @@ public class TableViewFactory extends DataViewFactory {
                     dataViewName = "hdf.view.DefaultCompoundDSTableView";
                 else if (dataObject instanceof Attribute)
                     dataViewName = "hdf.view.DefaultAttributeTableView";
+                else
+                    dataViewName = null;
 
                 try {
                     log.trace("getTableView(): Class.forName({})", dataViewName);

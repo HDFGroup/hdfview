@@ -20,6 +20,9 @@ import java.util.List;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.Group;
 import hdf.object.HObject;
 
 /**
@@ -93,7 +96,14 @@ public class MetaDataViewFactory extends DataViewFactory {
                         dataViewName, ex);
 
                 /* No loadable class found; use the default MetaDataView */
-                dataViewName = "hdf.view.DefaultMetaDataView";
+                if (theObj instanceof Group)
+                    dataViewName = "hdf.view.DefaultGroupMetaDataView";
+                else if (theObj instanceof Dataset)
+                    dataViewName = "hdf.view.DefaultDatasetMetaDataView";
+                else if (theObj instanceof Datatype)
+                    dataViewName = "hdf.view.DefaultDatatypeMetaDataView";
+                else
+                    dataViewName = null;
 
                 try {
                     log.trace("getMetaDataView(): Class.forName({})", dataViewName);
