@@ -14,7 +14,10 @@
 
 package hdf.view.dialog;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,24 +34,24 @@ import hdf.view.ViewProperties;
 public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsHDFPage.class);
 
-    private Text                  fileExtField, maxMemberField, startMemberField;
-    private Button                checkConvertEnum, checkShowRegRefValues;
-    private Button                nativeOrder, decOrder, checkIndexCreateOrder;
-    private Button                checkIndexType, checkIndexOrder, checkIndexNative;
-    private Button                earlyLibVersion, early18LibVersion, early110LibVersion, earlyLateLibVersion;
-    private Button                lateLibVersion, late18LibVersion, late110LibVersion, lateLateLibVersion;
+    private Text fileExtField, maxMemberField, startMemberField;
+    private Button checkConvertEnum, checkShowRegRefValues, helpButton;
+    private Button nativeOrder, decOrder, checkIndexCreateOrder;
+    private Button checkIndexType, checkIndexOrder, checkIndexNative;
+    private Button earlyLibVersion, early18LibVersion, early110LibVersion, earlyLateLibVersion;
+    private Button lateLibVersion, late18LibVersion, late110LibVersion, lateLateLibVersion;
 
     /** Default early libversion for files */
-    private static String         earlyLibVers;
+    private static String earlyLibVers;
 
     /** Default late libversion for files */
-    private static String         lateLibVers;
+    private static String lateLibVers;
 
     /** Default index type for files */
-    private static String         indexType;
+    private static String indexType;
 
     /** Default index ordering for files */
-    private static String         indexOrder;
+    private static String indexOrder;
 
     public UserOptionsHDFPage() {
         super("HDF Settings");
@@ -124,6 +127,11 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 ViewProperties.setIndexOrder("H5_ITER_DEC");
         }
 
+        if (checkConvertEnum != null)
+            ViewProperties.setConvertEnum(checkConvertEnum.getSelection());
+        if (checkShowRegRefValues != null)
+            ViewProperties.setShowRegRefValue(checkShowRegRefValues.getSelection());
+
         return true;
     }
 
@@ -146,6 +154,9 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         late18LibVersion.setSelection(lateLibVers.compareTo("v18") == 0);
         late110LibVersion.setSelection(lateLibVers.compareTo("v110") == 0);
         lateLateLibVersion.setSelection(lateLibVers.compareTo("Latest") == 0);
+
+        checkConvertEnum.setSelection(ViewProperties.isConvertEnum());
+        checkShowRegRefValues.setSelection(ViewProperties.showRegRefValues());
 
         indexType = ViewProperties.getIndexType();
         checkIndexType.setSelection(indexType.compareTo("H5_INDEX_NAME") == 0);
@@ -244,6 +255,36 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         lateLateLibVersion.setFont(curFont);
         lateLateLibVersion.setText("Latest");
         lateLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+
+        org.eclipse.swt.widgets.Group dataGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
+        dataGroup.setLayout(new GridLayout(4, false));
+        dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        dataGroup.setFont(curFont);
+        dataGroup.setText("Data");
+
+        helpButton = new Button(dataGroup, SWT.PUSH);
+        helpButton.setImage(ViewProperties.getHelpIcon());
+        helpButton.setToolTipText("Help on Convert Enum");
+        helpButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                final String msg = "Convert enum data to strings. \n"
+                        + "For example, a dataset of an enum type of (R=0, G=, B=2) \n"
+                        + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
+                        + "shown as (R, B, B, B, G, G).\n\n\n";
+
+                MessageDialog.openInformation(shell, shell.getText(), msg);
+            }
+        });
+
+        checkConvertEnum = new Button(dataGroup, SWT.CHECK);
+        checkConvertEnum.setFont(curFont);
+        checkConvertEnum.setText("Convert Enum");
+        checkConvertEnum.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+
+        checkShowRegRefValues = new Button(dataGroup, SWT.CHECK);
+        checkShowRegRefValues.setFont(curFont);
+        checkShowRegRefValues.setText("Show RegRef Values");
+        checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group displayIndexingGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         displayIndexingGroup.setLayout(new GridLayout());

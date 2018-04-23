@@ -42,19 +42,19 @@ import hdf.view.ViewProperties;
 public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsGeneralPage.class);
 
-    private Text                  UGField, workField, maxMemberField, startMemberField;
-    private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
-    private Button                checkCurrentUserDir, checkAutoContrast, checkConvertEnum, checkShowValues, checkShowRegRefValues;
-    private Button                currentDirButton, rwButton, helpButton;
-    private Button                checkReadOnly, checkReadAll;
+    private Text UGField, workField, maxMemberField, startMemberField;
 
-    private boolean               isFontChanged;
+    private Combo fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
 
-    private boolean               isUserGuideChanged;
+    private Button checkCurrentUserDir, checkAutoContrast, checkShowValues;
+    private Button currentDirButton, rwButton, helpButton;
+    private Button checkReadOnly, checkReadAll;
 
-    private boolean               isWorkDirChanged;
+    private boolean isFontChanged;
+    private boolean isUserGuideChanged;
+    private boolean isWorkDirChanged;
 
-    private static String         fontname;
+    private static String fontname;
 
     public UserOptionsGeneralPage() {
         super("General Settings");
@@ -121,9 +121,46 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
             isFontChanged = false;
         }
 
+        // set file access
+        if (checkReadOnly != null) {
+            if (checkReadOnly.getSelection())
+                ViewProperties.setReadOnly(true);
+            else
+                ViewProperties.setReadOnly(false);
+        }
+
         // set data delimiter
-        ViewProperties.setDataDelimiter(delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
-        ViewProperties.setImageOrigin(imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
+        if (delimiterChoice != null)
+            ViewProperties.setDataDelimiter(delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
+        if (imageOriginChoice != null)
+            ViewProperties.setImageOrigin(imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
+
+        if (checkReadAll != null) {
+            if (checkReadAll.getSelection()) {
+                ViewProperties.setStartMembers(0);
+                ViewProperties.setMaxMembers(-1);
+            }
+            else {
+                try {
+                    int maxsize = Integer.parseInt(maxMemberField.getText());
+                    ViewProperties.setMaxMembers(maxsize);
+                }
+                catch (Exception ex) {
+                }
+
+                try {
+                    int startsize = Integer.parseInt(startMemberField.getText());
+                    ViewProperties.setStartMembers(startsize);
+                }
+                catch (Exception ex) {
+                }
+            }
+        }
+
+        if (checkAutoContrast != null)
+            ViewProperties.setAutoContrast(checkAutoContrast.getSelection());
+        if (checkShowValues != null)
+            ViewProperties.setShowImageValue(checkShowValues.getSelection());
 
         if (indexBaseChoice != null) {
             if (indexBaseChoice.getSelectionIndex() == 0)
@@ -403,7 +440,8 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         imageGroup.setFont(curFont);
         imageGroup.setText("Image");
 
-        Button helpButton = new Button(imageGroup, SWT.PUSH);
+        helpButton = new Button(imageGroup, SWT.PUSH);
+        helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Auto Contrast");
         helpButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -455,34 +493,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         dataGroup.setFont(curFont);
         dataGroup.setText("Data");
-
-        helpButton = new Button(dataGroup, SWT.PUSH);
-        helpButton.setToolTipText("Help on Convert Enum");
-        helpButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                final String msg = "Convert enum data to strings. \n"
-                        + "For example, a dataset of an enum type of (R=0, G=, B=2) \n"
-                        + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
-                        + "shown as (R, B, B, B, G, G).\n\n\n";
-
-                MessageDialog.openInformation(shell, shell.getText(), msg);
-            }
-        });
-
-        checkConvertEnum = new Button(dataGroup, SWT.CHECK);
-        checkConvertEnum.setFont(curFont);
-        checkConvertEnum.setText("Convert Enum");
-        checkConvertEnum.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
-
-        checkShowRegRefValues = new Button(dataGroup, SWT.CHECK);
-        checkShowRegRefValues.setFont(curFont);
-        checkShowRegRefValues.setText("Show RegRef Values");
-        checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-        // Add dummy label
-        label = new Label(dataGroup, SWT.RIGHT);
-        label.setFont(curFont);
-        label.setText("");
 
         label = new Label(dataGroup, SWT.RIGHT);
         label.setFont(curFont);
