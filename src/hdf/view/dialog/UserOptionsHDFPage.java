@@ -18,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -56,13 +57,22 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     }
 
     /**
+     * Performs special processing when this page's Defaults button has been pressed.
+     */
+    public void performDefaults() {
+        super.performDefaults();
+        getPreferenceStore();
+
+    }
+
+    /**
      * Notifies that the OK button if this page's container has been pressed.
      *
      * @return <code>false</code> to abort the container's OK processing and <code>true</code> to allow
      *         the OK to happen
      */
     public boolean performOk() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
         if (fileExtField != null) {
             String ext = fileExtField.getText();
@@ -123,7 +133,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      * Loads all stored values in the <code>FieldEditor</code>s.
      */
     protected void load() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
         fileExtField.setText(ViewProperties.getFileExtension());
 
@@ -157,22 +167,16 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      * @return the new control
      */
     protected Control createContents(Composite parent) {
-        shell = parent.getShell();
-        ScrolledComposite scroller = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-        scroller.setExpandHorizontal(true);
-        scroller.setExpandVertical(true);
-
-        Composite composite = new Composite(scroller, SWT.NONE);
-        composite.setLayout(new GridLayout(1, true));
-        scroller.setContent(composite);
+        Composite composite = new Composite(parent, SWT.NONE);
+        composite.setLayout(new GridLayout(1, false));
 
         Composite fileOptionComposite = new Composite(composite, SWT.NONE);
-        fileOptionComposite.setLayout(new GridLayout(1, true));
+        fileOptionComposite.setLayout(new GridLayout());
         fileOptionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group fileExtensionGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
-        fileExtensionGroup.setLayout(new GridLayout(2, false));
-        fileExtensionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        fileExtensionGroup.setLayout(new GridLayout(2, true));
+        fileExtensionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         fileExtensionGroup.setFont(curFont);
         fileExtensionGroup.setText("File Extensions");
 
@@ -186,84 +190,84 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
 
 
         org.eclipse.swt.widgets.Group defaultLibVersionGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        defaultLibVersionGroup.setLayout(new GridLayout(1, true));
+        defaultLibVersionGroup.setLayout(new GridLayout());
         defaultLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         defaultLibVersionGroup.setFont(curFont);
         defaultLibVersionGroup.setText("Default Lib Version");
 
         org.eclipse.swt.widgets.Group earlyLibVersionGroup = new org.eclipse.swt.widgets.Group(defaultLibVersionGroup, SWT.NONE);
         earlyLibVersionGroup.setLayout(new GridLayout(4, true));
-        earlyLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        earlyLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         earlyLibVersionGroup.setFont(curFont);
         earlyLibVersionGroup.setText("Default Early Lib Version");
 
         earlyLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLibVersion.setFont(curFont);
         earlyLibVersion.setText("Earliest");
-        earlyLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        earlyLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         early18LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early18LibVersion.setFont(curFont);
         early18LibVersion.setText("v18");
-        early18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        early18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         early110LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early110LibVersion.setFont(curFont);
         early110LibVersion.setText("v110");
-        early110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        early110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         earlyLateLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLateLibVersion.setFont(curFont);
         earlyLateLibVersion.setText("Latest");
-        earlyLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        earlyLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group lateLibVersionGroup = new org.eclipse.swt.widgets.Group(defaultLibVersionGroup, SWT.NONE);
         lateLibVersionGroup.setLayout(new GridLayout(4, true));
-        lateLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        lateLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         lateLibVersionGroup.setFont(curFont);
         lateLibVersionGroup.setText("Default Late Lib Version");
 
         lateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLibVersion.setFont(curFont);
         lateLibVersion.setText("Earliest");
-        lateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        lateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         late18LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late18LibVersion.setFont(curFont);
         late18LibVersion.setText("v18");
-        late18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        late18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         late110LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late110LibVersion.setFont(curFont);
         late110LibVersion.setText("v110");
-        late110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        late110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         lateLateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLateLibVersion.setFont(curFont);
         lateLateLibVersion.setText("Latest");
-        lateLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        lateLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group displayIndexingGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        displayIndexingGroup.setLayout(new GridLayout(1, true));
+        displayIndexingGroup.setLayout(new GridLayout());
         displayIndexingGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         displayIndexingGroup.setFont(curFont);
         displayIndexingGroup.setText("Display Indexing Options");
 
         org.eclipse.swt.widgets.Group indexingTypeGroup = new org.eclipse.swt.widgets.Group(displayIndexingGroup, SWT.NONE);
         indexingTypeGroup.setLayout(new GridLayout(2, true));
-        indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         indexingTypeGroup.setFont(curFont);
         indexingTypeGroup.setText("Indexing Type");
 
         checkIndexType = new Button(indexingTypeGroup, SWT.RADIO);
         checkIndexType.setFont(curFont);
         checkIndexType.setText("By Name");
-        checkIndexType.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        checkIndexType.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         checkIndexCreateOrder = new Button(indexingTypeGroup, SWT.RADIO);
         checkIndexCreateOrder.setFont(curFont);
         checkIndexCreateOrder.setText("By Creation Order");
-        checkIndexCreateOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        checkIndexCreateOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
 
         org.eclipse.swt.widgets.Group indexingOrderGroup = new org.eclipse.swt.widgets.Group(displayIndexingGroup, SWT.NONE);
@@ -275,19 +279,19 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkIndexOrder = new Button(indexingOrderGroup, SWT.RADIO);
         checkIndexOrder.setFont(curFont);
         checkIndexOrder.setText("Increments");
-        checkIndexOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        checkIndexOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         decOrder = new Button(indexingOrderGroup, SWT.RADIO);
         decOrder.setFont(curFont);
         decOrder.setText("Decrements");
-        decOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        decOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         nativeOrder = new Button(indexingOrderGroup, SWT.RADIO);
         nativeOrder.setFont(curFont);
         nativeOrder.setText("Native");
-        nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         load();
-        return scroller;
+        return composite;
     }
 }

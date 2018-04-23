@@ -25,6 +25,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -78,7 +79,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      * <code>true</code> to allow the OK to happen
      */
     public boolean performOk() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
         if (UGField != null) {
             String UGPath = UGField.getText();
@@ -152,7 +153,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      * Loads all stored values in the <code>FieldEditor</code>s.
      */
     protected void load() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
         try {
             curFont = new Font(
@@ -246,17 +247,12 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      */
     protected Control createContents(Composite parent) {
         shell = parent.getShell();
-        ScrolledComposite scroller = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-        scroller.setExpandHorizontal(true);
-        scroller.setExpandVertical(true);
-
-        Composite composite = new Composite(scroller, SWT.NONE);
-        composite.setLayout(new GridLayout(1, true));
-        scroller.setContent(composite);
+        Composite composite = new Composite(parent, SWT.NONE);
+        composite.setLayout(new GridLayout());
 
         org.eclipse.swt.widgets.Group workingDirectoryGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         workingDirectoryGroup.setLayout(new GridLayout(3, false));
-        workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         workingDirectoryGroup.setFont(curFont);
         workingDirectoryGroup.setText("Default Working Directory");
 
@@ -274,7 +270,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         workField = new Text(workingDirectoryGroup, SWT.SINGLE | SWT.BORDER);
         workField.setFont(curFont);
-        workField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        workField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         currentDirButton = new Button(workingDirectoryGroup, SWT.PUSH);
         currentDirButton.setFont(curFont);
@@ -296,7 +292,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group helpDocumentGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         helpDocumentGroup.setLayout(new GridLayout(3, false));
-        helpDocumentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        helpDocumentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         helpDocumentGroup.setFont(curFont);
         helpDocumentGroup.setText("Help Document");
 
@@ -306,7 +302,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         UGField = new Text(helpDocumentGroup, SWT.SINGLE | SWT.BORDER);
         UGField.setFont(curFont);
-        UGField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        UGField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button browseButton = new Button(helpDocumentGroup, SWT.PUSH);
         browseButton.setFont(curFont);
@@ -336,7 +332,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         });
 
         Composite fileOptionComposite = new Composite(composite, SWT.NONE);
-        fileOptionComposite.setLayout(new GridLayout(13, true));
+        fileOptionComposite.setLayout(new GridLayout(3, true));
         fileOptionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group fileAccessModeGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
@@ -510,7 +506,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         delimiterChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        objectsGroup.setLayout(new GridLayout(5, false));
+        objectsGroup.setLayout(new GridLayout(5, true));
         objectsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         objectsGroup.setFont(curFont);
         objectsGroup.setText("Objects to Open");
@@ -546,6 +542,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         maxMemberField.setEnabled(!checkReadAll.getSelection());
 
         load();
-        return scroller;
+        // return scroller;
+        return composite;
     }
 }
