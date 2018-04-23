@@ -901,6 +901,11 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Preferences"));
 
+            SWTBotButton rwButton = shell.bot().radio("Read/Write");
+            assertTrue(rwButton.isEnabled());
+
+            //botshell.bot().button("Restore Defaults").click();
+
             botshell.bot().button("Cancel").click();
         }
         catch (Exception ex) {
