@@ -133,7 +133,7 @@ public class ViewProperties extends PreferenceStore {
     private static ClassLoader      extClassLoader         = null;
 
     /** a list of srb accounts */
-    private static Vector<String[]> srbAccountList = new Vector<String[]>(5);
+    private static Vector<String[]> srbAccountList = new Vector<>(5);
 
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
@@ -156,7 +156,7 @@ public class ViewProperties extends PreferenceStore {
     private static String LateLib = "Latest";
 
     /** a list of palette files */
-    private static Vector<String>   paletteList            = new Vector<String>(5);
+    private static Vector<String>   paletteList            = new Vector<>(5);
 
     /** flag to indicate if enum data is converted to strings */
     private static boolean          convertEnum            = true;
@@ -187,22 +187,22 @@ public class ViewProperties extends PreferenceStore {
     private static String           propertyFile;
 
     /** a list of treeview modules */
-    private static Vector<String>   moduleListTreeView     = new Vector<String>(5);
+    private static Vector<String>   moduleListTreeView     = new Vector<>(5);
 
     /** a list of metaview modules */
-    private static Vector<String>   moduleListMetaDataView = new Vector<String>(5);
+    private static Vector<String>   moduleListMetaDataView = new Vector<>(5);
 
     /** a list of tableview modules */
-    private static Vector<String>   moduleListTableView    = new Vector<String>(5);
+    private static Vector<String>   moduleListTableView    = new Vector<>(5);
 
     /** a list of imageview modules */
-    private static Vector<String>   moduleListImageView    = new Vector<String>(5);
+    private static Vector<String>   moduleListImageView    = new Vector<>(5);
 
     /** a list of paletteview modules */
-    private static Vector<String>   moduleListPaletteView  = new Vector<String>(5);
+    private static Vector<String>   moduleListPaletteView  = new Vector<>(5);
 
     /** a list of helpview modules */
-    private static Vector<String>   moduleListHelpView     = new Vector<String>(5);
+    private static Vector<String>   moduleListHelpView     = new Vector<>(5);
 
     /**
      * Creates a property list with given root directory of the HDFView.
@@ -259,7 +259,7 @@ public class ViewProperties extends PreferenceStore {
             workDir = workPath;
         }
 
-        recentFiles = new Vector<String>(MAX_RECENT_FILES + 5);
+        recentFiles = new Vector<>(MAX_RECENT_FILES + 5);
     }
 
     /**
@@ -300,8 +300,8 @@ public class ViewProperties extends PreferenceStore {
             return extClassLoader;
         }
 
-        Vector<String> jarList = new Vector<String>(50);
-        Vector<String> classList = new Vector<String>(50);
+        Vector<String> jarList = new Vector<>(50);
+        Vector<String> classList = new Vector<>(50);
         for (int i = 0; i < jars.length; i++) {
             log.trace("loadExtClass: load jar[{}]", i);
             if (jars[i].endsWith(".jar")) {
@@ -969,8 +969,11 @@ public class ViewProperties extends PreferenceStore {
         }
     }
 
-    /** Load user properties from property file
-     * @throws Exception if a failure occurred
+    /**
+     * Load user properties from property file
+     * 
+     * @throws IOException
+     *             if a failure occurred
      */
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1202,7 +1205,7 @@ public class ViewProperties extends PreferenceStore {
     /**
      * Save user properties into property file
      *
-     * @throws Exception
+     * @throws IOException
      *             if a failure occurred
      */
     @Override

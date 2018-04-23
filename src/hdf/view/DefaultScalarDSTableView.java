@@ -532,14 +532,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     }
 
     /**
-     * Returns an appropriate DataValidator to check that the data entered is valid
-     * before committing it to memory.
+     * Returns an appropriate DataValidator to check that the data entered is valid before committing it
+     * to memory.
      *
-     * @param theDataset
+     * @param dataObject
      *            The dataset being edited
      *
-     * @return A new DataValidator that returns true if the data is valid and can be
-     *         committed to memory, or false otherwise.
+     * @return A new DataValidator that returns true if the data is valid and can be committed to
+     *         memory, or false otherwise.
      */
     @Override
     protected DataValidator getDataValidator(final DataFormat dataObject) {
@@ -832,7 +832,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * Display data pointed to by region references. Data of each region is shown in
      * a separate spreadsheet. The reg. ref. information is stored in strings of the
      * format below:
-     * <p>
      * <ul>
      * <li>For point selections: "file_id:obj_id { <point1> <point2> ...) }", where
      * <point1> is in the form of (location_of_dim0, location_of_dim1, ...). For
