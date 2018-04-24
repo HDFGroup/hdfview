@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotRadio;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -900,6 +901,11 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             SWTBotShell botshell = bot.shell("Preferences");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Preferences"));
+
+            SWTBotRadio rwButton = botshell.bot().radio("Read/Write");
+            assertTrue(rwButton.isEnabled());
+
+            //botshell.bot().button("Restore Defaults").click();
 
             botshell.bot().button("Cancel").click();
         }

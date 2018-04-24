@@ -175,6 +175,7 @@ public class FileFormatTest {
      * <li>current file formats are HDF5, HDF.
      * </ul>
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testGetFileFormatKeys() {
         log.debug("testGetFileFormatKeys");

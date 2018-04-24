@@ -96,7 +96,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      *
      * @param parent
      *            The parent for the NatTable
-     * @param theDataset
+     * @param dataObject
      *            The Compound dataset for the NatTable to display
      *
      * @return The newly created NatTable

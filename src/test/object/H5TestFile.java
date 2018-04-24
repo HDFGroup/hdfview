@@ -112,7 +112,7 @@ public class H5TestFile {
      *
      * @throws Exception
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final H5File createTestFile(String fileName) throws Exception {
         log.debug("createTestFile {}", fileName);
         H5File file = null;
