@@ -714,6 +714,7 @@
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
@@ -763,6 +764,7 @@
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
@@ -835,6 +837,7 @@
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
