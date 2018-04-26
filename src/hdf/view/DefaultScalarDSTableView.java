@@ -111,25 +111,27 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         log.trace("isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
 
-        if (((ScalarDS) dataObject).isText())
-            shell.setImage(ViewProperties.getTextIcon());
-        else
-            shell.setImage(ViewProperties.getDatasetIcon());
+        if (!shell.isDisposed()) {
+            if (dataObject.isTextData())
+                shell.setImage(ViewProperties.getTextIcon());
+            else
+                shell.setImage(ViewProperties.getDatasetIcon());
 
-        shell.addDisposeListener(new DisposeListener() {
-            @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (dataObject instanceof ScalarDS) {
-                    ScalarDS ds = (ScalarDS) dataObject;
+            shell.addDisposeListener(new DisposeListener() {
+                @Override
+                public void widgetDisposed(DisposeEvent e) {
+                    if (dataObject instanceof ScalarDS) {
+                        ScalarDS ds = (ScalarDS) dataObject;
 
-                    /*
-                     * Reload the data when it is displayed next time because the display type
-                     * (table or image) may be different.
-                     */
-                    if (ds.isImage()) ds.clearData();
+                        /*
+                         * Reload the data when it is displayed next time because the display type
+                         * (table or image) may be different.
+                         */
+                        if (ds.isImage()) ds.clearData();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -143,12 +145,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * @return The newly created NatTable
      */
     @Override
-    public NatTable createTable(Composite parent, DataFormat dataObject) {
+    protected NatTable createTable(Composite parent, DataFormat dataObject) {
         log.trace("createTable(): start");
 
         if (dataObject.getRank() <= 0) {
             try {
-                ((ScalarDS) dataObject).init();
+                if (dataObject instanceof ScalarDS)
+                    ((ScalarDS) dataObject).init();
+
                 log.trace("createTable(): dataset inited");
             }
             catch (Exception ex) {
@@ -190,7 +194,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 indexBaseGroup.setText(title);
             }
 
-            ((ScalarDS) dataObject).convertFromUnsignedC();
+            if (dataObject instanceof ScalarDS)
+                ((ScalarDS) dataObject).convertFromUnsignedC();
+
             dataValue = dataObject.getData();
         }
         catch (Throwable ex) {
@@ -241,7 +247,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         // Create body layer
-        final ScalarDSDataProvider bodyDataProvider = new ScalarDSDataProvider((ScalarDS) dataObject);
+        final ScalarDSDataProvider bodyDataProvider = new ScalarDSDataProvider(dataObject);
         dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
@@ -426,9 +432,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             log.trace("updateValueInMemory({}, {}): {} NT={}", row, col, cellValue, NT);
 
-            ScalarDS sds = (ScalarDS) dataObject;
-            boolean isUnsigned = sds.isUnsigned();
-            String cname = sds.getOriginalClass().getName();
+            boolean isUnsigned = dataObject.isUnsigned();
+            String cname = dataObject.getOriginalClass().getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("updateValueInMemory({}, {}): isUnsigned={} cname={} dname={}", row,
                     col, isUnsigned, cname, dname);
@@ -543,8 +548,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @Override
     protected DataValidator getDataValidator(final DataFormat dataObject) {
-        boolean isUnsigned = ((ScalarDS) dataObject).isUnsigned();
-        String cname = ((ScalarDS) dataObject).getOriginalClass().getName();
+        boolean isUnsigned = dataObject.isUnsigned();
+        String cname = dataObject.getOriginalClass().getName();
 
         // TODO: Add validation for array types when array editing is added
 
@@ -1141,7 +1146,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         private final long         rowCount;
         private final long         colCount;
 
-        public ScalarDSDataProvider(ScalarDS theDataset) {
+        public ScalarDSDataProvider(DataFormat theDataset) {
             log.trace("ScalarDSDataProvider:NT={} start", NT);
             buffer = new StringBuffer();
 

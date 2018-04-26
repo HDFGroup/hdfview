@@ -353,7 +353,7 @@ public class DataOptionDialog extends Dialog {
         boolean isImage = false;
 
         if (dataObject instanceof ScalarDS) {
-            if (!((ScalarDS) dataObject).isText()) {
+            if (!dataObject.isTextData()) {
                 ScalarDS sd = (ScalarDS) dataObject;
                 isImage = sd.isImageDisplay();
                 isTrueColorImage = sd.isTrueColor();
@@ -575,7 +575,7 @@ public class DataOptionDialog extends Dialog {
         else {
             ScalarDS ds = (ScalarDS) dataObject;
 
-            if(!ds.isText()) {
+            if (!ds.isTextData()) {
                 StringTokenizer st = new StringTokenizer(dataRangeField.getText(), ",");
                 if (st.countTokens() == 2) {
                     double min = 0, max = 0;
@@ -1673,7 +1673,7 @@ public class DataOptionDialog extends Dialog {
             Image preImage = null;
             ScalarDS sd = (ScalarDS) dataObject;
 
-            if (sd.isText()) {
+            if (sd.isTextData()) {
                 return null;
             }
 

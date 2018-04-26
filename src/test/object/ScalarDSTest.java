@@ -199,14 +199,14 @@ public class ScalarDSTest {
     @Test
     public void testIsText() {
         log.debug("testIsText");
-        assertTrue(strDset.isText());
-        assertFalse(imageDset.isText());
-        assertFalse(intDset.isText());
-        assertFalse(floatDset.isText());
-        assertFalse(charDset.isText());
-        assertFalse(enumDset.isText());
-        assertFalse(ORDset.isText());
-        assertFalse(imagePalete.isText());
+        assertTrue(strDset.isTextData());
+        assertFalse(imageDset.isTextData());
+        assertFalse(intDset.isTextData());
+        assertFalse(floatDset.isTextData());
+        assertFalse(charDset.isTextData());
+        assertFalse(enumDset.isTextData());
+        assertFalse(ORDset.isTextData());
+        assertFalse(imagePalete.isTextData());
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

@@ -102,7 +102,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * @return The newly created NatTable
      */
     @Override
-    public NatTable createTable(Composite parent, DataFormat dataObject) {
+    protected NatTable createTable(Composite parent, DataFormat dataObject) {
         log.trace("createTable(): start");
 
         if (dataObject.getRank() <= 0) ((CompoundDS) dataObject).init();

@@ -106,8 +106,7 @@ public class NewImageDialog extends Dialog {
         parentGroup = pGroup;
         objList = objs;
 
-        isH5 = pGroup.getFileFormat().isThisType(
-                FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+        isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
         fileFormat = pGroup.getFileFormat();
     }
 

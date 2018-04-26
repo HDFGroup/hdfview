@@ -26,6 +26,7 @@ import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
+import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
@@ -107,8 +108,14 @@ public class TableViewFactory extends DataViewFactory {
                     dataViewName = "hdf.view.DefaultScalarDSTableView";
                 else if (dataObject instanceof CompoundDS)
                     dataViewName = "hdf.view.DefaultCompoundDSTableView";
-                else if (dataObject instanceof Attribute)
-                    dataViewName = "hdf.view.DefaultAttributeTableView";
+                else if (dataObject instanceof Attribute) {
+                    int typeClass = ((Attribute) dataObject).getDatatype().getDatatypeClass();
+
+                    if (typeClass == Datatype.CLASS_COMPOUND)
+                        dataViewName = "hdf.view.DefaultCompoundAttributeTableView";
+                    else
+                        dataViewName = "hdf.view.DefaultScalarAttributeTableView";
+                }
                 else
                     dataViewName = null;
 

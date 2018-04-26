@@ -996,6 +996,30 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                             return;
                         }
 
+                        /* Edit the value of the Attribute in a separate TableView */
+                        if (i == 3) {
+                            viewManager.getTreeView().setDefaultDisplayMode(true);
+
+                            try {
+                                Display.getDefault().syncExec(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            viewManager.getTreeView().showDataContent((HObject) item.getData());
+                                        }
+                                        catch (Exception ex) {
+                                            log.debug("Attribute showDataContent failure: ", ex);
+                                        }
+                                    }
+                                });
+                            }
+                            catch (Exception e) {
+                                log.debug("Attribute showDataContent loading manually interrupted");
+                            }
+
+                            return;
+                        }
+
                         final int column = i;
                         final int row = index;
 

@@ -337,7 +337,25 @@ public abstract class DefaultBaseTableView implements TableView {
             return;
         }
 
-        isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
+        if (dataObject instanceof Dataset) {
+            isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
+
+            /* Cannot edit HDF4 VData */
+            if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
+                    && (dataObject instanceof CompoundDS)) {
+                isReadOnly = true;
+            }
+        }
+
+        /* Disable edit feature for SZIP compression when encode is not enabled */
+        if (!isReadOnly) {
+            String compression = dataObject.getCompression();
+            if ((compression != null) && compression.startsWith("SZIP")) {
+                if (!compression.endsWith("ENCODE_ENABLED")) {
+                    isReadOnly = true;
+                }
+            }
+        }
 
         log.trace("dataObject({}) isReadOnly={}", dataObject, isReadOnly);
 
@@ -364,22 +382,6 @@ public abstract class DefaultBaseTableView implements TableView {
             Tools.showError(shell, "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has dimension of size 0.", shell.getText());
             return;
-        }
-
-        // Cannot edit HDF4 Vdata
-        if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
-                && (dataObject instanceof CompoundDS)) {
-            isReadOnly = true;
-        }
-
-        // Disable edit feature for SZIP compression when encode is not enabled
-        if (!isReadOnly) {
-            String compression = dataObject.getCompression();
-            if ((compression != null) && compression.startsWith("SZIP")) {
-                if (!compression.endsWith("ENCODE_ENABLED")) {
-                    isReadOnly = true;
-                }
-            }
         }
 
         /*
@@ -448,6 +450,10 @@ public abstract class DefaultBaseTableView implements TableView {
         cellValueComposite.setWeights(new int[] { 1, 5 });
 
         /* Create the Shell's MenuBar */
+        /*
+         * TODO: If read-only access is not set correctly at this point, as may be the
+         * case with Attributes, then MenuItems may be incorrectly enabled.
+         */
         shell.setMenuBar(createMenuBar(shell));
 
         /* Create the actual NatTable */
@@ -473,13 +479,16 @@ public abstract class DefaultBaseTableView implements TableView {
          * Set the Shell's title using the object path and name
          */
         StringBuffer sb = new StringBuffer(hObject.getName());
-        sb.append("  at  ");
-        sb.append(hObject.getPath());
-        sb.append("  [");
-        sb.append(((HObject) dataObject).getFileFormat().getName());
-        sb.append("  in  ");
-        sb.append(((HObject) dataObject).getFileFormat().getParent());
-        sb.append("]");
+
+        if (((HObject) dataObject).getFileFormat() != null) {
+            sb.append("  at  ");
+            sb.append(hObject.getPath());
+            sb.append("  [");
+            sb.append(((HObject) dataObject).getFileFormat().getName());
+            sb.append("  in  ");
+            sb.append(((HObject) dataObject).getFileFormat().getParent());
+            sb.append("]");
+        }
 
         shell.setText(sb.toString());
 
