@@ -671,6 +671,49 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         return true;
                     }
                 };
+            case 'L':
+                Datatype type = dataObject.getDatatype();
+
+                /*
+                 * Data is of a class type; mostly likely this is '[Ljava.lang.String', or
+                 * string data.
+                 */
+                if (type.getDatatypeClass() == Datatype.CLASS_STRING) {
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            Datatype stringType = dataObject.getDatatype();
+
+                            /* If this is a fixed-length string type, check to make sure that the data
+                             * length does not exceed the datatype size.
+                             */
+                            /*
+                             * TODO: Add warning about overwriting NULL-terminator for NULLTERM type strings
+                             */
+                            if (!stringType.isVLEN()) {
+                                long lenDiff = ((String) newValue).length() - stringType.getDatatypeSize();
+
+                                if (lenDiff > 0)
+                                    throw new ValidationFailedException(
+                                            "Failed to update value at " + "(" + rowIndex + ", " + colIndex + ") to '"
+                                                    + newValue.toString()
+                                                    + "' - string size larger than datatype size by " + lenDiff
+                                                    + ((lenDiff > 1) ? " bytes." : " byte."));
+                            }
+
+                            return true;
+                        }
+                    };
+                }
+                else {
+                    /* Never validate if this is an unrecognized datatype class */
+                    return new DataValidator() {
+                        @Override
+                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                            return false;
+                        }
+                    };
+                }
             default:
                 // Default: never validate
                 return new DataValidator() {
