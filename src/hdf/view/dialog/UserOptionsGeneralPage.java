@@ -19,7 +19,6 @@ import java.io.File;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -43,19 +42,19 @@ import hdf.view.ViewProperties;
 public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsGeneralPage.class);
 
-    private Text                  UGField, workField, maxMemberField, startMemberField;
-    private Combo                 fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
-    private Button                checkCurrentUserDir, checkAutoContrast, checkConvertEnum, checkShowValues, checkShowRegRefValues;
-    private Button                currentDirButton, rwButton, helpButton;
-    private Button                checkReadOnly, checkReadAll;
+    private Text UGField, workField, maxMemberField, startMemberField;
 
-    private boolean               isFontChanged;
+    private Combo fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
 
-    private boolean               isUserGuideChanged;
+    private Button checkCurrentUserDir, checkAutoContrast, checkShowValues;
+    private Button currentDirButton, rwButton, helpButton;
+    private Button checkReadOnly, checkReadAll;
 
-    private boolean               isWorkDirChanged;
+    private boolean isFontChanged;
+    private boolean isUserGuideChanged;
+    private boolean isWorkDirChanged;
 
-    private static String         fontname;
+    private static String fontname;
 
     public UserOptionsGeneralPage() {
         super("General Settings");
@@ -63,6 +62,14 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         isUserGuideChanged = false;
         isWorkDirChanged = false;
     }
+
+    /**
+     * Performs special processing when this page's Defaults button has been pressed.
+     */
+    public void performDefaults() {
+        super.performDefaults();
+    }
+
     /**
      * Notifies that the OK button of this page's container has been pressed.
      *
@@ -70,52 +77,97 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      * <code>true</code> to allow the OK to happen
      */
     public boolean performOk() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
-        String UGPath = UGField.getText();
-        if ((UGPath != null) && (UGPath.length() > 0)) {
-            UGPath = UGPath.trim();
-            isUserGuideChanged = !UGPath.equals(ViewProperties.getUsersGuide());
-            ViewProperties.setUsersGuide(UGPath);
+        if (UGField != null) {
+            String UGPath = UGField.getText();
+            if ((UGPath != null) && (UGPath.length() > 0)) {
+                UGPath = UGPath.trim();
+                isUserGuideChanged = !UGPath.equals(ViewProperties.getUsersGuide());
+                ViewProperties.setUsersGuide(UGPath);
+            }
         }
 
-        String workPath = workField.getText();
-        if (checkCurrentUserDir.getSelection())
-            workPath = "user.home";
+        if (workField != null) {
+            String workPath = workField.getText();
+            if (checkCurrentUserDir.getSelection())
+                workPath = "user.home";
 
-        if ((workPath != null) && (workPath.length() > 0)) {
-            workPath = workPath.trim();
-            isWorkDirChanged = !workPath.equals(ViewProperties.getWorkDir());
-            ViewProperties.setWorkDir(workPath);
+            if ((workPath != null) && (workPath.length() > 0)) {
+                workPath = workPath.trim();
+                isWorkDirChanged = !workPath.equals(ViewProperties.getWorkDir());
+                ViewProperties.setWorkDir(workPath);
+            }
         }
 
         // set font size and type
         try {
-            String ftype = (String) fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
-            int fsize = Integer.parseInt((String) fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
+            if (fontTypeChoice != null) {
+                String ftype = fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
+                int fsize = Integer.parseInt(fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
 
-            if (ViewProperties.getFontSize() != fsize) {
-                ViewProperties.setFontSize(fsize);
-                isFontChanged = true;
-            }
+                if (ViewProperties.getFontSize() != fsize) {
+                    ViewProperties.setFontSize(fsize);
+                    isFontChanged = true;
+                }
 
-            if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
-                ViewProperties.setFontType(ftype);
-                isFontChanged = true;
+                if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
+                    ViewProperties.setFontType(ftype);
+                    isFontChanged = true;
+                }
             }
         }
         catch (Exception ex) {
             isFontChanged = false;
         }
 
-        // set data delimiter
-        ViewProperties.setDataDelimiter((String) delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
-        ViewProperties.setImageOrigin((String) imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
+        // set file access
+        if (checkReadOnly != null) {
+            if (checkReadOnly.getSelection())
+                ViewProperties.setReadOnly(true);
+            else
+                ViewProperties.setReadOnly(false);
+        }
 
-        if (indexBaseChoice.getSelectionIndex() == 0)
-            ViewProperties.setIndexBase1(false);
-        else
-            ViewProperties.setIndexBase1(true);
+        // set data delimiter
+        if (delimiterChoice != null)
+            ViewProperties.setDataDelimiter(delimiterChoice.getItem(delimiterChoice.getSelectionIndex()));
+        if (imageOriginChoice != null)
+            ViewProperties.setImageOrigin(imageOriginChoice.getItem(imageOriginChoice.getSelectionIndex()));
+
+        if (checkReadAll != null) {
+            if (checkReadAll.getSelection()) {
+                ViewProperties.setStartMembers(0);
+                ViewProperties.setMaxMembers(-1);
+            }
+            else {
+                try {
+                    int maxsize = Integer.parseInt(maxMemberField.getText());
+                    ViewProperties.setMaxMembers(maxsize);
+                }
+                catch (Exception ex) {
+                }
+
+                try {
+                    int startsize = Integer.parseInt(startMemberField.getText());
+                    ViewProperties.setStartMembers(startsize);
+                }
+                catch (Exception ex) {
+                }
+            }
+        }
+
+        if (checkAutoContrast != null)
+            ViewProperties.setAutoContrast(checkAutoContrast.getSelection());
+        if (checkShowValues != null)
+            ViewProperties.setShowImageValue(checkShowValues.getSelection());
+
+        if (indexBaseChoice != null) {
+            if (indexBaseChoice.getSelectionIndex() == 0)
+                ViewProperties.setIndexBase1(false);
+            else
+                ViewProperties.setIndexBase1(true);
+        }
 
         return true;
     }
@@ -136,7 +188,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      * Loads all stored values in the <code>FieldEditor</code>s.
      */
     protected void load() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
         try {
             curFont = new Font(
@@ -230,17 +282,12 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      */
     protected Control createContents(Composite parent) {
         shell = parent.getShell();
-        ScrolledComposite scroller = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-        scroller.setExpandHorizontal(true);
-        scroller.setExpandVertical(true);
-
-        Composite composite = new Composite(scroller, SWT.NONE);
-        composite.setLayout(new GridLayout(1, true));
-        scroller.setContent(composite);
+        Composite composite = new Composite(parent, SWT.NONE);
+        composite.setLayout(new GridLayout());
 
         org.eclipse.swt.widgets.Group workingDirectoryGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         workingDirectoryGroup.setLayout(new GridLayout(3, false));
-        workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         workingDirectoryGroup.setFont(curFont);
         workingDirectoryGroup.setText("Default Working Directory");
 
@@ -258,7 +305,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         workField = new Text(workingDirectoryGroup, SWT.SINGLE | SWT.BORDER);
         workField.setFont(curFont);
-        workField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        workField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         currentDirButton = new Button(workingDirectoryGroup, SWT.PUSH);
         currentDirButton.setFont(curFont);
@@ -280,7 +327,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group helpDocumentGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         helpDocumentGroup.setLayout(new GridLayout(3, false));
-        helpDocumentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        helpDocumentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         helpDocumentGroup.setFont(curFont);
         helpDocumentGroup.setText("Help Document");
 
@@ -290,7 +337,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         UGField = new Text(helpDocumentGroup, SWT.SINGLE | SWT.BORDER);
         UGField.setFont(curFont);
-        UGField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        UGField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button browseButton = new Button(helpDocumentGroup, SWT.PUSH);
         browseButton.setFont(curFont);
@@ -320,7 +367,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         });
 
         Composite fileOptionComposite = new Composite(composite, SWT.NONE);
-        fileOptionComposite.setLayout(new GridLayout(13, true));
+        fileOptionComposite.setLayout(new GridLayout(3, true));
         fileOptionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group fileAccessModeGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
@@ -393,7 +440,8 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         imageGroup.setFont(curFont);
         imageGroup.setText("Image");
 
-        Button helpButton = new Button(imageGroup, SWT.PUSH);
+        helpButton = new Button(imageGroup, SWT.PUSH);
+        helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Auto Contrast");
         helpButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -446,34 +494,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         dataGroup.setFont(curFont);
         dataGroup.setText("Data");
 
-        helpButton = new Button(dataGroup, SWT.PUSH);
-        helpButton.setToolTipText("Help on Convert Enum");
-        helpButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                final String msg = "Convert enum data to strings. \n"
-                        + "For example, a dataset of an enum type of (R=0, G=, B=2) \n"
-                        + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
-                        + "shown as (R, B, B, B, G, G).\n\n\n";
-
-                MessageDialog.openInformation(shell, shell.getText(), msg);
-            }
-        });
-
-        checkConvertEnum = new Button(dataGroup, SWT.CHECK);
-        checkConvertEnum.setFont(curFont);
-        checkConvertEnum.setText("Convert Enum");
-        checkConvertEnum.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
-
-        checkShowRegRefValues = new Button(dataGroup, SWT.CHECK);
-        checkShowRegRefValues.setFont(curFont);
-        checkShowRegRefValues.setText("Show RegRef Values");
-        checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-        // Add dummy label
-        label = new Label(dataGroup, SWT.RIGHT);
-        label.setFont(curFont);
-        label.setText("");
-
         label = new Label(dataGroup, SWT.RIGHT);
         label.setFont(curFont);
         label.setText("Index Base: ");
@@ -494,7 +514,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         delimiterChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        objectsGroup.setLayout(new GridLayout(5, false));
+        objectsGroup.setLayout(new GridLayout(5, true));
         objectsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         objectsGroup.setFont(curFont);
         objectsGroup.setText("Objects to Open");
@@ -530,6 +550,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         maxMemberField.setEnabled(!checkReadAll.getSelection());
 
         load();
-        return scroller;
+        // return scroller;
+        return composite;
     }
 }

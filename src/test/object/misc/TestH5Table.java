@@ -37,7 +37,7 @@ public class TestH5Table {
     /**
      * Test the performance of reading a small table data.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final void testTable(final long dim1, final long dim2) throws Exception
     {
         long nObjs = 0; // number of object left open

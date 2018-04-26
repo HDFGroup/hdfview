@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotRadio;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -882,6 +883,31 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
                     //("\\sSupported File Formats: \\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
             botshell.bot().button("   &OK   ").click();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+    }
+
+    @Test
+    public void verifyUserOptionsDialog() {
+        try {
+            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
+            fileMenuItem.click();
+
+            SWTBotShell botshell = bot.shell("Preferences");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive("Preferences"));
+
+            SWTBotRadio rwButton = botshell.bot().radio("Read/Write");
+            assertTrue(rwButton.isEnabled());
+
+            //botshell.bot().button("Restore Defaults").click();
+
+            botshell.bot().button("Cancel").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();

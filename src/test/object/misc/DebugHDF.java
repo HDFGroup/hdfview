@@ -152,11 +152,11 @@ public class DebugHDF {
         //try { testH5FileGet("g:\\temp\\dset.h5", "/dset/"); } catch (Exception ex) {ex.printStackTrace();}
 
 //        try {
-//        	String fname = "g:\\temp\\dset.h5";
-//        	new File(fname).delete(); // clean up existing file
+        // String fname = "g:\\temp\\dset.h5";
+        // new File(fname).delete(); // clean up existing file
 //
-//        	for (int i=0; i<10; i++)
-//        	    testCreateDS(fname, "dset"+i);
+        // for (int i=0; i<10; i++)
+        // testCreateDS(fname, "dset"+i);
 //
 //        } catch (Exception ex) {ex.printStackTrace();}
 
@@ -171,14 +171,14 @@ public class DebugHDF {
 
     public static void testRefData(String fname, String dname)throws Exception
     {
-    	int size = 10;
-    	long dims[] = {size};
-    	long[] maxdims = {HDF5Constants.H5S_UNLIMITED};
-    	byte[][] ref_buf = new byte[2][8];
+        int size = 10;
+        long dims[] = { size };
+        long[] maxdims = { HDF5Constants.H5S_UNLIMITED };
+        byte[][] ref_buf = new byte[2][8];
 
-    	float data[] = new float[size];
-    	for (int i=0; i<size; i++)
-    		data[i] = i;
+        float data[] = new float[size];
+        for (int i = 0; i < size; i++)
+            data[i] = i;
 
         H5File file = new H5File(fname, H5File.CREATE);
         file.open();
@@ -199,30 +199,31 @@ public class DebugHDF {
         attr.setData(ref_buf);
         ds.writeMetadata(attr);
 
-    	file.close();
+        file.close();
 
-    	// open the file and the dataset with refs
-    	file.open();
-    	ds = (H5ScalarDS)file.get(dname);
-     	long[] refs = (long[])ds.getData();
+        // open the file and the dataset with refs
+        file.open();
+        ds = (H5ScalarDS) file.get(dname);
+        long[] refs = (long[]) ds.getData();
 
-     	// use low level API function, H5.H5Rget_name
-       	String[] name = {""};;
-     	for (int i=0; i<refs.length; i++) {
-     		H5.H5Rget_name(file.getFID(), HDF5Constants.H5R_OBJECT, HDFNativeData.longToByte(refs[i]), name, 32);
-    		System.out.println(name[0]);
-    	}
+        // use low level API function, H5.H5Rget_name
+        String[] name = { "" };
+        ;
+        for (int i = 0; i < refs.length; i++) {
+            H5.H5Rget_name(file.getFID(), HDF5Constants.H5R_OBJECT, HDFNativeData.longToByte(refs[i]), name, 32);
+            System.out.println(name[0]);
+        }
 
-     	// if file.open() was called, search objects in memory by high level function, findObject()
-    	long[] oid = new long[1];
-    	for (int i=0; i<refs.length; i++) {
-    		oid[0] = refs[i];
-     		HObject obj = FileFormat.findObject(file, oid);
-    		System.out.println(obj.getFullName());
-    	}
+        // if file.open() was called, search objects in memory by high level function, findObject()
+        long[] oid = new long[1];
+        for (int i = 0; i < refs.length; i++) {
+            oid[0] = refs[i];
+            HObject obj = FileFormat.findObject(file, oid);
+            System.out.println(obj.getFullName());
+        }
 
-    	file.close();
-	}
+        file.close();
+    }
 
     @SuppressWarnings("deprecation")
     private static void testH5VlenAttr( String fname) throws Exception
@@ -300,9 +301,9 @@ public class DebugHDF {
 
 
         for (int i=0; i<DIM1; i++) {
-        	indexData[i] = i;
-        	lonData[i] = 5200.1+i;
-        	latData[i] = 10.2+i;
+            indexData[i] = i;
+            lonData[i] = 5200.1 + i;
+            latData[i] = 10.2 + i;
         }
 
         fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -316,28 +317,29 @@ public class DebugHDF {
         H5.H5Tinsert(tid, "index", 0, HDF5Constants.H5T_NATIVE_INT32);
         H5.H5Tinsert(tid, "location", 4, tid_nested);
 
-    	did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                HDF5Constants.H5P_DEFAULT);
 
-    	// write the first field "index"
-    	long tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 4);
-    	H5.H5Tinsert(tid_tmp, "index", 0, HDF5Constants.H5T_NATIVE_INT32);
+        // write the first field "index"
+        long tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 4);
+        H5.H5Tinsert(tid_tmp, "index", 0, HDF5Constants.H5T_NATIVE_INT32);
         H5.H5Dwrite(did, tid_tmp, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, indexData);
         H5.H5Tclose(tid_tmp);
 
         // write the first field of the nested compound, "location"->"Lon"
-    	tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
-    	H5.H5Tinsert(tid_tmp, "Lon", 0, HDF5Constants.H5T_NATIVE_DOUBLE);
-    	long tid_tmp_nested = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
-    	H5.H5Tinsert(tid_tmp_nested, "location", 0, tid_tmp);
+        tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
+        H5.H5Tinsert(tid_tmp, "Lon", 0, HDF5Constants.H5T_NATIVE_DOUBLE);
+        long tid_tmp_nested = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
+        H5.H5Tinsert(tid_tmp_nested, "location", 0, tid_tmp);
         H5.H5Dwrite(did, tid_tmp_nested, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, lonData);
         H5.H5Tclose(tid_tmp_nested);
         H5.H5Tclose(tid_tmp);
 
         // write the second field of the nested compound, "location"->"Lat"
-    	tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
-    	H5.H5Tinsert(tid_tmp, "Lat", 0, HDF5Constants.H5T_NATIVE_DOUBLE);
-    	tid_tmp_nested = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
-    	H5.H5Tinsert(tid_tmp_nested, "location", 0, tid_tmp);
+        tid_tmp = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
+        H5.H5Tinsert(tid_tmp, "Lat", 0, HDF5Constants.H5T_NATIVE_DOUBLE);
+        tid_tmp_nested = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
+        H5.H5Tinsert(tid_tmp_nested, "location", 0, tid_tmp);
         H5.H5Dwrite(did, tid_tmp_nested, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, latData);
         H5.H5Tclose(tid_tmp_nested);
         H5.H5Tclose(tid_tmp);
@@ -352,33 +354,33 @@ public class DebugHDF {
 
     public static void testExtendData(String fname, String dname, int size, int newSize)throws Exception
     {
-    	long dims[] = {size};
-    	long[] maxdims = {HDF5Constants.H5S_UNLIMITED};
-    	long newDims[] = {newSize};
-    	int extended = newSize - size;
+        long dims[] = { size };
+        long[] maxdims = { HDF5Constants.H5S_UNLIMITED };
+        long newDims[] = { newSize };
+        int extended = newSize - size;
 
-    	if (extended<=0)
-    		return; // nothing to extended
+        if (extended <= 0)
+            return; // nothing to extended
 
-    	float data[] = new float[size];
-    	for (int i=0; i<size; i++)
-    		data[i] = i;
+        float data[] = new float[size];
+        for (int i = 0; i < size; i++)
+            data[i] = i;
 
-       	float extendedData[] = new float[extended];
-    	for (int i=0; i<extended; i++)
-    		extendedData[i] = size+i;
+        float extendedData[] = new float[extended];
+        for (int i = 0; i < extended; i++)
+            extendedData[i] = size + i;
 
         H5File file = new H5File(fname, H5File.CREATE);
         file.open();
         file.createScalarDS(dname, null, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), dims, maxdims, null, 0, data);
-    	file.close();
+        file.close();
 
-    	// reopen the file
-    	file.open();
-    	H5ScalarDS ds = (H5ScalarDS)file.get(dname);
+        // reopen the file
+        file.open();
+        H5ScalarDS ds = (H5ScalarDS) file.get(dname);
 
-    	ds.init();
-    	ds.extend(newDims);
+        ds.init();
+        ds.extend(newDims);
 
         long [] start  = ds.getStartDims();
         long [] count  = ds.getSelectedDims();
@@ -386,8 +388,8 @@ public class DebugHDF {
         count[0] = extended;
         ds.write(extendedData);
 
-    	file.close();
-	}
+        file.close();
+    }
 
     private static final void testH5DeleteDS(String fname) throws Exception
     {
@@ -399,7 +401,7 @@ public class DebugHDF {
         byte[] byteData = new byte[strData.length*strLen];
 
         for (int i=0; i<strData.length; i++)
-        	System.arraycopy(strData[i].getBytes(), 0, byteData, i*strLen, strLen);
+            System.arraycopy(strData[i].getBytes(), 0, byteData, i * strLen, strLen);
 
         fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -412,23 +414,23 @@ public class DebugHDF {
         H5.H5Fclose(fid);
 
         for (int loop=0; loop<nloops; loop++) {
-    		fid = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
-    		H5.H5Ldelete( fid, dname, HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            H5.H5Ldelete(fid, dname, HDF5Constants.H5P_DEFAULT);
 
-    		strLen = loop+1;
+            strLen = loop + 1;
             H5.H5Tset_size(tid, strLen);
 
             for (int i=0; i<strData.length; i++) {
-            	strData[i] = "";
-            	for (int j=0; j<=loop; j++) {
-            		strData[i] += (i+1);
-            	}
+                strData[i] = "";
+                for (int j = 0; j <= loop; j++) {
+                    strData[i] += (i + 1);
+                }
             }
 
             byteData = new byte[strData.length*strLen];
 
             for (int i=0; i<strData.length; i++) {
-             	System.arraycopy(strData[i].getBytes(), 0, byteData, i*strLen, strLen);
+                System.arraycopy(strData[i].getBytes(), 0, byteData, i * strLen, strLen);
             }
 
             did = H5.H5Dcreate(fid, dname, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -450,10 +452,10 @@ public class DebugHDF {
         byte[]   buf = new byte[dimSize*dstLen];
 
         for (int i=0; i<dimSize; i++)
-        	System.arraycopy(strs[i].getBytes(), 0, buf, i*srcLen, 5);
+            System.arraycopy(strs[i].getBytes(), 0, buf, i * srcLen, 5);
 
         for (int i=0; i<dimSize; i++)
-        	System.out.println(new String(buf, i*srcLen, srcLen));
+            System.out.println(new String(buf, i * srcLen, srcLen));
 
         srcId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
         H5.H5Tset_size(srcId, srcLen);
@@ -467,122 +469,122 @@ public class DebugHDF {
         H5.H5Tclose(dstId);
 
         for (int i=0; i<dimSize; i++) {
-        	String str = new String(buf, i*dstLen, dstLen);
-        	System.out.println(str);
-        	System.out.println(str.startsWith(strs[i]));
+            String str = new String(buf, i * dstLen, dstLen);
+            System.out.println(str);
+            System.out.println(str.startsWith(strs[i]));
         }
     }
 
     private static final void testCreateVlenStr(String fname) throws Exception
     {
-    	String dname = "DS1";
-    	long file_id=-1, type_id=-1, dataspace_id =-1, dataset_id = -1;
-    	String[] strData = { "Parting", "is such", "sweet", "sorrow." };
-    	int rank = 1;
-    	long[] dims = { strData.length };
+        String dname = "DS1";
+        long file_id = -1, type_id = -1, dataspace_id = -1, dataset_id = -1;
+        String[] strData = { "Parting", "is such", "sweet", "sorrow." };
+        int rank = 1;
+        long[] dims = { strData.length };
 
-    	// Create a new file using default properties.
-    	try {
-    		file_id = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC,
-    				HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // Create a new file using default properties.
+        try {
+            file_id = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                    HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	try {
-    		type_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-    	   	H5.H5Tset_size(type_id, HDF5Constants.H5T_VARIABLE);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        try {
+            type_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(type_id, HDF5Constants.H5T_VARIABLE);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	// Create dataspace. Setting maximum size to NULL sets the maximum
-    	// size to be the current size.
-    	try {
-    		dataspace_id = H5.H5Screate_simple(rank, dims, null);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // Create dataspace. Setting maximum size to NULL sets the maximum
+        // size to be the current size.
+        try {
+            dataspace_id = H5.H5Screate_simple(rank, dims, null);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	// Create the dataset and write the string data to it.
-    	try {
-    		if ((file_id >= 0) && (type_id >= 0) && (dataspace_id >= 0))
-    			dataset_id = H5.H5Dcreate(file_id, dname, type_id,
-    					dataspace_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // Create the dataset and write the string data to it.
+        try {
+            if ((file_id >= 0) && (type_id >= 0) && (dataspace_id >= 0))
+                dataset_id = H5.H5Dcreate(file_id, dname, type_id, dataspace_id, HDF5Constants.H5P_DEFAULT,
+                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	// Write the data to the dataset.
-    	try {
-    		if ((dataset_id >= 0) && (type_id >= 0))
-    			H5.H5Dwrite_string(dataset_id, type_id, HDF5Constants.H5S_ALL,
-    					HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, strData);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // Write the data to the dataset.
+        try {
+            if ((dataset_id >= 0) && (type_id >= 0))
+                H5.H5Dwrite_string(dataset_id, type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                        HDF5Constants.H5P_DEFAULT, strData);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	// Write the data to the dataset.
-    	try {
-    		if ((dataset_id >= 0) && (type_id >= 0)) {
-    			String[] buf = new String[strData.length];
-    			H5.H5Dread(dataset_id, H5.H5Dget_type(dataset_id), HDF5Constants.H5S_ALL,
-    					HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
+        // Write the data to the dataset.
+        try {
+            if ((dataset_id >= 0) && (type_id >= 0)) {
+                String[] buf = new String[strData.length];
+                H5.H5Dread(dataset_id, H5.H5Dget_type(dataset_id), HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                        HDF5Constants.H5P_DEFAULT, buf);
 
-     			for (int i =0; i<strData.length; i++)
-    			System.out.println(buf[i]);
-    		}
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+                for (int i = 0; i < strData.length; i++)
+                    System.out.println(buf[i]);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
-    	// End access to the dataset and release resources used by it.
-    	try {
-    		if (dataset_id >= 0)
-    			H5.H5Dclose(dataset_id);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // End access to the dataset and release resources used by it.
+        try {
+            if (dataset_id >= 0)
+                H5.H5Dclose(dataset_id);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	// Terminate access to the data space.
-    	try {
-    		if (dataspace_id >= 0)
-    			H5.H5Sclose(dataspace_id);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // Terminate access to the data space.
+        try {
+            if (dataspace_id >= 0)
+                H5.H5Sclose(dataspace_id);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	// Terminate access to the file type.
-    	try {
-    		if (type_id >= 0)
-    			H5.H5Tclose(type_id);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // Terminate access to the file type.
+        try {
+            if (type_id >= 0)
+                H5.H5Tclose(type_id);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    	// Close the file.
-    	try {
-    		if (file_id >= 0)
-    			H5.H5Fclose(file_id);
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    	}
+        // Close the file.
+        try {
+            if (file_id >= 0)
+                H5.H5Fclose(file_id);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void testUpdateAttr(String fname) throws Exception
     {
-    	int data[] = {1,2,3,4,5,6};
+        int data[] = { 1, 2, 3, 4, 5, 6 };
         long[] dims = {data.length};
         String dname = "/dset";
 
@@ -621,161 +623,160 @@ public class DebugHDF {
     }
 
 
-	public static void test1DExtendStrings(String fname) throws Exception {
-		//row count of my dataset
-		int rowCount = 5;
+    public static void test1DExtendStrings(String fname) throws Exception {
+        // row count of my dataset
+        int rowCount = 5;
 
-		//max string length
-		int maxStringLength = 5;
+        // max string length
+        int maxStringLength = 5;
 
-		//buffer of test data to write
-		String[] data = {"12345","12345","12345","12345","12345"};
-		byte[][] buffer = new byte[5][5];
-		for(int i=0; i<data.length; i++){
-			buffer[i] = data[i].getBytes();
-		}
+        // buffer of test data to write
+        String[] data = { "12345", "12345", "12345", "12345", "12345" };
+        byte[][] buffer = new byte[5][5];
+        for (int i = 0; i < data.length; i++) {
+            buffer[i] = data[i].getBytes();
+        }
 
-		//create my file
-		File file = new File("fname");
-		long fileId = H5.H5Fcreate(file.getAbsolutePath(),
-				HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-				HDF5Constants.H5P_DEFAULT);
+        // create my file
+        File file = new File("fname");
+        long fileId = H5.H5Fcreate(file.getAbsolutePath(), HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                HDF5Constants.H5P_DEFAULT);
 
-		int RANK = 1;
-		long[] dataset_dims = { rowCount };
-		long[] max_dims = { HDF5Constants.H5S_UNLIMITED };
-		long[] chunk_dims = { rowCount };
+        int RANK = 1;
+        long[] dataset_dims = { rowCount };
+        long[] max_dims = { HDF5Constants.H5S_UNLIMITED };
+        long[] chunk_dims = { rowCount };
 
-		long strtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-		H5.H5Tset_size(strtypeId, maxStringLength);
+        long strtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        H5.H5Tset_size(strtypeId, maxStringLength);
 
-		long memtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-		H5.H5Tset_size(memtypeId, maxStringLength);
+        long memtypeId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        H5.H5Tset_size(memtypeId, maxStringLength);
 
-		long dataspaceId = H5.H5Screate_simple(RANK, dataset_dims, max_dims);
-		long memspaceId = H5.H5Screate_simple(RANK, chunk_dims, chunk_dims);
+        long dataspaceId = H5.H5Screate_simple(RANK, dataset_dims, max_dims);
+        long memspaceId = H5.H5Screate_simple(RANK, chunk_dims, chunk_dims);
 
-		long dcplId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
-		H5.H5Pset_deflate(dcplId, 9);
-		H5.H5Pset_chunk(dcplId, 1, chunk_dims);
+        long dcplId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        H5.H5Pset_deflate(dcplId, 9);
+        H5.H5Pset_chunk(dcplId, 1, chunk_dims);
 
-		long datasetId = H5.H5Dcreate(fileId, "/ds0",
-				strtypeId, dataspaceId, HDF5Constants.H5P_DEFAULT, dcplId, HDF5Constants.H5P_DEFAULT);
+        long datasetId = H5.H5Dcreate(fileId, "/ds0", strtypeId, dataspaceId, HDF5Constants.H5P_DEFAULT, dcplId,
+                HDF5Constants.H5P_DEFAULT);
 
-		long[] hyperslab_dims = { rowCount};
-		memspaceId = H5.H5Screate_simple(1, hyperslab_dims, hyperslab_dims);
+        long[] hyperslab_dims = { rowCount };
+        memspaceId = H5.H5Screate_simple(1, hyperslab_dims, hyperslab_dims);
 
-		H5.H5Sselect_hyperslab(dataspaceId, HDF5Constants.H5S_SELECT_SET,
-				new long[] { 0 }, new long[] { 1 },
-				new long[] { rowCount }, new long[] { 1});
+        H5.H5Sselect_hyperslab(dataspaceId, HDF5Constants.H5S_SELECT_SET, new long[] { 0 }, new long[] { 1 },
+                new long[] { rowCount }, new long[] { 1 });
 
-		H5.H5Dwrite(datasetId, memtypeId, memspaceId,
-				dataspaceId, HDF5Constants.H5P_DEFAULT, buffer);
+        H5.H5Dwrite(datasetId, memtypeId, memspaceId, dataspaceId, HDF5Constants.H5P_DEFAULT, buffer);
 
-		H5.H5Sclose(memspaceId);
-		H5.H5Sclose(dataspaceId);
-		H5.H5Tclose(strtypeId);
-		H5.H5Tclose(memtypeId);
-		H5.H5Dclose(datasetId);
-		H5.H5Fclose(fileId);
-	}
+        H5.H5Sclose(memspaceId);
+        H5.H5Sclose(dataspaceId);
+        H5.H5Tclose(strtypeId);
+        H5.H5Tclose(memtypeId);
+        H5.H5Dclose(datasetId);
+        H5.H5Fclose(fileId);
+    }
 
 
 
     private static void testH5Core(final String filename) throws Exception {
         long fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
-    	H5.H5Pset_fapl_core(fapl_id, 1024, true);
+        H5.H5Pset_fapl_core(fapl_id, 1024, true);
     }
 
     private static void testH5IO(final String filename) throws Exception {
-    	int SIZE = 10*1024*1024;
-    	long fid = -1, did = -1, sid = -1, rank = 1;
-    	long[] dims = { SIZE };
-    	float[] buf = new float[SIZE];
+        int SIZE = 10 * 1024 * 1024;
+        long fid = -1, did = -1, sid = -1, rank = 1;
+        long[] dims = { SIZE };
+        float[] buf = new float[SIZE];
 
-//    	for (int i = 0; i < buf.length; i++)
-//    		buf[i] = i;
+        // for (int i = 0; i < buf.length; i++)
+        // buf[i] = i;
 //
-//    	try {
-//    		fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC,
-//    				HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-//    		sid = H5.H5Screate_simple(rank, dims, null);
-//    		did = H5.H5Dcreate(fid, "test", HDF5Constants.H5T_NATIVE_FLOAT,
-//    				sid, HDF5Constants.H5P_DEFAULT);
-//    	} finally {
-//    		try {
-//    			H5.H5Sclose(sid);
-//    		} catch (HDF5Exception ex) {
-//    		}
-//    		try {
-//    			H5.H5Dclose(did);
-//    		} catch (HDF5Exception ex) {
-//    		}
+        // try {
+        // fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC,
+        // HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        // sid = H5.H5Screate_simple(rank, dims, null);
+        // did = H5.H5Dcreate(fid, "test", HDF5Constants.H5T_NATIVE_FLOAT,
+        // sid, HDF5Constants.H5P_DEFAULT);
+        // } finally {
+        // try {
+        // H5.H5Sclose(sid);
+        // } catch (HDF5Exception ex) {
+        // }
+        // try {
+        // H5.H5Dclose(did);
+        // } catch (HDF5Exception ex) {
+        // }
 //
-//    		try {
-//    			H5.H5Fclose(fid);
-//    		} catch (HDF5Exception ex) {
-//    		}
-//    	}
+        // try {
+        // H5.H5Fclose(fid);
+        // } catch (HDF5Exception ex) {
+        // }
+        // }
 //
-//    	try {
+        // try {
 //
-//    		fid = H5.H5Fopen(filename, HDF5Constants.H5F_ACC_RDWR,
-//    				HDF5Constants.H5P_DEFAULT);
-//    		did = H5.H5Dopen(fid, "test");
+        // fid = H5.H5Fopen(filename, HDF5Constants.H5F_ACC_RDWR,
+        // HDF5Constants.H5P_DEFAULT);
+        // did = H5.H5Dopen(fid, "test");
 //
-//    		long t0 = System.currentTimeMillis();
-//    		H5.H5Dwrite_float(did, HDF5Constants.H5T_NATIVE_FLOAT,
-//    				HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-//    				HDF5Constants.H5P_DEFAULT, buf);
-//    		long t1 = System.currentTimeMillis();
-//    		System.out.println("Time on writing (40MB): " + (t1 - t0));
+        // long t0 = System.currentTimeMillis();
+        // H5.H5Dwrite_float(did, HDF5Constants.H5T_NATIVE_FLOAT,
+        // HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+        // HDF5Constants.H5P_DEFAULT, buf);
+        // long t1 = System.currentTimeMillis();
+        // System.out.println("Time on writing (40MB): " + (t1 - t0));
 //
-//    	} finally {
-//    		try {
-//    			H5.H5Sclose(sid);
-//    		} catch (HDF5Exception ex) {
-//    		}
-//    		try {
-//    			H5.H5Dclose(did);
-//    		} catch (HDF5Exception ex) {
-//    		}
+        // } finally {
+        // try {
+        // H5.H5Sclose(sid);
+        // } catch (HDF5Exception ex) {
+        // }
+        // try {
+        // H5.H5Dclose(did);
+        // } catch (HDF5Exception ex) {
+        // }
 //
-//    		try {
-//    			H5.H5Fclose(fid);
-//    		} catch (HDF5Exception ex) {
-//    		}
-//    	}
+        // try {
+        // H5.H5Fclose(fid);
+        // } catch (HDF5Exception ex) {
+        // }
+        // }
 
-    	try {
+        try {
 
-    		fid = H5.H5Fopen(filename, HDF5Constants.H5F_ACC_RDWR,
-    				HDF5Constants.H5P_DEFAULT);
-    		did = H5.H5Dopen(fid, "test", HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(filename, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            did = H5.H5Dopen(fid, "test", HDF5Constants.H5P_DEFAULT);
 
-    		long t0 = System.currentTimeMillis();
-    		H5.H5Dread_float(did, HDF5Constants.H5T_NATIVE_FLOAT,
-    				HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-    				HDF5Constants.H5P_DEFAULT, buf);
-    		System.out.println(buf[SIZE-1]);
-    		long t1 = System.currentTimeMillis();
-    		System.out.println("Time on reading (40MB): " + (t1 - t0));
+            long t0 = System.currentTimeMillis();
+            H5.H5Dread_float(did, HDF5Constants.H5T_NATIVE_FLOAT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                    HDF5Constants.H5P_DEFAULT, buf);
+            System.out.println(buf[SIZE - 1]);
+            long t1 = System.currentTimeMillis();
+            System.out.println("Time on reading (40MB): " + (t1 - t0));
 
-    	} finally {
-    		try {
-    			H5.H5Sclose(sid);
-    		} catch (HDF5Exception ex) {
-    		}
-    		try {
-    			H5.H5Dclose(did);
-    		} catch (HDF5Exception ex) {
-    		}
+        }
+        finally {
+            try {
+                H5.H5Sclose(sid);
+            }
+            catch (HDF5Exception ex) {
+            }
+            try {
+                H5.H5Dclose(did);
+            }
+            catch (HDF5Exception ex) {
+            }
 
-    		try {
-    			H5.H5Fclose(fid);
-    		} catch (HDF5Exception ex) {
-    		}
-    	}
+            try {
+                H5.H5Fclose(fid);
+            }
+            catch (HDF5Exception ex) {
+            }
+        }
 
     }
 
@@ -877,7 +878,7 @@ public class DebugHDF {
 //        }
 
         int isNew, isFunc;
-        String apiName, newName;
+        String apiName;
         for(int i=0; i<nAll; i++) {
             idx = allAPIs[i].indexOf(' ');
             apiName = allAPIs[i].substring(idx+1);
@@ -909,7 +910,7 @@ public class DebugHDF {
         BufferedReader in  = new BufferedReader(new FileReader(fname));
         String line = in.readLine();
         StringTokenizer st = new StringTokenizer(line, ",") ;
-        int n = st.countTokens();
+        st.countTokens();
 
         PrintWriter out
         = new PrintWriter(new BufferedWriter(new FileWriter(fname+".out")));
@@ -922,6 +923,7 @@ public class DebugHDF {
         out.close();
     }
 
+    @SuppressWarnings("deprecation")
     public static void writeDatatype() throws Exception{
         String fname = "g:\\temp\\t1.h5";
         long[] dims0D = {1};
@@ -969,7 +971,7 @@ public class DebugHDF {
 
     @SuppressWarnings("deprecation")
     private static void readDatatype() throws Exception {
-    	String fname = "g:\\temp\\t1.h5";
+        String fname = "g:\\temp\\t1.h5";
 
         // retrieve an instance of H5File
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
@@ -1126,7 +1128,7 @@ public class DebugHDF {
 
         int nNaN = dataNaN.length/5;
         for (int i=0; i<nNaN; i+=2) {
-        	int idx = (int) (Math.random()*dataNaN.length);
+            int idx = (int) (Math.random() * dataNaN.length);
             dataINF[idx] = Float.POSITIVE_INFINITY;
             dataINF[idx+1] = Float.NEGATIVE_INFINITY;
             dataNaN[idx] = Float.NaN;
@@ -1194,7 +1196,7 @@ public class DebugHDF {
 
     private static final void TestBitmask()
     {
-        int bmask=0, value = 0;
+        int bmask=0;
         BitSet theMask = new BitSet(8);
 
         theMask.set(0);
@@ -1314,147 +1316,140 @@ public class DebugHDF {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void launchBrowser(String url) throws Exception {
-    	String os = System.getProperty("os.name");
-    	Runtime runtime=Runtime.getRuntime();
-    	try{
-    		// Block for Windows Platform
-    		if (os.startsWith("Windows")){
-    			String cmd = "rundll32 url.dll,FileProtocolHandler "+ url;
-    			Process p = runtime.exec(cmd);
-    		}
-    		//Block for Mac OS
-    		else if(os.startsWith("Mac OS")){
-    			Class fileMgr = Class.forName("com.apple.eio.FileManager");
-    			Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class});
-    			openURL.invoke(null, new Object[] {url});
-    		}
-    		//Block for UNIX Platform
-    		else {
-    			String[] browsers = {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
-    			String browser = null;
-    			for (int count = 0; count < browsers.length && browser == null; count++)
-    				if (runtime.exec(new String[] {"which", browsers[count]}).waitFor() == 0)
-    					browser = browsers[count];
-    			if (browser == null)
-    				throw new Exception("Could not find web browser");
-    			else
-    				runtime.exec(new String[] {browser, url});
-    		}
-    	}catch(Exception x){
-    		System.err.println("Exception occurd while invoking Browser!");
-    		x.printStackTrace();
-    	}
+        String os = System.getProperty("os.name");
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            // Block for Windows Platform
+            if (os.startsWith("Windows")) {
+                String cmd = "rundll32 url.dll,FileProtocolHandler " + url;
+                runtime.exec(cmd);
+            }
+            // Block for Mac OS
+            else if (os.startsWith("Mac OS")) {
+                Class fileMgr = Class.forName("com.apple.eio.FileManager");
+                Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] { String.class });
+                openURL.invoke(null, new Object[] { url });
+            }
+            // Block for UNIX Platform
+            else {
+                String[] browsers = { "firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
+                String browser = null;
+                for (int count = 0; count < browsers.length && browser == null; count++)
+                    if (runtime.exec(new String[] { "which", browsers[count] }).waitFor() == 0)
+                        browser = browsers[count];
+                if (browser == null)
+                    throw new Exception("Could not find web browser");
+                else
+                    runtime.exec(new String[] { browser, url });
+            }
+        }
+        catch (Exception x) {
+            System.err.println("Exception occurd while invoking Browser!");
+            x.printStackTrace();
+        }
     }
 
-	private static void testVlenRead(String fname) throws Exception {
+    private static void testVlenRead(String fname) throws Exception {
 
-		boolean  useBufferedReads = false;	// true = break up reads into smaller chunks, false = get data at once
+        boolean useBufferedReads = false; // true = break up reads into smaller chunks, false = get data at once
 
-		H5File h5File = new H5File(fname);
+        H5File h5File = new H5File(fname);
 
-		Dataset dataset = (Dataset)h5File.get("/Dataset1");
-		dataset.init();
-		long dsId = dataset.open();
+        Dataset dataset = (Dataset) h5File.get("/Dataset1");
+        dataset.init();
+        long dsId = dataset.open();
 
-		long[] dims = dataset.getDims();
+        long[] dims = dataset.getDims();
 
-		Object data;
-
-		if (useBufferedReads) {
-			// uses own memory space
-			int numRows = (int)dims[0];
-			int numBufRows = 200000;
-			for (int loop = 0; loop < 20; loop++) {
-				System.out.println("loop = "+loop);
-				for (int rowsRead = 0; rowsRead < numRows; ) {
-					int rowsToRead = Math.min(numRows-rowsRead,numBufRows);
-					data = getData(dataset,rowsRead,rowsToRead);
-					rowsRead += rowsToRead;
-				}
-			}
-		} else {
-			// uses default "all" memory space
-			for (int loop = 0; loop < 20; loop++) {
-				System.out.println("loop = "+loop);
-				data = dataset.read();
-			}
-		}
-
+        if (useBufferedReads) {
+            // uses own memory space
+            int numRows = (int) dims[0];
+            int numBufRows = 200000;
+            for (int loop = 0; loop < 20; loop++) {
+                System.out.println("loop = " + loop);
+                for (int rowsRead = 0; rowsRead < numRows;) {
+                    int rowsToRead = Math.min(numRows - rowsRead, numBufRows);
+                    getData(dataset, rowsRead, rowsToRead);
+                    rowsRead += rowsToRead;
+                }
+            }
+        }
+        else {
+            // uses default "all" memory space
+            for (int loop = 0; loop < 20; loop++) {
+                System.out.println("loop = " + loop);
+                dataset.read();
+            }
+        }
 
 
-		System.out.println("Enter CR to exit: ");
-		System.in.read();
 
-		// close datasets
-		dataset.close(dsId);
-	}
+        System.out.println("Enter CR to exit: ");
+        System.in.read();
+
+        // close datasets
+        dataset.close(dsId);
+    }
 
     @SuppressWarnings("deprecation")
     private static Object getData( Dataset ds, int startRow, int numRows ) throws IOException
     {
-    	Object o = null;
-    	if (ds != null) {
-    		ds.init();
-    		if( ds.getRank() != 1 )
-    		{
-    			throw new IllegalArgumentException("Dataset not 1D"); //$NON-NLS-1$
-    		}
-    		long[] dims = ds.getDims();
-    		long[] selectionStart = ds.getStartDims();
-    		long[] selectionStride = ds.getStride();
-    		long[] selectionCount = ds.getSelectedDims();
-    		selectionStart[0] = startRow;
-    		if( selectionStart.length == 2 )
-    		{
-    			selectionStart[1] = 0;
-    		}
-    		selectionStride[0] = 1;
-    		if( selectionStride.length == 2 )
-    		{
-    			selectionStride[1] = 0;
-    		}
-    		selectionCount[0] = Math.min(dims[0] - startRow, numRows);
-    		if( selectionCount.length == 2 )
-    		{
-    			selectionCount[1] = dims[1];
-    		}
+        Object o = null;
+        if (ds != null) {
+            ds.init();
+            if (ds.getRank() != 1) {
+                throw new IllegalArgumentException("Dataset not 1D"); //$NON-NLS-1$
+            }
+            long[] dims = ds.getDims();
+            long[] selectionStart = ds.getStartDims();
+            long[] selectionStride = ds.getStride();
+            long[] selectionCount = ds.getSelectedDims();
+            selectionStart[0] = startRow;
+            if (selectionStart.length == 2) {
+                selectionStart[1] = 0;
+            }
+            selectionStride[0] = 1;
+            if (selectionStride.length == 2) {
+                selectionStride[1] = 0;
+            }
+            selectionCount[0] = Math.min(dims[0] - startRow, numRows);
+            if (selectionCount.length == 2) {
+                selectionCount[1] = dims[1];
+            }
 
-    		try
-    		{
+            try {
 
-    			//o = ds.read();
+                // o = ds.read();
 
-  				// can also use H5.H5Dread() directly, bypassing the Java object layer and use own memory space
+                // can also use H5.H5Dread() directly, bypassing the Java object layer and use own memory space
 
-    		    long did = ds.open();
-    		    long tid = H5.H5Dget_type(did);
+                long did = ds.open();
+                long tid = H5.H5Dget_type(did);
 
-    		    long nativeDatatype = H5Datatype.toNative(tid);
+                long nativeDatatype = H5Datatype.toNative(tid);
 
-    		    long msid = H5.H5Screate_simple(ds.getRank(),selectionCount, null);
-    		    long fsid = H5.H5Dget_space(did);
-    			long[] lsize = {selectionCount[0]*(selectionCount.length > 1 ? selectionCount[1] : 1)};
-    			Object theData = H5Datatype.allocateArray(nativeDatatype, (int)lsize[0]);
-    			H5.H5Sselect_hyperslab(fsid,
-    					HDF5Constants.H5S_SELECT_SET, selectionStart, selectionStride,
-    					selectionCount, null );
-    			H5.H5Dread( did, nativeDatatype, msid, fsid, HDF5Constants.H5P_DEFAULT, theData);
-    			H5.H5Tclose(tid);
-    			H5.H5Tclose(nativeDatatype);
-    			H5.H5Sclose(msid);
-    			H5.H5Sclose(fsid);
-    			ds.close(did);
-    			o =  theData;
+                long msid = H5.H5Screate_simple(ds.getRank(), selectionCount, null);
+                long fsid = H5.H5Dget_space(did);
+                long[] lsize = { selectionCount[0] * (selectionCount.length > 1 ? selectionCount[1] : 1) };
+                Object theData = H5Datatype.allocateArray(nativeDatatype, (int) lsize[0]);
+                H5.H5Sselect_hyperslab(fsid, HDF5Constants.H5S_SELECT_SET, selectionStart, selectionStride,
+                        selectionCount, null);
+                H5.H5Dread(did, nativeDatatype, msid, fsid, HDF5Constants.H5P_DEFAULT, theData);
+                H5.H5Tclose(tid);
+                H5.H5Tclose(nativeDatatype);
+                H5.H5Sclose(msid);
+                H5.H5Sclose(fsid);
+                ds.close(did);
+                o = theData;
 
-    		}
-    		catch( Exception exc )
-    		{
-    			throw new IOException(exc.toString());
-    		}
-    	}
-    	return o;
+            }
+            catch (Exception exc) {
+                throw new IOException(exc.toString());
+            }
+        }
+        return o;
     }
 
     @SuppressWarnings("deprecation")
@@ -1534,9 +1529,10 @@ public class DebugHDF {
 
     private static void testMemoryLeak(String fname) throws Exception
     {
-    	/* a list of objects: char, compound, enum, float32, float64, image,
-    	 * int16, int32, int64, int8, str, uchar, uint16, uint32, uint8
-    	 */
+        /*
+         * a list of objects: char, compound, enum, float32, float64, image, int16, int32, int64, int8, str,
+         * uchar, uint16, uint32, uint8
+         */
         H5File testFile = null;
         Dataset dset = null;
 
@@ -1814,10 +1810,8 @@ public class DebugHDF {
 
             Datatype type = dset.getDatatype();
             System.out.println("Name="+names[i]+
-            		"\t tclass="+type.getDatatypeClass()+
-            		"\t tsize="+type.getDatatypeSize()+
-            		"\t tsign="+type.getDatatypeSign()+
-            		"\t torder="+type.getDatatypeOrder());
+                    "\t tclass=" + type.getDatatypeClass() + "\t tsize=" + type.getDatatypeSize() + "\t tsign="
+                    + type.getDatatypeSign() + "\t torder=" + type.getDatatypeOrder());
         }
 
         file.close();
@@ -1885,12 +1879,12 @@ public class DebugHDF {
 
     private static void testH5WriteDouble(final String filename) throws Exception
     {
-    	double[] data = new double[100];
+        double[] data = new double[100];
         H5File file = new H5File(filename, H5File.CREATE);
         file.open();
 
         for (int i=0; i<data.length; i++)
-        	data[i] = Math.random();
+            data[i] = Math.random();
 
         long[] dims = {data.length};
         Datatype dtype = file.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
@@ -1904,14 +1898,14 @@ public class DebugHDF {
 
     private static void testH5Write2D(final String filename) throws Exception
     {
-    	long[] dims = {10, 5};
-    	int[][] data = new int[(int)dims[0]][(int)dims[1]];
+        long[] dims = { 10, 5 };
+        int[][] data = new int[(int) dims[0]][(int) dims[1]];
         H5File file = new H5File(filename, H5File.CREATE);
         file.open();
 
         for (int i=0; i<data.length; i++)
             for (int j=0; j<data[0].length; j++)
-            		data[i][j] =(i+1)*j;
+                data[i][j] = (i + 1) * j;
 
         Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
         Dataset dataset = file.createScalarDS("dset", null, dtype, dims, null, null, 0, null);
@@ -1920,7 +1914,7 @@ public class DebugHDF {
         short[][] tmp = new short[(int)dims[0]][(int)dims[1]];
         for (int i=0; i<data.length; i++)
             for (int j=0; j<data[0].length; j++)
-            		tmp[i][j] = (short) data[i][j];
+                tmp[i][j] = (short) data[i][j];
 
         dataset.write(tmp);
 
@@ -2017,7 +2011,7 @@ public class DebugHDF {
         for (int i=0; i<dnames.length; i++) {
             final Dataset dset = (Dataset)file.get(dnames[i]);
             final long t0 = System.currentTimeMillis();
-            final float[] fdata = (float[]) dset.getData();
+            dset.getData();
             final long t1 = System.currentTimeMillis();
             dset.clear();
             System.out.println("Time on reading "+dnames[i]+" = "+ (t1-t0) +"ms");
@@ -2149,7 +2143,7 @@ public class DebugHDF {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static void testCreateLongPath(final String fname) throws Exception {
         final int n = 5;
         H5File file=null;
@@ -2189,7 +2183,7 @@ public class DebugHDF {
         try { file.close(); } catch (final Exception ex) {}
      }
 
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
     private static void testCompressedStrings(final String fname) throws Exception {
         H5File file=null;
 
@@ -2356,57 +2350,61 @@ public class DebugHDF {
 
     private static void testFillValue(final String fname) throws Exception
     {
-    	final int[] fill_int = {9999};
-    	final float[] fill_float = {9999.99f};
-    	final long[] dims = {20, 10};
+        final int[] fill_int = { 9999 };
+        final float[] fill_float = { 9999.99f };
+        final long[] dims = { 20, 10 };
 
-    	long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-    	final long sid = H5.H5Screate_simple(2, dims, null);
+        long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                HDF5Constants.H5P_DEFAULT);
+        final long sid = H5.H5Screate_simple(2, dims, null);
 
-    	long plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
-    	H5.H5Pset_fill_value(plist, HDF5Constants.H5T_NATIVE_INT, fill_int);
-    	long did = H5.H5Dcreate(fid, "/int", HDF5Constants.H5T_NATIVE_INT, sid, plist, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-    	H5.H5Dclose(did);
-    	H5.H5Pclose(plist);
+        long plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        H5.H5Pset_fill_value(plist, HDF5Constants.H5T_NATIVE_INT, fill_int);
+        long did = H5.H5Dcreate(fid, "/int", HDF5Constants.H5T_NATIVE_INT, sid, plist, HDF5Constants.H5P_DEFAULT,
+                HDF5Constants.H5P_DEFAULT);
+        H5.H5Dclose(did);
+        H5.H5Pclose(plist);
 
-    	plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
-    	H5.H5Pset_fill_value(plist, HDF5Constants.H5T_NATIVE_FLOAT, fill_float);
-    	did = H5.H5Dcreate(fid, "/float", HDF5Constants.H5T_NATIVE_FLOAT, sid, plist, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-    	H5.H5Dclose(did);
-    	H5.H5Pclose(plist);
+        plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        H5.H5Pset_fill_value(plist, HDF5Constants.H5T_NATIVE_FLOAT, fill_float);
+        did = H5.H5Dcreate(fid, "/float", HDF5Constants.H5T_NATIVE_FLOAT, sid, plist, HDF5Constants.H5P_DEFAULT,
+                HDF5Constants.H5P_DEFAULT);
+        H5.H5Dclose(did);
+        H5.H5Pclose(plist);
 
-    	H5.H5Fclose(fid);
+        H5.H5Fclose(fid);
 
-    	// reopen the file and check the fill value
-    	final int[] fill_int_read = {0};
-    	final float[] fill_float_read = {0f};
+        // reopen the file and check the fill value
+        final int[] fill_int_read = { 0 };
+        final float[] fill_float_read = { 0f };
 
-    	fid = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
-    	did = H5.H5Dopen(fid,"/int", HDF5Constants.H5P_DEFAULT);
-    	plist = H5.H5Dget_create_plist(did);
-    	H5.H5Pget_fill_value(plist, HDF5Constants.H5T_NATIVE_INT, fill_int_read);
-    	if (fill_int_read[0] == fill_int[0]) {
+        fid = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+        did = H5.H5Dopen(fid, "/int", HDF5Constants.H5P_DEFAULT);
+        plist = H5.H5Dget_create_plist(did);
+        H5.H5Pget_fill_value(plist, HDF5Constants.H5T_NATIVE_INT, fill_int_read);
+        if (fill_int_read[0] == fill_int[0]) {
             System.out.println("Correct fill value: "+fill_int_read[0]);
         } else {
             System.out.println("Incorrect fill value: "+fill_int_read[0]);
         }
-    	H5.H5Dclose(did);
-    	H5.H5Pclose(plist);
+        H5.H5Dclose(did);
+        H5.H5Pclose(plist);
 
-    	did = H5.H5Dopen(fid,"/float", HDF5Constants.H5P_DEFAULT);
-    	plist = H5.H5Dget_create_plist(did);
-    	H5.H5Pget_fill_value(plist, HDF5Constants.H5T_NATIVE_FLOAT, fill_float_read);
-    	if (fill_float_read[0] == fill_float[0]) {
+        did = H5.H5Dopen(fid, "/float", HDF5Constants.H5P_DEFAULT);
+        plist = H5.H5Dget_create_plist(did);
+        H5.H5Pget_fill_value(plist, HDF5Constants.H5T_NATIVE_FLOAT, fill_float_read);
+        if (fill_float_read[0] == fill_float[0]) {
             System.out.println("Correct fill value: "+fill_float_read[0]);
         } else {
             System.out.println("Incorrect fill value: "+fill_float_read[0]);
         }
-    	H5.H5Dclose(did);
-    	H5.H5Pclose(plist);
+        H5.H5Dclose(did);
+        H5.H5Pclose(plist);
 
-    	H5.H5Fclose(fid);
+        H5.H5Fclose(fid);
     }
 
+    @SuppressWarnings("unchecked")
     private static void testGetObjID() throws Exception
     {
         final HashMap typeMap = new HashMap();
@@ -2701,8 +2699,6 @@ public class DebugHDF {
         // Warm up all classes/methods we will use
         runGC ();
         usedMemory ();
-        String bigstr = "";
-
         // Array to keep strong references to allocated objects
         final int count = 100000;
         final int strlen = 15;
@@ -2716,7 +2712,7 @@ public class DebugHDF {
             bytes[i] = (byte)(Math.random()*25.0 + 65);
         }
 
-        bigstr = new String(bytes);
+        new String(bytes);
 
         // Allocate count+1 objects, discard the first one
         for (int i = -1; i < count; ++ i)
@@ -2795,7 +2791,7 @@ public class DebugHDF {
         return s_runtime.totalMemory () - s_runtime.freeMemory ();
     }
 
-    @SuppressWarnings({ "deprecation", "rawtypes" })
+    @SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
     private static void testHDFvector( final String fileName ) throws Exception
     {
 
@@ -2883,7 +2879,7 @@ public class DebugHDF {
        }
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Vector getData(final Group root, final String name )throws Exception
     {
         final Vector v = new Vector();
@@ -3133,24 +3129,12 @@ public class DebugHDF {
             memberSizes[i] = 1;
         }
 
-        /* compound data value must put into a vector field by field */
-/*
-        Vector dataIn = new Vector();
-        int size = D1*D2*D3;
-        int x[] = new int[size];
-        for (int i=0; i<size; i++)  x[i] = i;
-        dataIn.add(0, x);
-
-        size = D1*D2*D3*10;
-        float y[] = new float[size];
-        for (int i=0; i<size; i++) y[i] = i+i/10;
-        dataIn.add(1, y);
-*/
-        final Dataset d = testFile.createCompoundDS("chr22_CEU", root, dims, memberNames, memberDatatypes, memberSizes, null);
+        testFile.createCompoundDS("chr22_CEU", root, dims, memberNames, memberDatatypes, memberSizes, null);
         testFile.close();
 
     }
 
+    @SuppressWarnings("deprecation")
     private static void testHDFcomment(final String fileName) throws Exception {
         // retrieve an instance of H5File
 
@@ -3195,6 +3179,7 @@ public class DebugHDF {
         H5.H5Fflush(testFile.getFID(), HDF5Constants.H5F_SCOPE_GLOBAL);
     }
 
+    @SuppressWarnings("deprecation")
     private static void testHDFdelete(final String fileName) throws Exception {
         // retrieve an instance of H5File
 
@@ -3279,6 +3264,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void testHDFcompound() {
         String FNAME = "H:\\java\\java8\\xcao\\test\\bigdata.h5";
         String DNAME = "PI";
@@ -3306,7 +3292,7 @@ public class DebugHDF {
             rank = d.getRank();
         }
 
-        final long dims[] = d.getSelectedDims();
+        d.getSelectedDims();
         final long selected[] = d.getSelectedDims();
         final long start[] = d.getStartDims();
         final long stride[] = d.getStride();
@@ -3342,6 +3328,7 @@ public class DebugHDF {
         } /* if (data != null) { */
     }
 
+    @SuppressWarnings({ "deprecation", "unchecked" })
     private static void create2Dcompound(String FNAME, String DNAME) throws Exception
     {
         final long DIM1 = 50;
@@ -3381,6 +3368,7 @@ public class DebugHDF {
         h5File.close();
     }
 
+    @SuppressWarnings("deprecation")
     private static void createDataset( final String fname ) throws Exception
     {
         final long[] dims2D = {256, 200};
@@ -3452,6 +3440,7 @@ public class DebugHDF {
         testFile.close();
     }
 
+    @SuppressWarnings("deprecation")
     private static void createStrDataset( final String fname ) throws Exception
     {
         final long[] dims1D = {2};
@@ -3536,6 +3525,7 @@ public class DebugHDF {
         System.out.println( "Normal EOJ" );
     }
 
+    @SuppressWarnings("unchecked")
     private static final boolean create_test_file(final String fname)  throws Exception
     {
         H5File file=null;
@@ -3615,6 +3605,7 @@ public class DebugHDF {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     private static final boolean create_debug_file()  throws Exception
     {
         H5File file=null;
@@ -3697,86 +3688,93 @@ public class DebugHDF {
 
     static private void testGroupMemoryLeak(String fname) throws Exception
     {
-       	final int NGROUPS = 20;
-       	long _pid_ = HDF5Constants.H5P_DEFAULT;
-    	boolean TEST_MEM_LEAK = true;
+        final int NGROUPS = 20;
+        long _pid_ = HDF5Constants.H5P_DEFAULT;
+        boolean TEST_MEM_LEAK = true;
 
-    	for (int N=1; N<=NGROUPS; N++) {
+        for (int N = 1; N <= NGROUPS; N++) {
 
-    	    long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
-    	    long gid = H5.H5Gcreate(fid, "/levelOneGroup", _pid_, _pid_, _pid_);
+            long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
+            long gid = H5.H5Gcreate(fid, "/levelOneGroup", _pid_, _pid_, _pid_);
 
-    		H5.H5Gclose(gid);
-    		H5.H5Fclose(fid);
+            H5.H5Gclose(gid);
+            H5.H5Fclose(fid);
 
-        	for (int i = 0; i<N; i++) {
-        		fid = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDWR, _pid_);
+            for (int i = 0; i < N; i++) {
+                fid = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDWR, _pid_);
 
-        		if (TEST_MEM_LEAK) {
-        			// we have only one object, /levelOneGroup, at the root
+                if (TEST_MEM_LEAK) {
+                    // we have only one object, /levelOneGroup, at the root
                     int[] objTypes = new int[1];
                     long[] objRefs = new long[1];
                     String[] objNames = new String[1];
-            		H5.H5Gget_obj_info_all(fid, "/", objNames, objTypes, objRefs);
-        		}
+                    H5.H5Gget_obj_info_all(fid, "/", objNames, objTypes, objRefs);
+                }
 
-        		gid = H5.H5Gcreate(fid, "/levelOneGroup/group" + i, _pid_, _pid_, _pid_);
+                gid = H5.H5Gcreate(fid, "/levelOneGroup/group" + i, _pid_, _pid_, _pid_);
 
-        		H5.H5Gclose(gid);
-        		H5.H5Fclose(fid);
-        	} /* for (int i = 0; i<N; i++) { */
+                H5.H5Gclose(gid);
+                H5.H5Fclose(fid);
+            } /* for (int i = 0; i<N; i++) { */
 
-        	DecimalFormat fmt = new  DecimalFormat("###,###,###");
-        	System.out.println("no. of groups = " +N+"\tfile size = "+fmt.format((new File(fname)).length()));
-    	} /*for (int N=1; N<=NGROUPS; N++)  */
+            DecimalFormat fmt = new DecimalFormat("###,###,###");
+            System.out.println("no. of groups = " + N + "\tfile size = " + fmt.format((new File(fname)).length()));
+        } /* for (int N=1; N<=NGROUPS; N++) */
      }
 
     static private int testH5OflushCrash(String fname) throws Exception
     {
-    	final long _pid_ = HDF5Constants.H5P_DEFAULT;
-    	long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
+        final long _pid_ = HDF5Constants.H5P_DEFAULT;
+        long fid = H5.H5Fcreate(fname, HDF5Constants.H5F_ACC_TRUNC, _pid_, _pid_);
 
-    	try {
-    	    long sid = H5.H5Screate_simple(1, new long[] {1}, null);
-    	    long did = H5.H5Dcreate(fid, "dset", HDF5Constants.H5T_NATIVE_INT, sid, _pid_, _pid_, _pid_);
-    	    long aid = H5.H5Acreate(did, "ref", HDF5Constants.H5T_STD_REF_OBJ, sid, _pid_, _pid_);
-    		H5.H5Awrite(aid, HDF5Constants.H5T_STD_REF_OBJ, new long[]{-1});
-    		H5.H5Dclose(did);
-    		H5.H5Aclose(aid);
-    		H5.H5Sclose(sid);
-    	} catch (Exception ex) {}
+        try {
+            long sid = H5.H5Screate_simple(1, new long[] { 1 }, null);
+            long did = H5.H5Dcreate(fid, "dset", HDF5Constants.H5T_NATIVE_INT, sid, _pid_, _pid_, _pid_);
+            long aid = H5.H5Acreate(did, "ref", HDF5Constants.H5T_STD_REF_OBJ, sid, _pid_, _pid_);
+            H5.H5Awrite(aid, HDF5Constants.H5T_STD_REF_OBJ, new long[] { -1 });
+            H5.H5Dclose(did);
+            H5.H5Aclose(aid);
+            H5.H5Sclose(sid);
+        }
+        catch (Exception ex) {
+        }
 
-    	try {
-    	    long ocp_plist_id = H5.H5Pcreate(HDF5Constants.H5P_OBJECT_COPY);
-    		H5.H5Pset_copy_object(ocp_plist_id, HDF5Constants.H5O_COPY_EXPAND_REFERENCE_FLAG);
-    		try {
-    			H5.H5Ocopy(fid, "/dset", fid, "dset2", ocp_plist_id, _pid_);
-    		} finally { H5.H5Pclose(ocp_plist_id);}
+        try {
+            long ocp_plist_id = H5.H5Pcreate(HDF5Constants.H5P_OBJECT_COPY);
+            H5.H5Pset_copy_object(ocp_plist_id, HDF5Constants.H5O_COPY_EXPAND_REFERENCE_FLAG);
+            try {
+                H5.H5Ocopy(fid, "/dset", fid, "dset2", ocp_plist_id, _pid_);
+            }
+            finally {
+                H5.H5Pclose(ocp_plist_id);
+            }
 
-    	} catch (Exception ex) {}
+        }
+        catch (Exception ex) {
+        }
 
-    	H5.H5Fclose(fid);
+        H5.H5Fclose(fid);
 
 
-    	return 0;
+        return 0;
     }
 
     static private int testPrintData()
     {
-    	int[] idata = {1,2,3,4,5,6,7,8,9,10};
-    	float[] fdata = {1.001f,2.001f,3.001f,4.001f,5.001f,6.001f,7.001f,8.001f,9.001f,10.001f};
-    	double[] ddata = new double[idata.length];
+        int[] idata = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        float[] fdata = { 1.001f, 2.001f, 3.001f, 4.001f, 5.001f, 6.001f, 7.001f, 8.001f, 9.001f, 10.001f };
+        double[] ddata = new double[idata.length];
 
-    	for (int i=0; i<idata.length; i++) {
-    		ddata[i] = ((Number) Array.get(fdata, i)).doubleValue();
-    	}
+        for (int i = 0; i < idata.length; i++) {
+            ddata[i] = ((Number) Array.get(fdata, i)).doubleValue();
+        }
 
-    	for (int i=0; i<idata.length; i++) {
-    		System.out.println(ddata[i]+"\t");
-    	}
+        for (int i = 0; i < idata.length; i++) {
+            System.out.println(ddata[i] + "\t");
+        }
 
 
-    	return 0;
+        return 0;
     }
 
     private static void testObjReadData(String filename, String dname) throws Exception
@@ -3859,7 +3857,7 @@ public class DebugHDF {
      */
     private static void testCreateDS(String filename, String dname) throws Exception
     {
-    	long[] dims = {20};
+        long[] dims = { 20 };
 
         H5File file = (H5File) (new H5File()).createFile(filename, H5File.FILE_CREATE_OPEN);
         file.open();
@@ -3877,75 +3875,75 @@ public class DebugHDF {
     }
 
     private static void testHDF4(String filename){
-    	System.out.println("filename"+filename);
-    	// "E:\work\data\1\1\test.hdf"
-    	FileFormat h4file=FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
-    	if (h4file==null){
-    		System.err.println("Cannot find HDF4 FileFormat");
-    		return;
-    	}
+        System.out.println("filename" + filename);
+        // "E:\work\data\1\1\test.hdf"
+        FileFormat h4file = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
+        if (h4file == null) {
+            System.err.println("Cannot find HDF4 FileFormat");
+            return;
+        }
 
-    	// Create an instance obj H4File with read access
-    	try {
-    		H4File myfile = (H4File) h4file.createInstance(filename,FileFormat.READ);
-    		long fid = myfile.open();
-    		Group g=(Group) myfile.getRootObject();
-    		List list=g.getMemberList();
-    		int n=list.size();
-    		System.out.println("--->"+n);
-    		myfile.close();
-    	}
-    	catch (Exception e) {
-    		// TODO Auto-generated catch block
-    		e.printStackTrace();
-    	}
+        // Create an instance obj H4File with read access
+        try {
+            H4File myfile = (H4File) h4file.createInstance(filename, FileFormat.READ);
+            long fid = myfile.open();
+            Group g = (Group) myfile.getRootObject();
+            List list = g.getMemberList();
+            int n = list.size();
+            System.out.println("--->" + n);
+            myfile.close();
+        }
+        catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private static void test3DHDF4(String filename, String dsetname) throws Exception
     {
         H4File file = new H4File(filename, H5File.READ);
 
-    	if (file==null){
-    		System.err.println("Cannot find HDF4 file: "+filename);
-    		return;
-    	}
+        if (file == null) {
+            System.err.println("Cannot find HDF4 file: " + filename);
+            return;
+        }
 
         file.open();
 
         Group g = (Group) file.getRootObject();
         H4SDS sds = (H4SDS) g.getMemberList().get(0);
 
-    	if (sds==null){
-    		System.err.println("Cannot find HDF4 SDS: "+dsetname);
-    		return;
-    	}
+        if (sds == null) {
+            System.err.println("Cannot find HDF4 SDS: " + dsetname);
+            return;
+        }
 
-    	// only read 2D
-    	Object data=sds.read();
-    	int n = Array.getLength(data);
-    	for (int i=0; i<n; i++) {
-    		if ((i%10)==0)
-    			System.out.println("");
+        // only read 2D
+        Object data = sds.read();
+        int n = Array.getLength(data);
+        for (int i = 0; i < n; i++) {
+            if ((i % 10) == 0)
+                System.out.println("");
 
-    		System.out.print(Array.get(data, i)+"\t");
-    	}
+            System.out.print(Array.get(data, i) + "\t");
+        }
 
-    	// read the whole 3D
-    	int rank = sds.getRank();
-    	long dims[] = sds.getDims();
-    	long selectedDims[] = sds.getSelectedDims();
+        // read the whole 3D
+        int rank = sds.getRank();
+        long dims[] = sds.getDims();
+        long selectedDims[] = sds.getSelectedDims();
 
-    	for (int i=0; i<rank; i++)
-    		selectedDims[i] = dims[i];
+        for (int i = 0; i < rank; i++)
+            selectedDims[i] = dims[i];
 
-    	data=sds.read();
-    	n = Array.getLength(data);
-    	for (int i=0; i<n; i++) {
-    		if ((i%10)==0)
-    			System.out.println("");
+        data = sds.read();
+        n = Array.getLength(data);
+        for (int i = 0; i < n; i++) {
+            if ((i % 10) == 0)
+                System.out.println("");
 
-    		System.out.print(Array.get(data, i)+"\t");
-    	}
+            System.out.print(Array.get(data, i) + "\t");
+        }
     }
 
 

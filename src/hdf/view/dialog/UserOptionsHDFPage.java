@@ -14,8 +14,10 @@
 
 package hdf.view.dialog;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,78 +34,103 @@ import hdf.view.ViewProperties;
 public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsHDFPage.class);
 
-    private Text                  fileExtField, maxMemberField, startMemberField;
-    private Button                checkConvertEnum, checkShowRegRefValues;
-    private Button                nativeOrder, decOrder, checkIndexCreateOrder;
-    private Button                checkIndexType, checkIndexOrder, checkIndexNative;
-    private Button                earlyLibVersion, early18LibVersion, early110LibVersion, earlyLateLibVersion;
-    private Button                lateLibVersion, late18LibVersion, late110LibVersion, lateLateLibVersion;
+    private Text fileExtField, maxMemberField, startMemberField;
+    private Button checkConvertEnum, checkShowRegRefValues, helpButton;
+    private Button nativeOrder, decOrder, checkIndexCreateOrder;
+    private Button checkIndexType, checkIndexOrder, checkIndexNative;
+    private Button earlyLibVersion, early18LibVersion, early110LibVersion, earlyLateLibVersion;
+    private Button lateLibVersion, late18LibVersion, late110LibVersion, lateLateLibVersion;
 
     /** Default early libversion for files */
-    private static String         earlyLibVers;
+    private static String earlyLibVers;
 
     /** Default late libversion for files */
-    private static String         lateLibVers;
+    private static String lateLibVers;
 
     /** Default index type for files */
-    private static String         indexType;
+    private static String indexType;
 
     /** Default index ordering for files */
-    private static String         indexOrder;
+    private static String indexOrder;
 
     public UserOptionsHDFPage() {
         super("HDF Settings");
     }
+
     /**
-     * Notifies that the OK button of this page's container has been pressed.
+     * Performs special processing when this page's Defaults button has been pressed.
+     */
+    public void performDefaults() {
+        super.performDefaults();
+        getPreferenceStore();
+
+    }
+
+    /**
+     * Notifies that the OK button if this page's container has been pressed.
      *
-     * @return <code>false</code> to abort the container's OK processing and
-     * <code>true</code> to allow the OK to happen
+     * @return <code>false</code> to abort the container's OK processing and <code>true</code> to allow
+     *         the OK to happen
      */
     public boolean performOk() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
-        String ext = fileExtField.getText();
-        if ((ext != null) && (ext.length() > 0)) {
-            ext = ext.trim();
-            ViewProperties.setFileExtension(ext);
+        if (fileExtField != null) {
+            String ext = fileExtField.getText();
+            if ((ext != null) && (ext.length() > 0)) {
+                ext = ext.trim();
+                ViewProperties.setFileExtension(ext);
+            }
         }
 
-        if (earlyLibVersion.getSelection())
-            ViewProperties.setEarlyLib("Earliest");
-        else if (early18LibVersion.getSelection())
-            ViewProperties.setEarlyLib("v18");
-        else if (early110LibVersion.getSelection())
-            ViewProperties.setEarlyLib("v110");
-        else if (earlyLateLibVersion.getSelection())
-            ViewProperties.setEarlyLib("Latest");
-        else
-            ViewProperties.setEarlyLib("Earliest");
+        if (earlyLibVersion != null) {
+            if (earlyLibVersion.getSelection())
+                ViewProperties.setEarlyLib("Earliest");
+            else if (early18LibVersion.getSelection())
+                ViewProperties.setEarlyLib("v18");
+            else if (early110LibVersion.getSelection())
+                ViewProperties.setEarlyLib("v110");
+            else if (earlyLateLibVersion.getSelection())
+                ViewProperties.setEarlyLib("Latest");
+            else
+                ViewProperties.setEarlyLib("Earliest");
+        }
 
-        if (lateLibVersion.getSelection())
-            ViewProperties.setLateLib("Earliest");
-        else if (late18LibVersion.getSelection())
-            ViewProperties.setLateLib("v18");
-        else if (late110LibVersion.getSelection())
-            ViewProperties.setLateLib("v110");
-        else if (lateLateLibVersion.getSelection())
-            ViewProperties.setLateLib("Latest");
-        else
-            ViewProperties.setLateLib("Latest");
+        if (lateLibVersion != null) {
+            if (lateLibVersion.getSelection())
+                ViewProperties.setLateLib("Earliest");
+            else if (late18LibVersion.getSelection())
+                ViewProperties.setLateLib("v18");
+            else if (late110LibVersion.getSelection())
+                ViewProperties.setLateLib("v110");
+            else if (lateLateLibVersion.getSelection())
+                ViewProperties.setLateLib("Latest");
+            else
+                ViewProperties.setLateLib("Latest");
+        }
 
         // set index type
-        if (checkIndexType.getSelection())
-            ViewProperties.setIndexType("H5_INDEX_NAME");
-        else
-            ViewProperties.setIndexType("H5_INDEX_CRT_ORDER");
+        if (checkIndexType != null) {
+            if (checkIndexType.getSelection())
+                ViewProperties.setIndexType("H5_INDEX_NAME");
+            else
+                ViewProperties.setIndexType("H5_INDEX_CRT_ORDER");
+        }
 
         // set index order
-        if (checkIndexOrder.getSelection())
-            ViewProperties.setIndexOrder("H5_ITER_INC");
-        else if (checkIndexNative.getSelection())
-            ViewProperties.setIndexOrder("H5_ITER_NATIVE");
-        else
-            ViewProperties.setIndexOrder("H5_ITER_DEC");
+        if (checkIndexOrder != null) {
+            if (checkIndexOrder.getSelection())
+                ViewProperties.setIndexOrder("H5_ITER_INC");
+            else if (checkIndexNative.getSelection())
+                ViewProperties.setIndexOrder("H5_ITER_NATIVE");
+            else
+                ViewProperties.setIndexOrder("H5_ITER_DEC");
+        }
+
+        if (checkConvertEnum != null)
+            ViewProperties.setConvertEnum(checkConvertEnum.getSelection());
+        if (checkShowRegRefValues != null)
+            ViewProperties.setShowRegRefValue(checkShowRegRefValues.getSelection());
 
         return true;
     }
@@ -112,7 +139,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      * Loads all stored values in the <code>FieldEditor</code>s.
      */
     protected void load() {
-        ViewProperties store = (ViewProperties)getPreferenceStore();
+        getPreferenceStore();
 
         fileExtField.setText(ViewProperties.getFileExtension());
 
@@ -127,6 +154,9 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         late18LibVersion.setSelection(lateLibVers.compareTo("v18") == 0);
         late110LibVersion.setSelection(lateLibVers.compareTo("v110") == 0);
         lateLateLibVersion.setSelection(lateLibVers.compareTo("Latest") == 0);
+
+        checkConvertEnum.setSelection(ViewProperties.isConvertEnum());
+        checkShowRegRefValues.setSelection(ViewProperties.showRegRefValues());
 
         indexType = ViewProperties.getIndexType();
         checkIndexType.setSelection(indexType.compareTo("H5_INDEX_NAME") == 0);
@@ -146,22 +176,16 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      * @return the new control
      */
     protected Control createContents(Composite parent) {
-        shell = parent.getShell();
-        ScrolledComposite scroller = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-        scroller.setExpandHorizontal(true);
-        scroller.setExpandVertical(true);
-
-        Composite composite = new Composite(scroller, SWT.NONE);
-        composite.setLayout(new GridLayout(1, true));
-        scroller.setContent(composite);
+        Composite composite = new Composite(parent, SWT.NONE);
+        composite.setLayout(new GridLayout(1, false));
 
         Composite fileOptionComposite = new Composite(composite, SWT.NONE);
-        fileOptionComposite.setLayout(new GridLayout(1, true));
+        fileOptionComposite.setLayout(new GridLayout());
         fileOptionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group fileExtensionGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
-        fileExtensionGroup.setLayout(new GridLayout(2, false));
-        fileExtensionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        fileExtensionGroup.setLayout(new GridLayout(2, true));
+        fileExtensionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         fileExtensionGroup.setFont(curFont);
         fileExtensionGroup.setText("File Extensions");
 
@@ -175,84 +199,114 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
 
 
         org.eclipse.swt.widgets.Group defaultLibVersionGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        defaultLibVersionGroup.setLayout(new GridLayout(1, true));
+        defaultLibVersionGroup.setLayout(new GridLayout());
         defaultLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         defaultLibVersionGroup.setFont(curFont);
         defaultLibVersionGroup.setText("Default Lib Version");
 
         org.eclipse.swt.widgets.Group earlyLibVersionGroup = new org.eclipse.swt.widgets.Group(defaultLibVersionGroup, SWT.NONE);
         earlyLibVersionGroup.setLayout(new GridLayout(4, true));
-        earlyLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        earlyLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         earlyLibVersionGroup.setFont(curFont);
         earlyLibVersionGroup.setText("Default Early Lib Version");
 
         earlyLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLibVersion.setFont(curFont);
         earlyLibVersion.setText("Earliest");
-        earlyLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        earlyLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         early18LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early18LibVersion.setFont(curFont);
         early18LibVersion.setText("v18");
-        early18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        early18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         early110LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early110LibVersion.setFont(curFont);
         early110LibVersion.setText("v110");
-        early110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        early110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         earlyLateLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLateLibVersion.setFont(curFont);
         earlyLateLibVersion.setText("Latest");
-        earlyLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        earlyLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group lateLibVersionGroup = new org.eclipse.swt.widgets.Group(defaultLibVersionGroup, SWT.NONE);
         lateLibVersionGroup.setLayout(new GridLayout(4, true));
-        lateLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        lateLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         lateLibVersionGroup.setFont(curFont);
         lateLibVersionGroup.setText("Default Late Lib Version");
 
         lateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLibVersion.setFont(curFont);
         lateLibVersion.setText("Earliest");
-        lateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        lateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         late18LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late18LibVersion.setFont(curFont);
         late18LibVersion.setText("v18");
-        late18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        late18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         late110LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late110LibVersion.setFont(curFont);
         late110LibVersion.setText("v110");
-        late110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        late110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         lateLateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLateLibVersion.setFont(curFont);
         lateLateLibVersion.setText("Latest");
-        lateLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        lateLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+
+        org.eclipse.swt.widgets.Group dataGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
+        dataGroup.setLayout(new GridLayout(4, false));
+        dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        dataGroup.setFont(curFont);
+        dataGroup.setText("Data");
+
+        helpButton = new Button(dataGroup, SWT.PUSH);
+        helpButton.setImage(ViewProperties.getHelpIcon());
+        helpButton.setToolTipText("Help on Convert Enum");
+        helpButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                final String msg = "Convert enum data to strings. \n"
+                        + "For example, a dataset of an enum type of (R=0, G=, B=2) \n"
+                        + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
+                        + "shown as (R, B, B, B, G, G).\n\n\n";
+
+                MessageDialog.openInformation(shell, shell.getText(), msg);
+            }
+        });
+
+        checkConvertEnum = new Button(dataGroup, SWT.CHECK);
+        checkConvertEnum.setFont(curFont);
+        checkConvertEnum.setText("Convert Enum");
+        checkConvertEnum.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+
+        checkShowRegRefValues = new Button(dataGroup, SWT.CHECK);
+        checkShowRegRefValues.setFont(curFont);
+        checkShowRegRefValues.setText("Show RegRef Values");
+        checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group displayIndexingGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        displayIndexingGroup.setLayout(new GridLayout(1, true));
+        displayIndexingGroup.setLayout(new GridLayout());
         displayIndexingGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         displayIndexingGroup.setFont(curFont);
         displayIndexingGroup.setText("Display Indexing Options");
 
         org.eclipse.swt.widgets.Group indexingTypeGroup = new org.eclipse.swt.widgets.Group(displayIndexingGroup, SWT.NONE);
         indexingTypeGroup.setLayout(new GridLayout(2, true));
-        indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         indexingTypeGroup.setFont(curFont);
         indexingTypeGroup.setText("Indexing Type");
 
         checkIndexType = new Button(indexingTypeGroup, SWT.RADIO);
         checkIndexType.setFont(curFont);
         checkIndexType.setText("By Name");
-        checkIndexType.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        checkIndexType.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         checkIndexCreateOrder = new Button(indexingTypeGroup, SWT.RADIO);
         checkIndexCreateOrder.setFont(curFont);
         checkIndexCreateOrder.setText("By Creation Order");
-        checkIndexCreateOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        checkIndexCreateOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
 
         org.eclipse.swt.widgets.Group indexingOrderGroup = new org.eclipse.swt.widgets.Group(displayIndexingGroup, SWT.NONE);
@@ -264,19 +318,19 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkIndexOrder = new Button(indexingOrderGroup, SWT.RADIO);
         checkIndexOrder.setFont(curFont);
         checkIndexOrder.setText("Increments");
-        checkIndexOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        checkIndexOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         decOrder = new Button(indexingOrderGroup, SWT.RADIO);
         decOrder.setFont(curFont);
         decOrder.setText("Decrements");
-        decOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        decOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         nativeOrder = new Button(indexingOrderGroup, SWT.RADIO);
         nativeOrder.setFont(curFont);
         nativeOrder.setText("Native");
-        nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         load();
-        return scroller;
+        return composite;
     }
 }

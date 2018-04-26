@@ -289,7 +289,7 @@
         basedir="${classes.dir}"
         excludes="hdf/view/** examples/** test/** *.log *.h5 *.data">
         <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
-        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
+        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
 
         <manifest>
           <attribute name="Main-Class" value="${main-class}" />
@@ -315,7 +315,7 @@
       excludes="examples/** test/** *.log *.h5 *.data">
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
-      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
+      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.os}/${machine.arch}" includes="swt.jar" />
 
       <zipfileset src="${lib.dir}/ext/swt/commons-logging.jar" excludes="META-INF/**/*"></zipfileset>
@@ -360,8 +360,8 @@
     <mkdir dir="${jar.dir}/lib/ext" />
     <copy todir="${jar.dir}/lib">
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar" />
-      <fileset dir="${hdf5.lib.dir}" includes="*.jar" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -714,9 +714,10 @@
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
-      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
     </copy>
 
     <!-- Bundle jre -->
@@ -763,6 +764,7 @@
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
@@ -775,6 +777,7 @@
         <include name="libjpeg.so" />
         <include name="libszip.so" />
         <include name="libz.so" />
+        <exclude name="slf4j*.jar" />
       </fileset>
       <fileset dir="${hdf5.lib.dir}">
         <include name="*.jar" />
@@ -782,6 +785,7 @@
         <include name="libhdf5_java.so" />
         <include name="libszip.so" />
         <include name="libz.so" />
+        <exclude name="slf4j*.jar" />
       </fileset>
     </copy>
 
@@ -835,9 +839,10 @@
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
-      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
     </copy>

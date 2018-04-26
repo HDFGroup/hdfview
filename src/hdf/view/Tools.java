@@ -1967,8 +1967,14 @@ public final class Tools {
     /**
      * Reads data from a binary file into a buffer.
      *
-     * @param filename
+     * @param dataOut
+     *            the output stream
+     * @param fileName
      *            the file to read binary data from
+     * @param order
+     *            the new byte order, either BIG_ENDIAN or LITTLE_ENDIAN
+     *
+     * @return true if successful; otherwise, false.
      */
     public static boolean getBinaryDataFromFile(Object dataOut, String fileName, ByteOrder order) {
         if (dataOut == null) return false;
