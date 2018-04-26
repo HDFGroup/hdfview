@@ -1282,7 +1282,21 @@ public class H5Datatype extends Datatype {
                     description = "String, length = variable";
                 }
                 else {
+                    String strPadType;
+                    int strPad = H5.H5Tget_strpad(tid);
+
+                    if (strPad == HDF5Constants.H5T_STR_NULLTERM)
+                        strPadType = "H5T_STR_NULLTERM";
+                    else if (strPad == HDF5Constants.H5T_STR_NULLPAD)
+                        strPadType = "H5T_STR_NULLPAD";
+                    else if (strPad == HDF5Constants.H5T_STR_SPACEPAD)
+                        strPadType = "H5T_STR_SPACEPAD";
+                    else
+                        strPadType = null;
+
                     description = "String, length = " + H5.H5Tget_size(tid);
+
+                    if (strPadType != null) description += ", string padding = " + strPadType;
                 }
             }
             catch (Exception ex) {
