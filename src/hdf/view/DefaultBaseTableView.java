@@ -532,11 +532,7 @@ public abstract class DefaultBaseTableView implements TableView {
         int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
         shell.setSize(width, height);
 
-        viewer.addDataView(this);
-
         log.trace("finish");
-
-        shell.open();
     }
 
     /**

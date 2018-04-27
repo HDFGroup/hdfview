@@ -95,6 +95,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     public DefaultScalarDSTableView(ViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
 
+        log.trace("DefaultScalarDSTableView: start");
+
         if (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE) {
             if (dataObject.getDatatype().getDatatypeSize() > 8) {
                 isReadOnly = true;
@@ -138,6 +140,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 }
             });
         }
+
+        viewer.addDataView(this);
+
+        log.trace("DefaultScalarDSTableView: finish");
+
+        shell.open();
     }
 
     /**

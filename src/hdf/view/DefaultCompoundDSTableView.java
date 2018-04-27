@@ -86,9 +86,17 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     public DefaultCompoundDSTableView(ViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
 
+        log.trace("DefaultCompoundDSTableView: start");
+
         isDataTransposed = false; // Disable transpose for compound datasets
 
         shell.setImage(ViewProperties.getTableIcon());
+
+        viewer.addDataView(this);
+
+        log.trace("DefaultCompoundDSTableView: finish");
+
+        shell.open();
     }
 
     /**
