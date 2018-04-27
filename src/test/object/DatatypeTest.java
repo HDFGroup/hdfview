@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.object;
 
@@ -18,7 +18,7 @@ import org.junit.Test;
 
 /**
  * @author rsinha
- * 
+ *
  */
 public class DatatypeTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatatypeTest.class);
@@ -85,13 +85,31 @@ public class DatatypeTest {
             "16-bit integer", "32-bit integer", "64-bit integer", "Object reference", "Object reference",
             "Object reference", "Object reference", "Object reference", "Object reference", "Object reference",
             "Object reference", "Object reference", "Object reference", "Object reference", "Object reference",
-            "String, length = 1", "String, length = 2", "String, length = 1", "String, length = 2",
-            "String, length = 1", "String, length = 2", "String, length = 1", "String, length = 2",
-            "String, length = 1", "String, length = 2", "String, length = 1", "String, length = 2",
-            "String, length = 1", "String, length = 2", "String, length = 1", "String, length = 2",
-            "String, length = 1", "String, length = 2", "String, length = 1", "String, length = 2",
-            "String, length = 1", "String, length = 2", "String, length = 1", "String, length = 2", "Unknown",
-            "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "String, length = 1, string padding = H5T_STR_NULLTERM",
+            "String, length = 2, string padding = H5T_STR_NULLTERM", "Unknown", "Unknown", "Unknown", "Unknown",
+            "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown",
             "Unknown", "Unknown" };
 
     @BeforeClass

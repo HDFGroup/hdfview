@@ -375,7 +375,8 @@ public class AttributeTest {
     @Test
     public void testGetType() {
         log.debug("testGetType");
-        assertTrue(strAttr.getDatatype().getDatatypeDescription().equals("String, length = 20"));
+        assertTrue(strAttr.getDatatype().getDatatypeDescription()
+                .equals("String, length = 20, string padding = H5T_STR_NULLTERM"));
         assertTrue(arrayIntAttr.getDatatype().getDatatypeDescription().equals("32-bit integer"));
         long nObjs = 0;
         try {
