@@ -1490,7 +1490,7 @@ public class H5CompoundDSTest {
                     assertTrue(
                             ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0].equals(((String[]) attr.getData())[0]));
                 } catch (Exception ex) {
-                    log.trace("testGetMetadata(): getData() failure: {}", ex);
+                    log.trace("testGetMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testGetMetadata(): Out of memory");
@@ -1508,7 +1508,7 @@ public class H5CompoundDSTest {
                         assertEquals(expected[j], ints[j]);
                     }
                 } catch (Exception ex) {
-                    log.trace("testGetMetadata(): getData() failure: {}", ex);
+                    log.trace("testGetMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testGetMetadata(): Out of memory");
@@ -1562,7 +1562,7 @@ public class H5CompoundDSTest {
                     final String[] strs = (String[]) attr.getData();
                     strs[0] = TEST_VALUE_STR;
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
@@ -1577,7 +1577,7 @@ public class H5CompoundDSTest {
                         ints[j] = TEST_VALUE_INT;
                     }
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
@@ -1632,7 +1632,7 @@ public class H5CompoundDSTest {
                     assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
                     assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
@@ -1648,7 +1648,7 @@ public class H5CompoundDSTest {
                         assertEquals(TEST_VALUE_INT, ints[j]);
                     }
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
@@ -1661,7 +1661,7 @@ public class H5CompoundDSTest {
                     final float[] floats = (float[]) attr.getData();
                     assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
@@ -1688,7 +1688,7 @@ public class H5CompoundDSTest {
                     final String[] strs = (String[]) attr.getData();
                     strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0];
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
@@ -1704,7 +1704,7 @@ public class H5CompoundDSTest {
                         ints[j] = expected[j];
                     }
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");

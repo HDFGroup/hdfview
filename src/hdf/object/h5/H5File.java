@@ -2028,7 +2028,7 @@ public class H5File extends FileFormat {
                 }
                 catch (Exception ex) {
                     attrValue = null;
-                    log.trace("writeAttribute(): getData() failure {}", ex);
+                    log.trace("writeAttribute(): getData() failure:", ex);
                 }
 
                 log.trace("writeAttribute(): getValue");

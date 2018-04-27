@@ -90,7 +90,7 @@ public class TableViewFactory extends DataViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
+            log.debug("getTableView(): Class.forName({}) failure:", dataViewName, ex);
 
             try {
                 log.trace("getTableView(): ViewProperties.loadExtClass().loadClass({})",
@@ -100,7 +100,7 @@ public class TableViewFactory extends DataViewFactory {
                 theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
             }
             catch (Exception ex2) {
-                log.debug("getTableView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                log.debug("getTableView(): ViewProperties.loadExtClass().loadClass({}) failure:",
                         dataViewName, ex);
 
                 /* No loadable class found; use the default TableView */
@@ -125,7 +125,7 @@ public class TableViewFactory extends DataViewFactory {
                     theClass = Class.forName(dataViewName);
                 }
                 catch (Exception ex3) {
-                    log.debug("getTableView(): Class.forName({}) failure: {}", dataViewName, ex);
+                    log.debug("getTableView(): Class.forName({}) failure:", dataViewName, ex);
 
                     theClass = null;
                 }
@@ -189,7 +189,7 @@ public class TableViewFactory extends DataViewFactory {
             log.trace("getTableView(): returning TableView instance {}", theView);
         }
         catch (Exception ex) {
-            log.trace("getTableView(): Error instantiating class: {}", ex);
+            log.debug("getTableView(): Error instantiating class:", ex);
         }
 
         log.trace("getTableView(): finish");

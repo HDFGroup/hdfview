@@ -496,7 +496,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             isValueChanged = true;
         }
         catch (Exception ex) {
-            log.debug("updateValueInMemory({}, {}): {}", row, col, ex);
+            log.debug("updateValueInMemory({}, {}) failure:", row, col, ex);
         }
 
         log.trace("updateValueInMemory({}, {}): finish", row, col);
@@ -1331,6 +1331,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
             catch (Exception ex) {
                 log.debug("ScalarDSDataProvider:setDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
+                Tools.showError(shell, "Unable to set new value:\n\n " + ex, shell.getText());
             }
         }
 

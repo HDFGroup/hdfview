@@ -1137,7 +1137,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     customFormat.applyPattern(str);
                 }
                 catch (Exception ex) {
-                    log.debug("Invalid custom number notation format: {}: {}", str, ex);
+                    log.debug("Invalid custom number notation format: {}:", str, ex);
                     Tools.showError(shell, "Invalid custom notation format " + str,
                             shell.getText());
                 }
@@ -1984,11 +1984,11 @@ public abstract class DefaultBaseTableView implements TableView {
             dataTable.doCommand(new StructuralRefreshCommand());
         }
         catch (Exception ex) {
-            log.trace("importBinaryData(): {}", ex);
+            log.debug("importBinaryData():", ex);
             return;
         }
         catch (OutOfMemoryError e) {
-            log.trace("importBinaryData(): Out of memory");
+            log.debug("importBinaryData(): Out of memory");
             return;
         }
     }

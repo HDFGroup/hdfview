@@ -861,7 +861,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 dataObject.getFileFormat().renameAttribute(dataObject, attrName, newName);
             }
             catch (Exception ex) {
-                log.debug("renameAttribute(): renaming failure: {}", ex);
+                log.debug("renameAttribute(): renaming failure:", ex);
                 Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
             }
 
@@ -878,7 +878,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 ((MetaDataContainer) dataObject).updateMetadata(attr);
             }
             catch (Exception ex) {
-                log.debug("renameAttribute(): updateMetadata() failure: {}", ex);
+                log.debug("renameAttribute(): updateMetadata() failure:", ex);
                 Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
             }
         }
@@ -915,7 +915,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             data = attr.getData();
         }
         catch (Exception ex) {
-            log.debug("updateAttributeValue(): getData() failure: {}", ex);
+            log.debug("updateAttributeValue(): getData() failure:", ex);
             log.trace("updateAttributeValue(): finish");
             return;
         }
@@ -1098,7 +1098,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 ((MetaDataContainer) dataObject).updateMetadata(attr);
             }
             catch (Exception ex) {
-                log.debug("updateAttributeValue(): updateMetadata() failure: {}", ex);
+                log.debug("updateAttributeValue(): updateMetadata() failure:", ex);
                 Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
             }
         }

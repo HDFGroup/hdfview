@@ -434,7 +434,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
         }
         catch (Exception ex) {
-            log.debug("updateValueInMemory({}, {}): {}", row, col, ex);
+            log.debug("updateValueInMemory({}, {}):", row, col, ex);
         }
 
         log.trace("updateValueInMemory({}, {}): finish", row, col);
