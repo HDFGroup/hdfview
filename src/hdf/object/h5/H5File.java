@@ -3048,7 +3048,7 @@ public class H5File extends FileFormat {
         log.trace("renameAttribute(): rename {} to {}", oldAttrName, newAttrName);
         if (!attrFlag) {
             attrFlag = true;
-            H5.H5Arename_by_name(obj.getFID(), obj.getName(), oldAttrName, newAttrName, HDF5Constants.H5P_DEFAULT);
+            H5.H5Arename_by_name(obj.getFID(), obj.getFullName(), oldAttrName, newAttrName, HDF5Constants.H5P_DEFAULT);
         }
     }
 

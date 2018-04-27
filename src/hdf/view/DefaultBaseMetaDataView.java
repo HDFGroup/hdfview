@@ -24,7 +24,8 @@ import java.util.StringTokenizer;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -43,6 +44,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -59,6 +62,7 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
+import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.NewAttributeDialog;
 
 /**
@@ -227,7 +231,52 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         attrTable.setFont(curFont);
         attrTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 
-        attrTable.addListener(SWT.MouseDoubleClick, attrTableCellEditor);
+        Menu attrPopupMenu = createAttributePopupMenu(attrTable);
+        attrTable.setMenu(attrPopupMenu);
+
+        /*
+         * Add a double-click listener for editing attribute values in a separate
+         * TableView
+         */
+        attrTable.addListener(SWT.MouseDoubleClick, new Listener() {
+            @Override
+            public void handleEvent(Event arg0) {
+                final TableItem item = attrTable.getItem(attrTable.getSelectionIndex());
+
+                viewManager.getTreeView().setDefaultDisplayMode(true);
+
+                try {
+                    Display.getDefault().syncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                viewManager.getTreeView().showDataContent((HObject) item.getData());
+                            }
+                            catch (Exception ex) {
+                                log.debug("Attribute showDataContent failure: ", ex);
+                            }
+                        }
+                    });
+                }
+                catch (Exception e) {
+                    log.debug("Attribute showDataContent loading manually interrupted");
+                }
+            }
+        });
+
+        /*
+         * Add a right-click listener for showing a menu that has options for renaming
+         * an attribute, editing an attribute, or deleting an attribute
+         */
+        attrTable.addListener(SWT.MenuDetect, new Listener() {
+            @Override
+            public void handleEvent(Event arg0) {
+                int index = attrTable.getSelectionIndex();
+                if (index < 0) return;
+
+                attrTable.getMenu().setVisible(true);
+            }
+        });
 
         for (int i = 0; i < columnNames.length; i++) {
             TableColumn column = new TableColumn(attrTable, SWT.NONE);
@@ -617,6 +666,86 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         return dataObject;
     }
 
+    private Menu createAttributePopupMenu(final Table table) {
+        Menu menu = new Menu(table);
+        MenuItem item;
+
+        item = new MenuItem(menu, SWT.PUSH);
+        item.setText("Rename Attribute");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                HObject itemObj = (HObject) table.getItem(table.getSelectionIndex()).getData();
+                String result = new InputDialog(Display.getDefault().getShells()[0],
+                        Display.getDefault().getShells()[0].getText(), "New Attribute Name",
+                        itemObj.getName()).open();
+
+                if ((result == null) || ((result = result.trim()) == null)
+                        || (result.length() < 1)) {
+                    return;
+                }
+
+                Attribute attr = (Attribute) attrTable.getItem(attrTable.getSelectionIndex()).getData();
+                renameAttribute(attr, result);
+            }
+        });
+
+        item = new MenuItem(menu, SWT.PUSH);
+        item.setText("Edit Attribute");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                final TableItem item = attrTable.getItem(attrTable.getSelectionIndex());
+
+                viewManager.getTreeView().setDefaultDisplayMode(true);
+
+                try {
+                    Display.getDefault().syncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                viewManager.getTreeView().showDataContent((HObject) item.getData());
+                            }
+                            catch (Exception ex) {
+                                log.debug("Attribute showDataContent failure: ", ex);
+                            }
+                        }
+                    });
+                }
+                catch (Exception ex) {
+                    log.debug("Attribute showDataContent loading manually interrupted");
+                }
+            }
+        });
+
+        item = new MenuItem(menu, SWT.PUSH);
+        item.setText("Delete Attribute");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                final TableItem item = attrTable.getItem(attrTable.getSelectionIndex());
+
+                deleteAttribute((HObject) item.getData());
+            }
+        });
+
+        menu.addMenuListener(new MenuAdapter() {
+            @Override
+            public void menuShown(MenuEvent e) {
+                /* 'Rename Attribute' MenuItem */
+                menu.getItem(0).setEnabled(!dataObject.getFileFormat().isReadOnly() && !isH4);
+
+                /* 'Edit Attribute' MenuItem */
+                menu.getItem(1).setEnabled(!dataObject.getFileFormat().isReadOnly());
+
+                /* 'Delete Attribute' MenuItem */
+                menu.getItem(2).setEnabled(!dataObject.getFileFormat().isReadOnly() && !isH4);
+            }
+        });
+
+        return menu;
+    }
+
     @Override
     public Attribute addAttribute(HObject obj) {
         if (obj == null) return null;
@@ -714,6 +843,49 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         return attr;
     }
 
+    private void renameAttribute(Attribute attr, String newName) {
+        log.trace("renameAttribute(): start");
+
+        if ((attr == null) || (newName == null) || (newName = newName.trim()) == null || (newName.length() < 1)) {
+            log.debug("renameAttribute(): Attribute is null or Attribute's new name is null");
+            log.trace("renameAttribute(): finish");
+            return;
+        }
+
+        String attrName = attr.getName();
+
+        log.trace("renameAttribute(): oldName={} newName={}", attrName, newName);
+
+        if (isH5) {
+            try {
+                dataObject.getFileFormat().renameAttribute(dataObject, attrName, newName);
+            }
+            catch (Exception ex) {
+                log.debug("renameAttribute(): renaming failure: {}", ex);
+                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+            }
+
+            /* Update the attribute table */
+            attrTable.getItem(attrTable.getSelectionIndex()).setText(0, newName);
+        }
+        else {
+            log.debug("renameAttribute(): renaming attributes is only allowed for HDF5 files");
+        }
+
+        if (dataObject instanceof MetaDataContainer) {
+            try {
+                log.trace("renameAttribute(): updateMetadata()");
+                ((MetaDataContainer) dataObject).updateMetadata(attr);
+            }
+            catch (Exception ex) {
+                log.debug("renameAttribute(): updateMetadata() failure: {}", ex);
+                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+            }
+        }
+
+        log.trace("renameAttribute(): finish");
+    }
+
     /**
      * Update an attribute's value. Currently can only update a single data point.
      *
@@ -724,359 +896,215 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
      * @param col
      *            the column number of the selected cell.
      */
-    private void updateAttributeValue(String newValue, int row, int col) {
-        log.trace("updateAttributeValue(): start newValue[{},{}]={}", row, col, newValue);
+    private void updateAttributeValue(Attribute attr, String newValue) {
+        log.trace("updateAttributeValue(): start");
 
-        List<?> attrList = null;
+        if ((attr == null) || (newValue == null) || (newValue = newValue.trim()) == null || (newValue.length() < 1)) {
+            log.debug("updateAttributeValue(): Attribute is null or Attribute's new value is null");
+            log.trace("updateAttributeValue(): finish");
+            return;
+        }
+
+        String attrName = attr.getName();
+        Object data;
+
+        log.trace("updateAttributeValue(): changing value of attribute '{}'", attrName);
+
         try {
-            log.trace("updateAttributeValue(): dataObject.getMetadata()");
-            attrList = ((MetaDataContainer) dataObject).getMetadata();
+            log.trace("updateAttributeValue(): attr.getData()");
+            data = attr.getData();
         }
         catch (Exception ex) {
-            log.debug("updateAttributeValue(): Error getting underlying object metadata for object '{}': ",
-                    dataObject.getName(), ex);
+            log.debug("updateAttributeValue(): getData() failure: {}", ex);
+            log.trace("updateAttributeValue(): finish");
+            return;
+        }
+
+        if (data == null) {
+            log.debug("updateAttributeValue(): attribute's data was null");
+            log.trace("updateAttributeValue(): finish");
+            return;
+        }
+
+        int array_length = Array.getLength(data);
+        StringTokenizer st = new StringTokenizer(newValue, ",");
+        if (st.countTokens() < array_length) {
+            log.debug("updateAttributeValue(): More data values needed: {}", newValue);
+            log.trace("updateAttributeValue(): finish");
+            Tools.showError(display.getShells()[0], "More data values needed: " + newValue,
+                    display.getShells()[0].getText());
+            return;
+        }
+
+        char NT = ' ';
+        String cName = data.getClass().getName();
+        int cIndex = cName.lastIndexOf("[");
+        if (cIndex >= 0) {
+            NT = cName.charAt(cIndex + 1);
+        }
+        boolean isUnsigned = attr.isUnsigned();
+
+        log.trace("updateAttributeValue(): array_length={} cName={} NT={} isUnsigned={}", array_length, cName,
+                NT, isUnsigned);
+
+        double d = 0;
+        String theToken = null;
+        long max = 0, min = 0;
+        for (int i = 0; i < array_length; i++) {
+            max = min = 0;
+            theToken = st.nextToken().trim();
+            try {
+                if (!(Array.get(data, i) instanceof String)) {
+                    d = Double.parseDouble(theToken);
+                }
+            }
+            catch (NumberFormatException ex) {
+                log.debug("updateAttributeValue(): NumberFormatException: ", ex);
+                log.trace("updateAttributeValue(): finish");
+                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+                return;
+            }
+
+            if (isUnsigned && (d < 0)) {
+                log.debug("updateAttributeValue(): Negative value for unsigned integer: {}", theToken);
+                log.trace("updateAttributeValue(): finish");
+                Tools.showError(display.getShells()[0], "Negative value for unsigned integer: " + theToken,
+                        display.getShells()[0].getText());
+                return;
+            }
+
+            switch (NT) {
+                case 'B': {
+                    if (isUnsigned) {
+                        min = 0;
+                        max = 255;
+                    }
+                    else {
+                        min = Byte.MIN_VALUE;
+                        max = Byte.MAX_VALUE;
+                    }
+
+                    if ((d > max) || (d < min)) {
+                        Tools.showError(display.getShells()[0],
+                                "Data is out of range[" + min + ", " + max + "]: " + theToken,
+                                display.getShells()[0].getText());
+                    }
+                    else {
+                        Array.setByte(data, i, (byte) d);
+                    }
+                    break;
+                }
+                case 'S': {
+                    if (isUnsigned) {
+                        min = 0;
+                        max = 65535;
+                    }
+                    else {
+                        min = Short.MIN_VALUE;
+                        max = Short.MAX_VALUE;
+                    }
+
+                    if ((d > max) || (d < min)) {
+                        Tools.showError(display.getShells()[0],
+                                "Data is out of range[" + min + ", " + max + "]: " + theToken,
+                                display.getShells()[0].getText());
+                    }
+                    else {
+                        Array.setShort(data, i, (short) d);
+                    }
+                    break;
+                }
+                case 'I': {
+                    if (isUnsigned) {
+                        min = 0;
+                        max = 4294967295L;
+                    }
+                    else {
+                        min = Integer.MIN_VALUE;
+                        max = Integer.MAX_VALUE;
+                    }
+
+                    if ((d > max) || (d < min)) {
+                        Tools.showError(display.getShells()[0],
+                                "Data is out of range[" + min + ", " + max + "]: " + theToken,
+                                display.getShells()[0].getText());
+                    }
+                    else {
+                        Array.setInt(data, i, (int) d);
+                    }
+                    break;
+                }
+                case 'J':
+                    long lvalue = 0;
+                    if (isUnsigned) {
+                        if (theToken != null) {
+                            String theValue = theToken;
+                            BigInteger Jmax = new BigInteger("18446744073709551615");
+                            BigInteger big = new BigInteger(theValue);
+                            if ((big.compareTo(Jmax) > 0) || (big.compareTo(BigInteger.ZERO) < 0)) {
+                                Tools.showError(display.getShells()[0],
+                                        "Data is out of range[" + min + ", " + max + "]: " + theToken,
+                                        display.getShells()[0].getText());
+                            }
+                            lvalue = big.longValue();
+                            log.trace("updateAttributeValue(): big.longValue={}", lvalue);
+                            Array.setLong(data, i, lvalue);
+                        }
+                        else
+                            Array.set(data, i, theToken);
+                    }
+                    else {
+                        min = Long.MIN_VALUE;
+                        max = Long.MAX_VALUE;
+                        if ((d > max) || (d < min)) {
+                            Tools.showError(display.getShells()[0],
+                                    "Data is out of range[" + min + ", " + max + "]: " + theToken,
+                                    display.getShells()[0].getText());
+                        }
+                        lvalue = (long) d;
+                        log.trace("updateAttributeValue(): longValue={}", lvalue);
+                        Array.setLong(data, i, lvalue);
+                    }
+                    break;
+                case 'F':
+                    Array.setFloat(data, i, (float) d);
+                    break;
+                case 'D':
+                    Array.setDouble(data, i, d);
+                    break;
+                default:
+                    Array.set(data, i, theToken);
+                    break;
+            }
+        }
+
+        try {
+            log.trace("updateAttributeValue(): writeAttribute()");
+            dataObject.getFileFormat().writeAttribute(dataObject, attr, true);
+        }
+        catch (Exception ex) {
+            log.debug("updateAttributeValue(): writeAttribute failure: ", ex);
             log.trace("updateAttributeValue(): finish");
             Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
             return;
         }
 
-        String attrName = attrTable.getItem(row).getText(0);
-        Attribute attr = (Attribute) attrList.get(row);
+        /* Update the attribute table */
+        attrTable.getItem(attrTable.getSelectionIndex()).setText(3, attr.toString(", "));
 
-        if (col == 1) { // To change attribute value
-            Object data;
-
-            log.trace("updateAttributeValue(): changing value of attribute '{}'", attrName);
-
+        if (dataObject instanceof MetaDataContainer) {
             try {
-                log.trace("updateAttributeValue(): attr.getData()");
-                data = attr.getData();
-            }
-            catch (Exception ex) {
-                log.debug("updateAttributeValue(): getData() failure: {}", ex);
-                log.trace("updateAttributeValue(): finish");
-                return;
-            }
-
-            if (data == null) {
-                log.debug("updateAttributeValue(): attribute's data was null");
-                log.trace("updateAttributeValue(): finish");
-                return;
-            }
-
-            int array_length = Array.getLength(data);
-            StringTokenizer st = new StringTokenizer(newValue, ",");
-            if (st.countTokens() < array_length) {
-                log.debug("updateAttributeValue(): More data values needed: {}", newValue);
-                log.trace("updateAttributeValue(): finish");
-                Tools.showError(display.getShells()[0], "More data values needed: " + newValue,
-                        display.getShells()[0].getText());
-                return;
-            }
-
-            char NT = ' ';
-            String cName = data.getClass().getName();
-            int cIndex = cName.lastIndexOf("[");
-            if (cIndex >= 0) {
-                NT = cName.charAt(cIndex + 1);
-            }
-            boolean isUnsigned = attr.isUnsigned();
-
-            log.trace("updateAttributeValue(): array_length={} cName={} NT={} isUnsigned={}", array_length, cName,
-                    NT, isUnsigned);
-
-            double d = 0;
-            String theToken = null;
-            long max = 0, min = 0;
-            for (int i = 0; i < array_length; i++) {
-                max = min = 0;
-                theToken = st.nextToken().trim();
-                try {
-                    if (!(Array.get(data, i) instanceof String)) {
-                        d = Double.parseDouble(theToken);
-                    }
-                }
-                catch (NumberFormatException ex) {
-                    log.debug("updateAttributeValue(): NumberFormatException: ", ex);
-                    log.trace("updateAttributeValue(): finish");
-                    Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
-                    return;
-                }
-
-                if (isUnsigned && (d < 0)) {
-                    log.debug("updateAttributeValue(): Negative value for unsigned integer: {}", theToken);
-                    log.trace("updateAttributeValue(): finish");
-                    Tools.showError(display.getShells()[0], "Negative value for unsigned integer: " + theToken,
-                            display.getShells()[0].getText());
-                    return;
-                }
-
-                switch (NT) {
-                    case 'B': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 255;
-                        }
-                        else {
-                            min = Byte.MIN_VALUE;
-                            max = Byte.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            Tools.showError(display.getShells()[0],
-                                    "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                    display.getShells()[0].getText());
-                        }
-                        else {
-                            Array.setByte(data, i, (byte) d);
-                        }
-                        break;
-                    }
-                    case 'S': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 65535;
-                        }
-                        else {
-                            min = Short.MIN_VALUE;
-                            max = Short.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            Tools.showError(display.getShells()[0],
-                                    "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                    display.getShells()[0].getText());
-                        }
-                        else {
-                            Array.setShort(data, i, (short) d);
-                        }
-                        break;
-                    }
-                    case 'I': {
-                        if (isUnsigned) {
-                            min = 0;
-                            max = 4294967295L;
-                        }
-                        else {
-                            min = Integer.MIN_VALUE;
-                            max = Integer.MAX_VALUE;
-                        }
-
-                        if ((d > max) || (d < min)) {
-                            Tools.showError(display.getShells()[0],
-                                    "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                    display.getShells()[0].getText());
-                        }
-                        else {
-                            Array.setInt(data, i, (int) d);
-                        }
-                        break;
-                    }
-                    case 'J':
-                        long lvalue = 0;
-                        if (isUnsigned) {
-                            if (theToken != null) {
-                                String theValue = theToken;
-                                BigInteger Jmax = new BigInteger("18446744073709551615");
-                                BigInteger big = new BigInteger(theValue);
-                                if ((big.compareTo(Jmax) > 0) || (big.compareTo(BigInteger.ZERO) < 0)) {
-                                    Tools.showError(display.getShells()[0],
-                                            "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                            display.getShells()[0].getText());
-                                }
-                                lvalue = big.longValue();
-                                log.trace("updateAttributeValue(): big.longValue={}", lvalue);
-                                Array.setLong(data, i, lvalue);
-                            }
-                            else
-                                Array.set(data, i, theToken);
-                        }
-                        else {
-                            min = Long.MIN_VALUE;
-                            max = Long.MAX_VALUE;
-                            if ((d > max) || (d < min)) {
-                                Tools.showError(display.getShells()[0],
-                                        "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                        display.getShells()[0].getText());
-                            }
-                            lvalue = (long) d;
-                            log.trace("updateAttributeValue(): longValue={}", lvalue);
-                            Array.setLong(data, i, lvalue);
-                        }
-                        break;
-                    case 'F':
-                        Array.setFloat(data, i, (float) d);
-                        break;
-                    case 'D':
-                        Array.setDouble(data, i, d);
-                        break;
-                    default:
-                        Array.set(data, i, theToken);
-                        break;
-                }
-            }
-
-            try {
-                log.trace("updateAttributeValue(): writeAttribute()");
-                dataObject.getFileFormat().writeAttribute(dataObject, attr, true);
-            }
-            catch (Exception ex) {
-                log.debug("updateAttributeValue(): writeAttribute failure: ", ex);
-                log.trace("updateAttributeValue(): finish");
-                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
-                return;
-            }
-
-            // update the attribute table
-            attrTable.getItem(row).setText(1, attr.toString(", "));
-        }
-
-        if ((col == 0) && isH5) { // To change attribute name
-            log.trace("updateAttributeValue(): changing name of attribute '{}'", attrName);
-
-            try {
-                log.trace("updateAttributeValue(): renameAttribute()");
-                dataObject.getFileFormat().renameAttribute(dataObject, attrName, newValue);
-            }
-            catch (Exception ex) {
-                log.debug("updateAttributeValue(): renameAttribute failure: {}", ex);
-                log.trace("updateAttributeValue(): finish");
-                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
-                return;
-            }
-
-            // update the attribute table
-            attrTable.getItem(row).setText(0, newValue);
-        }
-
-        if (dataObject instanceof ScalarDS) {
-            ScalarDS ds = (ScalarDS) dataObject;
-            try {
-                log.trace("updateAttributeValue(): ScalarDS.updateMetadata()");
-                ds.updateMetadata(attr);
+                log.trace("updateAttributeValue(): updateMetadata()");
+                ((MetaDataContainer) dataObject).updateMetadata(attr);
             }
             catch (Exception ex) {
                 log.debug("updateAttributeValue(): updateMetadata() failure: {}", ex);
                 Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
             }
         }
-        else {
-            log.debug("updateAttributeValue(): updateMetadata(): HObject is not instanceof ScalarDS");
-        }
 
         log.trace("updateAttributeValue(): finish");
     }
-
-    /*
-     * Listener to allow user to only change an attribute's name or value in the
-     * attribute table
-     */
-    private Listener attrTableCellEditor = new Listener() {
-        @Override
-        public void handleEvent(Event event) {
-            final TableEditor editor = new TableEditor(attrTable);
-            editor.horizontalAlignment = SWT.LEFT;
-            editor.grabHorizontal = true;
-
-            Rectangle clientArea = attrTable.getClientArea();
-            Point pt = new Point(event.x, event.y);
-
-            int index = attrTable.getTopIndex();
-
-            while (index < attrTable.getItemCount()) {
-                boolean visible = false;
-                final TableItem item = attrTable.getItem(index);
-
-                for (int i = 0; i < attrTable.getColumnCount(); i++) {
-                    Rectangle rect = item.getBounds(i);
-
-                    if (rect.contains(pt)) {
-                        if (!(i == 3 || (isH5 && (i == 0)))) {
-                            // Only attribute value and name can be changed
-                            return;
-                        }
-
-                        /* Edit the value of the Attribute in a separate TableView */
-                        if (i == 3) {
-                            viewManager.getTreeView().setDefaultDisplayMode(true);
-
-                            try {
-                                Display.getDefault().syncExec(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            viewManager.getTreeView().showDataContent((HObject) item.getData());
-                                        }
-                                        catch (Exception ex) {
-                                            log.debug("Attribute showDataContent failure: ", ex);
-                                        }
-                                    }
-                                });
-                            }
-                            catch (Exception e) {
-                                log.debug("Attribute showDataContent loading manually interrupted");
-                            }
-
-                            return;
-                        }
-
-                        final int column = i;
-                        final int row = index;
-
-                        final Text text = new Text(attrTable, SWT.NONE);
-                        text.setFont(curFont);
-
-                        /*
-                         * XXX: TODO try { viewManager.getTreeView().showMetaData(obj); } catch
-                         * (Exception ex) { display.beep(); Tools.showError(display.getShells()[0],
-                         * ex.getMessage(), display.getShells()[0].getText()); }
-                         */
-
-                        Listener textListener = new Listener() {
-                            @Override
-                            public void handleEvent(final Event e) {
-                                switch (e.type) {
-                                    case SWT.FocusOut:
-                                        item.setText(column, text.getText());
-                                        updateAttributeValue(text.getText(), row, column);
-                                        text.dispose();
-                                        break;
-                                    case SWT.Traverse:
-                                        switch (e.detail) {
-                                            case SWT.TRAVERSE_RETURN:
-                                                item.setText(column, text.getText());
-                                                updateAttributeValue(text.getText(), row, column);
-                                            case SWT.TRAVERSE_ESCAPE:
-                                                text.dispose();
-                                                e.doit = false;
-                                        }
-
-                                        break;
-                                }
-                            }
-                        };
-
-                        text.addListener(SWT.FocusOut, textListener);
-                        text.addListener(SWT.Traverse, textListener);
-                        editor.setEditor(text, item, i);
-                        text.setText(item.getText(i));
-                        text.selectAll();
-                        text.setFocus();
-                        return;
-
-                    }
-
-                    if (!visible && rect.intersects(clientArea)) {
-                        visible = true;
-                    }
-                }
-
-                if (!visible) return;
-
-                index++;
-            }
-        }
-    };
 
     private class UserBlockDialog extends Dialog {
         private Shell          shell;
