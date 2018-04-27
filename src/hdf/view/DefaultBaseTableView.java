@@ -160,12 +160,6 @@ public abstract class DefaultBaseTableView implements TableView {
     protected enum ViewType { TABLE, IMAGE };
     protected      ViewType                 viewType = ViewType.TABLE;
 
-    /**
-     * Numerical data type. B = byte array, S = short array, I = int array, J = long array, F =
-     * float array, and D = double array.
-     */
-    protected char                          NT = ' ';
-
     // Changed to use normalized scientific notation (1 <= coefficient < 10).
     // private final DecimalFormat scientificFormat = new DecimalFormat("###.#####E0#");
     protected final DecimalFormat           scientificFormat = new DecimalFormat("0.0###E0###");
@@ -1125,7 +1119,17 @@ public abstract class DefaultBaseTableView implements TableView {
         });
 
         int type = dataObject.getDatatype().getDatatypeClass();
-        boolean isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
+
+        /*
+         * TODO: temporary workaround until moved to ScalarDSTableView
+         */
+        String cName = dataValue.getClass().getName();
+        boolean isInt = false;
+        int cIndex = cName.lastIndexOf("[");
+        if (cIndex >= 0) {
+            char typeSymbol = cName.charAt(cIndex + 1);
+            isInt = (typeSymbol == 'B' || typeSymbol == 'S' || typeSymbol == 'I' || typeSymbol == 'J');
+        }
 
         if ((dataObject instanceof ScalarDS)
                 && (isInt || type == Datatype.CLASS_BITFIELD || type == Datatype.CLASS_OPAQUE)) {

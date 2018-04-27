@@ -63,6 +63,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarDSTableView.class);
 
     /**
+     * Numerical data type. B = byte array, S = short array, I = int array, J = long
+     * array, F = float array, and D = double array.
+     */
+    protected char NT = ' ';
+
+    /**
      * Constructs a ScalarDS TableView with no additional data properties.
      *
      * @param theView
