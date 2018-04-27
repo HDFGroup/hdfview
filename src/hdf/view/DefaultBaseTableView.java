@@ -50,6 +50,7 @@ import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
+import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
@@ -77,6 +78,7 @@ import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.BeveledBorderD
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.LineBorderDecorator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
+import org.eclipse.nebula.widgets.nattable.selection.command.SelectCellCommand;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
@@ -1069,6 +1071,16 @@ public abstract class DefaultBaseTableView implements TableView {
                     }
 
                     dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
                 }
             });
 
@@ -1091,6 +1103,16 @@ public abstract class DefaultBaseTableView implements TableView {
                     }
 
                     dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
                 }
             });
         }
@@ -1108,13 +1130,21 @@ public abstract class DefaultBaseTableView implements TableView {
                         + "\n\t to make the digits required \"0.00000E000\"\n\n";
 
                 // Add custom HDFLarge icon to dialog
-                String str = (new InputDialog(theShell, "Create a custom number format", msg)).open();
+                String str = (new InputDialog(theShell, "Create a custom number format", msg, customFormat.toPattern()))
+                        .open();
 
                 if ((str == null) || (str.length() < 1)) {
                     return;
                 }
 
-                customFormat.applyPattern(str);
+                try {
+                    customFormat.applyPattern(str);
+                }
+                catch (Exception ex) {
+                    log.debug("Invalid custom number notation format: {}: {}", str, ex);
+                    Tools.showError(shell, "Invalid custom notation format " + str,
+                            shell.getText());
+                }
             }
         });
 
@@ -1149,6 +1179,16 @@ public abstract class DefaultBaseTableView implements TableView {
                     }
 
                     dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
                 }
             });
 
@@ -1168,6 +1208,16 @@ public abstract class DefaultBaseTableView implements TableView {
                     }
 
                     dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
                 }
             });
         }
