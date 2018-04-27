@@ -21,12 +21,12 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Test;
 
 /**
- * Tests the Next Page, Previous Page, First Page and Last Page buttons of TableView.
- * Also tests manual page selection.
+ * Tests the Next Frame, Previous Frame, First Frame and Last Frame buttons of TableView. Also tests
+ * manual page selection.
  *
- * NatTable indices take the table row and column header into account.
- * Therefore, to get the cell data value for the cell at (row, col),
- * table.getCellDataValueByPosition(row + 1, col + 1) must be called.
+ * NatTable indices take the table row and column header into account. Therefore, to get the cell
+ * data value for the cell at (row, col), table.getCellDataValueByPosition(row + 1, col + 1) must be
+ * called.
  *
  * @author Jordan Henderson
  */
@@ -85,7 +85,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             val = table.getCellDataValueByPosition(2, 4);
             assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "52", val), val.equals("52"));
 
-            tableShell.bot().toolbarButtonWithTooltip("Next Page").click();
+            tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
 
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("testNextFrame()", "frame field shows wrong value", "1", val), val.equals("1"));
@@ -167,7 +167,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             val = table.getCellDataValueByPosition(5, 3);
             assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "215", val), val.equals("215"));
 
-            tableShell.bot().toolbarButtonWithTooltip("Previous Page").click();
+            tableShell.bot().toolbarButtonWithTooltip("Previous Frame").click();
 
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("testPreviousFrame()", "frame field shows wrong value", "0", val), val.equals("0"));
@@ -244,7 +244,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             }
 
             for (int i = 0; i < 3; i++)
-                tableShell.bot().toolbarButtonWithTooltip("Next Page").click();
+                tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
 
             String val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "3", val), val.equals("3"));
@@ -255,7 +255,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             val = table.getCellDataValueByPosition(1, 3);
             assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "7", val), val.equals("7"));
 
-            tableShell.bot().toolbarButtonWithTooltip("First Page").click();
+            tableShell.bot().toolbarButtonWithTooltip("First Frame").click();
 
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "0", val), val.equals("0"));
@@ -337,7 +337,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             val = table.getCellDataValueByPosition(2, 1);
             assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "2", val), val.equals("2"));
 
-            tableShell.bot().toolbarButtonWithTooltip("Last Page").click();
+            tableShell.bot().toolbarButtonWithTooltip("Last Frame").click();
 
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("testLastFrame()", "frame field shows wrong value", "4", val), val.equals("4"));
