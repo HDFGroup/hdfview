@@ -272,7 +272,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                         + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
                         + "shown as (R, B, B, B, G, G).\n\n\n";
 
-                MessageDialog.openInformation(shell, shell.getText(), msg);
+                MessageDialog.openInformation(getShell(), getShell().getText(), msg);
             }
         });
 
