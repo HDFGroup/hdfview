@@ -24,9 +24,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.EditableRule;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
+import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
@@ -42,11 +44,18 @@ import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
+import org.eclipse.nebula.widgets.nattable.selection.command.SelectCellCommand;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.exceptions.HDF5Exception;
@@ -57,6 +66,7 @@ import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
+import hdf.view.dialog.InputDialog;
 
 public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView {
 
@@ -146,6 +156,378 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         log.trace("DefaultScalarDSTableView: finish");
 
         shell.open();
+    }
+
+    /**
+     * Creates the menubar for the Shell.
+     */
+    @Override
+    protected Menu createMenuBar(final Shell theShell) {
+        Menu baseMenu = super.createMenuBar(theShell);
+        MenuItem[] baseMenuItems = baseMenu.getItems();
+        MenuItem item = null;
+
+        /*****************************************************************************
+         *                                                                           *
+         * Add in a few MenuItems for importing/exporting data from/to binary files. *
+         *                                                                           *
+         *****************************************************************************/
+
+        MenuItem importExportMenuItem = null;
+        for (int i = 0; i < baseMenuItems.length; i++)
+            if (baseMenuItems[i].getText().equals("&Import/Export Data"))
+                importExportMenuItem = baseMenuItems[i];
+
+        if (importExportMenuItem != null) {
+            Menu importExportMenu = importExportMenuItem.getMenu();
+            MenuItem[] importExportMenuItems = importExportMenu.getItems();
+
+            for (int i = 0; i < importExportMenuItems.length; i++)
+                if (importExportMenuItems[i].getText().equals("Export Data to"))
+                    item = importExportMenuItems[i];
+
+            if (item != null) {
+                Menu exportMenu = item.getMenu();
+
+                MenuItem exportAsBinaryMenuItem = new MenuItem(exportMenu, SWT.CASCADE);
+                exportAsBinaryMenuItem.setText("Binary File");
+
+                Menu exportAsBinaryMenu = new Menu(exportAsBinaryMenuItem);
+                exportAsBinaryMenuItem.setMenu(exportAsBinaryMenu);
+
+                item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
+                item.setText("Native Order");
+                item.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        binaryOrder = 1;
+
+                        try {
+                            saveAsBinary();
+                        }
+                        catch (Exception ex) {
+                            theShell.getDisplay().beep();
+                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                        }
+                    }
+                });
+
+                item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
+                item.setText("Little Endian");
+                item.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        binaryOrder = 2;
+
+                        try {
+                            saveAsBinary();
+                        }
+                        catch (Exception ex) {
+                            theShell.getDisplay().beep();
+                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                        }
+                    }
+                });
+
+                item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
+                item.setText("Big Endian");
+                item.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        binaryOrder = 3;
+
+                        try {
+                            saveAsBinary();
+                        }
+                        catch (Exception ex) {
+                            theShell.getDisplay().beep();
+                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                        }
+                    }
+                });
+            }
+
+            item = null;
+            for (int i = 0; i < importExportMenuItems.length; i++)
+                if (importExportMenuItems[i].getText().equals("Import Data from"))
+                    item = importExportMenuItems[i];
+
+            if (item != null) {
+                Menu importMenu = item.getMenu();
+
+                MenuItem importAsBinaryMenuItem = new MenuItem(importMenu, SWT.CASCADE);
+                importAsBinaryMenuItem.setText("Binary File");
+
+                Menu importAsBinaryMenu = new Menu(importAsBinaryMenuItem);
+                importAsBinaryMenuItem.setMenu(importAsBinaryMenu);
+
+                item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
+                item.setText("Native Order");
+                item.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        binaryOrder = 1;
+
+                        try {
+                            importBinaryData();
+                        }
+                        catch (Exception ex) {
+                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                        }
+                    }
+                });
+
+                item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
+                item.setText("Little Endian");
+                item.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        binaryOrder = 2;
+
+                        try {
+                            importBinaryData();
+                        }
+                        catch (Exception ex) {
+                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                        }
+                    }
+                });
+
+                item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
+                item.setText("Big Endian");
+                item.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        binaryOrder = 3;
+
+                        try {
+                            importBinaryData();
+                        }
+                        catch (Exception ex) {
+                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                        }
+                    }
+                });
+            }
+
+            new MenuItem(importExportMenu, SWT.SEPARATOR);
+
+            checkFixedDataLength = new MenuItem(importExportMenu, SWT.CHECK);
+            checkFixedDataLength.setText("Fixed Data Length");
+            checkFixedDataLength.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    if (!checkFixedDataLength.getSelection()) {
+                        fixedDataLength = -1;
+                        return;
+                    }
+
+                    String str = new InputDialog(theShell, "",
+                            "Enter fixed data length when importing text data\n\n"
+                                    + "For example, for a text string of \"12345678\"\n\t\tenter 2,"
+                                    + "the data will be 12, 34, 56, 78\n\t\tenter 4, the data will be" + "1234, 5678\n")
+                                            .open();
+
+                    if ((str == null) || (str.length() < 1)) {
+                        checkFixedDataLength.setSelection(false);
+                        return;
+                    }
+
+                    try {
+                        fixedDataLength = Integer.parseInt(str);
+                    }
+                    catch (Exception ex) {
+                        fixedDataLength = -1;
+                    }
+
+                    if (fixedDataLength < 1) {
+                        checkFixedDataLength.setSelection(false);
+                        return;
+                    }
+                }
+            });
+        }
+
+        /*****************************************************************************************
+         *                                                                                       *
+         * Add a section for changing the way that data is displayed, e.g. as hexadecimal values *
+         *                                                                                       *
+         *****************************************************************************************/
+
+        MenuItem dataDisplayMenuItem = new MenuItem(baseMenu, SWT.CASCADE);
+        dataDisplayMenuItem.setText("Data Display");
+
+        Menu dataDisplayMenu = new Menu(theShell, SWT.DROP_DOWN);
+        dataDisplayMenuItem.setMenu(dataDisplayMenu);
+
+        checkScientificNotation = new MenuItem(dataDisplayMenu, SWT.CHECK);
+        checkScientificNotation.setText("Show Scientific Notation");
+        checkScientificNotation.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (checkScientificNotation.getSelection()) {
+                    if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                    if (checkHex != null) checkHex.setSelection(false);
+                    if (checkBin != null) checkBin.setSelection(false);
+
+                    numberFormat = scientificFormat;
+                    showAsHex = false;
+                    showAsBin = false;
+                }
+                else {
+                    numberFormat = normalFormat;
+                }
+
+                dataTable.doCommand(new VisualRefreshCommand());
+
+                PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                if (lastSelectedCell != null) {
+                    /*
+                     * Send down a cell selection event for the current cell to update the cell
+                     * value labels
+                     */
+                    dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                            lastSelectedCell.rowPosition, false, false));
+                }
+            }
+        });
+
+        checkCustomNotation = new MenuItem(dataDisplayMenu, SWT.CHECK);
+        checkCustomNotation.setText("Show Custom Notation");
+        checkCustomNotation.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (checkCustomNotation.getSelection()) {
+                    if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
+                    if (checkHex != null) checkHex.setSelection(false);
+                    if (checkBin != null) checkBin.setSelection(false);
+
+                    numberFormat = customFormat;
+                    showAsHex = false;
+                    showAsBin = false;
+                }
+                else {
+                    numberFormat = normalFormat;
+                }
+
+                dataTable.doCommand(new VisualRefreshCommand());
+
+                PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                if (lastSelectedCell != null) {
+                    /*
+                     * Send down a cell selection event for the current cell to update the cell
+                     * value labels
+                     */
+                    dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                            lastSelectedCell.rowPosition, false, false));
+                }
+            }
+        });
+
+        item = new MenuItem(dataDisplayMenu, SWT.PUSH);
+        item.setText("Create custom notation");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String msg = "Create number format by pattern \nINTEGER . FRACTION E EXPONENT\nusing # for optional digits and 0 for required digits"
+                        + "\nwhere, INTEGER: the pattern for the integer part"
+                        + "\n       FRACTION: the pattern for the fractional part"
+                        + "\n       EXPONENT: the pattern for the exponent part" + "\n\nFor example, "
+                        + "\n\t the normalized scientific notation format is \"#.0###E0##\""
+                        + "\n\t to make the digits required \"0.00000E000\"\n\n";
+
+                String str = (new InputDialog(theShell, "Create a custom number format", msg, customFormat.toPattern()))
+                        .open();
+
+                if ((str == null) || (str.length() < 1)) {
+                    return;
+                }
+
+                try {
+                    customFormat.applyPattern(str);
+                }
+                catch (Exception ex) {
+                    log.debug("Invalid custom number notation format: {}:", str, ex);
+                    Tools.showError(shell, "Invalid custom notation format " + str,
+                            shell.getText());
+                }
+            }
+        });
+
+        int type = dataObject.getDatatype().getDatatypeClass();
+
+        /*
+         * TODO: temporary workaround until moved to ScalarDSTableView
+         */
+        String cName = dataValue.getClass().getName();
+        boolean isInt = false;
+        int cIndex = cName.lastIndexOf("[");
+        if (cIndex >= 0) {
+            char typeSymbol = cName.charAt(cIndex + 1);
+            isInt = (typeSymbol == 'B' || typeSymbol == 'S' || typeSymbol == 'I' || typeSymbol == 'J');
+        }
+
+        if (isInt || type == Datatype.CLASS_BITFIELD || type == Datatype.CLASS_OPAQUE) {
+            checkHex = new MenuItem(dataDisplayMenu, SWT.CHECK);
+            checkHex.setText("Show Hexadecimal");
+            checkHex.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    showAsHex = checkHex.getSelection();
+                    if (showAsHex) {
+                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
+                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkBin != null) checkBin.setSelection(false);
+
+                        showAsBin = false;
+                        numberFormat = normalFormat;
+                    }
+
+                    dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
+                }
+            });
+
+            checkBin = new MenuItem(dataDisplayMenu, SWT.CHECK);
+            checkBin.setText("Show Binary");
+            checkBin.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    showAsBin = checkBin.getSelection();
+                    if (showAsBin) {
+                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
+                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkHex != null) checkHex.setSelection(false);
+
+                        showAsHex = false;
+                        numberFormat = normalFormat;
+                    }
+
+                    dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
+                }
+            });
+        }
+
+        return baseMenu;
     }
 
     /**
