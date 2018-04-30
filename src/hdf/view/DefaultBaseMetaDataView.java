@@ -241,7 +241,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         attrTable.addListener(SWT.MouseDoubleClick, new Listener() {
             @Override
             public void handleEvent(Event arg0) {
-                final TableItem item = attrTable.getItem(attrTable.getSelectionIndex());
+                int selectionIndex = attrTable.getSelectionIndex();
+                if (selectionIndex < 0) {
+                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
+                            Display.getDefault().getShells()[0].getText());
+                    return;
+                }
+
+                final TableItem item = attrTable.getItem(selectionIndex);
 
                 viewManager.getTreeView().setDefaultDisplayMode(true);
 
@@ -675,7 +682,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                HObject itemObj = (HObject) table.getItem(table.getSelectionIndex()).getData();
+                int selectionIndex = table.getSelectionIndex();
+                if (selectionIndex < 0) {
+                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
+                            Display.getDefault().getShells()[0].getText());
+                    return;
+                }
+
+                HObject itemObj = (HObject) table.getItem(selectionIndex).getData();
                 String result = new InputDialog(Display.getDefault().getShells()[0],
                         Display.getDefault().getShells()[0].getText(), "New Attribute Name",
                         itemObj.getName()).open();
@@ -685,7 +699,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     return;
                 }
 
-                Attribute attr = (Attribute) attrTable.getItem(attrTable.getSelectionIndex()).getData();
+                Attribute attr = (Attribute) attrTable.getItem(selectionIndex).getData();
                 renameAttribute(attr, result);
             }
         });
@@ -695,7 +709,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                final TableItem item = attrTable.getItem(attrTable.getSelectionIndex());
+                int selectionIndex = attrTable.getSelectionIndex();
+                if (selectionIndex < 0) {
+                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
+                            Display.getDefault().getShells()[0].getText());
+                    return;
+                }
+
+                final TableItem item = attrTable.getItem(selectionIndex);
 
                 viewManager.getTreeView().setDefaultDisplayMode(true);
 
@@ -723,7 +744,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                final TableItem item = attrTable.getItem(attrTable.getSelectionIndex());
+                int selectionIndex = attrTable.getSelectionIndex();
+                if (selectionIndex < 0) {
+                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
+                            Display.getDefault().getShells()[0].getText());
+                    return;
+                }
+
+                final TableItem item = attrTable.getItem(selectionIndex);
 
                 deleteAttribute((HObject) item.getData());
             }
@@ -866,7 +894,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
 
             /* Update the attribute table */
-            attrTable.getItem(attrTable.getSelectionIndex()).setText(0, newName);
+            int selectionIndex = attrTable.getSelectionIndex();
+            if (selectionIndex < 0) {
+                Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
+                        Display.getDefault().getShells()[0].getText());
+                return;
+            }
+
+            attrTable.getItem(selectionIndex).setText(0, newName);
         }
         else {
             log.debug("renameAttribute(): renaming attributes is only allowed for HDF5 files");
@@ -1090,7 +1125,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
 
         /* Update the attribute table */
-        attrTable.getItem(attrTable.getSelectionIndex()).setText(3, attr.toString(", "));
+        int selectionIndex = attrTable.getSelectionIndex();
+        if (selectionIndex < 0) {
+            Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
+                    Display.getDefault().getShells()[0].getText());
+            return;
+        }
+
+        attrTable.getItem(selectionIndex).setText(3, attr.toString(", "));
 
         if (dataObject instanceof MetaDataContainer) {
             try {
