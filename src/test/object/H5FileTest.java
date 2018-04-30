@@ -2027,7 +2027,8 @@ public class H5FileTest {
         H5File file = null;
         long fid = -1;
         Group g1 = null;
-        Datatype d1 = null;
+        Datatype t1 = null;
+        Dataset d1 = null;
 
         try {
             file = (H5File) H5FILE.createFile(nameNew, FileFormat.FILE_CREATE_DELETE); // Create File
@@ -2053,10 +2054,18 @@ public class H5FileTest {
         assertNotNull(g1);
 
         try {
-            d1 = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE, "NATIVE_INT");
+            t1 = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE, "NATIVE_INT");
         }
         catch (final Exception ex) {
             fail("file.createDatatype() failed. " + ex);
+        }
+        assertNotNull(t1);
+
+        try {
+            d1 = file.createScalarDS("TEST_DATASET", g1, t1, new long[1], null, null, 0, null);
+        }
+        catch (final Exception ex) {
+            fail("file.createScalarDS() failed. " + ex);
         }
         assertNotNull(d1);
 
@@ -2070,6 +2079,12 @@ public class H5FileTest {
             fail("g1.writeMetadata() failed. " + ex);
         }
         try {
+            t1.writeMetadata(attr1);
+        }
+        catch (final Exception ex) {
+            fail("d1.writeMetadata() failed. " + ex);
+        }
+        try {
             d1.writeMetadata(attr1);
         }
         catch (final Exception ex) {
@@ -2078,7 +2093,8 @@ public class H5FileTest {
 
         try {
             file.renameAttribute(g1, "strAttr", "GroupAttribute");
-            file.renameAttribute(d1, attr1.getName(), "DatatypeAttribute");
+            file.renameAttribute(t1, attr1.getName(), "DatatypeAttribute");
+            file.renameAttribute(d1, attr1.getName(), "DatasetAttribute");
         }
         catch (final Exception ex) {
             ex.printStackTrace();

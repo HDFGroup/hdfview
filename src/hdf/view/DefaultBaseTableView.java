@@ -160,12 +160,6 @@ public abstract class DefaultBaseTableView implements TableView {
     protected enum ViewType { TABLE, IMAGE };
     protected      ViewType                 viewType = ViewType.TABLE;
 
-    /**
-     * Numerical data type. B = byte array, S = short array, I = int array, J = long array, F =
-     * float array, and D = double array.
-     */
-    protected char                          NT = ' ';
-
     // Changed to use normalized scientific notation (1 <= coefficient < 10).
     // private final DecimalFormat scientificFormat = new DecimalFormat("###.#####E0#");
     protected final DecimalFormat           scientificFormat = new DecimalFormat("0.0###E0###");
@@ -337,7 +331,25 @@ public abstract class DefaultBaseTableView implements TableView {
             return;
         }
 
-        isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
+        if (dataObject instanceof Dataset) {
+            isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
+
+            /* Cannot edit HDF4 VData */
+            if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
+                    && (dataObject instanceof CompoundDS)) {
+                isReadOnly = true;
+            }
+        }
+
+        /* Disable edit feature for SZIP compression when encode is not enabled */
+        if (!isReadOnly) {
+            String compression = dataObject.getCompression();
+            if ((compression != null) && compression.startsWith("SZIP")) {
+                if (!compression.endsWith("ENCODE_ENABLED")) {
+                    isReadOnly = true;
+                }
+            }
+        }
 
         log.trace("dataObject({}) isReadOnly={}", dataObject, isReadOnly);
 
@@ -364,22 +376,6 @@ public abstract class DefaultBaseTableView implements TableView {
             Tools.showError(shell, "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has dimension of size 0.", shell.getText());
             return;
-        }
-
-        // Cannot edit HDF4 Vdata
-        if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
-                && (dataObject instanceof CompoundDS)) {
-            isReadOnly = true;
-        }
-
-        // Disable edit feature for SZIP compression when encode is not enabled
-        if (!isReadOnly) {
-            String compression = dataObject.getCompression();
-            if ((compression != null) && compression.startsWith("SZIP")) {
-                if (!compression.endsWith("ENCODE_ENABLED")) {
-                    isReadOnly = true;
-                }
-            }
         }
 
         /*
@@ -447,7 +443,14 @@ public abstract class DefaultBaseTableView implements TableView {
 
         cellValueComposite.setWeights(new int[] { 1, 5 });
 
+        /* Make sure that the Dataset's data value is accessible for conditionally adding GUI components */
+        loadData(dataObject);
+
         /* Create the Shell's MenuBar */
+        /*
+         * TODO: If read-only access is not set correctly at this point, as may be the
+         * case with Attributes, then MenuItems may be incorrectly enabled.
+         */
         shell.setMenuBar(createMenuBar(shell));
 
         /* Create the actual NatTable */
@@ -473,13 +476,16 @@ public abstract class DefaultBaseTableView implements TableView {
          * Set the Shell's title using the object path and name
          */
         StringBuffer sb = new StringBuffer(hObject.getName());
-        sb.append("  at  ");
-        sb.append(hObject.getPath());
-        sb.append("  [");
-        sb.append(((HObject) dataObject).getFileFormat().getName());
-        sb.append("  in  ");
-        sb.append(((HObject) dataObject).getFileFormat().getParent());
-        sb.append("]");
+
+        if (((HObject) dataObject).getFileFormat() != null) {
+            sb.append("  at  ");
+            sb.append(hObject.getPath());
+            sb.append("  [");
+            sb.append(((HObject) dataObject).getFileFormat().getName());
+            sb.append("  in  ");
+            sb.append(((HObject) dataObject).getFileFormat().getParent());
+            sb.append("]");
+        }
 
         shell.setText(sb.toString());
 
@@ -527,11 +533,7 @@ public abstract class DefaultBaseTableView implements TableView {
         int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
         shell.setSize(width, height);
 
-        viewer.addDataView(this);
-
         log.trace("finish");
-
-        shell.open();
     }
 
     /**
@@ -655,23 +657,24 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * Creates the menubar for the Shell.
      */
-    private Menu createMenuBar(final Shell theShell) {
+    protected Menu createMenuBar(final Shell theShell) {
         Menu menuBar = new Menu(theShell, SWT.BAR);
         boolean isEditable = !isReadOnly;
 
-        MenuItem tableMenu = new MenuItem(menuBar, SWT.CASCADE);
-        tableMenu.setText("&Table");
+        MenuItem tableMenuItem = new MenuItem(menuBar, SWT.CASCADE);
+        tableMenuItem.setText("&Table");
 
-        Menu menu = new Menu(theShell, SWT.DROP_DOWN);
-        tableMenu.setMenu(menu);
+        Menu tableMenu = new Menu(theShell, SWT.DROP_DOWN);
+        tableMenuItem.setMenu(tableMenu);
 
-        MenuItem item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Export Data to Text File");
+        MenuItem item = new MenuItem(tableMenu, SWT.PUSH);
+        item.setText("Select All");
+        item.setAccelerator(SWT.CTRL | 'A');
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    saveAsText();
+                    dataTable.doCommand(new SelectAllCommand());
                 }
                 catch (Exception ex) {
                     theShell.getDisplay().beep();
@@ -680,200 +683,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        if (dataObject instanceof ScalarDS) {
-            MenuItem exportAsBinaryMenuItem = new MenuItem(menu, SWT.CASCADE);
-            exportAsBinaryMenuItem.setText("Export Data to Binary File");
-
-            Menu exportAsBinaryMenu = new Menu(menu);
-
-            item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
-            item.setText("Native Order");
-            item.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    binaryOrder = 1;
-
-                    try {
-                        saveAsBinary();
-                    }
-                    catch (Exception ex) {
-                        theShell.getDisplay().beep();
-                        Tools.showError(theShell, ex.getMessage(), theShell.getText());
-                    }
-                }
-            });
-
-            item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
-            item.setText("Little Endian");
-            item.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    binaryOrder = 2;
-
-                    try {
-                        saveAsBinary();
-                    }
-                    catch (Exception ex) {
-                        theShell.getDisplay().beep();
-                        Tools.showError(theShell, ex.getMessage(), theShell.getText());
-                    }
-                }
-            });
-
-            item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
-            item.setText("Big Endian");
-            item.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    binaryOrder = 3;
-
-                    try {
-                        saveAsBinary();
-                    }
-                    catch (Exception ex) {
-                        theShell.getDisplay().beep();
-                        Tools.showError(theShell, ex.getMessage(), theShell.getText());
-                    }
-                }
-            });
-
-            exportAsBinaryMenuItem.setMenu(exportAsBinaryMenu);
-        }
-
-        new MenuItem(menu, SWT.SEPARATOR);
-
-        item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Import Data from Text File");
-        item.setEnabled(isEditable);
-        item.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                String currentDir = ((HObject) dataObject).getFileFormat().getParent();
-
-                String filename = null;
-                if (((HDFView) viewer).getTestState()) {
-                    filename = currentDir + File.separator + new InputDialog(theShell, "Enter a file name", "").open();
-                }
-                else {
-                    FileDialog fChooser = new FileDialog(theShell, SWT.OPEN);
-                    fChooser.setFilterPath(currentDir);
-
-                    DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-                    fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
-                    fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
-                    fChooser.setFilterIndex(1);
-
-                    filename = fChooser.open();
-                }
-
-                if (filename == null) return;
-
-                File chosenFile = new File(filename);
-                if (!chosenFile.exists()) {
-                    Tools.showError(theShell, "File " + filename + " does not exist.", "Import Data from Text File");
-                    return;
-                }
-
-                if (!MessageDialog.openConfirm(theShell, "Import Data", "Do you want to paste selected data?")) return;
-                importTextData(chosenFile.getAbsolutePath());
-            }
-        });
-
-        if (dataObject instanceof ScalarDS) {
-            checkFixedDataLength = new MenuItem(menu, SWT.CHECK);
-            checkFixedDataLength.setText("Fixed Data Length");
-            checkFixedDataLength.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (!checkFixedDataLength.getSelection()) {
-                        fixedDataLength = -1;
-                        return;
-                    }
-
-                    String str = new InputDialog(theShell, "",
-                            "Enter fixed data length when importing text data\n\n"
-                                    + "For example, for a text string of \"12345678\"\n\t\tenter 2,"
-                                    + "the data will be 12, 34, 56, 78\n\t\tenter 4, the data will be" + "1234, 5678\n")
-                            .open();
-
-                    if ((str == null) || (str.length() < 1)) {
-                        checkFixedDataLength.setSelection(false);
-                        return;
-                    }
-
-                    try {
-                        fixedDataLength = Integer.parseInt(str);
-                    }
-                    catch (Exception ex) {
-                        fixedDataLength = -1;
-                    }
-
-                    if (fixedDataLength < 1) {
-                        checkFixedDataLength.setSelection(false);
-                        return;
-                    }
-                }
-            });
-
-            MenuItem importAsBinaryMenuItem = new MenuItem(menu, SWT.CASCADE);
-            importAsBinaryMenuItem.setText("Import Data from Binary File");
-
-            Menu importFromBinaryMenu = new Menu(menu);
-
-            item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
-            item.setText("Native Order");
-            item.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    binaryOrder = 1;
-
-                    try {
-                        importBinaryData();
-                    }
-                    catch (Exception ex) {
-                        Tools.showError(theShell, ex.getMessage(), theShell.getText());
-                    }
-                }
-            });
-
-            item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
-            item.setText("Little Endian");
-            item.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    binaryOrder = 2;
-
-                    try {
-                        importBinaryData();
-                    }
-                    catch (Exception ex) {
-                        Tools.showError(theShell, ex.getMessage(), theShell.getText());
-                    }
-                }
-            });
-
-            item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
-            item.setText("Big Endian");
-            item.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    binaryOrder = 3;
-
-                    try {
-                        importBinaryData();
-                    }
-                    catch (Exception ex) {
-                        Tools.showError(theShell, ex.getMessage(), theShell.getText());
-                    }
-                }
-            });
-
-            importAsBinaryMenuItem.setMenu(importFromBinaryMenu);
-        }
-
-        new MenuItem(menu, SWT.SEPARATOR);
-
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Copy");
         item.setAccelerator(SWT.CTRL | 'C');
         item.addSelectionListener(new SelectionAdapter() {
@@ -883,7 +693,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Paste");
         item.setAccelerator(SWT.CTRL | 'V');
         item.setEnabled(isEditable);
@@ -894,9 +704,9 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        new MenuItem(menu, SWT.SEPARATOR);
+        new MenuItem(tableMenu, SWT.SEPARATOR);
 
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Copy to New Dataset");
         item.setEnabled(isEditable && (dataObject instanceof ScalarDS));
         item.addSelectionListener(new SelectionAdapter() {
@@ -939,7 +749,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Save Changes to File");
         item.setAccelerator(SWT.CTRL | 'U');
         item.setEnabled(isEditable);
@@ -956,27 +766,9 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        new MenuItem(menu, SWT.SEPARATOR);
+        new MenuItem(tableMenu, SWT.SEPARATOR);
 
-        item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Select All");
-        item.setAccelerator(SWT.CTRL | 'A');
-        item.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                try {
-                    dataTable.doCommand(new SelectAllCommand());
-                }
-                catch (Exception ex) {
-                    theShell.getDisplay().beep();
-                    Tools.showError(theShell, ex.getMessage(), theShell.getText());
-                }
-            }
-        });
-
-        new MenuItem(menu, SWT.SEPARATOR);
-
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Show Lineplot");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -985,7 +777,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Show Statistics");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -1026,9 +818,9 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        new MenuItem(menu, SWT.SEPARATOR);
+        new MenuItem(tableMenu, SWT.SEPARATOR);
 
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Math Conversion");
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
@@ -1044,124 +836,9 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        new MenuItem(menu, SWT.SEPARATOR);
+        new MenuItem(tableMenu, SWT.SEPARATOR);
 
-        if (dataObject instanceof ScalarDS) {
-            checkScientificNotation = new MenuItem(menu, SWT.CHECK);
-            checkScientificNotation.setText("Show Scientific Notation");
-            checkScientificNotation.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (checkScientificNotation.getSelection()) {
-                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
-                        if (checkHex != null) checkHex.setSelection(false);
-                        if (checkBin != null) checkBin.setSelection(false);
-
-                        numberFormat = scientificFormat;
-                        showAsHex = false;
-                        showAsBin = false;
-                    }
-                    else {
-                        numberFormat = normalFormat;
-                    }
-
-                    dataTable.doCommand(new VisualRefreshCommand());
-                }
-            });
-
-            checkCustomNotation = new MenuItem(menu, SWT.CHECK);
-            checkCustomNotation.setText("Show Custom Notation");
-            checkCustomNotation.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (checkCustomNotation.getSelection()) {
-                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
-                        if (checkHex != null) checkHex.setSelection(false);
-                        if (checkBin != null) checkBin.setSelection(false);
-
-                        numberFormat = customFormat;
-                        showAsHex = false;
-                        showAsBin = false;
-                    }
-                    else {
-                        numberFormat = normalFormat;
-                    }
-
-                    dataTable.doCommand(new VisualRefreshCommand());
-                }
-            });
-        }
-
-        item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Create custom notation");
-        item.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                String msg = "Create number format by pattern \nINTEGER . FRACTION E EXPONENT\nusing # for optional digits and 0 for required digits"
-                        + "\nwhere, INTEGER: the pattern for the integer part"
-                        + "\n       FRACTION: the pattern for the fractional part"
-                        + "\n       EXPONENT: the pattern for the exponent part" + "\n\nFor example, "
-                        + "\n\t the normalized scientific notation format is \"#.0###E0##\""
-                        + "\n\t to make the digits required \"0.00000E000\"\n\n";
-
-                // Add custom HDFLarge icon to dialog
-                String str = (new InputDialog(theShell, "Create a custom number format", msg)).open();
-
-                if ((str == null) || (str.length() < 1)) {
-                    return;
-                }
-
-                customFormat.applyPattern(str);
-            }
-        });
-
-        int type = dataObject.getDatatype().getDatatypeClass();
-        boolean isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
-
-        if ((dataObject instanceof ScalarDS)
-                && (isInt || type == Datatype.CLASS_BITFIELD || type == Datatype.CLASS_OPAQUE)) {
-            checkHex = new MenuItem(menu, SWT.CHECK);
-            checkHex.setText("Show Hexadecimal");
-            checkHex.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    showAsHex = checkHex.getSelection();
-                    if (showAsHex) {
-                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
-                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
-                        if (checkBin != null) checkBin.setSelection(false);
-
-                        showAsBin = false;
-                        numberFormat = normalFormat;
-                    }
-
-                    dataTable.doCommand(new VisualRefreshCommand());
-                }
-            });
-
-            checkBin = new MenuItem(menu, SWT.CHECK);
-            checkBin.setText("Show Binary");
-            checkBin.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    showAsBin = checkBin.getSelection();
-                    if (showAsBin) {
-                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
-                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
-                        if (checkHex != null) checkHex.setSelection(false);
-
-                        showAsHex = false;
-                        numberFormat = normalFormat;
-                    }
-
-                    dataTable.doCommand(new VisualRefreshCommand());
-                }
-            });
-        }
-
-        new MenuItem(menu, SWT.SEPARATOR);
-
-        item = new MenuItem(menu, SWT.PUSH);
+        item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Close");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -1170,8 +847,88 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
+
+        /********************************************************************
+         *                                                                  *
+         * Set up MenuItems for Importing/Exporting Data from the TableView *
+         *                                                                  *
+         ********************************************************************/
+
+
+        MenuItem importExportMenuItem = new MenuItem(menuBar, SWT.CASCADE);
+        importExportMenuItem.setText("&Import/Export Data");
+
+        Menu importExportMenu = new Menu(theShell, SWT.DROP_DOWN);
+        importExportMenuItem.setMenu(importExportMenu);
+
+        item = new MenuItem(importExportMenu, SWT.CASCADE);
+        item.setText("Export Data to");
+
+        Menu exportMenu = new Menu(item);
+        item.setMenu(exportMenu);
+
+        item = new MenuItem(exportMenu, SWT.PUSH);
+        item.setText("Text File");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    saveAsText();
+                }
+                catch (Exception ex) {
+                    theShell.getDisplay().beep();
+                    Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                }
+            }
+        });
+
+        item = new MenuItem(importExportMenu, SWT.CASCADE);
+        item.setText("Import Data from");
+
+        Menu importMenu = new Menu(item);
+        item.setMenu(importMenu);
+
+        item = new MenuItem(importMenu, SWT.PUSH);
+        item.setText("Text File");
+        item.setEnabled(!isReadOnly);
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String currentDir = ((HObject) dataObject).getFileFormat().getParent();
+
+                String filename = null;
+                if (((HDFView) viewer).getTestState()) {
+                    filename = currentDir + File.separator + new InputDialog(theShell, "Enter a file name", "").open();
+                }
+                else {
+                    FileDialog fChooser = new FileDialog(theShell, SWT.OPEN);
+                    fChooser.setFilterPath(currentDir);
+
+                    DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
+                    fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+                    fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
+                    fChooser.setFilterIndex(1);
+
+                    filename = fChooser.open();
+                }
+
+                if (filename == null) return;
+
+                File chosenFile = new File(filename);
+                if (!chosenFile.exists()) {
+                    Tools.showError(theShell, "File " + filename + " does not exist.", "Import Data from Text File");
+                    return;
+                }
+
+                if (!MessageDialog.openConfirm(theShell, "Import Data", "Do you want to paste selected data?")) return;
+                importTextData(chosenFile.getAbsolutePath());
+            }
+        });
+
         return menuBar;
     }
+
+    protected abstract void loadData(DataFormat dataObject);
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
 
@@ -1452,7 +1209,7 @@ public abstract class DefaultBaseTableView implements TableView {
      * @throws Exception
      *             if a failure occurred
      */
-    private void saveAsText() throws Exception {
+    protected void saveAsText() throws Exception {
         String currentDir = ((HObject) dataObject).getFileFormat().getParent();
 
         String filename = null;
@@ -1652,7 +1409,7 @@ public abstract class DefaultBaseTableView implements TableView {
      * @throws Exception
      *             if a failure occurred
      */
-    private void saveAsBinary() throws Exception {
+    protected void saveAsBinary() throws Exception {
         String currentDir = ((HObject) dataObject).getFileFormat().getParent();
 
         String filename = null;
@@ -1727,7 +1484,7 @@ public abstract class DefaultBaseTableView implements TableView {
      * @param fname
      *            the file to import text from
      */
-    private void importTextData(String fname) {
+    protected void importTextData(String fname) {
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
         int r0;
@@ -1883,7 +1640,7 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * Import data values from binary file.
      */
-    private void importBinaryData() {
+    protected void importBinaryData() {
         String currentDir = ((HObject) dataObject).getFileFormat().getParent();
 
         String filename = null;
@@ -1925,11 +1682,11 @@ public abstract class DefaultBaseTableView implements TableView {
             dataTable.doCommand(new StructuralRefreshCommand());
         }
         catch (Exception ex) {
-            log.trace("importBinaryData(): {}", ex);
+            log.debug("importBinaryData():", ex);
             return;
         }
         catch (OutOfMemoryError e) {
-            log.trace("importBinaryData(): Out of memory");
+            log.debug("importBinaryData(): Out of memory");
             return;
         }
     }

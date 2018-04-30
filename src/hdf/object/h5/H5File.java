@@ -117,8 +117,6 @@ public class H5File extends FileFormat {
     public static final int LIBVER_V18 = HDF5Constants.H5F_LIBVER_V18;
     public static final int LIBVER_V110 = HDF5Constants.H5F_LIBVER_V110;
 
-    private boolean attrFlag;
-
     /***************************************************************************
      * Constructor
      **************************************************************************/
@@ -175,7 +173,6 @@ public class H5File extends FileFormat {
         // Call FileFormat ctor to set absolute path name
         super(fileName);
         libver = new int[2];
-        attrFlag = false;
 
         // set metadata for the instance
         rootObject = null;
@@ -2031,7 +2028,7 @@ public class H5File extends FileFormat {
                 }
                 catch (Exception ex) {
                     attrValue = null;
-                    log.trace("writeAttribute(): getData() failure {}", ex);
+                    log.trace("writeAttribute(): getData() failure:", ex);
                 }
 
                 log.trace("writeAttribute(): getValue");
@@ -3046,10 +3043,7 @@ public class H5File extends FileFormat {
     @Override
     public void renameAttribute(HObject obj, String oldAttrName, String newAttrName) throws Exception {
         log.trace("renameAttribute(): rename {} to {}", oldAttrName, newAttrName);
-        if (!attrFlag) {
-            attrFlag = true;
-            H5.H5Arename_by_name(obj.getFID(), obj.getName(), oldAttrName, newAttrName, HDF5Constants.H5P_DEFAULT);
-        }
+        H5.H5Arename_by_name(obj.getFID(), obj.getFullName(), oldAttrName, newAttrName, HDF5Constants.H5P_DEFAULT);
     }
 
     /**

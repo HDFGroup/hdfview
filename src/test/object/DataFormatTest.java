@@ -133,7 +133,7 @@ public class DataFormatTest {
                 try {
                     value = (String[]) attrobj.getData();
                 } catch (Exception ex) {
-                    log.trace("testGetMetadata(): getData() failure: {}", ex);
+                    log.trace("testGetMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testGetMetadata(): Out of memory");
@@ -154,7 +154,7 @@ public class DataFormatTest {
         try {
             value = (String[]) strAttr.getData();
         } catch (Exception ex) {
-            log.trace("testGetMetadata(): getData() failure: {}", ex);
+            log.trace("testGetMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
         } catch (OutOfMemoryError e) {
             log.trace("testGetMetadata(): Out of memory");
@@ -172,7 +172,7 @@ public class DataFormatTest {
         try {
             intValue = (int[]) arrayIntAttr.getData();
         } catch (Exception ex) {
-            log.trace("testGetMetadata(): getData() failure: {}", ex);
+            log.trace("testGetMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
         } catch (OutOfMemoryError e) {
             log.trace("testGetMetadata(): Out of memory");
@@ -242,7 +242,7 @@ public class DataFormatTest {
                 try {
                     value = (String[]) attrobj.getData();
                 } catch (Exception ex) {
-                    log.trace("testWriteMetadata(): getData() failure: {}", ex);
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
                 } catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
@@ -263,7 +263,7 @@ public class DataFormatTest {
         try {
             value = (String[]) strAttr.getData();
         } catch (Exception ex) {
-            log.trace("testWriteMetadata(): getData() failure: {}", ex);
+            log.trace("testWriteMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
         } catch (OutOfMemoryError e) {
             log.trace("testWriteMetadata(): Out of memory");
@@ -282,7 +282,7 @@ public class DataFormatTest {
         try {
             intValue = (int[]) arrayIntAttr.getData();
         } catch (Exception ex) {
-            log.trace("testWriteMetadata(): getData() failure: {}", ex);
+            log.trace("testWriteMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
         } catch (OutOfMemoryError e) {
             log.trace("testWriteMetadata(): Out of memory");
@@ -298,7 +298,7 @@ public class DataFormatTest {
         try {
             value = (String[]) imgAttr.getData();
         } catch (Exception ex) {
-            log.trace("testWriteMetadata(): getData() failure: {}", ex);
+            log.trace("testWriteMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
         } catch (OutOfMemoryError e) {
             log.trace("testWriteMetadata(): Out of memory");

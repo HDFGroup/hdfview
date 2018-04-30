@@ -387,6 +387,17 @@ public abstract class CompoundDS extends Dataset {
     }
 
     /**
+     * Returns true if the original C data is unsigned integers.
+     *
+     * @return true if the original C data is unsigned integers.
+     */
+    @Override
+    public final boolean isUnsigned() {
+        /* TODO: */
+        return false;
+    }
+
+    /**
      * @deprecated Not implemented for compound dataset.
      */
     @Deprecated

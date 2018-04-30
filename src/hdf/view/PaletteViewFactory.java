@@ -73,7 +73,7 @@ public class PaletteViewFactory extends DataViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getPaletteView(): Class.forName({}) failure: {}", dataViewName, ex);
+            log.debug("getPaletteView(): Class.forName({}) failure:", dataViewName, ex);
 
             try {
                 log.trace("getPaletteView(): ViewProperties.loadExtClass().loadClass({})",
@@ -84,7 +84,7 @@ public class PaletteViewFactory extends DataViewFactory {
             }
             catch (Exception ex2) {
                 log.debug(
-                        "getPaletteView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                        "getPaletteView(): ViewProperties.loadExtClass().loadClass({}) failure:",
                         dataViewName, ex);
 
                 /* No loadable class found; use the default PaletteView */
@@ -96,7 +96,7 @@ public class PaletteViewFactory extends DataViewFactory {
                     theClass = Class.forName(dataViewName);
                 }
                 catch (Exception ex3) {
-                    log.debug("getPaletteView(): Class.forName({}) failure: {}", dataViewName, ex);
+                    log.debug("getPaletteView(): Class.forName({}) failure:", dataViewName, ex);
 
                     theClass = null;
                 }
@@ -109,7 +109,7 @@ public class PaletteViewFactory extends DataViewFactory {
             log.trace("getPaletteView(): returning PaletteView instance {}", theView);
         }
         catch (Exception ex) {
-            log.trace("getPaletteView(): Error instantiating class: {}", ex);
+            log.debug("getPaletteView(): Error instantiating class:", ex);
         }
 
         log.trace("getPaletteView(): finish");

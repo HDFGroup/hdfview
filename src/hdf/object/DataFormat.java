@@ -323,4 +323,26 @@ public interface DataFormat {
      * @return the string representation of compression information.
      */
     public abstract String getCompression();
+
+    /**
+     * Get runtime Class of the original data buffer if converted.
+     *
+     * @return the Class of the original data buffer
+     */
+    @SuppressWarnings("rawtypes")
+    public abstract Class getOriginalClass();
+
+    /**
+     * Returns whether or not the data is unsigned.
+     *
+     * @return whether or not the data is unsigned.
+     */
+    public abstract boolean isUnsigned();
+
+    /**
+     * Returns whether or not the data is text data.
+     *
+     * @return whether or not the data is text data.
+     */
+    public abstract boolean isTextData();
 }

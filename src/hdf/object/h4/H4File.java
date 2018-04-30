@@ -528,7 +528,7 @@ public class H4File extends FileFormat {
             attrValue = attr.getData();
         } catch (Exception ex) {
             attrValue = null;
-            log.trace("writeAttribute(): getData() failure {}", ex);
+            log.trace("writeAttribute(): getData() failure:", ex);
         }
 
         if (Array.get(attrValue, 0) instanceof String) {
