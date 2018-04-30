@@ -201,6 +201,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
 
+            // Reload file to update link
             items[0].click();
             items[0].contextMenu("Reload File").click();
 
@@ -210,6 +211,13 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "5", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 5);
             assertTrue("testHardLinks() filetree is missing link '" + group_link_name + "'", items[0].getNode(1).getText().compareTo(group_link_name) == 0);
+
+            // Delete link
+            items[3].click();
+            items[3].contextMenu("Delete").click();
+
+            linkShell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(linkShell));
 
             // Test links to datasets
             items[0].click();
@@ -242,12 +250,16 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
 
+            // Reload file to update link
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 6);
-            assertTrue("testHardLinks() filetree is missing link '" + dataset_link_name + "'", items[0].getNode(2).getText().compareTo(dataset_link_name) == 0);
+            assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 4);
+            assertTrue("testHardLinks() filetree is missing link '" + dataset_link_name + "'", items[0].getNode(1).getText().compareTo(dataset_link_name) == 0);
 
             items[0].getNode(2).click();
             items[0].getNode(2).contextMenu("Open").click();
@@ -314,12 +326,12 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             createNewHDF5Group();
             createNewHDF5Dataset();
 
-            assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 3);
             assertTrue("testSoftLinks() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
             assertTrue("testSoftLinks() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
-            // Test links to groups
+            // Test soft link to existing object
             items[0].click();
             items[0].contextMenu("New").menu("Link").click();
 
@@ -350,6 +362,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
 
+            // Reload file to update link
             items[0].click();
             items[0].contextMenu("Reload File").click();
 
@@ -360,7 +373,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     filetree.visibleRowCount() == 5);
             assertTrue("testSoftLinks() filetree is missing link '" + group_link_name + "'", items[0].getNode(1).getText().compareTo(group_link_name) == 0);
 
-            // Test links to datasets
+            // Test soft link to non-existing object
             items[0].click();
             items[0].contextMenu("New").menu("Link").click();
 
@@ -368,11 +381,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.activate();
             bot.waitUntil(Conditions.shellIsActive(linkShell.getText()));
 
-            linkShell.bot().text(0).setText(dataset_link_name);
+            linkShell.bot().text(0).setText("test_nonexisting_object_link");
 
             val = linkShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name", dataset_link_name, val),
-                    val.equals(dataset_link_name));
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name", "test_nonexisting_object_link", val),
+                    val.equals("test_nonexisting_object_link"));
 
             linkShell.bot().comboBox(0).setSelection("/");
 
@@ -382,21 +395,53 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             linkShell.bot().radio("Soft Link").click();
 
-            linkShell.bot().ccomboBox().setSelection("/" + groupname + "/" + datasetname);
+            linkShell.bot().ccomboBox().setSelection("/" + groupname + "/nonexist");
 
             val = linkShell.bot().ccomboBox().getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link target", "/" + groupname + "/" + datasetname, val),
-                    val.equals("/" + groupname + "/" + datasetname));
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link target", "/" + groupname + "/nonexist", val),
+                    val.equals("/" + groupname + "/nonexist"));
 
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
+
+            // Reload file to update link
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
             assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 6);
-            assertTrue("testSoftLinks() filetree is missing link '" + dataset_link_name + "'", items[0].getNode(2).getText().compareTo(dataset_link_name) == 0);
+            assertTrue("testSoftLinks() filetree is missing link 'test_nonexisting_object_link'", items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
+
+            // Change link to point to existing object - metadata
+            items[0].getNode(2).click();
+
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.textWithLabel("Link To Target: ").getText();
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name", "test_nonexisting_object_link", val),
+                    val.equals("test_nonexisting_object_link"));
+
+            linkShell.bot().textWithLabel("Link To Target: ").setText("/" + groupname + "/" + datasetname);
+
+            SWTBotShell linkTargetShell = bot.shell("Link target changed.");
+            linkTargetShell.activate();
+            linkTargetShell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(linkShell));
+
+            // Reload file to update link
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 6);
+            assertTrue("testSoftLinks() filetree is missing link 'test_nonexisting_object_link'", items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
 
             items[0].getNode(2).click();
             items[0].getNode(2).contextMenu("Open").click();
