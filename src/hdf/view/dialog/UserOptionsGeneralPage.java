@@ -466,7 +466,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
                         // + "bias_max = fabs(bias) * 3.0 \n"
                         + "\n\n";
 
-                MessageDialog.openInformation(shell, shell.getText(), msg);
+                MessageDialog.openInformation(getShell(), getShell().getText(), msg);
             }
         });
 
