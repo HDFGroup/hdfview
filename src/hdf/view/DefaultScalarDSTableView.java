@@ -73,12 +73,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarDSTableView.class);
 
     /**
-     * Numerical data type. B = byte array, S = short array, I = int array, J = long
-     * array, F = float array, and D = double array.
-     */
-    protected char NT = ' ';
-
-    /**
      * Constructs a ScalarDS TableView with no additional data properties.
      *
      * @param theView
@@ -156,6 +150,109 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         log.trace("DefaultScalarDSTableView: finish");
 
         shell.open();
+    }
+
+    @Override
+    protected void loadData(DataFormat dataObject) {
+        log.trace("loadData(): start");
+
+        if (dataObject.getRank() <= 0) {
+            try {
+                if (dataObject instanceof ScalarDS)
+                    ((ScalarDS) dataObject).init();
+
+                log.trace("loadData(): dataset inited");
+            }
+            catch (Exception ex) {
+                Tools.showError(shell, ex.getMessage(), "loadData:" + shell.getText());
+                dataValue = null;
+                log.debug("loadData(): ", ex);
+                log.trace("loadData(): finish");
+                return;
+            }
+        }
+
+        /* TODO: move down into object library */
+        // Make sure entire dataset is not loaded when looking at 3D
+        // datasets using the default display mode (double clicking the
+        // data object)
+        if (dataObject.getRank() > 2) {
+            dataObject.getSelectedDims()[dataObject.getSelectedIndex()[2]] = 1;
+        }
+
+        dataValue = null;
+        try {
+            dataValue = dataObject.getData();
+            if (dataValue == null) {
+                Tools.showError(shell, "No data read", "ScalarDS loadData:" + shell.getText());
+                log.debug("loadData(): no data read");
+                log.trace("loadData(): finish");
+                return;
+            }
+
+            log.trace("loadData(): dataValue={}", dataValue);
+
+            if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
+                isReadOnly = true;
+                String opName = "Bits ";
+
+                if (bitmaskOP == ViewProperties.BITMASK_OP.AND) opName = "Bitwise AND ";
+
+                String title = indexBaseGroup.getText();
+                title += ", " + opName + bitmask;
+                indexBaseGroup.setText(title);
+            }
+
+            if (dataObject instanceof ScalarDS)
+                ((ScalarDS) dataObject).convertFromUnsignedC();
+
+            dataValue = dataObject.getData();
+        }
+        catch (Throwable ex) {
+            Tools.showError(shell, ex.getMessage(), "ScalarDS loadData:" + shell.getText());
+            log.debug("loadData(): ", ex);
+            log.trace("loadData(): finish");
+            dataValue = null;
+        }
+
+        if (dataValue == null) {
+            log.debug("loadData(): data value is null");
+            log.trace("loadData(): finish");
+            return;
+        }
+
+        fillValue = dataObject.getFillValue();
+        log.trace("loadData(): fillValue={}", fillValue);
+
+        char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+        log.trace("loadData(): cName={} runtimeTypeClass={}", dataValue.getClass().getName(), runtimeTypeClass);
+
+        /*
+         * Convert numerical data into character data; only possible cases are byte[]
+         * and short[] (converted from unsigned byte)
+         */
+        if (isDisplayTypeChar && ((runtimeTypeClass == 'B') || (runtimeTypeClass == 'S'))) {
+            int n = Array.getLength(dataValue);
+            char[] charData = new char[n];
+            for (int i = 0; i < n; i++) {
+                if (runtimeTypeClass == 'B') {
+                    charData[i] = (char) Array.getByte(dataValue, i);
+                }
+                else if (runtimeTypeClass == 'S') {
+                    charData[i] = (char) Array.getShort(dataValue, i);
+                }
+            }
+
+            dataValue = charData;
+        }
+        else if ((runtimeTypeClass == 'B') && dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
+            Datatype baseType = dataObject.getDatatype().getBasetype();
+            if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
+                dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
+            }
+        }
+
+        log.trace("loadData(): finish");
     }
 
     /**
@@ -455,17 +552,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         });
 
         int type = dataObject.getDatatype().getDatatypeClass();
-
-        /*
-         * TODO: temporary workaround until moved to ScalarDSTableView
-         */
-        String cName = dataValue.getClass().getName();
-        boolean isInt = false;
-        int cIndex = cName.lastIndexOf("[");
-        if (cIndex >= 0) {
-            char typeSymbol = cName.charAt(cIndex + 1);
-            isInt = (typeSymbol == 'B' || typeSymbol == 'S' || typeSymbol == 'I' || typeSymbol == 'J');
-        }
+        char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+        boolean isInt = (runtimeTypeClass == 'B' || runtimeTypeClass == 'S' || runtimeTypeClass == 'I'
+                || runtimeTypeClass == 'J');
 
         if (isInt || type == Datatype.CLASS_BITFIELD || type == Datatype.CLASS_OPAQUE) {
             checkHex = new MenuItem(dataDisplayMenu, SWT.CHECK);
@@ -543,104 +632,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     @Override
     protected NatTable createTable(Composite parent, DataFormat dataObject) {
         log.trace("createTable(): start");
-
-        if (dataObject.getRank() <= 0) {
-            try {
-                if (dataObject instanceof ScalarDS)
-                    ((ScalarDS) dataObject).init();
-
-                log.trace("createTable(): dataset inited");
-            }
-            catch (Exception ex) {
-                Tools.showError(shell, ex.getMessage(), "createTable:" + shell.getText());
-                dataValue = null;
-                log.debug("createTable(): ", ex);
-                log.trace("createTable(): finish");
-                return null;
-            }
-        }
-
-        // Make sure entire dataset is not loaded when looking at 3D
-        // datasets using the default display mode (double clicking the
-        // data object)
-        if (dataObject.getRank() > 2) {
-            dataObject.getSelectedDims()[dataObject.getSelectedIndex()[2]] = 1;
-        }
-
-        dataValue = null;
-        try {
-            dataValue = dataObject.getData();
-            if (dataValue == null) {
-                Tools.showError(shell, "No data read", "ScalarDS createTable:" + shell.getText());
-                log.debug("createTable(): no data read");
-                log.trace("createTable(): finish");
-                return null;
-            }
-
-            log.trace("createTable(): dataValue={}", dataValue);
-
-            if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
-                isReadOnly = true;
-                String opName = "Bits ";
-
-                if (bitmaskOP == ViewProperties.BITMASK_OP.AND) opName = "Bitwise AND ";
-
-                String title = indexBaseGroup.getText();
-                title += ", " + opName + bitmask;
-                indexBaseGroup.setText(title);
-            }
-
-            if (dataObject instanceof ScalarDS)
-                ((ScalarDS) dataObject).convertFromUnsignedC();
-
-            dataValue = dataObject.getData();
-        }
-        catch (Throwable ex) {
-            Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
-            log.debug("createTable(): ", ex);
-            log.trace("createTable(): finish");
-            dataValue = null;
-        }
-
-        if (dataValue == null) {
-            log.debug("createTable(): data value is null");
-            log.trace("createTable(): finish");
-            return null;
-        }
-
-        fillValue = dataObject.getFillValue();
-        log.trace("createTable(): fillValue={}", fillValue);
-
-        String cName = dataValue.getClass().getName();
-        int cIndex = cName.lastIndexOf("[");
-        if (cIndex >= 0) {
-            NT = cName.charAt(cIndex + 1);
-        }
-        log.trace("createTable(): cName={} NT={}", cName, NT);
-
-        // convert numerical data into char
-        // only possible cases are byte[] and short[] (converted from unsigned
-        // byte)
-        if (isDisplayTypeChar && ((NT == 'B') || (NT == 'S'))) {
-            int n = Array.getLength(dataValue);
-            char[] charData = new char[n];
-            for (int i = 0; i < n; i++) {
-                if (NT == 'B') {
-                    charData[i] = (char) Array.getByte(dataValue, i);
-                }
-                else if (NT == 'S') {
-                    charData[i] = (char) Array.getShort(dataValue, i);
-                }
-            }
-
-            dataValue = charData;
-        }
-        else if ((NT == 'B') && dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
-            Datatype baseType = dataObject.getDatatype().getBasetype();
-            if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
-                dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
-            }
-        }
 
         // Create body layer
         final ScalarDSDataProvider bodyDataProvider = new ScalarDSDataProvider(dataObject);
@@ -729,7 +720,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             selectedData = new String[size];
         }
         else {
-            switch (NT) {
+            switch (Tools.getJavaObjectRuntimeClass(dataValue)) {
                 case 'B':
                     selectedData = new byte[size];
                     break;
@@ -759,7 +750,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             Tools.showError(shell, "Unsupported data type.", shell.getText());
             return null;
         }
-        log.trace("getSelectedData(): selectedData is type {}", NT);
+
+        log.trace("getSelectedData(): selectedData is type {}", Tools.getJavaObjectRuntimeClass(dataValue));
 
         int w = dataTable.getPreferredColumnCount() - 1;
         log.trace("getSelectedData(): getColumnCount={}", w);
@@ -826,7 +818,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 i = row * (dataTable.getPreferredColumnCount() - 1) + col;
             }
 
-            log.trace("updateValueInMemory({}, {}): {} NT={}", row, col, cellValue, NT);
+            char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+
+            log.trace("updateValueInMemory({}, {}): {} runtimeTypeClass={}", row, col, cellValue, runtimeTypeClass);
 
             boolean isUnsigned = dataObject.isUnsigned();
             String cname = dataObject.getOriginalClass().getName();
@@ -834,7 +828,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.trace("updateValueInMemory({}, {}): isUnsigned={} cname={} dname={}", row,
                     col, isUnsigned, cname, dname);
 
-            switch (NT) {
+            switch (runtimeTypeClass) {
                 case 'B':
                     byte bvalue = 0;
                     bvalue = Byte.parseByte(cellValue);
@@ -1543,7 +1537,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         private final long         colCount;
 
         public ScalarDSDataProvider(DataFormat theDataset) {
-            log.trace("ScalarDSDataProvider:NT={} start", NT);
+            log.trace("ScalarDSDataProvider: start");
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
@@ -1553,13 +1547,24 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             rank = theDataset.getRank();
 
+            char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+            if (runtimeTypeClass == ' ') {
+                log.debug("ScalarDSDataProvider: invalid data value runtime type class: runtimeTypeClass={}",
+                        runtimeTypeClass);
+                log.trace("ScalarDSDataProvider: finish");
+                throw new IllegalStateException("Invalid data value runtime type class: " + runtimeTypeClass);
+            }
+
+            isInt = (runtimeTypeClass == 'B' || runtimeTypeClass == 'S' || runtimeTypeClass == 'I'
+                    || runtimeTypeClass == 'J');
+            log.trace("ScalarDSDataProvider:runtimeTypeClass={}", runtimeTypeClass);
+
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
             log.trace("ScalarDSDataProvider:isArray={} start", isArray);
-            isInt = (NT == 'B' || NT == 'S' || NT == 'I' || NT == 'J');
             if (isArray)
-                isUINT64 = (btype.isUnsigned() && (NT == 'J'));
+                isUINT64 = (btype.isUnsigned() && (runtimeTypeClass == 'J'));
             else
-                isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
+                isUINT64 = (dtype.isUnsigned() && (runtimeTypeClass == 'J'));
             isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE
                     || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
 
@@ -1742,7 +1747,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         private final boolean      isBitfieldOrOpaque;
 
         public ScalarDSDataDisplayConverter(final DataFormat theDataObject) {
-            log.trace("ScalarDSDataDisplayConverter:NT={} start", NT);
+            log.trace("ScalarDSDataDisplayConverter: start");
             buffer = new StringBuffer();
 
             dtype = theDataObject.getDatatype();
@@ -1754,9 +1759,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.trace("ScalarDSDisplayConverter:isArray={} start", isArray);
             isEnum = dtype.getDatatypeClass() == Datatype.CLASS_ENUM;
             if (isArray)
-                isUINT64 = (btype.isUnsigned() && (NT == 'J'));
+                isUINT64 = (btype.isUnsigned() && (Tools.getJavaObjectRuntimeClass(dataValue) == 'J'));
             else
-                isUINT64 = (dtype.isUnsigned() && (NT == 'J'));
+                isUINT64 = (dtype.isUnsigned() && (Tools.getJavaObjectRuntimeClass(dataValue) == 'J'));
             isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE
                     || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
             log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
@@ -1968,6 +1973,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 if (isRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
+
                     log.trace("ScalarDSCellSelectionListener: CellSelected displayValues={}", displayValues);
                     if (displayValues && val != null && ((String) val).compareTo("NULL") != 0) {
                         String reg = (String) val;
@@ -2088,15 +2094,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                     "Region Reference:" + shell.getText());
                                         }
 
-                                        // Convert dbuf to a displayable
-                                        // string
-                                        String cName = dbuf.getClass().getName();
-                                        int cIndex = cName.lastIndexOf("[");
-                                        if (cIndex >= 0) {
-                                            NT = cName.charAt(cIndex + 1);
-                                        }
-                                        log.trace("ScalarDSCellSelectionListener: CellSelected: cName={} NT={}", cName,
-                                                NT);
+                                        /* Convert dbuf to a displayable string */
+                                        char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dbuf);
+                                        log.trace(
+                                                "ScalarDSCellSelectionListener: CellSelected: cName={} runtimeTypeClass={}",
+                                                dbuf.getClass().getName(), runtimeTypeClass);
 
                                         if (idx > 0) strvalSB.append(',');
 
@@ -2112,17 +2114,17 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         if (baseType == null) baseType = dtype;
                                         if ((dtype.getDatatypeClass() == Datatype.CLASS_ARRAY
                                                 && baseType.getDatatypeClass() == Datatype.CLASS_CHAR)
-                                                && ((NT == 'B') || (NT == 'S'))) {
+                                                && ((runtimeTypeClass == 'B') || (runtimeTypeClass == 'S'))) {
                                             int n = Array.getLength(dbuf);
                                             log.trace(
                                                     "ScalarDSCellSelectionListener: CellSelected charData length = {}",
                                                     n);
                                             char[] charData = new char[n];
                                             for (int i = 0; i < n; i++) {
-                                                if (NT == 'B') {
+                                                if (runtimeTypeClass == 'B') {
                                                     charData[i] = (char) Array.getByte(dbuf, i);
                                                 }
-                                                else if (NT == 'S') {
+                                                else if (runtimeTypeClass == 'S') {
                                                     charData[i] = (char) Array.getShort(dbuf, i);
                                                 }
                                             }
@@ -2136,7 +2138,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             boolean is_unsigned = dtype.isUnsigned();
                                             int n = Array.getLength(dbuf);
                                             if (is_unsigned) {
-                                                switch (NT) {
+                                                switch (runtimeTypeClass) {
                                                     case 'B':
                                                         byte[] barray = (byte[]) dbuf;
                                                         short sValue = barray[0];

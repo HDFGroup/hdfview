@@ -443,6 +443,9 @@ public abstract class DefaultBaseTableView implements TableView {
 
         cellValueComposite.setWeights(new int[] { 1, 5 });
 
+        /* Make sure that the Dataset's data value is accessible for conditionally adding GUI components */
+        loadData(dataObject);
+
         /* Create the Shell's MenuBar */
         /*
          * TODO: If read-only access is not set correctly at this point, as may be the
@@ -924,6 +927,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
         return menuBar;
     }
+
+    protected abstract void loadData(DataFormat dataObject);
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
 
