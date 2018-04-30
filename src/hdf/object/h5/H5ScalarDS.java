@@ -1541,15 +1541,6 @@ public class H5ScalarDS extends ScalarDS {
             selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
         }
 
-        // by default, only one-D is selected for text data
-        /* TODO: Determine whether to remove */
-        // if ((rank > 1) && isText) {
-        // selectedIndex[0] = rank - 1;
-        // selectedIndex[1] = 0;
-        // selectedDims[0] = 1;
-        // selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
-        // }
-
         isDataLoaded = false;
         isDefaultImageOrder = true;
         log.trace("resetSelection(): finish");
