@@ -99,19 +99,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         shell.open();
     }
 
-    /**
-     * Creates a NatTable for a Compound dataset
-     *
-     * @param parent
-     *            The parent for the NatTable
-     * @param dataObject
-     *            The Compound dataset for the NatTable to display
-     *
-     * @return The newly created NatTable
-     */
     @Override
-    protected NatTable createTable(Composite parent, DataFormat dataObject) {
-        log.trace("createTable(): start");
+    protected void loadData(DataFormat dataObject) {
+        log.trace("loadData(): start");
 
         if (dataObject.getRank() <= 0) ((CompoundDS) dataObject).init();
 
@@ -120,6 +110,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             ((CompoundDS) dataObject).setConvertByteToString(false);
         }
 
+        /* TODO: move down into the object library */
         // Make sure entire dataset is not loaded when looking at 3D
         // datasets using the default display mode (double clicking the
         // data object)
@@ -133,16 +124,33 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), "TableView " + shell.getText());
-            log.debug("createTable(): ", ex);
+            Tools.showError(shell, ex.getMessage(), "CompoundDS loadData: " + shell.getText());
+            log.debug("loadData(): ", ex);
             dataValue = null;
         }
 
         if ((dataValue == null) || !(dataValue instanceof List)) {
-            log.debug("createTable(): data value is null or data not a list");
-            log.trace("createTable(): finish");
-            return null;
+            log.debug("loadData(): data value is null or data not a list");
+            log.trace("loadData(): finish");
+            return;
         }
+
+        log.trace("loadData(): finish");
+    }
+
+    /**
+     * Creates a NatTable for a Compound dataset
+     *
+     * @param parent
+     *            The parent for the NatTable
+     * @param dataObject
+     *            The Compound dataset for the NatTable to display
+     *
+     * @return The newly created NatTable
+     */
+    @Override
+    protected NatTable createTable(Composite parent, DataFormat dataObject) {
+        log.trace("createTable(): start");
 
         // Create body layer
         final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
