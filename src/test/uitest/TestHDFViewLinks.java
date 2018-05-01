@@ -483,7 +483,113 @@ public class TestHDFViewLinks extends AbstractWindowTest {
              * thisVal), thisVal.equals(expected)); } }
              *
              * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
-             */ }
+             */
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.close();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void testExternalLinks() {
+        String filename = "testexternallinks";
+        String file_ext = ".h5";
+        String file_link_name = "tintsize.h5";
+        String file_dset_name = "DU08BITS";
+        String dataset_link_name = "test_external_dataset_link";
+        SWTBotShell tableShell = null;
+
+        File hdf_file = createHDF5File(filename);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "1",
+                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
+            assertTrue("testExternalLinks() filetree is missing file '" + filename + file_ext + "'",
+                    items[0].getText().compareTo(filename + file_ext) == 0);
+
+            createNewHDF5Group();
+            createNewHDF5Dataset();
+
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "3",
+                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 3);
+            assertTrue("testExternalLinks() filetree is missing group '" + groupname + "'",
+                    items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testExternalLinks() filetree is missing dataset '" + datasetname + "'",
+                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            // Test external link to existing object
+            items[0].click();
+            items[0].contextMenu("New").menu("Link").click();
+
+            SWTBotShell linkShell = bot.shell("New Link...");
+            linkShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(linkShell.getText()));
+
+            linkShell.bot().text(0).setText(file_link_name);
+
+            String val = linkShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link name", file_link_name, val),
+                    val.equals(file_link_name));
+
+            SWTBotCombo combo = linkShell.bot().comboBox(0);
+            combo.setSelection("/");
+
+            val = combo.getText();
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link parent", "/", val),
+                    val.equals("/"));
+
+            linkShell.bot().radio("External Link").click();
+
+            linkShell.bot().textWithLabel("Target File: ").setText(workDir + "/" + file_link_name);
+
+            val = linkShell.bot().textWithLabel("Target File: ").getText();
+            assertTrue(
+                    constructWrongValueMessage("testExternalLinks()", "wrong link file", workDir + "/" + file_link_name,
+                            val),
+                    val.equals(workDir + "/" + file_link_name));
+
+            SWTBotCCombo ccombo = linkShell.bot().ccomboBox(0);
+            ccombo.setText("/" + file_dset_name);
+
+            val = ccombo.getText();
+            assertTrue(
+                    constructWrongValueMessage("testExternalLinks()", "wrong link target", "/" + file_dset_name, val),
+                    val.equals("/" + file_dset_name));
+
+            linkShell.bot().button("   OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(linkShell));
+
+            // Reload file to update link
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "4",
+                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 4);
+            assertTrue("testExternalLinks() filetree is missing link '" + file_link_name + "'",
+                    items[0].getNode(1).getText().compareTo(file_link_name) == 0);
+        }
         catch (Exception ex) {
             ex.printStackTrace();
         }
