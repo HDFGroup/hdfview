@@ -76,7 +76,7 @@ public class ImageViewFactory extends DataViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getImageView(): Class.forName({}) failure: {}", dataViewName, ex);
+            log.debug("getImageView(): Class.forName({}) failure:", dataViewName, ex);
 
             try {
                 log.trace("getImageView(): ViewProperties.loadExtClass().loadClass({})",
@@ -86,7 +86,7 @@ public class ImageViewFactory extends DataViewFactory {
                 theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
             }
             catch (Exception ex2) {
-                log.debug("getImageView(): ViewProperties.loadExtClass().loadClass({}) failure: {}",
+                log.debug("getImageView(): ViewProperties.loadExtClass().loadClass({}) failure:",
                         dataViewName, ex);
 
                 /* No loadable class found; use the default ImageView */
@@ -98,7 +98,7 @@ public class ImageViewFactory extends DataViewFactory {
                     theClass = Class.forName(dataViewName);
                 }
                 catch (Exception ex3) {
-                    log.debug("getImageView(): Class.forName({}) failure: {}", dataViewName, ex);
+                    log.debug("getImageView(): Class.forName({}) failure:", dataViewName, ex);
 
                     theClass = null;
                 }
@@ -117,7 +117,7 @@ public class ImageViewFactory extends DataViewFactory {
             log.trace("getImageView(): returning ImageView instance {}", theView);
         }
         catch (Exception ex) {
-            log.trace("getImageView(): Error instantiating class: {}", ex);
+            log.debug("getImageView(): Error instantiating class:", ex);
         }
 
         log.trace("getImageView(): finish");

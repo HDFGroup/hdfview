@@ -1648,7 +1648,7 @@ public class DefaultTreeView implements TreeView {
                         return imageIcon;
                     }
                 }
-                else if (sd.isText()) {
+                else if (sd.isTextData()) {
                     if (hasAttribute) {
                         return textIconA;
                     }
@@ -2291,12 +2291,12 @@ public class DefaultTreeView implements TreeView {
                     }
                 }
                 catch (UnsatisfiedLinkError e) {
-                    log.debug("openFile({}): HDF4 library link error: {}", filename, e);
+                    log.debug("openFile({}): HDF4 library link error:", filename, e);
                     ((HDFView) viewer).showStatus("Unable to open file '" + filename
                             + "': HDF4 library linking error - see log for more info");
                 }
                 catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
+                    log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
                 continue;
             }
@@ -2310,12 +2310,12 @@ public class DefaultTreeView implements TreeView {
                     }
                 }
                 catch (UnsatisfiedLinkError e) {
-                    log.debug("openFile({}): HDF5 library link error: {}", filename, e);
+                    log.debug("openFile({}): HDF5 library link error:", filename, e);
                     ((HDFView) viewer).showStatus("Unable to open file '" + filename
                             + "': HDF5 library linking error - see log for more info");
                 }
                 catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
+                    log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
                 continue;
             }
@@ -2329,7 +2329,7 @@ public class DefaultTreeView implements TreeView {
                     }
                 }
                 catch (Throwable err) {
-                    log.debug("openFile: Error retrieving the file structure of {}: {}", filename, err);
+                    log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
             }
         }
@@ -2353,7 +2353,7 @@ public class DefaultTreeView implements TreeView {
             fileFormat.open();
         }
         catch (Exception ex) {
-            log.debug("openFile: FileFormat init and open: {}", ex);
+            log.debug("openFile: FileFormat init and open error:", ex);
             fileFormat = null;
         }
         finally {
@@ -2428,7 +2428,7 @@ public class DefaultTreeView implements TreeView {
                     theFile.close();
                 }
                 catch (Exception ex) {
-                    log.debug("closeFile({}): {}:", theFile.getFilePath(), ex);
+                    log.debug("closeFile({}):", theFile.getFilePath(), ex);
                 }
 
                 fileList.remove(theFile);

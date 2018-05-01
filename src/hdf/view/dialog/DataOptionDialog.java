@@ -353,7 +353,7 @@ public class DataOptionDialog extends Dialog {
         boolean isImage = false;
 
         if (dataObject instanceof ScalarDS) {
-            if (!((ScalarDS) dataObject).isText()) {
+            if (!dataObject.isTextData()) {
                 ScalarDS sd = (ScalarDS) dataObject;
                 isImage = sd.isImageDisplay();
                 isTrueColorImage = sd.isTrueColor();
@@ -575,7 +575,7 @@ public class DataOptionDialog extends Dialog {
         else {
             ScalarDS ds = (ScalarDS) dataObject;
 
-            if(!ds.isText()) {
+            if (!ds.isTextData()) {
                 StringTokenizer st = new StringTokenizer(dataRangeField.getText(), ",");
                 if (st.countTokens() == 2) {
                     double min = 0, max = 0;
@@ -1044,7 +1044,7 @@ public class DataOptionDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         int tsize = (int) dataObject.getDatatype().getDatatypeSize();
-        bitmaskButtons = (tsize >= 0) ? new Button[8 * tsize] : new Button[0];
+        bitmaskButtons = (tsize >= 0 && !dataObject.isTextData()) ? new Button[8 * tsize] : new Button[0];
 
         for (int i = 0; i < bitmaskButtons.length; i++) {
             bitmaskButtons[i] = new Button(buttonComposite, SWT.RADIO);
@@ -1673,7 +1673,7 @@ public class DataOptionDialog extends Dialog {
             Image preImage = null;
             ScalarDS sd = (ScalarDS) dataObject;
 
-            if (sd.isText()) {
+            if (sd.isTextData()) {
                 return null;
             }
 

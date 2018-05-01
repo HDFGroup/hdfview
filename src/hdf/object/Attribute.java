@@ -93,8 +93,11 @@ public class Attribute extends HObject implements DataFormat {
     /** Flag to indicate if the datatype is an unsigned integer. */
     private boolean           isUnsigned;
 
+    /** Flag to indicate if the data is text */
+    protected boolean         isTextData = false;
+
     /** flag to indicate if the dataset is a single scalar point */
-    protected boolean         isScalar         = false;
+    protected boolean         isScalar = false;
 
     /**
      * Create an attribute with specified name, data type and dimension sizes.
@@ -182,18 +185,21 @@ public class Attribute extends HObject implements DataFormat {
             rank = dims.length;
 
         isUnsigned = (type.getDatatypeSign() == Datatype.SIGN_NONE);
+        isTextData = (type.getDatatypeClass() == Datatype.CLASS_STRING);
 
         log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName, type,
                 value, rank, isUnsigned, isScalar);
 
-        selectedDims = null;
-        startDims = null;
-        selectedStride = null;
+        selectedDims = new long[rank];
+        startDims = new long[rank];
+        selectedStride = new long[rank];
 
         selectedIndex = new int[3];
         selectedIndex[0] = 0;
         selectedIndex[1] = 1;
         selectedIndex[2] = 2;
+
+        resetSelection();
 
         log.trace("Attribute: finish");
     }
@@ -237,6 +243,55 @@ public class Attribute extends HObject implements DataFormat {
     public void clearData() {
         /* Currently not implemented for Attributes */
         return;
+    }
+
+    private void resetSelection() {
+        log.trace("resetSelection(): start");
+
+        for (int i = 0; i < rank; i++) {
+            startDims[i] = 0;
+            selectedDims[i] = 1;
+            if (selectedStride != null) {
+                selectedStride[i] = 1;
+            }
+        }
+
+        if (rank == 1) {
+            selectedIndex[0] = 0;
+            selectedDims[0] = dims[0];
+        }
+        else if (rank == 2) {
+            selectedIndex[0] = 0;
+            selectedIndex[1] = 1;
+            selectedDims[0] = dims[0];
+            selectedDims[1] = dims[1];
+        }
+        else if (rank > 2) {
+            // // hdf-java 2.5 version: 3D dataset is arranged in the order of
+            // [frame][height][width] by default
+            // selectedIndex[1] = rank-1; // width, the fastest dimension
+            // selectedIndex[0] = rank-2; // height
+            // selectedIndex[2] = rank-3; // frames
+
+            //
+            // (5/4/09) Modified the default dimension order. See bug#1379
+            // We change the default order to the following. In most situation,
+            // users want to use the natural order of
+            // selectedIndex[0] = 0
+            // selectedIndex[1] = 1
+            // selectedIndex[2] = 2
+            // Most of NPOESS data is the the order above.
+
+            selectedIndex[0] = 0; // width, the fastest dimension
+            selectedIndex[1] = 1; // height
+            selectedIndex[2] = 2; // frames
+
+            selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
+            selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
+            selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
+        }
+
+        log.trace("resetSelection(): finish");
     }
 
     /**
@@ -317,6 +372,17 @@ public class Attribute extends HObject implements DataFormat {
     }
 
     /**
+     * Get Class of the original data buffer if converted.
+     *
+     * @return the Class of originalBuf
+     */
+    @Override
+    @SuppressWarnings("rawtypes")
+    public final Class getOriginalClass() {
+        return value.getClass();
+    }
+
+    /**
      * @return true if the data is a single scalar point; otherwise, returns
      *         false.
      */
@@ -330,8 +396,14 @@ public class Attribute extends HObject implements DataFormat {
      * @return true if the data type of the attribute is an unsigned integer;
      *         otherwise returns false.
      */
+    @Override
     public boolean isUnsigned() {
         return isUnsigned;
+    }
+
+    @Override
+    public boolean isTextData() {
+        return isTextData;
     }
 
     @Override

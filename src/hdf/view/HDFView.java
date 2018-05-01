@@ -1324,6 +1324,9 @@ public class HDFView implements ViewManager {
 
                     if (obj == null) continue;
 
+                    /*
+                     * TODO: Handle attributes
+                     */
                     if (obj.getFileFormat().equals(theFile)) {
                         views[i].dispose();
                         views[i] = null;
@@ -1395,6 +1398,9 @@ public class HDFView implements ViewManager {
                 for (int i = 0; i < openShells.length; i++) {
                     DataView theView = (DataView) openShells[i].getData();
 
+                    /*
+                     * TODO: Handle attributes
+                     */
                     if (theView instanceof TableView) {
                         TableView tableView = (TableView) theView;
                         FileFormat file = tableView.getDataObject().getFileFormat();
@@ -1495,6 +1501,9 @@ public class HDFView implements ViewManager {
 
                 currentFile = currentObj.getFileFormat();
 
+                /*
+                 * TODO: Handle attributes
+                 */
                 if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))
                     return view;
             }

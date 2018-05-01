@@ -421,7 +421,8 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return true if this dataset is ASCII text.
      */
-    public final boolean isText() {
+    @Override
+    public boolean isTextData() {
         return isText;
     }
 
@@ -447,6 +448,7 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return true if the original C data is unsigned integers.
      */
+    @Override
     public final boolean isUnsigned() {
         return isUnsigned;
     }
@@ -465,6 +467,7 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return the fill values for the dataset.
      */
+    @Override
     public final Object getFillValue() {
         return fillValue;
     }
