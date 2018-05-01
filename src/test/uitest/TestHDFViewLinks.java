@@ -589,6 +589,32 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 4);
             assertTrue("testExternalLinks() filetree is missing link '" + file_link_name + "'",
                     items[0].getNode(1).getText().compareTo(file_link_name) == 0);
+
+            items[0].getNode(1).click();
+            items[0].getNode(1).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(file_link_name + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "255", val), val.equals("255"));
+
+            table.click(8, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "128", val), val.equals("128"));
+
+            table.click(8, 8);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "0", val), val.equals("0"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
