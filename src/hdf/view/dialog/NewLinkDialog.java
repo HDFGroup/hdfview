@@ -519,7 +519,12 @@ public class NewLinkDialog extends Dialog {
                 targetObj = fileFormat.get(targetObject.getText());
             }
             catch (Exception ex) {
-                log.debug("soft link:", ex);
+		/* It is possible that this is a soft link to a non-existent
+		 * object, in which case this exception would be normal.
+		 * For this reason, no logging is done here even though there
+		 * is the possibility of a real HDF5 exception being thrown
+		 * if something went terribly wrong.
+		 */
             }
 
             String tObj = null;
