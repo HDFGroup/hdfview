@@ -139,6 +139,16 @@ public class H4File extends FileFormat {
 
         this.fid = -1;
 
+        if ((access & FILE_CREATE_OPEN) == FILE_CREATE_OPEN) {
+            File f = new File(fileName);
+            if (f.exists()) {
+                access = WRITE;
+            }
+            else {
+                access = CREATE;
+            }
+        }
+
         if (access == READ) {
             flag = HDFConstants.DFACC_READ;
         }
@@ -927,62 +937,62 @@ public class H4File extends FileFormat {
             ref = refs[i];
 
             switch (tag) {
-            case HDFConstants.DFTAG_RIG:
-            case HDFConstants.DFTAG_RI:
-            case HDFConstants.DFTAG_RI8:
-                try {
-                    index = HDFLibrary.GRreftoindex(grid, (short) ref);
-                }
-                catch (HDFException ex) {
-                    index = HDFConstants.FAIL;
-                }
-                if (index != HDFConstants.FAIL) {
-                    H4GRImage gr = getGRImage(tag, index, fullPath, true);
-                    parentGroup.addToMemberList(gr);
-                }
-                break;
-            case HDFConstants.DFTAG_SD:
-            case HDFConstants.DFTAG_SDG:
-            case HDFConstants.DFTAG_NDG:
-                try {
-                    index = HDFLibrary.SDreftoindex(sdid, ref);
-                }
-                catch (HDFException ex) {
-                    index = HDFConstants.FAIL;
-                }
-                if (index != HDFConstants.FAIL) {
-                    H4SDS sds = getSDS(tag, index, fullPath, true);
-                    parentGroup.addToMemberList(sds);
-                }
-                break;
-            case HDFConstants.DFTAG_VH:
-            case HDFConstants.DFTAG_VS:
-                H4Vdata vdata = getVdata(tag, ref, fullPath, true);
-                parentGroup.addToMemberList(vdata);
-                break;
-            case HDFConstants.DFTAG_VG:
-                H4Group vgroup = getVGroup(tag, ref, fullPath, parentGroup, true);
-                parentGroup.addToMemberList(vgroup);
-                if ((vgroup != null) && (parentGroup != null)) {
-                    // check for loops
-                    boolean looped = false;
-                    H4Group theGroup = parentGroup;
-                    while ((theGroup != null) && !looped) {
-                        long[] oid = { tag, ref };
-                        if (theGroup.equalsOID(oid)) {
-                            looped = true;
+                case HDFConstants.DFTAG_RIG:
+                case HDFConstants.DFTAG_RI:
+                case HDFConstants.DFTAG_RI8:
+                    try {
+                        index = HDFLibrary.GRreftoindex(grid, (short) ref);
+                    }
+                    catch (HDFException ex) {
+                        index = HDFConstants.FAIL;
+                    }
+                    if (index != HDFConstants.FAIL) {
+                        H4GRImage gr = getGRImage(tag, index, fullPath, true);
+                        parentGroup.addToMemberList(gr);
+                    }
+                    break;
+                case HDFConstants.DFTAG_SD:
+                case HDFConstants.DFTAG_SDG:
+                case HDFConstants.DFTAG_NDG:
+                    try {
+                        index = HDFLibrary.SDreftoindex(sdid, ref);
+                    }
+                    catch (HDFException ex) {
+                        index = HDFConstants.FAIL;
+                    }
+                    if (index != HDFConstants.FAIL) {
+                        H4SDS sds = getSDS(tag, index, fullPath, true);
+                        parentGroup.addToMemberList(sds);
+                    }
+                    break;
+                case HDFConstants.DFTAG_VH:
+                case HDFConstants.DFTAG_VS:
+                    H4Vdata vdata = getVdata(tag, ref, fullPath, true);
+                    parentGroup.addToMemberList(vdata);
+                    break;
+                case HDFConstants.DFTAG_VG:
+                    H4Group vgroup = getVGroup(tag, ref, fullPath, parentGroup, true);
+                    parentGroup.addToMemberList(vgroup);
+                    if ((vgroup != null) && (parentGroup != null)) {
+                        // check for loops
+                        boolean looped = false;
+                        H4Group theGroup = parentGroup;
+                        while ((theGroup != null) && !looped) {
+                            long[] oid = { tag, ref };
+                            if (theGroup.equalsOID(oid)) {
+                                looped = true;
+                            }
+                            else {
+                                theGroup = (H4Group) theGroup.getParent();
+                            }
                         }
-                        else {
-                            theGroup = (H4Group) theGroup.getParent();
+                        if (!looped) {
+                            depth_first(vgroup);
                         }
                     }
-                    if (!looped) {
-                        depth_first(vgroup);
-                    }
-                }
-                break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
             } // switch (tag)
 
         } // for (int i=0; i<nelms; i++)

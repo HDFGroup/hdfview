@@ -28,8 +28,6 @@ import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -388,74 +386,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         text.setText(dataObject.getName());
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        /* For HDF5 links, add a box to allow changing of the link target */
-        if (isH5) {
-            if (dataObject.getLinkTargetObjName() != null) {
-                final HObject theObj = dataObject;
-
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(curFont);
-                label.setText("Link To Target: ");
-
-                final Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
-                linkTarget.setFont(curFont);
-                linkTarget.setText(dataObject.getLinkTargetObjName());
-                linkTarget.addTraverseListener(new TraverseListener() {
-                    @Override
-                    public void keyTraversed(TraverseEvent e) {
-                        if (e.detail == SWT.TRAVERSE_RETURN) {
-                            Group pgroup = null;
-                            try {
-                                pgroup = (Group) theObj.getFileFormat().get(theObj.getPath());
-                            }
-                            catch (Exception ex) {
-                                log.debug("parent group:", ex);
-                            }
-                            if (pgroup == null) {
-                                display.beep();
-                                Tools.showError(display.getShells()[0], "Parent group is null.",
-                                        display.getShells()[0].getText());
-                                return;
-                            }
-
-                            String target_name = linkTarget.getText();
-                            if (target_name != null) target_name = target_name.trim();
-
-                            int linkType = Group.LINK_TYPE_SOFT;
-                            if (theObj.getLinkTargetObjName().contains(FileFormat.FILE_OBJ_SEP))
-                                linkType = Group.LINK_TYPE_EXTERNAL;
-                            else if (target_name.equals("/")) { // do not allow to link to the root
-                                display.beep();
-                                Tools.showError(display.getShells()[0], "Link to root not allowed.",
-                                        display.getShells()[0].getText());
-                                return;
-                            }
-
-                            // no change
-                            if (target_name.equals(theObj.getLinkTargetObjName())) return;
-
-                            // invalid name
-                            if (target_name == null || target_name.length() < 1) return;
-
-                            try {
-                                theObj.getFileFormat().createLink(pgroup, theObj.getName(), target_name, linkType);
-                                theObj.setLinkTargetObjName(target_name);
-                            }
-                            catch (Exception ex) {
-                                display.beep();
-                                Tools.showError(display.getShells()[0], ex.getMessage(),
-                                        display.getShells()[0].getText());
-                                return;
-                            }
-
-                            MessageDialog.openInformation(display.getShells()[0], display.getShells()[0].getText(),
-                                    "Link target changed.");
-                        }
-                    }
-                });
-            }
-        }
-
         /* Object Path section */
         label = new Label(generalInfoGroup, SWT.LEFT);
         label.setFont(curFont);
@@ -523,16 +453,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         /* Object ID section */
-        if (isH5) {
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(curFont);
-            label.setText("Object Ref:       ");
-        }
-        else {
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(curFont);
-            label.setText("Tag, Ref:        ");
-        }
 
         // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
         String oidStr = null;
@@ -540,13 +460,24 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (OID != null) {
             oidStr = String.valueOf(OID[0]);
             if (isH4) oidStr += ", " + OID[1];
-        }
 
-        text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
-        text.setEditable(false);
-        text.setFont(curFont);
-        text.setText(oidStr);
-        text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            if (isH5) {
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(curFont);
+                label.setText("Object Ref:       ");
+            }
+            else {
+                label = new Label(generalInfoGroup, SWT.LEFT);
+                label.setFont(curFont);
+                label.setText("Tag, Ref:        ");
+            }
+
+            text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText(oidStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        }
 
         /*
          * If this is the root group, add some special extra info, such as the Library
@@ -1388,7 +1319,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                                 + "Do you want to replace the current file? Click "
                                 + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
                                 + "\n\"Cancel\" to quit without saving the change.\n\n ",
-                        MessageDialog.QUESTION_WITH_CANCEL, new String[] { "Yes", "No", "Cancel" }, 0);
+                                MessageDialog.QUESTION_WITH_CANCEL, new String[] { "Yes", "No", "Cancel" }, 0);
                 int op = confirm.open();
 
                 if (op == 2) return;

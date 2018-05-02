@@ -76,11 +76,6 @@ public class TableViewFactory extends DataViewFactory {
 
         if (dataObject == null) return null;
 
-        /*
-         * TODO: Currently no support for other modules; return DefaultBaseTableView
-         * subclasses
-         */
-
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
