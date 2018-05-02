@@ -19,6 +19,7 @@ import java.util.List;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 
 /**
  * An H5Link object represents an existing HDF5 object in file.
@@ -32,7 +33,7 @@ import hdf.object.HObject;
  * @author Nidhi Gupta
  */
 
-public class H5Link extends HObject {
+public class H5Link extends HObject implements MetaDataContainer {
     private static final long serialVersionUID = -8137277460521594367L;
 
     @SuppressWarnings("unused")
@@ -49,7 +50,7 @@ public class H5Link extends HObject {
      *            the full path of this link, e.g. "/groups/".
      */
     public H5Link(FileFormat theFile, String name, String path) {
-       this (theFile, name, path, null);
+        this (theFile, name, path, null);
     }
 
     @SuppressWarnings("deprecation")

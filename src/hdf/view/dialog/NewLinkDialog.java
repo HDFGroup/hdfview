@@ -519,7 +519,12 @@ public class NewLinkDialog extends Dialog {
                 targetObj = fileFormat.get(targetObject.getText());
             }
             catch (Exception ex) {
-                log.debug("soft link:", ex);
+                /* It is possible that this is a soft link to a non-existent
+                 * object, in which case this exception would be normal.
+                 * For this reason, no logging is done here even though there
+                 * is the possibility of a real HDF5 exception being thrown
+                 * if something went terribly wrong.
+                 */
             }
 
             String tObj = null;
@@ -672,11 +677,16 @@ public class NewLinkDialog extends Dialog {
     }
 
     private List<HObject> getAllUserObjectsBreadthFirst(FileFormat file) {
-        if(file == null) return null;
+        if (file == null) return null;
 
         Vector<HObject> breadthFirstObjects = new Vector<HObject>();
         Queue<HObject> currentChildren = new LinkedList<HObject>();
         HObject currentObject = file.getRootObject();
+
+        if (currentObject == null) {
+            log.debug("getAllUserObjectsBreadthFirst(): file root object is null");
+            return null;
+        }
 
         breadthFirstObjects.add(file.getRootObject()); // Add the root object to the list first
 
@@ -700,9 +710,16 @@ public class NewLinkDialog extends Dialog {
     // Retrieves the list of objects from the file
     private void retrieveObjects(FileFormat file) {
         HObject obj = null;
-        Iterator<HObject> iterator = getAllUserObjectsBreadthFirst(file).iterator();
+        List<HObject> userObjectList = getAllUserObjectsBreadthFirst(file);
+        Iterator<HObject> iterator;
         String full_name = null;
 
+        if (userObjectList == null) {
+            log.debug("retrieveObjects(): user object list is null");
+            return;
+        }
+
+        iterator = userObjectList.iterator();
         while (iterator.hasNext()) {
             obj = iterator.next();
 

@@ -24,6 +24,7 @@ import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.h5.H5Link;
 
 /**
  * A Factory class to return instances of classes implementing the MetaDataView
@@ -70,8 +71,6 @@ public class MetaDataViewFactory extends DataViewFactory {
 
         dataViewName = (String) metaDataViewList.get(0);
 
-        /* TODO: Currently no support for other modules; return DefaultMetaDataView */
-
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
@@ -102,6 +101,8 @@ public class MetaDataViewFactory extends DataViewFactory {
                     dataViewName = "hdf.view.DefaultDatasetMetaDataView";
                 else if (theObj instanceof Datatype)
                     dataViewName = "hdf.view.DefaultDatatypeMetaDataView";
+                else if (theObj instanceof H5Link)
+                    dataViewName = "hdf.view.DefaultH5LinkMetaDataView";
                 else
                     dataViewName = null;
 

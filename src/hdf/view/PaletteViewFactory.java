@@ -62,8 +62,6 @@ public class PaletteViewFactory extends DataViewFactory {
 
         dataViewName = (String) paletteViewList.get(0);
 
-        /* TODO: Currently no support for other modules; return DefaultImageView */
-
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {

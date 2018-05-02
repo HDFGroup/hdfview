@@ -256,7 +256,10 @@ public abstract class HObject implements Serializable {
                 this.fullName = theName;
             }
             else {
-                this.fullName = "/" + theName;
+                if (this instanceof Attribute)
+                    this.fullName = theName;
+                else
+                    this.fullName = "/" + theName;
             }
         }
     }

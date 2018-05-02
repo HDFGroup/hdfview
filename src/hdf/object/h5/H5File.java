@@ -174,6 +174,16 @@ public class H5File extends FileFormat {
         super(fileName);
         libver = new int[2];
 
+        if ((access & FILE_CREATE_OPEN) == FILE_CREATE_OPEN) {
+            File f = new File(fileName);
+            if (f.exists()) {
+                access = WRITE;
+            }
+            else {
+                access = CREATE;
+            }
+        }
+
         // set metadata for the instance
         rootObject = null;
         this.fid = -1;

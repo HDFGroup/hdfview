@@ -1438,7 +1438,8 @@ public class HDFView implements ViewManager {
         }
 
         HObject obj = dataView.getDataObject();
-        String fullPath = obj.getPath() + obj.getName();
+        String fullPath = ((obj.getPath() == null) ? "" : obj.getPath())
+                + ((obj.getName() == null) ? "" : obj.getName());
 
         MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText(fullPath);
