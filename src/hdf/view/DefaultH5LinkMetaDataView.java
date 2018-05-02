@@ -89,7 +89,7 @@ public class DefaultH5LinkMetaDataView extends DefaultBaseMetaDataView implement
         if (pgroup == null) {
             log.debug("addObjectSpecificContent(): parent group is null");
             display.beep();
-            Tools.showError(display.getShells()[0], "Parent group is null.", display.getShells()[0].getText());
+            Tools.showError(display.getShells()[0], "Link target change failed.", "Parent group is null.");
             return;
         }
 
@@ -100,7 +100,7 @@ public class DefaultH5LinkMetaDataView extends DefaultBaseMetaDataView implement
             linkType = Group.LINK_TYPE_EXTERNAL;
         else if (linkTargetName.equals("/")) { // do not allow to link to the root
             display.beep();
-            Tools.showError(display.getShells()[0], "Link to root not allowed.", display.getShells()[0].getText());
+            Tools.showError(display.getShells()[0], "Link target change failed.", "Link to root not allowed.");
             return;
         }
 
@@ -117,11 +117,12 @@ public class DefaultH5LinkMetaDataView extends DefaultBaseMetaDataView implement
         catch (Exception ex) {
             log.debug("addObjectSpecificContent(): createLink() failure:", ex);
             display.beep();
-            Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+            Tools.showError(display.getShells()[0], "Link target change failed.", ex.getMessage());
             return;
         }
 
-        MessageDialog.openInformation(display.getShells()[0], display.getShells()[0].getText(), "Link target changed.");
+        MessageDialog.openInformation(display.getShells()[0], "Link target changed.",
+                "Reload file to display changes.");
     }
 
 }

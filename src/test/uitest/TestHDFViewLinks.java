@@ -10,6 +10,7 @@ import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
+import org.eclipse.swtbot.swt.finder.keyboard.Keystrokes;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
@@ -429,61 +430,74 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link target", "nonexist", val),
                     val.equals("nonexist"));
 
-            linkShell.bot().button(" &Cancel ").click();
+            // linkShell.bot().button(" &Cancel ").click();
+            // bot.waitUntil(Conditions.shellCloses(linkShell));
+
+            linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
 
-            /*
-             * linkShell.bot().button(" &OK ").click(); bot.waitUntil(Conditions.shellCloses(linkShell));
-             *
-             * // Reload file to update link items[0].click(); items[0].contextMenu("Reload File").click();
-             *
-             * items = filetree.getAllItems(); filetree.expandNode(items[0].getText(), true);
-             *
-             * assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6",
-             * String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 6);
-             * assertTrue("testSoftLinks() filetree is missing link 'test_nonexisting_object_link'",
-             * items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
-             *
-             * // Change link to point to existing object - metadata items[0].getNode(2).click();
-             *
-             * SWTBotTabItem tabItem = bot.tabItem("General Object Info"); tabItem.activate();
-             *
-             * val = bot.textWithLabel("Link To Target: ").getText();
-             * assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name",
-             * "test_nonexisting_object_link", val), val.equals("test_nonexisting_object_link"));
-             *
-             * linkShell.bot().textWithLabel("Link To Target: ").setText("/" + groupname + "/" + datasetname);
-             *
-             * SWTBotShell linkTargetShell = bot.shell("Link target changed."); linkTargetShell.activate();
-             * linkTargetShell.bot().button("   &OK   ").click();
-             * bot.waitUntil(Conditions.shellCloses(linkShell));
-             *
-             * // Reload file to update link items[0].click(); items[0].contextMenu("Reload File").click();
-             *
-             * items = filetree.getAllItems(); filetree.expandNode(items[0].getText(), true);
-             *
-             * assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6",
-             * String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 6);
-             * assertTrue("testSoftLinks() filetree is missing link 'test_nonexisting_object_link'",
-             * items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
-             *
-             * items[0].getNode(2).click(); items[0].getNode(2).contextMenu("Open").click();
-             * org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname +
-             * ".*at.*\\[.*in.*\\]"); bot.waitUntil(Conditions.waitForShell(shellMatcher));
-             *
-             * tableShell = bot.shells()[1]; tableShell.activate();
-             * bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-             *
-             * final SWTBotNatTable table = new
-             * SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-             *
-             * for (int row = 1; row <= 4; row++) { for (int col = 1; col <= 4; col++) { String thisVal =
-             * table.getCellDataValueByPosition(row, col); String expected = String.valueOf(((row - 1) * 4) +
-             * (col)); assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong data", expected,
-             * thisVal), thisVal.equals(expected)); } }
-             *
-             * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
-             */
+            // Reload file to update link items[0].click(); items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6",
+                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 6);
+            assertTrue("testSoftLinks() filetree is missing link 'test_nonexisting_object_link'",
+                    items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
+
+            items[0].getNode(2).click();
+
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.textWithLabel("Link To Target: ").getText();
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name", "/nonexist", val),
+                    val.equals("/nonexist"));
+
+            bot.textWithLabel("Link To Target: ").setText("/" + groupname + "/" + datasetname)
+                    .pressShortcut(Keystrokes.CR);
+
+            SWTBotShell linkTargetShell = bot.shell("Link target changed.");
+            linkTargetShell.activate();
+            linkTargetShell.bot().button("OK").click();
+            bot.waitUntil(Conditions.shellCloses(linkTargetShell));
+
+            // Reload file to update link
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6",
+                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 6);
+            assertTrue("testSoftLinks() filetree is missing link 'test_nonexisting_object_link'",
+                    items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
+
+            items[0].getNode(2).click();
+            items[0].getNode(2).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            for (int row = 1; row <= 4; row++) {
+                for (int col = 1; col <= 4; col++) {
+                    String thisVal = table.getCellDataValueByPosition(row, col);
+                    String expected = String.valueOf(((row - 1) * 4) + (col));
+                    assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong data", expected, thisVal),
+                            thisVal.equals(expected));
+                }
+            }
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
         }
         catch (Exception ex) {
             ex.printStackTrace();
