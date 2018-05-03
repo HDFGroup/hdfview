@@ -203,9 +203,6 @@ public class HDFView implements ViewManager {
 
         //editGUIs = new Vector<Object>();
 
-        ViewProperties.loadIcons();
-        ViewProperties.loadExtClass();
-
         props = new ViewProperties(rootDir);
         try {
             props.load();
@@ -213,6 +210,8 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             log.debug("Failed to load View Properties from {}", rootDir);
         }
+
+        ViewProperties.loadIcons();
 
         currentDir = ViewProperties.getWorkDir();
         if (currentDir == null) currentDir = System.getProperty("user.home");

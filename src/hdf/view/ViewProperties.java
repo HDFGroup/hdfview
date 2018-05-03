@@ -268,6 +268,7 @@ public class ViewProperties extends PreferenceStore {
      * @return the ClassLoader
      */
     public static ClassLoader loadExtClass() {
+        log.trace("loadExtClass: start");
         if (extClassLoader != null) {
             return extClassLoader;
         }
@@ -624,300 +625,386 @@ public class ViewProperties extends PreferenceStore {
 
     public static void loadIcons() {
         InputStream s = null;
+        log.trace("loadIcons: start");
 
         // load icon images
-        if (hdfIcon == null) {
+
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/hdf.gif");
-            if (s != null) {
-                hdfIcon = new Image(null, s);
-            }
+            hdfIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfIcon = null;
+            log.trace("hdfIcon: null");
         }
 
-        if (h4Icon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/hdf4.gif");
-            if (s != null) {
-                h4Icon = new Image(null, s);
-            }
+            h4Icon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            h4Icon = null;
+            log.trace("h4Icon: null");
         }
 
-        if (h4IconR == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/hdf4R.gif");
-            if (s != null) {
-                h4IconR = new Image(null, s);
-            }
+            h4IconR = new Image(null, s);
+        }
+        catch (Exception ex) {
+            h4IconR = null;
+            log.trace("h4IconR: null");
         }
 
-        if (h5Icon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/hdf5.gif");
-            if (s != null) {
-                h5Icon = new Image(null, s);
-            }
+            h5Icon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            h5Icon = null;
+            log.trace("h5Icon: null");
         }
 
-        if (h5IconR == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/hdf5R.gif");
-            if (s != null) {
-                h5IconR = new Image(null, s);
-            }
+            h5IconR = new Image(null, s);
+        }
+        catch (Exception ex) {
+            h5IconR = null;
+            log.trace("h5IconR: null");
         }
 
-        if (foldercloseIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/folderclose.gif");
-            if (s != null) {
-                foldercloseIcon = new Image(null, s);
-            }
+            foldercloseIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            foldercloseIcon = null;
+            log.trace("foldercloseIcon: null");
         }
 
-        if (foldercloseIconA == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/foldercloseA.gif");
-            if (s != null) {
-                foldercloseIconA = new Image(null, s);
-            }
+            foldercloseIconA = new Image(null, s);
+        }
+        catch (Exception ex) {
+            foldercloseIconA = null;
+            log.trace("foldercloseIconA: null");
         }
 
-        if (folderopenIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/folderopen.gif");
-            if (s != null) {
-                folderopenIcon = new Image(null, s);
-            }
+            folderopenIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            folderopenIcon = null;
+            log.trace("folderopenIcon: null");
         }
 
-        if (folderopenIconA == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/folderopenA.gif");
-            if (s != null) {
-                folderopenIconA = new Image(null, s);
-            }
+            folderopenIconA = new Image(null, s);
+        }
+        catch (Exception ex) {
+            folderopenIconA = null;
+            log.trace("folderopenIconA: null");
         }
 
-        if (datasetIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/dataset.gif");
-            if (s != null) {
-                datasetIcon = new Image(null, s);
-            }
+            datasetIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            datasetIcon = null;
+            log.trace("datasetIcon: null");
         }
 
-        if (datasetIconA == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/datasetA.gif");
-            if (s != null) {
-                datasetIconA = new Image(null, s);
-            }
+            datasetIconA = new Image(null, s);
+        }
+        catch (Exception ex) {
+            datasetIconA = null;
+            log.trace("datasetIconA: null");
         }
 
-        if (datatypeIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/datatype.gif");
-            if (s != null) {
-                datatypeIcon = new Image(null, s);
-            }
+            datatypeIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            datatypeIcon = null;
+            log.trace("datatypeIcon: null");
         }
 
-        if (datatypeIconA == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/datatypeA.gif");
-            if (s != null) {
-                datatypeIconA = new Image(null, s);
-            }
+            datatypeIconA = new Image(null, s);
+        }
+        catch (Exception ex) {
+            datatypeIconA = null;
+            log.trace("datatypeIconA: null");
         }
 
-        if (linkIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/link.gif");
-            if (s != null) {
-                linkIcon = new Image(null, s);
-            }
+            linkIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            linkIcon = null;
+            log.trace("linkIcon: null");
         }
 
-        if (fileopenIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/fileopen.gif");
-            if (s != null) {
-                fileopenIcon = new Image(null, s);
-            }
+            fileopenIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            fileopenIcon = null;
+            log.trace("fileopenIcon: null");
         }
 
-        if (filesaveIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/filesave.gif");
-            if (s != null) {
-                filesaveIcon = new Image(null, s);
-            }
+            filesaveIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            filesaveIcon = null;
+            log.trace("filesaveIcon: null");
         }
 
-        if (filenewIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/filenew.gif");
-            if (s != null) {
-                filenewIcon = new Image(null, s);
-            }
+            filenewIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            filenewIcon = null;
+            log.trace("filenewIcon: null");
         }
 
-        if (filecloseIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/fileclose.gif");
-            if (s != null) {
-                filecloseIcon = new Image(null, s);
-            }
+            filecloseIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            filecloseIcon = null;
+            log.trace("filecloseIcon: null");
         }
 
-        if (paletteIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/palette.gif");
-            if (s != null) {
-                paletteIcon = new Image(null, s);
-            }
+            paletteIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            paletteIcon = null;
+            log.trace("paletteIcon: null");
         }
 
-        if (brightIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/brightness.gif");
-            if (s != null) {
-                brightIcon = new Image(null, s);
-            }
+            brightIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            brightIcon = null;
+            log.trace("brightIcon: null");
         }
 
-        if (autocontrastIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/autocontrast.gif");
-            if (s != null) {
-                autocontrastIcon = new Image(null, s);
-            }
+            autocontrastIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            autocontrastIcon = null;
+            log.trace("autocontrastIcon: null");
         }
 
-        if (imageIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/image.gif");
-            if (s != null) {
-                imageIcon = new Image(null, s);
-            }
+            imageIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            imageIcon = null;
+            log.trace("imageIcon: null");
         }
 
-        if (imageIconA == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/imageA.gif");
-            if (s != null) {
-                imageIconA = new Image(null, s);
-            }
+            imageIconA = new Image(null, s);
+        }
+        catch (Exception ex) {
+            imageIconA = null;
+            log.trace("imageIconA: null");
         }
 
-        if (tableIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/table.gif");
-            if (s != null) {
-                tableIcon = new Image(null, s);
-            }
+            tableIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            tableIcon = null;
+            log.trace("tableIcon: null");
         }
 
-        if (tableIconA == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/tableA.gif");
-            if (s != null) {
-                tableIconA = new Image(null, s);
-            }
+            tableIconA = new Image(null, s);
+        }
+        catch (Exception ex) {
+            tableIconA = null;
+            log.trace("tableIconA: null");
         }
 
-        if (textIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/text.gif");
-            if (s != null) {
-                textIcon = new Image(null, s);
-            }
+            textIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            textIcon = null;
+            log.trace("textIcon: null");
         }
 
-        if (textIconA == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/textA.gif");
-            if (s != null) {
-                textIconA = new Image(null, s);
-            }
+            textIconA = new Image(null, s);
+        }
+        catch (Exception ex) {
+            textIconA = null;
+            log.trace("textIconA: null");
         }
 
-        if (zoominIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/zoomin.gif");
-            if (s != null) {
-                zoominIcon = new Image(null, s);
-            }
+            zoominIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            zoominIcon = null;
+            log.trace("iconAUzoominIconDIO: null");
         }
 
-        if (zoomoutIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/zoomout.gif");
-            if (s != null) {
-                zoomoutIcon = new Image(null, s);
-            }
+            zoomoutIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            zoomoutIcon = null;
+            log.trace("zoomoutIcon: null");
         }
 
-        if (blankIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/blank.gif");
-            if (s != null) {
-                blankIcon = new Image(null, s);
-            }
+            blankIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            blankIcon = null;
+            log.trace("blankIcon: null");
         }
 
-        if (helpIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/help.gif");
-            if (s != null) {
-                helpIcon = new Image(null, s);
-            }
+            helpIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            helpIcon = null;
+            log.trace("helpIcon: null");
         }
 
-        if (copyIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/copy.gif");
-            if (s != null) {
-                copyIcon = new Image(null, s);
-            }
+            copyIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            copyIcon = null;
+            log.trace("copyIcon: null");
         }
 
-        if (cutIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/cut.gif");
-            if (s != null) {
-                cutIcon = new Image(null, s);
-            }
+            cutIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            cutIcon = null;
+            log.trace("cutIcon: null");
         }
 
-        if (pasteIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/paste.gif");
-            if (s != null) {
-                pasteIcon = new Image(null, s);
-            }
+            pasteIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            pasteIcon = null;
+            log.trace("pasteIcon: null");
         }
 
-        if (largeHdfIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/hdf_large.gif");
-            if (s != null) {
-                largeHdfIcon = new Image(null, s);
-            }
+            largeHdfIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            largeHdfIcon = null;
+            log.trace("largeHdfIcon: null");
         }
 
-        if (previousIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/previous.gif");
-            if (s != null) {
-                previousIcon = new Image(null, s);
-            }
+            previousIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            previousIcon = null;
+            log.trace("previousIcon: null");
         }
 
-        if (nextIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/next.gif");
-            if (s != null) {
-                nextIcon = new Image(null, s);
-            }
+            nextIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            nextIcon = null;
+            log.trace("nextIcon: null");
         }
 
-        if (firstIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/first.gif");
-            if (s != null) {
-                firstIcon = new Image(null, s);
-            }
+            firstIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            firstIcon = null;
+            log.trace("firstIcon: null");
         }
 
-        if (lastIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/last.gif");
-            if (s != null) {
-                lastIcon = new Image(null, s);
-            }
+            lastIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            lastIcon = null;
+            log.trace("lastIcon: null");
         }
 
-        if (chartIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/chart.gif");
-            if (s != null) {
-                chartIcon = new Image(null, s);
-            }
+            chartIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            chartIcon = null;
+            log.trace("chartIcon: null");
         }
 
-        if (animationIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/animation.gif");
-            if (s != null) {
-                animationIcon = new Image(null, s);
-            }
+            animationIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            animationIcon = null;
+            log.trace("animationIcon: null");
         }
 
-        if (questionIcon == null) {
+        try {
             s = ViewProperties.class.getResourceAsStream("icons/question.gif");
-            if (s != null) {
-                questionIcon = new Image(null, s);
-            }
+            questionIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            questionIcon = null;
+            log.trace("questionIcon: null");
         }
 
         try {
@@ -926,6 +1013,7 @@ public class ViewProperties extends PreferenceStore {
         }
         catch (Exception ex) {
             iconAUDIO = null;
+            log.trace("iconAUDIO: null");
         }
 
         try {
@@ -934,6 +1022,7 @@ public class ViewProperties extends PreferenceStore {
         }
         catch (Exception ex) {
             iconXLS = null;
+            log.trace("iconXLS: null");
         }
 
         try {
@@ -942,6 +1031,7 @@ public class ViewProperties extends PreferenceStore {
         }
         catch (Exception ex) {
             iconPDF = null;
+            log.trace("iconPDF: null");
         }
 
         try {
@@ -950,6 +1040,7 @@ public class ViewProperties extends PreferenceStore {
         }
         catch (Exception ex) {
             iconAPPS = null;
+            log.trace("iconAPPS: null");
         }
 
         try {
@@ -958,6 +1049,7 @@ public class ViewProperties extends PreferenceStore {
         }
         catch (Exception ex) {
             iconURL = null;
+            log.trace("iconURL: null");
         }
 
         try {
@@ -966,12 +1058,14 @@ public class ViewProperties extends PreferenceStore {
         }
         catch (Exception ex) {
             iconVIDEO = null;
+            log.trace("iconVIDEO: null");
         }
+        log.trace("loadIcons: finish");
     }
 
     /**
      * Load user properties from property file
-     * 
+     *
      * @throws IOException
      *             if a failure occurred
      */
@@ -998,16 +1092,16 @@ public class ViewProperties extends PreferenceStore {
 
         // add default implementation of modules
         log.trace("load user properties: modules");
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < moduleNames.length; i++) {
             if (!moduleList[i].contains(moduleNames[i])) moduleList[i].addElement(moduleNames[i]);
             log.trace("load: add default moduleList[{}] is {}", i, moduleNames[i]);
-            log.trace("load: add default moduleList[{}] is {}", i, Arrays.toString(moduleList[i].toArray()));
         }
+        log.trace("load Ext Class modules");
         if (extClassLoader == null) loadExtClass();
 
         // set default selection of data views
         log.trace("load user properties: set default selection of data views");
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < moduleNames.length; i++) {
             Vector<String> theList = moduleList[i];
             propVal = getString(moduleKeys[i]);
             log.trace("load: default theList is {}", Arrays.toString(theList.toArray()));
