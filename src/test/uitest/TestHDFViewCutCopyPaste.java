@@ -312,6 +312,28 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCopyPasteGroupInDifferentFile() filetree is missing group '" + groupname + "'", items[1].getNode(0).getText().compareTo(groupname) == 0);
             assertTrue("testCopyPasteGroupInDifferentFile() filetree is missing dataset '" + datasetname + "'",
                     items[1].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[1].getNode(0).click();
+            items[1].getNode(0).getNode(0).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            for (int row = 1; row <= table2.preferredRowCount() - 1; row++) {
+                for (int col = 1; col < table2.preferredColumnCount(); col++) {
+                    String expected = String.valueOf(((row - 1) * (table2.preferredColumnCount() - 1)) + (col));
+                    String val = table2.getCellDataValueByPosition(row, col);
+                    assertTrue(constructWrongValueMessage("testCopyPasteGroupInDifferentFile()", "wrong data", expected, val), val.equals(expected));
+                }
+            }
+
+            tableShell.bot().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
