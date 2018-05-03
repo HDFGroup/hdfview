@@ -48,7 +48,7 @@ package hdf.object;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class CompoundDS extends Dataset {
+public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     private static final long serialVersionUID = -4880399929644095662L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
@@ -170,6 +170,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the number of members of the compound dataset.
      */
+    @Override
     public final int getMemberCount() {
         return numberOfMembers;
     }
@@ -186,6 +187,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the number of selected members.
      */
+    @Override
     public final int getSelectedMemberCount() {
         int count = 0;
 
@@ -210,6 +212,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the names of compound members.
      */
+    @Override
     public final String[] getMemberNames() {
         return memberNames;
     }
@@ -222,6 +225,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return true if the i-th memeber is selected; otherwise returns false.
      */
+    @Override
     public final boolean isMemberSelected(int idx) {
         if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
             return isMemberSelected[idx];
@@ -237,6 +241,7 @@ public abstract class CompoundDS extends Dataset {
      * @param idx
      *            the index of compound member.
      */
+    @Override
     public final void selectMember(int idx) {
         if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
             isMemberSelected[idx] = true;
@@ -246,18 +251,19 @@ public abstract class CompoundDS extends Dataset {
     /**
      * Selects/deselects all members.
      *
-     * @param isSelected
+     * @param selectAll
      *            The indicator to select or deselect all members. If true, all
      *            members are selected for read/write. If false, no member is
      *            selected for read/write.
      */
-    public final void setMemberSelection(boolean isSelected) {
+    @Override
+    public final void setAllMemberSelection(boolean selectAll) {
         if (isMemberSelected == null) {
             return;
         }
 
         for (int i = 0; i < isMemberSelected.length; i++) {
-            isMemberSelected[i] = isSelected;
+            isMemberSelected[i] = selectAll;
         }
     }
 
@@ -282,6 +288,7 @@ public abstract class CompoundDS extends Dataset {
      * @return the array containing the total number of elements of the members
      *         of compound.
      */
+    @Override
     public final int[] getMemberOrders() {
         return memberOrders;
     }
@@ -307,6 +314,7 @@ public abstract class CompoundDS extends Dataset {
      * @return array containing the total number of elements of the selected
      *         members of compound.
      */
+    @Override
     public final int[] getSelectedMemberOrders() {
         if (isMemberSelected == null) {
             return memberOrders;
@@ -344,6 +352,7 @@ public abstract class CompoundDS extends Dataset {
      * @return the dimension sizes of the i-th member, null if the compound
      *         member is not an array.
      */
+    @Override
     public final int[] getMemberDims(int i) {
         if (memberDims == null) {
             return null;
@@ -361,6 +370,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the array of datatype objects of the compound members.
      */
+    @Override
     public final Datatype[] getMemberTypes() {
         return memberTypes;
     }
@@ -370,6 +380,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return an array of datatype objects of selected compound members.
      */
+    @Override
     public final Datatype[] getSelectedMemberTypes() {
         if (isMemberSelected == null) {
             return memberTypes;
