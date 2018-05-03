@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
     TestHDFViewMenu.class,
     TestHDFViewLibBounds.class,
     TestHDFViewLinks.class,
+        TestHDFViewCutCopyPaste.class,
     TestHDFViewDatasetFrameSelection.class,
     TestHDFViewImageConversion.class,
     TestTreeViewFiles.class,
