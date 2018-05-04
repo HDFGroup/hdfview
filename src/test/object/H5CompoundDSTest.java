@@ -559,7 +559,7 @@ public class H5CompoundDSTest {
                 selectedDims[0] = 1;
             }
             for (int i = 0; i < nmembers; i++) {
-                testDataset.setMemberSelection(false);
+                testDataset.setAllMemberSelection(false);
             }
 
             long nObjs = 0;
@@ -720,7 +720,7 @@ public class H5CompoundDSTest {
                 testDataset.clearData();
                 testDataset.init();
 
-                testDataset.setMemberSelection(false);
+                testDataset.setAllMemberSelection(false);
                 testDataset.selectMember(i);
 
                 try {
@@ -733,27 +733,27 @@ public class H5CompoundDSTest {
                 assertTrue(data.size() == 1);
 
                 switch (i) {
-                case 0:
-                    final int[] ints = (int[]) data.get(0);
-                    assertNotNull(ints);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        assertEquals(H5TestFile.DATA_INT[j], ints[j]);
-                    }
-                    break;
-                case 1:
-                    final float[] floats = (float[]) data.get(0);
-                    assertNotNull(floats);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        assertEquals(H5TestFile.DATA_FLOAT[j], floats[j], Float.MIN_VALUE);
-                    }
-                    break;
-                case 2:
-                    final String[] strs = (String[]) data.get(0);
-                    assertNotNull(strs);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        assertTrue(H5TestFile.DATA_STR[j].equals(strs[j]));
-                    }
-                    break;
+                    case 0:
+                        final int[] ints = (int[]) data.get(0);
+                        assertNotNull(ints);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            assertEquals(H5TestFile.DATA_INT[j], ints[j]);
+                        }
+                        break;
+                    case 1:
+                        final float[] floats = (float[]) data.get(0);
+                        assertNotNull(floats);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            assertEquals(H5TestFile.DATA_FLOAT[j], floats[j], Float.MIN_VALUE);
+                        }
+                        break;
+                    case 2:
+                        final String[] strs = (String[]) data.get(0);
+                        assertNotNull(strs);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            assertTrue(H5TestFile.DATA_STR[j].equals(strs[j]));
+                        }
+                        break;
                 }
             } // for (int i=0; i<nmembers; i++) {
         } // for (int loop=0; loop<NLOOPS; loop++) {
@@ -1057,7 +1057,7 @@ public class H5CompoundDSTest {
                 testDataset.clearData();
                 testDataset.init();
 
-                testDataset.setMemberSelection(false);
+                testDataset.setAllMemberSelection(false);
                 testDataset.selectMember(i);
 
                 try {
@@ -1071,27 +1071,27 @@ public class H5CompoundDSTest {
 
                 // change the data value
                 switch (i) {
-                case 0:
-                    final int[] ints = (int[]) data.get(0);
-                    assertNotNull(ints);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        ints[j] = TEST_VALUE_INT;
-                    }
-                    break;
-                case 1:
-                    final float[] floats = (float[]) data.get(0);
-                    assertNotNull(floats);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        floats[j] = TEST_VALUE_FLOAT;
-                    }
-                    break;
-                case 2:
-                    final String[] strs = (String[]) data.get(0);
-                    assertNotNull(strs);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        strs[j] = TEST_VALUE_STR;
-                    }
-                    break;
+                    case 0:
+                        final int[] ints = (int[]) data.get(0);
+                        assertNotNull(ints);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            ints[j] = TEST_VALUE_INT;
+                        }
+                        break;
+                    case 1:
+                        final float[] floats = (float[]) data.get(0);
+                        assertNotNull(floats);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            floats[j] = TEST_VALUE_FLOAT;
+                        }
+                        break;
+                    case 2:
+                        final String[] strs = (String[]) data.get(0);
+                        assertNotNull(strs);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            strs[j] = TEST_VALUE_STR;
+                        }
+                        break;
                 }
 
                 // write data field y field
@@ -1111,27 +1111,27 @@ public class H5CompoundDSTest {
                     fail("getData() failed. " + ex);
                 }
                 switch (i) {
-                case 0:
-                    final int[] ints = (int[]) data.get(0);
-                    assertNotNull(ints);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        assertEquals(TEST_VALUE_INT, ints[j]);
-                    }
-                    break;
-                case 1:
-                    final float[] floats = (float[]) data.get(0);
-                    assertNotNull(floats);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        assertEquals(TEST_VALUE_FLOAT, floats[j], Float.MIN_VALUE);
-                    }
-                    break;
-                case 2:
-                    final String[] strs = (String[]) data.get(0);
-                    assertNotNull(strs);
-                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
-                        assertTrue(TEST_VALUE_STR.equals(strs[j]));
-                    }
-                    break;
+                    case 0:
+                        final int[] ints = (int[]) data.get(0);
+                        assertNotNull(ints);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            assertEquals(TEST_VALUE_INT, ints[j]);
+                        }
+                        break;
+                    case 1:
+                        final float[] floats = (float[]) data.get(0);
+                        assertNotNull(floats);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            assertEquals(TEST_VALUE_FLOAT, floats[j], Float.MIN_VALUE);
+                        }
+                        break;
+                    case 2:
+                        final String[] strs = (String[]) data.get(0);
+                        assertNotNull(strs);
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                            assertTrue(TEST_VALUE_STR.equals(strs[j]));
+                        }
+                        break;
                 }
 
                 // write the original data into file

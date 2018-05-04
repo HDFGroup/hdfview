@@ -567,7 +567,7 @@ public class DataOptionDialog extends Dialog {
                 return false;
             }
 
-            d.setMemberSelection(false); // deselect all members
+            d.setAllMemberSelection(false); // deselect all members
             for (int i = 0; i < selectedFieldIndices.length; i++) {
                 d.selectMember(selectedFieldIndices[i]);
             }

@@ -1230,10 +1230,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.trace("showObjRefData(): Using default dataview");
             switch (viewType) {
                 case IMAGE:
-                    viewName = "hdf.view.DefaultImageView";
+                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
                     break;
                 case TABLE:
-                    viewName = "hdf.view.DefaultScalarDSTableView";
+                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
                     break;
                 default:
                     viewName = null;
@@ -1464,10 +1464,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 log.trace("showRegRefData(): Using default dataview");
                 switch (viewType) {
                     case IMAGE:
-                        viewName = "hdf.view.DefaultImageView";
+                        viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
                         break;
                     case TABLE:
-                        viewName = "hdf.view.DefaultScalarDSTableView";
+                        viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
                         break;
                     default:
                         viewName = null;

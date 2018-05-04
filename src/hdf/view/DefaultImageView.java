@@ -1590,7 +1590,7 @@ public class DefaultImageView implements ImageView {
 
         try {
             Class theClass = Class.forName(viewName);
-            if ("hdf.view.DefaultPaletteView".equals(viewName)) {
+            if (ViewProperties.DEFAULT_PALETTEVIEW_NAME.equals(viewName)) {
                 Object[] initargs = { shell, viewer, this };
                 Tools.newInstance(theClass, initargs);
             }

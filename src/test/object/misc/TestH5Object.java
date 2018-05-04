@@ -55,7 +55,7 @@ public class TestH5Object
     private final static long DIM2 = 10;
     private final static long[] DIMs = {DIM1, DIM2};
     private final static long[] CHUNKs = {DIM1/2, DIM2/2};
-//    private final static int RANK = 2;
+    //    private final static int RANK = 2;
     private final static int STR_LEN = 20;
     private final static int DIM_SIZE = (int)(DIM1*DIM2);;
 
@@ -166,7 +166,7 @@ public class TestH5Object
             final String[] data2 = (String[])buf2;
             for (int i = 0; i < n; i++) {
                 if (!data1[i].equals(data2[i])) {
-                   return false;
+                    return false;
                 }
             }
         } else {
@@ -344,7 +344,7 @@ public class TestH5Object
             dset.getData();
             file.close();
 
-         } catch (final Exception ex) { failed(message, ex, file); return 1; }
+        } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
         passed(message);
         try { file.close(); } catch (final Exception ex) {}
@@ -405,13 +405,13 @@ public class TestH5Object
 
         final int N = 5;
         final int dtype_cls[] = {Datatype.CLASS_INTEGER, Datatype.CLASS_FLOAT,
-            Datatype.CLASS_CHAR, Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
+                Datatype.CLASS_CHAR, Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
         final String dtype_names[] = {"INTEGER", "FLOAT", "CHAR", "STRING", "ENUM"};
         final String msgs[] = { "H5File.createDatatype(..., "+dtype_names[0]+")",
-                          "H5File.createDatatype(..., "+dtype_names[1]+")",
-                          "H5File.createDatatype(..., "+dtype_names[2]+")",
-                          "H5File.createDatatype(..., "+dtype_names[3]+")",
-                          "H5File.createDatatype(..., "+dtype_names[4]+")"};
+                "H5File.createDatatype(..., "+dtype_names[1]+")",
+                "H5File.createDatatype(..., "+dtype_names[2]+")",
+                "H5File.createDatatype(..., "+dtype_names[3]+")",
+                "H5File.createDatatype(..., "+dtype_names[4]+")"};
 
         message = "Test creating named datatypes";
         try {
@@ -449,7 +449,7 @@ public class TestH5Object
         Group pgroup = null;
         final int N = 5;
         final int dtype_cls[] = {Datatype.CLASS_INTEGER, Datatype.CLASS_FLOAT,
-            Datatype.CLASS_CHAR, Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
+                Datatype.CLASS_CHAR, Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
         final int dtype_sizes[] = {-1, -1, 1, 80, -1};
         final String names[] = {"INTEGER", "FLOAT", "CHAR", "STRING", "ENUM"};
 
@@ -651,7 +651,7 @@ public class TestH5Object
         rank = compDS.getRank();
 
         // read only one column but all rows
-        compDS.setMemberSelection(false); //unselect all members
+        compDS.setAllMemberSelection(false); // unselect all members
         compDS.selectMember(1); // select the second column
         try {
             data_read = (List)dset.read();
@@ -662,7 +662,7 @@ public class TestH5Object
         }
 
         // read only one row but all columns
-        compDS.setMemberSelection(true); //select all members, it is default
+        compDS.setAllMemberSelection(true); // select all members, it is default
         final int nmembers = compDS.getSelectedMemberCount();
         final long[] count = compDS.getSelectedDims();
         final long[] start = compDS.getStartDims();
@@ -785,7 +785,7 @@ public class TestH5Object
                 failed(message, new HDF5LibraryException("failed to read attributes from group"), file);
                 return 1;
             }
-         } catch (final Exception ex) { failed(message, ex, file); return 1; }
+        } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
         passed(message);
         try { file.close(); } catch (final Exception ex) {}
@@ -1269,7 +1269,7 @@ public class TestH5Object
             }
 
             final int[] data_int1 = (int[])obj.getData();
-             if (data_int1 == null) {
+            if (data_int1 == null) {
                 failed(message, new HDF5Exception("Failed to read data from "+NAME_DATASET_INT), file);
                 try { obj.getFileFormat().close(); } catch (final Exception ex2) {}
                 return 1;
@@ -1326,7 +1326,7 @@ public class TestH5Object
             }
 
             final Vector buf1 = (Vector)obj.getData();
-             if (buf1 == null) {
+            if (buf1 == null) {
                 failed(message, new HDF5Exception("Failed to read data from "+NAME_DATASET_COMPOUND), file);
                 try { obj.getFileFormat().close(); } catch (final Exception ex2) {}
                 return 1;

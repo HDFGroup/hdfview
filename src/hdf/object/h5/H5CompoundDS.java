@@ -1671,7 +1671,7 @@ public class H5CompoundDS extends CompoundDS {
         }
 
         isDataLoaded = false;
-        setMemberSelection(true);
+        setAllMemberSelection(true);
         log.trace("resetSelection(): finish");
     }
 

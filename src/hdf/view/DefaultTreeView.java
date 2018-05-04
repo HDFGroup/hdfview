@@ -1572,10 +1572,10 @@ public class DefaultTreeView implements TreeView {
             }
         }
         catch (Exception ex) {
-            log.debug("populateTree(): Error populating Tree with members of file {}", theFile.getFilePath());
-            if(rootItem != null) rootItem.dispose();
+            log.debug("populateTree(): Error populating Tree with members of file {}:", theFile.getFilePath(), ex);
+            if (rootItem != null) rootItem.dispose();
             shell.getDisplay().beep();
-            Tools.showError(shell, "Error opening file " + theFile.getName(), "Open File");
+            Tools.showError(shell, "Error opening file " + theFile.getName() + "\n\n" + ex.getMessage(), "Open File");
             log.trace("populateTree(): finish");
             return null;
         }
