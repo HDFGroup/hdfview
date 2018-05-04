@@ -31,7 +31,7 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Link;
 
-public class DefaultGroupMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
+public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultGroupMetaDataView.class);
 
@@ -42,6 +42,8 @@ public class DefaultGroupMetaDataView extends DefaultBaseMetaDataView implements
     @Override
     protected void addObjectSpecificContent() {
         log.trace("addObjectSpecificContent(): start");
+
+        super.addObjectSpecificContent();
 
         Group g = (Group) dataObject;
         List<?> mlist = g.getMemberList();

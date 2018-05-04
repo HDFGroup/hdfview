@@ -100,16 +100,16 @@ public class TableViewFactory extends DataViewFactory {
 
                 /* No loadable class found; use the default TableView */
                 if (dataObject instanceof ScalarDS)
-                    dataViewName = "hdf.view.DefaultScalarDSTableView";
+                    dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
                 else if (dataObject instanceof CompoundDS)
-                    dataViewName = "hdf.view.DefaultCompoundDSTableView";
+                    dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
                 else if (dataObject instanceof Attribute) {
                     int typeClass = ((Attribute) dataObject).getDatatype().getDatatypeClass();
 
                     if (typeClass == Datatype.CLASS_COMPOUND)
-                        dataViewName = "hdf.view.DefaultCompoundAttributeTableView";
+                        dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
                     else
-                        dataViewName = "hdf.view.DefaultScalarAttributeTableView";
+                        dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
                 }
                 else
                     dataViewName = null;

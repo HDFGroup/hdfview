@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Text;
 import hdf.object.Datatype;
 import hdf.object.HObject;
 
-public class DefaultDatatypeMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
+public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatatypeMetaDataView.class);
 
@@ -34,6 +34,8 @@ public class DefaultDatatypeMetaDataView extends DefaultBaseMetaDataView impleme
     @Override
     protected void addObjectSpecificContent() {
         log.trace("addObjectSpecificContent(): start");
+
+        super.addObjectSpecificContent();
 
         org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
         datatypeInfoGroup.setFont(curFont);

@@ -36,7 +36,7 @@ import hdf.object.Datatype;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
-public class DefaultDatasetMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
+public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
 
@@ -47,6 +47,8 @@ public class DefaultDatasetMetaDataView extends DefaultBaseMetaDataView implemen
     @Override
     protected void addObjectSpecificContent() {
         log.trace("addObjectSpecificContent(): start");
+
+        super.addObjectSpecificContent();
 
         String labelInfo;
         Label label;

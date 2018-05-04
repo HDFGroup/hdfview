@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Composite;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
+import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
@@ -103,10 +104,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     protected void loadData(DataFormat dataObject) {
         log.trace("loadData(): start");
 
-        if (dataObject.getRank() <= 0) ((CompoundDS) dataObject).init();
+        if (dataObject.getRank() <= 0) {
+            if (dataObject instanceof CompoundDS)
+                ((CompoundDS) dataObject).init();
+
+            log.trace("loadData(): inited");
+        }
 
         // use lazy convert for large number of strings
-        if (dataObject.getHeight() > 10000) {
+        if (dataObject.getHeight() > 10000 && dataObject instanceof CompoundDS) {
             ((CompoundDS) dataObject).setConvertByteToString(false);
         }
 
@@ -156,7 +162,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
         final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
 
-        final IDataProvider bodyDataProvider = new CompoundDSDataProvider((CompoundDS) dataObject);
+        final IDataProvider bodyDataProvider = new CompoundDSDataProvider(dataObject);
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer = new ColumnGroupExpandCollapseLayer(dataLayer,
                 secondLevelGroupModel, columnGroupModel);
@@ -314,10 +320,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
 
         try {
-            CompoundDS compDS = (CompoundDS) dataObject;
-            List<?> cdata = (List<?>) compDS.getData();
-            int orders[] = compDS.getSelectedMemberOrders();
-            Datatype types[] = compDS.getSelectedMemberTypes();
+            List<?> cdata = (List<?>) dataObject.getData();
+            int orders[] = ((CompoundDataFormat) dataObject).getSelectedMemberOrders();
+            Datatype types[] = ((CompoundDataFormat) dataObject).getSelectedMemberTypes();
             int nFields = cdata.size();
             int nSubColumns = (dataTable.getPreferredColumnCount() - 1) / nFields;
             int column = col;
@@ -550,15 +555,17 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private final int          nCols;
         private final int          nSubColumns;
 
-        public CompoundDSDataProvider(CompoundDS theDataset) {
+        public CompoundDSDataProvider(DataFormat theDataset) {
+            CompoundDataFormat dataFormat = (CompoundDataFormat) theDataset;
+
             stringBuffer = new StringBuffer();
 
-            types = theDataset.getSelectedMemberTypes();
+            types = dataFormat.getSelectedMemberTypes();
 
-            orders = theDataset.getSelectedMemberOrders();
+            orders = dataFormat.getSelectedMemberOrders();
             nFields = ((List<?>) dataValue).size();
-            nRows = (int) theDataset.getHeight();
-            nCols = (int) (theDataset.getWidth() * theDataset.getSelectedMemberCount());
+            nRows = (int) dataFormat.getHeight();
+            nCols = (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount());
             nSubColumns = (nFields > 0) ? getColumnCount() / nFields : 0;
         }
 
@@ -814,14 +821,16 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private final int          nSubColumns;
 
         public CompoundDSDataDisplayConverter(final DataFormat dataObject) {
+            CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
+
             buffer = new StringBuffer();
 
-            types = ((CompoundDS) dataObject).getSelectedMemberTypes();
+            types = dataFormat.getSelectedMemberTypes();
 
-            orders = ((CompoundDS) dataObject).getSelectedMemberOrders();
+            orders = dataFormat.getSelectedMemberOrders();
             nFields = ((List<?>) dataValue).size();
             nSubColumns = (nFields > 0)
-                    ? (int) (dataObject.getWidth() * ((CompoundDS) dataObject).getSelectedMemberCount()) / nFields
+                    ? (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount()) / nFields
                             : 0;
                     log.trace("CompoundDSDataDisplayConverter {} finish", nSubColumns);
         }
@@ -1040,19 +1049,21 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private final int      groupSize;
 
         public CompoundDSColumnHeaderDataProvider(DataFormat dataObject) {
-            int datasetWidth = (int) dataObject.getWidth();
-            Datatype[] types = ((CompoundDS) dataObject).getSelectedMemberTypes();
-            groupSize = ((CompoundDS) dataObject).getSelectedMemberCount();
+            CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
+
+            int datasetWidth = (int) dataFormat.getWidth();
+            Datatype[] types = dataFormat.getSelectedMemberTypes();
+            groupSize = dataFormat.getSelectedMemberCount();
             numGroups = (datasetWidth * groupSize) / groupSize;
             ncols = groupSize * numGroups;
 
-            String[] datasetMemberNames = ((CompoundDS) dataObject).getMemberNames();
+            String[] datasetMemberNames = dataFormat.getMemberNames();
             columnNames = new String[groupSize];
 
             // Copy selected dataset member names
             int idx = 0;
             for (int i = 0; i < datasetMemberNames.length; i++) {
-                if (((CompoundDS) dataObject).isMemberSelected(i)) {
+                if (dataFormat.isMemberSelected(i)) {
                     // Copy the dataset member name reference, so changes to the column name
                     // don't affect the dataset's internal member names
                     columnNames[idx] = new String(datasetMemberNames[i]);

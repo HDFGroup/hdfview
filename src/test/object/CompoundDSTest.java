@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.object;
 
@@ -7,12 +7,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.CompoundDS;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5File;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -20,9 +14,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.CompoundDS;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.h5.H5File;
+
 /**
  * @author rsinha
- * 
+ *
  */
 public class CompoundDSTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDSTest.class);
@@ -165,14 +166,14 @@ public class CompoundDSTest {
         log.debug("testSelectionDeselectionCountWorks");
         if (testDS.getSelectedMemberCount() != H5TestFile.COMPOUND_MEMBER_NAMES.length) {
             fail("Right after init getSelectedMemberCount returns" + testDS.getSelectedMemberCount()
-                    + ", when it should return " + H5TestFile.COMPOUND_MEMBER_NAMES.length);
+            + ", when it should return " + H5TestFile.COMPOUND_MEMBER_NAMES.length);
         }
 
-        testDS.setMemberSelection(false);
+        testDS.setAllMemberSelection(false);
         assertEquals(testDS.getSelectedMemberCount(), 0);
-        testDS.setMemberSelection(true);
+        testDS.setAllMemberSelection(true);
         assertEquals(testDS.getSelectedMemberCount(), H5TestFile.COMPOUND_MEMBER_NAMES.length);
-        testDS.setMemberSelection(false);
+        testDS.setAllMemberSelection(false);
         assertEquals(testDS.getSelectedMemberCount(), 0);
 
         for (int i = 0; i < testDS.getMemberCount(); i++) {

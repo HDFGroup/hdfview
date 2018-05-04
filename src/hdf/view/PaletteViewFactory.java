@@ -86,7 +86,7 @@ public class PaletteViewFactory extends DataViewFactory {
                         dataViewName, ex);
 
                 /* No loadable class found; use the default PaletteView */
-                dataViewName = "hdf.view.DefaultPaletteView";
+                dataViewName = ViewProperties.DEFAULT_PALETTEVIEW_NAME;
 
                 try {
                     log.trace("getPaletteView(): Class.forName({})", dataViewName);
