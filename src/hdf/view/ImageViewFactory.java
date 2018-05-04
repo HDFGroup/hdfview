@@ -88,7 +88,7 @@ public class ImageViewFactory extends DataViewFactory {
                         dataViewName, ex);
 
                 /* No loadable class found; use the default ImageView */
-                dataViewName = "hdf.view.DefaultImageView";
+                dataViewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
 
                 try {
                     log.trace("getImageView(): Class.forName({})", dataViewName);
@@ -104,7 +104,7 @@ public class ImageViewFactory extends DataViewFactory {
         }
 
         /* Add some data display properties if using the default ImageView */
-        if (dataViewName.startsWith("hdf.view.DefaultImageView")) {
+        if (dataViewName.startsWith(ViewProperties.DEFAULT_IMAGEVIEW_NAME)) {
             BitSet bitmask = (BitSet) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
             dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, Boolean.valueOf((bitmask != null)));
         }

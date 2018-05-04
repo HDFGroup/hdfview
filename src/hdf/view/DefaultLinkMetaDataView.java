@@ -29,12 +29,13 @@ import org.eclipse.swt.widgets.Text;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.h5.H5Link;
 
-public class DefaultH5LinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
+public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultH5LinkMetaDataView.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
 
-    public DefaultH5LinkMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
+    public DefaultLinkMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }
 
@@ -48,7 +49,25 @@ public class DefaultH5LinkMetaDataView extends DefaultBaseMetaDataView implement
             linkTargetGroup.setFont(curFont);
             linkTargetGroup.setText("Link Target Info");
             linkTargetGroup.setLayout(new GridLayout(2, false));
-            linkTargetGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+            /*
+             * If this object is purely a link, meaning a soft/external/other link that does
+             * not point to an existing object, allow the Link Target Info Group to take up
+             * all the available vertical space in the MetaDataView.
+             *
+             * Otherwise, if this link points to an existing object, it will not be an
+             * instanceof H5Link. Rather, it will be an instanceof Dataset, instanceof
+             * Group, etc. and will contain the information necessary to determine that the
+             * object is really a link.
+             *
+             * In this case, we don't allow the Link Target Info Group to take up all the
+             * available vertical space, in order to allow other object Metadata information
+             * to be comfortable displayed in the MetaDataView.
+             */
+            if (dataObject instanceof H5Link)
+                linkTargetGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+            else
+                linkTargetGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
             Label label = new Label(linkTargetGroup, SWT.LEFT);
             label.setFont(curFont);

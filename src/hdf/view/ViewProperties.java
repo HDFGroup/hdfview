@@ -74,6 +74,31 @@ public class ViewProperties extends PreferenceStore {
     public static final String  DELIMITER_SEMI_COLON = "Semi-Colon";
 
     /**
+     * The names of the various default classes for each HDFView module interface
+     */
+
+    /** Default TreeView class names */
+    public static final String DEFAULT_TREEVIEW_NAME = "hdf.view.DefaultTreeView";
+
+    /** Default TableView class names */
+    public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME = "hdf.view.DefaultScalarDSTableView";
+    public static final String DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.DefaultScalarAttributeTableView";
+    public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME = "hdf.view.DefaultCompoundDSTableView";
+    public static final String DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.DefaultCompoundAttributeTableView";
+
+    /** Default MetaDataView class names */
+    public static final String DEFAULT_GROUP_METADATAVIEW_NAME = "hdf.view.DefaultGroupMetaDataView";
+    public static final String DEFAULT_DATASET_METADATAVIEW_NAME = "hdf.view.DefaultDatasetMetaDataView";
+    public static final String DEFAULT_DATATYPE_METADATAVIEW_NAME = "hdf.view.DefaultDatatypeMetaDataView";
+    public static final String DEFAULT_LINK_METADATAVIEW_NAME = "hdf.view.DefaultLinkMetaDataView";
+
+    /** Default ImageView class names */
+    public static final String DEFAULT_IMAGEVIEW_NAME = "hdf.view.DefaultImageView";
+
+    /** Default PaletteView class names */
+    public static final String DEFAULT_PALETTEVIEW_NAME = "hdf.view.DefaultPaletteView";
+
+    /**
      * Used to create different DataViews for a given HObject.
      */
     public static enum DataViewType {

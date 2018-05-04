@@ -96,13 +96,13 @@ public class MetaDataViewFactory extends DataViewFactory {
 
                 /* No loadable class found; use the default MetaDataView */
                 if (theObj instanceof Group)
-                    dataViewName = "hdf.view.DefaultGroupMetaDataView";
+                    dataViewName = ViewProperties.DEFAULT_GROUP_METADATAVIEW_NAME;
                 else if (theObj instanceof Dataset)
-                    dataViewName = "hdf.view.DefaultDatasetMetaDataView";
+                    dataViewName = ViewProperties.DEFAULT_DATASET_METADATAVIEW_NAME;
                 else if (theObj instanceof Datatype)
-                    dataViewName = "hdf.view.DefaultDatatypeMetaDataView";
+                    dataViewName = ViewProperties.DEFAULT_DATATYPE_METADATAVIEW_NAME;
                 else if (theObj instanceof H5Link)
-                    dataViewName = "hdf.view.DefaultH5LinkMetaDataView";
+                    dataViewName = ViewProperties.DEFAULT_LINK_METADATAVIEW_NAME;
                 else
                     dataViewName = null;
 
