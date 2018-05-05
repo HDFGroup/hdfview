@@ -18,7 +18,6 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -287,12 +286,12 @@ public class ImageConversionDialog extends Dialog {
         File f = new File(srcFile);
         if (!f.exists()) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Source file does not exist.", shell.getText());
+            Tools.showError(shell, "Convert", "Source file does not exist.");
             return false;
         }
         else if (f.isDirectory()) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Source file is a directory.", shell.getText());
+            Tools.showError(shell, "Convert", "Source file is a directory.");
             return false;
         }
 
@@ -306,8 +305,8 @@ public class ImageConversionDialog extends Dialog {
         }
         else if (!pfile.exists()) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Destination file path does not exist at\n"
-                    + pfile.getPath(), shell.getText());
+            Tools.showError(shell, "Convert", "Destination file path does not exist at\n"
+                    + pfile.getPath());
             return false;
         }
 
@@ -319,14 +318,14 @@ public class ImageConversionDialog extends Dialog {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(dstFile)) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "The destination file is being used.", shell.getText());
+                    Tools.showError(shell, "Convert", "The destination file is being used.");
                     return false;
                 }
             }
         }
 
         if (f.exists()) {
-            if(!MessageDialog.openConfirm(shell, shell.getText(), "Destination file exists. Do you want to replace it ?"))
+            if(!Tools.showConfirm(shell, "Convert", "Destination file exists. Do you want to replace it ?"))
                 return false;
         }
 
@@ -339,7 +338,7 @@ public class ImageConversionDialog extends Dialog {
             convertedFile = null;
             converted = false;
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Convert", ex.getMessage());
             return false;
         }
 

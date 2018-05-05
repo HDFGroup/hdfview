@@ -17,7 +17,6 @@ package hdf.view.dialog;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,6 +33,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
 /**
@@ -466,7 +466,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
                         // + "bias_max = fabs(bias) * 3.0 \n"
                         + "\n\n";
 
-                MessageDialog.openInformation(getShell(), getShell().getText(), msg);
+                Tools.showInformation(getShell(), "Help", msg);
             }
         });
 

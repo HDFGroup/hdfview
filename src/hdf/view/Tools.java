@@ -3246,12 +3246,51 @@ public final class Tools {
      * Show an SWT error dialog with the given error message.
      * @param parent
      *           The parent Shell of the MessageDialog
-     * @param errorMsg
-     *           The error message to display in the MessageDialog
      * @param title
      *           The title to set for the MessageDialog
+     * @param errorMsg
+     *           The error message to display in the MessageDialog
      */
-    public static void showError(Shell parent, String errorMsg, String title) {
-        MessageDialog.openError(parent, (title == null) ? "null" : title, (errorMsg == null) ? "null" : errorMsg);
+    public static void showError(Shell parent, String title, String errorMsg) {
+        MessageDialog.openError(parent, (title == null) ? parent.getText() : parent.getText() + title, (errorMsg == null) ? "UNKNOWN" : errorMsg);
+    }
+
+    /**
+     * Show an SWT Information dialog with the given message.
+     * @param parent
+     *           The parent Shell of the MessageDialog
+     * @param title
+     *           The title to set for the MessageDialog
+     * @param infoMsg
+     *           The message to display in the MessageDialog
+     */
+    public static void showInformation(Shell parent, String title, String infoMsg) {
+        MessageDialog.openInformation(parent, (title == null) ? parent.getText() : parent.getText() + title, (infoMsg == null) ? "UNKNOWN" : infoMsg);
+    }
+
+    /**
+     * Show an SWT Confirm dialog with the given message.
+     * @param parent
+     *           The parent Shell of the MessageDialog
+     * @param title
+     *           The title to set for the MessageDialog
+     * @param confMsg
+     *           The message to display in the MessageDialog
+     */
+    public static boolean showConfirm(Shell parent, String title, String confMsg) {
+        return MessageDialog.openConfirm(parent, (title == null) ? parent.getText() : parent.getText() + title, (confMsg == null) ? "UNKNOWN" : confMsg);
+    }
+
+    /**
+     * Show an SWT Warning dialog with the given message.
+     * @param parent
+     *           The parent Shell of the MessageDialog
+     * @param title
+     *           The title to set for the MessageDialog
+     * @param warnMsg
+     *           The message to display in the MessageDialog
+     */
+    public static void showWarning(Shell parent, String title, String warnMsg) {
+        MessageDialog.openWarning(parent, (title == null) ? parent.getText() : parent.getText() + title, (warnMsg == null) ? "UNKNOWN" : warnMsg);
     }
 }

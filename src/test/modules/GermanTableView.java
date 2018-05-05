@@ -389,7 +389,7 @@ public class GermanTableView implements TableView {
         long tsize = 1;
 
         if (dims == null) {
-            Tools.showError(shell, "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Null Dimensionen.", shell.getText());
+            Tools.showError(shell, "Test", "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Null Dimensionen.");
             return;
         }
 
@@ -398,7 +398,7 @@ public class GermanTableView implements TableView {
 
         log.trace("dataset size={} Height={} Width={}", tsize, dataset.getHeight(), dataset.getWidth());
         if (dataset.getHeight() <= 0 || dataset.getWidth() <= 0 || tsize <= 0) {
-            Tools.showError(shell, "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Dimension der Größe 0.", shell.getText());
+            Tools.showError(shell, "Test", "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Dimension der Größe 0.");
             return;
         }
 
@@ -640,7 +640,7 @@ public class GermanTableView implements TableView {
                 log.trace("createTable(): dataset inited");
             }
             catch (Exception ex) {
-                Tools.showError(shell, ex.getMessage(), "createTable:" + shell.getText());
+                Tools.showError(shell, "Test", "createTable:" + ex.getMessage());
                 dataValue = null;
                 log.debug("createTable(): ", ex);
                 log.trace("createTable(): finish");
@@ -652,7 +652,7 @@ public class GermanTableView implements TableView {
         try {
             dataValue = theDataset.getData();
             if (dataValue == null) {
-                Tools.showError(shell, "Keine Daten lesen", "ScalarDS createTable:" + shell.getText());
+                Tools.showError(shell, "Test", "ScalarDS createTable:" + "Keine Daten lesen");
                 log.debug("createTable(): no data read");
                 log.trace("createTable(): finish");
                 return null;
@@ -675,7 +675,7 @@ public class GermanTableView implements TableView {
             dataValue = theDataset.getData();
         }
         catch (Throwable ex) {
-            Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
+            Tools.showError(shell, "Test", "ScalarDS createTable:" + ex.getMessage());
             log.debug("createTable(): ", ex);
             log.trace("createTable(): finish");
             dataValue = null;
@@ -801,7 +801,7 @@ public class GermanTableView implements TableView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), "TableView " + shell.getText());
+            Tools.showError(shell, "Test", "TableView " + ex.getMessage());
             log.debug("createTable(): ", ex);
             dataValue = null;
         }
@@ -894,7 +894,7 @@ public class GermanTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -917,7 +917,7 @@ public class GermanTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -934,7 +934,7 @@ public class GermanTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -951,7 +951,7 @@ public class GermanTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -981,7 +981,7 @@ public class GermanTableView implements TableView {
 
                 File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
                 if (!chosenFile.exists()) {
-                    Tools.showError(shell, "Datei " + chosenFile.getName() + " existiert nicht.", "Importieren Sie Daten aus Textdatei");
+                    Tools.showError(shell, "Test", "Importieren Sie Daten aus Textdatei\nDatei " + chosenFile.getName() + " existiert nicht.");
                     return;
                 }
 
@@ -1044,7 +1044,7 @@ public class GermanTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -1060,7 +1060,7 @@ public class GermanTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -1076,7 +1076,7 @@ public class GermanTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -1165,7 +1165,7 @@ public class GermanTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1183,7 +1183,7 @@ public class GermanTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1210,7 +1210,7 @@ public class GermanTableView implements TableView {
                     if (dataset instanceof CompoundDS) {
                         int cols = selectionLayer.getFullySelectedColumnPositions().length;
                         if (cols != 1) {
-                            Tools.showError(shell, "Bitte wählen Sie eine Colunm eine Zeit für zusammengesetzte Dataset.", shell.getText());
+                            Tools.showError(shell, "Test", "Bitte wählen Sie eine Colunm eine Zeit für zusammengesetzte Dataset.");
                             return;
                         }
                     }
@@ -1236,7 +1236,7 @@ public class GermanTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1254,7 +1254,7 @@ public class GermanTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1588,7 +1588,7 @@ public class GermanTableView implements TableView {
 
         if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Die Frame-Nummer muss zwischen " + indexBase + " und " + (dims[selectedIndex[2]] - 1 + indexBase), shell.getText());
+            Tools.showError(shell, "Test", "Die Frame-Nummer muss zwischen " + indexBase + " und " + (dims[selectedIndex[2]] - 1 + indexBase));
             return;
         }
 
@@ -1609,7 +1609,7 @@ public class GermanTableView implements TableView {
         }
         catch (Exception ex) {
             dataValue = null;
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Test", ex.getMessage());
             return;
         }
         finally {
@@ -1638,7 +1638,7 @@ public class GermanTableView implements TableView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Test", ex.getMessage());
             log.debug("updateValueInFile(): ", ex);
             log.trace("updateValueInFile(): finish");
             return;
@@ -1835,7 +1835,7 @@ public class GermanTableView implements TableView {
         StringTokenizer st = new StringTokenizer(cellValue, ",");
         if (st.countTokens() < morder) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Anzahl der Datenpunkte < " + morder + ".", shell.getText());
+            Tools.showError(shell, "Test", "Anzahl der Datenpunkte < " + morder + ".");
             log.debug("updateCompoundData({}, {}): number of data points < {}", morder, row, col);
             log.trace("updateCompoundData({}, {}): finish", row, col);
             return;
@@ -1909,7 +1909,7 @@ public class GermanTableView implements TableView {
 
         Rectangle selection = selectionLayer.getLastSelectedRegion();
         if (selection == null) {
-            Tools.showError(shell, "Wählen Sie die zu kopierenden Daten aus.", shell.getText());
+            Tools.showError(shell, "Test", "Wählen Sie die zu kopierenden Daten aus.");
             return;
         }
 
@@ -1937,7 +1937,7 @@ public class GermanTableView implements TableView {
         }
         catch (java.lang.OutOfMemoryError err) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Das Kopieren von Daten auf Zwischenspeicher fehlgeschlagen. \nMit Export oder Import Daten für das Kopieren oder Einfügen von großen Daten.", shell.getText());
+            Tools.showError(shell, "Test", "Das Kopieren von Daten auf Zwischenspeicher fehlgeschlagen. \nMit Export oder Import Daten für das Kopieren oder Einfügen von großen Daten.");
             return;
         }
 
@@ -2019,7 +2019,7 @@ public class GermanTableView implements TableView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Test", ex.getMessage());
         }
     }
 
@@ -2130,7 +2130,7 @@ public class GermanTableView implements TableView {
 
         if (selectedData == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Nicht unterstützte Datentypen.", shell.getText());
+            Tools.showError(shell, "Test", "Nicht unterstützte Datentypen.");
             return null;
         }
         log.trace("GermanTableView getSelectedScalarData: selectedData is type {}", NT);
@@ -2164,7 +2164,7 @@ public class GermanTableView implements TableView {
 
         if ((cols <= 0) || (rows <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+            Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
             return null;
         }
 
@@ -2206,7 +2206,7 @@ public class GermanTableView implements TableView {
         }
         else {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Nicht unterstützte Datentypen.", shell.getText());
+            Tools.showError(shell, "Test", "Nicht unterstützte Datentypen.");
             return null;
         }
         log.trace("getSelectedCompoundData(): selectedData={}", selectedData);
@@ -2231,7 +2231,7 @@ public class GermanTableView implements TableView {
         int cols = selectionLayer.getSelectedColumnPositions().length;
         if ((dataset instanceof CompoundDS) && (cols > 1)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Bitte wählen Sie eine Colunm eine Zeit für mathematische Umrechnung für zusammengesetzte Dataset.", shell.getText());
+            Tools.showError(shell, "Test", "Bitte wählen Sie eine Colunm eine Zeit für mathematische Umrechnung für zusammengesetzte Dataset.");
             log.debug("mathConversion(): more than one column selected for CompoundDS");
             log.trace("mathConversion(): finish");
             return;
@@ -2240,7 +2240,7 @@ public class GermanTableView implements TableView {
         Object theData = getSelectedData();
         if (theData == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+            Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
             log.debug("mathConversion(): no data selected");
             log.trace("mathConversion(): finish");
             return;
@@ -2313,7 +2313,7 @@ public class GermanTableView implements TableView {
 
         HObject obj = FileFormat.findObject(dataset.getFileFormat(), oid);
         if (obj == null || !(obj instanceof ScalarDS)) {
-            Tools.showError(shell, "Objektreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten", shell.getText());
+            Tools.showError(shell, "Test", "Objektreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten");
             log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
             log.trace("showObjRefData(): finish");
             return;
@@ -2336,7 +2336,7 @@ public class GermanTableView implements TableView {
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): couldn't show data: ", ex);
-            Tools.showError(shell, ex.getMessage(), "Objektverweis: " + shell.getText());
+            Tools.showError(shell, "Test", "Objektverweis: " + ex.getMessage());
             data = null;
         }
 
@@ -2391,7 +2391,7 @@ public class GermanTableView implements TableView {
             catch (Exception ex) {
                 log.debug("showObjRefData(): no suitable display class found");
                 log.trace("showObjRefData(): finish");
-                Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden", shell.getText());
+                Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden");
                 return;
             }
         }
@@ -2405,7 +2405,7 @@ public class GermanTableView implements TableView {
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): Could not show reference data: ", ex);
-            Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: " + ex.toString(), shell.getText());
+            Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: " + ex.toString());
         }
 
         log.trace("showObjRefData(): finish");
@@ -2434,7 +2434,7 @@ public class GermanTableView implements TableView {
         log.trace("showRegRefData(): start: reg={}", reg);
 
         if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
-            Tools.showError(shell, "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten", shell.getText());
+            Tools.showError(shell, "Test", "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten");
             log.debug("showRegRefData(): ref is null or invalid");
             log.trace("showRegRefData(): finish");
             return;
@@ -2449,7 +2449,7 @@ public class GermanTableView implements TableView {
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
         if (regStr == null || regStr.length() <= 0) {
-            Tools.showError(shell, "Region-Referenzdaten konnten nicht angezeigt werden.", shell.getText());
+            Tools.showError(shell, "Test", "Region-Referenzdaten konnten nicht angezeigt werden.");
             log.debug("showRegRefData(): no region selection made");
             log.trace("showRegRefData(): finish");
             return; // no selection
@@ -2460,7 +2460,7 @@ public class GermanTableView implements TableView {
         StringTokenizer st = new StringTokenizer(regStr);
         int nSelections = st.countTokens();
         if (nSelections <= 0) {
-            Tools.showError(shell, "Region-Referenzdaten konnten nicht angezeigt werden.", shell.getText());
+            Tools.showError(shell, "Test", "Region-Referenzdaten konnten nicht angezeigt werden.");
             log.debug("showRegRefData(): no region selection made");
             log.trace("showRegRefData(): finish");
             return; // no selection
@@ -2469,7 +2469,7 @@ public class GermanTableView implements TableView {
 
         HObject obj = FileFormat.findObject(dataset.getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
-            Tools.showError(shell, "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten", shell.getText());
+            Tools.showError(shell, "Test", "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten");
             log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
             log.debug("showRegRefData(): finish");
             return;
@@ -2572,7 +2572,7 @@ public class GermanTableView implements TableView {
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): getData failure: ", ex);
-                Tools.showError(shell, ex.getMessage(), "Region Reference: " + shell.getText());
+                Tools.showError(shell, "Test", "Region Reference: " + ex.getMessage());
             }
 
             Class<?> theClass = null;
@@ -2621,7 +2621,7 @@ public class GermanTableView implements TableView {
                 catch (Exception ex) {
                     log.debug("showRegRefData(): no suitable display class found");
                     log.trace("showRegRefData(): finish");
-                    Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden", shell.getText());
+                    Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden");
                     return;
                 }
             }
@@ -2635,7 +2635,7 @@ public class GermanTableView implements TableView {
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): Could not show reference data: ", ex);
-                Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: " + ex.toString(), shell.getText());
+                Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: " + ex.toString());
             }
 
             log.trace("showRegRefData(): st.hasMoreTokens() end");
@@ -2763,7 +2763,7 @@ public class GermanTableView implements TableView {
                     } // while (tokenizer1.hasMoreTokens() && index < size)
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
 
                     try {
                         in.close();
@@ -2820,7 +2820,7 @@ public class GermanTableView implements TableView {
 
         File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
         if (!chosenFile.exists()) {
-            Tools.showError(shell, "Datei " + chosenFile.getName() + " existiert nicht.", "Daten aus Binärdatei importieren");
+            Tools.showError(shell, "Test", "Daten aus Binärdatei importieren\nDatei " + chosenFile.getName() + " existiert nicht.");
             return;
         }
 
@@ -3108,7 +3108,7 @@ public class GermanTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.", shell.getText());
+                        Tools.showError(shell, "Test", "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.");
                         return;
                     }
                 }
@@ -3194,7 +3194,7 @@ public class GermanTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.", shell.getText());
+                        Tools.showError(shell, "Test", "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.");
                         return;
                     }
                 }
@@ -3432,7 +3432,7 @@ public class GermanTableView implements TableView {
 
         if ((rows == null) || (cols == null) || (rows.length <= 0) || (cols.length <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Wählen Sie Zeilen oder Spalten mit dem Zeichnen einer Linie zeichnen.", shell.getText());
+            Tools.showError(shell, "Test", "Wählen Sie Zeilen oder Spalten mit dem Zeichnen einer Linie zeichnen.");
             return;
         }
 
@@ -3574,8 +3574,8 @@ public class GermanTableView implements TableView {
         }
         else if (yRange[0] > yRange[1]) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Kann ein Grundstück für die ausgewählten Daten. \n" + "Bitte überprüfen Sie den Datenbereich: ("
-                    + yRange[0] + ", " + yRange[1] + ").", shell.getText());
+            Tools.showError(shell, "Test", "Kann ein Grundstück für die ausgewählten Daten. \n" + "Bitte überprüfen Sie den Datenbereich: ("
+                    + yRange[0] + ", " + yRange[1] + ").");
             data = null;
             return;
         }
@@ -4260,7 +4260,7 @@ public class GermanTableView implements TableView {
                                             dbuf = dset.getData();
                                         }
                                         catch (Exception ex) {
-                                            Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
+                                            Tools.showError(shell, "Test", "Region Reference:" + ex.getMessage());
                                         }
 
                                         // Convert dbuf to a displayable
@@ -5260,12 +5260,12 @@ public class GermanTableView implements TableView {
                                 catch (Exception ex) {
                                     log.debug("show reference data: ", ex);
                                     theData = null;
-                                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                                    Tools.showError(shell, "Test", ex.getMessage());
                                 }
 
                                 if (theData == null) {
                                     shell.getDisplay().beep();
-                                    Tools.showError(shell, "Keine Daten ausgewählt.", shell.getText());
+                                    Tools.showError(shell, "Test", "Keine Daten ausgewählt.");
                                     return;
                                 }
 
@@ -5281,7 +5281,7 @@ public class GermanTableView implements TableView {
                                 Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
                                 if (selectedRows == null || selectedRows.length <= 0) {
                                     log.debug("show reference data: no data selected");
-                                    Tools.showError(shell, "Keine Daten ausgewählt.", shell.getText());
+                                    Tools.showError(shell, "Test", "Keine Daten ausgewählt.");
                                     return;
                                 }
                                 int len = Array.getLength(selectedRows);
@@ -5540,7 +5540,7 @@ public class GermanTableView implements TableView {
                     Object theData = getSelectedData();
                     if (theData == null) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         return;
                     }
 
@@ -5557,7 +5557,7 @@ public class GermanTableView implements TableView {
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
                     if (selectedRows == null || selectedRows.length <= 0) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
                         return;
                     }
@@ -5590,7 +5590,7 @@ public class GermanTableView implements TableView {
                     Object theData = getSelectedData();
                     if (theData == null) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         return;
                     }
 
@@ -5607,7 +5607,7 @@ public class GermanTableView implements TableView {
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
                     if (selectedRows == null || selectedRows.length <= 0) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
                         return;
                     }
@@ -5639,7 +5639,7 @@ public class GermanTableView implements TableView {
             //                    Object theData = getSelectedData();
             //                    if (theData == null) {
             //                        shell.getDisplay().beep();
-            //                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+            //                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
             //                        return;
             //                    }
             //

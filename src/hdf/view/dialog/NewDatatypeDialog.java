@@ -392,13 +392,13 @@ public class NewDatatypeDialog extends Dialog {
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Datatype name is not specified.", shell.getText());
+            Tools.showError(shell, "Create", "Datatype name is not specified.");
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Datatype name cannot contain path.", shell.getText());
+            Tools.showError(shell, "Create", "Datatype name cannot contain path.");
             return null;
         }
 
@@ -406,7 +406,7 @@ public class NewDatatypeDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Parent group is null.", shell.getText());
+            Tools.showError(shell, "Create", "Parent group is null.");
             return null;
         }
 
@@ -466,7 +466,7 @@ public class NewDatatypeDialog extends Dialog {
 
                 if (stringLength <= 0) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Invalid string length: " + stringLengthField.getText(), shell.getText());
+                    Tools.showError(shell, "Create", "Invalid string length: " + stringLengthField.getText());
                     return null;
                 }
 
@@ -488,7 +488,7 @@ public class NewDatatypeDialog extends Dialog {
 
         if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "HDF4 does not support 64-bit integer.", shell.getText());
+            Tools.showError(shell, "Create", "HDF4 does not support 64-bit integer.");
             return null;
         }
 
@@ -523,7 +523,7 @@ public class NewDatatypeDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return null;
         }
 

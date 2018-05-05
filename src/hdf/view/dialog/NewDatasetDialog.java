@@ -23,7 +23,6 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -707,7 +706,7 @@ public class NewDatasetDialog extends Dialog {
 
         if (stMax.countTokens() != stDim.countTokens()) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Wrong number of values in the max dimension size " + maxSize, shell.getText());
+            Tools.showError(shell, "Check", "Wrong number of values in the max dimension size " + maxSize);
             maxSize = null;
             return;
         }
@@ -729,7 +728,7 @@ public class NewDatasetDialog extends Dialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Invalid max dimension size: " + maxSize, shell.getText());
+                    Tools.showError(shell, "Check", "Invalid max dimension size: " + maxSize);
                     maxSize = null;
                     return;
                 }
@@ -741,13 +740,13 @@ public class NewDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Invalid dimension size: " + dimStr, shell.getText());
+                Tools.showError(shell, "Check", "Invalid dimension size: " + dimStr);
                 return;
             }
 
             if (max != -1 && max < dim) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Invalid max dimension size: " + maxSize, shell.getText());
+                Tools.showError(shell, "Check", "Invalid max dimension size: " + maxSize);
                 maxSize = null;
                 return;
             }
@@ -761,7 +760,7 @@ public class NewDatasetDialog extends Dialog {
         if (isH5) {
             if (isChunkNeeded && !checkChunked.getSelection()) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Chunking is required for the max dimensions of " + maxSize, shell.getText());
+                Tools.showError(shell, "Check", "Chunking is required for the max dimensions of " + maxSize);
                 checkChunked.setSelection(true);
             }
         }
@@ -770,7 +769,7 @@ public class NewDatasetDialog extends Dialog {
                 if (maxdims[i] <= 0) {
                     maxSize = currentSizeField.getText();
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Only dim[0] can be unlimited." + maxSize, shell.getText());
+                    Tools.showError(shell, "Check", "Only dim[0] can be unlimited." + maxSize);
                     return;
                 }
             }
@@ -787,13 +786,13 @@ public class NewDatasetDialog extends Dialog {
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Dataset name is not specified.", shell.getText());
+            Tools.showError(shell, "Create", "Dataset name is not specified.");
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Dataset name cannot contain path.", shell.getText());
+            Tools.showError(shell, "Create", "Dataset name cannot contain path.");
             return null;
         }
 
@@ -801,7 +800,7 @@ public class NewDatasetDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Parent group is null.", shell.getText());
+            Tools.showError(shell, "Create", "Parent group is null.");
             return null;
         }
 
@@ -864,7 +863,7 @@ public class NewDatasetDialog extends Dialog {
 
                 if (stringLength <= 0) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Invalid string length: " + stringLengthField.getText(), shell.getText());
+                    Tools.showError(shell, "Create", "Invalid string length: " + stringLengthField.getText());
                     return null;
                 }
                 tsize = stringLength;
@@ -874,7 +873,7 @@ public class NewDatasetDialog extends Dialog {
             String enumStr = stringLengthField.getText();
             if ((enumStr == null) || (enumStr.length() < 1) || enumStr.endsWith("...")) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Invalid member values: " + stringLengthField.getText(), shell.getText());
+                Tools.showError(shell, "Create", "Invalid member values: " + stringLengthField.getText());
                 return null;
             }
         }
@@ -893,7 +892,7 @@ public class NewDatasetDialog extends Dialog {
 
         if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "HDF4 does not support 64-bit integer.", shell.getText());
+            Tools.showError(shell, "Create", "HDF4 does not support 64-bit integer.");
             return null;
         }
 
@@ -913,7 +912,7 @@ public class NewDatasetDialog extends Dialog {
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Number of values in the current dimension size is less than " + rank, shell.getText());
+            Tools.showError(shell, "Create", "Number of values in the current dimension size is less than " + rank);
             return null;
         }
 
@@ -927,13 +926,13 @@ public class NewDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Invalid dimension size: " + currentSizeField.getText(), shell.getText());
+                Tools.showError(shell, "Create", "Invalid dimension size: " + currentSizeField.getText());
                 return null;
             }
 
             if (l <= 0) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Dimension size must be greater than zero.", shell.getText());
+                Tools.showError(shell, "Create", "Dimension size must be greater than zero.");
                 return null;
             }
 
@@ -945,7 +944,7 @@ public class NewDatasetDialog extends Dialog {
             st = new StringTokenizer(maxSizeStr, "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Number of values in the max dimension size is less than " + rank, shell.getText());
+                Tools.showError(shell, "Create", "Number of values in the max dimension size is less than " + rank);
                 return null;
             }
 
@@ -963,14 +962,14 @@ public class NewDatasetDialog extends Dialog {
                     }
                     catch (NumberFormatException ex) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Invalid max dimension size: " + maxSize, shell.getText());
+                        Tools.showError(shell, "Create", "Invalid max dimension size: " + maxSize);
                         return null;
                     }
                 }
 
                 if (l < -1) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Dimension size cannot be less than -1.", shell.getText());
+                    Tools.showError(shell, "Create", "Dimension size cannot be less than -1.");
                     return null;
                 }
                 else if (l == 0) {
@@ -986,7 +985,7 @@ public class NewDatasetDialog extends Dialog {
             st = new StringTokenizer(chunkSizeField.getText(), "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Number of values in the chunk size is less than " + rank, shell.getText());
+                Tools.showError(shell, "Create", "Number of values in the chunk size is less than " + rank);
                 return null;
             }
 
@@ -999,13 +998,13 @@ public class NewDatasetDialog extends Dialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Invalid chunk dimension size: " + chunkSizeField.getText(), shell.getText());
+                    Tools.showError(shell, "Create", "Invalid chunk dimension size: " + chunkSizeField.getText());
                     return null;
                 }
 
                 if (l < 1) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Chunk size cannot be less than 1.", shell.getText());
+                    Tools.showError(shell, "Create", "Chunk size cannot be less than 1.");
                     return null;
                 }
 
@@ -1020,7 +1019,7 @@ public class NewDatasetDialog extends Dialog {
 
             if (tchunksize >= tdimsize) {
                 shell.getDisplay().beep();
-                if(!MessageDialog.openConfirm(shell, shell.getText(),
+                if(!Tools.showConfirm(shell, "Create",
                         "Chunk size is equal/greater than the current size. "
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
@@ -1029,7 +1028,7 @@ public class NewDatasetDialog extends Dialog {
 
             if (tchunksize == 1) {
                 shell.getDisplay().beep();
-                if(!MessageDialog.openConfirm(shell, shell.getText(),
+                if(!Tools.showConfirm(shell, "Create",
                         "Chunk size is one, which may cause large memory overhead for large dataset."
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
@@ -1065,7 +1064,7 @@ public class NewDatasetDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return null;
         }
 
@@ -1081,20 +1080,20 @@ public class NewDatasetDialog extends Dialog {
         name = nameField.getText();
         if (name == null || name.length() == 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Dataset name is not specified.", shell.getText());
+            Tools.showError(shell, "Create", "Dataset name is not specified.");
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Dataset name cannot contain path.", shell.getText());
+            Tools.showError(shell, "Create", "Dataset name cannot contain path.");
             return null;
         }
 
         pgroup = groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Parent group is null.", shell.getText());
+            Tools.showError(shell, "Create", "Parent group is null.");
             return null;
         }
 
@@ -1120,7 +1119,7 @@ public class NewDatasetDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return null;
         }
 
@@ -1135,20 +1134,20 @@ public class NewDatasetDialog extends Dialog {
         name = nameField.getText();
         if (name == null || name.length() == 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Dataset name is not specified.", shell.getText());
+            Tools.showError(shell, "Create", "Dataset name is not specified.");
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Dataset name cannot contain path.", shell.getText());
+            Tools.showError(shell, "Create", "Dataset name cannot contain path.");
             return null;
         }
 
         pgroup = groupList.get(parentChoice.getSelectionIndex());
         if (pgroup == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Parent group is null.", shell.getText());
+            Tools.showError(shell, "Create", "Parent group is null.");
             return null;
         }
 
@@ -1201,7 +1200,7 @@ public class NewDatasetDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return null;
         }
 
@@ -1331,9 +1330,8 @@ public class NewDatasetDialog extends Dialog {
             catch (Error er) {
                 // Try opening help link in external browser if platform
                 // doesn't support SWT browser
-                Tools.showError(shell,
-                        "Platform doesn't support Browser. Opening external link in web browser...",
-                        "Browser support");
+                Tools.showError(shell, "Browser support",
+                        "Platform doesn't support Browser. Opening external link in web browser...");
 
                 //TODO: Add support for launching in external browser
             }

@@ -50,7 +50,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
@@ -576,7 +575,7 @@ public class DefaultImageView implements ImageView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Save", ex.getMessage());
                 }
             }
         });
@@ -595,7 +594,7 @@ public class DefaultImageView implements ImageView {
         //                }
         //                catch (Exception ex) {
         //                    shell.getDisplay().beep();
-        //                    Tools.showError(shell, ex.getMessage(), shell.getText());
+        //                    Tools.showError(shell, "Save", ex.getMessage());
         //                }
         //            }
         //        });
@@ -611,7 +610,7 @@ public class DefaultImageView implements ImageView {
                     saveImageAs(filetype);
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Save", ex.getMessage());
                 }
             }
         });
@@ -627,7 +626,7 @@ public class DefaultImageView implements ImageView {
                     saveImageAs(filetype);
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Save", ex.getMessage());
                 }
             }
         });
@@ -643,7 +642,7 @@ public class DefaultImageView implements ImageView {
                     saveImageAs(filetype);
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Save", ex.getMessage());
                 }
             }
         });
@@ -734,8 +733,7 @@ public class DefaultImageView implements ImageView {
 
                 if (chosenFile.exists()) {
                     int answer = SWT.NO;
-                    if(MessageDialog.openConfirm(shell,
-                            shell.getText(), "File exists. Do you want to replace it ?"))
+                    if(Tools.showConfirm(shell, "Export", "File exists. Do you want to replace it ?"))
                         answer = SWT.YES;
 
                     if (answer == SWT.NO) return;
@@ -1015,12 +1013,12 @@ public class DefaultImageView implements ImageView {
                                 + minmax[1] + "\nMean                     = "
                                 + stat[0] + "\nStandard deviation = " + stat[1];
 
-                        MessageDialog.openInformation(shell, "Statistics", statistics);
+                        Tools.showInformation(shell, "Statistics", statistics);
                     }
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Statistics", ex.getMessage());
                 }
             }
         });
@@ -1037,7 +1035,7 @@ public class DefaultImageView implements ImageView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Select", ex.getMessage());
                 }
             }
         });
@@ -1380,7 +1378,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "ImageView: " + shell.getText(), shell.getText());
+            Tools.showError(shell, "Select", "ImageView: " + shell.getText());
             return null;
         }
 
@@ -1609,15 +1607,14 @@ public class DefaultImageView implements ImageView {
 
         if (isTrueColor) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Unsupported operation: unable to draw histogram for true color image.", shell.getText());
+            Tools.showError(shell, "Select", "Unsupported operation: unable to draw histogram for true color image.");
             return;
         }
 
         if ((rec == null) || (rec.width <= 0) || (rec.height <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell,
-                    "No data for histogram.\nUse Shift+Mouse_drag to select an image area.",
-                    shell.getText());
+            Tools.showError(shell, "Select",
+                    "No data for histogram.\nUse Shift+Mouse_drag to select an image area.");
             return;
         }
 
@@ -1807,7 +1804,8 @@ public class DefaultImageView implements ImageView {
             fChooser.setFilterExtensions(new String[] {"*.*"});
             fChooser.setFilterNames(new String[] {"All Files"});
             fChooser.setFilterIndex(0);
-        } else {
+        }
+        else {
             fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
             fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
             fChooser.setFilterIndex(1);
@@ -1842,7 +1840,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (OutOfMemoryError err) {
             shell.getDisplay().beep();
-            Tools.showError(shell, err.getMessage(), shell.getText());
+            Tools.showError(shell, "Save", err.getMessage());
             return;
         }
 
@@ -2063,8 +2061,8 @@ public class DefaultImageView implements ImageView {
 
         if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Frame number must be between " + indexBase + " and "
-                    + (dims[selectedIndex[2]] - 1 + indexBase), shell.getText());
+            Tools.showError(shell, "Select", "Frame number must be between " + indexBase + " and "
+                    + (dims[selectedIndex[2]] - 1 + indexBase));
             return;
         }
 
@@ -2270,7 +2268,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Throwable err) {
             shell.getDisplay().beep();
-            Tools.showError(shell, err.getMessage(), shell.getText());
+            Tools.showError(shell, "Apply", err.getMessage());
             status = false;
         }
 
@@ -2305,7 +2303,7 @@ public class DefaultImageView implements ImageView {
 
     private void writeSelectionToImage() {
         if ((getSelectedArea().width <= 0) || (getSelectedArea().height <= 0)) {
-            Tools.showError(shell, "No data to write.\nUse Shift+Mouse_drag to select an image area.", shell.getText());
+            Tools.showError(shell, "Select", "No data to write.\nUse Shift+Mouse_drag to select an image area.");
             return;
         }
 
@@ -2400,7 +2398,8 @@ public class DefaultImageView implements ImageView {
 
                     if (curFont != null) {
                         fontData = curFont.getFontData();
-                    } else {
+                    }
+                    else {
                         fontData = Display.getDefault().getSystemFont().getFontData();
                     }
 
@@ -2527,7 +2526,8 @@ public class DefaultImageView implements ImageView {
                             originalSelectedArea.setBounds((int) (x0 * ratio),
                                     (int) (y0 * ratio), (int) (w * ratio),
                                     (int) (h * ratio));
-                        } else {
+                        }
+                        else {
                             if(hbar != null) {
                                 if(hbar.isVisible()) {
                                     int dx = startPosition.x - currentPosition.x;
@@ -2764,7 +2764,8 @@ public class DefaultImageView implements ImageView {
                     i0 = y * w + x; // index for the first plane
                     i1 = i0 + w * h; // index for the second plane
                     i2 = i0 + 2 * w * h; // index for the third plane
-                } else {
+                }
+                else {
                     i0 = 3 * (y * w + x); // index for the first pixel
                     i1 = i0 + 1; // index for the second pixel
                     i2 = i0 + 2; // index for the third pixel
@@ -2774,7 +2775,8 @@ public class DefaultImageView implements ImageView {
                     r = String.valueOf(convertUnsignedPoint(i0));
                     g = String.valueOf(convertUnsignedPoint(i1));
                     b = String.valueOf(convertUnsignedPoint(i2));
-                } else {
+                }
+                else {
                     r = String.valueOf(Array.get(data, i0));
                     g = String.valueOf(Array.get(data, i1));
                     b = String.valueOf(Array.get(data, i2));
@@ -2810,14 +2812,16 @@ public class DefaultImageView implements ImageView {
                 } else {
                     l = b;
                 }
-            } else if (NT == 'S') {
+            }
+            else if (NT == 'S') {
                 short s = Array.getShort(data, idx);
                 if (s < 0) {
                     l = s + 65536;
                 } else {
                     l = s;
                 }
-            } else if (NT == 'I') {
+            }
+            else if (NT == 'I') {
                 int i = Array.getInt(data, idx);
                 if (i < 0) {
                     l = i + 4294967296L;
@@ -3319,14 +3323,16 @@ public class DefaultImageView implements ImageView {
                         if (raster[p] >= level) {
                             pixels[p] = color;
                         }
-                    } else if (rgb == level) {
+                    }
+                    else if (rgb == level) {
                         while ((raster[p] == level) && (p < u)) {
                             p++;
                         }
                         if ((raster[p] < level) || (raster[p] > level)) {
                             pixels[p] = color;
                         }
-                    } else {
+                    }
+                    else {
                         while ((raster[p] > level) && (p < u)) {
                             p++;
                         }
@@ -3338,7 +3344,8 @@ public class DefaultImageView implements ImageView {
 
                 if (u == q) {
                     break;
-                } else {
+                }
+                else {
                     u += w;
                     p++;
                 }
@@ -3366,7 +3373,8 @@ public class DefaultImageView implements ImageView {
             if (direction == ROTATE_CW_90) {
                 retcoord[0] = -y;
                 retcoord[1] = x;
-            } else {
+            }
+            else {
                 retcoord[0] = y;
                 retcoord[1] = -x;
             }
@@ -3376,7 +3384,8 @@ public class DefaultImageView implements ImageView {
             if (direction == ROTATE_CCW_90) {
                 retcoord[0] = -y;
                 retcoord[1] = x;
-            } else {
+            }
+            else {
                 retcoord[0] = y;
                 retcoord[1] = -x;
             }
@@ -3423,7 +3432,8 @@ public class DefaultImageView implements ImageView {
             Object o = props.get("filters");
             if (o == null) {
                 props.put("filters", toString());
-            } else if (o instanceof String) {
+            }
+            else if (o instanceof String) {
                 props.put("filters", ((String) o) + toString());
             }
             consumer.setProperties(props);
@@ -3465,7 +3475,8 @@ public class DefaultImageView implements ImageView {
                     srcoff += scansize;
                     dstoff += srcW;
                 }
-            } else {
+            }
+            else {
                 for (int yc = 0; yc < h; yc++) {
                     for (int xc = 0; xc < w; xc++) {
                         raster[dstoff++] = model.getRGB(pixels[srcoff++]);
