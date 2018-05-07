@@ -543,6 +543,7 @@ public class HDFView implements ViewManager {
                 if(filename == null) return;
 
                 try {
+                    log.trace("HDFView create hdf4 file");
                     FileFormat theFile = Tools.createNewFile(filename, currentDir,
                             FileFormat.FILE_TYPE_HDF4, getTreeView().getCurrentFiles());
 
@@ -608,6 +609,7 @@ public class HDFView implements ViewManager {
                 if(filename == null) return;
 
                 try {
+                    log.trace("HDFView create hdf5 file");
                     FileFormat theFile = Tools.createNewFile(filename, currentDir,
                             FileFormat.FILE_TYPE_HDF5, getTreeView().getCurrentFiles());
 

@@ -418,12 +418,12 @@ public class Attribute extends HObject implements DataFormat {
 
     @Override
     public Object read() throws Exception, OutOfMemoryError {
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Attribute:read Unsupported operation.");
     }
 
     @Override
     public void write(Object buf) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Attribute:write Unsupported operation.");
     }
 
     @Override
@@ -571,7 +571,7 @@ public class Attribute extends HObject implements DataFormat {
 
             String enum_members = this.getDatatype().getEnumMembers();
             log.trace("toString: is_enum enum_members={}", enum_members);
-            Map<String,String> map = new HashMap<String,String>();
+            Map<String,String> map = new HashMap<>();
             String[] entries = enum_members.split(",");
             for (String entry : entries) {
                 String[] keyValue = entry.split("=");

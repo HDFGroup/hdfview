@@ -1272,7 +1272,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     @Override
     public boolean isTextData() {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement this functionality.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Dataset:isTextData.");
     }
 
     /**
