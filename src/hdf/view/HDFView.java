@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -552,7 +551,7 @@ public class HDFView implements ViewManager {
                     currentDir = theFile.getParent();
                 }
                 catch (Exception ex) {
-                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage());
                     return;
                 }
 
@@ -570,7 +569,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage() + "\n" + filename);
                 }
             }
         });
@@ -617,7 +616,7 @@ public class HDFView implements ViewManager {
                     currentDir = theFile.getParent();
                 }
                 catch (Exception ex) {
-                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage());
                     return;
                 }
 
@@ -635,7 +634,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage() + "\n" + filename);
                 }
             }
         });
@@ -682,12 +681,12 @@ public class HDFView implements ViewManager {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
-                    Tools.showError(mainWindow, "No files currently open.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently open.");
                     return;
                 }
 
                 if (treeView.getSelectedFile() == null) {
-                    Tools.showError(mainWindow, "No files currently selected.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently selected.");
                     return;
                 }
 
@@ -702,12 +701,12 @@ public class HDFView implements ViewManager {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
-                    Tools.showError(mainWindow, "No files currently open.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently open.");
                     return;
                 }
 
                 if (treeView.getSelectedFile() == null) {
-                    Tools.showError(mainWindow, "No files currently selected.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently selected.");
                     return;
                 }
 
@@ -716,7 +715,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage(), shell.getText());
+                    Tools.showError(mainWindow, "Save", ex.getMessage());
                 }
             }
         });
@@ -1010,7 +1009,7 @@ public class HDFView implements ViewManager {
                     org.eclipse.swt.program.Program.launch(ugPath);
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Help", ex.getMessage());
                 }
             }
         });
@@ -1306,7 +1305,7 @@ public class HDFView implements ViewManager {
     public void closeFile(FileFormat theFile) {
         if (theFile == null) {
             display.beep();
-            Tools.showError(mainWindow, "Select a file to close", mainWindow.getText());
+            Tools.showError(mainWindow, "Close", "Select a file to close");
             return;
         }
 
@@ -1410,7 +1409,7 @@ public class HDFView implements ViewManager {
         }
         catch (Exception ex) {
             display.beep();
-            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, "Save", ex.getMessage());
         }
     }
 
@@ -1674,7 +1673,7 @@ public class HDFView implements ViewManager {
         if (filename != null) {
             File file = new File(filename);
             if(!file.exists()) {
-                Tools.showError(mainWindow, "File " + filename + " does not exist.", "Open File");
+                Tools.showError(mainWindow, "Open", "File " + filename + " does not exist.");
                 return;
             }
 
@@ -1704,7 +1703,7 @@ public class HDFView implements ViewManager {
                 catch (Throwable ex2) {
                     display.beep();
                     url_bar.deselectAll();
-                    Tools.showError(mainWindow, "Failed to open file " + filename + "\n" + ex2, mainWindow.getText());
+                    Tools.showError(mainWindow, "Open", "Failed to open file " + filename + "\n" + ex2);
                     currentFile = null;
                 }
             }
@@ -1731,7 +1730,7 @@ public class HDFView implements ViewManager {
                     chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
 
                     if(!chosenFiles[i].exists()) {
-                        Tools.showError(mainWindow, "File " + chosenFiles[i].getName() + " does not exist.", "Open File");
+                        Tools.showError(mainWindow, "Open", "File " + chosenFiles[i].getName() + " does not exist.");
                         continue;
                     }
 
@@ -1761,21 +1760,22 @@ public class HDFView implements ViewManager {
                         catch (Throwable ex2) {
                             display.beep();
                             url_bar.deselectAll();
-                            Tools.showError(mainWindow, "Failed to open file " + selectedFilenames[i] + "\n" + ex2, mainWindow.getText());
+                            Tools.showError(mainWindow, "Open", "Failed to open file " + selectedFilenames[i] + "\n" + ex2);
                             currentFile = null;
                         }
                     }
                 }
 
                 currentFile = chosenFiles[0].getAbsolutePath();
-            } else {
+            }
+            else {
                 // Prepend test file directory to filename
                 String fName = currentDir + File.separator + new InputDialog(mainWindow, "Enter a file name", "").open();
 
                 File chosenFile = new File(fName);
 
                 if(!chosenFile.exists()) {
-                    Tools.showError(mainWindow, "File " + chosenFile.getName() + " does not exist.", "Open File");
+                    Tools.showError(mainWindow, "Open", "File " + chosenFile.getName() + " does not exist.");
                     return;
                 }
 
@@ -1805,7 +1805,7 @@ public class HDFView implements ViewManager {
                     catch (Throwable ex2) {
                         display.beep();
                         url_bar.deselectAll();
-                        Tools.showError(mainWindow, "Failed to open file " + chosenFile + "\n" + ex2, mainWindow.getText());
+                        Tools.showError(mainWindow, "Open", "Failed to open file " + chosenFile + "\n" + ex2);
                         currentFile = null;
                     }
                 }
@@ -1858,7 +1858,7 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             url = null;
             display.beep();
-            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, "Open", ex.getMessage());
             return null;
         }
 
@@ -1872,7 +1872,7 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             in = null;
             display.beep();
-            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, "Open", ex.getMessage());
 
             try {
                 out.close();
@@ -1965,9 +1965,8 @@ public class HDFView implements ViewManager {
         int idx2 = str.lastIndexOf(':');
 
         if ((idx1 < 0) || (idx2 <= idx1)) {
-            Tools.showError(mainWindow, "Failed to register " + str
-                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION",
-                    "Register File Format");
+            Tools.showError(mainWindow, "Register File Format", "Failed to register " + str
+                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION");
             return;
         }
 
@@ -1982,14 +1981,13 @@ public class HDFView implements ViewManager {
         while (local_enum.hasMoreElements()) {
             theKey = (String) local_enum.nextElement();
             if (theKey.endsWith(key)) {
-                Tools.showError(mainWindow, "Invalid key: " + key + " is taken.", "Register File Format");
+                Tools.showError(mainWindow, "Register File Format", "Invalid key: " + key + " is taken.");
                 return;
             }
 
             theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
             if (theClassName.endsWith(className)) {
-                Tools.showError(mainWindow, "The file format has already been registered: " + className,
-                        "Register File Format");
+                Tools.showError(mainWindow, "Register File Format", "The file format has already been registered: " + className);
                 return;
             }
         }
@@ -2020,7 +2018,7 @@ public class HDFView implements ViewManager {
             }
         }
         catch (Throwable ex) {
-            Tools.showError(mainWindow, "Failed to register " + str + "\n\n" + ex, "Register File Format");
+            Tools.showError(mainWindow, "Register File Format", "Failed to register " + str + "\n\n" + ex);
             return;
         }
 
@@ -2505,7 +2503,7 @@ public class HDFView implements ViewManager {
             }
             else if("-java.version".equalsIgnoreCase(args[i])) {
                 /* Set icon to ViewProperties.getLargeHdfIcon() */
-                MessageDialog.openInformation(mainWindow, mainWindow.getText(), JAVA_VER_INFO);
+                Tools.showInformation(mainWindow, "Java Version", JAVA_VER_INFO);
                 System.exit(0);
             }
         }

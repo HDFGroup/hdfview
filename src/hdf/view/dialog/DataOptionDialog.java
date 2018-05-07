@@ -25,7 +25,6 @@ import java.util.BitSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -284,31 +283,36 @@ public class DataOptionDialog extends Dialog {
             public void handleEvent(Event e) {
                 if (imageButton == null) {
                     isImageDisplay = false;
-                } else {
+                }
+                else {
                     isImageDisplay = imageButton.getSelection();
                 }
 
                 if (charCheckbox == null) {
                     isDisplayTypeChar = false;
-                } else {
+                }
+                else {
                     isDisplayTypeChar = charCheckbox.getSelection();
                 }
 
                 if (transposeChoice == null) {
                     isTransposed = false;
-                } else {
+                }
+                else {
                     isTransposed = transposeChoice.isEnabled() && transposeChoice.getSelectionIndex() == 0;
                 }
 
                 if (base1Button == null) {
                     isIndexBase1 = false;
-                } else {
+                }
+                else {
                     isIndexBase1 = base1Button.getSelection();
                 }
 
                 if (applyBitmaskButton == null) {
                     isApplyBitmaskOnly = false;
-                } else {
+                }
+                else {
                     isApplyBitmaskOnly = applyBitmaskButton.getSelection();
                 }
 
@@ -529,7 +533,7 @@ public class DataOptionDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, ex.getMessage(), shell.getText());
+                Tools.showError(shell, "Set", ex.getMessage());
                 return false;
             }
 
@@ -563,7 +567,7 @@ public class DataOptionDialog extends Dialog {
             if ((selectedFieldIndices == null)
                     || (selectedFieldIndices.length < 1)) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "No member/field is selected.", shell.getText());
+                Tools.showError(shell, "Set", "No member/field is selected.");
                 return false;
             }
 
@@ -617,7 +621,7 @@ public class DataOptionDialog extends Dialog {
              */
             if (!Tools.checkValidJavaArrayIndex(selectedSize)) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Subset selection too large to display.", shell.getText());
+                Tools.showError(shell, "Set", "Subset selection too large to display.");
                 return false;
             }
 
@@ -974,9 +978,8 @@ public class DataOptionDialog extends Dialog {
                         extractBitButton.setSelection(false);
                         applyBitmaskButton.setSelection(true);
 
-                        Tools.showError(shell,
-                                "Selecting non-adjacent bits is only allowed \nfor the \"Apply Bitmask\" option.",
-                                "Select Bitmask");
+                        Tools.showError(shell, "Select",
+                                "Selecting non-adjacent bits is only allowed \nfor the \"Apply Bitmask\" option.");
                         return;
                     }
                 }
@@ -1007,7 +1010,7 @@ public class DataOptionDialog extends Dialog {
                         + "their corresponding bits in the bitmask are 0. \nFor the same example above, "
                         + "the result is \n101 ==> the decimal value is 5.\n\n";
 
-                MessageDialog.openInformation(shell, shell.getText(), msg);
+                Tools.showInformation(shell, "Help", msg);
             }
         });
 
@@ -1070,9 +1073,8 @@ public class DataOptionDialog extends Dialog {
                                 }
 
                                 if(n > 1) {
-                                    Tools.showError(shell,
-                                            "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.",
-                                            "Select Bitmask");
+                                    Tools.showError(shell, "Select",
+                                            "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
 
                                     source.setSelection(false);
                                     return;
@@ -1083,8 +1085,7 @@ public class DataOptionDialog extends Dialog {
                     );
         }
 
-        if (tclass == Datatype.CLASS_CHAR
-                || (tclass == Datatype.CLASS_INTEGER && tsize <= 8)) {
+        if (tclass == Datatype.CLASS_CHAR || (tclass == Datatype.CLASS_INTEGER && tsize <= 8)) {
             extractBitButton.setEnabled(true);
             applyBitmaskButton.setEnabled(true);
             bitmaskHelp.setEnabled(true);
@@ -1398,7 +1399,7 @@ public class DataOptionDialog extends Dialog {
 
                 StringTokenizer st = new StringTokenizer(result, "x");
                 if (st.countTokens() < n) {
-                    Tools.showError(shell, "Number of dimension(s) is less than " + n + "\n" + result, "Select Slice Location");
+                    Tools.showError(shell, "Select", "Number of dimension(s) is less than " + n + "\n" + result);
                     return;
                 }
 
@@ -1408,15 +1409,13 @@ public class DataOptionDialog extends Dialog {
                         start4[i] = Long.parseLong(st.nextToken().trim());
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, ex.getMessage(), "Select Slice Location");
+                        Tools.showError(shell, "Select", ex.getMessage());
                         return;
                     }
 
                     if ((start4[i] < 0) || (start4[i] >= dims[choice4Index[i]])) {
-                        Tools.showError(shell,
-                                "Slice location is out of range.\n" + start4[i]
-                                        + " >= " + dims[choice4Index[i]],
-                                "Select Slice Location");
+                        Tools.showError(shell, "Select",
+                                "Slice location is out of range.\n" + start4[i] + " >= " + dims[choice4Index[i]]);
 
                         return;
                     }

@@ -129,7 +129,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), "CompoundDS loadData: " + shell.getText());
+            Tools.showError(shell, "Load", "CompoundDS loadData: " + ex.getMessage());
             log.debug("loadData(): ", ex);
             dataValue = null;
         }
@@ -219,7 +219,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         if ((cols <= 0) || (rows <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "No data is selected.", shell.getText());
+            Tools.showError(shell, "Select", "No data is selected.");
             return null;
         }
 
@@ -261,7 +261,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
         else {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Unsupported data type.", shell.getText());
+            Tools.showError(shell, "Select", "Unsupported data type.");
             return null;
         }
         log.trace("getSelectedData(): selectedData={}", selectedData);
@@ -303,8 +303,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         if ((cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
             log.debug(
-                    "updateValueInMemory({}, {}): cell value not updated; new value is null",
-                    row, col);
+                    "updateValueInMemory({}, {}): cell value not updated; new value is null", row, col);
             log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
@@ -312,8 +311,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // No need to update if values are the same
         if (cellValue.equals(dataLayer.getDataValue(col, row).toString())) {
             log.debug(
-                    "updateValueInMemory({}, {}): cell value not updated; new value same as old value",
-                    row, col);
+                    "updateValueInMemory({}, {}): cell value not updated; new value same as old value", row, col);
             log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
@@ -381,9 +379,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             StringTokenizer st = new StringTokenizer(cellValue, ",");
             if (st.countTokens() < morder) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Number of data points < " + morder + ".", shell.getText());
-                log.debug("updateValueInMemory({}, {}): number of data points < {}", row,
-                        col, morder);
+                Tools.showError(shell, "Select", "Number of data points < " + morder + ".");
+                log.debug("updateValueInMemory({}, {}): number of data points < {}", row, col, morder);
                 log.trace("updateValueInMemory({}, {}): finish", row, col);
                 return;
             }
@@ -472,7 +469,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Update", ex.getMessage());
             log.debug("updateValueInFile(): ", ex);
             log.trace("updateValueInFile(): finish");
             return;

@@ -14,7 +14,6 @@
 
 package hdf.view.dialog;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -26,6 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
 /**
@@ -272,7 +272,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                         + "has values of (0, 2, 2, 2, 1, 1). With conversion, the data values are \n"
                         + "shown as (R, B, B, B, G, G).\n\n\n";
 
-                MessageDialog.openInformation(getShell(), getShell().getText(), msg);
+                Tools.showInformation(getShell(), "Help", msg);
             }
         });
 

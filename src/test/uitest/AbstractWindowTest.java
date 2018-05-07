@@ -241,8 +241,8 @@ public abstract class AbstractWindowTest {
                         String rootDir = System.getProperty("hdfview.workdir");
                         if(rootDir == null) rootDir = System.getProperty("user.dir");
 
-                        int W = 500,
-                            H = 400,
+                        int W = 800,
+                            H = 600,
                             X = 0,
                             Y = 0;
 

@@ -241,8 +241,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             public void handleEvent(Event arg0) {
                 int selectionIndex = attrTable.getSelectionIndex();
                 if (selectionIndex < 0) {
-                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
-                            Display.getDefault().getShells()[0].getText());
+                    Tools.showError(Display.getDefault().getShells()[0], "Select", "No Attribute selected");
                     return;
                 }
 
@@ -615,18 +614,15 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             public void widgetSelected(SelectionEvent e) {
                 int selectionIndex = table.getSelectionIndex();
                 if (selectionIndex < 0) {
-                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
-                            Display.getDefault().getShells()[0].getText());
+                    Tools.showError(Display.getDefault().getShells()[0], "Select", "No Attribute selected");
                     return;
                 }
 
                 HObject itemObj = (HObject) table.getItem(selectionIndex).getData();
                 String result = new InputDialog(Display.getDefault().getShells()[0],
-                        Display.getDefault().getShells()[0].getText(), "New Attribute Name",
-                        itemObj.getName()).open();
+                        Display.getDefault().getShells()[0].getText(), "New Attribute Name", itemObj.getName()).open();
 
-                if ((result == null) || ((result = result.trim()) == null)
-                        || (result.length() < 1)) {
+                if ((result == null) || ((result = result.trim()) == null) || (result.length() < 1)) {
                     return;
                 }
 
@@ -642,8 +638,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             public void widgetSelected(SelectionEvent e) {
                 int selectionIndex = attrTable.getSelectionIndex();
                 if (selectionIndex < 0) {
-                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
-                            Display.getDefault().getShells()[0].getText());
+                    Tools.showError(Display.getDefault().getShells()[0], "Select", "No Attribute selected");
                     return;
                 }
 
@@ -677,8 +672,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             public void widgetSelected(SelectionEvent e) {
                 int selectionIndex = attrTable.getSelectionIndex();
                 if (selectionIndex < 0) {
-                    Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
-                            Display.getDefault().getShells()[0].getText());
+                    Tools.showError(Display.getDefault().getShells()[0], "Select", "No Attribute selected");
                     return;
                 }
 
@@ -761,12 +755,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (idx < 0) {
             log.debug("deleteAttribute(): no attribute is selected");
             log.trace("deleteAttribute(): finish");
-            Tools.showError(display.getShells()[0], "No attribute is selected.", display.getShells()[0].getText());
+            Tools.showError(display.getShells()[0], "Delete", "No attribute is selected.");
             return null;
         }
 
         int answer = SWT.NO;
-        if (MessageDialog.openConfirm(display.getShells()[0], display.getShells()[0].getText(),
+        if (Tools.showConfirm(display.getShells()[0], "Delete",
                 "Do you want to delete the selected attribute?"))
             answer = SWT.YES;
         if (answer == SWT.NO) {
@@ -821,14 +815,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             catch (Exception ex) {
                 log.debug("renameAttribute(): renaming failure:", ex);
-                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+                Tools.showError(display.getShells()[0], "Delete", ex.getMessage());
             }
 
             /* Update the attribute table */
             int selectionIndex = attrTable.getSelectionIndex();
             if (selectionIndex < 0) {
-                Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
-                        Display.getDefault().getShells()[0].getText());
+                Tools.showError(Display.getDefault().getShells()[0], "Delete", "No Attribute selected");
                 return;
             }
 
@@ -845,7 +838,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             catch (Exception ex) {
                 log.debug("renameAttribute(): updateMetadata() failure:", ex);
-                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+                Tools.showError(display.getShells()[0], "Delete", ex.getMessage());
             }
         }
 
@@ -855,12 +848,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     /**
      * Update an attribute's value. Currently can only update a single data point.
      *
+     * @param attr
+     *            the selected attribute.
      * @param newValue
      *            the string of the new value.
-     * @param row
-     *            the row number of the selected cell.
-     * @param col
-     *            the column number of the selected cell.
      */
     private void updateAttributeValue(Attribute attr, String newValue) {
         log.trace("updateAttributeValue(): start");
@@ -897,8 +888,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (st.countTokens() < array_length) {
             log.debug("updateAttributeValue(): More data values needed: {}", newValue);
             log.trace("updateAttributeValue(): finish");
-            Tools.showError(display.getShells()[0], "More data values needed: " + newValue,
-                    display.getShells()[0].getText());
+            Tools.showError(display.getShells()[0], "Update", "More data values needed: " + newValue);
             return;
         }
 
@@ -927,15 +917,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             catch (NumberFormatException ex) {
                 log.debug("updateAttributeValue(): NumberFormatException: ", ex);
                 log.trace("updateAttributeValue(): finish");
-                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+                Tools.showError(display.getShells()[0], "Update", ex.getMessage());
                 return;
             }
 
             if (isUnsigned && (d < 0)) {
                 log.debug("updateAttributeValue(): Negative value for unsigned integer: {}", theToken);
                 log.trace("updateAttributeValue(): finish");
-                Tools.showError(display.getShells()[0], "Negative value for unsigned integer: " + theToken,
-                        display.getShells()[0].getText());
+                Tools.showError(display.getShells()[0], "Update", "Negative value for unsigned integer: " + theToken);
                 return;
             }
 
@@ -951,9 +940,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     }
 
                     if ((d > max) || (d < min)) {
-                        Tools.showError(display.getShells()[0],
-                                "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                display.getShells()[0].getText());
+                        Tools.showError(display.getShells()[0], "Update",
+                                "Data is out of range[" + min + ", " + max + "]: " + theToken);
                     }
                     else {
                         Array.setByte(data, i, (byte) d);
@@ -971,9 +959,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     }
 
                     if ((d > max) || (d < min)) {
-                        Tools.showError(display.getShells()[0],
-                                "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                display.getShells()[0].getText());
+                        Tools.showError(display.getShells()[0], "Update",
+                                "Data is out of range[" + min + ", " + max + "]: " + theToken);
                     }
                     else {
                         Array.setShort(data, i, (short) d);
@@ -991,9 +978,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     }
 
                     if ((d > max) || (d < min)) {
-                        Tools.showError(display.getShells()[0],
-                                "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                display.getShells()[0].getText());
+                        Tools.showError(display.getShells()[0], "Update",
+                                "Data is out of range[" + min + ", " + max + "]: " + theToken);
                     }
                     else {
                         Array.setInt(data, i, (int) d);
@@ -1008,9 +994,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                             BigInteger Jmax = new BigInteger("18446744073709551615");
                             BigInteger big = new BigInteger(theValue);
                             if ((big.compareTo(Jmax) > 0) || (big.compareTo(BigInteger.ZERO) < 0)) {
-                                Tools.showError(display.getShells()[0],
-                                        "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                        display.getShells()[0].getText());
+                                Tools.showError(display.getShells()[0], "Update",
+                                        "Data is out of range[" + min + ", " + max + "]: " + theToken);
                             }
                             lvalue = big.longValue();
                             log.trace("updateAttributeValue(): big.longValue={}", lvalue);
@@ -1023,9 +1008,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         min = Long.MIN_VALUE;
                         max = Long.MAX_VALUE;
                         if ((d > max) || (d < min)) {
-                            Tools.showError(display.getShells()[0],
-                                    "Data is out of range[" + min + ", " + max + "]: " + theToken,
-                                    display.getShells()[0].getText());
+                            Tools.showError(display.getShells()[0], "Update",
+                                    "Data is out of range[" + min + ", " + max + "]: " + theToken);
                         }
                         lvalue = (long) d;
                         log.trace("updateAttributeValue(): longValue={}", lvalue);
@@ -1051,15 +1035,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         catch (Exception ex) {
             log.debug("updateAttributeValue(): writeAttribute failure: ", ex);
             log.trace("updateAttributeValue(): finish");
-            Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+            Tools.showError(display.getShells()[0], "Update", ex.getMessage());
             return;
         }
 
         /* Update the attribute table */
         int selectionIndex = attrTable.getSelectionIndex();
         if (selectionIndex < 0) {
-            Tools.showError(Display.getDefault().getShells()[0], "No Attribute selected",
-                    Display.getDefault().getShells()[0].getText());
+            Tools.showError(Display.getDefault().getShells()[0], "Update", "No Attribute selected");
             return;
         }
 
@@ -1072,7 +1055,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             catch (Exception ex) {
                 log.debug("updateAttributeValue(): updateMetadata() failure:", ex);
-                Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+                Tools.showError(display.getShells()[0], "Update", ex.getMessage());
             }
         }
 
@@ -1285,7 +1268,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     raf = new java.io.RandomAccessFile(obj.getFile(), "rw");
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, "Can't open output file: " + obj.getFile(), shell.getText());
+                    Tools.showError(shell, "Save", "Can't open output file: " + obj.getFile());
                     return;
                 }
 
@@ -1308,11 +1291,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     log.debug("raf close:", ex);
                 }
 
-                MessageDialog.openInformation(shell, shell.getText(), "Saving user block is successful.");
+                Tools.showInformation(shell, "Save", "Saving user block is successful.");
             }
             else {
                 // must rewrite the whole file
-                MessageDialog confirm = new MessageDialog(shell, shell.getText(), null,
+                MessageDialog confirm = new MessageDialog(shell, "Save", null,
                         "The user block to write is " + blkSize1 + " (bytes),\n"
                                 + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
                                 + "To expand the user block, the file must be rewritten.\n\n"
@@ -1361,7 +1344,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         outFile.createNewFile();
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, "Failed to write user block into file.", shell.getText());
+                        Tools.showError(shell, "Save", "Failed to write user block into file.");
                         return;
                     }
                 }
@@ -1387,14 +1370,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                             outFile.renameTo(oldFile);
                         }
                         else {
-                            Tools.showError(shell, "Cannot replace the current file.\nPlease save to a different file.",
-                                    shell.getText());
+                            Tools.showError(shell, "Save", "Cannot replace the current file.\nPlease save to a different file.");
                             outFile.delete();
                         }
                     }
                 }
                 else {
-                    Tools.showError(shell, "Failed to write user block into file.", shell.getText());
+                    Tools.showError(shell, "Save", "Failed to write user block into file.");
                     outFile.delete();
                 }
 

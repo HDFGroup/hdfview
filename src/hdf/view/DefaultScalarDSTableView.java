@@ -163,7 +163,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 log.trace("loadData(): data object inited");
             }
             catch (Exception ex) {
-                Tools.showError(shell, ex.getMessage(), "loadData:" + shell.getText());
+                Tools.showError(shell, "Load", "loadData:" + ex.getMessage());
                 dataValue = null;
                 log.debug("loadData(): ", ex);
                 log.trace("loadData(): finish");
@@ -183,7 +183,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         try {
             dataValue = dataObject.getData();
             if (dataValue == null) {
-                Tools.showError(shell, "No data read", "ScalarDS loadData:" + shell.getText());
+                Tools.showError(shell, "Load", "ScalarDS loadData:" + "No data read");
                 log.debug("loadData(): no data read");
                 log.trace("loadData(): finish");
                 return;
@@ -208,7 +208,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             dataValue = dataObject.getData();
         }
         catch (Throwable ex) {
-            Tools.showError(shell, ex.getMessage(), "ScalarDS loadData:" + shell.getText());
+            Tools.showError(shell, "Load", "ScalarDS loadData:" + ex.getMessage());
             log.debug("loadData(): ", ex);
             log.trace("loadData(): finish");
             dataValue = null;
@@ -303,7 +303,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         }
                         catch (Exception ex) {
                             theShell.getDisplay().beep();
-                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                            Tools.showError(theShell, "Export", ex.getMessage());
                         }
                     }
                 });
@@ -320,7 +320,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         }
                         catch (Exception ex) {
                             theShell.getDisplay().beep();
-                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                            Tools.showError(theShell, "Export", ex.getMessage());
                         }
                     }
                 });
@@ -337,7 +337,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         }
                         catch (Exception ex) {
                             theShell.getDisplay().beep();
-                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                            Tools.showError(theShell, "Export", ex.getMessage());
                         }
                     }
                 });
@@ -368,7 +368,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             importBinaryData();
                         }
                         catch (Exception ex) {
-                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                            Tools.showError(theShell, "Import", ex.getMessage());
                         }
                     }
                 });
@@ -384,7 +384,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             importBinaryData();
                         }
                         catch (Exception ex) {
-                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                            Tools.showError(theShell, "Import", ex.getMessage());
                         }
                     }
                 });
@@ -400,7 +400,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             importBinaryData();
                         }
                         catch (Exception ex) {
-                            Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                            Tools.showError(theShell, "Import", ex.getMessage());
                         }
                     }
                 });
@@ -544,8 +544,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 }
                 catch (Exception ex) {
                     log.debug("Invalid custom number notation format: {}:", str, ex);
-                    Tools.showError(shell, "Invalid custom notation format " + str,
-                            shell.getText());
+                    Tools.showError(shell, "Create", "Invalid custom notation format " + str);
                 }
             }
         });
@@ -746,7 +745,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         if (selectedData == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Unsupported data type.", shell.getText());
+            Tools.showError(shell, "Select", "Unsupported data type.");
             return null;
         }
 
@@ -897,7 +896,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Update", ex.getMessage());
             log.debug("updateValueInFile(): ", ex);
             log.trace("updateValueInFile(): finish");
             return;
@@ -1166,7 +1165,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oid);
         if (obj == null || !(obj instanceof ScalarDS)) {
-            Tools.showError(shell, "Could not show object reference data: invalid or null data", shell.getText());
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
             log.trace("showObjRefData(): finish");
             return;
@@ -1189,7 +1188,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): couldn't show data: ", ex);
-            Tools.showError(shell, ex.getMessage(), "Object Reference: " + shell.getText());
+            Tools.showError(shell, "Select", "Object Reference: " + ex.getMessage());
             data = null;
         }
 
@@ -1244,8 +1243,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             catch (Exception ex) {
                 log.debug("showObjRefData(): no suitable display class found");
                 log.trace("showObjRefData(): finish");
-                Tools.showError(shell, "Could not show reference data: no suitable display class found",
-                        shell.getText());
+                Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
                 return;
             }
         }
@@ -1259,7 +1257,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): Could not show reference data: ", ex);
-            Tools.showError(shell, "Could not show reference data: " + ex.toString(), shell.getText());
+            Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
         }
 
         log.trace("showObjRefData(): finish");
@@ -1289,7 +1287,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         log.trace("showRegRefData(): start: reg={}", reg);
 
         if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
-            Tools.showError(shell, "Could not show region reference data: invalid or null data", shell.getText());
+            Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showRegRefData(): ref is null or invalid");
             log.trace("showRegRefData(): finish");
             return;
@@ -1305,7 +1303,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
         if (regStr == null || regStr.length() <= 0) {
-            Tools.showError(shell, "Could not show region reference data: no region selection made.", shell.getText());
+            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
             log.trace("showRegRefData(): finish");
             return; // no selection
@@ -1316,7 +1314,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         StringTokenizer st = new StringTokenizer(regStr);
         int nSelections = st.countTokens();
         if (nSelections <= 0) {
-            Tools.showError(shell, "Could not show region reference data: no region selection made.", shell.getText());
+            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
             log.trace("showRegRefData(): finish");
             return; // no selection
@@ -1325,7 +1323,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
-            Tools.showError(shell, "Could not show object reference data: invalid or null data", shell.getText());
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
             log.debug("showRegRefData(): finish");
             return;
@@ -1429,7 +1427,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): getData failure: ", ex);
-                Tools.showError(shell, ex.getMessage(), "Region Reference: " + shell.getText());
+                Tools.showError(shell, "Select", "Region Reference: " + ex.getMessage());
             }
 
             Class<?> theClass = null;
@@ -1478,8 +1476,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 catch (Exception ex) {
                     log.debug("showRegRefData(): no suitable display class found");
                     log.trace("showRegRefData(): finish");
-                    Tools.showError(shell, "Could not show reference data: no suitable display class found",
-                            shell.getText());
+                    Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
                     return;
                 }
             }
@@ -1493,7 +1490,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): Could not show reference data: ", ex);
-                Tools.showError(shell, "Could not show reference data: " + ex.toString(), shell.getText());
+                Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
             }
 
             log.trace("showRegRefData(): st.hasMoreTokens() end");
@@ -1717,7 +1714,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
             catch (Exception ex) {
                 log.debug("ScalarDSDataProvider:setDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
-                Tools.showError(shell, "Unable to set new value:\n\n " + ex, shell.getText());
+                Tools.showError(shell, "Select", "Unable to set new value:\n\n " + ex);
             }
         }
 
@@ -2089,8 +2086,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             dbuf = dset.getData();
                                         }
                                         catch (Exception ex) {
-                                            Tools.showError(shell, ex.getMessage(),
-                                                    "Region Reference:" + shell.getText());
+                                            Tools.showError(shell, "Select", "Region Reference:" +ex.getMessage());
                                         }
 
                                         /* Convert dbuf to a displayable string */

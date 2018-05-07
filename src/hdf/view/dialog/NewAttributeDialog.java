@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -452,7 +451,7 @@ public class NewAttributeDialog extends Dialog {
         }
 
         if ((attrName == null) || (attrName.length() < 1)) {
-            Tools.showError(shell, "No attribute name specified.", shell.getText());
+            Tools.showError(shell, "Create", "No attribute name specified.");
             return false;
         }
 
@@ -473,7 +472,7 @@ public class NewAttributeDialog extends Dialog {
         }
 
         if (arraySize <= 0) {
-            Tools.showError(shell, "Invalid attribute length.", shell.getText());
+            Tools.showError(shell, "Create", "Invalid attribute length.");
             return false;
         }
 
@@ -516,14 +515,14 @@ public class NewAttributeDialog extends Dialog {
             }
             torder = Datatype.NATIVE;
 
-            MessageDialog.openWarning(shell, shell.getText(), "Multi-dimensional Variable Length Integer Attributes will be created without data.");
+            Tools.showWarning(shell, "Create", "Multi-dimensional Variable Length Integer Attributes will be created without data.");
         }
         else if (idx == 6) {
             isVLen = true;
             tclass = Datatype.CLASS_FLOAT;
             torder = Datatype.NATIVE;
 
-            MessageDialog.openWarning(shell, shell.getText(), "Multi-dimensional Variable Length Float Attributes will be created without data.");
+            Tools.showWarning(shell, "Create", "Multi-dimensional Variable Length Float Attributes will be created without data.");
         }
         else if (idx == 7) {
             isVLen = true;
@@ -600,7 +599,7 @@ public class NewAttributeDialog extends Dialog {
                         ref[j] = Long.parseLong(theToken);
                     }
                     catch (NumberFormatException ex) {
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Create", ex.getMessage());
                         return false;
                     }
                 }
@@ -636,7 +635,7 @@ public class NewAttributeDialog extends Dialog {
             }
 
             if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
-                Tools.showError(shell, "HDF4 does not support 64-bit integer.", shell.getText());
+                Tools.showError(shell, "Create", "HDF4 does not support 64-bit integer.");
                 return false;
             }
 
@@ -651,7 +650,7 @@ public class NewAttributeDialog extends Dialog {
                                 sv = Short.parseShort(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                             if (sv < 0) {
@@ -673,7 +672,7 @@ public class NewAttributeDialog extends Dialog {
                                 iv = Integer.parseInt(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                             if (iv < 0) {
@@ -695,7 +694,7 @@ public class NewAttributeDialog extends Dialog {
                                 lv = Long.parseLong(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                             if (lv < 0) {
@@ -717,7 +716,7 @@ public class NewAttributeDialog extends Dialog {
                                 lv = new BigInteger(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                             i[j] = lv.longValue();
@@ -734,7 +733,7 @@ public class NewAttributeDialog extends Dialog {
                                 b[j] = Byte.parseByte(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                         }
@@ -749,7 +748,7 @@ public class NewAttributeDialog extends Dialog {
                                 s[j] = Short.parseShort(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                         }
@@ -764,7 +763,7 @@ public class NewAttributeDialog extends Dialog {
                                 i[j] = Integer.parseInt(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                         }
@@ -778,7 +777,7 @@ public class NewAttributeDialog extends Dialog {
                                 l[j] = Long.parseLong(theToken);
                             }
                             catch (NumberFormatException ex) {
-                                Tools.showError(shell, ex.getMessage(), shell.getText());
+                                Tools.showError(shell, "Create", ex.getMessage());
                                 return false;
                             }
                         }
@@ -796,7 +795,7 @@ public class NewAttributeDialog extends Dialog {
                             f[j] = Float.parseFloat(theToken);
                         }
                         catch (NumberFormatException ex) {
-                            Tools.showError(shell, ex.getMessage(), shell.getText());
+                            Tools.showError(shell, "Create", ex.getMessage());
                             return false;
                         }
                         if (Float.isInfinite(f[j]) || Float.isNaN(f[j])) {
@@ -813,7 +812,7 @@ public class NewAttributeDialog extends Dialog {
                             d[j] = Double.parseDouble(theToken);
                         }
                         catch (NumberFormatException ex) {
-                            Tools.showError(shell, ex.getMessage(), shell.getText());
+                            Tools.showError(shell, "Create", ex.getMessage());
                             return false;
                         }
                         if (Double.isInfinite(d[j]) || Double.isNaN(d[j])) {
@@ -836,7 +835,7 @@ public class NewAttributeDialog extends Dialog {
             datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
         }
         catch (Exception ex) {
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return false;
         }
 
@@ -861,7 +860,7 @@ public class NewAttributeDialog extends Dialog {
             }
         }
         catch (Exception ex) {
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return false;
         }
 
@@ -918,7 +917,8 @@ public class NewAttributeDialog extends Dialog {
                         buff.append("</html>");
                         browser.setText(buff.toString(), true);
                     }
-                } else {
+                }
+                else {
                     try {
                         URL url = null, url2 = null, url3 = null;
                         String rootPath = ViewProperties.getViewRoot();
@@ -994,9 +994,8 @@ public class NewAttributeDialog extends Dialog {
             catch (Error er) {
                 // Try opening help link in external browser if platform
                 // doesn't support SWT browser
-                Tools.showError(shell,
-                        "Platform doesn't support Browser. Opening external link in web browser...",
-                        "Browser support");
+                Tools.showError(shell, "Browser support",
+                        "Platform doesn't support Browser. Opening external link in web browser...");
 
                 //TODO: Add support for launching in external browser
             }

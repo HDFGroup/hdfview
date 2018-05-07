@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -289,13 +288,13 @@ public class NewGroupDialog extends Dialog {
         name = nameField.getText();
         if (name == null || name.length() == 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Group name is not specified.", shell.getText());
+            Tools.showError(shell, "Create", "Group name is not specified.");
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Group name cannot contain path.", shell.getText());
+            Tools.showError(shell, "Create", "Group name cannot contain path.");
             return null;
         }
 
@@ -303,7 +302,7 @@ public class NewGroupDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Parent group is null.", shell.getText());
+            Tools.showError(shell, "Create", "Parent group is null.");
             return null;
         }
 
@@ -325,13 +324,13 @@ public class NewGroupDialog extends Dialog {
 
             if ((maxCompact <= 0) || (maxCompact > 65536) || (minDense > 65536)) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Max Compact and Min Indexed should be > 0 and < 65536.", shell.getText());
+                Tools.showError(shell, "Create", "Max Compact and Min Indexed should be > 0 and < 65536.");
                 return null;
             }
 
             if (maxCompact < minDense) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Min Indexed should be <= Max Compact", shell.getText());
+                Tools.showError(shell, "Create", "Min Indexed should be <= Max Compact");
                 return null;
             }
 
@@ -351,7 +350,7 @@ public class NewGroupDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return null;
         }
 
@@ -381,7 +380,7 @@ public class NewGroupDialog extends Dialog {
                         + "now be explicitly tracked and indexed in the order that they were created. \n\n"
                         + "The default order in which links in a group are listed is alphanumeric-by-name. \n\n\n";
 
-                MessageDialog.openInformation(shell, shell.getText(), msg);
+                Tools.showInformation(shell, "Create", msg);
             }
         });
 
@@ -444,7 +443,7 @@ public class NewGroupDialog extends Dialog {
                         + "Groups which are in indexed format and in which the number of links falls    \n"
                         + "below this threshold are automatically converted to compact format. \n\n\n";
 
-                MessageDialog.openInformation(shell, shell.getText(), msg);
+                Tools.showInformation(shell, "Create", msg);
             }
         });
 
