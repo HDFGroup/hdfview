@@ -1157,14 +1157,16 @@ public class H5ScalarDS extends ScalarDS {
                 order = attrPropList[1];
             }
         }
+
+        attributeList = H5File.getAttribute(this, indxType, order);
+        log.trace("getMetadata(): attributeList loaded");
+
         log.trace("getMetadata(): open dataset");
         did = open();
         if (did >= 0) {
             log.trace("getMetadata(): dataset opened");
             try {
                 compression = "";
-                attributeList = H5File.getAttribute(did, indxType, order);
-                log.trace("getMetadata(): attributeList loaded");
 
                 // get the compression and chunk information
                 pcid = H5.H5Dget_create_plist(did);

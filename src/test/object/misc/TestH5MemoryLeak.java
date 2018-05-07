@@ -382,8 +382,10 @@ public class TestH5MemoryLeak
         g1 = file.createGroup(NAME_GROUP_ATTR, null);
         g00 = file.createGroup(NAME_GROUP_SUB, null);
 
-        g1.writeMetadata(ATTRIBUTE_STR);
-        g1.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR.setParentObject(g1);
+        ATTRIBUTE_INT_ARRAY.setParentObject(g1);
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         final Dataset[] dsets = new Dataset[11];
         dsets[0] = file.createScalarDS  (NAME_DATASET_INT, null, typeInt, DIMs, null, CHUNKs, 9, DATA_INT);
@@ -400,8 +402,10 @@ public class TestH5MemoryLeak
                 COMPOUND_MEMBER_NAMES, COMPOUND_MEMBER_DATATYPES, null, DATA_COMP);
         dsets[10] = file.createScalarDS  (NAME_DATASET_STR_VLEN, null, typeStrVlen, DIMs, null, CHUNKs, 9, DATA_STR);
         for (int i=0; i<dsets.length; i++) {
-            dsets[i].writeMetadata(ATTRIBUTE_STR);
-            dsets[i].writeMetadata(ATTRIBUTE_INT_ARRAY);
+            ATTRIBUTE_STR.setParentObject(dsets[i]);
+            ATTRIBUTE_INT_ARRAY.setParentObject(dsets[i]);
+            ATTRIBUTE_STR.write();
+            ATTRIBUTE_INT_ARRAY.write();
         }
 
         file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_INT);

@@ -549,7 +549,7 @@ public class H4SDS extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                Attribute attr = new Attribute(this.getFileFormat(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);

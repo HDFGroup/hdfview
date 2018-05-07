@@ -210,12 +210,11 @@ public class DataFormatTest {
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
-        Attribute attr = new Attribute(((Group) testGroup).getFileFormat(), attrName, attrType, attrDims);
+        Attribute attr = new Attribute((Group) testGroup, attrName, attrType, attrDims);
         assertNotNull(testGroup);
         assertNotNull(attr);
-        attr.setData(classValue);
         try {
-            testGroup.writeMetadata(attr);
+            attr.write(classValue);
         }
         catch (Exception ex) {
             fail("writeMetadata() failed " + ex.getMessage());

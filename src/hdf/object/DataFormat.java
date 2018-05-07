@@ -93,6 +93,14 @@ public interface DataFormat {
     public abstract void write(Object buf) throws Exception;
 
     /**
+     * Writes the current memory buffer to the object in the file.
+     *
+     * @throws Exception
+     *             if data can not be written
+     */
+    public abstract void write() throws Exception;
+
+    /**
      * Returns the fill values for the data object.
      *
      * @return the fill values for the data object.

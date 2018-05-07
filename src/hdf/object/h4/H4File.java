@@ -1497,7 +1497,7 @@ public class H4File extends FileFormat {
 
                         if (b && (str[0].length() > 0)) {
                             long attrDims[] = { str[0].length() };
-                            Attribute newAttr = new Attribute(this, annName + " #" + i,
+                            Attribute newAttr = new Attribute(getRootObject(), annName + " #" + i,
                                     new H4Datatype(HDFConstants.DFNT_CHAR), attrDims);
                             attrList.add(newAttr);
                             newAttr.setData(str[0]);
@@ -1580,7 +1580,7 @@ public class H4File extends FileFormat {
                 }
 
                 long[] attrDims = { attrInfo[1] };
-                Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attrList.add(attr);
 
                 Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
@@ -1660,7 +1660,7 @@ public class H4File extends FileFormat {
                 }
 
                 long[] attrDims = { attrInfo[1] };
-                Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attrList.add(attr);
 
                 Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);

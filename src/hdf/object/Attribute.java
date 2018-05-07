@@ -76,6 +76,11 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
 
+    private boolean           inited = false;
+
+    /** The HObject to which this Attribute is attached */
+    protected HObject         parentObject;
+
     /** The datatype of the attribute. */
     private final Datatype    type;
 
@@ -221,8 +226,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
      * attr.setValue(classValue);
      * </pre>
      *
-     * @param fileFormat
-     *            the FileFormat to which this Attribute belongs.
+     * @param parentObj
+     *            the HObject to which this Attribute is attached.
      * @param attrName
      *            the name of the attribute.
      * @param attrType
@@ -232,8 +237,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
      *
      * @see hdf.object.Datatype
      */
-    public Attribute(FileFormat fileFormat, String attrName, Datatype attrType, long[] attrDims) {
-        this(fileFormat, attrName, attrType, attrDims, null);
+    public Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims) {
+        this(parentObj, attrName, attrType, attrDims, null);
     }
 
     /**
@@ -255,8 +260,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
      * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
-     * @param fileFormat
-     *            the FileFormat to which this Attribute belongs.
+     * @param parentObj
+     *            the HObject to which this Attribute is attached.
      * @param attrName
      *            the name of the attribute.
      * @param attrType
@@ -269,35 +274,32 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
      * @see hdf.object.Datatype
      */
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-    public Attribute(FileFormat fileFormat, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
-        super(fileFormat, attrName, null, null);
+    public Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
+        super((parentObj == null) ? null : parentObj.getFileFormat(), attrName,
+                (parentObj == null) ? null : parentObj.getFullName(), null);
 
         log.trace("Attribute: start");
+
+        this.parentObject = parentObj;
 
         type = attrType;
         dims = attrDims;
         value = attrValue;
         properties = new HashMap();
-        rank = 0;
+        rank = -1;
 
-        init();
-
-        if (dims == null) {
-            isScalar = true;
-            rank = 1;
-            dims = new long[] { 1 };
-        }
-        else {
-            isScalar = false;
-            rank = dims.length;
-        }
-
+        isScalar = (dims == null);
         isUnsigned = (type.getDatatypeSign() == Datatype.SIGN_NONE);
         isTextData = (type.getDatatypeClass() == Datatype.CLASS_STRING);
         isCompound = (type.getDatatypeClass() == Datatype.CLASS_COMPOUND);
 
-        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName, type,
-                value, rank, isUnsigned, isScalar);
+        if (dims == null) {
+            rank = 1;
+            dims = new long[] { 1 };
+        }
+        else {
+            rank = dims.length;
+        }
 
         selectedDims = new long[rank];
         startDims = new long[rank];
@@ -307,6 +309,9 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         selectedIndex[0] = 0;
         selectedIndex[1] = 1;
         selectedIndex[2] = 2;
+
+        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName, type,
+                value, rank, isUnsigned, isScalar);
 
         resetSelection();
 
@@ -322,19 +327,30 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     public long open() {
         log.trace("open(): start");
 
-        long aid = -1;
+        if (parentObject == null) {
+            log.debug("open(): attribute's parent object is null");
+            log.trace("open(): finish");
+            return -1;
+        }
 
-        /* TODO: Get H5Aopen working */
-        System.out.println(getFID());
-        System.out.println(getName());
+        long aid = -1;
+        long pObjID = -1;
 
         try {
-            aid = H5.H5Aopen(getFID(), getName(), HDF5Constants.H5P_DEFAULT);
+            pObjID = parentObject.open();
+            if (pObjID >= 0) {
+                if (H5.H5Aexists(pObjID, getName()))
+                    aid = H5.H5Aopen(pObjID, getName(), HDF5Constants.H5P_DEFAULT);
+            }
+
             log.trace("open(): aid={}", aid);
         }
         catch (HDF5Exception ex) {
-            log.debug("open(): Failed to open attribute {}: ", getPath() + getName(), ex);
+            log.debug("open(): Failed to open attribute {}: ", getName(), ex);
             aid = -1;
+        }
+        finally {
+            parentObject.close(pObjID);
         }
 
         log.trace("open(): finish");
@@ -367,7 +383,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     public void init() {
         log.trace("init(): start");
 
-        if (rank > 0) {
+        if (inited) {
             resetSelection();
             log.trace("init(): Attribute already inited");
             log.trace("init(): finish");
@@ -449,6 +465,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                         }
                     } // for (int i=0; i<numberOfMembers; i++)
                 }
+
+                inited = true;
             }
             catch (HDF5Exception ex) {
                 numberOfMembers = 0;
@@ -477,14 +495,31 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                 }
             }
 
-        }
-        else {
-            log.debug("init(): failed to open attribute");
+            close(aid);
         }
 
         resetSelection();
 
         log.trace("init(): finish");
+    }
+
+    /**
+     * Returns the HObject to which this Attribute is currently "attached".
+     *
+     * @return the HObject to which this Attribute is currently "attached".
+     */
+    public HObject getParentObject() {
+        return parentObject;
+    }
+
+    /**
+     * Sets the HObject to which this Attribute is "attached".
+     *
+     * @param pObj
+     *            the new HObject to which this Attribute is "attached".
+     */
+    public void setParentObject(HObject pObj) {
+        parentObject = pObj;
     }
 
     /**
@@ -499,6 +534,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
      */
     @Override
     public Object getData() throws Exception, OutOfMemoryError {
+        if (!inited) init();
+
         /*
          * TODO: For now, convert a compound Attribute's data (String[]) into a List for
          * convenient processing
@@ -629,6 +666,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
      */
     @Override
     public final int getRank() {
+        if (!inited) init();
+
         return rank;
     }
 
@@ -640,6 +679,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
      */
     @Override
     public final long[] getDims() {
+        if (!inited) init();
+
         return dims;
     }
 
@@ -701,16 +742,38 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
     @Override
     public Object read() throws Exception, OutOfMemoryError {
+        if (!inited) init();
+
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
     @Override
     public void write(Object buf) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation.");
+        setData(buf);
+        write();
+    }
+
+    @Override
+    public void write() throws Exception {
+        log.trace("write(): start");
+
+        if (!inited) init();
+
+        if (parentObject == null) {
+            log.debug("write(): parent object is null; nowhere to write attribute to");
+            log.debug("write(): finish");
+            return;
+        }
+
+        ((MetaDataContainer) getParentObject()).writeMetadata(this);
+
+        log.trace("write(): finish");
     }
 
     @Override
     public long[] getSelectedDims() {
+        if (!inited) init();
+
         /*
          * Currently, Attributes do not support subsetting.
          */
@@ -719,7 +782,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
     @Override
     public long[] getStartDims() {
-        if (rank < 0) return null;
+        if (!inited) init();
 
         /*
          * Currently, Attributes do not support subsetting.
@@ -737,7 +800,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
     @Override
     public long[] getStride() {
-        if (rank <= 0) return null;
+        if (!inited) init();
 
         /*
          * Currently, Attributes do not support subsetting.
@@ -755,13 +818,15 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
     @Override
     public int[] getSelectedIndex() {
-        if (rank < 0) return null;
+        if (!inited) init();
 
         return selectedIndex;
     }
 
     @Override
     public long getHeight() {
+        if (!inited) init();
+
         if ((selectedDims == null) || (selectedIndex == null)) return 0;
 
         return selectedDims[selectedIndex[0]];
@@ -769,6 +834,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
     @Override
     public long getWidth() {
+        if (!inited) init();
+
         if ((selectedDims == null) || (selectedIndex == null)) return 0;
 
         if ((selectedDims.length < 2) || (selectedIndex.length < 2)) return 1;

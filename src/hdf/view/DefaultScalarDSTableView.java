@@ -171,7 +171,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
         }
 
-        /* TODO: move down into object library */
         // Make sure entire dataset is not loaded when looking at 3D
         // datasets using the default display mode (double clicking the
         // data object)
@@ -892,7 +891,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         try {
             log.trace("updateValueInFile(): write");
-            ((ScalarDS) dataObject).write();
+            dataObject.write();
         }
         catch (Exception ex) {
             shell.getDisplay().beep();

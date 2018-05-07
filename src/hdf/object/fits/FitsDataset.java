@@ -171,7 +171,7 @@ public class FitsDataset extends ScalarDS
         while (it.hasNext()) {
             value = "";
             hc = (HeaderCard)it.next();
-            attr = new Attribute(this.getFileFormat(), hc.getKey(), dtype, dims);
+            attr = new Attribute(this, hc.getKey(), dtype, dims);
             String tvalue = hc.getValue();
             if (tvalue != null) {
                 value += tvalue;

@@ -1583,7 +1583,6 @@ public class H5Datatype extends Datatype {
         log.trace("getMetadata(): start");
         // load attributes first
         if (attributeList == null) {
-            long tid = open();
             int indxType = fileFormat.getIndexType(null);
             int order = fileFormat.getIndexOrder(null);
 
@@ -1595,13 +1594,10 @@ public class H5Datatype extends Datatype {
             }
 
             try {
-                attributeList = H5File.getAttribute(tid, indxType, order);
+                attributeList = H5File.getAttribute(this, indxType, order);
             }
             catch (Exception ex) {
                 log.debug("getMetadata(): H5File.getAttribute failure: ", ex);
-            }
-            finally {
-                close(tid);
             }
         } // if (attributeList == null)
 

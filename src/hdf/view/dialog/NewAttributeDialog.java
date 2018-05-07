@@ -840,7 +840,7 @@ public class NewAttributeDialog extends Dialog {
         }
 
         long[] dims = { arraySize };
-        Attribute attr = new Attribute(hObject.getFileFormat(), attrName, datatype, dims);
+        Attribute attr = new Attribute(hObject, attrName, datatype, dims);
         attr.setData(value);
 
         try {
@@ -856,7 +856,7 @@ public class NewAttributeDialog extends Dialog {
             }
             else {
                 log.trace("writeMetadata()");
-                ((MetaDataContainer) hObject).writeMetadata(attr);
+                attr.write();
             }
         }
         catch (Exception ex) {

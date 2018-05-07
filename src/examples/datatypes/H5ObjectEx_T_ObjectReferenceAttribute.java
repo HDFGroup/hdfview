@@ -118,7 +118,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute attr = new Attribute(file, ATTRIBUTENAME, typeRef, dims);
+            Attribute attr = new Attribute(dset, ATTRIBUTENAME, typeRef, dims);
             attr.setData(dset_data);
             file.writeAttribute(dset, attr, false);
         }

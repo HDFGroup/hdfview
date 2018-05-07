@@ -192,12 +192,12 @@ public class DebugHDF {
 
         // create ref attributes
         Datatype attr_dtype = file.createDatatype( Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
-        Attribute attr = new Attribute(file, "ref", attr_dtype, new long[] {1});
+        Attribute attr = new Attribute(ds, "ref", attr_dtype, new long[] { 1 });
         attr.setData(ds.getFullName());
         file.writeAttribute(ds, attr, false);
-        attr = new Attribute(file, "refs", attr_dtype, new long[] {2});
+        attr = new Attribute(ds, "refs", attr_dtype, new long[] { 2 });
         attr.setData(ref_buf);
-        ds.writeMetadata(attr);
+        attr.write();
 
         file.close();
 
@@ -258,11 +258,11 @@ public class DebugHDF {
         Datatype attr_dtype = testFile.createDatatype(
             Datatype.CLASS_STRING, 5,
             Datatype.NATIVE, Datatype.NATIVE);
-        Attribute attr = new Attribute("foo", attr_dtype, attr_dims);
+        Attribute attr = new Attribute(dataset, "foo", attr_dtype, attr_dims);
 
         //byte[] bvalue = Dataset.stringToByte(attr_value, 5);
         attr.setData(attr_value);
-        dataset.writeMetadata(attr);
+        attr.write();
 
         testFile.close();
 
@@ -596,9 +596,9 @@ public class DebugHDF {
         // create and write an attribute to the dataset
         long[] attrDims = {2};
         int[] attrValue = {0, 10000};
-        Attribute attr = new Attribute(file, "range", dtype, attrDims);
+        Attribute attr = new Attribute(dataset, "range", dtype, attrDims);
         attr.setData(attrValue); // set the attribute value
-        dataset.writeMetadata(attr);
+        attr.write();
 
         // close the file
         file.close();
@@ -614,8 +614,7 @@ public class DebugHDF {
         if (attr!=null) {
             attrValue[0] = 100;
             attr.setData(attrValue);
-
-            dataset.writeMetadata(attr);
+            attr.write();
         }
 
         // close file resource
@@ -955,13 +954,12 @@ public class DebugHDF {
                 Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
                 Datatype.NATIVE);
 
-        Attribute attr = new Attribute(testFile, "attribute int", attrType, dims0D);
+        Attribute attr = new Attribute(root, "attribute int", attrType, dims0D);
 
         int[] attrValue = { 15 }; // attribute value
 
         attr.setData(attrValue); // set the attribute value
-
-        root.writeMetadata(attr);
+        attr.write();
 
         // close file resource
         testFile.close();
@@ -1509,11 +1507,11 @@ public class DebugHDF {
         int[] attrValue = {0, 10000}; // attribute value
 
         // create a attribute of 1D integer of size two
-        Attribute attr = new Attribute(testFile, "data range", dtype, attrDims);
+        Attribute attr = new Attribute(dataset, "data range", dtype, attrDims);
         attr.setData(attrValue); // set the attribute value
 
         // attach the attribute to the dataset
-        dataset.writeMetadata(attr);
+        attr.write();
 
         // read the attribute into memory
         List attrList = dataset.getMetadata();
@@ -3584,9 +3582,9 @@ public class DebugHDF {
         final String attrName = "Test attribute";
         final String[] attrValue = {"Test for group attribute"};
         final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, -1, -1);
-        final Attribute attr = new Attribute(file, attrName, attrType, attrDims);
+        final Attribute attr = new Attribute(g1, attrName, attrType, attrDims);
         attr.setData(attrValue);
-        g1.writeMetadata(attr);
+        attr.write();
 
         file.createScalarDS(NAME_DATASET_INT, null, new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
         file.createScalarDS(NAME_DATASET_FLOAT, null, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_FLOAT);
