@@ -20,23 +20,27 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.HObject;
+import hdf.view.ImageView.ImageView;
+import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.PaletteView.PaletteView;
+import hdf.view.TableView.TableView;
 
 public abstract class DataViewFactory {
     /* Get an instance of TableView given the appropriate constructor parameters */
     @SuppressWarnings("rawtypes")
-    abstract TableView    getTableView(ViewManager viewer, HashMap dataPropertiesMap);
+    public abstract TableView    getTableView(ViewManager viewer, HashMap dataPropertiesMap);
 
     /* Get an instance of ImageView given the appropriate constructor parameters */
     @SuppressWarnings("rawtypes")
-    abstract ImageView    getImageView(ViewManager viewer, HashMap dataPropertiesMap);
+    public abstract ImageView    getImageView(ViewManager viewer, HashMap dataPropertiesMap);
 
     /*
      * Get an instance of PaletteView given the appropriate constructor parameters
      */
-    abstract PaletteView  getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView);
+    public abstract PaletteView  getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView);
 
     /*
      * Get an instance of MetaDataView given the appropriate constructor parameters
      */
-    abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj);
+    public abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj);
 }

@@ -12,7 +12,9 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.PaletteView;
+
+import hdf.view.DataView;
 
 /**
  *

@@ -12,9 +12,11 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
 import java.util.HashMap;
+
+import hdf.view.ViewManager;
 
 public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
 

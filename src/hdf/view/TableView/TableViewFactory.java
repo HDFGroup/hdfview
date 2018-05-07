@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
 import java.lang.reflect.Constructor;
 import java.util.BitSet;
@@ -29,6 +29,13 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.DataViewFactory;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
+import hdf.view.ImageView.ImageView;
+import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.PaletteView.PaletteView;
 
 /**
  * A Factory class to return instances of classes implementing the TableView
@@ -191,17 +198,17 @@ public class TableViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
     @Override
-    PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
+    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
         return null;
     }
 
     @Override
-    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
+    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
         return null;
     }
 

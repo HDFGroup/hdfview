@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -55,6 +55,9 @@ import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
 
 public class DefaultCompoundDSTableView extends DefaultBaseTableView implements TableView {
 

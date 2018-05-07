@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.MetaDataView;
 
 import java.util.List;
 
@@ -30,6 +30,8 @@ import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Link;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
 
 public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 

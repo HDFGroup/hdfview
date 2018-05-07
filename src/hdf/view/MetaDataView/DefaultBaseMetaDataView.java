@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.MetaDataView;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -60,6 +60,11 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
+import hdf.view.DefaultFileFilter;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
+import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.NewAttributeDialog;
 

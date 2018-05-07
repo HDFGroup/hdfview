@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.MetaDataView;
 
 import java.lang.reflect.Array;
 
@@ -35,6 +35,8 @@ import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
 
 public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 

@@ -78,25 +78,25 @@ public class ViewProperties extends PreferenceStore {
      */
 
     /** Default TreeView class names */
-    public static final String DEFAULT_TREEVIEW_NAME = "hdf.view.DefaultTreeView";
+    public static final String DEFAULT_TREEVIEW_NAME = "hdf.view.TreeView.DefaultTreeView";
 
     /** Default TableView class names */
-    public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME = "hdf.view.DefaultScalarDSTableView";
-    public static final String DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.DefaultScalarAttributeTableView";
-    public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME = "hdf.view.DefaultCompoundDSTableView";
-    public static final String DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.DefaultCompoundAttributeTableView";
+    public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarDSTableView";
+    public static final String DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarAttributeTableView";
+    public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundDSTableView";
+    public static final String DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundAttributeTableView";
 
     /** Default MetaDataView class names */
-    public static final String DEFAULT_GROUP_METADATAVIEW_NAME = "hdf.view.DefaultGroupMetaDataView";
-    public static final String DEFAULT_DATASET_METADATAVIEW_NAME = "hdf.view.DefaultDatasetMetaDataView";
-    public static final String DEFAULT_DATATYPE_METADATAVIEW_NAME = "hdf.view.DefaultDatatypeMetaDataView";
-    public static final String DEFAULT_LINK_METADATAVIEW_NAME = "hdf.view.DefaultLinkMetaDataView";
+    public static final String DEFAULT_GROUP_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultGroupMetaDataView";
+    public static final String DEFAULT_DATASET_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultDatasetMetaDataView";
+    public static final String DEFAULT_DATATYPE_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultDatatypeMetaDataView";
+    public static final String DEFAULT_LINK_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultLinkMetaDataView";
 
     /** Default ImageView class names */
-    public static final String DEFAULT_IMAGEVIEW_NAME = "hdf.view.DefaultImageView";
+    public static final String DEFAULT_IMAGEVIEW_NAME = "hdf.view.ImageView.DefaultImageView";
 
     /** Default PaletteView class names */
-    public static final String DEFAULT_PALETTEVIEW_NAME = "hdf.view.DefaultPaletteView";
+    public static final String DEFAULT_PALETTEVIEW_NAME = "hdf.view.PaletteView.DefaultPaletteView";
 
     /**
      * Used to create different DataViews for a given HObject.
@@ -417,31 +417,32 @@ public class ViewProperties extends PreferenceStore {
                             String interfaceName = interfaces[j].getName();
                             log.trace("loadExtClass: load interfaces[{}] is {}", j, interfaceName);
 
-                            if ("hdf.view.TreeView".equals(interfaceName) && !moduleListTreeView.contains(theName)) {
+                            if ("hdf.view.TreeView.TreeView".equals(interfaceName)
+                                    && !moduleListTreeView.contains(theName)) {
                                 moduleListTreeView.add(theName);
                                 break;
                             }
-                            else if ("hdf.view.MetaDataView".equals(interfaceName)
+                            else if ("hdf.view.MetaDataView.MetaDataView".equals(interfaceName)
                                     && !moduleListMetaDataView.contains(theName)) {
                                 moduleListMetaDataView.add(theName);
                                 break;
                             }
-                            else if ("hdf.view.TableView".equals(interfaceName)
+                            else if ("hdf.view.TableView.TableView".equals(interfaceName)
                                     && !moduleListTableView.contains(theName)) {
                                 moduleListTableView.add(theName);
                                 break;
                             }
-                            else if ("hdf.view.ImageView".equals(interfaceName)
+                            else if ("hdf.view.ImageView.ImageView".equals(interfaceName)
                                     && !moduleListImageView.contains(theName)) {
                                 moduleListImageView.add(theName);
                                 break;
                             }
-                            else if ("hdf.view.PaletteView".equals(interfaceName)
+                            else if ("hdf.view.PaletteView.PaletteView".equals(interfaceName)
                                     && !moduleListPaletteView.contains(theName)) {
                                 moduleListPaletteView.add(theName);
                                 break;
                             }
-                            else if ("hdf.view.HelpView".equals(interfaceName)
+                            else if ("hdf.view.HelpView.HelpView".equals(interfaceName)
                                     && !moduleListHelpView.contains(theName)) {
                                 moduleListHelpView.add(theName);
                                 break;
@@ -1120,8 +1121,8 @@ public class ViewProperties extends PreferenceStore {
                 "module.imageview", "module.paletteview" };
         Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
                 moduleListImageView, moduleListPaletteView };
-        String[] moduleNames = { "hdf.view.DefaultTreeView", "hdf.view.DefaultMetaDataView",
-                "hdf.view.DefaultTableView", "hdf.view.DefaultImageView", "hdf.view.DefaultPaletteView" };
+        String[] moduleNames = { DEFAULT_TREEVIEW_NAME, "hdf.view.DefaultMetaDataView", "hdf.view.DefaultTableView",
+                DEFAULT_IMAGEVIEW_NAME, DEFAULT_PALETTEVIEW_NAME };
 
         // add default implementation of modules
         log.trace("load user properties: modules");

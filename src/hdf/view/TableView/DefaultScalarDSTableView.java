@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -66,6 +66,10 @@ import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
+import hdf.view.HDFView;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
 import hdf.view.dialog.InputDialog;
 
 public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView {

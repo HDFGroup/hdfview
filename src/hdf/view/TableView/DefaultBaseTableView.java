@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -124,7 +124,14 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.Chart;
+import hdf.view.DefaultFileFilter;
+import hdf.view.HDFView;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.MathConversionDialog;
 import hdf.view.dialog.NewDatasetDialog;

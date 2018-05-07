@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.MetaDataView;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
@@ -29,6 +29,8 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Link;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
 
 public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
 

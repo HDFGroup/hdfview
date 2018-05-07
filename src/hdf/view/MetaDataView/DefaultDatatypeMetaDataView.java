@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.MetaDataView;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.object.Datatype;
 import hdf.object.HObject;
+import hdf.view.ViewManager;
 
 public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
