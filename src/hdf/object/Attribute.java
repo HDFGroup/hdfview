@@ -16,9 +16,18 @@ package hdf.object;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.HDFNativeData;
+import hdf.hdf5lib.exceptions.HDF5Exception;
+import hdf.object.h5.H5Datatype;
 
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data
@@ -61,11 +70,16 @@ import java.util.Map;
  * @version 2.0 4/2/2018
  * @author Peter X. Cao, Jordan T. Henderson
  */
-public class Attribute extends HObject implements DataFormat {
+public class Attribute extends HObject implements DataFormat, CompoundDataFormat {
 
     private static final long serialVersionUID = 2072473407027648309L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
+
+    private boolean           inited = false;
+
+    /** The HObject to which this Attribute is attached */
+    protected HObject         parentObject;
 
     /** The datatype of the attribute. */
     private final Datatype    type;
@@ -91,24 +105,117 @@ public class Attribute extends HObject implements DataFormat {
     private Map<String, Object>  properties;
 
     /** Flag to indicate if the datatype is an unsigned integer. */
-    private boolean           isUnsigned;
+    private final boolean     isUnsigned;
 
     /** Flag to indicate if the data is text */
-    protected boolean         isTextData = false;
+    protected final boolean   isTextData;
 
-    /** flag to indicate if the dataset is a single scalar point */
-    protected boolean         isScalar = false;
+    /** Flag to indicate if the attribute data is a single scalar point */
+    protected final boolean   isScalar;
+
+    /** Flag to indicate if the attribute has a compound datatype */
+    protected final boolean   isCompound;
+
+    /** Fields for Compound datatype attributes */
+
+    /**
+     * A list of names of all compound fields including nested fields.
+     * <p>
+     * The nested names are separated by CompoundDS.separator. For example, if
+     * compound attribute "A" has the following nested structure,
+     *
+     * <pre>
+     * A --&gt; m01
+     * A --&gt; m02
+     * A --&gt; nest1 --&gt; m11
+     * A --&gt; nest1 --&gt; m12
+     * A --&gt; nest1 --&gt; nest2 --&gt; m21
+     * A --&gt; nest1 --&gt; nest2 --&gt; m22
+     * i.e.
+     * A = { m01, m02, nest1{m11, m12, nest2{ m21, m22}}}
+     * </pre>
+     *
+     * The flatNameList of compound attribute "A" will be {m01, m02, nest1[m11,
+     * nest1[m12, nest1[nest2[m21, nest1[nest2[m22}
+     *
+     */
+    private List<String> flatNameList;
+
+    /**
+     * A list of datatypes of all compound fields including nested fields.
+     */
+    private List<Long> flatTypeList;
+
+    /**
+     * The number of members of the compound attribute.
+     */
+    protected int numberOfMembers = 0;
+
+    /**
+     * The names of the members of the compound attribute.
+     */
+    protected String[] memberNames = null;
+
+    /**
+     * Array containing the total number of elements of the members of this compound
+     * attribute.
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * memberOrders is an integer array of {1, 5, 6} to indicate that member A has
+     * one element, member B has 5 elements, and member C has 6 elements.
+     */
+    protected int[] memberOrders = null;
+
+    /**
+     * The dimension sizes of each member.
+     * <p>
+     * The i-th element of the Object[] is an integer array (int[]) that contains
+     * the dimension sizes of the i-th member.
+     */
+    protected Object[] memberDims = null;
+
+    /**
+     * The datatypes of the compound attribute's members.
+     */
+    protected Datatype[] memberTypes = null;
+
+    /**
+     * The array to store flags to indicate if a member of this compound attribute
+     * is selected for read/write.
+     * <p>
+     * If a member is selected, the read/write will perform on the member.
+     * Applications such as HDFView will only display the selected members of the
+     * compound attribute.
+     *
+     * <pre>
+     * For example, if a compound attribute has four members
+     *     String[] memberNames = {"X", "Y", "Z", "TIME"};
+     * and
+     *     boolean[] isMemberSelected = {true, false, false, true};
+     * members "X" and "TIME" are selected for read and write.
+     * </pre>
+     */
+    protected boolean[] isMemberSelected = null;
 
     /**
      * Create an attribute with specified name, data type and dimension sizes.
      *
-     * For scalar attribute, the dimension size can be either an array of size
-     * one or null, and the rank can be either 1 or zero. Attribute is a general
-     * class and is independent of file format, e.g., the implementation of
-     * attribute applies to both HDF4 and HDF5.
+     * For scalar attribute, the dimension size can be either an array of size one
+     * or null, and the rank can be either 1 or zero. Attribute is a general class
+     * and is independent of file format, e.g., the implementation of attribute
+     * applies to both HDF4 and HDF5.
      * <p>
-     * The following example creates a string attribute with the name "CLASS"
-     * and value "IMAGE".
+     * The following example creates a string attribute with the name "CLASS" and
+     * value "IMAGE".
      *
      * <pre>
      * long[] attrDims = { 1 };
@@ -119,30 +226,31 @@ public class Attribute extends HObject implements DataFormat {
      * attr.setValue(classValue);
      * </pre>
      *
+     * @param parentObj
+     *            the HObject to which this Attribute is attached.
      * @param attrName
      *            the name of the attribute.
      * @param attrType
      *            the datatype of the attribute.
      * @param attrDims
-     *            the dimension sizes of the attribute, null for scalar
-     *            attribute
+     *            the dimension sizes of the attribute, null for scalar attribute
      *
      * @see hdf.object.Datatype
      */
-    public Attribute(String attrName, Datatype attrType, long[] attrDims) {
-        this(attrName, attrType, attrDims, null);
+    public Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims) {
+        this(parentObj, attrName, attrType, attrDims, null);
     }
 
     /**
      * Create an attribute with specific name and value.
      *
-     * For scalar attribute, the dimension size can be either an array of size
-     * one or null, and the rank can be either 1 or zero. Attribute is a general
-     * class and is independent of file format, e.g., the implementation of
-     * attribute applies to both HDF4 and HDF5.
+     * For scalar attribute, the dimension size can be either an array of size one
+     * or null, and the rank can be either 1 or zero. Attribute is a general class
+     * and is independent of file format, e.g., the implementation of attribute
+     * applies to both HDF4 and HDF5.
      * <p>
-     * The following example creates a string attribute with the name "CLASS"
-     * and value "IMAGE".
+     * The following example creates a string attribute with the name "CLASS" and
+     * value "IMAGE".
      *
      * <pre>
      * long[] attrDims = { 1 };
@@ -152,43 +260,46 @@ public class Attribute extends HObject implements DataFormat {
      * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
+     * @param parentObj
+     *            the HObject to which this Attribute is attached.
      * @param attrName
      *            the name of the attribute.
      * @param attrType
      *            the datatype of the attribute.
      * @param attrDims
-     *            the dimension sizes of the attribute, null for scalar
-     *            attribute
+     *            the dimension sizes of the attribute, null for scalar attribute
      * @param attrValue
      *            the value of the attribute, null if no value
      *
      * @see hdf.object.Datatype
      */
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-    public Attribute(String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
-        super(null, attrName, null, null);
+    public Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
+        super((parentObj == null) ? null : parentObj.getFileFormat(), attrName,
+                (parentObj == null) ? null : parentObj.getFullName(), null);
 
         log.trace("Attribute: start");
+
+        this.parentObject = parentObj;
 
         type = attrType;
         dims = attrDims;
         value = attrValue;
         properties = new HashMap();
-        rank = 0;
+        rank = -1;
+
+        isScalar = (dims == null);
+        isUnsigned = (type.getDatatypeSign() == Datatype.SIGN_NONE);
+        isTextData = (type.getDatatypeClass() == Datatype.CLASS_STRING);
+        isCompound = (type.getDatatypeClass() == Datatype.CLASS_COMPOUND);
 
         if (dims == null) {
-            isScalar = true;
             rank = 1;
             dims = new long[] { 1 };
         }
-        else
+        else {
             rank = dims.length;
-
-        isUnsigned = (type.getDatatypeSign() == Datatype.SIGN_NONE);
-        isTextData = (type.getDatatypeClass() == Datatype.CLASS_STRING);
-
-        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName, type,
-                value, rank, isUnsigned, isScalar);
+        }
 
         selectedDims = new long[rank];
         startDims = new long[rank];
@@ -199,9 +310,216 @@ public class Attribute extends HObject implements DataFormat {
         selectedIndex[1] = 1;
         selectedIndex[2] = 2;
 
+        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName, type,
+                value, rank, isUnsigned, isScalar);
+
         resetSelection();
 
         log.trace("Attribute: finish");
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.HObject#open()
+     */
+    @Override
+    public long open() {
+        log.trace("open(): start");
+
+        if (parentObject == null) {
+            log.debug("open(): attribute's parent object is null");
+            log.trace("open(): finish");
+            return -1;
+        }
+
+        long aid = -1;
+        long pObjID = -1;
+
+        try {
+            pObjID = parentObject.open();
+            if (pObjID >= 0) {
+                if (H5.H5Aexists(pObjID, getName()))
+                    aid = H5.H5Aopen(pObjID, getName(), HDF5Constants.H5P_DEFAULT);
+            }
+
+            log.trace("open(): aid={}", aid);
+        }
+        catch (HDF5Exception ex) {
+            log.debug("open(): Failed to open attribute {}: ", getName(), ex);
+            aid = -1;
+        }
+        finally {
+            parentObject.close(pObjID);
+        }
+
+        log.trace("open(): finish");
+
+        return aid;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.HObject#close(int)
+     */
+    @Override
+    public void close(long aid) {
+        log.trace("close(): start");
+
+        if (aid >= 0) {
+            try {
+                H5.H5Aclose(aid);
+            }
+            catch (HDF5Exception ex) {
+                log.debug("close(): H5Aclose({}) failure: ", aid, ex);
+            }
+        }
+
+        log.trace("close(): finish");
+    }
+
+    @Override
+    public void init() {
+        log.trace("init(): start");
+
+        if (inited) {
+            resetSelection();
+            log.trace("init(): Attribute already inited");
+            log.trace("init(): finish");
+            return;
+        }
+
+        long aid = -1;
+        long tid = -1;
+        int tclass = -1;
+        flatNameList = new Vector<>();
+        flatTypeList = new Vector<>();
+        long[] memberTIDs = null;
+
+        aid = open();
+        if (aid >= 0) {
+            try {
+                tid = H5.H5Aget_type(aid);
+                tclass = H5.H5Tget_class(tid);
+
+                long tmptid = 0;
+                if (tclass == HDF5Constants.H5T_ARRAY) {
+                    // array of compound
+                    tmptid = tid;
+                    tid = H5.H5Tget_super(tmptid);
+                    try {
+                        H5.H5Tclose(tmptid);
+                    }
+                    catch (HDF5Exception ex) {
+                        log.debug("init(): H5Tclose({}) failure: ", tmptid, ex);
+                    }
+                }
+
+                if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
+                    // initialize member information
+                    extractCompoundInfo(tid, "", flatNameList, flatTypeList);
+                    numberOfMembers = flatNameList.size();
+                    log.trace("init(): numberOfMembers={}", numberOfMembers);
+
+                    memberNames = new String[numberOfMembers];
+                    memberTIDs = new long[numberOfMembers];
+                    memberTypes = new Datatype[numberOfMembers];
+                    memberOrders = new int[numberOfMembers];
+                    isMemberSelected = new boolean[numberOfMembers];
+                    memberDims = new Object[numberOfMembers];
+
+                    for (int i = 0; i < numberOfMembers; i++) {
+                        isMemberSelected[i] = true;
+                        memberTIDs[i] = flatTypeList.get(i).longValue();
+                        memberTypes[i] = new H5Datatype(memberTIDs[i]);
+                        memberNames[i] = flatNameList.get(i);
+                        memberOrders[i] = 1;
+                        memberDims[i] = null;
+                        log.trace("init()[{}]: memberNames[{}]={}, memberTIDs[{}]={}, memberTypes[{}]={}", i, i,
+                                memberNames[i], i, memberTIDs[i], i, memberTypes[i]);
+
+                        try {
+                            tclass = H5.H5Tget_class(memberTIDs[i]);
+                        }
+                        catch (HDF5Exception ex) {
+                            log.debug("init(): H5Tget_class({}) failure: ", memberTIDs[i], ex);
+                        }
+
+                        if (tclass == HDF5Constants.H5T_ARRAY) {
+                            int n = H5.H5Tget_array_ndims(memberTIDs[i]);
+                            long mdim[] = new long[n];
+                            H5.H5Tget_array_dims(memberTIDs[i], mdim);
+                            int idim[] = new int[n];
+                            for (int j = 0; j < n; j++)
+                                idim[j] = (int) mdim[j];
+                            memberDims[i] = idim;
+                            tmptid = H5.H5Tget_super(memberTIDs[i]);
+                            memberOrders[i] = (int) (H5.H5Tget_size(memberTIDs[i]) / H5.H5Tget_size(tmptid));
+                            try {
+                                H5.H5Tclose(tmptid);
+                            }
+                            catch (HDF5Exception ex) {
+                                log.debug("init(): memberTIDs[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
+                            }
+                        }
+                    } // for (int i=0; i<numberOfMembers; i++)
+                }
+
+                inited = true;
+            }
+            catch (HDF5Exception ex) {
+                numberOfMembers = 0;
+                memberNames = null;
+                memberTypes = null;
+                memberOrders = null;
+                log.debug("init(): ", ex);
+            }
+            finally {
+                try {
+                    H5.H5Tclose(tid);
+                }
+                catch (HDF5Exception ex2) {
+                    log.debug("init(): H5Tclose({}) failure: ", tid, ex2);
+                }
+
+                if (memberTIDs != null) {
+                    for (int i = 0; i < memberTIDs.length; i++) {
+                        try {
+                            H5.H5Tclose(memberTIDs[i]);
+                        }
+                        catch (Exception ex) {
+                            log.debug("init(): H5Tclose(memberTIDs[{}] {}) failure: ", i, memberTIDs[i], ex);
+                        }
+                    }
+                }
+            }
+
+            close(aid);
+        }
+
+        resetSelection();
+
+        log.trace("init(): finish");
+    }
+
+    /**
+     * Returns the HObject to which this Attribute is currently "attached".
+     *
+     * @return the HObject to which this Attribute is currently "attached".
+     */
+    public HObject getParentObject() {
+        return parentObject;
+    }
+
+    /**
+     * Sets the HObject to which this Attribute is "attached".
+     *
+     * @param pObj
+     *            the new HObject to which this Attribute is "attached".
+     */
+    public void setParentObject(HObject pObj) {
+        parentObject = pObj;
     }
 
     /**
@@ -216,6 +534,18 @@ public class Attribute extends HObject implements DataFormat {
      */
     @Override
     public Object getData() throws Exception, OutOfMemoryError {
+        if (!inited) init();
+
+        /*
+         * TODO: For now, convert a compound Attribute's data (String[]) into a List for
+         * convenient processing
+         */
+        if (isCompound) {
+            List<String> valueList = Arrays.asList((String[]) value);
+
+            return valueList;
+        }
+
         return value;
     }
 
@@ -336,6 +666,8 @@ public class Attribute extends HObject implements DataFormat {
      */
     @Override
     public final int getRank() {
+        if (!inited) init();
+
         return rank;
     }
 
@@ -347,6 +679,8 @@ public class Attribute extends HObject implements DataFormat {
      */
     @Override
     public final long[] getDims() {
+        if (!inited) init();
+
         return dims;
     }
 
@@ -407,27 +741,39 @@ public class Attribute extends HObject implements DataFormat {
     }
 
     @Override
-    public long open() {
-        return -1;
-    }
-
-    @Override
-    public void close(long id) {
-        return;
-    }
-
-    @Override
     public Object read() throws Exception, OutOfMemoryError {
+        if (!inited) init();
+
         throw new UnsupportedOperationException("Attribute:read Unsupported operation.");
     }
 
     @Override
     public void write(Object buf) throws Exception {
-        throw new UnsupportedOperationException("Attribute:write Unsupported operation.");
+        setData(buf);
+        write();
+    }
+
+    @Override
+    public void write() throws Exception {
+        log.trace("write(): start");
+
+        if (!inited) init();
+
+        if (parentObject == null) {
+            log.debug("write(): parent object is null; nowhere to write attribute to");
+            log.debug("write(): finish");
+            return;
+        }
+
+        ((MetaDataContainer) getParentObject()).writeMetadata(this);
+
+        log.trace("write(): finish");
     }
 
     @Override
     public long[] getSelectedDims() {
+        if (!inited) init();
+
         /*
          * Currently, Attributes do not support subsetting.
          */
@@ -436,7 +782,7 @@ public class Attribute extends HObject implements DataFormat {
 
     @Override
     public long[] getStartDims() {
-        if (rank < 0) return null;
+        if (!inited) init();
 
         /*
          * Currently, Attributes do not support subsetting.
@@ -454,7 +800,7 @@ public class Attribute extends HObject implements DataFormat {
 
     @Override
     public long[] getStride() {
-        if (rank <= 0) return null;
+        if (!inited) init();
 
         /*
          * Currently, Attributes do not support subsetting.
@@ -472,13 +818,15 @@ public class Attribute extends HObject implements DataFormat {
 
     @Override
     public int[] getSelectedIndex() {
-        if (rank < 0) return null;
+        if (!inited) init();
 
         return selectedIndex;
     }
 
     @Override
     public long getHeight() {
+        if (!inited) init();
+
         if ((selectedDims == null) || (selectedIndex == null)) return 0;
 
         return selectedDims[selectedIndex[0]];
@@ -486,11 +834,245 @@ public class Attribute extends HObject implements DataFormat {
 
     @Override
     public long getWidth() {
+        if (!inited) init();
+
         if ((selectedDims == null) || (selectedIndex == null)) return 0;
 
         if ((selectedDims.length < 2) || (selectedIndex.length < 2)) return 1;
 
         return selectedDims[selectedIndex[1]];
+    }
+
+    /**
+     * Returns the number of members of the compound attribute.
+     *
+     * @return the number of members of the compound attribute.
+     */
+    @Override
+    public int getMemberCount() {
+        return numberOfMembers;
+    }
+
+    /**
+     * Returns the number of selected members of the compound attribute.
+     *
+     * Selected members are the compound fields which are selected for read/write.
+     * <p>
+     * For example, in a compound datatype of {int A, float B, char[] C}, users can
+     * choose to retrieve only {A, C} from the attribute. In this case,
+     * getSelectedMemberCount() returns two.
+     *
+     * @return the number of selected members.
+     */
+    @Override
+    public int getSelectedMemberCount() {
+        int count = 0;
+
+        if (isMemberSelected != null) {
+            for (int i = 0; i < isMemberSelected.length; i++) {
+                if (isMemberSelected[i]) {
+                    count++;
+                }
+            }
+        }
+
+        log.trace("getSelectedMemberCount(): count of selected members={}", count);
+
+        return count;
+    }
+
+    /**
+     * Returns the names of the members of the compound attribute. The names of
+     * compound members are stored in an array of Strings.
+     * <p>
+     * For example, for a compound datatype of {int A, float B, char[] C}
+     * getMemberNames() returns ["A", "B", "C"}.
+     *
+     * @return the names of compound members.
+     */
+    @Override
+    public String[] getMemberNames() {
+        return memberNames;
+    }
+
+    /**
+     * Checks if a member of the compound attribute is selected for read/write.
+     *
+     * @param idx
+     *            the index of compound member.
+     *
+     * @return true if the i-th memeber is selected; otherwise returns false.
+     */
+    @Override
+    public boolean isMemberSelected(int idx) {
+        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
+            return isMemberSelected[idx];
+        }
+
+        return false;
+    }
+
+    /**
+     * Selects the i-th member for read/write.
+     *
+     * @param idx
+     *            the index of compound member.
+     */
+    @Override
+    public void selectMember(int idx) {
+        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
+            isMemberSelected[idx] = true;
+        }
+    }
+
+    /**
+     * Selects/deselects all members.
+     *
+     * @param selectAll
+     *            The indicator to select or deselect all members. If true, all
+     *            members are selected for read/write. If false, no member is
+     *            selected for read/write.
+     */
+    @Override
+    public void setAllMemberSelection(boolean selectAll) {
+        if (isMemberSelected == null) {
+            return;
+        }
+
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            isMemberSelected[i] = selectAll;
+        }
+    }
+
+    /**
+     * Returns array containing the total number of elements of the members of the
+     * compound attribute.
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * getMemberOrders() will return an integer array of {1, 5, 6} to indicate that
+     * member A has one element, member B has 5 elements, and member C has 6
+     * elements.
+     *
+     * @return the array containing the total number of elements of the members of
+     *         the compound attribute.
+     */
+    @Override
+    public int[] getMemberOrders() {
+        return memberOrders;
+    }
+
+    /**
+     * Returns array containing the total number of elements of the selected members
+     * of the compound attribute.
+     *
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * If A and B are selected, getSelectedMemberOrders() returns an array of {1, 5}
+     *
+     * @return array containing the total number of elements of the selected members
+     *         of the compound attribute.
+     */
+    @Override
+    public int[] getSelectedMemberOrders() {
+        if (isMemberSelected == null) {
+            return memberOrders;
+        }
+
+        int idx = 0;
+        int[] orders = new int[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                orders[idx++] = memberOrders[i];
+            }
+        }
+
+        return orders;
+    }
+
+    /**
+     * Returns the dimension sizes of the i-th member.
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * getMemberDims(2) returns an array of {2, 3}, while getMemberDims(1) returns
+     * an array of {5}, and getMemberDims(0) returns null.
+     *
+     * @param i
+     *            the i-th member
+     *
+     * @return the dimension sizes of the i-th member, null if the compound member
+     *         is not an array.
+     */
+    @Override
+    public int[] getMemberDims(int i) {
+        if (memberDims == null) {
+            return null;
+        }
+
+        return (int[]) memberDims[i];
+    }
+
+    /**
+     * Returns an array of datatype objects of compound members.
+     * <p>
+     * Each member of a compound attribute has its own datatype. The datatype of a
+     * member can be atomic or other compound datatype (nested compound). The
+     * datatype objects are setup at init().
+     * <p>
+     *
+     * @return the array of datatype objects of the compound members.
+     */
+    @Override
+    public Datatype[] getMemberTypes() {
+        return memberTypes;
+    }
+
+    /**
+     * Returns an array of datatype objects of selected compound members.
+     *
+     * @return an array of datatype objects of selected compound members.
+     */
+    @Override
+    public Datatype[] getSelectedMemberTypes() {
+        if (isMemberSelected == null) {
+            return memberTypes;
+        }
+
+        int idx = 0;
+        Datatype[] types = new Datatype[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                types[idx++] = memberTypes[i];
+            }
+        }
+
+        return types;
     }
 
     /**
@@ -789,5 +1371,314 @@ public class Attribute extends HObject implements DataFormat {
 
         log.trace("toString: finish");
         return sb.toString();
+    }
+
+    /**
+     * Extracts compound information into flat structure.
+     * <p>
+     * For example, compound datatype "nest" has {nest1{a, b, c}, d, e} then
+     * extractCompoundInfo() will put the names of nested compound fields into a
+     * flat list as
+     *
+     * <pre>
+     * nest.nest1.a
+     * nest.nest1.b
+     * nest.nest1.c
+     * nest.d
+     * nest.e
+     * </pre>
+     *
+     * @param tid
+     *            the identifier of the compound datatype
+     * @param name
+     *            the name of the compound datatype
+     * @param names
+     *            the list to store the member names of the compound datatype
+     * @param flatTypeList2
+     *            the list to store the nested member names of the compound datatype
+     */
+    private void extractCompoundInfo(long tid, String name, List<String> names, List<Long> flatTypeList2) {
+        log.trace("extractCompoundInfo(): start: tid={}, name={}", tid, name);
+
+        int nMembers = 0, mclass = -1;
+        long mtype = -1;
+        String mname = null;
+
+        try {
+            nMembers = H5.H5Tget_nmembers(tid);
+        }
+        catch (Exception ex) {
+            log.debug("extractCompoundInfo(): H5Tget_nmembers(tid {}) failure", tid, ex);
+            nMembers = 0;
+        }
+        log.trace("extractCompoundInfo(): nMembers={}", nMembers);
+
+        if (nMembers <= 0) {
+            log.debug("extractCompoundInfo(): datatype has no members");
+            log.trace("extractCompoundInfo(): finish");
+            return;
+        }
+
+        long tmptid = -1;
+        for (int i = 0; i < nMembers; i++) {
+            log.trace("extractCompoundInfo(): nMembers[{}]", i);
+            try {
+                mtype = H5.H5Tget_member_type(tid, i);
+            }
+            catch (Exception ex) {
+                log.debug("extractCompoundInfo(): continue after H5Tget_member_type[{}] failure: ", i, ex);
+                continue;
+            }
+
+            try {
+                tmptid = mtype;
+                mtype = H5.H5Tget_native_type(tmptid);
+            }
+            catch (HDF5Exception ex) {
+                log.debug("extractCompoundInfo(): continue after H5Tget_native_type[{}] failure: ", i, ex);
+                continue;
+            }
+            finally {
+                try {
+                    H5.H5Tclose(tmptid);
+                }
+                catch (HDF5Exception ex) {
+                    log.debug("extractCompoundInfo(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
+                }
+            }
+
+            try {
+                mclass = H5.H5Tget_class(mtype);
+            }
+            catch (HDF5Exception ex) {
+                log.debug("extractCompoundInfo(): continue after H5Tget_class[{}] failure: ", i, ex);
+                continue;
+            }
+
+            if (names != null) {
+                mname = name + H5.H5Tget_member_name(tid, i);
+                log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
+            }
+
+            if (mclass == HDF5Constants.H5T_COMPOUND) {
+                extractCompoundInfo(mtype, mname + CompoundDS.separator, names, flatTypeList2);
+                log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
+                continue;
+            }
+            else if (mclass == HDF5Constants.H5T_ARRAY) {
+                try {
+                    tmptid = H5.H5Tget_super(mtype);
+                    int tmpclass = H5.H5Tget_class(tmptid);
+
+                    // cannot deal with ARRAY of ARRAY, support only ARRAY of atomic types
+                    if ((tmpclass == HDF5Constants.H5T_ARRAY)) {
+                        log.debug("extractCompoundInfo():[{}] unsupported ARRAY of ARRAY", i);
+                        continue;
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("extractCompoundInfo():[{}] continue after H5T_ARRAY id or class failure: ", i, ex);
+                    continue;
+                }
+                finally {
+                    try {
+                        H5.H5Tclose(tmptid);
+                    }
+                    catch (Exception ex) {
+                        log.debug("extractCompoundInfo():[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
+                    }
+                }
+            }
+
+            if (names != null) {
+                names.add(mname);
+            }
+            flatTypeList2.add(new Long(mtype));
+
+        } // for (int i=0; i<nMembers; i++)
+        log.trace("extractCompoundInfo(): finish");
+    } // extractNestedCompoundInfo
+
+    /**
+     * Creates a datatype of a compound with one field.
+     * <p>
+     * This function is needed to read/write data field by field.
+     *
+     * @param atom_tid
+     *            The datatype identifier of the compound to create
+     * @param member_name
+     *            The name of the datatype
+     * @param compInfo
+     *            compInfo[0]--IN: class of member datatype; compInfo[1]--IN: size
+     *            of member datatype; compInfo[2]--OUT: non-zero if the base type of
+     *            the compound field is unsigned; zero, otherwise.
+     *
+     * @return the identifier of the compound datatype.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
+     */
+    private final long createCompoundFieldType(long atom_tid, String member_name, int[] compInfo) throws HDF5Exception {
+        log.trace("createCompoundFieldType(): start");
+
+        long nested_tid = -1;
+
+        long arrayType = -1;
+        long baseType = -1;
+        long tmp_tid1 = -1;
+        long tmp_tid4 = -1;
+
+        try {
+            int member_class = compInfo[0];
+            int member_size = compInfo[1];
+
+            log.trace("createCompoundFieldType(): {} Member is class {} of size={} with baseType={}", member_name,
+                    member_class, member_size, baseType);
+            if (member_class == HDF5Constants.H5T_ARRAY) {
+                int mn = H5.H5Tget_array_ndims(atom_tid);
+                long[] marray = new long[mn];
+                H5.H5Tget_array_dims(atom_tid, marray);
+                baseType = H5.H5Tget_super(atom_tid);
+                tmp_tid4 = H5.H5Tget_native_type(baseType);
+                arrayType = H5.H5Tarray_create(tmp_tid4, mn, marray);
+                log.trace("createCompoundFieldType(): H5T_ARRAY {} Member is class {} of size={} with baseType={}",
+                        member_name, member_class, member_size, baseType);
+            }
+
+            try {
+                if (baseType < 0) {
+                    if (H5Datatype.isUnsigned(atom_tid)) {
+                        compInfo[2] = 1;
+                    }
+                }
+                else {
+                    if (H5Datatype.isUnsigned(baseType)) {
+                        compInfo[2] = 1;
+                    }
+                }
+            }
+            catch (Exception ex2) {
+                log.debug("createCompoundFieldType(): baseType isUnsigned: ", ex2);
+            }
+            try {
+                H5.H5Tclose(baseType);
+                baseType = -1;
+            }
+            catch (HDF5Exception ex4) {
+                log.debug("createCompoundFieldType(): H5Tclose(baseType {}) failure: ", baseType, ex4);
+            }
+
+            member_size = (int) H5.H5Tget_size(atom_tid);
+            log.trace("createCompoundFieldType(): member_size={}", member_size);
+
+            // construct nested compound structure with a single field
+            String theName = member_name;
+            if (arrayType < 0) {
+                tmp_tid1 = H5.H5Tcopy(atom_tid);
+            }
+            else {
+                tmp_tid1 = H5.H5Tcopy(arrayType);
+            }
+            try {
+                H5.H5Tclose(arrayType);
+                arrayType = -1;
+            }
+            catch (HDF5Exception ex4) {
+                log.debug("createCompoundFieldType(): H5Tclose(arrayType {}) failure: ", arrayType, ex4);
+            }
+            int sep = member_name.lastIndexOf(CompoundDS.separator);
+            log.trace("createCompoundFieldType(): sep={}", sep);
+
+            while (sep > 0) {
+                theName = member_name.substring(sep + 1);
+                log.trace("createCompoundFieldType(): sep={} with name={}", sep, theName);
+                nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, member_size);
+                H5.H5Tinsert(nested_tid, theName, 0, tmp_tid1);
+                try {
+                    log.trace("createCompoundFieldType(sep): H5.H5Tclose:tmp_tid1={}", tmp_tid1);
+                    H5.H5Tclose(tmp_tid1);
+                }
+                catch (Exception ex) {
+                    log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex);
+                }
+                tmp_tid1 = nested_tid;
+                member_name = member_name.substring(0, sep);
+                sep = member_name.lastIndexOf(CompoundDS.separator);
+            }
+
+            nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, member_size);
+
+            H5.H5Tinsert(nested_tid, member_name, 0, tmp_tid1);
+        }
+        finally {
+            try {
+                log.trace("createCompoundFieldType(): finally H5.H5Tclose:tmp_tid1={}", tmp_tid1);
+                H5.H5Tclose(tmp_tid1);
+            }
+            catch (HDF5Exception ex3) {
+                log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex3);
+            }
+            try {
+                log.trace("createCompoundFieldType(): finally H5.H5Tclose:tmp_tid4={}", tmp_tid4);
+                H5.H5Tclose(tmp_tid4);
+            }
+            catch (HDF5Exception ex3) {
+                log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid4, ex3);
+            }
+            try {
+                log.trace("createCompoundFieldType(): finally H5.H5Tclose:baseType={}", baseType);
+                H5.H5Tclose(baseType);
+            }
+            catch (HDF5Exception ex4) {
+                log.debug("createCompoundFieldType(): H5Tclose(baseType {}) failure: ", baseType, ex4);
+            }
+            try {
+                log.trace("createCompoundFieldType(): finally H5.H5Tclose:arrayType={}", arrayType);
+                H5.H5Tclose(arrayType);
+            }
+            catch (HDF5Exception ex4) {
+                log.debug("createCompoundFieldType(): H5Tclose(arrayType {}) failure: ", arrayType, ex4);
+            }
+        }
+
+        log.trace("createCompoundFieldType(): finish");
+        return nested_tid;
+    }
+
+    /**
+     * Given an array of bytes representing a compound Datatype and a start index
+     * and length, converts len number of bytes into the correct Object type and
+     * returns it.
+     *
+     * @param data
+     *            The byte array representing the data of the compound Datatype
+     * @param data_type
+     *            The type of data to convert the bytes to
+     * @param start
+     *            The start index of the bytes to get
+     * @param len
+     *            The number of bytes to convert
+     * @return The converted type of the bytes
+     */
+    private Object convertCompoundByteMember(byte[] data, long data_type, long start, long len) {
+        Object currentData = null;
+
+        try {
+            long typeClass = H5.H5Tget_class(data_type);
+
+            if (typeClass == HDF5Constants.H5T_INTEGER) {
+                long size = H5.H5Tget_size(data_type);
+
+                currentData = HDFNativeData.byteToInt((int) start, (int) (len / size), data);
+            }
+            else if (typeClass == HDF5Constants.H5T_FLOAT) {
+                currentData = HDFNativeData.byteToDouble((int) start, 1, data);
+            }
+        }
+        catch (Exception ex) {
+            log.debug("convertCompoundByteMember(): conversion failure: ", ex);
+        }
+
+        return currentData;
     }
 }

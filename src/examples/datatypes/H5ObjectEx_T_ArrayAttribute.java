@@ -87,8 +87,8 @@ public class H5ObjectEx_T_ArrayAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute dataArray = new Attribute(ATTRIBUTENAME, typeIntArray, dims);
-            dset.writeMetadata(dataArray);
+            Attribute dataArray = new Attribute(dset, ATTRIBUTENAME, typeIntArray, dims);
+            dataArray.write();
         }
         catch (Exception e) {
             e.printStackTrace();

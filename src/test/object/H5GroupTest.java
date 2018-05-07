@@ -621,7 +621,7 @@ public class H5GroupTest {
                 }
             }
             try {
-                testGroup.writeMetadata(attr);
+                attr.write();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -629,9 +629,10 @@ public class H5GroupTest {
         } // for (int i=0; i<n; i++) {
 
         // attache a new attribute
-        attr = new Attribute("float attribute", typeFloat, new long[] { 1 }, new float[] { TEST_VALUE_FLOAT });
+        attr = new Attribute(testGroup, "float attribute", typeFloat, new long[] { 1 },
+                new float[] { TEST_VALUE_FLOAT });
         try {
-            testGroup.writeMetadata(attr);
+            attr.write();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
@@ -748,7 +749,7 @@ public class H5GroupTest {
                 }
             }
             try {
-                testGroup.writeMetadata(attr);
+                attr.write();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -823,8 +824,10 @@ public class H5GroupTest {
 
         // restore to the original
         try {
-            testGroup.writeMetadata(H5TestFile.ATTRIBUTE_STR);
-            testGroup.writeMetadata(H5TestFile.ATTRIBUTE_INT_ARRAY);
+            H5TestFile.ATTRIBUTE_STR.setParentObject(testGroup);
+            H5TestFile.ATTRIBUTE_INT_ARRAY.setParentObject(testGroup);
+            H5TestFile.ATTRIBUTE_STR.write();
+            H5TestFile.ATTRIBUTE_INT_ARRAY.write();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);

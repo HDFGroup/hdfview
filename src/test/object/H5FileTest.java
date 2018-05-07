@@ -1883,18 +1883,20 @@ public class H5FileTest {
         }
         assertNotNull(g1);
 
-        Attribute attr1 = new Attribute("intAttr", new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1),
+        Attribute attr1 = new Attribute(g1, "intAttr", new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1),
                 new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
-        Attribute attr2 = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
+        Attribute attr2 = new Attribute(g1, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1),
+                new long[] { 1 },
                 new String[] { "String attribute." });
 
-        Attribute attr3 = new Attribute("floatAttr", new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1), new long[] { 2 },
+        Attribute attr3 = new Attribute(g1, "floatAttr", new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1),
+                new long[] { 2 },
                 new float[] { 2, 4 });
 
         try {
-            g1.writeMetadata(attr1);
-            g1.writeMetadata(attr2);
-            g1.writeMetadata(attr3);
+            attr1.write();
+            attr2.write();
+            attr3.write();
         }
         catch (final Exception ex) {
             fail("g1.writeMetadata() failed. " + ex);
@@ -1909,7 +1911,7 @@ public class H5FileTest {
         }
         List attributeList = null;
         try {
-            attributeList = H5File.getAttribute(gid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC);
+            attributeList = H5File.getAttribute(g1, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC);
             // Retrieve attributes in increasing creation order.
             assertEquals(attr2.getName(), attributeList.get(1).toString());
         }
@@ -1918,7 +1920,7 @@ public class H5FileTest {
         }
 
         try {
-            attributeList = H5File.getAttribute(gid);
+            attributeList = H5File.getAttribute(g1);
             // Retrieve attributes in increasing alphabetical order.
             assertEquals(attr2.getName(), attributeList.get(2).toString());
         }
@@ -1987,11 +1989,12 @@ public class H5FileTest {
         }
         assertNotNull(d1);
 
-        Attribute attr1 = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
+        Attribute attr1 = new Attribute(d1, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1),
+                new long[] { 1 },
                 new String[] { "String attribute." });
 
         try {
-            d1.writeMetadata(attr1);
+            attr1.write();
         }
         catch (final Exception ex) {
             fail("d1.writeMetadata() failed. " + ex);
@@ -2069,23 +2072,26 @@ public class H5FileTest {
         }
         assertNotNull(d1);
 
-        Attribute attr1 = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
+        Attribute attr1 = new Attribute(g1, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1),
+                new long[] { 1 },
                 new String[] { "String attribute." });
 
         try {
-            g1.writeMetadata(attr1);
+            attr1.write();
         }
         catch (final Exception ex) {
             fail("g1.writeMetadata() failed. " + ex);
         }
         try {
-            t1.writeMetadata(attr1);
+            attr1.setParentObject(t1);
+            attr1.write();
         }
         catch (final Exception ex) {
             fail("d1.writeMetadata() failed. " + ex);
         }
         try {
-            d1.writeMetadata(attr1);
+            attr1.setParentObject(d1);
+            attr1.write();
         }
         catch (final Exception ex) {
             fail("d1.writeMetadata() failed. " + ex);

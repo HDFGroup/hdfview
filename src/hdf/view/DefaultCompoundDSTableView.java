@@ -105,8 +105,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         log.trace("loadData(): start");
 
         if (dataObject.getRank() <= 0) {
-            if (dataObject instanceof CompoundDS)
-                ((CompoundDS) dataObject).init();
+            dataObject.init();
 
             log.trace("loadData(): inited");
         }
@@ -116,7 +115,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             ((CompoundDS) dataObject).setConvertByteToString(false);
         }
 
-        /* TODO: move down into the object library */
         // Make sure entire dataset is not loaded when looking at 3D
         // datasets using the default display mode (double clicking the
         // data object)
@@ -466,7 +464,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         try {
             log.trace("updateValueInFile(): write");
-            ((CompoundDS) dataObject).write();
+            dataObject.write();
         }
         catch (Exception ex) {
             shell.getDisplay().beep();

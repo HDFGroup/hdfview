@@ -203,9 +203,8 @@ public class TestH5Object
             final String attrName = "Test attribute";
             final String[] attrValue = {"Test for group attribute"};
             final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, -1, -1);
-            final Attribute attr = new Attribute(attrName, attrType, attrDims);
-            attr.setData(attrValue);
-            g1.writeMetadata(attr);
+            final Attribute attr = new Attribute(g1, attrName, attrType, attrDims);
+            attr.write(attrValue);
         } catch (final Exception ex) { failed(message, ex, file); return null; }
 
         // create datasets
@@ -768,9 +767,7 @@ public class TestH5Object
             file = new H5File(fname);
             final Dataset dset = (Dataset)file.get(NAME_DATASET_ATTR);
 
-            final long did = dset.open();
-            List<Attribute> attrs = H5File.getAttribute(did);
-            try { dset.close(did); } catch (final Exception ex2) {}
+            List<Attribute> attrs = H5File.getAttribute(dset);
             if ((attrs == null) || (attrs.size() < 1)) {
                 failed(message, new HDF5LibraryException("failed to read attributes from dataset"), file);
                 return 1;
@@ -778,9 +775,7 @@ public class TestH5Object
 
             attrs.clear();
             final Group grp = (Group)file.get(NAME_GROUP_ATTR);
-            final long gid = grp.open();
-            attrs = H5File.getAttribute(gid);
-            try { grp.close(gid); } catch (final Exception ex2) {}
+            attrs = H5File.getAttribute(grp);
             if ((attrs == null) || (attrs.size() < 1)) {
                 failed(message, new HDF5LibraryException("failed to read attributes from group"), file);
                 return 1;

@@ -14,8 +14,6 @@
 
 package hdf.object;
 
-/* TODO: Update comments */
-
 /**
  * An interface that provides general I/O operations for object data. For
  * example, reading data content from the file into memory or writing data
@@ -28,6 +26,8 @@ package hdf.object;
  * @author Jordan T. Henderson
  */
 public interface DataFormat {
+    public abstract void init();
+
     /**
      * Retrieves the object's data from the file.
      *
@@ -91,6 +91,14 @@ public interface DataFormat {
      *             if data can not be written
      */
     public abstract void write(Object buf) throws Exception;
+
+    /**
+     * Writes the current memory buffer to the object in the file.
+     *
+     * @throws Exception
+     *             if data can not be written
+     */
+    public abstract void write() throws Exception;
 
     /**
      * Returns the fill values for the data object.

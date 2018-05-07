@@ -109,6 +109,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     protected boolean                     isH5, isH4;
 
+    private final static String[]         attrTableColNames = { "Name", "Type", "Array Size", "Value[50](...)" };
+
     public DefaultBaseMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
         log.trace("start");
 
@@ -221,8 +223,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             addButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false, 2, 1));
         }
 
-        String[] columnNames = { "Name", "Type", "Array Size", "Value[50](...)" };
-
         attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         attrTable.setLinesVisible(true);
         attrTable.setHeaderVisible(true);
@@ -282,15 +282,15 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
         });
 
-        for (int i = 0; i < columnNames.length; i++) {
+        for (int i = 0; i < attrTableColNames.length; i++) {
             TableColumn column = new TableColumn(attrTable, SWT.NONE);
-            column.setText(columnNames[i]);
+            column.setText(attrTableColNames[i]);
             column.setMoveable(false);
 
             /*
              * Make sure all columns show even when the object in question has no attributes
              */
-            if (i == columnNames.length - 1)
+            if (i == attrTableColNames.length - 1)
                 column.setWidth(200);
             else
                 column.setWidth(50);
@@ -300,51 +300,17 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             attrNumberLabel.setText("Number of attributes = " + numAttributes);
 
             Attribute attr = null;
-            String name, type, size;
             for (int i = 0; i < numAttributes; i++) {
                 attr = (Attribute) attrList.get(i);
-                name = attr.getName();
-                type = attr.getDatatype().getDatatypeDescription();
-                log.trace("createAttributeInfoPane(): attr[{}] is {} of type {}", i, name, type);
 
-                if (name == null) name = "null";
-                if (type == null) type = "null";
+                log.trace("createAttributeInfoPane(): attr[{}] is {} of type {}", i, attr.getName(),
+                        attr.getDatatype().getDatatypeDescription());
 
-                if (attr.isScalar()) {
-                    size = "Scalar";
-                }
-                else {
-                    long dims[] = attr.getDims();
-                    size = String.valueOf(dims[0]);
-                    for (int j = 1; j < dims.length; j++) {
-                        size += " x " + dims[j];
-                    }
-
-                    if (size == null) size = "null";
-                }
-
-                TableItem item = new TableItem(attrTable, SWT.NONE);
-                item.setFont(curFont);
-                item.setData(attr);
-
-                if (attr.getProperty("field") != null) {
-                    String fieldInfo = " {Field: " + attr.getProperty("field") + "}";
-                    item.setText(0, (name + fieldInfo == null) ? "null" : name + fieldInfo);
-                }
-                else {
-                    item.setText(0, (name == null) ? "null" : name);
-                }
-
-                String value = attr.toString(", ", 50);
-                if (value == null) value = "null";
-
-                item.setText(1, type);
-                item.setText(2, size);
-                item.setText(3, value);
+                addAttributeTableItem(attrTable, attr);
             } // for (int i=0; i<n; i++)
         }
 
-        for (int i = 0; i < columnNames.length; i++) {
+        for (int i = 0; i < attrTableColNames.length; i++) {
             attrTable.getColumn(i).pack();
         }
 
@@ -717,25 +683,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             return null;
         }
 
-        String rowData[] = new String[4]; // name, value, type, size
-
-        rowData[0] = attr.getName();
-        rowData[1] = attr.toString(", ");
-        rowData[2] = attr.getDatatype().getDatatypeDescription();
-
-        long dims[] = attr.getDims();
-
-        rowData[3] = String.valueOf(dims[0]);
-        for (int j = 1; j < dims.length; j++) {
-            rowData[3] += " x " + dims[j];
-        }
-
-        log.trace("addAttribute(): attr name={} value={} type={} size={}", rowData[0], rowData[1], rowData[2],
-                rowData[3]);
-
-        TableItem item = new TableItem(attrTable, SWT.NONE);
-        item.setFont(curFont);
-        item.setText(rowData);
+        addAttributeTableItem(attrTable, attr);
 
         numAttributes++;
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
@@ -1060,6 +1008,54 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
 
         log.trace("updateAttributeValue(): finish");
+    }
+
+    private void addAttributeTableItem(Table table, Attribute attr) {
+        if (table == null || attr == null) {
+            log.debug("addAttributeTableItem(): table or attribute is null");
+            return;
+        }
+
+        String attrName = attr.getName();
+        String attrType = attr.getDatatype().getDatatypeDescription();
+        String attrSize;
+        String attrValue = attr.toString(", ", 50);
+        String[] rowData = new String[attrTableColNames.length];
+
+        if (attrName == null) attrName = "null";
+        if (attrType == null) attrType = "null";
+        if (attrValue == null) attrValue = "null";
+
+        TableItem item = new TableItem(attrTable, SWT.NONE);
+        item.setFont(curFont);
+        item.setData(attr);
+
+        if (attr.getProperty("field") != null) {
+            String fieldInfo = " {Field: " + attr.getProperty("field") + "}";
+            rowData[0] = (attrName + fieldInfo == null) ? "null" : attrName + fieldInfo;
+        }
+        else {
+            rowData[0] = attrName;
+        }
+
+        if (attr.isScalar()) {
+            attrSize = "Scalar";
+        }
+        else {
+            long dims[] = attr.getDims();
+            attrSize = String.valueOf(dims[0]);
+            for (int j = 1; j < dims.length; j++) {
+                attrSize += " x " + dims[j];
+            }
+
+            if (attrSize == null) attrSize = "null";
+        }
+
+        rowData[1] = attrType;
+        rowData[2] = attrSize;
+        rowData[3] = attrValue;
+
+        item.setText(rowData);
     }
 
     private class UserBlockDialog extends Dialog {

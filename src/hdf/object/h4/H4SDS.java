@@ -210,7 +210,7 @@ public class H4SDS extends ScalarDS
     // To do: Implementing Dataset
     @Override
     public Dataset copy(Group pgroup, String dname, long[] dims, Object buff)
-    throws Exception
+            throws Exception
     {
         log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
 
@@ -270,8 +270,8 @@ public class H4SDS extends ScalarDS
         // create the new dataset and attach it to the parent group
         tid = datatypeID;
         dstdid = HDFLibrary.SDcreate(
-            ((H4File)pgroup.getFileFormat()).getSDAccessID(),
-            dname, tid, theRank, count);
+                ((H4File)pgroup.getFileFormat()).getSDAccessID(),
+                dname, tid, theRank, count);
         if (dstdid < 0) {
             log.debug("copy(): Invalid dest SDID");
             log.trace("copy(): finish");
@@ -490,7 +490,7 @@ public class H4SDS extends ScalarDS
             HDFLibrary.HXsetdir(getFileFormat().getParent());
 
             HDFLibrary.SDwritedata(id, start, stride, select, tmpData);
-        //} catch (Exception ex) {ex.printStackTrace();
+            //} catch (Exception ex) {ex.printStackTrace();
         }
         catch (Exception ex) {
             log.debug("write(): failure: ", ex);
@@ -549,7 +549,7 @@ public class H4SDS extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
@@ -578,13 +578,13 @@ public class H4SDS extends ScalarDS
 
             // retrieve attribute of dimension
             // BUG !! HDFLibrary.SDgetdimstrs(dimID, argv, 80) does not return anything
-/*
+            /*
             for (int i=0; i< rank; i++) {
                 int dimID = HDFLibrary.SDgetdimid(id, i);
                 String[] argv = {" ", " ", " "};
                 HDFLibrary.SDgetdimstrs(dimID, argv, 80);
             }
-*/
+             */
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);
@@ -983,7 +983,7 @@ public class H4SDS extends ScalarDS
                     idims[0] = (int)dims[0];
                     data = new byte[tsize*vsize];
                 }
-                */
+                 */
 
             }
             catch (Exception ex) {
@@ -1082,9 +1082,9 @@ public class H4SDS extends ScalarDS
             long[] chunks,
             int gzip,
             Object data) throws Exception
-   {
+    {
         return create(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
-   }
+    }
 
     /**
      * copy attributes from one SDS to another SDS

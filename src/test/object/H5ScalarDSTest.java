@@ -1629,7 +1629,7 @@ public class H5ScalarDSTest {
                 }
             }
             try {
-                testDataset.writeMetadata(attr);
+                attr.write();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -1637,9 +1637,10 @@ public class H5ScalarDSTest {
         } // for (int i=0; i<n; i++) {
 
         // attache a new attribute
-        attr = new Attribute("float attribute", typeFloat, new long[] { 1 }, new float[] { TEST_VALUE_FLOAT });
+        attr = new Attribute(testDataset, "float attribute", typeFloat, new long[] { 1 },
+                new float[] { TEST_VALUE_FLOAT });
         try {
-            testDataset.writeMetadata(attr);
+            attr.write();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
@@ -1756,7 +1757,7 @@ public class H5ScalarDSTest {
                 }
             }
             try {
-                testDataset.writeMetadata(attr);
+                attr.write();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -1831,8 +1832,10 @@ public class H5ScalarDSTest {
 
         // restore to the original
         try {
-            testDataset.writeMetadata(H5TestFile.ATTRIBUTE_STR);
-            testDataset.writeMetadata(H5TestFile.ATTRIBUTE_INT_ARRAY);
+            H5TestFile.ATTRIBUTE_STR.setParentObject(testDataset);
+            H5TestFile.ATTRIBUTE_INT_ARRAY.setParentObject(testDataset);
+            H5TestFile.ATTRIBUTE_STR.write();
+            H5TestFile.ATTRIBUTE_INT_ARRAY.write();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);

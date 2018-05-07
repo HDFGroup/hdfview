@@ -118,7 +118,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute attr = new Attribute(ATTRIBUTENAME, typeRef, dims);
+            Attribute attr = new Attribute(dset, ATTRIBUTENAME, typeRef, dims);
             attr.setData(dset_data);
             file.writeAttribute(dset, attr, false);
         }
@@ -220,38 +220,38 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
                 }
                 if ((object_id >= 0) && (object_type >= -1)) {
                     switch (H5O_TYPE_obj.get(object_type)) {
-                    case H5O_TYPE_GROUP:
-                        System.out.print("H5O_TYPE_GROUP");
-                        try {
-                            if (object_id >= 0)
-                                H5.H5Gclose(object_id);
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case H5O_TYPE_DATASET:
-                        System.out.print("H5O_TYPE_DATASET");
-                        try {
-                            if (object_id >= 0)
-                                H5.H5Dclose(object_id);
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case H5O_TYPE_NAMED_DATATYPE:
-                        System.out.print("H5O_TYPE_NAMED_DATATYPE");
-                        try {
-                            if (object_id >= 0)
-                                H5.H5Tclose(object_id);
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    default:
-                        System.out.print("UNHANDLED");
+                        case H5O_TYPE_GROUP:
+                            System.out.print("H5O_TYPE_GROUP");
+                            try {
+                                if (object_id >= 0)
+                                    H5.H5Gclose(object_id);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case H5O_TYPE_DATASET:
+                            System.out.print("H5O_TYPE_DATASET");
+                            try {
+                                if (object_id >= 0)
+                                    H5.H5Dclose(object_id);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case H5O_TYPE_NAMED_DATATYPE:
+                            System.out.print("H5O_TYPE_NAMED_DATATYPE");
+                            try {
+                                if (object_id >= 0)
+                                    H5.H5Tclose(object_id);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        default:
+                            System.out.print("UNHANDLED");
                     }
                 }
                 // Print the name.

@@ -86,7 +86,7 @@ public class FitsDataset extends ScalarDS
      */
     @Override
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
-    throws Exception {
+            throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -145,6 +145,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public List getMetadata() throws Exception {
         if (attributeList != null) {
@@ -170,7 +171,7 @@ public class FitsDataset extends ScalarDS
         while (it.hasNext()) {
             value = "";
             hc = (HeaderCard)it.next();
-            attr = new Attribute(hc.getKey(), dtype, dims);
+            attr = new Attribute(this, hc.getKey(), dtype, dims);
             String tvalue = hc.getValue();
             if (tvalue != null) {
                 value += tvalue;

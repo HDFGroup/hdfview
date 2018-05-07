@@ -84,11 +84,11 @@ public class H5TestFile {
             new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE) };
 
     // attributes
-    public final static Attribute ATTRIBUTE_STR = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING,
+    public final static Attribute ATTRIBUTE_STR = new Attribute(null, "strAttr", new H5Datatype(Datatype.CLASS_STRING,
             STR_LEN, -1, -1), new long[] { 1 }, new String[] { "String attribute." });
-    public final static Attribute ATTRIBUTE_INT_ARRAY = new Attribute("arrayInt", new H5Datatype(
+    public final static Attribute ATTRIBUTE_INT_ARRAY = new Attribute(null, "arrayInt", new H5Datatype(
             Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1), new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9,
-            10 });
+                    10 });
 
     /**
      * Creates an HDF5 test file.
@@ -154,8 +154,10 @@ public class H5TestFile {
         g1 = file.createGroup(NAME_GROUP_ATTR, null);
         g00 = file.createGroup(NAME_GROUP_SUB, null);
 
-        g1.writeMetadata(ATTRIBUTE_STR);
-        g1.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR.setParentObject(g1);
+        ATTRIBUTE_INT_ARRAY.setParentObject(g1);
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dsets[0] = file.createScalarDS(NAME_DATASET_INT, null, typeInt, DIMs, null, CHUNKs, 9, DATA_INT);
         dsets[1] = file.createScalarDS(NAME_DATASET_FLOAT, null, typeFloat, DIMs, null, CHUNKs, 9, DATA_FLOAT);
@@ -173,8 +175,10 @@ public class H5TestFile {
 
         // attach attributes to all datasets
         for (int i = 0; i < dsets.length; i++) {
-            dsets[i].writeMetadata(ATTRIBUTE_STR);
-            dsets[i].writeMetadata(ATTRIBUTE_INT_ARRAY);
+            ATTRIBUTE_STR.setParentObject(dsets[i]);
+            ATTRIBUTE_INT_ARRAY.setParentObject(dsets[i]);
+            ATTRIBUTE_STR.write();
+            ATTRIBUTE_INT_ARRAY.write();
         }
 
         // create a wave palette and attach it to the image
@@ -186,26 +190,33 @@ public class H5TestFile {
         for (int i = 0; i < n; i++) {
             final Attribute attr = (Attribute) attrs.get(i);
             if ("PALETTE".equals(attr.getName())) {
-                attr.setData(oid);
-                dsets[7].writeMetadata(attr);
+                attr.write(oid);
             }
         }
 
         Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_INT);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR.setParentObject(dtype);
+        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE, NAME_DATATYPE_UINT);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR.setParentObject(dtype);
+        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_FLOAT);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR.setParentObject(dtype);
+        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1, NAME_DATATYPE_STR);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR.setParentObject(dtype);
+        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         file.createLink(g0, NAME_HARD_LINK_TO_IMAGE, dsets[7]);
 

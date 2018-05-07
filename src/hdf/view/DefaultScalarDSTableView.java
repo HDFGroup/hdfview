@@ -158,10 +158,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         if (dataObject.getRank() <= 0) {
             try {
-                if (dataObject instanceof ScalarDS)
-                    ((ScalarDS) dataObject).init();
+                dataObject.init();
 
-                log.trace("loadData(): dataset inited");
+                log.trace("loadData(): data object inited");
             }
             catch (Exception ex) {
                 Tools.showError(shell, "Load", "loadData:" + ex.getMessage());
@@ -172,7 +171,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
         }
 
-        /* TODO: move down into object library */
         // Make sure entire dataset is not loaded when looking at 3D
         // datasets using the default display mode (double clicking the
         // data object)
@@ -423,7 +421,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             "Enter fixed data length when importing text data\n\n"
                                     + "For example, for a text string of \"12345678\"\n\t\tenter 2,"
                                     + "the data will be 12, 34, 56, 78\n\t\tenter 4, the data will be" + "1234, 5678\n")
-                                            .open();
+                            .open();
 
                     if ((str == null) || (str.length() < 1)) {
                         checkFixedDataLength.setSelection(false);
@@ -893,7 +891,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         try {
             log.trace("updateValueInFile(): write");
-            ((ScalarDS) dataObject).write();
+            dataObject.write();
         }
         catch (Exception ex) {
             shell.getDisplay().beep();

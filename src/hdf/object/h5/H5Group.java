@@ -199,26 +199,20 @@ public class H5Group extends Group {
     public List getMetadata(int... attrPropList) throws HDF5Exception {
         log.trace("getMetadata(): start");
         if (attributeList == null) {
-            long gid = open();
-            if(gid >= 0) {
-                int indxType = fileFormat.getIndexType(null);
-                int order = fileFormat.getIndexOrder(null);
+            int indxType = fileFormat.getIndexType(null);
+            int order = fileFormat.getIndexOrder(null);
 
-                if (attrPropList.length > 0) {
-                    indxType = attrPropList[0];
-                    if (attrPropList.length > 1) {
-                        order = attrPropList[1];
-                    }
-                }
-                try {
-                    attributeList = H5File.getAttribute(gid, indxType, order);
-                }
-                finally {
-                    close(gid);
+            if (attrPropList.length > 0) {
+                indxType = attrPropList[0];
+                if (attrPropList.length > 1) {
+                    order = attrPropList[1];
                 }
             }
-            else {
-                log.debug("getMetadata(): failed to open group");
+            try {
+                attributeList = H5File.getAttribute(this, indxType, order);
+            }
+            catch (Exception ex) {
+                log.debug("getMetadata(): H5File.getAttribute failure: ", ex);
             }
         }
 

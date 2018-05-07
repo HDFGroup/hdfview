@@ -1322,7 +1322,7 @@ public class HDFView implements ViewManager {
                 if ((DataView) shellData != null) {
                     HObject obj = ((DataView) shellData).getDataObject();
 
-                    if (obj == null) continue;
+                    if (obj == null || obj.getFileFormat() == null) continue;
 
                     /*
                      * TODO: Handle attributes

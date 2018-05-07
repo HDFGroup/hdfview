@@ -183,10 +183,51 @@ public class H5ScalarDS extends ScalarDS {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves datatype and dataspace information from file and sets the dataset
+     * in memory.
+     * <p>
+     * The init() is designed to support lazy operation in a dataset object. When a
+     * data object is retrieved from file, the datatype, dataspace and raw data are
+     * not loaded into memory. When it is asked to read the raw data from file,
+     * init() is first called to get the datatype and dataspace information, then
+     * load the raw data from file.
+     * <p>
+     * init() is also used to reset the selection of a dataset (start, stride and
+     * count) to the default, which is the entire dataset for 1D or 2D datasets. In
+     * the following example, init() at step 1) retrieves datatype and dataspace
+     * information from file. getData() at step 3) reads only one data point. init()
+     * at step 4) resets the selection to the whole dataset. getData() at step 4)
+     * reads the values of whole dataset into memory.
      *
-     * @see hdf.object.Dataset#init()
+     * <pre>
+     * dset = (Dataset) file.get(NAME_DATASET);
+     *
+     * // 1) get datatype and dataspace information from file
+     * dset.init();
+     * rank = dset.getRank(); // rank = 2, a 2D dataset
+     * count = dset.getSelectedDims();
+     * start = dset.getStartDims();
+     * dims = dset.getDims();
+     *
+     * // 2) select only one data point
+     * for (int i = 0; i &lt; rank; i++) {
+     *     start[0] = 0;
+     *     count[i] = 1;
+     * }
+     *
+     * // 3) read one data point
+     * data = dset.getData();
+     *
+     * // 4) reset selection to the whole dataset
+     * dset.init();
+     *
+     * // 5) clean the memory data buffer
+     * dset.clearData();
+     *
+     * // 6) Read the whole dataset
+     * data = dset.getData();
+     * </pre>
      */
     @Override
     public void init() {
@@ -1116,14 +1157,16 @@ public class H5ScalarDS extends ScalarDS {
                 order = attrPropList[1];
             }
         }
+
+        attributeList = H5File.getAttribute(this, indxType, order);
+        log.trace("getMetadata(): attributeList loaded");
+
         log.trace("getMetadata(): open dataset");
         did = open();
         if (did >= 0) {
             log.trace("getMetadata(): dataset opened");
             try {
                 compression = "";
-                attributeList = H5File.getAttribute(did, indxType, order);
-                log.trace("getMetadata(): attributeList loaded");
 
                 // get the compression and chunk information
                 pcid = H5.H5Dget_create_plist(did);
@@ -2243,44 +2286,44 @@ public class H5ScalarDS extends ScalarDS {
 
         try {
             switch (datatypeClass) {
-            case Datatype.CLASS_INTEGER:
-            case Datatype.CLASS_ENUM:
-            case Datatype.CLASS_CHAR:
-                log.trace("parseFillValue(): class CLASS_INT-ENUM-CHAR");
-                if (datatypeSize == 1) {
-                    data = new byte[] { (byte) val_dbl };
-                }
-                else if (datatypeSize == 2) {
-                    data = HDFNativeData.shortToByte((short) val_dbl);
-                }
-                else if (datatypeSize == 8) {
+                case Datatype.CLASS_INTEGER:
+                case Datatype.CLASS_ENUM:
+                case Datatype.CLASS_CHAR:
+                    log.trace("parseFillValue(): class CLASS_INT-ENUM-CHAR");
+                    if (datatypeSize == 1) {
+                        data = new byte[] { (byte) val_dbl };
+                    }
+                    else if (datatypeSize == 2) {
+                        data = HDFNativeData.shortToByte((short) val_dbl);
+                    }
+                    else if (datatypeSize == 8) {
+                        data = HDFNativeData.longToByte((long) val_dbl);
+                    }
+                    else {
+                        data = HDFNativeData.intToByte((int) val_dbl);
+                    }
+                    break;
+                case Datatype.CLASS_FLOAT:
+                    log.trace("parseFillValue(): class CLASS_FLOAT");
+                    if (datatypeSize == 8) {
+                        data = HDFNativeData.doubleToByte(val_dbl);
+                    }
+                    else {
+                        data = HDFNativeData.floatToByte((float) val_dbl);
+                        ;
+                    }
+                    break;
+                case Datatype.CLASS_STRING:
+                    log.trace("parseFillValue(): class CLASS_STRING");
+                    data = val_str.getBytes();
+                    break;
+                case Datatype.CLASS_REFERENCE:
+                    log.trace("parseFillValue(): class CLASS_REFERENCE");
                     data = HDFNativeData.longToByte((long) val_dbl);
-                }
-                else {
-                    data = HDFNativeData.intToByte((int) val_dbl);
-                }
-                break;
-            case Datatype.CLASS_FLOAT:
-                log.trace("parseFillValue(): class CLASS_FLOAT");
-                if (datatypeSize == 8) {
-                    data = HDFNativeData.doubleToByte(val_dbl);
-                }
-                else {
-                    data = HDFNativeData.floatToByte((float) val_dbl);
-                    ;
-                }
-                break;
-            case Datatype.CLASS_STRING:
-                log.trace("parseFillValue(): class CLASS_STRING");
-                data = val_str.getBytes();
-                break;
-            case Datatype.CLASS_REFERENCE:
-                log.trace("parseFillValue(): class CLASS_REFERENCE");
-                data = HDFNativeData.longToByte((long) val_dbl);
-                break;
-            default:
-                log.debug("parseFillValue(): datatypeClass unknown");
-                break;
+                    break;
+                default:
+                    log.debug("parseFillValue(): datatypeClass unknown");
+                    break;
             } // switch (tclass)
         }
         catch (Exception ex) {

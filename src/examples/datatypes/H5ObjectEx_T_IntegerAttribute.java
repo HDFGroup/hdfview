@@ -66,8 +66,8 @@ public class H5ObjectEx_T_IntegerAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute dataArray = new Attribute(ATTRIBUTENAME, typeBigInt, dims);
-            dset.writeMetadata(dataArray);
+            Attribute dataArray = new Attribute(dset, ATTRIBUTENAME, typeBigInt, dims);
+            dataArray.write();
         }
         catch (Exception e) {
             e.printStackTrace();
