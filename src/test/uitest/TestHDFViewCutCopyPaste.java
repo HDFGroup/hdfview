@@ -197,7 +197,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             items[0].click();
             items[0].contextMenu("Paste").click();
 
-            SWTBotShell copyTargetShell = bot.shell("Copy object");
+            SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
             copyTargetShell.bot().button("OK").click();
             bot.waitUntil(Conditions.shellCloses(copyTargetShell));
@@ -285,7 +285,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             items[1].click();
             items[1].contextMenu("Paste").click();
 
-            SWTBotShell copyTargetShell = bot.shell("Copy object");
+            SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
             copyTargetShell.bot().button("OK").click();
             bot.waitUntil(Conditions.shellCloses(copyTargetShell));
@@ -342,12 +342,433 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             ae.printStackTrace();
         }
         finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.close();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
             try {
-                if (hdf_file2 != null)
-                    closeFile(hdf_file2, true);
+                closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    @Test
+    public void testCutPasteGroupInDifferentFile() {
+        String filename = "testcopy";
+        String filenameTo = "testpaste";
+        String file_ext = ".h5";
+        SWTBotShell tableShell = null;
+
+        File hdf_file = createHDF5File(filename);
+        File hdf_file2 = createHDF5File(filenameTo);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            createNewHDF5Group();
+            createNewHDF5Dataset();
+
+            assertTrue(constructWrongValueMessage("testCutPasteGroupInDifferentFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 4);
+            assertTrue("testCutPasteGroupInDifferentFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCutPasteGroupInDifferentFile() filetree is missing dataset '" + datasetname + "'",
+                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[0].getNode(0).click();
+            items[0].getNode(0).contextMenu("Cut").click();
+
+            items[1].click();
+            items[1].contextMenu("Paste").click();
+
+            SWTBotShell copyTargetShell = bot.shells()[1];
+            copyTargetShell.activate();
+            copyTargetShell.bot().button("OK").click();
+            bot.waitUntil(Conditions.shellCloses(copyTargetShell));
+
+            // Reload file
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            // Reload file
+            items[1].click();
+            items[1].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[1].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testCutPasteGroupInDifferentFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 4);
+            assertTrue("testCutPasteGroupInDifferentFile() filetree is missing group '" + groupname + "'", items[1].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCutPasteGroupInDifferentFile() filetree is missing dataset '" + datasetname + "'",
+                    items[1].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[1].getNode(0).click();
+            items[1].getNode(0).getNode(0).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            for (int row = 1; row <= table2.preferredRowCount() - 1; row++) {
+                for (int col = 1; col < table2.preferredColumnCount(); col++) {
+                    String expected = String.valueOf(((row - 1) * (table2.preferredColumnCount() - 1)) + (col));
+                    String val = table2.getCellDataValueByPosition(row, col);
+                    assertTrue(constructWrongValueMessage("testCutPasteGroupInDifferentFile()", "wrong data", expected, val), val.equals(expected));
+                }
+            }
+
+            tableShell.bot().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.close();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    @Test
+    public void testCopyPasteDatasetInSameFile() {
+        String filename = "testcopypaste";
+        String file_ext = ".h5";
+        String group_copy_name = "test_group_copy";
+        String dataset_copy_name = "test_dataset_copy";
+        SWTBotShell tableShell = null;
+
+        File hdf_file = createHDF5File(filename);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInSameFile()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 1);
+            assertTrue("testCopyPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+
+            createNewHDF5Group();
+            createNewHDF5Dataset();
+
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInSameFile()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 3);
+            assertTrue("testCopyPasteDatasetInSameFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCopyPasteDatasetInSameFile() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[0].getNode(0).getNode(0).click();
+            items[0].getNode(0).getNode(0).contextMenu("Copy").click();
+
+            items[0].click();
+            items[0].contextMenu("New").menu("Group").click();
+
+            SWTBotShell groupShell = bot.shell("New Group...");
+            groupShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(groupShell.getText()));
+
+            groupShell.bot().text(0).setText(group_copy_name);
+
+            String val = groupShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInSameFile()", "wrong group name", group_copy_name, val), val.equals(group_copy_name));
+
+            groupShell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(groupShell));
+
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInSameFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 4);
+            assertTrue("testCopyPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testCopyPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
+
+            items[0].getNode(1).click();
+            items[0].getNode(1).contextMenu("Paste").click();
+
+            SWTBotShell copyTargetShell = bot.shells()[1];
+            copyTargetShell.activate();
+            copyTargetShell.bot().button("OK").click();
+            bot.waitUntil(Conditions.shellCloses(copyTargetShell));
+
+            // Reload file
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInSameFile()", "filetree wrong row count", "5", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 5);
+            assertTrue("testCopyPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testCopyPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
+
+            items[0].getNode(1).click();
+            items[0].getNode(1).getNode(0).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            for (int row = 1; row <= table2.preferredRowCount() - 1; row++) {
+                for (int col = 1; col < table2.preferredColumnCount(); col++) {
+                    String expected = String.valueOf(((row - 1) * (table2.preferredColumnCount() - 1)) + (col));
+                    String tval = table2.getCellDataValueByPosition(row, col);
+                    assertTrue(constructWrongValueMessage("testCopyPasteDatasetInSameFile()", "wrong data", expected, tval), tval.equals(expected));
+                }
+            }
+
+            tableShell.bot().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+        finally {
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
                 closeFile(hdf_file, true);
             }
             catch (Exception ex) {}
+        }
+    }
+
+    @Test
+    public void testCopyPasteDatasetInDifferentFile() {
+        String filename = "testcopy";
+        String filenameTo = "testpaste";
+        String file_ext = ".h5";
+        SWTBotShell tableShell = null;
+
+        File hdf_file = createHDF5File(filename);
+        File hdf_file2 = createHDF5File(filenameTo);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            createNewHDF5Group();
+            createNewHDF5Dataset();
+
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 4);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing dataset '" + datasetname + "'",
+                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[0].getNode(0).getNode(0).click();
+            items[0].getNode(0).getNode(0).contextMenu("Copy").click();
+
+            items[1].getNode(0).click();
+            items[1].getNode(0).contextMenu("Paste").click();
+
+            SWTBotShell copyTargetShell = bot.shells()[1];
+            copyTargetShell.activate();
+            copyTargetShell.bot().button("OK").click();
+            bot.waitUntil(Conditions.shellCloses(copyTargetShell));
+
+            // Reload file
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            // Reload file
+            items[1].click();
+            items[1].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[1].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 6);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing dataset '" + datasetname + "'",
+                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing group '" + groupname + "'", items[1].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing dataset '" + datasetname + "'",
+                    items[1].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[1].getNode(0).click();
+            items[1].getNode(0).getNode(0).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            for (int row = 1; row <= table2.preferredRowCount() - 1; row++) {
+                for (int col = 1; col < table2.preferredColumnCount(); col++) {
+                    String expected = String.valueOf(((row - 1) * (table2.preferredColumnCount() - 1)) + (col));
+                    String val = table2.getCellDataValueByPosition(row, col);
+                    assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "wrong data", expected, val), val.equals(expected));
+                }
+            }
+
+            tableShell.bot().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.close();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    @Test
+    public void testCutPasteDatasetInSameFile() {
+        String filename = "testcopypaste";
+        String file_ext = ".h5";
+        String group_copy_name = "test_group_copy";
+        String dataset_copy_name = "test_dataset_copy";
+        SWTBotShell tableShell = null;
+
+        File hdf_file = createHDF5File(filename);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 1);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+
+            createNewHDF5Group();
+            createNewHDF5Dataset();
+
+            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 3);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[0].getNode(0).getNode(0).click();
+            items[0].getNode(0).getNode(0).contextMenu("Cut").click();
+
+            items[0].click();
+            items[0].contextMenu("New").menu("Group").click();
+
+            SWTBotShell groupShell = bot.shell("New Group...");
+            groupShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(groupShell.getText()));
+
+            groupShell.bot().text(0).setText(group_copy_name);
+
+            String val = groupShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "wrong group name", group_copy_name, val), val.equals(group_copy_name));
+
+            groupShell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(groupShell));
+
+            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 4);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
+
+            items[0].getNode(1).click();
+            items[0].getNode(1).contextMenu("Paste").click();
+
+            SWTBotShell copyTargetShell = bot.shells()[1];
+            copyTargetShell.activate();
+            copyTargetShell.bot().button("OK").click();
+            bot.waitUntil(Conditions.shellCloses(copyTargetShell));
+
+            // Reload file
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
+            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "filetree wrong row count", "5", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 5);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
+
+            items[0].getNode(1).getNode(0).click();
+            items[0].getNode(1).getNode(0).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            for (int row = 1; row <= table2.preferredRowCount() - 1; row++) {
+                for (int col = 1; col < table2.preferredColumnCount(); col++) {
+                    String expected = String.valueOf(((row - 1) * (table2.preferredColumnCount() - 1)) + (col));
+                    String tval = table2.getCellDataValueByPosition(row, col);
+                    assertTrue(constructWrongValueMessage("testCopyPasteDatasetInSameFile()", "wrong data", expected, tval), tval.equals(expected));
+                }
+            }
+
+            tableShell.bot().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+            }
         }
     }
 }
