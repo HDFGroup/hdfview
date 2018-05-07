@@ -630,7 +630,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     @Override
     public void writeMetadata(Object info) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:writeMetadata.");
     }
 
     /*
@@ -640,7 +640,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     @Override
     public void removeMetadata(Object info) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:removeMetadata.");
     }
 
     /*
@@ -650,6 +650,6 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     @Override
     public void updateMetadata(Object info) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:updateMetadata.");
     }
 }

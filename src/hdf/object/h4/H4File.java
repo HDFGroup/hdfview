@@ -1006,8 +1006,8 @@ public class H4File extends FileFormat {
      * object.
      */
     private static List<HObject> getMembersBreadthFirst(HObject obj) {
-        List<HObject> allMembers = new Vector<HObject>();
-        Queue<HObject> queue = new LinkedList<HObject>();
+        List<HObject> allMembers = new Vector<>();
+        Queue<HObject> queue = new LinkedList<>();
         HObject currentObject = obj;
 
         queue.add(currentObject);
@@ -2070,4 +2070,9 @@ public class H4File extends FileFormat {
         log.trace("getAttachedObject(): finish");
         return null;
     }
+
+    public void setNewLibBounds(String lowStr, String highStr) throws Exception {
+        return;
+    }
+
 }

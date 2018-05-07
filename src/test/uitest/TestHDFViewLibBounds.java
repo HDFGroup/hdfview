@@ -73,10 +73,10 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             libVersionShell.bot().button("   &OK   ").click();
 
-            bot.waitUntil(Conditions.shellIsActive("HDFView Error"));
-            SWTBotShell libVersionErrorShell = bot.shell("HDFView Error");
+            SWTBotShell libVersionErrorShell = bot.shells()[2];
             libVersionErrorShell.activate();
             libVersionErrorShell.bot().button("OK").click();
+            bot.waitUntil(Conditions.shellCloses(libVersionErrorShell));
 
             libVersionShell.bot().button(" &Cancel ").click();
             bot.waitUntil(shellCloses(libVersionShell));

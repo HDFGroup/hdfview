@@ -744,7 +744,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     public Object read() throws Exception, OutOfMemoryError {
         if (!inited) init();
 
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Attribute:read Unsupported operation.");
     }
 
     @Override
@@ -1153,7 +1153,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
             String enum_members = this.getDatatype().getEnumMembers();
             log.trace("toString: is_enum enum_members={}", enum_members);
-            Map<String,String> map = new HashMap<String,String>();
+            Map<String,String> map = new HashMap<>();
             String[] entries = enum_members.split(",");
             for (String entry : entries) {
                 String[] keyValue = entry.split("=");
