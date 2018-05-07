@@ -20,6 +20,7 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
+import hdf.object.Group;
 import hdf.object.MetaDataContainer;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
@@ -209,7 +210,7 @@ public class DataFormatTest {
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
-        Attribute attr = new Attribute(attrName, attrType, attrDims);
+        Attribute attr = new Attribute(((Group) testGroup).getFileFormat(), attrName, attrType, attrDims);
         assertNotNull(testGroup);
         assertNotNull(attr);
         attr.setData(classValue);

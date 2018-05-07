@@ -2603,7 +2603,7 @@ public class DefaultTreeView implements TreeView {
         DataFormat d = (DataFormat) dataObject;
         HashMap<DATA_VIEW_KEY, Serializable> map = new HashMap<>(8);
 
-        if (d.getRank() <= 0 && (d instanceof Dataset)) ((Dataset) d).init();
+        if (d.getRank() <= 0) d.init();
 
         boolean isImage = ((d instanceof ScalarDS) && ((ScalarDS) d).isImage());
         boolean isDisplayTypeChar = false;

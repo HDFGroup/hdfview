@@ -203,7 +203,7 @@ public class TestH5Object
             final String attrName = "Test attribute";
             final String[] attrValue = {"Test for group attribute"};
             final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, -1, -1);
-            final Attribute attr = new Attribute(attrName, attrType, attrDims);
+            final Attribute attr = new Attribute(file, attrName, attrType, attrDims);
             attr.setData(attrValue);
             g1.writeMetadata(attr);
         } catch (final Exception ex) { failed(message, ex, file); return null; }

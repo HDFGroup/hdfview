@@ -1883,12 +1883,12 @@ public class H5FileTest {
         }
         assertNotNull(g1);
 
-        Attribute attr1 = new Attribute("intAttr", new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1),
+        Attribute attr1 = new Attribute(testFile, "intAttr", new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1),
                 new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
-        Attribute attr2 = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
+        Attribute attr2 = new Attribute(testFile, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
                 new String[] { "String attribute." });
 
-        Attribute attr3 = new Attribute("floatAttr", new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1), new long[] { 2 },
+        Attribute attr3 = new Attribute(testFile, "floatAttr", new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1), new long[] { 2 },
                 new float[] { 2, 4 });
 
         try {
@@ -1987,7 +1987,7 @@ public class H5FileTest {
         }
         assertNotNull(d1);
 
-        Attribute attr1 = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
+        Attribute attr1 = new Attribute(testFile, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
                 new String[] { "String attribute." });
 
         try {
@@ -2069,7 +2069,7 @@ public class H5FileTest {
         }
         assertNotNull(d1);
 
-        Attribute attr1 = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
+        Attribute attr1 = new Attribute(testFile, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1), new long[] { 1 },
                 new String[] { "String attribute." });
 
         try {

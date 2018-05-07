@@ -53,7 +53,7 @@ public class H5Object_CreateAttribute {
 
         // Create a dataset attribute.
         try {
-            attr = new Attribute(DATASETATTRIBUTE, typeInt, dims, attr_data);
+            attr = new Attribute(file, DATASETATTRIBUTE, typeInt, dims, attr_data);
         }
         catch (Exception e) {
             e.printStackTrace();

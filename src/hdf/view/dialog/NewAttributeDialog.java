@@ -164,7 +164,7 @@ public class NewAttributeDialog extends Dialog {
         optionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         optionsComposite.setLayout(new GridLayout(
                 (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot()) ? 5 : 3,
-                false)
+                        false)
                 );
 
         label = new Label(optionsComposite, SWT.LEFT);
@@ -508,7 +508,7 @@ public class NewAttributeDialog extends Dialog {
         else if (idx == 4) {
             tclass = Datatype.CLASS_REFERENCE;
         }
-        else if (idx == 5) {;
+        else if (idx == 5) {
             isVLen = true;
             tclass = Datatype.CLASS_INTEGER;
             if (checkUnsigned.getSelection()) {
@@ -518,7 +518,7 @@ public class NewAttributeDialog extends Dialog {
 
             MessageDialog.openWarning(shell, shell.getText(), "Multi-dimensional Variable Length Integer Attributes will be created without data.");
         }
-        else if (idx == 6) {;
+        else if (idx == 6) {
             isVLen = true;
             tclass = Datatype.CLASS_FLOAT;
             torder = Datatype.NATIVE;
@@ -540,18 +540,18 @@ public class NewAttributeDialog extends Dialog {
             value = strArray;
             if (tclass == Datatype.CLASS_INTEGER) {
                 switch(idx) {
-                        case 0:
-                                tsize = 1;
-                                break;
-                        case 1:
-                                tsize = 2;
-                                break;
-                        case 2:
-                                tsize = 4;
-                                break;
-                        case 3:
-                                tsize = 8;
-                                break;
+                    case 0:
+                        tsize = 1;
+                        break;
+                    case 1:
+                        tsize = 2;
+                        break;
+                    case 2:
+                        tsize = 4;
+                        break;
+                    case 3:
+                        tsize = 8;
+                        break;
                 }
                 log.trace("Attribute VL-CLASS_INTEGER: tsize={}", tsize);
             }
@@ -841,7 +841,7 @@ public class NewAttributeDialog extends Dialog {
         }
 
         long[] dims = { arraySize };
-        Attribute attr = new Attribute(attrName, datatype, dims);
+        Attribute attr = new Attribute(hObject.getFileFormat(), attrName, datatype, dims);
         attr.setData(value);
 
         try {
@@ -981,7 +981,7 @@ public class NewAttributeDialog extends Dialog {
                 Rectangle parentBounds = parent.getBounds();
                 Point shellSize = helpShell.getSize();
                 helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                                      (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
                 helpShell.open();
 

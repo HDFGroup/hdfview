@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
-import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
@@ -158,10 +157,8 @@ public class TableViewFactory extends DataViewFactory {
 
             if (d_copy != null) {
                 try {
-                    if (d_copy instanceof Dataset) {
-                        ((Dataset) d_copy).init();
-                        log.trace("getTableView(): d_copy inited");
-                    }
+                    ((DataFormat) d_copy).init();
+                    log.trace("getTableView(): d_copy inited");
 
                     int rank = ((DataFormat) dataObject).getRank();
                     System.arraycopy(((DataFormat) dataObject).getDims(), 0, ((DataFormat) d_copy).getDims(), 0, rank);

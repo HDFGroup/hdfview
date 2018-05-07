@@ -1637,7 +1637,7 @@ public class H5ScalarDSTest {
         } // for (int i=0; i<n; i++) {
 
         // attache a new attribute
-        attr = new Attribute("float attribute", typeFloat, new long[] { 1 }, new float[] { TEST_VALUE_FLOAT });
+        attr = new Attribute(testFile, "float attribute", typeFloat, new long[] { 1 }, new float[] { TEST_VALUE_FLOAT });
         try {
             testDataset.writeMetadata(attr);
         }

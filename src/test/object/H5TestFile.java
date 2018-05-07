@@ -84,11 +84,11 @@ public class H5TestFile {
             new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE) };
 
     // attributes
-    public final static Attribute ATTRIBUTE_STR = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING,
+    public final static Attribute ATTRIBUTE_STR = new Attribute(null, "strAttr", new H5Datatype(Datatype.CLASS_STRING,
             STR_LEN, -1, -1), new long[] { 1 }, new String[] { "String attribute." });
-    public final static Attribute ATTRIBUTE_INT_ARRAY = new Attribute("arrayInt", new H5Datatype(
+    public final static Attribute ATTRIBUTE_INT_ARRAY = new Attribute(null, "arrayInt", new H5Datatype(
             Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1), new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9,
-            10 });
+                    10 });
 
     /**
      * Creates an HDF5 test file.

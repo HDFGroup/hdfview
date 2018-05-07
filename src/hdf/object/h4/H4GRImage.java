@@ -244,8 +244,8 @@ public class H4GRImage extends ScalarDS
         int interlace = grInfo[2];
         int numberOfAttributes = grInfo[3];
         dstdid = HDFLibrary.GRcreate(
-            ((H4File)pgroup.getFileFormat()).getGRAccessID(),
-            dname, ncomp, tid, interlace, count);
+                ((H4File)pgroup.getFileFormat()).getGRAccessID(),
+                dname, ncomp, tid, interlace, count);
         if (dstdid < 0) {
             log.debug("copy(): Invalid dest dataset ID");
             log.trace("copy(): finish");
@@ -535,7 +535,7 @@ public class H4GRImage extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                Attribute attr = new Attribute(this.getFileFormat(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);

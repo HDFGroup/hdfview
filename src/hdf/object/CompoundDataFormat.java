@@ -159,8 +159,8 @@ public interface CompoundDataFormat extends DataFormat {
      * Returns an array of datatype objects of the compound members.
      * <p>
      * Each member of a compound data object has its own datatype. The datatype of a
-     * member can be atomic or other compound datatype (nested compound).
-     * Sub-classes set up the datatype objects at init().
+     * member can be atomic or other compound datatype (nested compound). The
+     * datatype objects are setup at init().
      * <p>
      *
      * @return the array of datatype objects of the compound members.

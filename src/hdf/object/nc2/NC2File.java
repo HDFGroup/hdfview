@@ -40,7 +40,7 @@ public class NC2File extends FileFormat {
      */
     private static final long serialVersionUID = 6941235662108358451L;
 
-//    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2File.class);
+    //    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2File.class);
 
     /**
      * file identifier for the open file.
@@ -82,8 +82,8 @@ public class NC2File extends FileFormat {
             ncFile = new NetcdfFile(fullFileName);
         }
         catch (Exception ex) {
-//            if(!pathname.isEmpty())
-//                log.debug("constuctor {}:", fullFileName, ex);
+            //            if(!pathname.isEmpty())
+            //                log.debug("constuctor {}:", fullFileName, ex);
         }
     }
 
@@ -127,7 +127,7 @@ public class NC2File extends FileFormat {
                 raf.close();
             }
             catch (Exception ex) {
-//                log.debug("raf close:", ex);
+                //                log.debug("raf close:", ex);
             }
             return false;
         }
@@ -142,8 +142,8 @@ public class NC2File extends FileFormat {
 
         if (header != null) {
             if (
-            // netCDF
-            ((header[0] == 67) && (header[1] == 68) && (header[2] == 70) && (header[3] < 4))) {
+                    // netCDF
+                    ((header[0] == 67) && (header[1] == 68) && (header[2] == 70) && (header[3] < 4))) {
                 is_netcdf = true;
             }
             else {
@@ -155,7 +155,7 @@ public class NC2File extends FileFormat {
             raf.close();
         }
         catch (Exception ex) {
-//            log.debug("raf close:", ex);
+            //            log.debug("raf close:", ex);
         }
 
         return is_netcdf;
@@ -352,10 +352,12 @@ public class NC2File extends FileFormat {
             return null;
         }
 
+        /* TODO: Attribute creation with null FileFormat causes issues */
+
         String attrName = netcdfAttr.getName();
         long[] attrDims = { netcdfAttr.getLength() };
         Datatype attrType = new NC2Datatype(netcdfAttr.getDataType());
-        ncsaAttr = new hdf.object.Attribute(attrName, attrType, attrDims);
+        ncsaAttr = new hdf.object.Attribute(null, attrName, attrType, attrDims);
         ncsaAttr.setData(netcdfAttr.getValues());
 
         return ncsaAttr;

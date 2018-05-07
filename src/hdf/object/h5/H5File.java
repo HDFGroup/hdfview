@@ -452,9 +452,11 @@ public class H5File extends FileFormat {
                     }
                 }
                 Datatype attrType = new H5Datatype(tid);
-                Attribute attr = new Attribute(nameA, attrType, dims);
+                Attribute attr = new Attribute(null, nameA, attrType, dims);
                 attributeList.add(attr);
                 log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attrType.getDatatypeDescription());
+
+                /* TODO: Attribute creation with null FileFormat causes issues */
 
                 boolean is_variable_str = false;
                 boolean isVLEN = false;
@@ -685,14 +687,14 @@ public class H5File extends FileFormat {
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
-        Attribute attr = new Attribute(attrName, attrType, null);
+        Attribute attr = new Attribute(dataset.getFileFormat(), attrName, attrType, null);
         attr.setData(classValue);
         dataset.writeMetadata(attr);
 
         attrName = "IMAGE_VERSION";
         String[] versionValue = { "1.2" };
         attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, -1, -1);
-        attr = new Attribute(attrName, attrType, null);
+        attr = new Attribute(dataset.getFileFormat(), attrName, attrType, null);
         attr.setData(versionValue);
         dataset.writeMetadata(attr);
 
@@ -700,14 +702,14 @@ public class H5File extends FileFormat {
         attrName = "IMAGE_MINMAXRANGE";
         byte[] attrValueInt = { 0, (byte) 255 };
         attrType = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-        attr = new Attribute(attrName, attrType, attrDims);
+        attr = new Attribute(dataset.getFileFormat(), attrName, attrType, attrDims);
         attr.setData(attrValueInt);
         dataset.writeMetadata(attr);
 
         attrName = "IMAGE_SUBCLASS";
         String[] subclassValue = { subclass };
         attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, -1, -1);
-        attr = new Attribute(attrName, attrType, null);
+        attr = new Attribute(dataset.getFileFormat(), attrName, attrType, null);
         attr.setData(subclassValue);
         dataset.writeMetadata(attr);
 
@@ -715,7 +717,7 @@ public class H5File extends FileFormat {
             attrName = "INTERLACE_MODE";
             String[] interlaceValue = { interlaceMode };
             attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, -1, -1);
-            attr = new Attribute(attrName, attrType, null);
+            attr = new Attribute(dataset.getFileFormat(), attrName, attrType, null);
             attr.setData(interlaceValue);
             dataset.writeMetadata(attr);
         }
@@ -723,7 +725,7 @@ public class H5File extends FileFormat {
             attrName = "PALETTE";
             long[] palRef = { 0 }; // set ref to null
             attrType = new H5Datatype(Datatype.CLASS_REFERENCE, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-            attr = new Attribute(attrName, attrType, null);
+            attr = new Attribute(dataset.getFileFormat(), attrName, attrType, null);
             attr.setData(palRef);
             dataset.writeMetadata(attr);
         }

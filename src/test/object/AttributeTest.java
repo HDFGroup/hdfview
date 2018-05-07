@@ -129,7 +129,7 @@ public class AttributeTest {
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
-        Attribute attr = new Attribute(attrName, attrType, attrDims);
+        Attribute attr = new Attribute(testFile, attrName, attrType, attrDims);
         attr.setData(classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
@@ -160,7 +160,7 @@ public class AttributeTest {
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
-        Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
+        Attribute attr = new Attribute(testFile, attrName, attrType, attrDims, classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
         long nObjs = 0;

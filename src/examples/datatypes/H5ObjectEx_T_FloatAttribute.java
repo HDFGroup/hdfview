@@ -67,7 +67,7 @@ public class H5ObjectEx_T_FloatAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute dataFloat = new Attribute(ATTRIBUTENAME, typeFloat, dims);
+            Attribute dataFloat = new Attribute(file, ATTRIBUTENAME, typeFloat, dims);
             dset.writeMetadata(dataFloat);
         }
         catch (Exception e) {

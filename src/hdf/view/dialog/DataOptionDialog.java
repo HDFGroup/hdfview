@@ -176,7 +176,7 @@ public class DataOptionDialog extends Dialog {
 
         rank = dataObject.getRank();
         if (rank <= 0) {
-            ((Dataset) dataObject).init();
+            dataObject.init();
         }
         if (isH5 && (dataObject instanceof ScalarDS)) {
             byte[] palRefs = ((ScalarDS) dataObject).getPaletteRefs();

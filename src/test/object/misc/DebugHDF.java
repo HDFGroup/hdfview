@@ -46,128 +46,128 @@ public class DebugHDF {
             System.out.println(libversion[0]+"."+libversion[1]+"."+libversion[2]);
         } catch (Exception ex) {ex.printStackTrace();}
 
-//      try { create_debug_file();} catch(Exception ex) {}
-//      try { createStrDataset( "G:\\temp\\H5DatasetCreate.h5"); } catch(Exception ex) {}
-//      try { createDataset( "E:\\temp\\H5DatasetCreate.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { testchunkchche(); } catch (Exception ex) {ex.printStackTrace();}
-//      try { TestHDFcompound(); } catch (Exception ex) {ex.printStackTrace();}
-//      try { TestHDFdelete( "E:\\temp\\H5DatasetDelete.h5"); } catch(Exception ex) {ex.printStackTrace();}/
-//      try { TestHDFcomment( "E:\\temp\\H5DatasetComment.h5"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestHDFgenotype( "E:\\temp\\genotypes_chr22_CEU.h5"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestHDFvector( "E:\\temp\\TestVector.h5"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { testSizeof(); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { testSDgetchunkinfo("E:\\temp\\MOD021KM.A2006016.0942.hdf"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { testEnum("E:\\temp\\MOD021KM.A2006016.0942.hdf"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { testHDF5OpenClose(); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { testHDF5Write("E:\\temp\\TestHDF5Write.h5"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestHDF5Misc("E:\\hdf-files\\TestHDF5Misc.h5"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestHDF5Get("E:\\hdf-files\\TestHDF5Get.h5"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestHDF5Copy("d:\\hdf-files\\hdf5_test.h5", "/arrays/Vdata with mixed types"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestHDF5Copy("d:\\hdf-files\\hdf5_test.h5", "/arrays"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestHDF5Copy("d:\\hdf-files\\hdf5_test.h5", "/datatypes/H5T_NATIVE_INT"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { testGetObjID(); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { testFillValue( "E:\\temp\\TestFillValue.h5"); } catch(Exception ex) {}
-//      try { TestGetOneRow("E:\\hdf-files\\hdf5_test.h5", "/arrays/Vdata with mixed types", 0); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestGetOneRow("E:\\hdf-files\\HDF5FileDAOTest.h5", "/Group0/1/Table0"); }   catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5OpenClose("TestH5Object.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { checkMemory(); } catch(Exception ex) {ex.printStackTrace();}
-//      try { testCompressedStrings("G:\\temp\\test.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { testCreateLongPath("G:\\temp\\test_hdf5_5_group_levels.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5Bug847("d:\\hdf-files\\h5bug847.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5ReadChunk("d:\\hdf-files\\ExampleHDF5.hdf5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5Bug863("d:\\hdf-files\\bug863.h5"); } catch(final Exception ex) {ex.printStackTrace();}
-//      try { checkMemory(); } catch(Exception ex) {ex.printStackTrace();}
-//      try { testConvertFromUnsignedC();} catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5ReadPerf("d:\\hdf-files\\ushort_8kx8k_fast_order.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5ReadPerf("d:\\hdf-files\\ushort_8kx8k_fast_order.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5WriteFloats("g:\\temp\\t.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5Vlen("g:\\temp\\t.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5Array("g:\\temp\\t.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5DreadNIO("d:\\hdf-files\\ushort_8kx8k_fast_order.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestH5Compound2000Fields("g:\\temp\\h5comp2k.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestMemoryLeakOpenClose("D:\\hdf-files\\SAFNWC_MSG2_TPW__200807281015_CoMd.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { testTofwerkReaderBug1213("D:\\hdf-files\\bug1213_GCxGC_dummyData.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { testTofwerkReaderBug1213("D:\\hdf-files\\bug1213_GCxGC_dummyData_chunk100x200.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { testTofwerkReaderBug1213("G:\\Projects\\Java\\Release\\hdfview_release_test_files\\bug1213_GCxGC_dummyData_chunk10x20.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestMemoryLeak("D:\\hdf-files\\debug_memory_leak.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestBEAttr("G:\\temp\\TestBEAttr.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestVlenRead("d:\\hdf-files\\test_vlen.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { launchBrowser("http://www.armchairgeneral.com/tactics-101-021-intelligence-preparation-of-the-battlefield-in-urban-operations.htm"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Events_Intel-Report.pdf"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\IPB_URL-Reference.txt"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Recon_Immersive-Video.avi"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Situation_Weather-XLS.xls"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Software_External-Link.txt"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestVlen("d:\\hdf-files\\test_vlen.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestPinning("G:\\Projects\\Rosetta\\debug\\test_pinning.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//      try { createDataset("g:\\temp\\testDataset.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { create_debug_file();} catch(Exception ex) {}
+        //      try { createStrDataset( "G:\\temp\\H5DatasetCreate.h5"); } catch(Exception ex) {}
+        //      try { createDataset( "E:\\temp\\H5DatasetCreate.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { testchunkchche(); } catch (Exception ex) {ex.printStackTrace();}
+        //      try { TestHDFcompound(); } catch (Exception ex) {ex.printStackTrace();}
+        //      try { TestHDFdelete( "E:\\temp\\H5DatasetDelete.h5"); } catch(Exception ex) {ex.printStackTrace();}/
+        //      try { TestHDFcomment( "E:\\temp\\H5DatasetComment.h5"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestHDFgenotype( "E:\\temp\\genotypes_chr22_CEU.h5"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestHDFvector( "E:\\temp\\TestVector.h5"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { testSizeof(); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { testSDgetchunkinfo("E:\\temp\\MOD021KM.A2006016.0942.hdf"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { testEnum("E:\\temp\\MOD021KM.A2006016.0942.hdf"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { testHDF5OpenClose(); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { testHDF5Write("E:\\temp\\TestHDF5Write.h5"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestHDF5Misc("E:\\hdf-files\\TestHDF5Misc.h5"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestHDF5Get("E:\\hdf-files\\TestHDF5Get.h5"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestHDF5Copy("d:\\hdf-files\\hdf5_test.h5", "/arrays/Vdata with mixed types"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestHDF5Copy("d:\\hdf-files\\hdf5_test.h5", "/arrays"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestHDF5Copy("d:\\hdf-files\\hdf5_test.h5", "/datatypes/H5T_NATIVE_INT"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { testGetObjID(); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { testFillValue( "E:\\temp\\TestFillValue.h5"); } catch(Exception ex) {}
+        //      try { TestGetOneRow("E:\\hdf-files\\hdf5_test.h5", "/arrays/Vdata with mixed types", 0); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestGetOneRow("E:\\hdf-files\\HDF5FileDAOTest.h5", "/Group0/1/Table0"); }   catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5OpenClose("TestH5Object.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { checkMemory(); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { testCompressedStrings("G:\\temp\\test.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { testCreateLongPath("G:\\temp\\test_hdf5_5_group_levels.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5Bug847("d:\\hdf-files\\h5bug847.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5ReadChunk("d:\\hdf-files\\ExampleHDF5.hdf5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5Bug863("d:\\hdf-files\\bug863.h5"); } catch(final Exception ex) {ex.printStackTrace();}
+        //      try { checkMemory(); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { testConvertFromUnsignedC();} catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5ReadPerf("d:\\hdf-files\\ushort_8kx8k_fast_order.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5ReadPerf("d:\\hdf-files\\ushort_8kx8k_fast_order.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5WriteFloats("g:\\temp\\t.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5Vlen("g:\\temp\\t.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5Array("g:\\temp\\t.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5DreadNIO("d:\\hdf-files\\ushort_8kx8k_fast_order.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestH5Compound2000Fields("g:\\temp\\h5comp2k.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestMemoryLeakOpenClose("D:\\hdf-files\\SAFNWC_MSG2_TPW__200807281015_CoMd.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { testTofwerkReaderBug1213("D:\\hdf-files\\bug1213_GCxGC_dummyData.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { testTofwerkReaderBug1213("D:\\hdf-files\\bug1213_GCxGC_dummyData_chunk100x200.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { testTofwerkReaderBug1213("G:\\Projects\\Java\\Release\\hdfview_release_test_files\\bug1213_GCxGC_dummyData_chunk10x20.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestMemoryLeak("D:\\hdf-files\\debug_memory_leak.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestBEAttr("G:\\temp\\TestBEAttr.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestVlenRead("d:\\hdf-files\\test_vlen.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { launchBrowser("http://www.armchairgeneral.com/tactics-101-021-intelligence-preparation-of-the-battlefield-in-urban-operations.htm"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Events_Intel-Report.pdf"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\IPB_URL-Reference.txt"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Recon_Immersive-Video.avi"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Situation_Weather-XLS.xls"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Software_External-Link.txt"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestVlen("d:\\hdf-files\\test_vlen.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestPinning("G:\\Projects\\Rosetta\\debug\\test_pinning.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { createDataset("g:\\temp\\testDataset.h5"); } catch(Exception ex) {ex.printStackTrace();}
 
-//      try { TestVlen("d:\\hdf-files\\test_vlen.h5", FileFormat.WRITE); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestVlen("d:\\hdf-files\\test_vlen_org.h5", FileFormat.READ); } catch(Exception ex) {ex.printStackTrace();}
-//      try { TestVlen("g:\\temp\\test_vlen.h5", FileFormat.WRITE); } catch(Exception ex) {ex.printStackTrace();}
-//        TestBit64();
-//        TestBitmask();
-//        TestBinaryWrite(1, 1);
-//        TestBinaryWrite(9, 1);
-//        TestBinaryWrite(15, 1);
-//        TestBinaryWrite(127, 2);
-//        TestBinaryWrite(2147483647, 2);
-//        TestBinaryWrite(2147483647, 4);
-//        TestBinaryWrite(9123456789123456789L, 8);
-//
-//        try { TestBug1523("G:\\Projects\\HUGS\\data\\testfile02.h5.corrupt"); } catch(Exception ex) {ex.printStackTrace();}
-//       try { TestBug1523("G:\\Projects\\HUGS\\data\\testfile02.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { createINF("G:\\temp\\inf.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { createNaN_INF("G:\\temp\\nan_inf.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//        try { testStrings("G:\\temp\\strs.h5"); } catch(Exception ex) {ex.printStackTrace();}
-//        testVariableArity("null argument", null);
-//        testVariableArity("no argument");
-//        testVariableArity("1 argument", 1);
-//        testVariableArity("2 argument", 1,"string");
-//        testVariableArity("3 argument", 1,"string",2.59);
-//       try { readDatatype(); } catch(Exception ex) {ex.printStackTrace();}
-//       try { readTextFile("G:\\temp\\vlarsizes.txt"); } catch(Exception ex) {ex.printStackTrace();}
-//       try {processa8apis(); } catch (Exception ex) {}
-//       try {convertByte2Long(); } catch (Exception ex) {ex.printStackTrace();}
-//       try {testH5IO("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {testH5Core("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {test1Dstrings("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {testUpdateAttr("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {testCreateVlenStr("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {testH5TconvertStr(); } catch (Exception ex) {ex.printStackTrace();}
-//        try {testH5DeleteDS("g:\\temp\\strs.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {testExtendData("g:\\temp\\extended.h5", "dset", 1000, 1500); } catch (Exception ex) {ex.printStackTrace();}
-//        try {createNestedcompound("g:\\temp\\nested_cmp.h5", "dset"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {  testH5Vlen("G:\\temp\\str.h5") ; } catch (Exception ex) {ex.printStackTrace();}
-//        try {  testH5VlenObj("G:\\temp\\str2.h5") ; } catch (Exception ex) {ex.printStackTrace();}
-//        try {  testH5VlenAttr("G:\\temp\\vlen_str_attr.h5") ; } catch (Exception ex) {ex.printStackTrace();}
-//        try {testRefData("g:\\temp\\refs.h5", "refs"); } catch (Exception ex) {ex.printStackTrace();}
-//      try {testH5WriteDouble("g:\\temp\\double.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try {testGroupMemoryLeak("G:\\temp\\mem_leak.h5"); } catch (Exception ex) {ex.printStackTrace();}
-//        try { testH5OflushCrash("G:\\temp\\H5Oflush_crash.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //      try { TestVlen("d:\\hdf-files\\test_vlen.h5", FileFormat.WRITE); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestVlen("d:\\hdf-files\\test_vlen_org.h5", FileFormat.READ); } catch(Exception ex) {ex.printStackTrace();}
+        //      try { TestVlen("g:\\temp\\test_vlen.h5", FileFormat.WRITE); } catch(Exception ex) {ex.printStackTrace();}
+        //        TestBit64();
+        //        TestBitmask();
+        //        TestBinaryWrite(1, 1);
+        //        TestBinaryWrite(9, 1);
+        //        TestBinaryWrite(15, 1);
+        //        TestBinaryWrite(127, 2);
+        //        TestBinaryWrite(2147483647, 2);
+        //        TestBinaryWrite(2147483647, 4);
+        //        TestBinaryWrite(9123456789123456789L, 8);
+        //
+        //        try { TestBug1523("G:\\Projects\\HUGS\\data\\testfile02.h5.corrupt"); } catch(Exception ex) {ex.printStackTrace();}
+        //       try { TestBug1523("G:\\Projects\\HUGS\\data\\testfile02.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { createINF("G:\\temp\\inf.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { createNaN_INF("G:\\temp\\nan_inf.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //        try { testStrings("G:\\temp\\strs.h5"); } catch(Exception ex) {ex.printStackTrace();}
+        //        testVariableArity("null argument", null);
+        //        testVariableArity("no argument");
+        //        testVariableArity("1 argument", 1);
+        //        testVariableArity("2 argument", 1,"string");
+        //        testVariableArity("3 argument", 1,"string",2.59);
+        //       try { readDatatype(); } catch(Exception ex) {ex.printStackTrace();}
+        //       try { readTextFile("G:\\temp\\vlarsizes.txt"); } catch(Exception ex) {ex.printStackTrace();}
+        //       try {processa8apis(); } catch (Exception ex) {}
+        //       try {convertByte2Long(); } catch (Exception ex) {ex.printStackTrace();}
+        //       try {testH5IO("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testH5Core("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {test1Dstrings("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testUpdateAttr("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testCreateVlenStr("G:\\temp\\test.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testH5TconvertStr(); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testH5DeleteDS("g:\\temp\\strs.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testExtendData("g:\\temp\\extended.h5", "dset", 1000, 1500); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {createNestedcompound("g:\\temp\\nested_cmp.h5", "dset"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {  testH5Vlen("G:\\temp\\str.h5") ; } catch (Exception ex) {ex.printStackTrace();}
+        //        try {  testH5VlenObj("G:\\temp\\str2.h5") ; } catch (Exception ex) {ex.printStackTrace();}
+        //        try {  testH5VlenAttr("G:\\temp\\vlen_str_attr.h5") ; } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testRefData("g:\\temp\\refs.h5", "refs"); } catch (Exception ex) {ex.printStackTrace();}
+        //      try {testH5WriteDouble("g:\\temp\\double.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try {testGroupMemoryLeak("G:\\temp\\mem_leak.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try { testH5OflushCrash("G:\\temp\\H5Oflush_crash.h5"); } catch (Exception ex) {ex.printStackTrace();}
 
-//        testPrintData();
+        //        testPrintData();
 
         //try { testObjReadData("g:\\temp\\dset.h5", "dset"); } catch (Exception ex) {ex.printStackTrace();}
         //try { testH5FileGet("g:\\temp\\dset.h5", "/dset/"); } catch (Exception ex) {ex.printStackTrace();}
 
-//        try {
+        //        try {
         // String fname = "g:\\temp\\dset.h5";
         // new File(fname).delete(); // clean up existing file
-//
+        //
         // for (int i=0; i<10; i++)
         // testCreateDS(fname, "dset"+i);
-//
-//        } catch (Exception ex) {ex.printStackTrace();}
+        //
+        //        } catch (Exception ex) {ex.printStackTrace();}
 
-//      try { testH5Write2D("g:\\temp\\dset.h5"); } catch (Exception ex) {ex.printStackTrace();}
+        //      try { testH5Write2D("g:\\temp\\dset.h5"); } catch (Exception ex) {ex.printStackTrace();}
 
-//        try { testHDF4("g:\\temp\\test_hdf4.hdf"); } catch (Exception ex) {ex.printStackTrace();}
+        //        try { testHDF4("g:\\temp\\test_hdf4.hdf"); } catch (Exception ex) {ex.printStackTrace();}
 
         //try { test3DHDF4("g:\\temp\\hdf3d.hdf", "3dint"); } catch (Exception ex) {ex.printStackTrace();}
 
         try { testH5DataType("G:\\temp\\H5Datatype.h5"); } catch (Exception ex) {ex.printStackTrace();}
-     }
+    }
 
     public static void testRefData(String fname, String dname)throws Exception
     {
@@ -192,10 +192,10 @@ public class DebugHDF {
 
         // create ref attributes
         Datatype attr_dtype = file.createDatatype( Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
-        Attribute attr = new Attribute("ref", attr_dtype, new long[] {1});
+        Attribute attr = new Attribute(file, "ref", attr_dtype, new long[] {1});
         attr.setData(ds.getFullName());
         file.writeAttribute(ds, attr, false);
-        attr = new Attribute("refs", attr_dtype, new long[] {2});
+        attr = new Attribute(file, "refs", attr_dtype, new long[] {2});
         attr.setData(ref_buf);
         ds.writeMetadata(attr);
 
@@ -596,7 +596,7 @@ public class DebugHDF {
         // create and write an attribute to the dataset
         long[] attrDims = {2};
         int[] attrValue = {0, 10000};
-        Attribute attr = new Attribute("range", dtype, attrDims);
+        Attribute attr = new Attribute(file, "range", dtype, attrDims);
         attr.setData(attrValue); // set the attribute value
         dataset.writeMetadata(attr);
 
@@ -694,7 +694,7 @@ public class DebugHDF {
 
         // for (int i = 0; i < buf.length; i++)
         // buf[i] = i;
-//
+        //
         // try {
         // fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC,
         // HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -710,26 +710,26 @@ public class DebugHDF {
         // H5.H5Dclose(did);
         // } catch (HDF5Exception ex) {
         // }
-//
+        //
         // try {
         // H5.H5Fclose(fid);
         // } catch (HDF5Exception ex) {
         // }
         // }
-//
+        //
         // try {
-//
+        //
         // fid = H5.H5Fopen(filename, HDF5Constants.H5F_ACC_RDWR,
         // HDF5Constants.H5P_DEFAULT);
         // did = H5.H5Dopen(fid, "test");
-//
+        //
         // long t0 = System.currentTimeMillis();
         // H5.H5Dwrite_float(did, HDF5Constants.H5T_NATIVE_FLOAT,
         // HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
         // HDF5Constants.H5P_DEFAULT, buf);
         // long t1 = System.currentTimeMillis();
         // System.out.println("Time on writing (40MB): " + (t1 - t0));
-//
+        //
         // } finally {
         // try {
         // H5.H5Sclose(sid);
@@ -739,7 +739,7 @@ public class DebugHDF {
         // H5.H5Dclose(did);
         // } catch (HDF5Exception ex) {
         // }
-//
+        //
         // try {
         // H5.H5Fclose(fid);
         // } catch (HDF5Exception ex) {
@@ -790,14 +790,14 @@ public class DebugHDF {
             return ;
         }
 
-//        // only need the two lines below to convert byte[] to long[]
-//        ByteBuffer bb = ByteBuffer.wrap(ba);
-//        long[] la2 = (bb.asLongBuffer()).array();
-//
-//        if (la2.length != la.length) {
-//            System.out.println ("Failed to convert from long[] to byte[]");
-//            return;
-//        }
+        //        // only need the two lines below to convert byte[] to long[]
+        //        ByteBuffer bb = ByteBuffer.wrap(ba);
+        //        long[] la2 = (bb.asLongBuffer()).array();
+        //
+        //        if (la2.length != la.length) {
+        //            System.out.println ("Failed to convert from long[] to byte[]");
+        //            return;
+        //        }
 
         long[] la2 = HDFNativeData.byteToLong(ba);
         for (int i=0; i<la.length; i++) {
@@ -856,26 +856,26 @@ public class DebugHDF {
         }
 
         // make sure no repeated elements
-//        for (int i=0; i<nNew; i++) {
-//            line = newAPIs[i];
-//            if (line==null || line.length()<=0)
-//                continue;
-//
-//            for (int j=i+1; j<nNew; j++) {
-//                if (line.equals(newAPIs[j])) {
-//                    System.out.println(i + " and "+ j + " REPEATED !!!!!");
-//                }
-//            }
-//        }
-//
-//        for (int i=0; i<nAll; i++) {
-//            line = allAPIs[i];
-//            for (int j=i+1; j<nAll; j++) {
-//                if (line.endsWith(allAPIs[j])) {
-//                    System.out.println(i + " and "+ j + " REPEATED !!!!!");
-//                }
-//            }
-//        }
+        //        for (int i=0; i<nNew; i++) {
+        //            line = newAPIs[i];
+        //            if (line==null || line.length()<=0)
+        //                continue;
+        //
+        //            for (int j=i+1; j<nNew; j++) {
+        //                if (line.equals(newAPIs[j])) {
+        //                    System.out.println(i + " and "+ j + " REPEATED !!!!!");
+        //                }
+        //            }
+        //        }
+        //
+        //        for (int i=0; i<nAll; i++) {
+        //            line = allAPIs[i];
+        //            for (int j=i+1; j<nAll; j++) {
+        //                if (line.endsWith(allAPIs[j])) {
+        //                    System.out.println(i + " and "+ j + " REPEATED !!!!!");
+        //                }
+        //            }
+        //        }
 
         int isNew, isFunc;
         String apiName;
@@ -955,7 +955,7 @@ public class DebugHDF {
                 Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
                 Datatype.NATIVE);
 
-        Attribute attr = new Attribute("attribut int", attrType, dims0D);
+        Attribute attr = new Attribute(testFile, "attribute int", attrType, dims0D);
 
         int[] attrValue = { 15 }; // attribute value
 
@@ -965,7 +965,7 @@ public class DebugHDF {
 
         // close file resource
         testFile.close();
-  }
+    }
 
 
 
@@ -1168,22 +1168,22 @@ public class DebugHDF {
         StringBuffer sb = new StringBuffer();
         for (int i=nhex-1; i>=0; i--) {
             switch (hex[i]) {
-            case 0:  sb.append("0000"); break;
-            case 1:  sb.append("0001"); break;
-            case 2:  sb.append("0010"); break;
-            case 3:  sb.append("0011"); break;
-            case 4:  sb.append("0100"); break;
-            case 5:  sb.append("0101"); break;
-            case 6:  sb.append("0110"); break;
-            case 7:  sb.append("0111"); break;
-            case 8:  sb.append("1000"); break;
-            case 9:  sb.append("1001"); break;
-            case 10: sb.append("1010"); break;
-            case 11: sb.append("1011"); break;
-            case 12: sb.append("1100"); break;
-            case 13: sb.append("1101"); break;
-            case 14: sb.append("1110"); break;
-            case 15: sb.append("1111"); break;
+                case 0:  sb.append("0000"); break;
+                case 1:  sb.append("0001"); break;
+                case 2:  sb.append("0010"); break;
+                case 3:  sb.append("0011"); break;
+                case 4:  sb.append("0100"); break;
+                case 5:  sb.append("0101"); break;
+                case 6:  sb.append("0110"); break;
+                case 7:  sb.append("0111"); break;
+                case 8:  sb.append("1000"); break;
+                case 9:  sb.append("1001"); break;
+                case 10: sb.append("1010"); break;
+                case 11: sb.append("1011"); break;
+                case 12: sb.append("1100"); break;
+                case 13: sb.append("1101"); break;
+                case 14: sb.append("1110"); break;
+                case 15: sb.append("1111"); break;
             }
         }
 
@@ -1211,29 +1211,29 @@ public class DebugHDF {
 
         System.out.println(bmask);
 
-//        System.out.println("15 & 1 = "+ (15 & 1));
-//        System.out.println("15 & 0x01 = "+ (15 & 0x01));
-//        System.out.println("15 & 0x0f = "+ (15 & 0x0f));
-//        System.out.println("15 & 2 = "+ (15 & 2));
-//        System.out.println("15 & 4 = "+ (15 & 4));
-//
-//        System.out.println("6 & 1 = "+ (6 & 1));
-//        System.out.println("6 & 0x01 = "+ (6 & 0x01));
-//        System.out.println("6 & 0x0f = "+ (6 & 0x0f));
-//        System.out.println("6 & 15 = "+ (6 & 15));
-//        System.out.println("6 & 4 = "+ (6 & 4));
-//
-//        System.out.println("7 & 1 = "+ (7 & 1));
-//        System.out.println("7 & 0x01 = "+ (7 & 0x01));
-//        System.out.println("7 & 0x0f = "+ (7 & 0x0f));
-//        System.out.println("7 & 15 = "+ (7 & 15));
-//        System.out.println("7 & 4 = "+ (7 & 4));
-//
-//        System.out.println("8 & 1 = "+ (8 & 1));
-//        System.out.println("8 & 0x01 = "+ (8 & 0x01));
-//        System.out.println("8 & 0x0f = "+ (8 & 0x0f));
-//        System.out.println("8 & 15 = "+ (8 & 15));
-//        System.out.println("8 & 4 = "+ (8 & 4));
+        //        System.out.println("15 & 1 = "+ (15 & 1));
+        //        System.out.println("15 & 0x01 = "+ (15 & 0x01));
+        //        System.out.println("15 & 0x0f = "+ (15 & 0x0f));
+        //        System.out.println("15 & 2 = "+ (15 & 2));
+        //        System.out.println("15 & 4 = "+ (15 & 4));
+        //
+        //        System.out.println("6 & 1 = "+ (6 & 1));
+        //        System.out.println("6 & 0x01 = "+ (6 & 0x01));
+        //        System.out.println("6 & 0x0f = "+ (6 & 0x0f));
+        //        System.out.println("6 & 15 = "+ (6 & 15));
+        //        System.out.println("6 & 4 = "+ (6 & 4));
+        //
+        //        System.out.println("7 & 1 = "+ (7 & 1));
+        //        System.out.println("7 & 0x01 = "+ (7 & 0x01));
+        //        System.out.println("7 & 0x0f = "+ (7 & 0x0f));
+        //        System.out.println("7 & 15 = "+ (7 & 15));
+        //        System.out.println("7 & 4 = "+ (7 & 4));
+        //
+        //        System.out.println("8 & 1 = "+ (8 & 1));
+        //        System.out.println("8 & 0x01 = "+ (8 & 0x01));
+        //        System.out.println("8 & 0x0f = "+ (8 & 0x0f));
+        //        System.out.println("8 & 15 = "+ (8 & 15));
+        //        System.out.println("8 & 4 = "+ (8 & 4));
     }
 
 
@@ -1509,7 +1509,7 @@ public class DebugHDF {
         int[] attrValue = {0, 10000}; // attribute value
 
         // create a attribute of 1D integer of size two
-        Attribute attr = new Attribute("data range", dtype, attrDims);
+        Attribute attr = new Attribute(testFile, "data range", dtype, attrDims);
         attr.setData(attrValue); // set the attribute value
 
         // attach the attribute to the dataset
@@ -1671,7 +1671,7 @@ public class DebugHDF {
         H5CompoundDS dset = null;
         try {
             dset = (H5CompoundDS)H5CompoundDS.create(
-                name, root, dims, memberNames, memberDatatypes, memberRanks, memberDims);
+                    name, root, dims, memberNames, memberDatatypes, memberRanks, memberDims);
         } catch (final Exception ex) {
             ex.printStackTrace();
         }
@@ -1755,7 +1755,7 @@ public class DebugHDF {
 
         H5.H5Sclose(sid);
         H5.H5Fclose(fid);
-   }
+    }
 
     private static void testH5Vlen(final String filename) throws Exception
     {
@@ -1832,7 +1832,7 @@ public class DebugHDF {
         Dataset dataset = testFile.createScalarDS ("/str", root, dtype, dims, null, null, 0, buf);
 
         testFile.close();
-     }
+    }
 
     @SuppressWarnings("deprecation")
     private static void testH5WriteFloats(final String filename) throws Exception
@@ -1872,7 +1872,7 @@ public class DebugHDF {
             data[i] = 1.0f + i * 10;
         }
         dataset.write(data);
-        */
+         */
 
         file.close();
     }
@@ -1996,10 +1996,10 @@ public class DebugHDF {
         }
 
         long[] expected32 = (long[])Dataset.convertFromUnsignedC(int32, null);
-            if (!(Arrays.equals(expected32, uint32))) {
-                System.out.println("testConvertFromUnsignedC failed.");
-            }
-   }
+        if (!(Arrays.equals(expected32, uint32))) {
+            System.out.println("testConvertFromUnsignedC failed.");
+        }
+    }
 
     private static void testH5ReadChunk(final String filename) throws Exception
     {
@@ -2016,7 +2016,7 @@ public class DebugHDF {
             dset.clear();
             System.out.println("Time on reading "+dnames[i]+" = "+ (t1-t0) +"ms");
         }
-      }
+    }
 
     private static void testH5Bug863(final String filename) throws Exception
     {
@@ -2126,7 +2126,7 @@ public class DebugHDF {
             }
             list = (List)dset.read();
 
-             for (int i=0; i<nmembers; i++) {
+            for (int i=0; i<nmembers; i++) {
                 System.out.print(Array.get(list.get(i), 0)+",\t");
             }
             System.out.println("\n");
@@ -2164,7 +2164,7 @@ public class DebugHDF {
         final long dims[] = {size};
         final long chunks[] = {10};
         final int gzip = -1;
-         final String strs[] = new String[size];
+        final String strs[] = new String[size];
         for (int i=0; i<size; i++) {
             strs[i] = "";
         }
@@ -2181,7 +2181,7 @@ public class DebugHDF {
         H5.H5Lcreate_soft(dset_name, parent.open(), "/soft_link", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
         try { file.close(); } catch (final Exception ex) {}
-     }
+    }
 
     @SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
     private static void testCompressedStrings(final String fname) throws Exception {
@@ -2260,26 +2260,26 @@ public class DebugHDF {
     }
 
     public static void checkMemory() throws Exception {
-       final int _SIZE = 5000000;
+        final int _SIZE = 5000000;
 
-       final Object[] array = new Object[_SIZE];
-       collectGarbage();
-       long totalMem = Runtime.getRuntime().totalMemory();
-       for (int i = 0; i < _SIZE; i++) {
-           array[i] = new Object();
-       }
-       long freeMem = Runtime.getRuntime().freeMemory();
-       long difference = ( totalMem - freeMem ) / _SIZE;
-       System.out.println( difference + " \tbytes/object" );
+        final Object[] array = new Object[_SIZE];
+        collectGarbage();
+        long totalMem = Runtime.getRuntime().totalMemory();
+        for (int i = 0; i < _SIZE; i++) {
+            array[i] = new Object();
+        }
+        long freeMem = Runtime.getRuntime().freeMemory();
+        long difference = ( totalMem - freeMem ) / _SIZE;
+        System.out.println( difference + " \tbytes/object" );
 
-       collectGarbage();
-       totalMem = Runtime.getRuntime().totalMemory();
-       for (int i = 0; i < _SIZE; i++) {
-           array[i] = new String(String.valueOf(i));
-       }
-       freeMem = Runtime.getRuntime().freeMemory();
-       difference = ( totalMem - freeMem ) / _SIZE;
-       System.out.println( difference + " \tbytes/String" );
+        collectGarbage();
+        totalMem = Runtime.getRuntime().totalMemory();
+        for (int i = 0; i < _SIZE; i++) {
+            array[i] = new String(String.valueOf(i));
+        }
+        freeMem = Runtime.getRuntime().freeMemory();
+        difference = ( totalMem - freeMem ) / _SIZE;
+        System.out.println( difference + " \tbytes/String" );
     }
 
     private static void testH5OpenClose(final String filename)  throws Exception
@@ -2524,7 +2524,7 @@ public class DebugHDF {
         {
             final HObject hObject = (HObject) list.get(i);
             System.out.println(
-                hObject.getPath() + hObject.getName() + " : " + hObject.getClass().getName());
+                    hObject.getPath() + hObject.getName() + " : " + hObject.getClass().getName());
             try
             {
                 printHObject(hObject);
@@ -2650,49 +2650,49 @@ public class DebugHDF {
         System.out.println(H5.H5Tget_member_name(booleanEnum, 1));
     }
 
-//    private static void testSDgetchunkinfo(final String fileName) throws Exception
-//    {
-//        final FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
-//        if (fileFormat == null)
-//        {
-//             System.err.println("Cannot find HDF5 FileFormat.");
-//             return;
-//        }
-//
-//        // create a new file with a given file name.
-//        final H4File testFile = (H4File)fileFormat.open(fileName, FileFormat.READ);
-//        if (testFile == null)
-//        {
-//             System.err.println("Failed to open file: "+fileName);
-//             return;
-//        }
-//
-//        // retrieve the file structure
-//        testFile.open();
-//        final Group root = (Group) testFile.getRootObject();
-//        final Dataset d = (Dataset)root.getMemberList().get(1);
-//        if (d != null) {
-//            System.out.println(d.getName());
-//        } else
-//        {
-//             System.err.println("No such dataset in file: "+fileName);
-//             testFile.close();
-//             return;
-//        }
-//        final int did = d.open();
-//        final HDFChunkInfo chunkInfo = new HDFChunkInfo();
-//        final int[] cflag = {HDFConstants.HDF_NONE};
-//        final boolean status = HDFLibrary.SDgetchunkinfo(did, chunkInfo, cflag);
-//
-//        if (status) {
-//            System.out.println("Calling SDgetchunkinfo() is OK");
-//        } else {
-//            System.out.println("Calling SDgetchunkinfo() FAILED");
-//        }
-//
-//        d.close(did);
-//        testFile.close();
-//    }
+    //    private static void testSDgetchunkinfo(final String fileName) throws Exception
+    //    {
+    //        final FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
+    //        if (fileFormat == null)
+    //        {
+    //             System.err.println("Cannot find HDF5 FileFormat.");
+    //             return;
+    //        }
+    //
+    //        // create a new file with a given file name.
+    //        final H4File testFile = (H4File)fileFormat.open(fileName, FileFormat.READ);
+    //        if (testFile == null)
+    //        {
+    //             System.err.println("Failed to open file: "+fileName);
+    //             return;
+    //        }
+    //
+    //        // retrieve the file structure
+    //        testFile.open();
+    //        final Group root = (Group) testFile.getRootObject();
+    //        final Dataset d = (Dataset)root.getMemberList().get(1);
+    //        if (d != null) {
+    //            System.out.println(d.getName());
+    //        } else
+    //        {
+    //             System.err.println("No such dataset in file: "+fileName);
+    //             testFile.close();
+    //             return;
+    //        }
+    //        final int did = d.open();
+    //        final HDFChunkInfo chunkInfo = new HDFChunkInfo();
+    //        final int[] cflag = {HDFConstants.HDF_NONE};
+    //        final boolean status = HDFLibrary.SDgetchunkinfo(did, chunkInfo, cflag);
+    //
+    //        if (status) {
+    //            System.out.println("Calling SDgetchunkinfo() is OK");
+    //        } else {
+    //            System.out.println("Calling SDgetchunkinfo() FAILED");
+    //        }
+    //
+    //        d.close(did);
+    //        testFile.close();
+    //    }
 
     private static void testSizeof () throws Exception
     {
@@ -2752,7 +2752,7 @@ public class DebugHDF {
         System.out.println ("'before' heap: " + heap1 +
                             ", 'after' heap: " + heap2);
         System.out.println ("heap delta: " + (heap2 - heap1) +
-            ", {" + objects [0].getClass () + "} size = " + size + " bytes");
+                ", {" + objects [0].getClass () + "} size = " + size + " bytes");
 
         for (int i = 0; i < count; ++ i) {
             objects [i] = null;
@@ -2799,53 +2799,53 @@ public class DebugHDF {
         final FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         if (fileFormat == null)
         {
-             System.err.println("Cannot find HDF5 FileFormat.");
-             return;
+            System.err.println("Cannot find HDF5 FileFormat.");
+            return;
         }
 
         // create a new file with a given file name.
         final H5File tFile = (H5File)fileFormat.create(fileName);
         if (tFile == null)
         {
-             System.err.println("Failed to create file:"+fileName);
-             return;
+            System.err.println("Failed to create file:"+fileName);
+            return;
         }
 
         final FileFormat testFile = fileFormat.open(fileName,FileFormat.WRITE);
         if(testFile == null){
-          System.err.println("Failed to open file " + fileName);
-          return;
-     }
-     testFile.open();
-     final Group root = (Group) testFile.getRootObject();
+            System.err.println("Failed to open file " + fileName);
+            return;
+        }
+        testFile.open();
+        final Group root = (Group) testFile.getRootObject();
 
-    Vector v = new Vector();
-    v.addElement(new Float(1.2));
-    v.addElement(new Float(2.3));
-    v.addElement(new Float(4.5));
+        Vector v = new Vector();
+        v.addElement(new Float(1.2));
+        v.addElement(new Float(2.3));
+        v.addElement(new Float(4.5));
 
-    putData(testFile, root, "Vector Dataset",v,true, null);
-    v = getData(root, "Vector Dataset");
-    System.out.println("first time getData " + v);
+        putData(testFile, root, "Vector Dataset",v,true, null);
+        v = getData(root, "Vector Dataset");
+        System.out.println("first time getData " + v);
 
-    //adding five more elements tothe vector
-    v.addElement(new Float(4));
-    v.addElement(new Float(5));
-    v.addElement(new Float(6));
-    v.addElement(new Float(7));
-    final long[] extended_dims = {7};
-    putData(testFile, root, "Vector Dataset",v,false, extended_dims);
-    System.out.println("After adding four more elements to the vector");
+        //adding five more elements tothe vector
+        v.addElement(new Float(4));
+        v.addElement(new Float(5));
+        v.addElement(new Float(6));
+        v.addElement(new Float(7));
+        final long[] extended_dims = {7};
+        putData(testFile, root, "Vector Dataset",v,false, extended_dims);
+        System.out.println("After adding four more elements to the vector");
 
-    v = getData(root, "Vector Dataset");
-    System.out.println("Second time getData " + v);
-    testFile.close();
+        v = getData(root, "Vector Dataset");
+        System.out.println("Second time getData " + v);
+        testFile.close();
 
     }
 
     @SuppressWarnings("rawtypes")
     public static void putData(final FileFormat testFile, final Group root, final String name,
-        final Vector value, final boolean flag, final long[] extended_dims)throws Exception
+            final Vector value, final boolean flag, final long[] extended_dims)throws Exception
     {
         final int size = value.size();
         final long[] dims = {size};
@@ -2859,24 +2859,24 @@ public class DebugHDF {
         if(flag == true ) {
             // create Vector dataset
             final Datatype dtype = testFile.createDatatype(
-                        Datatype.CLASS_FLOAT,
-                        Datatype.NATIVE,
-                        Datatype.NATIVE,
-                        Datatype.NATIVE);
+                    Datatype.CLASS_FLOAT,
+                    Datatype.NATIVE,
+                    Datatype.NATIVE,
+                    Datatype.NATIVE);
 
-           final long[] maxdims = {HDF5Constants.H5S_UNLIMITED};
-           final Dataset dataset = testFile.createScalarDS(
-                  name, root, dtype, dims, maxdims, null, 0, dataFl);
+            final long[] maxdims = {HDF5Constants.H5S_UNLIMITED};
+            final Dataset dataset = testFile.createScalarDS(
+                    name, root, dtype, dims, maxdims, null, 0, dataFl);
 
-           dataset.write(dataFl);
+            dataset.write(dataFl);
 
-       } else{
-           final Dataset dset = (Dataset)root.getMemberList().get(0);
-           final long did = dset.open();
-           H5.H5Dset_extent(did, extended_dims);
-           dset.close(did);
-           dset.write(dataFl);
-       }
+        } else{
+            final Dataset dset = (Dataset)root.getMemberList().get(0);
+            final long did = dset.open();
+            H5.H5Dset_extent(did, extended_dims);
+            dset.close(did);
+            dset.write(dataFl);
+        }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -2889,8 +2889,8 @@ public class DebugHDF {
         final float[] dataRead = (float[])dataset.read();
         // print out the data values
         for(int i=0; i<dataRead.length; i++){
-           v.add(new Float(dataRead[i]));
-           System.out.println(v);
+            v.add(new Float(dataRead[i]));
+            System.out.println(v);
         }
         return v;
     }
@@ -2920,209 +2920,209 @@ public class DebugHDF {
 
         final long[] dims = {52636};
         final String[] memberNames = {
-                                "rs#",
-                                "SNPalleles",
-                                "chrom",
-                                "pos",
-                                "strand",
-                                "genome_build",
-                                "center",
-                                "protLSID",
-                                "assayLSID",
-                                "panelLSID",
-                                "QC_code",
-                                "NA06985",
-                                "NA06991",
-                                "NA06993",
-                                "NA06994",
-                                "NA07000",
-                                "NA07019",
-                                "NA07022",
-                                "NA07029",
-                                "NA07034",
-                                "NA07048",
-                                "NA07055",
-                                "NA07056",
-                                "NA07345",
-                                "NA07348",
-                                "NA07357",
-                                "NA10830",
-                                "NA10831",
-                                "NA10835",
-                                "NA10838",
-                                "NA10839",
-                                "NA10846",
-                                "NA10847",
-                                "NA10851",
-                                "NA10854",
-                                "NA10855",
-                                "NA10856",
-                                "NA10857",
-                                "NA10859",
-                                "NA10860",
-                                "NA10861",
-                                "NA10863",
-                                "NA11829",
-                                "NA11830",
-                                "NA11831",
-                                "NA11832",
-                                "NA11839",
-                                "NA11840",
-                                "NA11881",
-                                "NA11882",
-                                "NA11992",
-                                "NA11993",
-                                "NA11994",
-                                "NA11995",
-                                "NA12003",
-                                "NA12004",
-                                "NA12005",
-                                "NA12006",
-                                "NA12043",
-                                "NA12044",
-                                "NA12056",
-                                "NA12057",
-                                "NA12144",
-                                "NA12145",
-                                "NA12146",
-                                "NA12154",
-                                "NA12155",
-                                "NA12156",
-                                "NA12234",
-                                "NA12236",
-                                "NA12239",
-                                "NA12248",
-                                "NA12249",
-                                "NA12264",
-                                "NA12707",
-                                "NA12716",
-                                "NA12717",
-                                "NA12740",
-                                "NA12750",
-                                "NA12751",
-                                "NA12752",
-                                "NA12753",
-                                "NA12760",
-                                "NA12761",
-                                "NA12762",
-                                "NA12763",
-                                "NA12801",
-                                "NA12802",
-                                "NA12812",
-                                "NA12813",
-                                "NA12814",
-                                "NA12815",
-                                "NA12864",
-                                "NA12865",
-                                "NA12872",
-                                "NA12873",
-                                "NA12874",
-                                "NA12875",
-                                "NA12878",
-                                "NA12891",
-                                "NA12892"};
+                "rs#",
+                "SNPalleles",
+                "chrom",
+                "pos",
+                "strand",
+                "genome_build",
+                "center",
+                "protLSID",
+                "assayLSID",
+                "panelLSID",
+                "QC_code",
+                "NA06985",
+                "NA06991",
+                "NA06993",
+                "NA06994",
+                "NA07000",
+                "NA07019",
+                "NA07022",
+                "NA07029",
+                "NA07034",
+                "NA07048",
+                "NA07055",
+                "NA07056",
+                "NA07345",
+                "NA07348",
+                "NA07357",
+                "NA10830",
+                "NA10831",
+                "NA10835",
+                "NA10838",
+                "NA10839",
+                "NA10846",
+                "NA10847",
+                "NA10851",
+                "NA10854",
+                "NA10855",
+                "NA10856",
+                "NA10857",
+                "NA10859",
+                "NA10860",
+                "NA10861",
+                "NA10863",
+                "NA11829",
+                "NA11830",
+                "NA11831",
+                "NA11832",
+                "NA11839",
+                "NA11840",
+                "NA11881",
+                "NA11882",
+                "NA11992",
+                "NA11993",
+                "NA11994",
+                "NA11995",
+                "NA12003",
+                "NA12004",
+                "NA12005",
+                "NA12006",
+                "NA12043",
+                "NA12044",
+                "NA12056",
+                "NA12057",
+                "NA12144",
+                "NA12145",
+                "NA12146",
+                "NA12154",
+                "NA12155",
+                "NA12156",
+                "NA12234",
+                "NA12236",
+                "NA12239",
+                "NA12248",
+                "NA12249",
+                "NA12264",
+                "NA12707",
+                "NA12716",
+                "NA12717",
+                "NA12740",
+                "NA12750",
+                "NA12751",
+                "NA12752",
+                "NA12753",
+                "NA12760",
+                "NA12761",
+                "NA12762",
+                "NA12763",
+                "NA12801",
+                "NA12802",
+                "NA12812",
+                "NA12813",
+                "NA12814",
+                "NA12815",
+                "NA12864",
+                "NA12865",
+                "NA12872",
+                "NA12873",
+                "NA12874",
+                "NA12875",
+                "NA12878",
+                "NA12891",
+        "NA12892"};
         final Datatype[] memberDatatypes = {
-                       new H5Datatype(Datatype.CLASS_STRING, 12, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 4, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 6, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 2, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 4, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                       new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1)};
+                new H5Datatype(Datatype.CLASS_STRING, 12, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 4, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 6, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 2, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 4, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
+                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1)};
 
         final int[] memberSizes = new int[101];
         for (int i=0; i<101; i++) {
@@ -3175,7 +3175,7 @@ public class DebugHDF {
         dataset = (Dataset)root.getMemberList().get(1);
 
         testFile.delete(dataset);
-    //    testFile.close();
+        //    testFile.close();
         H5.H5Fflush(testFile.getFID(), HDF5Constants.H5F_SCOPE_GLOBAL);
     }
 
@@ -3219,7 +3219,7 @@ public class DebugHDF {
 
         dataset = (Dataset)root.getMemberList().get(1);
         testFile.delete(dataset);
-    //    testFile.close();
+        //    testFile.close();
         H5.H5Fflush(testFile.getFID(), HDF5Constants.H5F_SCOPE_GLOBAL);
     }
 
@@ -3231,19 +3231,19 @@ public class DebugHDF {
         final double[] rdccW0 = new double[1];
 
         H5.H5Pget_cache(pid,
-                      mdcNumElements,
-                      rdccNumElements,
-                      rdccNumBytes,
-                      rdccW0);
+                mdcNumElements,
+                rdccNumElements,
+                rdccNumBytes,
+                rdccW0);
 
         H5.H5Pset_cache(pid,
-                      mdcNumElements[0],
-                      rdccNumElements[0],
-                      1024*1024*4,
-                      rdccW0[0]);
+                mdcNumElements[0],
+                rdccNumElements[0],
+                1024*1024*4,
+                rdccW0[0]);
 
         final long fid = H5.H5Fopen("H:\\java\\java8\\xcao\\test\\bigdata.h5",
-            HDF5Constants.H5F_ACC_RDWR, pid);
+                HDF5Constants.H5F_ACC_RDWR, pid);
         final long did = H5.H5Dopen(fid, "/PI", HDF5Constants.H5P_DEFAULT);
         final long tid = H5.H5Dget_type(did);
         final long mtid = H5.H5Tget_native_type(tid);
@@ -3254,7 +3254,7 @@ public class DebugHDF {
         final long dim1d[] = {125*130*39};
         final long msid = H5.H5Screate_simple(1, dim1d, null);
         if (H5.H5Dread_float(did, mtid, msid, HDF5Constants.H5S_ALL,
-            HDF5Constants.H5P_DEFAULT, allData)<0) {
+                HDF5Constants.H5P_DEFAULT, allData)<0) {
             System.err.println("##### Read data failed\n");
         }
         H5.H5Sclose(msid);
@@ -3342,8 +3342,8 @@ public class DebugHDF {
         final long[] dims = {DIM1, DIM2, DIM3};
         final String[] memberNames = {"x", "y"};
         final Datatype[] memberDatatypes = {
-            new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1),
-            new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1)
+                new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1),
+                new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1)
         };
         final int[] memberSizes = {1, 10};
 
@@ -3408,33 +3408,33 @@ public class DebugHDF {
 
         // create 2D 32-bit (4 bytes) integer dataset of 20 by 10
         Datatype dtype = testFile.createDatatype(
-            Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
+                Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
         Dataset dataset = testFile.createScalarDS
-            ("2D int", g1, dtype, dims2D, null, null, 0, dataInt);
+                ("2D int", g1, dtype, dims2D, null, null, 0, dataInt);
 
         // create 2D 32-bit (4 bytes) integer dataset of 20 by 10
         dtype = testFile.createDatatype(
-            Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
+                Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
         dataset = testFile.createScalarDS
-            ("2D uint", g1, dtype, dims2D, null, null, 0, dataInt);
+                ("2D uint", g1, dtype, dims2D, null, null, 0, dataInt);
 
         // create 3D 8-bit (1 byte) unsigned integer dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
-            Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
+                Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
         dataset = testFile.createScalarDS
-            ("3D byte", g1, dtype, dims3D, null, null, 0, null);
+                ("3D byte", g1, dtype, dims3D, null, null, 0, null);
 
         // create 2D 64-bit (8 bytes) double dataset of 20 by 10
         dtype = testFile.createDatatype(
-            Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
         dataset = testFile.createScalarDS
-            ("2D double", g2, dtype, dims2D, null, null, 0, dataDouble);
+                ("2D double", g2, dtype, dims2D, null, null, 0, dataDouble);
 
         // create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
-            Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
         dataset = testFile.createScalarDS
-            ("3D float", g2, dtype, dims3D, null, null, 0, null);
+                ("3D float", g2, dtype, dims3D, null, null, 0, null);
 
         // close file resource
         testFile.close();
@@ -3480,27 +3480,27 @@ public class DebugHDF {
 
         // Create 2D 32-bit (4 bytes) integer dataset of 20 by 10
         Datatype dtype = testFile.createDatatype(
-            Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
+                Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
         Dataset dataset = testFile.createScalarDS
-            ("2D 32-bit integer 20x10", g1, dtype, dims2D, null, null, 0, null);
+                ("2D 32-bit integer 20x10", g1, dtype, dims2D, null, null, 0, null);
 
         // Create 3D 8-bit (1 byte) unsigned integer dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
-            Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
+                Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
         dataset = testFile.createScalarDS
-            ("3D 8-bit unsigned integer 20x10x5", g1, dtype, dims3D, null, null, 0, null);
+                ("3D 8-bit unsigned integer 20x10x5", g1, dtype, dims3D, null, null, 0, null);
 
         // Create 2D 64-bit (8 bytes) double dataset of 20 by 10
         dtype = testFile.createDatatype(
-            Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
         dataset = testFile.createScalarDS
-            ("2D 64-bit double 20x10", g2, dtype, dims2D, null, null, 0, null);
+                ("2D 64-bit double 20x10", g2, dtype, dims2D, null, null, 0, null);
 
         // Create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
-            Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
         dataset = testFile.createScalarDS
-            ("3D 32-bit float  20x10x5", g2, dtype, dims3D, null, null, 0, null);
+                ("3D 32-bit float  20x10x5", g2, dtype, dims3D, null, null, 0, null);
 
         // Create String dataset
         System.out.println( "Just before call for STRINGS" );
@@ -3584,7 +3584,7 @@ public class DebugHDF {
         final String attrName = "Test attribute";
         final String[] attrValue = {"Test for group attribute"};
         final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, -1, -1);
-        final Attribute attr = new Attribute(attrName, attrType, attrDims);
+        final Attribute attr = new Attribute(file, attrName, attrType, attrDims);
         attr.setData(attrValue);
         g1.writeMetadata(attr);
 
@@ -3720,7 +3720,7 @@ public class DebugHDF {
             DecimalFormat fmt = new DecimalFormat("###,###,###");
             System.out.println("no. of groups = " + N + "\tfile size = " + fmt.format((new File(fname)).length()));
         } /* for (int N=1; N<=NGROUPS; N++) */
-     }
+    }
 
     static private int testH5OflushCrash(String fname) throws Exception
     {
@@ -3812,7 +3812,7 @@ public class DebugHDF {
         createFile(filename, dname, dims2D);
 
         H5File file = new H5File(filename, H5File.WRITE);
-    //    file.open();
+        //    file.open();
 
         System.runFinalization();
 

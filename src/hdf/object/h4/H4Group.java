@@ -160,7 +160,7 @@ public class H4Group extends Group
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    Attribute attr = new Attribute(this.getFileFormat(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     attributeList.add(attr);
 
                     Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
@@ -306,7 +306,7 @@ public class H4Group extends Group
      * @throws Exception if the group can not be created
      */
     public static H4Group create(String name, Group pgroup)
-        throws Exception
+            throws Exception
     {
         log.trace("create(): start: name={} parentGroup={}", name, pgroup);
 

@@ -246,54 +246,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     }
 
     /**
-     * Retrieves datatype and dataspace information from file and sets the
-     * dataset in memory.
-     * <p>
-     * The init() is designed to support lazy operation in a dataset object. When
-     * a data object is retrieved from file, the datatype, dataspace and raw
-     * data are not loaded into memory. When it is asked to read the raw data
-     * from file, init() is first called to get the datatype and dataspace
-     * information, then load the raw data from file.
-     * <p>
-     * init() is also used to reset the selection of a dataset (start, stride and
-     * count) to the default, which is the entire dataset for 1D or 2D datasets.
-     * In the following example, init() at step 1) retrieves datatype and
-     * dataspace information from file. getData() at step 3) reads only one data
-     * point. init() at step 4) resets the selection to the whole dataset.
-     * getData() at step 4) reads the values of whole dataset into memory.
-     *
-     * <pre>
-     * dset = (Dataset) file.get(NAME_DATASET);
-     *
-     * // 1) get datatype and dataspace information from file
-     * dset.init();
-     * rank = dset.getRank(); // rank = 2, a 2D dataset
-     * count = dset.getSelectedDims();
-     * start = dset.getStartDims();
-     * dims = dset.getDims();
-     *
-     * // 2) select only one data point
-     * for (int i = 0; i &lt; rank; i++) {
-     *     start[0] = 0;
-     *     count[i] = 1;
-     * }
-     *
-     * // 3) read one data point
-     * data = dset.getData();
-     *
-     * // 4) reset selection to the whole dataset
-     * dset.init();
-     *
-     * // 5) clean the memory data buffer
-     * dset.clearData();
-     *
-     * // 6) Read the whole dataset
-     * data = dset.getData();
-     * </pre>
-     */
-    public abstract void init();
-
-    /**
      * Returns the rank (number of dimensions) of the dataset.
      *
      * @return the number of dimensions of the dataset.
@@ -1293,6 +1245,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @return the Class of originalBuf
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public final Class getOriginalClass() {
         return originalBuf.getClass();

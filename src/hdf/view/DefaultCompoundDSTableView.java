@@ -105,8 +105,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         log.trace("loadData(): start");
 
         if (dataObject.getRank() <= 0) {
-            if (dataObject instanceof CompoundDS)
-                ((CompoundDS) dataObject).init();
+            dataObject.init();
 
             log.trace("loadData(): inited");
         }
