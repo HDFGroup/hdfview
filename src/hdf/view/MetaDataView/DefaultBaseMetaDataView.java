@@ -64,6 +64,7 @@ import hdf.view.DefaultFileFilter;
 import hdf.view.Tools;
 import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.TreeView.DefaultTreeView;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.NewAttributeDialog;
@@ -693,6 +694,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         numAttributes++;
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
 
+        if (viewManager.getTreeView() instanceof DefaultTreeView)
+            ((DefaultTreeView) viewManager.getTreeView()).updateItemIcon(obj);
+
         log.trace("addAttribute(): finish");
 
         return attr;
@@ -743,6 +747,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         numAttributes--;
 
         attrNumberLabel.setText("Number of attributes = " + numAttributes);
+
+        if (viewManager.getTreeView() instanceof DefaultTreeView)
+            ((DefaultTreeView) viewManager.getTreeView()).updateItemIcon(obj);
 
         log.trace("deleteAttribute(): finish");
 

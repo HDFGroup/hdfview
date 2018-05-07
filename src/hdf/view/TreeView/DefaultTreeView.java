@@ -2803,6 +2803,49 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
+     * Updates the icon for the TreeItem representing the given HObject. Used
+     * to change the icon after a status update, such as adding an attribute to
+     * an object.
+     *
+     * @param obj
+     *           the object to update the icon for
+     */
+    public void updateItemIcon(HObject obj) {
+        if (obj == null) {
+            log.debug("updateItemIcon(): object is null");
+            return;
+        }
+
+        TreeItem theItem = findTreeItem(obj);
+
+        if (theItem == null) {
+            log.debug("updateItemIcon(): could not find TreeItem for HObject");
+        }
+
+        if (obj instanceof Group && !(((Group) obj).isRoot())) {
+            if (theItem.getExpanded()) {
+                if (((MetaDataContainer) obj).hasAttribute()) {
+                    theItem.setImage(folderOpenIconA);
+                }
+                else {
+                    theItem.setImage(folderOpenIcon);
+                }
+            }
+            else {
+                if (((MetaDataContainer) obj).hasAttribute()) {
+                    theItem.setImage(folderCloseIconA);
+                }
+                else {
+                    theItem.setImage(folderCloseIcon);
+                }
+            }
+        }
+        else {
+            theItem.setImage(getObjectTypeImage(obj));
+        }
+    }
+
+    /**
      * ChangeIndexingDialog displays file index options.
      */
     private class ChangeIndexingDialog extends Dialog {
