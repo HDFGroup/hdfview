@@ -285,6 +285,14 @@ public class ViewProperties extends PreferenceStore {
         }
 
         recentFiles = new Vector<>(MAX_RECENT_FILES + 5);
+
+        setDefault("image.showvalues", false);
+        setDefault("lib.lowversion", "Earliest");
+        setDefault("lib.highversion", "Latest");
+        setDefault("enum.conversion", false);
+        setDefault("regref.showvalues", false);
+        setDefault("index.base1", false);
+        setDefault("font.size", 12);
     }
 
     /**
@@ -1200,6 +1208,7 @@ public class ViewProperties extends PreferenceStore {
             isReadOnly = ("r".equalsIgnoreCase(propVal));
 
         EarlyLib = getString("lib.lowversion");
+
         LateLib = getString("lib.highversion");
 
         convertEnum = getBoolean("enum.conversion");
