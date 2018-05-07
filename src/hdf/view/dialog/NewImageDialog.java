@@ -313,13 +313,13 @@ public class NewImageDialog extends Dialog {
         }
         if ((name == null) || (name.length() <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Image name is not specified.", shell.getText());
+            Tools.showError(shell, "Create", "Image name is not specified.");
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Image name cannot contain path.", shell.getText());
+            Tools.showError(shell, "Create", "Image name cannot contain path.");
             return null;
         }
 
@@ -327,7 +327,7 @@ public class NewImageDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Select a parent group.", shell.getText());
+            Tools.showError(shell, "Create", "Select a parent group.");
             return null;
         }
 
@@ -338,7 +338,7 @@ public class NewImageDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return null;
         }
 
@@ -395,7 +395,7 @@ public class NewImageDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Create", ex.getMessage());
             return null;
         }
 

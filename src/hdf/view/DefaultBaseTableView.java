@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
@@ -264,7 +263,7 @@ public abstract class DefaultBaseTableView implements TableView {
             @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
-                    if (MessageDialog.openConfirm(shell, "Changes Detected", "\"" + ((HObject) dataObject).getName()
+                    if (Tools.showConfirm(shell, "Changes Detected", "\"" + ((HObject) dataObject).getName()
                             + "\" has changed.\nDo you want to save the changes?"))
                         updateValueInFile();
                     else
@@ -359,8 +358,8 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dims == null) {
             log.debug("data object has null dimensions");
             log.trace("finish");
-            Tools.showError(shell, "Could not open data object '" + ((HObject) dataObject).getName()
-                    + "'. Data object has null dimensions.", shell.getText());
+            Tools.showError(shell, "Create", "Could not open data object '" + ((HObject) dataObject).getName()
+                    + "'. Data object has null dimensions.");
             return;
         }
 
@@ -373,8 +372,8 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
             log.debug("data object has dimension of size 0");
             log.trace("finish");
-            Tools.showError(shell, "Could not open data object '" + ((HObject) dataObject).getName()
-                    + "'. Data object has dimension of size 0.", shell.getText());
+            Tools.showError(shell, "Create", "Could not open data object '" + ((HObject) dataObject).getName()
+                    + "'. Data object has dimension of size 0.");
             return;
         }
 
@@ -678,7 +677,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
                 catch (Exception ex) {
                     theShell.getDisplay().beep();
-                    Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                    Tools.showError(theShell, "Select", ex.getMessage());
                 }
             }
         });
@@ -714,7 +713,7 @@ public abstract class DefaultBaseTableView implements TableView {
             public void widgetSelected(SelectionEvent e) {
                 if ((selectionLayer.getSelectedColumnPositions().length <= 0)
                         || (selectionLayer.getSelectedRowCount() <= 0)) {
-                    MessageDialog.openInformation(theShell, theShell.getText(), "Select table cells to write.");
+                    Tools.showInformation(theShell, "Copy", "Select table cells to write.");
                     return;
                 }
 
@@ -761,7 +760,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
                 catch (Exception ex) {
                     theShell.getDisplay().beep();
-                    Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                    Tools.showError(theShell, "Save", ex.getMessage());
                 }
             }
         });
@@ -788,8 +787,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     if (dataObject instanceof CompoundDS) {
                         int cols = selectionLayer.getFullySelectedColumnPositions().length;
                         if (cols != 1) {
-                            Tools.showError(theShell, "Please select one column at a time for compound dataset.",
-                                    theShell.getText());
+                            Tools.showError(theShell, "Statistics", "Please select one column at a time for compound dataset.");
                             return;
                         }
                     }
@@ -805,7 +803,7 @@ public abstract class DefaultBaseTableView implements TableView {
                         String stats = "Min                      = " + minmax[0] + "\nMax                      = "
                                 + minmax[1] + "\nMean                     = " + stat[0] + "\nStandard deviation = "
                                 + stat[1];
-                        MessageDialog.openInformation(theShell, "Statistics", stats);
+                        Tools.showInformation(theShell, "Statistics", stats);
                     }
 
                     theData = null;
@@ -813,7 +811,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
                 catch (Exception ex) {
                     theShell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), theShell.getText());
+                    Tools.showError(shell, "Statistics", ex.getMessage());
                 }
             }
         });
@@ -831,7 +829,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                    Tools.showError(theShell, "Convert", ex.getMessage());
                 }
             }
         });
@@ -877,7 +875,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
                 catch (Exception ex) {
                     theShell.getDisplay().beep();
-                    Tools.showError(theShell, ex.getMessage(), theShell.getText());
+                    Tools.showError(theShell, "Save", ex.getMessage());
                 }
             }
         });
@@ -916,11 +914,11 @@ public abstract class DefaultBaseTableView implements TableView {
 
                 File chosenFile = new File(filename);
                 if (!chosenFile.exists()) {
-                    Tools.showError(theShell, "File " + filename + " does not exist.", "Import Data from Text File");
+                    Tools.showError(theShell, "Import", "Import Data from Text File " + filename + " does not exist.");
                     return;
                 }
 
-                if (!MessageDialog.openConfirm(theShell, "Import Data", "Do you want to paste selected data?")) return;
+                if (!Tools.showConfirm(theShell, "Import Data", "Do you want to paste selected data?")) return;
                 importTextData(chosenFile.getAbsolutePath());
             }
         });
@@ -1049,9 +1047,8 @@ public abstract class DefaultBaseTableView implements TableView {
         // Do a bit of frame index validation
         if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
             shell.getDisplay().beep();
-            Tools.showError(shell,
-                    "Frame number must be between " + indexBase + " and " + (dims[selectedIndex[2]] - 1 + indexBase),
-                    shell.getText());
+            Tools.showError(shell, "Select",
+                    "Frame number must be between " + indexBase + " and " + (dims[selectedIndex[2]] - 1 + indexBase));
             return;
         }
 
@@ -1072,7 +1069,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (Exception ex) {
             dataValue = null;
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Select", ex.getMessage());
             return;
         }
         finally {
@@ -1090,7 +1087,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         Rectangle selection = selectionLayer.getLastSelectedRegion();
         if (selection == null) {
-            Tools.showError(shell, "Select data to copy.", shell.getText());
+            Tools.showError(shell, "Copy", "Select data to copy.");
             return;
         }
 
@@ -1118,9 +1115,8 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (java.lang.OutOfMemoryError err) {
             shell.getDisplay().beep();
-            Tools.showError(shell,
-                    "Copying data to system clipboard failed. \nUse \"export/import data\" for copying/pasting large data.",
-                    shell.getText());
+            Tools.showError(shell, "Copy",
+                    "Copying data to system clipboard failed. \nUse \"export/import data\" for copying/pasting large data.");
             return;
         }
 
@@ -1133,7 +1129,7 @@ public abstract class DefaultBaseTableView implements TableView {
      * Paste data from the system clipboard to the spreadsheet.
      */
     private void pasteData() {
-        if (!MessageDialog.openConfirm(shell, "Clipboard Data", "Do you want to paste selected data?")) return;
+        if (!Tools.showConfirm(shell, "Clipboard Data", "Do you want to paste selected data?")) return;
 
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
@@ -1199,7 +1195,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Paste", ex.getMessage());
         }
     }
 
@@ -1245,15 +1241,14 @@ public abstract class DefaultBaseTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell,
-                                "Unable to save data to file \"" + fname + "\". \nThe file is being used.",
-                                shell.getText());
+                        Tools.showError(shell, "Save",
+                                "Unable to save data to file \"" + fname + "\". \nThe file is being used.");
                         return;
                     }
                 }
             }
 
-            if (!MessageDialog.openConfirm(shell, shell.getText(), "File exists. Do you want to replace it?")) return;
+            if (!Tools.showConfirm(shell, "Save", "File exists. Do you want to replace it?")) return;
         }
 
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(chosenFile)));
@@ -1329,8 +1324,8 @@ public abstract class DefaultBaseTableView implements TableView {
     // while (iterator.hasNext()) {
     // theFile = iterator.next();
     // if (theFile.getFilePath().equals(fname)) {
-    // Tools.showError(shell, "Unable to save data to file \"" + fname
-    // + "\". \nThe file is being used.", shell.getText());
+    // Tools.showError(shell, "Save", "Unable to save data to file \"" + fname
+    // + "\". \nThe file is being used.");
     // return;
     // }
     // }
@@ -1445,15 +1440,14 @@ public abstract class DefaultBaseTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell,
-                                "Unable to save data to file \"" + fname + "\". \nThe file is being used.",
-                                shell.getText());
+                        Tools.showError(shell, "Save",
+                                "Unable to save data to file \"" + fname + "\". \nThe file is being used.");
                         return;
                     }
                 }
             }
 
-            if (!MessageDialog.openConfirm(shell, shell.getText(), "File exists. Do you want to replace it?")) return;
+            if (!Tools.showConfirm(shell, "Save", "File exists. Do you want to replace it?")) return;
         }
 
         FileOutputStream outputFile = new FileOutputStream(chosenFile);
@@ -1598,7 +1592,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     } // while (tokenizer1.hasMoreTokens() && index < size)
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Import", ex.getMessage());
 
                     try {
                         in.close();
@@ -1663,11 +1657,11 @@ public abstract class DefaultBaseTableView implements TableView {
 
         File chosenFile = new File(filename);
         if (!chosenFile.exists()) {
-            Tools.showError(shell, "File " + chosenFile.getName() + " does not exist.", "Import Data from Binary File");
+            Tools.showError(shell, "Import", "Import Data from Binary File " + chosenFile.getName() + " does not exist.");
             return;
         }
 
-        if (!MessageDialog.openConfirm(shell, "Import Data", "Do you want to paste selected data?")) return;
+        if (!Tools.showConfirm(shell, "Import Data", "Do you want to paste selected data?")) return;
 
         ByteOrder bo = ByteOrder.nativeOrder();
         if (binaryOrder == 1)
@@ -1706,8 +1700,7 @@ public abstract class DefaultBaseTableView implements TableView {
         int cols = selectionLayer.getSelectedColumnPositions().length;
         if ((dataObject instanceof CompoundDS) && (cols > 1)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Please select one column at a time for math conversion" + "for compound dataset.",
-                    shell.getText());
+            Tools.showError(shell, "Convert", "Please select one column at a time for math conversion" + "for compound dataset.");
             log.debug("mathConversion(): more than one column selected for CompoundDS");
             log.trace("mathConversion(): finish");
             return;
@@ -1716,7 +1709,7 @@ public abstract class DefaultBaseTableView implements TableView {
         Object theData = getSelectedData();
         if (theData == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "No data is selected.", shell.getText());
+            Tools.showError(shell, "Convert", "No data is selected.");
             log.debug("mathConversion(): no data selected");
             log.trace("mathConversion(): finish");
             return;
@@ -1791,7 +1784,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         if ((rows == null) || (cols == null) || (rows.length <= 0) || (cols.length <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Select rows/columns to draw line plot.", shell.getText());
+            Tools.showError(shell, "Select", "Select rows/columns to draw line plot.");
             return;
         }
 
@@ -1826,7 +1819,7 @@ public abstract class DefaultBaseTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                MessageDialog.openWarning(shell, shell.getText(),
+                Tools.showWarning(shell, "Select",
                         "More than 10 rows are selected.\n" + "The first 10 rows will be displayed.");
             }
             lineLabels = new String[nLines];
@@ -1869,7 +1862,7 @@ public abstract class DefaultBaseTableView implements TableView {
             if (nLines > 10) {
                 shell.getDisplay().beep();
                 nLines = 10;
-                MessageDialog.openWarning(shell, shell.getText(),
+                Tools.showWarning(shell, "Select",
                         "More than 10 columns are selected.\n" + "The first 10 columns will be displayed.");
             }
             lineLabels = new String[nLines];
@@ -1928,8 +1921,8 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         else if (yRange[0] > yRange[1]) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Cannot show line plot for the selected data. \n" + "Please check the data range: ("
-                    + yRange[0] + ", " + yRange[1] + ").", shell.getText());
+            Tools.showError(shell, "Select", "Cannot show line plot for the selected data. \n" + "Please check the data range: ("
+                    + yRange[0] + ", " + yRange[1] + ").");
             data = null;
             return;
         }
@@ -2057,12 +2050,12 @@ public abstract class DefaultBaseTableView implements TableView {
                                 catch (Exception ex) {
                                     log.debug("show reference data: ", ex);
                                     theData = null;
-                                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                                    Tools.showError(shell, "Select", ex.getMessage());
                                 }
 
                                 if (theData == null) {
                                     shell.getDisplay().beep();
-                                    Tools.showError(shell, "No data selected.", shell.getText());
+                                    Tools.showError(shell, "Select", "No data selected.");
                                     return;
                                 }
 
@@ -2078,7 +2071,7 @@ public abstract class DefaultBaseTableView implements TableView {
                                 Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
                                 if (selectedRows == null || selectedRows.length <= 0) {
                                     log.debug("show reference data: no data selected");
-                                    Tools.showError(shell, "No data selected.", shell.getText());
+                                    Tools.showError(shell, "Select", "No data selected.");
                                     return;
                                 }
                                 int len = Array.getLength(selectedRows);
@@ -2261,7 +2254,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     Object theData = getSelectedData();
                     if (theData == null) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "No data selected.", shell.getText());
+                        Tools.showError(shell, "Select", "No data selected.");
                         return;
                     }
 
@@ -2278,7 +2271,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
                     if (selectedRows == null || selectedRows.length <= 0) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "No data selected.", shell.getText());
+                        Tools.showError(shell, "Select", "No data selected.");
                         log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
                         return;
                     }
@@ -2311,7 +2304,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     Object theData = getSelectedData();
                     if (theData == null) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "No data selected.", shell.getText());
+                        Tools.showError(shell, "Select", "No data selected.");
                         return;
                     }
 
@@ -2328,7 +2321,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
                     if (selectedRows == null || selectedRows.length <= 0) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "No data selected.", shell.getText());
+                        Tools.showError(shell, "Select", "No data selected.");
                         log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
                         return;
                     }
@@ -2360,7 +2353,7 @@ public abstract class DefaultBaseTableView implements TableView {
             // Object theData = getSelectedData();
             // if (theData == null) {
             // shell.getDisplay().beep();
-            // Tools.showError(shell, "No data selected.", shell.getText());
+            // Tools.showError(shell, "Select", "No data selected.");
             // return;
             // }
             //

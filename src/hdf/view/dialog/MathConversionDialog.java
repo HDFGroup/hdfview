@@ -269,14 +269,14 @@ public class MathConversionDialog extends Dialog {
                 a = Integer.parseInt(aField.getText().trim());
                 if (a <= 0) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "a must be an integer greater than zero.", shell.getText());
+                    Tools.showError(shell, "Convert", "a must be an integer greater than zero.");
                     return false;
                 }
             }
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Convert", ex.getMessage());
             return false;
         }
 
@@ -290,7 +290,7 @@ public class MathConversionDialog extends Dialog {
                     x = bdata[i];
                     value = y(index, x, a, b);
                     if ((value > Byte.MAX_VALUE) || (value < Byte.MIN_VALUE)) {
-                        Tools.showError(shell, "Invalid byte value: " + (long) value, shell.getText());
+                        Tools.showError(shell, "Convert", "Invalid byte value: " + (long) value);
                         return false;
                     }
 
@@ -303,7 +303,7 @@ public class MathConversionDialog extends Dialog {
                     x = sdata[i];
                     value = y(index, x, a, b);
                     if ((value > Short.MAX_VALUE) || (value < Short.MIN_VALUE)) {
-                        Tools.showError(shell, "Invalid short value: " + (long) value, shell.getText());
+                        Tools.showError(shell, "Convert", "Invalid short value: " + (long) value);
                         return false;
                     }
 
@@ -316,7 +316,7 @@ public class MathConversionDialog extends Dialog {
                     x = idata[i];
                     value = y(index, x, a, b);
                     if ((value > Integer.MAX_VALUE) || (value < Integer.MIN_VALUE)) {
-                        Tools.showError(shell, "Invalid int value: " + (long) value, shell.getText());
+                        Tools.showError(shell, "Convert", "Invalid int value: " + (long) value);
                         return false;
                     }
 
@@ -329,7 +329,7 @@ public class MathConversionDialog extends Dialog {
                     x = ldata[i];
                     value = y(index, x, a, b);
                     if ((value > Long.MAX_VALUE) || (value < Long.MIN_VALUE)) {
-                        Tools.showError(shell, "Invalid long value: " + (long) value, shell.getText());
+                        Tools.showError(shell, "Convert", "Invalid long value: " + (long) value);
                         return false;
                     }
 
@@ -343,7 +343,7 @@ public class MathConversionDialog extends Dialog {
                     value = y(index, x, a, b);
                     if ((value > Float.MAX_VALUE) || (value < -Float.MAX_VALUE)
                         || (value == Float.NaN)) {
-                        Tools.showError(shell, "Invalid float value: " + value, shell.getText());
+                        Tools.showError(shell, "Convert", "Invalid float value: " + value);
                         return false;
                     }
 
@@ -357,7 +357,7 @@ public class MathConversionDialog extends Dialog {
                     value = y(index, x, a, b);
                     if ((value > Double.MAX_VALUE) || (value < -Double.MAX_VALUE)
                         || (value == Double.NaN)) {
-                        Tools.showError(shell, "Invalid double value: " + value, shell.getText());
+                        Tools.showError(shell, "Convert", "Invalid double value: " + value);
                         return false;
                     }
 

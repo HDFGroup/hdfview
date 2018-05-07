@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.DisposeEvent;
@@ -200,7 +199,7 @@ public class NewLinkDialog extends Dialog {
                         + "Soft links and external links are also known as symbolic links as they use "
                         + "a name to point to an object; hard links employ an object's address in the file.  \n\n\n";
 
-                MessageDialog.openInformation(shell, shell.getText(), msg);
+                Tools.showInformation(shell, "Help", msg);
             }
         });
 
@@ -304,9 +303,8 @@ public class NewLinkDialog extends Dialog {
                     //Check if the target File is not the current file.
                     String currentFileName = fileFormat.getAbsolutePath();
                     if(currentFileName.equals(chosenFile.getAbsolutePath())) {
-                        Tools.showError(shell,
-                                "Please select a file other than the current file for external links.",
-                                shell.getText());
+                        Tools.showError(shell, "Traverse",
+                                "Please select a file other than the current file for external links.");
                         targetFile.setText("");
                         return;
                     }
@@ -463,13 +461,13 @@ public class NewLinkDialog extends Dialog {
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Link name is not specified.", shell.getText());
+            Tools.showError(shell, "Create", "Link name is not specified.");
             return null;
         }
 
         if (name.indexOf(HObject.separator) >= 0) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Link name cannot contain path.", shell.getText());
+            Tools.showError(shell, "Create", "Link name cannot contain path.");
             return null;
         }
 
@@ -477,7 +475,7 @@ public class NewLinkDialog extends Dialog {
 
         if (pgroup == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Parent group is null.", shell.getText());
+            Tools.showError(shell, "Create", "Parent group is null.");
             return null;
         }
 
@@ -487,13 +485,13 @@ public class NewLinkDialog extends Dialog {
 
             if (targetObj == null) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Target object is null.", shell.getText());
+                Tools.showError(shell, "Create", "Target object is null.");
                 return null;
             }
 
             if ((targetObj instanceof Group) && ((Group) targetObj).isRoot()) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Cannot make a link to the root group.", shell.getText());
+                Tools.showError(shell, "Create", "Cannot make a link to the root group.");
                 return null;
             }
 
@@ -502,7 +500,7 @@ public class NewLinkDialog extends Dialog {
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, ex.getMessage(), shell.getText());
+                Tools.showError(shell, "Create", ex.getMessage());
                 return null;
             }
         }
@@ -510,7 +508,7 @@ public class NewLinkDialog extends Dialog {
             String target_name = targetObject.getText();
             if (target_name.length() < 1)  {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Target object name is not specified.", shell.getText());
+                Tools.showError(shell, "Create", "Target object name is not specified.");
                 return null;
             }
 
@@ -538,7 +536,7 @@ public class NewLinkDialog extends Dialog {
 
             if ((targetObj instanceof Group) && ((Group) targetObj).isRoot()) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Cannot make a link to the root group.", shell.getText());
+                Tools.showError(shell, "Create", "Cannot make a link to the root group.");
                 return null;
             }
 
@@ -551,7 +549,7 @@ public class NewLinkDialog extends Dialog {
             catch (Exception ex) {
                 ex.printStackTrace();
                 shell.getDisplay().beep();
-                Tools.showError(shell, ex.getMessage(), shell.getText());
+                Tools.showError(shell, "Create", ex.getMessage());
                 return null;
             }
         }
@@ -596,7 +594,7 @@ public class NewLinkDialog extends Dialog {
                 tObj = targetObject.getText();
                 if (tObj.length() < 1)  {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Target object name not specified.", shell.getText());
+                    Tools.showError(shell, "Create", "Target object name not specified.");
                     return null;
                 }
                 tFileObj = TargetFileName + FileFormat.FILE_OBJ_SEP + tObj;
@@ -611,7 +609,7 @@ public class NewLinkDialog extends Dialog {
             catch (Exception ex) {
                 ex.printStackTrace();
                 shell.getDisplay().beep();
-                Tools.showError(shell, ex.getMessage(), shell.getText());
+                Tools.showError(shell, "Create", ex.getMessage());
                 return null;
             }
         }
@@ -646,7 +644,7 @@ public class NewLinkDialog extends Dialog {
         //Check if the target File is not the current file.
         String currentFileName = fileFormat.getAbsolutePath();
         if(currentFileName.equals(chosenFile.getAbsolutePath())) {
-            Tools.showError(shell, "Please select a file other than the current file for external links.", shell.getText());
+            Tools.showError(shell, "Open", "Please select a file other than the current file for external links.");
             targetFile.setText("");
             return null;
         }
@@ -773,7 +771,7 @@ public class NewLinkDialog extends Dialog {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Invalid File Format", shell.getText());
+            Tools.showError(shell, "Target", "Invalid File Format");
             targetFile.setText("");
             return;
         }

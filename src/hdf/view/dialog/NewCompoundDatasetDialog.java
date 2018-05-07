@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.TableEditor;
@@ -711,7 +710,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                     newObject = createCompoundDS();
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Create", ex.getMessage());
                 }
 
                 if (newObject != null) {
@@ -846,7 +845,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 type = fileformat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
                 if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Invalid member values: " + orderStr, shell.getText());
+                    Tools.showError(shell, "Create", "Invalid member values: " + orderStr);
                     return null;
                 }
                 else {
@@ -866,7 +865,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Number of values in the current dimension size is less than " + rank, shell.getText());
+            Tools.showError(shell, "Create", "Number of values in the current dimension size is less than " + rank);
             return null;
         }
 
@@ -880,13 +879,13 @@ public class NewCompoundDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Invalid dimension size: " + currentSizeField.getText(), shell.getText());
+                Tools.showError(shell, "Create", "Invalid dimension size: " + currentSizeField.getText());
                 return null;
             }
 
             if (l <= 0) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Dimension size must be greater than zero.", shell.getText());
+                Tools.showError(shell, "Create", "Dimension size must be greater than zero.");
                 return null;
             }
 
@@ -896,7 +895,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         st = new StringTokenizer(maxSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Number of values in the max dimension size is less than " + rank, shell.getText());
+            Tools.showError(shell, "Create", "Number of values in the max dimension size is less than " + rank);
             return null;
         }
 
@@ -909,13 +908,13 @@ public class NewCompoundDatasetDialog extends Dialog {
             }
             catch (NumberFormatException ex) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Invalid max dimension size: " + maxSizeField.getText(), shell.getText());
+                Tools.showError(shell, "Create", "Invalid max dimension size: " + maxSizeField.getText());
                 return null;
             }
 
             if (l < -1) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Dimension size cannot be less than -1.", shell.getText());
+                Tools.showError(shell, "Create", "Dimension size cannot be less than -1.");
                 return null;
             }
             else if (l == 0) {
@@ -930,7 +929,7 @@ public class NewCompoundDatasetDialog extends Dialog {
             st = new StringTokenizer(chunkSizeField.getText(), "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Number of values in the chunk size is less than " + rank, shell.getText());
+                Tools.showError(shell, "Create", "Number of values in the chunk size is less than " + rank);
                 return null;
             }
 
@@ -944,13 +943,13 @@ public class NewCompoundDatasetDialog extends Dialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Invalid chunk dimension size: " + chunkSizeField.getText(), shell.getText());
+                    Tools.showError(shell, "Create", "Invalid chunk dimension size: " + chunkSizeField.getText());
                     return null;
                 }
 
                 if (l < 1) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Chunk size cannot be less than 1.", shell.getText());
+                    Tools.showError(shell, "Create", "Chunk size cannot be less than 1.");
                     return null;
                 }
 
@@ -965,7 +964,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
             if (tchunksize >= tdimsize) {
                 shell.getDisplay().beep();
-                if(!MessageDialog.openConfirm(shell, shell.getText(), "Chunk size is equal/greater than the current size. "
+                if(!Tools.showConfirm(shell, "Create", "Chunk size is equal/greater than the current size. "
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
                 }
@@ -973,7 +972,7 @@ public class NewCompoundDatasetDialog extends Dialog {
 
             if (tchunksize == 1) {
                 shell.getDisplay().beep();
-                if(!MessageDialog.openConfirm(shell, shell.getText(), "Chunk size is one, which may cause large memory overhead for large dataset."
+                if(!Tools.showConfirm(shell, "Create", "Chunk size is one, which may cause large memory overhead for large dataset."
                         + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
                     return null;
                 }

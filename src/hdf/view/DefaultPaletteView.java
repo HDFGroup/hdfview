@@ -740,7 +740,7 @@ public class DefaultPaletteView extends Dialog {
             }
 
             if (value < 0 || value > 255) {
-                Tools.showError(tableShell, "Value is out of range [0, 255]\n", tableShell.getText());
+                Tools.showError(tableShell, "Update", "Value is out of range [0, 255]");
                 return;
             }
 

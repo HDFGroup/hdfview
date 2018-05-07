@@ -265,7 +265,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(display.getShells()[0], ex.getMessage(), display.getShells()[0].getText());
+                    Tools.showError(display.getShells()[0], "Select", ex.getMessage());
                 }
             }
         });
