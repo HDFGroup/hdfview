@@ -352,8 +352,6 @@ public class NC2File extends FileFormat {
             return null;
         }
 
-        /* TODO: Attribute creation with null FileFormat causes issues */
-
         String attrName = netcdfAttr.getName();
         long[] attrDims = { netcdfAttr.getLength() };
         Datatype attrType = new NC2Datatype(netcdfAttr.getDataType());
