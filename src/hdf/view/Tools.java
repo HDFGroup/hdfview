@@ -3252,7 +3252,7 @@ public final class Tools {
      *           The error message to display in the MessageDialog
      */
     public static void showError(Shell parent, String title, String errorMsg) {
-        MessageDialog.openError(parent, (title == null) ? parent.getText() : parent.getText() + title, (errorMsg == null) ? "UNKNOWN" : errorMsg);
+        MessageDialog.openError(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (errorMsg == null) ? "UNKNOWN" : errorMsg);
     }
 
     /**
@@ -3265,7 +3265,7 @@ public final class Tools {
      *           The message to display in the MessageDialog
      */
     public static void showInformation(Shell parent, String title, String infoMsg) {
-        MessageDialog.openInformation(parent, (title == null) ? parent.getText() : parent.getText() + title, (infoMsg == null) ? "UNKNOWN" : infoMsg);
+        MessageDialog.openInformation(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (infoMsg == null) ? "UNKNOWN" : infoMsg);
     }
 
     /**
@@ -3278,7 +3278,7 @@ public final class Tools {
      *           The message to display in the MessageDialog
      */
     public static boolean showConfirm(Shell parent, String title, String confMsg) {
-        return MessageDialog.openConfirm(parent, (title == null) ? parent.getText() : parent.getText() + title, (confMsg == null) ? "UNKNOWN" : confMsg);
+        return MessageDialog.openConfirm(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (confMsg == null) ? "UNKNOWN" : confMsg);
     }
 
     /**
@@ -3291,6 +3291,6 @@ public final class Tools {
      *           The message to display in the MessageDialog
      */
     public static void showWarning(Shell parent, String title, String warnMsg) {
-        MessageDialog.openWarning(parent, (title == null) ? parent.getText() : parent.getText() + title, (warnMsg == null) ? "UNKNOWN" : warnMsg);
+        MessageDialog.openWarning(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (warnMsg == null) ? "UNKNOWN" : warnMsg);
     }
 }

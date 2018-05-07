@@ -697,7 +697,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             String target = val.substring(0, targetIndex) + ":///DU32BITS";
             bot.textWithLabel("Link To Target: ").setText(target).pressShortcut(Keystrokes.CR);
 
-            SWTBotShell linkTargetShell = bot.shell("Link target changed.");
+            SWTBotShell linkTargetShell = bot.shells()[1];
             linkTargetShell.activate();
             linkTargetShell.bot().button("OK").click();
             bot.waitUntil(Conditions.shellCloses(linkTargetShell));
