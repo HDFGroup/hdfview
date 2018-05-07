@@ -1157,12 +1157,25 @@ public class ViewProperties extends PreferenceStore {
             }
             log.trace("load: final theList is {}", Arrays.toString(theList.toArray()));
         }
+
+        // set default modules from user property files
+        log.trace("load user properties: default modules");
+        for (int i = 0; i < moduleNames.length; i++) {
+            String moduleName = getString(moduleKeys[i]);
+            log.trace("load: default modules from user property is {}", moduleName);
+            if ((moduleName != null) && (moduleName.length() > 0)) {
+                if (moduleList[i].contains(moduleName))
+                    moduleList[i].remove(moduleName);
+                moduleList[i].add(0, moduleName);
+            }
+        }
+
         // add fileformat modules
         log.trace("load user properties: fileformat modules");
         String[] local_enum = this.preferenceNames();
         String fExt = null;
         for (String theKey : local_enum) {
-            log.trace("load: add file format {}", theKey);
+            log.trace("load: add prop {}", theKey);
             if (theKey.startsWith("module.fileformat")) {
                 fExt = theKey.substring(18);
                 try {
@@ -1316,17 +1329,6 @@ public class ViewProperties extends PreferenceStore {
         // srbAccountList.add(srbaccount);
         // srbaccount = new String[7];
         // }
-
-        // set default modules from user property files
-        log.trace("load user properties: default modules");
-        for (int i = 0; i < 6; i++) {
-            String moduleName = getString(moduleKeys[i]);
-            log.trace("load: default modules from user property is {}", moduleName);
-            if ((moduleName != null) && (moduleName.length() > 0)) {
-                if (moduleList[i].contains(moduleName)) moduleList[i].remove(moduleName);
-                moduleList[i].add(0, moduleName);
-            }
-        }
         log.trace("load: finish");
     }
 
