@@ -74,6 +74,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      */
     public boolean performOk() {
         getPreferenceStore();
+        log.trace("performOk: save HDF options");
 
         if (fileExtField != null) {
             String ext = fileExtField.getText();
@@ -83,6 +84,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
             }
         }
 
+        log.trace("performOk: save HDF options earlyLibVersion={}", earlyLibVersion);
         if (earlyLibVersion != null) {
             if (earlyLibVersion.getSelection())
                 ViewProperties.setEarlyLib("Earliest");
@@ -96,6 +98,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 ViewProperties.setEarlyLib("Earliest");
         }
 
+        log.trace("performOk: save HDF options lateLibVersion={}", lateLibVersion);
         if (lateLibVersion != null) {
             if (lateLibVersion.getSelection())
                 ViewProperties.setLateLib("Earliest");
@@ -132,6 +135,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         if (checkShowRegRefValues != null)
             ViewProperties.setShowRegRefValue(checkShowRegRefValues.getSelection());
 
+        log.trace("performOk: save HDF options finished");
         return true;
     }
 
@@ -140,16 +144,19 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      */
     protected void load() {
         getPreferenceStore();
+        log.trace("performOk: load HDF options");
 
         fileExtField.setText(ViewProperties.getFileExtension());
 
         earlyLibVers = ViewProperties.getEarlyLib();
+        log.trace("performOk: load HDF options earlyLibVers={}", earlyLibVers);
         earlyLibVersion.setSelection(earlyLibVers.compareTo("Earliest") == 0);
         early18LibVersion.setSelection(earlyLibVers.compareTo("v18") == 0);
         early110LibVersion.setSelection(earlyLibVers.compareTo("v110") == 0);
         earlyLateLibVersion.setSelection(earlyLibVers.compareTo("Latest") == 0);
 
         lateLibVers = ViewProperties.getLateLib();
+        log.trace("performOk: load HDF options lateLibVers={}", lateLibVers);
         lateLibVersion.setSelection(lateLibVers.compareTo("Earliest") == 0);
         late18LibVersion.setSelection(lateLibVers.compareTo("v18") == 0);
         late110LibVersion.setSelection(lateLibVers.compareTo("v110") == 0);
@@ -166,6 +173,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkIndexOrder.setSelection(indexOrder.compareTo("H5_ITER_INC") == 0);
         decOrder.setSelection(indexOrder.compareTo("H5_ITER_DEC") == 0);
         nativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
+
+        log.trace("performOk: load HDF options finished");
     }
 
     /**

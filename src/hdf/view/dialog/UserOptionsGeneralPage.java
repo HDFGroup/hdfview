@@ -78,6 +78,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      */
     public boolean performOk() {
         getPreferenceStore();
+        log.trace("performOk: save General options");
 
         if (UGField != null) {
             String UGPath = UGField.getText();
@@ -105,15 +106,18 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
             if (fontTypeChoice != null) {
                 String ftype = fontTypeChoice.getItem(fontTypeChoice.getSelectionIndex());
                 int fsize = Integer.parseInt(fontSizeChoice.getItem(fontSizeChoice.getSelectionIndex()));
+                log.trace("performOk: save font options {} - {}", ftype, fsize);
 
                 if (ViewProperties.getFontSize() != fsize) {
                     ViewProperties.setFontSize(fsize);
                     isFontChanged = true;
+                    log.trace("performOk: props font size {}", ViewProperties.getFontSize());
                 }
 
                 if (!ftype.equalsIgnoreCase(ViewProperties.getFontType())) {
                     ViewProperties.setFontType(ftype);
                     isFontChanged = true;
+                    log.trace("performOk: props font {}", ViewProperties.getFontType());
                 }
             }
         }
@@ -169,6 +173,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
                 ViewProperties.setIndexBase1(true);
         }
 
+        log.trace("performOk: save General options finished");
         return true;
     }
 
@@ -189,6 +194,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      */
     protected void load() {
         getPreferenceStore();
+        log.trace("performOk: load General options");
 
         try {
             curFont = new Font(
@@ -220,8 +226,10 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         rwButton.setSelection(!ViewProperties.isReadOnly());
 
+        String fontsize = String.valueOf(ViewProperties.getFontSize());
+        log.trace("performOk: load General options fontsize={}", fontsize);
         try {
-            int selectionIndex = fontSizeChoice.indexOf(String.valueOf(ViewProperties.getFontSize()));
+            int selectionIndex = fontSizeChoice.indexOf(fontsize);
             fontSizeChoice.select(selectionIndex);
         }
         catch (Exception ex) {
@@ -271,6 +279,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         startMemberField.setText(String.valueOf(ViewProperties.getStartMembers()));
 
         maxMemberField.setText(String.valueOf(ViewProperties.getMaxMembers()));
+        log.trace("performOk: load General options finished");
     }
 
     /**

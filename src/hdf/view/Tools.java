@@ -2965,6 +2965,7 @@ public final class Tools {
      */
     public static FileFormat createNewFile(String filename, String dir,
             String type, List<FileFormat> openFiles) throws Exception {
+        log.trace("createNewFile: {} start", filename);
         File f = new File(filename);
 
         String fname = f.getAbsolutePath();
@@ -3003,6 +3004,7 @@ public final class Tools {
         if (f.exists() && f.isDirectory()) {
             throw new Exception("File is a directory.");
         }
+        log.trace("createNewFile: {} not a directory", filename);
 
         File pfile = f.getParentFile();
         if (pfile == null) {
@@ -3014,6 +3016,7 @@ public final class Tools {
         }
 
         // check if the file is in use
+        log.trace("createNewFile: {} check if the file is in use", filename);
         if (openFiles != null) {
             FileFormat theFile = null;
             Iterator<FileFormat> iterator = openFiles.iterator();
@@ -3026,6 +3029,7 @@ public final class Tools {
         }
 
         if (f.exists()) {
+            log.trace("createNewFile: {} file exists", filename);
             Shell tempShell = new Shell(display);
 
             if(!MessageDialog.openConfirm(tempShell, "Create New File", "File exists. Do you want to replace it?")) {
@@ -3042,6 +3046,7 @@ public final class Tools {
                 aFlag = FileFormat.FILE_CREATE_DELETE | FileFormat.FILE_CREATE_EARLY_LIB;
                 FileFormat.getFileFormat(type).setNewLibBounds(ViewProperties.getEarlyLib(), ViewProperties.getLateLib());
             }
+            log.trace("createNewFile: {} FileFormat create", filename);
             FileFormat theFile = FileFormat.getFileFormat(type).createFile(fname, aFlag);
             return theFile;
         }
