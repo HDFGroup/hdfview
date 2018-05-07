@@ -568,6 +568,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
         String filename = "testcopy";
         String filenameTo = "testpaste";
         String file_ext = ".h5";
+        String group_copy_name = "test_group_copy";
         SWTBotShell tableShell = null;
 
         File hdf_file = createHDF5File(filename);
@@ -580,6 +581,9 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             createNewHDF5Group();
             createNewHDF5Dataset();
 
+            items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
+
             assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 4);
             assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
@@ -588,6 +592,21 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
 
             items[0].getNode(0).getNode(0).click();
             items[0].getNode(0).getNode(0).contextMenu("Copy").click();
+
+            items[1].click();
+            items[1].contextMenu("New").menu("Group").click();
+
+            SWTBotShell groupShell = bot.shell("New Group...");
+            groupShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(groupShell.getText()));
+
+            groupShell.bot().text(0).setText(group_copy_name);
+
+            String val = groupShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "wrong group name", group_copy_name, val), val.equals(group_copy_name));
+
+            groupShell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(groupShell));
 
             items[1].getNode(0).click();
             items[1].getNode(0).contextMenu("Paste").click();
@@ -601,14 +620,12 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             items[0].click();
             items[0].contextMenu("Reload File").click();
 
-            items = filetree.getAllItems();
-            filetree.expandNode(items[0].getText(), true);
-
             // Reload file
             items[1].click();
             items[1].contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
+            filetree.expandNode(items[0].getText(), true);
             filetree.expandNode(items[1].getText(), true);
 
             assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
@@ -616,7 +633,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
             assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing dataset '" + datasetname + "'",
                     items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
-            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing group '" + groupname + "'", items[1].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing group '" + group_copy_name + "'", items[1].getNode(0).getText().compareTo(group_copy_name) == 0);
             assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing dataset '" + datasetname + "'",
                     items[1].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
@@ -634,8 +651,8 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             for (int row = 1; row <= table2.preferredRowCount() - 1; row++) {
                 for (int col = 1; col < table2.preferredColumnCount(); col++) {
                     String expected = String.valueOf(((row - 1) * (table2.preferredColumnCount() - 1)) + (col));
-                    String val = table2.getCellDataValueByPosition(row, col);
-                    assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "wrong data", expected, val), val.equals(expected));
+                    String tval = table2.getCellDataValueByPosition(row, col);
+                    assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "wrong data", expected, tval), tval.equals(expected));
                 }
             }
 
@@ -707,12 +724,6 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             groupShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(groupShell));
 
-            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 4);
-            assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testCutPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
-            assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
-
             items[0].getNode(1).click();
             items[0].getNode(1).contextMenu("Paste").click();
 
@@ -728,8 +739,8 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "filetree wrong row count", "5", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 5);
+            assertTrue(constructWrongValueMessage("testCutPasteDatasetInSameFile()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 4);
             assertTrue("testCutPasteDatasetInSameFile() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
             assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
 
