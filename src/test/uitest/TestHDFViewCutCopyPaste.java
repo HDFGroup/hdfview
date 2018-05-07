@@ -348,6 +348,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             }
 
             try {
+                closeFile(hdf_file2, true);
                 closeFile(hdf_file, true);
             }
             catch (Exception ex) {
@@ -444,6 +445,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             }
 
             try {
+                closeFile(hdf_file2, true);
                 closeFile(hdf_file, true);
             }
             catch (Exception ex) {
@@ -653,6 +655,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             }
 
             try {
+                closeFile(hdf_file2, true);
                 closeFile(hdf_file, true);
             }
             catch (Exception ex) {
