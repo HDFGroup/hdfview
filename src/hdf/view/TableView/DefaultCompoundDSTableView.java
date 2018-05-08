@@ -163,7 +163,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
         final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
 
-        final IDataProvider bodyDataProvider = new CompoundDSDataProvider(dataObject);
+        final IDataProvider bodyDataProvider = getDataProvider(dataObject);
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer = new ColumnGroupExpandCollapseLayer(dataLayer,
                 secondLevelGroupModel, columnGroupModel);
@@ -479,6 +479,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         isValueChanged = false;
         log.trace("updateValueInFile(): finish");
+    }
+
+    protected IDataProvider getDataProvider(DataFormat dataObject) {
+        if (dataObject == null) return null;
+
+        return new CompoundDSDataProvider(dataObject);
     }
 
     /**
