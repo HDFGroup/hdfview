@@ -634,10 +634,12 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             table.click(8, 1);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "128", val), val.equals("128"));
-//
-//            table.click(8, 8);
-//            val = tableShell.bot().text(0).getText();
-//            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "0", val), val.equals("0"));
+
+            // TODO Disabled until offscreen columns/rows can be accessed
+            // table.click(8, 8);
+            // val = tableShell.bot().text(0).getText();
+            // assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "0", val),
+            // val.equals("0"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
