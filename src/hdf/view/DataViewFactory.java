@@ -24,6 +24,7 @@ import hdf.view.ImageView.ImageView;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.PaletteView.PaletteView;
 import hdf.view.TableView.TableView;
+import hdf.view.TreeView.TreeView;
 
 public abstract class DataViewFactory {
     /* Get an instance of TableView given the appropriate constructor parameters */
@@ -43,4 +44,9 @@ public abstract class DataViewFactory {
      * Get an instance of MetaDataView given the appropriate constructor parameters
      */
     public abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj);
+
+    /*
+     * Get an instance of TreeView given the appropriate constructor parameters
+     */
+    public abstract TreeView     getTreeView(Composite parent, ViewManager viewer);
 }

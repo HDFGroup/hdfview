@@ -137,7 +137,10 @@ import hdf.view.dialog.MathConversionDialog;
 import hdf.view.dialog.NewDatasetDialog;
 
 /**
- * TODO:
+ * DefaultBaseTableView serves as the base class for a DataView that displays
+ * HDF data in a tabular format. This class is used for internal bookkeeping and
+ * as a place to store higher-level data manipulation functions, whereas its
+ * subclasses are responsible for setting up the actual GUI components.
  *
  * @author jhenderson
  * @version 1.0 4/13/2018

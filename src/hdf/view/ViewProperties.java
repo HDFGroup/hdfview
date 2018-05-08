@@ -102,7 +102,7 @@ public class ViewProperties extends PreferenceStore {
      * Used to create different DataViews for a given HObject.
      */
     public static enum DataViewType {
-        TABLE, IMAGE, PALETTE, METADATA
+        TABLE, IMAGE, PALETTE, METADATA, TREEVIEW
     }
 
     /**

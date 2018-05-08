@@ -14,11 +14,12 @@
 
 package hdf.view;
 
+import hdf.view.ViewProperties.DataViewType;
 import hdf.view.ImageView.ImageViewFactory;
 import hdf.view.MetaDataView.MetaDataViewFactory;
 import hdf.view.PaletteView.PaletteViewFactory;
 import hdf.view.TableView.TableViewFactory;
-import hdf.view.ViewProperties.DataViewType;
+import hdf.view.TreeView.TreeViewFactory;
 
 /**
  * Following the Abstract Factory Pattern, represents a class to produce
@@ -58,6 +59,12 @@ public class DataViewFactoryProducer {
             log.trace("getFactory(): finish");
 
             return new MetaDataViewFactory();
+        }
+        else if (viewType == DataViewType.TREEVIEW) {
+            log.trace("getFactory(): returning TreeView factory instance");
+            log.trace("getFactory(): finish");
+
+            return new TreeViewFactory();
         }
 
         log.trace("getFactory(): no suitable factory class found");

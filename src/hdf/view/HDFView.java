@@ -18,7 +18,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -151,7 +150,7 @@ public class HDFView implements ViewManager {
     //private final List<?>            editGUIs;
 
     /* GUI component: the TreeView */
-    private TreeView                   treeView;
+    private TreeView                   treeView = null;
 
     private static final String        HDF4_VERSION = HDFVersions.HDF4_VERSION;
     private static final String        HDF5_VERSION = HDFVersions.HDF5_VERSION;
@@ -240,41 +239,6 @@ public class HDFView implements ViewManager {
         paletteViews = ViewProperties.getPaletteViewList();
         helpViews = ViewProperties.getHelpViewList();
 
-        int n = treeViews.size();
-        Class<?> theClass = null;
-        for (int i = 0; i < n; i++) {
-            // Use the first available treeview
-            String className = treeViews.get(i);
-
-            // Enables use of JHDF5 in JNLP (Web Start) applications, the system
-            // class loader with reflection first.
-            try {
-                theClass = Class.forName(className);
-            }
-            catch (Exception ex) {
-                try {
-                    theClass = ViewProperties.loadExtClass().loadClass(className);
-                }
-                catch (Exception ex2) {
-                    theClass = null;
-                }
-            }
-
-            if (theClass != null) break;
-        }
-
-        if (theClass != null) {
-            try {
-                @SuppressWarnings("rawtypes")
-                Class[] paramClass = { Class.forName("hdf.view.ViewManager") };
-                Constructor<?> constructor = theClass.getConstructor(paramClass);
-                Object[] paramObj = { this };
-                treeView = (TreeView) constructor.newInstance(paramObj);
-            }
-            catch (Exception ex) {
-                treeView = null;
-            }
-        }
         log.debug("Constructor exit");
     }
 
@@ -1162,17 +1126,18 @@ public class HDFView implements ViewManager {
         generalArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
         generalArea.setMinHeight(contentArea.getSize().y - 2);
 
+        // Create status area for displaying messages and metadata
+        status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
+        status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+        status.setEditable(false);
+        status.setFont(currentFont);
+
         contentArea.addListener(SWT.Resize, new Listener() {
             @Override
             public void handleEvent(Event arg0) {
                 generalArea.setMinHeight(contentArea.getSize().y - 2);
             }
         });
-
-        // Could not load user's treeview, use default treeview.
-        if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
-
-        treeArea.setContent(treeView.getTree());
 
         // Add drag and drop support for opening files
         DropTarget target = new DropTarget(treeArea, DND.DROP_COPY);
@@ -1202,17 +1167,28 @@ public class HDFView implements ViewManager {
             }
         });
 
-        // Create status area for displaying messages and metadata
-        status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
-        status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-        status.setEditable(false);
-        status.setFont(currentFont);
-
         showStatus("HDFView root - " + rootDir);
         showStatus("User property file - " + ViewProperties.getPropertyFile());
 
-        content.setWeights(new int[] {9, 1});
-        contentArea.setWeights(new int[] {1, 3});
+        content.setWeights(new int[] { 9, 1 });
+        contentArea.setWeights(new int[] { 1, 3 });
+
+        log.trace("createContentArea(): load TreeView");
+
+        DataViewFactory treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
+        if (treeViewFactory == null) {
+            log.debug("createContentArea(): TreeView Factory is null");
+            return;
+        }
+
+        treeView = treeViewFactory.getTreeView(treeArea, this);
+        if (treeView == null) {
+            log.debug("createContentArea(): no suitable TreeView class found");
+            this.showStatus("Unable to find suitable TreeView class");
+            return;
+        }
+
+        treeArea.setContent(treeView.getTree());
 
         log.info("Content Area created");
     }
@@ -1269,6 +1245,11 @@ public class HDFView implements ViewManager {
      */
     @Override
     public void showStatus(String msg) {
+        if (status == null) {
+            log.debug("showStatus(): status area is null");
+            return;
+        }
+
         status.append(msg);
         status.append("\n");
     }
