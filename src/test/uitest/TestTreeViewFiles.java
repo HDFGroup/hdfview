@@ -386,10 +386,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openHDF5IntsAttribute()", "wrong attribute name", datasetname, val),
                     val.equals(datasetname));
 
-            // doublecleck attribute and open dialog for edit??
+            // double-check attribute and open dialog for edit??
             // Beginning of Data
             assertTrue("openHDF5IntsAttribute() data did not match regex '^18446744073709551615, .*'", attrTable.cell(0, 3).matches("^18446744073709551615, .*"));
             // End of data
+            // TODO disabled until non-visible scrolling available
             //assertTrue("openHDF5IntsAttribute() data did not match regex '^.*808, 0, 0, 0, 0, 0, 0, 0$'", attrTable.cell(0, 3).matches("^.*808, 0, 0, 0, 0, 0, 0, 0$"));
         }
         catch (Exception ex) {
@@ -450,7 +451,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
                     tableShell.bot().text(0).getText().matches("^-1, .*"));
 
-            // Disabled until offscreen columns/rows can be accessed
+            // TODO Disabled until offscreen columns/rows can be accessed
             /*
              * table.click(6, 8);
              * assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'"
