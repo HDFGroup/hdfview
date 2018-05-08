@@ -26,8 +26,7 @@ import hdf.view.ViewManager;
 
 public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableView implements TableView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory
-            .getLogger(DefaultCompoundAttributeTableView.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundAttributeTableView.class);
 
     public DefaultCompoundAttributeTableView(ViewManager theView) {
         this(theView, null);

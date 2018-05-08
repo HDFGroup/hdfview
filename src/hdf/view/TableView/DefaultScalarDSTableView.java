@@ -635,7 +635,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         log.trace("createTable(): start");
 
         // Create body layer
-        final ScalarDSDataProvider bodyDataProvider = new ScalarDSDataProvider(dataObject);
+        final IDataProvider bodyDataProvider = getDataProvider(dataObject);
         dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
@@ -907,6 +907,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         isValueChanged = false;
         log.trace("updateValueInFile(): finish");
+    }
+
+    protected IDataProvider getDataProvider(final DataFormat dataObject) {
+        if (dataObject == null) return null;
+
+        return new ScalarDSDataProvider(dataObject);
     }
 
     /**
