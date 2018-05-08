@@ -2,15 +2,16 @@ package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.junit.Test;
 
 public class TestHDFViewLibBounds extends AbstractWindowTest {
@@ -83,9 +84,11 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {

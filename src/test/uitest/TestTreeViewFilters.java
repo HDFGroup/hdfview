@@ -1,46 +1,22 @@
 package test.uitest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.command.LayerCommandUtil;
-import org.eclipse.nebula.widgets.nattable.layer.ILayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
-import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
-import org.eclipse.nebula.widgets.nattable.viewport.command.ShowColumnInViewportCommand;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
-
-import static org.hamcrest.Matcher.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
 import org.junit.Ignore;
+import org.junit.Test;
 
 public class TestTreeViewFilters extends AbstractWindowTest {
     @Ignore
@@ -121,9 +97,11 @@ public class TestTreeViewFilters extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -186,9 +164,11 @@ public class TestTreeViewFilters extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {

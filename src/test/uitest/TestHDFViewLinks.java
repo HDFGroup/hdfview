@@ -2,21 +2,20 @@ package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.keyboard.Keystrokes;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCCombo;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -52,9 +51,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if (groupShell != null && groupShell.isOpen()) {
@@ -133,9 +134,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if (datasetShell != null && datasetShell.isOpen()) {
@@ -308,9 +311,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if (tableShell != null && tableShell.isOpen()) {
@@ -506,9 +511,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if (tableShell != null && tableShell.isOpen()) {
@@ -742,9 +749,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if (tableShell != null && tableShell.isOpen()) {

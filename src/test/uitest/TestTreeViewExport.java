@@ -1,14 +1,11 @@
 package test.uitest;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import java.io.File;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
@@ -16,16 +13,10 @@ import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotRadio;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestTreeViewExport extends AbstractWindowTest {
@@ -99,9 +90,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
 
         return hdf_file;
@@ -156,9 +149,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
     }
 
@@ -209,9 +204,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(exportShell != null && exportShell.isOpen()) {
@@ -273,9 +270,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(exportShell != null && exportShell.isOpen()) {
@@ -311,6 +310,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
 
         File hdf_file = createImportHDF5Dataset(datasetname);
@@ -352,9 +352,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             tableShell.bot().menu("Table").menu("Close").click();
@@ -396,6 +398,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
 
         File hdf_file = createImportHDF5Dataset(datasetname);
@@ -436,9 +439,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             tableShell.bot().menu("Table").menu("Close").click();

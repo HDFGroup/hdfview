@@ -1,6 +1,7 @@
 package test.uitest;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -93,9 +94,11 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {
@@ -181,9 +184,11 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {
