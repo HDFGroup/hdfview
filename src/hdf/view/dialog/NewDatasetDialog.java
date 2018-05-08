@@ -50,10 +50,10 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.view.DataView;
-import hdf.view.ImageView;
-import hdf.view.TableView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
+import hdf.view.ImageView.ImageView;
+import hdf.view.TableView.TableView;
 
 /**
  * NewDatasetDialog shows a message dialog requesting user input for creating a

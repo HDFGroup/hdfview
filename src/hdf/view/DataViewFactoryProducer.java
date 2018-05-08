@@ -14,6 +14,10 @@
 
 package hdf.view;
 
+import hdf.view.ImageView.ImageViewFactory;
+import hdf.view.MetaDataView.MetaDataViewFactory;
+import hdf.view.PaletteView.PaletteViewFactory;
+import hdf.view.TableView.TableViewFactory;
 import hdf.view.ViewProperties.DataViewType;
 
 /**

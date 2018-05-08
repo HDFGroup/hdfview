@@ -12,53 +12,28 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
-import java.awt.Image;
-import java.awt.Rectangle;
+import hdf.view.DataView;
 
 /**
- * The image view interface for displaying image object
+ *
+ * The table view interface for displaying data in table form
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface ImageView extends DataView {
-    /**
-     * Returns the selected area of the image
-     *
-     * @return the rectangle of the selected image area.
-     */
-    public abstract Rectangle getSelectedArea();
-
-    /** @return true if the image is a truecolor image. */
-    public abstract boolean isTrueColor();
-
-    /** @return true if the image interlace is plane interlace. */
-    public abstract boolean isPlaneInterlace();
+public abstract interface TableView extends DataView {
+    /** @return the table */
+    public abstract Object getTable();
 
     /** @return array of selected data */
     public abstract Object getSelectedData();
 
-    /** @return the image displayed in this imageView */
-    public abstract Image getImage();
+    public abstract int getSelectedColumnCount();
 
-    /** Sets the image
-     *
-     * @param img the image to view
-     */
-    public abstract void setImage(Image img);
+    public abstract int getSelectedRowCount();
 
-    /** @return the palette of the image */
-    public abstract byte[][] getPalette();
-
-    /** Sets the image palette
-     *
-     * @param palette the palette for the image to view
-     */
-    public abstract void setPalette(byte[][] palette);
-
-    /** @return the byte array of the image data */
-    public abstract byte[] getImageByteData();
-
+    /** Write the change of a dataset into file. */
+    public abstract void updateValueInFile();
 }

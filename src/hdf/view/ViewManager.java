@@ -15,6 +15,7 @@
 package hdf.view;
 
 import hdf.object.HObject;
+import hdf.view.TreeView.TreeView;
 
 /**
  *

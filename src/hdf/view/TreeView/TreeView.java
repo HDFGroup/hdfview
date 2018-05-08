@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TreeView;
 
 import java.util.List;
 
@@ -22,6 +22,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.view.DataView;
+import hdf.view.MetaDataView.MetaDataView;
 
 /**
  *

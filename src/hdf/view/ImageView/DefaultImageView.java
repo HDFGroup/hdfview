@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.ImageView;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -98,7 +98,16 @@ import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.Chart;
+import hdf.view.DataViewFactory;
+import hdf.view.DataViewFactoryProducer;
+import hdf.view.DefaultFileFilter;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.ViewProperties.DataViewType;
+import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.NewDatasetDialog;
 
 /**
@@ -1584,21 +1593,12 @@ public class DefaultImageView implements ImageView {
             return;
         }
 
-        String viewName = (String) HDFView.getListOfPaletteViews().get(0);
-
-        try {
-            Class theClass = Class.forName(viewName);
-            if (ViewProperties.DEFAULT_PALETTEVIEW_NAME.equals(viewName)) {
-                Object[] initargs = { shell, viewer, this };
-                Tools.newInstance(theClass, initargs);
+        DataViewFactory paletteViewFactory = DataViewFactoryProducer.getFactory(DataViewType.PALETTE);
+        if (paletteViewFactory != null) {
+            if (paletteViewFactory.getPaletteView(shell, viewer, this) == null) {
+                log.debug("showColorTable(): PaletteView is null");
+                viewer.showStatus("Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
             }
-            else {
-                Object[] initargs = { shell, this };
-                Tools.newInstance(theClass, initargs);
-            }
-        }
-        catch (Exception ex) {
-            viewer.showStatus(ex.toString());
         }
     }
 

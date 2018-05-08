@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.PaletteView;
 
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -56,6 +56,10 @@ import org.eclipse.swt.widgets.Text;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
+import hdf.view.ImageView.ImageView;
 
 /**
  * Displays a dialog for viewing and change palettes.
@@ -204,6 +208,7 @@ public class DefaultPaletteView extends Dialog {
         choicePalette.setFont(curFont);
         choicePalette.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         choicePalette.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 int idx = choicePalette.getSelectionIndex();
                 if (idx <= 0) {
@@ -235,7 +240,7 @@ public class DefaultPaletteView extends Dialog {
                     imagePalette = Tools.createWavePalette();
                 }
                 else if (idx > 0 && idx <= numberOfPalettes) {
-                    imagePalette = ((ScalarDS) dataset).readPalette(idx - 1);
+                    imagePalette = dataset.readPalette(idx - 1);
                 }
                 else {
                     imagePalette = Tools.readPalette((String) item);
@@ -263,7 +268,7 @@ public class DefaultPaletteView extends Dialog {
 
         choicePalette.add("Select palette");
 
-        String paletteName = ((ScalarDS) dataset).getPaletteName(0);
+        String paletteName = dataset.getPaletteName(0);
 
         if (paletteName != null)
             paletteName = paletteName.trim();
@@ -272,13 +277,13 @@ public class DefaultPaletteView extends Dialog {
             choicePalette.add(paletteName);
 
         if (isH5 && (dataset instanceof ScalarDS)) {
-            byte[] palRefs = ((ScalarDS) dataset).getPaletteRefs();
+            byte[] palRefs = dataset.getPaletteRefs();
             if ((palRefs != null) && (palRefs.length > 8)) {
                 numberOfPalettes = palRefs.length / 8;
             }
         }
         for (int i = 1; i < numberOfPalettes; i++) {
-            paletteName = ((ScalarDS) dataset).getPaletteName(i);
+            paletteName = dataset.getPaletteName(i);
             choicePalette.add(paletteName);
         }
         choicePalette.add(PALETTE_GRAY);
@@ -298,6 +303,7 @@ public class DefaultPaletteView extends Dialog {
         showValueButton.setText("Show Values");
         showValueButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         showValueButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (paletteValueTable == null) {
                     paletteValueTable = new PaletteValueTable(shell, SWT.NONE);
@@ -316,6 +322,7 @@ public class DefaultPaletteView extends Dialog {
         okButton.setFont(curFont);
         okButton.setText("   &OK   ");
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (isPaletteChanged) {
                     updatePalette();
@@ -332,6 +339,7 @@ public class DefaultPaletteView extends Dialog {
         cancelButton.setFont(curFont);
         cancelButton.setText(" &Cancel ");
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 imageView.setImage(originalImage);
                 shell.dispose();
@@ -342,6 +350,7 @@ public class DefaultPaletteView extends Dialog {
         previewButton.setFont(curFont);
         previewButton.setText("&Preview");
         previewButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 updatePalette();
                 imageView.setImage(currentImage);
@@ -351,6 +360,7 @@ public class DefaultPaletteView extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null)
                     curFont.dispose();
@@ -380,8 +390,8 @@ public class DefaultPaletteView extends Dialog {
         }
 
         IndexColorModel colorModel = new IndexColorModel(8, // bits - the number
-                                                            // of bits each
-                                                            // pixel occupies
+                // of bits each
+                // pixel occupies
                 256, // size - the size of the color component arrays
                 palette[0], // r - the array of red color components
                 palette[1], // g - the array of green color components
@@ -440,6 +450,7 @@ public class DefaultPaletteView extends Dialog {
             this.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
             this.addPaintListener(new PaintListener() {
+                @Override
                 public void paintControl(PaintEvent e) {
                     // Get the graphics context for this paint event
                     GC g = e.gc;
@@ -536,6 +547,7 @@ public class DefaultPaletteView extends Dialog {
 
             //TODO: editing behavior not quite correct yet
             this.addMouseMoveListener(new MouseMoveListener() {
+                @Override
                 public void mouseMove(MouseEvent e) {
                     if ((e.stateMask & SWT.BUTTON1) != 0) {
                         int x1 = e.x - 40;
@@ -585,6 +597,7 @@ public class DefaultPaletteView extends Dialog {
             });
 
             this.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseDown(MouseEvent e) {
                     // dragX0 = e.x - xgap;
                     // dragY0 = e.y + gap;
@@ -599,6 +612,7 @@ public class DefaultPaletteView extends Dialog {
                     // dragY0 = plotHeight + gap;
                 }
 
+                @Override
                 public void mouseUp(MouseEvent e) {
                     if (paletteValueTable != null)
                         paletteValueTable.refresh();
@@ -651,6 +665,7 @@ public class DefaultPaletteView extends Dialog {
             valueTable.addListener(SWT.MouseDoubleClick, valueTableCellEditor);
 
             valueTable.addListener(SWT.Resize, new Listener() {
+                @Override
                 public void handleEvent(Event e) {
                     int numColumns = valueTable.getColumnCount();
 
@@ -661,6 +676,7 @@ public class DefaultPaletteView extends Dialog {
             });
 
             valueTable.addPaintListener(new PaintListener() {
+                @Override
                 public void paintControl(PaintEvent e) {
                     for (int i = 0; i < valueTable.getItemCount(); i++) {
                         Color cellColor = new Color(display, paletteData[0][i], paletteData[1][i], paletteData[2][i]);
@@ -699,6 +715,7 @@ public class DefaultPaletteView extends Dialog {
             okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     tableShell.dispose();
                 }
@@ -755,6 +772,7 @@ public class DefaultPaletteView extends Dialog {
         }
 
         private Listener valueTableCellEditor = new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 final TableEditor editor = new TableEditor(valueTable);
                 editor.horizontalAlignment = SWT.LEFT;
@@ -780,6 +798,7 @@ public class DefaultPaletteView extends Dialog {
                             text.setFont(curFont);
 
                             Listener textListener = new Listener() {
+                                @Override
                                 public void handleEvent(final Event e) {
                                     Integer.parseInt(text.getText());
 

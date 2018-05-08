@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.MetaDataView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +25,13 @@ import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Link;
+import hdf.view.DataViewFactory;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
+import hdf.view.ImageView.ImageView;
+import hdf.view.PaletteView.PaletteView;
+import hdf.view.TableView.TableView;
 
 /**
  * A Factory class to return instances of classes implementing the MetaDataView
@@ -40,23 +47,23 @@ public class MetaDataViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
     @Override
-    PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
+    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
         return null;
     }
 
     @Override
-    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
+    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
         String dataViewName = null;
         Object[] initargs = { parentObj, viewer, theObj };
         MetaDataView theView = null;

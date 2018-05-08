@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TreeView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -76,8 +76,17 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
+import hdf.view.DataView;
+import hdf.view.DataViewFactory;
+import hdf.view.DataViewFactoryProducer;
+import hdf.view.DefaultFileFilter;
+import hdf.view.HDFView;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
 import hdf.view.ViewProperties.DataViewType;
+import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.dialog.DataOptionDialog;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.NewCompoundDatasetDialog;
@@ -2790,6 +2799,49 @@ public class DefaultTreeView implements TreeView {
         while (!files.isEmpty()) {
             FileFormat theFile = files.remove();
             ((HDFView) viewer).reloadFile(theFile);
+        }
+    }
+
+    /**
+     * Updates the icon for the TreeItem representing the given HObject. Used
+     * to change the icon after a status update, such as adding an attribute to
+     * an object.
+     *
+     * @param obj
+     *           the object to update the icon for
+     */
+    public void updateItemIcon(HObject obj) {
+        if (obj == null) {
+            log.debug("updateItemIcon(): object is null");
+            return;
+        }
+
+        TreeItem theItem = findTreeItem(obj);
+
+        if (theItem == null) {
+            log.debug("updateItemIcon(): could not find TreeItem for HObject");
+        }
+
+        if (obj instanceof Group && !(((Group) obj).isRoot())) {
+            if (theItem.getExpanded()) {
+                if (((MetaDataContainer) obj).hasAttribute()) {
+                    theItem.setImage(folderOpenIconA);
+                }
+                else {
+                    theItem.setImage(folderOpenIcon);
+                }
+            }
+            else {
+                if (((MetaDataContainer) obj).hasAttribute()) {
+                    theItem.setImage(folderCloseIconA);
+                }
+                else {
+                    theItem.setImage(folderCloseIcon);
+                }
+            }
+        }
+        else {
+            theItem.setImage(getObjectTypeImage(obj));
         }
     }
 

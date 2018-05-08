@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -66,6 +66,10 @@ import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
+import hdf.view.HDFView;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
 import hdf.view.dialog.InputDialog;
 
 public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView {
@@ -631,7 +635,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         log.trace("createTable(): start");
 
         // Create body layer
-        final ScalarDSDataProvider bodyDataProvider = new ScalarDSDataProvider(dataObject);
+        final IDataProvider bodyDataProvider = getDataProvider(dataObject);
         dataLayer = new DataLayer(bodyDataProvider);
         selectionLayer = new SelectionLayer(dataLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
@@ -903,6 +907,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         isValueChanged = false;
         log.trace("updateValueInFile(): finish");
+    }
+
+    protected IDataProvider getDataProvider(final DataFormat dataObject) {
+        if (dataObject == null) return null;
+
+        return new ScalarDSDataProvider(dataObject);
     }
 
     /**

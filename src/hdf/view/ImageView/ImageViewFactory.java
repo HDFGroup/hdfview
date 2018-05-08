@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.ImageView;
 
 import java.util.BitSet;
 import java.util.HashMap;
@@ -22,6 +22,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.HObject;
+import hdf.view.DataViewFactory;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
+import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.PaletteView.PaletteView;
+import hdf.view.TableView.TableView;
 
 /**
  * A Factory class to return instances of classes implementing the ImageView
@@ -37,13 +44,13 @@ public class ImageViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
         String dataViewName = null;
         Object[] initargs = { viewer, dataPropertiesMap };
         ImageView theView = null;
@@ -124,12 +131,12 @@ public class ImageViewFactory extends DataViewFactory {
     }
 
     @Override
-    PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
+    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
         return null;
     }
 
     @Override
-    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
+    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
         return null;
     }
 

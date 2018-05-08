@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.PaletteView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +21,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.HObject;
+import hdf.view.DataViewFactory;
+import hdf.view.Tools;
+import hdf.view.ViewManager;
+import hdf.view.ViewProperties;
+import hdf.view.ImageView.ImageView;
+import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.TableView.TableView;
 
 /**
  * A Factory class to return instances of classes implementing the PaletteView
@@ -36,20 +43,20 @@ public class PaletteViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
         return null;
     }
 
     @Override
-    PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
+    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
         String dataViewName = ViewProperties.getPaletteViewList().get(0);
-        Object[] initargs = { parent, viewer, theImageView };
+        Object[] initargs;
         PaletteView theView = null;
 
         log.trace("getPaletteView(): start");
@@ -102,6 +109,13 @@ public class PaletteViewFactory extends DataViewFactory {
         }
 
         try {
+            if (ViewProperties.DEFAULT_PALETTEVIEW_NAME.equals(dataViewName)) {
+                initargs = new Object[] { parent, viewer, theImageView };
+            }
+            else {
+                initargs = new Object[] { parent, theImageView };
+            }
+
             theView = (PaletteView) Tools.newInstance(theClass, initargs);
 
             log.trace("getPaletteView(): returning PaletteView instance {}", theView);
@@ -116,7 +130,7 @@ public class PaletteViewFactory extends DataViewFactory {
     }
 
     @Override
-    MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
+    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
         return null;
     }
 
