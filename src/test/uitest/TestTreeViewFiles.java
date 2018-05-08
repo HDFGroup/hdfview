@@ -1,27 +1,29 @@
 package test.uitest;
 
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -384,10 +386,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openHDF5IntsAttribute()", "wrong attribute name", datasetname, val),
                     val.equals(datasetname));
 
-            // doublecleck attribute and open dialog for edit??
+            // double-check attribute and open dialog for edit??
             // Beginning of Data
             assertTrue("openHDF5IntsAttribute() data did not match regex '^18446744073709551615, .*'", attrTable.cell(0, 3).matches("^18446744073709551615, .*"));
             // End of data
+            // TODO disabled until non-visible scrolling available
             //assertTrue("openHDF5IntsAttribute() data did not match regex '^.*808, 0, 0, 0, 0, 0, 0, 0$'", attrTable.cell(0, 3).matches("^.*808, 0, 0, 0, 0, 0, 0, 0$"));
         }
         catch (Exception ex) {
@@ -448,7 +451,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
                     tableShell.bot().text(0).getText().matches("^-1, .*"));
 
-            // Disabled until offscreen columns/rows can be accessed
+            // TODO Disabled until offscreen columns/rows can be accessed
             /*
              * table.click(6, 8);
              * assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'"
@@ -494,8 +497,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
     }
 
-    @Ignore
-    // TODO: disabled until a good solution for retrieving the value from non-visible cells is found
+    @Test
     public void openHDF5CompoundDSints() {
         String filename = "tcmpdints";
         String filename2 = "testintsfile2";
@@ -539,9 +541,10 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-4", val),
                     val.equals("-4"));
 
-            val = table.getCellDataValueByPosition(6, 8);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-8", val),
-                    val.equals("-8"));
+            // TODO: SWTBot cannot retrieve values of cells that are not visible
+            // val = table.getCellDataValueByPosition(6, 8);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-8", val),
+            // val.equals("-8"));
 
             val = table.getCellDataValueByPosition(3, 1);
             assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "255", val),
@@ -574,37 +577,41 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             //TODO: SWTBot cannot retrieve values of cells that are not visible
-            val = table.getCellDataValueByPosition(30, 8);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-8", val),
-                    val.equals("-8"));
-
-            val = table.getCellDataValueByPosition(29, 7);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-1024", val),
-                    val.equals("-1024"));
-
-            val = table.getCellDataValueByPosition(28, 6);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-33554432", val),
-                    val.equals("-33554432"));
-
-            val = table.getCellDataValueByPosition(27, 5);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-16777216", val),
-                    val.equals("-16777216"));
-
-            val = table.getCellDataValueByPosition(26, 4);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "128", val),
-                    val.equals("128"));
-
-            val = table.getCellDataValueByPosition(25, 3);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "65472", val),
-                    val.equals("65472"));
-
-            val = table.getCellDataValueByPosition(24, 2);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "4292870144", val),
-                    val.equals("4292870144"));
-
-            val = table.getCellDataValueByPosition(23, 1);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "18446744073708503040", val),
-                    val.equals("18446744073708503040"));
+            // val = table.getCellDataValueByPosition(30, 8);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-8", val),
+            // val.equals("-8"));
+            //
+            // val = table.getCellDataValueByPosition(29, 7);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-1024", val),
+            // val.equals("-1024"));
+            //
+            // val = table.getCellDataValueByPosition(28, 6);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-33554432",
+            // val),
+            // val.equals("-33554432"));
+            //
+            // val = table.getCellDataValueByPosition(27, 5);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-16777216",
+            // val),
+            // val.equals("-16777216"));
+            //
+            // val = table.getCellDataValueByPosition(26, 4);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "128", val),
+            // val.equals("128"));
+            //
+            // val = table.getCellDataValueByPosition(25, 3);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "65472", val),
+            // val.equals("65472"));
+            //
+            // val = table.getCellDataValueByPosition(24, 2);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "4292870144",
+            // val),
+            // val.equals("4292870144"));
+            //
+            // val = table.getCellDataValueByPosition(23, 1);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data",
+            // "18446744073708503040", val),
+            // val.equals("18446744073708503040"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -650,46 +657,53 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             //TODO: SWTBot cannot retrieve values of cells that are not visible
-            val = table.getCellDataValueByPosition(30, 8);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-8", val),
-                    val.equals("-8"));
+            // val = table.getCellDataValueByPosition(30, 8);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-8", val),
+            // val.equals("-8"));
+            //
+            // val = table.getCellDataValueByPosition(29, 7);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-1024", val),
+            // val.equals("-1024"));
+            //
+            // val = table.getCellDataValueByPosition(28, 6);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-33554432",
+            // val),
+            // val.equals("-33554432"));
+            //
+            // val = table.getCellDataValueByPosition(27, 5);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-16777216",
+            // val),
+            // val.equals("-16777216"));
+            //
+            // val = table.getCellDataValueByPosition(26, 4);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "128", val),
+            // val.equals("128"));
+            //
+            // val = table.getCellDataValueByPosition(25, 3);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "65472", val),
+            // val.equals("65472"));
+            //
+            // val = table.getCellDataValueByPosition(24, 2);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "4292870144",
+            // val),
+            // val.equals("4292870144"));
+            //
+            // val = table.getCellDataValueByPosition(23, 1);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data",
+            // "18446744073708503040", val),
+            // val.equals("18446744073708503040"));
 
-            val = table.getCellDataValueByPosition(29, 7);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-1024", val),
-                    val.equals("-1024"));
+            final SWTBotNatTable edittable = table;
+            Display.getDefault().syncExec(new Runnable() {
+                @Override
+                public void run() {
+                    edittable.doubleclick(3, 2);
+                    edittable.widget.getActiveCellEditor().setEditorValue("0");
+                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
+                }
+            });
 
-            val = table.getCellDataValueByPosition(28, 6);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-33554432", val),
-                    val.equals("-33554432"));
-
-            val = table.getCellDataValueByPosition(27, 5);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "-16777216", val),
-                    val.equals("-16777216"));
-
-            val = table.getCellDataValueByPosition(26, 4);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "128", val),
-                    val.equals("128"));
-
-            val = table.getCellDataValueByPosition(25, 3);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "65472", val),
-                    val.equals("65472"));
-
-            val = table.getCellDataValueByPosition(24, 2);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "4292870144", val),
-                    val.equals("4292870144"));
-
-            val = table.getCellDataValueByPosition(23, 1);
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "18446744073708503040", val),
-                    val.equals("18446744073708503040"));
-
-            table.doubleclick(1, 2);
-            bot.waitUntil(Conditions.waitForWidget(WidgetOfType.widgetOfType(org.eclipse.swt.widgets.Text.class)));
-            tableShell.bot().text().setText("0");
-
-            // Press enter to set value
-            table.pressShortcut(SWT.NONE, SWT.CR, ' ');
-
-            val = table.getCellDataValueByPosition(1, 2);
+            val = table.getCellDataValueByPosition(3, 2);
             assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "0", val),
                     val.equals("0"));
 
@@ -699,6 +713,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[1].click();
             items[1].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            filetree.expandNode(items[1].getText(), true);
 
             items[1].getNode(1).click();
             items[1].getNode(1).contextMenu("Open").click();
@@ -711,7 +728,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            val = table.getCellDataValueByPosition(1, 2);
+            val = table.getCellDataValueByPosition(3, 2);
             assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong data", "0", val),
                     val.equals("0"));
 
@@ -738,12 +755,6 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            //            try {
-            //                closeFile(hdf_file, false);
-            //            }
-            //            catch (Exception ex) {
-            //                ex.printStackTrace();
-            //            }
         }
     }
 

@@ -19,7 +19,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestTreeViewFilters extends AbstractWindowTest {
-    @Ignore
+    @Test
     public void openHDF5Filters() {
         String filename = "tfilters";
         String file_ext = ".h5";
@@ -58,10 +58,11 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             //SelectionLayer selectionLayer = ((BodyLayerStack)((GridLayer)nTable.getLayer()).getBodyLayer()).getSelectionLayer();
             //ViewportLayer viewportLayer = new ViewportLayer(ntable.getViewportLayer());
             //ntable.getUnderlyingLayer().doCommand(new ShowColumnInViewportCommand(selectionLayer, 10));
-            table.click(1, 10);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "9", val),
-                    val.equals("9"));
+            // TODO disabled until non-visible scrolling available
+            // table.click(1, 10);
+            // val = tableShell.bot().text(0).getText();
+            // assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "9", val),
+            // val.equals("9"));
 
             table.click(12, 5);
             val = tableShell.bot().text(0).getText();
@@ -87,10 +88,11 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "91", val),
                     val.equals("91"));
 
-            table.click(20, 2);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "191", val),
-                    val.equals("191"));
+            // TODO disabled until non-visible scrolling available
+            // table.click(20, 2);
+            // val = tableShell.bot().text(0).getText();
+            // assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "191", val),
+            // val.equals("191"));
 
             tableShell.bot().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -121,7 +123,6 @@ public class TestTreeViewFilters extends AbstractWindowTest {
         String filename = "tfilters";
         String file_ext = ".h5";
         String filtername = "fletcher32";
-        SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
