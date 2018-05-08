@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view.PaletteView;
+package hdf.view.TreeView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,20 +27,20 @@ import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
 import hdf.view.ImageView.ImageView;
 import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.PaletteView.PaletteView;
 import hdf.view.TableView.TableView;
-import hdf.view.TreeView.TreeView;
 
 /**
- * A Factory class to return instances of classes implementing the PaletteView
- * interface, depending on the "current selected" PaletteView class in the list
+ * A Factory class to return instances of classes implementing the TreeView
+ * interface, depending on the "current selected" TreeView class in the list
  * maintained by the ViewProperties class.
  *
  * @author jhenderson
  * @version 1.0 4/18/2018
  */
-public class PaletteViewFactory extends DataViewFactory {
+public class TreeViewFactory extends DataViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PaletteViewFactory.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TreeViewFactory.class);
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -56,78 +56,7 @@ public class PaletteViewFactory extends DataViewFactory {
 
     @Override
     public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
-        String dataViewName = ViewProperties.getPaletteViewList().get(0);
-        Object[] initargs;
-        PaletteView theView = null;
-
-        log.trace("getPaletteView(): start");
-
-        /* Retrieve the "currently selected" PaletteView class to use */
-        List<?> paletteViewList = ViewProperties.getPaletteViewList();
-        if ((paletteViewList == null) || (paletteViewList.size() <= 0)) {
-            return null;
-        }
-
-        dataViewName = (String) paletteViewList.get(0);
-
-        /* Attempt to load the class by name */
-        Class<?> theClass = null;
-        try {
-            log.trace("getPaletteView(): Class.forName({})", dataViewName);
-
-            /* Attempt to load the class by the given name */
-            theClass = Class.forName(dataViewName);
-        }
-        catch (Exception ex) {
-            log.debug("getPaletteView(): Class.forName({}) failure:", dataViewName, ex);
-
-            try {
-                log.trace("getPaletteView(): ViewProperties.loadExtClass().loadClass({})",
-                        dataViewName);
-
-                /* Attempt to load the class as an external module */
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                log.debug(
-                        "getPaletteView(): ViewProperties.loadExtClass().loadClass({}) failure:",
-                        dataViewName, ex);
-
-                /* No loadable class found; use the default PaletteView */
-                dataViewName = ViewProperties.DEFAULT_PALETTEVIEW_NAME;
-
-                try {
-                    log.trace("getPaletteView(): Class.forName({})", dataViewName);
-
-                    theClass = Class.forName(dataViewName);
-                }
-                catch (Exception ex3) {
-                    log.debug("getPaletteView(): Class.forName({}) failure:", dataViewName, ex);
-
-                    theClass = null;
-                }
-            }
-        }
-
-        try {
-            if (ViewProperties.DEFAULT_PALETTEVIEW_NAME.equals(dataViewName)) {
-                initargs = new Object[] { parent, viewer, theImageView };
-            }
-            else {
-                initargs = new Object[] { parent, theImageView };
-            }
-
-            theView = (PaletteView) Tools.newInstance(theClass, initargs);
-
-            log.trace("getPaletteView(): returning PaletteView instance {}", theView);
-        }
-        catch (Exception ex) {
-            log.debug("getPaletteView(): Error instantiating class:", ex);
-        }
-
-        log.trace("getPaletteView(): finish");
-
-        return theView;
+        return null;
     }
 
     @Override
@@ -137,7 +66,68 @@ public class PaletteViewFactory extends DataViewFactory {
 
     @Override
     public TreeView getTreeView(Composite parent, ViewManager viewer) {
-        return null;
+        String dataViewName = null;
+        Object[] initargs = { parent, viewer };
+        TreeView theView = null;
+
+        log.trace("getTreeView(): start");
+
+        /* Retrieve the "currently selected" TreeView class to use */
+        List<?> treeViewList = ViewProperties.getTreeViewList();
+        if ((treeViewList == null) || (treeViewList.size() <= 0)) {
+            return null;
+        }
+
+        dataViewName = (String) treeViewList.get(0);
+
+        /* Attempt to load the class by name */
+        Class<?> theClass = null;
+        try {
+            log.trace("getTreeView(): Class.forName({})", dataViewName);
+
+            /* Attempt to load the class by the given name */
+            theClass = Class.forName(dataViewName);
+        }
+        catch (Exception ex) {
+            log.debug("getTreeView(): Class.forName({}) failure:", dataViewName, ex);
+
+            try {
+                log.trace("getTreeView(): ViewProperties.loadExtClass().loadClass({})", dataViewName);
+
+                /* Attempt to load the class as an external module */
+                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
+            }
+            catch (Exception ex2) {
+                log.debug("getTreeView(): ViewProperties.loadExtClass().loadClass({}) failure:", dataViewName, ex);
+
+                /* No loadable class found; use the default PaletteView */
+                dataViewName = ViewProperties.DEFAULT_TREEVIEW_NAME;
+
+                try {
+                    log.trace("getTreeView(): Class.forName({})", dataViewName);
+
+                    theClass = Class.forName(dataViewName);
+                }
+                catch (Exception ex3) {
+                    log.debug("getTreeView(): Class.forName({}) failure:", dataViewName, ex);
+
+                    theClass = null;
+                }
+            }
+        }
+
+        try {
+            theView = (TreeView) Tools.newInstance(theClass, initargs);
+
+            log.trace("getTreeView(): returning TreeView instance {}", theView);
+        }
+        catch (Exception ex) {
+            log.debug("getTreeView(): Error instantiating class:", ex);
+        }
+
+        log.trace("getTreeView(): finish");
+
+        return theView;
     }
 
 }

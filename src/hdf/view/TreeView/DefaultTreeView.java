@@ -213,7 +213,7 @@ public class DefaultTreeView implements TreeView {
 
     private enum OBJECT_TYPE {GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK};
 
-    public DefaultTreeView(ViewManager theView, Composite parent) {
+    public DefaultTreeView(Composite parent, ViewManager theView) {
         viewer = theView;
         shell = parent.getShell();
 

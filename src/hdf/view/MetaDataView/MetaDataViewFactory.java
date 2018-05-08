@@ -32,6 +32,7 @@ import hdf.view.ViewProperties;
 import hdf.view.ImageView.ImageView;
 import hdf.view.PaletteView.PaletteView;
 import hdf.view.TableView.TableView;
+import hdf.view.TreeView.TreeView;
 
 /**
  * A Factory class to return instances of classes implementing the MetaDataView
@@ -139,6 +140,11 @@ public class MetaDataViewFactory extends DataViewFactory {
         log.trace("getMetaDataView(): finish");
 
         return theView;
+    }
+
+    @Override
+    public TreeView getTreeView(Composite parent, ViewManager viewer) {
+        return null;
     }
 
 }
