@@ -72,12 +72,12 @@ import org.eclipse.swt.widgets.ToolItem;
 import hdf.HDFVersions;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
+import hdf.view.ViewProperties.DataViewType;
 import hdf.view.HelpView.HelpView;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.DefaultTreeView;
 import hdf.view.TreeView.TreeView;
-import hdf.view.ViewProperties.DataViewType;
 import hdf.view.dialog.ImageConversionDialog;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.UserOptionsDialog;
@@ -675,6 +675,7 @@ public class HDFView implements ViewManager {
                 currentFile = null;
 
                 for (Control control : generalArea.getChildren()) control.dispose();
+                generalArea.setContent(null);
 
                 url_bar.setText("");
             }
@@ -1329,9 +1330,6 @@ public class HDFView implements ViewManager {
 
                     if (obj == null || obj.getFileFormat() == null) continue;
 
-                    /*
-                     * TODO: Handle attributes
-                     */
                     if (obj.getFileFormat().equals(theFile)) {
                         views[i].dispose();
                         views[i] = null;
@@ -1357,6 +1355,7 @@ public class HDFView implements ViewManager {
         theFile = null;
 
         for (Control control : generalArea.getChildren()) control.dispose();
+        generalArea.setContent(null);
 
         System.gc();
     }
@@ -1403,9 +1402,6 @@ public class HDFView implements ViewManager {
                 for (int i = 0; i < openShells.length; i++) {
                     DataView theView = (DataView) openShells[i].getData();
 
-                    /*
-                     * TODO: Handle attributes
-                     */
                     if (theView instanceof TableView) {
                         TableView tableView = (TableView) theView;
                         FileFormat file = tableView.getDataObject().getFileFormat();
@@ -1507,9 +1503,6 @@ public class HDFView implements ViewManager {
 
                 currentFile = currentObj.getFileFormat();
 
-                /*
-                 * TODO: Handle attributes
-                 */
                 if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))
                     return view;
             }

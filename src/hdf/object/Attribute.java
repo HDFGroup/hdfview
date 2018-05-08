@@ -1076,6 +1076,28 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     }
 
     /**
+     * Returns whether this Attribute is equal to the specified HObject by comparing
+     * various properties.
+     *
+     * @param obj
+     *            The object
+     *
+     * @return true if the object is equal
+     */
+    @Override
+    public boolean equals(HObject obj) {
+        if (!this.getFullName().equals(obj.getFullName())) return false;
+
+        if (!this.getFileFormat().equals(obj.getFileFormat())) return false;
+
+        if (!this.getDims().equals(((DataFormat) obj).getDims())) return false;
+
+        if (!this.getParentObject().equals(((Attribute) obj).getParentObject())) return false;
+
+        return true;
+    }
+
+    /**
      * Returns a string representation of the data value of the attribute. For
      * example, "0, 255".
      * <p>
