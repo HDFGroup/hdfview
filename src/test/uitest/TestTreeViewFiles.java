@@ -176,18 +176,20 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
-            SWTBotShell textShell = bot.shells()[1];
-            textShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(textShell.getText()));
+            SWTBotShell tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            SWTBotTable textTable = textShell.bot().table();
+            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            String val = textTable.cell(0, 1);
+            table.click(1, 1);
+            String val = tableShell.bot().text(0).getText();
+
             String expected = "ABCDEFGHBCDEFGHICDEFGHIJDEFGHIJKEFGHIJKLFGHIJKLMGHIJKLMNHIJKLMNO";
             assertTrue(constructWrongValueMessage("openHDF5ScalarString()", "wrong data", expected, val), val.equals(expected));
 
-            textShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(textShell));
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].click();
 
