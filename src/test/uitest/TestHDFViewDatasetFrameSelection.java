@@ -1,8 +1,8 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -69,6 +69,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 text.setText("0");
 
                 Display.getDefault().syncExec(new Runnable() {
+                    @Override
                     public void run() {
                         text.widget.notifyListeners(SWT.Traverse, new Event() {
                             {
@@ -98,9 +99,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -151,6 +154,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 text.setText("1");
 
                 Display.getDefault().syncExec(new Runnable() {
+                    @Override
                     public void run() {
                         text.widget.notifyListeners(SWT.Traverse, new Event() {
                             {
@@ -180,9 +184,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -233,6 +239,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 text.setText("0");
 
                 Display.getDefault().syncExec(new Runnable() {
+                    @Override
                     public void run() {
                         text.widget.notifyListeners(SWT.Traverse, new Event() {
                             {
@@ -268,9 +275,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -321,6 +330,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 text.setText("0");
 
                 Display.getDefault().syncExec(new Runnable() {
+                    @Override
                     public void run() {
                         text.widget.notifyListeners(SWT.Traverse, new Event() {
                             {
@@ -350,9 +360,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -403,6 +415,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 text.setText("0");
 
                 Display.getDefault().syncExec(new Runnable() {
+                    @Override
                     public void run() {
                         text.widget.notifyListeners(SWT.Traverse, new Event() {
                             {
@@ -423,6 +436,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             text.setText("3");
 
             Display.getDefault().syncExec(new Runnable() {
+                @Override
                 public void run() {
                     text.widget.notifyListeners(SWT.Traverse, new Event() {
                         {
@@ -441,6 +455,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             text.setText("2");
 
             Display.getDefault().syncExec(new Runnable() {
+                @Override
                 public void run() {
                     text.widget.notifyListeners(SWT.Traverse, new Event() {
                         {
@@ -458,9 +473,11 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {

@@ -1,7 +1,7 @@
 package test.uitest;
 
-import static org.hamcrest.Matcher.*;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -111,6 +111,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
                     table.doubleclick(row, col);
 
                     Display.getDefault().syncExec(new Runnable() {
+                        @Override
                         public void run() {
                             table.widget.getActiveCellEditor().setEditorValue(thisVal);
                             table.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
@@ -148,9 +149,11 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
