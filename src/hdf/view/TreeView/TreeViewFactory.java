@@ -125,6 +125,7 @@ public class TreeViewFactory extends DataViewFactory {
         }
         catch (Exception ex) {
             log.debug("getTreeView(): Error instantiating class:", ex);
+            theView = null;
         }
 
         log.trace("getTreeView(): finish");

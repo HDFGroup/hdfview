@@ -192,6 +192,7 @@ public class TableViewFactory extends DataViewFactory {
         }
         catch (Exception ex) {
             log.debug("getTableView(): Error instantiating class:", ex);
+            theView = null;
         }
 
         log.trace("getTableView(): finish");

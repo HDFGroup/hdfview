@@ -137,6 +137,7 @@ public class MetaDataViewFactory extends DataViewFactory {
         }
         catch (Exception ex) {
             log.debug("getMetaDataView(): Error instantiating class:", ex);
+            theView = null;
         }
 
         log.trace("getMetaDataView(): finish");

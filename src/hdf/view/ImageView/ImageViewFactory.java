@@ -126,6 +126,7 @@ public class ImageViewFactory extends DataViewFactory {
         }
         catch (Exception ex) {
             log.debug("getImageView(): Error instantiating class:", ex);
+            theView = null;
         }
 
         log.trace("getImageView(): finish");

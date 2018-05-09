@@ -125,6 +125,7 @@ public class PaletteViewFactory extends DataViewFactory {
         }
         catch (Exception ex) {
             log.debug("getPaletteView(): Error instantiating class:", ex);
+            theView = null;
         }
 
         log.trace("getPaletteView(): finish");

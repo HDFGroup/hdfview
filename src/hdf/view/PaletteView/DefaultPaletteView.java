@@ -67,7 +67,7 @@ import hdf.view.ImageView.ImageView;
  * @author Jordan T. Henderson
  * @version 2.4 2/27/16
  */
-public class DefaultPaletteView extends Dialog {
+public class DefaultPaletteView extends Dialog implements PaletteView {
 
     private Shell shell;
 
@@ -378,6 +378,7 @@ public class DefaultPaletteView extends Dialog {
     }
 
     /** @return the data object displayed in this data viewer */
+    @Override
     public HObject getDataObject() {
         return dataset;
     }
