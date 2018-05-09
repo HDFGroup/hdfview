@@ -150,6 +150,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             viewer.addDataView(this);
 
+            log.trace("DefaultScalarDSTableView: viewer add");
+
             shell.open();
         }
 
@@ -157,7 +159,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     }
 
     @Override
-    protected void loadData(DataFormat dataObject) {
+    protected void loadData(DataFormat dataObject) throws Exception {
         log.trace("loadData(): start");
 
         if (dataObject.getRank() <= 0) {
@@ -220,7 +222,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (dataValue == null) {
             log.debug("loadData(): data value is null");
             log.trace("loadData(): finish");
-            return;
+            throw new RuntimeException("data value is null");
         }
 
         fillValue = dataObject.getFillValue();

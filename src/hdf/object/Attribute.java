@@ -404,15 +404,25 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                 tclass = H5.H5Tget_class(tid);
 
                 long tmptid = 0;
-                if (tclass == HDF5Constants.H5T_ARRAY) {
-                    // array of compound
-                    tmptid = tid;
-                    tid = H5.H5Tget_super(tmptid);
+
+                // Handle ARRAY and VLEN types by getting the base type
+                if (tclass == HDF5Constants.H5T_ARRAY || tclass == HDF5Constants.H5T_VLEN) {
                     try {
-                        H5.H5Tclose(tmptid);
+                        tmptid = tid;
+                        tid = H5.H5Tget_super(tmptid);
+                        log.trace("init(): H5T_ARRAY or H5T_VLEN class old={}, new={}", tmptid, tid);
                     }
-                    catch (HDF5Exception ex) {
-                        log.debug("init(): H5Tclose({}) failure: ", tmptid, ex);
+                    catch (Exception ex) {
+                        log.debug("init(): H5T_ARRAY or H5T_VLEN H5Tget_super({}) failure: ", tmptid, ex);
+                        tid = -1;
+                    }
+                    finally {
+                        try {
+                            H5.H5Tclose(tmptid);
+                        }
+                        catch (HDF5Exception ex) {
+                            log.debug("init(): H5Tclose({}) failure: ", tmptid, ex);
+                        }
                     }
                 }
 

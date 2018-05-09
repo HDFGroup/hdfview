@@ -458,6 +458,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);
+            log.trace("finish");
             viewer.showStatus("Error: unable to load table data - see log for more info");
             Tools.showError(shell, "Open", "An error occurred while loading data for the Table");
             shell.dispose();

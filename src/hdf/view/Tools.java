@@ -1097,8 +1097,9 @@ public final class Tools {
                     if (isConstructorMatched) {
                         try {
                             instance = constructor.newInstance(initargs);
-                        } catch (Exception ex) {
-                            log.debug("Error creating instance of {}: {}", cls, ex.getMessage());
+                        }
+                        catch (Exception ex) {
+                            log.debug("Error creating instance of {}: ", cls, ex);
                             ex.printStackTrace();
                         }
                         break;

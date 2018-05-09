@@ -99,6 +99,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             viewer.addDataView(this);
 
+            log.trace("DefaultCompoundDSTableView: viewer add");
+
             shell.open();
         }
 
