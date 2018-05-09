@@ -453,7 +453,16 @@ public abstract class DefaultBaseTableView implements TableView {
         cellValueComposite.setWeights(new int[] { 1, 5 });
 
         /* Make sure that the Dataset's data value is accessible for conditionally adding GUI components */
-        loadData(dataObject);
+        try {
+            loadData(dataObject);
+        }
+        catch (Exception ex) {
+            log.debug("loadData(): data not loaded: ", ex);
+            viewer.showStatus("Error: unable to load table data - see log for more info");
+            Tools.showError(shell, "Open", "An error occurred while loading data for the Table");
+            shell.dispose();
+            return;
+        }
 
         /* Create the Shell's MenuBar */
         /*
@@ -936,7 +945,7 @@ public abstract class DefaultBaseTableView implements TableView {
         return menuBar;
     }
 
-    protected abstract void loadData(DataFormat dataObject);
+    protected abstract void loadData(DataFormat dataObject) throws Exception;
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
 

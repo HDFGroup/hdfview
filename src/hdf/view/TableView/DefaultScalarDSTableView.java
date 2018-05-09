@@ -147,13 +147,13 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     }
                 }
             });
+
+            viewer.addDataView(this);
+
+            shell.open();
         }
 
-        viewer.addDataView(this);
-
         log.trace("DefaultScalarDSTableView: finish");
-
-        shell.open();
     }
 
     @Override
