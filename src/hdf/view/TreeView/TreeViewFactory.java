@@ -44,28 +44,28 @@ public class TreeViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
         return null;
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
+    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
+    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public TreeView getTreeView(Composite parent, ViewManager viewer) {
+    public TreeView getTreeView(Composite parent, ViewManager viewer) throws ClassNotFoundException {
         String dataViewName = null;
         Object[] initargs = { parent, viewer };
         TreeView theView = null;
@@ -115,6 +115,8 @@ public class TreeViewFactory extends DataViewFactory {
                 }
             }
         }
+
+        if (theClass == null) throw new ClassNotFoundException();
 
         try {
             theView = (TreeView) Tools.newInstance(theClass, initargs);

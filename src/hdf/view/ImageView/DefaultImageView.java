@@ -107,6 +107,7 @@ import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.BITMASK_OP;
 import hdf.view.ViewProperties.DataViewType;
+import hdf.view.PaletteView.PaletteView;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.NewDatasetDialog;
 
@@ -1595,9 +1596,20 @@ public class DefaultImageView implements ImageView {
 
         DataViewFactory paletteViewFactory = DataViewFactoryProducer.getFactory(DataViewType.PALETTE);
         if (paletteViewFactory != null) {
-            if (paletteViewFactory.getPaletteView(shell, viewer, this) == null) {
-                log.debug("showColorTable(): PaletteView is null");
+            PaletteView theView;
+            try {
+                theView = paletteViewFactory.getPaletteView(shell, viewer, this);
+            }
+            catch (ClassNotFoundException ex) {
+                log.debug("showColorTable(): no suitable PaletteView class found");
                 viewer.showStatus("Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
+                return;
+            }
+
+            if (theView == null) {
+                log.debug("showColorTable(): error occurred while instantiating PaletteView class");
+                viewer.showStatus("Error occurred while instantiating PaletteView class - see log for more info");
+                return;
             }
         }
     }

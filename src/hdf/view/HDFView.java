@@ -1181,10 +1181,18 @@ public class HDFView implements ViewManager {
             return;
         }
 
-        treeView = treeViewFactory.getTreeView(treeArea, this);
-        if (treeView == null) {
+        try {
+            treeView = treeViewFactory.getTreeView(treeArea, this);
+        }
+        catch (ClassNotFoundException ex) {
             log.debug("createContentArea(): no suitable TreeView class found");
             this.showStatus("Unable to find suitable TreeView class");
+            return;
+        }
+
+        if (treeView == null) {
+            log.debug("createContentArea(): error occurred while instantiating TreeView class");
+            this.showStatus("Error occurred while instantiating TreeView class - see log for more info");
             return;
         }
 
@@ -1265,9 +1273,19 @@ public class HDFView implements ViewManager {
         DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
         if (metaDataViewFactory == null) return;
 
-        MetaDataView theView = metaDataViewFactory.getMetaDataView(generalArea, this, obj);
+        MetaDataView theView;
+        try {
+            theView = metaDataViewFactory.getMetaDataView(generalArea, this, obj);
+        }
+        catch (ClassNotFoundException ex) {
+            log.debug("showMetaData(): no suitable MetaDataView class found");
+            this.showStatus("Unable to find suitable MetaDataView class");
+            return;
+        }
+
         if (theView == null) {
-            this.showStatus("Unable to find suitable MetaDataView class for object '" + obj.getName() + "'");
+            log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
+            this.showStatus("Error occurred while instantiating MetaDataView class - see log for more info");
             return;
         }
 

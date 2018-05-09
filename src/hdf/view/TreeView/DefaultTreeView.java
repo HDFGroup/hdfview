@@ -2681,10 +2681,19 @@ public class DefaultTreeView implements TreeView {
         if (isImage) {
             DataViewFactory imageViewFactory = DataViewFactoryProducer.getFactory(DataViewType.IMAGE);
             if (imageViewFactory != null) {
-                theView = imageViewFactory.getImageView(viewer, map);
-                if (theView == null) {
-                    log.debug("showDataContent(): ImageView is null");
+                try {
+                    theView = imageViewFactory.getImageView(viewer, map);
+                }
+                catch (ClassNotFoundException ex) {
+                    log.debug("showDataContent(): no suitable ImageView class found");
                     viewer.showStatus("Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
+                    return null;
+                }
+
+                if (theView == null) {
+                    log.debug("showDataContent(): error occurred while instantiating ImageView class");
+                    viewer.showStatus("Error occurred while instantiating ImageView class - see log for more info");
+                    return null;
                 }
             }
             else
@@ -2693,10 +2702,19 @@ public class DefaultTreeView implements TreeView {
         else {
             DataViewFactory tableViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TABLE);
             if (tableViewFactory != null) {
-                theView = tableViewFactory.getTableView(viewer, map);
-                if (theView == null) {
-                    log.debug("showDataContent(): TableView is null");
+                try {
+                    theView = tableViewFactory.getTableView(viewer, map);
+                }
+                catch (ClassNotFoundException ex) {
+                    log.debug("showDataContent(): no suitable TableView class found");
                     viewer.showStatus("Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
+                    return null;
+                }
+
+                if (theView == null) {
+                    log.debug("showDataContent(): error occurred while instantiating TableView class");
+                    viewer.showStatus("Error occurred while instantiating TableView class - see log for more info");
+                    return null;
                 }
             }
             else
@@ -2730,9 +2748,19 @@ public class DefaultTreeView implements TreeView {
         if (metaDataViewFactory == null) return null;
 
         /* TODO: initargs needs access to MetaDataView parent composite */
-        MetaDataView theView = metaDataViewFactory.getMetaDataView(null, viewer, dataObject);
-        if (theView == null) {
+        MetaDataView theView;
+        try {
+            theView = metaDataViewFactory.getMetaDataView(null, viewer, dataObject);
+        }
+        catch (ClassNotFoundException ex) {
+            log.debug("showMetaData(): no suitable MetaDataView class found");
             viewer.showStatus("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
+            return null;
+        }
+
+        if (theView == null) {
+            log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
+            viewer.showStatus("Error occurred while instantiating MetaDataView class - see log for more info");
             return null;
         }
 
