@@ -1599,16 +1599,18 @@ public class DefaultImageView implements ImageView {
             PaletteView theView;
             try {
                 theView = paletteViewFactory.getPaletteView(shell, viewer, this);
+
+                if (theView == null) {
+                    log.debug("showColorTable(): error occurred while instantiating PaletteView class");
+                    viewer.showStatus("Error occurred while instantiating PaletteView class - see log for more info");
+                    Tools.showError(shell, "Show Palette", "Error occurred while instantiating PaletteView class - see log for more info");
+                    return;
+                }
             }
             catch (ClassNotFoundException ex) {
                 log.debug("showColorTable(): no suitable PaletteView class found");
                 viewer.showStatus("Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
-                return;
-            }
-
-            if (theView == null) {
-                log.debug("showColorTable(): error occurred while instantiating PaletteView class");
-                viewer.showStatus("Error occurred while instantiating PaletteView class - see log for more info");
+                Tools.showError(shell, "Show Palette", "Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
                 return;
             }
         }
