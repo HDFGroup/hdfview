@@ -939,6 +939,19 @@ public class HDFView implements ViewManager {
             }
         });
 
+        /*
+         * TODO: Create new Icon for read-only open button.
+         */
+        ToolItem openRItem = new ToolItem(toolBar, SWT.PUSH);
+        openRItem.setToolTipText("Open Read-Only");
+        openRItem.setImage(ViewProperties.getFileopenIcon());
+        openRItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                openLocalFile(null, FileFormat.READ);
+            }
+        });
+
         new ToolItem(toolBar, SWT.SEPARATOR).setWidth(4);
 
         ToolItem closeItem = new ToolItem(toolBar, SWT.PUSH);

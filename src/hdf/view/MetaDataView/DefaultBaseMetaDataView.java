@@ -604,7 +604,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         });
 
         item = new MenuItem(menu, SWT.PUSH);
-        item.setText("Edit Attribute");
+        item.setText("View/Edit Attribute Value");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -659,9 +659,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             public void menuShown(MenuEvent e) {
                 /* 'Rename Attribute' MenuItem */
                 menu.getItem(0).setEnabled(!dataObject.getFileFormat().isReadOnly() && !isH4);
-
-                /* 'Edit Attribute' MenuItem */
-                menu.getItem(1).setEnabled(!dataObject.getFileFormat().isReadOnly());
 
                 /* 'Delete Attribute' MenuItem */
                 menu.getItem(2).setEnabled(!dataObject.getFileFormat().isReadOnly() && !isH4);

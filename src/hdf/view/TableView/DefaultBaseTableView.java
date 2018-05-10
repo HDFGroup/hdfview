@@ -340,14 +340,12 @@ public abstract class DefaultBaseTableView implements TableView {
             return;
         }
 
-        if (dataObject instanceof Dataset) {
-            isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
+        isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
 
+        if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
+                && (dataObject instanceof CompoundDS)) {
             /* Cannot edit HDF4 VData */
-            if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
-                    && (dataObject instanceof CompoundDS)) {
-                isReadOnly = true;
-            }
+            isReadOnly = true;
         }
 
         /* Disable edit feature for SZIP compression when encode is not enabled */

@@ -364,6 +364,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
                 item.setText("Native Order");
+                item.setEnabled(!isReadOnly);
                 item.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -380,6 +381,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
                 item.setText("Little Endian");
+                item.setEnabled(!isReadOnly);
                 item.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -396,6 +398,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
                 item.setText("Big Endian");
+                item.setEnabled(!isReadOnly);
                 item.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
