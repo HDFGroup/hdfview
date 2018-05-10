@@ -310,8 +310,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         selectedIndex[1] = 1;
         selectedIndex[2] = 2;
 
-        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName, type,
-                value, rank, isUnsigned, isScalar);
+        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName,
+                type.getDatatypeDescription(), value, rank, isUnsigned, isScalar);
 
         resetSelection();
 
@@ -339,13 +339,23 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         try {
             pObjID = parentObject.open();
             if (pObjID >= 0) {
-                if (H5.H5Aexists(pObjID, getName()))
-                    aid = H5.H5Aopen(pObjID, getName(), HDF5Constants.H5P_DEFAULT);
+                if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
+                    if (H5.H5Aexists(pObjID, getName()))
+                        aid = H5.H5Aopen(pObjID, getName(), HDF5Constants.H5P_DEFAULT);
+                }
+                else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+                    long attrIdx = -1;
+
+                    /*
+                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute
+                     * info.
+                     */
+                }
             }
 
             log.trace("open(): aid={}", aid);
         }
-        catch (HDF5Exception ex) {
+        catch (Exception ex) {
             log.debug("open(): Failed to open attribute {}: ", getName(), ex);
             aid = -1;
         }
