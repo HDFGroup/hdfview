@@ -212,22 +212,17 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         });
 
         /* Deleting attributes is not supported by HDF4 */
-        if (isH5) {
-            Button delButton = new Button(attributeInfoGroup, SWT.PUSH);
-            delButton.setFont(curFont);
-            delButton.setText("Delete Attribute");
-            delButton.setEnabled(!(dataObject.getFileFormat().isReadOnly()));
-            delButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-            delButton.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    deleteAttribute(dataObject);
-                }
-            });
-        }
-        else {
-            addButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false, 2, 1));
-        }
+        Button delButton = new Button(attributeInfoGroup, SWT.PUSH);
+        delButton.setFont(curFont);
+        delButton.setText("Delete Attribute");
+        delButton.setEnabled(isH5 && !(dataObject.getFileFormat().isReadOnly()));
+        delButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        delButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                deleteAttribute(dataObject);
+            }
+        });
 
         attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         attrTable.setLinesVisible(true);
@@ -592,7 +587,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
                 HObject itemObj = (HObject) table.getItem(selectionIndex).getData();
                 String result = new InputDialog(Display.getDefault().getShells()[0],
-                        Display.getDefault().getShells()[0].getText(), "New Attribute Name", itemObj.getName()).open();
+                        Display.getDefault().getShells()[0].getText() + " - Rename Attribute", "New Attribute Name",
+                        itemObj.getName()).open();
 
                 if ((result == null) || ((result = result.trim()) == null) || (result.length() < 1)) {
                     return;
@@ -648,9 +644,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     return;
                 }
 
-                final TableItem item = attrTable.getItem(selectionIndex);
-
-                deleteAttribute((HObject) item.getData());
+                deleteAttribute(dataObject);
             }
         });
 
