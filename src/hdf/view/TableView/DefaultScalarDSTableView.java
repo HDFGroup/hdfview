@@ -191,7 +191,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 Tools.showError(shell, "Load", "ScalarDS loadData:" + "No data read");
                 log.debug("loadData(): no data read");
                 log.trace("loadData(): finish");
-                return;
+                throw new RuntimeException("data value is null");
             }
 
             log.trace("loadData(): dataValue={}", dataValue);
