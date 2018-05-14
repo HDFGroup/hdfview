@@ -1097,8 +1097,9 @@ public final class Tools {
                     if (isConstructorMatched) {
                         try {
                             instance = constructor.newInstance(initargs);
-                        } catch (Exception ex) {
-                            log.debug("Error creating instance of {}: {}", cls, ex.getMessage());
+                        }
+                        catch (Exception ex) {
+                            log.debug("Error creating instance of {}: ", cls, ex);
                             ex.printStackTrace();
                         }
                         break;
@@ -3030,14 +3031,11 @@ public final class Tools {
 
         if (f.exists()) {
             log.trace("createNewFile: {} file exists", filename);
-            Shell tempShell = new Shell(display);
 
-            if(!MessageDialog.openConfirm(tempShell, "Create New File", "File exists. Do you want to replace it?")) {
-                tempShell.dispose();
+            if (!MessageDialog.openConfirm(display.getShells()[0], "Create New File",
+                    "File exists. Do you want to replace it?")) {
                 return null;
             }
-
-            tempShell.dispose();
         }
 
         try {

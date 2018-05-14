@@ -340,14 +340,12 @@ public abstract class DefaultBaseTableView implements TableView {
             return;
         }
 
-        if (dataObject instanceof Dataset) {
-            isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
+        isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
 
+        if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
+                && (dataObject instanceof CompoundDS)) {
             /* Cannot edit HDF4 VData */
-            if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))
-                    && (dataObject instanceof CompoundDS)) {
-                isReadOnly = true;
-            }
+            isReadOnly = true;
         }
 
         /* Disable edit feature for SZIP compression when encode is not enabled */
@@ -453,7 +451,17 @@ public abstract class DefaultBaseTableView implements TableView {
         cellValueComposite.setWeights(new int[] { 1, 5 });
 
         /* Make sure that the Dataset's data value is accessible for conditionally adding GUI components */
-        loadData(dataObject);
+        try {
+            loadData(dataObject);
+        }
+        catch (Exception ex) {
+            log.debug("loadData(): data not loaded: ", ex);
+            log.trace("finish");
+            viewer.showStatus("Error: unable to load table data - see log for more info");
+            Tools.showError(shell, "Open", "An error occurred while loading data for the Table");
+            shell.dispose();
+            return;
+        }
 
         /* Create the Shell's MenuBar */
         /*
@@ -936,7 +944,7 @@ public abstract class DefaultBaseTableView implements TableView {
         return menuBar;
     }
 
-    protected abstract void loadData(DataFormat dataObject);
+    protected abstract void loadData(DataFormat dataObject) throws Exception;
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
 

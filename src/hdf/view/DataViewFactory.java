@@ -29,24 +29,24 @@ import hdf.view.TreeView.TreeView;
 public abstract class DataViewFactory {
     /* Get an instance of TableView given the appropriate constructor parameters */
     @SuppressWarnings("rawtypes")
-    public abstract TableView    getTableView(ViewManager viewer, HashMap dataPropertiesMap);
+    public abstract TableView    getTableView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException;
 
     /* Get an instance of ImageView given the appropriate constructor parameters */
     @SuppressWarnings("rawtypes")
-    public abstract ImageView    getImageView(ViewManager viewer, HashMap dataPropertiesMap);
+    public abstract ImageView    getImageView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException;
 
     /*
      * Get an instance of PaletteView given the appropriate constructor parameters
      */
-    public abstract PaletteView  getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView);
+    public abstract PaletteView  getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) throws ClassNotFoundException;
 
     /*
      * Get an instance of MetaDataView given the appropriate constructor parameters
      */
-    public abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj);
+    public abstract MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) throws ClassNotFoundException;
 
     /*
      * Get an instance of TreeView given the appropriate constructor parameters
      */
-    public abstract TreeView     getTreeView(Composite parent, ViewManager viewer);
+    public abstract TreeView     getTreeView(Composite parent, ViewManager viewer) throws ClassNotFoundException;
 }

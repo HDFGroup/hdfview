@@ -94,17 +94,21 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         isDataTransposed = false; // Disable transpose for compound datasets
 
-        shell.setImage(ViewProperties.getTableIcon());
+        if (!shell.isDisposed()) {
+            shell.setImage(ViewProperties.getTableIcon());
 
-        viewer.addDataView(this);
+            viewer.addDataView(this);
+
+            log.trace("DefaultCompoundDSTableView: viewer add");
+
+            shell.open();
+        }
 
         log.trace("DefaultCompoundDSTableView: finish");
-
-        shell.open();
     }
 
     @Override
-    protected void loadData(DataFormat dataObject) {
+    protected void loadData(DataFormat dataObject) throws Exception {
         log.trace("loadData(): start");
 
         if (dataObject.getRank() <= 0) {
@@ -139,7 +143,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         if ((dataValue == null) || !(dataValue instanceof List)) {
             log.debug("loadData(): data value is null or data not a list");
             log.trace("loadData(): finish");
-            return;
+            throw new RuntimeException("data value is null");
         }
 
         log.trace("loadData(): finish");

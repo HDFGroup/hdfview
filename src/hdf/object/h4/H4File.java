@@ -327,7 +327,16 @@ public class H4File extends FileFormat {
             grid = HDFLibrary.GRstart(fid);
             log.trace("open(): fid:{} grid:{}", fid, grid);
         }
-        sdid = HDFLibrary.SDstart(fullFileName, flag);
+
+        try {
+            sdid = HDFLibrary.SDstart(fullFileName, flag);
+
+            if (sdid < 0) log.debug("open(): SDstart failed!");
+        }
+        catch (HDFException ex) {
+            log.debug("open(): SDstart failure: ", ex);
+        }
+
         log.trace("open(): sdid:{}", sdid);
 
         // load the file hierarchy
@@ -2071,6 +2080,7 @@ public class H4File extends FileFormat {
         return null;
     }
 
+    @Override
     public void setNewLibBounds(String lowStr, String highStr) throws Exception {
         return;
     }

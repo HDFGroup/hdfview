@@ -352,15 +352,25 @@ public class H5CompoundDS extends CompoundDS {
                 tclass = H5.H5Tget_class(tid);
 
                 long tmptid = 0;
-                if (tclass == HDF5Constants.H5T_ARRAY) {
-                    // array of compound
-                    tmptid = tid;
-                    tid = H5.H5Tget_super(tmptid);
+
+                // Handle ARRAY and VLEN types by getting the base type
+                if (tclass == HDF5Constants.H5T_ARRAY || tclass == HDF5Constants.H5T_VLEN) {
                     try {
-                        H5.H5Tclose(tmptid);
+                        tmptid = tid;
+                        tid = H5.H5Tget_super(tmptid);
+                        log.trace("init(): H5T_ARRAY or H5T_VLEN class old={}, new={}", tmptid, tid);
                     }
-                    catch (HDF5Exception ex) {
-                        log.debug("init(): H5Tclose({}) failure: ", tmptid, ex);
+                    catch (Exception ex) {
+                        log.debug("init(): H5T_ARRAY or H5T_VLEN H5Tget_super({}) failure: ", tmptid, ex);
+                        tid = -1;
+                    }
+                    finally {
+                        try {
+                            H5.H5Tclose(tmptid);
+                        }
+                        catch (HDF5Exception ex) {
+                            log.debug("init(): H5Tclose({}) failure: ", tmptid, ex);
+                        }
                     }
                 }
 
@@ -693,27 +703,37 @@ public class H5CompoundDS extends CompoundDS {
                 int n = flatNameList.size();
                 tid = H5.H5Dget_type(did);
                 int tclass = H5.H5Tget_class(tid);
-                if (tclass == HDF5Constants.H5T_ARRAY) {
-                    // array of compound
-                    long tmptid = -1;
+                long tmptid = -1;
+
+                // Handle ARRAY and VLEN types by getting the base type
+                if (tclass == HDF5Constants.H5T_ARRAY || tclass == HDF5Constants.H5T_VLEN) {
                     try {
                         tmptid = tid;
-                        log.trace("read(): H5Tget_super");
                         tid = H5.H5Tget_super(tmptid);
+                        log.trace("read(): H5T_ARRAY or H5T_VLEN class old={}, new={}", tmptid, tid);
 
                         // ARRAY of COMPOUND currently unsupported
-                        if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
+                        if ((tclass == HDF5Constants.H5T_ARRAY)
+                                && (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND)) {
                             log.debug("read(): cannot read dataset of type ARRAY of COMPOUND");
                             log.trace("read(): finish");
                             throw new Exception("Unsupported dataset of type ARRAY of COMPOUND");
+                        }
+
+                        // VLEN of COMPOUND currently unsupported
+                        if ((tclass == HDF5Constants.H5T_VLEN)
+                                && (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND)) {
+                            log.debug("read(): cannot read dataset of type VLEN of COMPOUND");
+                            log.trace("read(): finish");
+                            throw new Exception("Unsupported dataset of type VLEN of COMPOUND");
                         }
                     }
                     finally {
                         try {
                             H5.H5Tclose(tmptid);
                         }
-                        catch (Exception ex2) {
-                            log.debug("read(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
+                        catch (HDF5Exception ex) {
+                            log.debug("read(): H5Tclose({}) failure: ", tmptid, ex);
                         }
                     }
                 }
@@ -762,7 +782,6 @@ public class H5CompoundDS extends CompoundDS {
                         continue;
                     }
                     else if (member_class == HDF5Constants.H5T_ARRAY) {
-                        long tmptid = -1;
                         try {
                             tmptid = H5.H5Tget_super(atom_tid);
                             member_base_class = H5.H5Tget_class(tmptid);
@@ -1408,8 +1427,8 @@ public class H5CompoundDS extends CompoundDS {
                         if (vmaps > 0) {
                             for (long next = 0; next < vmaps; next++) {
                                 try {
-                                    long virtual_vspace = H5.H5Pget_virtual_vspace(pcid, next);
-                                    long virtual_srcspace = H5.H5Pget_virtual_srcspace(pcid, next);
+                                    H5.H5Pget_virtual_vspace(pcid, next);
+                                    H5.H5Pget_virtual_srcspace(pcid, next);
                                     String fname = H5.H5Pget_virtual_filename(pcid, next);
                                     String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
                                     storage_layout += "\n" + fname + " : " + dsetname;

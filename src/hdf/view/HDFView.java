@@ -939,6 +939,19 @@ public class HDFView implements ViewManager {
             }
         });
 
+        /*
+         * TODO: Create new Icon for read-only open button.
+         */
+        ToolItem openRItem = new ToolItem(toolBar, SWT.PUSH);
+        openRItem.setToolTipText("Open Read-Only");
+        openRItem.setImage(ViewProperties.getFileopenIcon());
+        openRItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                openLocalFile(null, FileFormat.READ);
+            }
+        });
+
         new ToolItem(toolBar, SWT.SEPARATOR).setWidth(4);
 
         ToolItem closeItem = new ToolItem(toolBar, SWT.PUSH);
@@ -1181,8 +1194,16 @@ public class HDFView implements ViewManager {
             return;
         }
 
-        treeView = treeViewFactory.getTreeView(treeArea, this);
-        if (treeView == null) {
+        try {
+            treeView = treeViewFactory.getTreeView(treeArea, this);
+
+            if (treeView == null) {
+                log.debug("createContentArea(): error occurred while instantiating TreeView class");
+                this.showStatus("Error occurred while instantiating TreeView class - see log for more info");
+                return;
+            }
+        }
+        catch (ClassNotFoundException ex) {
             log.debug("createContentArea(): no suitable TreeView class found");
             this.showStatus("Unable to find suitable TreeView class");
             return;
@@ -1265,9 +1286,19 @@ public class HDFView implements ViewManager {
         DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
         if (metaDataViewFactory == null) return;
 
-        MetaDataView theView = metaDataViewFactory.getMetaDataView(generalArea, this, obj);
-        if (theView == null) {
-            this.showStatus("Unable to find suitable MetaDataView class for object '" + obj.getName() + "'");
+        MetaDataView theView;
+        try {
+            theView = metaDataViewFactory.getMetaDataView(generalArea, this, obj);
+
+            if (theView == null) {
+                log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
+                this.showStatus("Error occurred while instantiating MetaDataView class - see log for more info");
+                return;
+            }
+        }
+        catch (ClassNotFoundException ex) {
+            log.debug("showMetaData(): no suitable MetaDataView class found");
+            this.showStatus("Unable to find suitable MetaDataView class");
             return;
         }
 

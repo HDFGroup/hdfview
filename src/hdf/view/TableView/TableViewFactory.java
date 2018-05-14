@@ -52,7 +52,7 @@ public class TableViewFactory extends DataViewFactory {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
         String dataViewName = null;
         Object[] initargs = { viewer, dataPropertiesMap };
         TableView theView = null;
@@ -134,6 +134,8 @@ public class TableViewFactory extends DataViewFactory {
             }
         }
 
+        if (theClass == null) throw new ClassNotFoundException();
+
         /* Check to see if there is a bitmask to be applied to the data */
         BitSet bitmask = (BitSet) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
         if (bitmask != null) {
@@ -190,6 +192,7 @@ public class TableViewFactory extends DataViewFactory {
         }
         catch (Exception ex) {
             log.debug("getTableView(): Error instantiating class:", ex);
+            theView = null;
         }
 
         log.trace("getTableView(): finish");
@@ -199,22 +202,22 @@ public class TableViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) {
+    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) {
+    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) {
+    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public TreeView getTreeView(Composite parent, ViewManager viewer) {
+    public TreeView getTreeView(Composite parent, ViewManager viewer) throws ClassNotFoundException {
         return null;
     }
 

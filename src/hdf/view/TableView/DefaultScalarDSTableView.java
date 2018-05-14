@@ -147,17 +147,19 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     }
                 }
             });
+
+            viewer.addDataView(this);
+
+            log.trace("DefaultScalarDSTableView: viewer add");
+
+            shell.open();
         }
 
-        viewer.addDataView(this);
-
         log.trace("DefaultScalarDSTableView: finish");
-
-        shell.open();
     }
 
     @Override
-    protected void loadData(DataFormat dataObject) {
+    protected void loadData(DataFormat dataObject) throws Exception {
         log.trace("loadData(): start");
 
         if (dataObject.getRank() <= 0) {
@@ -220,7 +222,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (dataValue == null) {
             log.debug("loadData(): data value is null");
             log.trace("loadData(): finish");
-            return;
+            throw new RuntimeException("data value is null");
         }
 
         fillValue = dataObject.getFillValue();
@@ -362,6 +364,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
                 item.setText("Native Order");
+                item.setEnabled(!isReadOnly);
                 item.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -378,6 +381,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
                 item.setText("Little Endian");
+                item.setEnabled(!isReadOnly);
                 item.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -394,6 +398,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 item = new MenuItem(importAsBinaryMenu, SWT.PUSH);
                 item.setText("Big Endian");
+                item.setEnabled(!isReadOnly);
                 item.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
