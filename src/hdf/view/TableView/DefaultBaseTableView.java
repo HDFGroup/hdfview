@@ -337,6 +337,7 @@ public abstract class DefaultBaseTableView implements TableView {
         if ((dataObject == null) || !(dataObject instanceof DataFormat)) {
             log.debug("data object is null or not an instanceof DataFormat");
             log.trace("finish");
+            shell.dispose();
             return;
         }
 
@@ -368,6 +369,7 @@ public abstract class DefaultBaseTableView implements TableView {
             log.trace("finish");
             Tools.showError(shell, "Create", "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has null dimensions.");
+            shell.dispose();
             return;
         }
 
@@ -382,6 +384,7 @@ public abstract class DefaultBaseTableView implements TableView {
             log.trace("finish");
             Tools.showError(shell, "Create", "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has dimension of size 0.");
+            shell.dispose();
             return;
         }
 
@@ -484,6 +487,7 @@ public abstract class DefaultBaseTableView implements TableView {
         catch (UnsupportedOperationException ex) {
             log.debug("Subclass does not implement createTable()");
             log.trace("finish");
+            shell.dispose();
             return;
         }
 
