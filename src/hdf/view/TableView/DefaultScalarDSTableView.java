@@ -162,10 +162,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     protected void loadData(DataFormat dataObject) throws Exception {
         log.trace("loadData(): start");
 
-        if (dataObject.getRank() <= 0) {
+        if (!dataObject.isInited()) {
             try {
                 dataObject.init();
-
                 log.trace("loadData(): data object inited");
             }
             catch (Exception ex) {
@@ -207,8 +206,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 indexBaseGroup.setText(title);
             }
 
-            if (dataObject instanceof ScalarDS)
-                ((ScalarDS) dataObject).convertFromUnsignedC();
+            dataObject.convertFromUnsignedC();
 
             dataValue = dataObject.getData();
         }

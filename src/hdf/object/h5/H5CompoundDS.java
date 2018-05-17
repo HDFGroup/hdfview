@@ -279,7 +279,7 @@ public class H5CompoundDS extends CompoundDS {
     public void init() {
         log.trace("init(): start");
 
-        if (rank > 0) {
+        if (inited) {
             resetSelection();
             log.trace("init(): Dataset already inited");
             log.trace("init(): finish");
@@ -437,6 +437,8 @@ public class H5CompoundDS extends CompoundDS {
                         }
                     }
                 } // for (int i=0; i<numberOfMembers; i++)
+
+                inited = true;
             }
             catch (HDF5Exception ex) {
                 numberOfMembers = 0;
@@ -557,9 +559,8 @@ public class H5CompoundDS extends CompoundDS {
 
         byte[] theData = null;
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
 
         long did = open();
         if (did >= 0) {
@@ -645,9 +646,8 @@ public class H5CompoundDS extends CompoundDS {
         long tid = -1;
         long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
-        if (rank <= 0) {
+        if (!isInited())
             init(); // read data information into memory
-        }
 
         if (numberOfMembers <= 0) {
             log.debug("read(): Dataset contains no members");
@@ -1242,6 +1242,16 @@ public class H5CompoundDS extends CompoundDS {
         log.trace("write(): finish");
     }
 
+    @Override
+    public Object convertFromUnsignedC() {
+        throw new UnsupportedOperationException("H5CompoundDS:convertFromUnsignedC Unsupported operation.");
+    }
+
+    @Override
+    public Object convertToUnsignedC() {
+        throw new UnsupportedOperationException("H5CompoundDS:convertToUnsignedC Unsupported operation.");
+    }
+
     /**
      * Set up the selection of hyperslab
      *
@@ -1305,7 +1315,7 @@ public class H5CompoundDS extends CompoundDS {
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         log.trace("getMetadata(): start");
 
-        if (rank <= 0) {
+        if (!isInited()) {
             init();
             log.trace("getMetadata(): inited");
         }

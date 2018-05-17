@@ -57,7 +57,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         Text text;
 
         Dataset d = (Dataset) dataObject;
-        if (d.getRank() <= 0) {
+        if (!d.isInited()) {
             d.init();
             log.trace("addObjectSpecificContent(): dataset inited");
         }

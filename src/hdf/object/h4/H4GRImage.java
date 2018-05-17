@@ -330,9 +330,7 @@ public class H4GRImage extends ScalarDS
 
         byte[] theData = null;
 
-        if (rank <= 0) {
-            init();
-        }
+        if (!isInited()) init();
 
         long id = open();
         if (id < 0) {
@@ -379,9 +377,7 @@ public class H4GRImage extends ScalarDS
 
         Object theData = null;
 
-        if (rank <=0 ) {
-            init();
-        }
+        if (!isInited()) init();
 
         long id = open();
         if (id < 0) {
@@ -645,7 +641,7 @@ public class H4GRImage extends ScalarDS
     {
         log.trace("init(): start");
 
-        if (rank>0) {
+        if (inited) {
             log.trace("init(): Already initialized");
             log.trace("init(): finish");
             return; // already called. Initialize only once
@@ -712,6 +708,7 @@ public class H4GRImage extends ScalarDS
                 log.debug("init(): get chunk information failure: ", ex);
             }
 
+            inited = true;
         }
         catch (HDFException ex) {
             log.debug("init(): failure: ", ex);

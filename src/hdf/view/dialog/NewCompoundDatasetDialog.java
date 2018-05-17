@@ -233,12 +233,10 @@ public class NewCompoundDatasetDialog extends Dialog {
 
                 if (dset == null) return;
 
-                int rank = dset.getRank();
-                if (rank < 1) {
+                if (!dset.isInited())
                     dset.init();
-                }
 
-                rank = dset.getRank();
+                int rank = dset.getRank();
                 rankChoice.select(rank - 1);
                 long[] dims = dset.getDims();
                 String[] mNames = dset.getMemberNames();

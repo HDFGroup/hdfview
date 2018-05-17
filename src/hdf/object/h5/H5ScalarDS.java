@@ -233,7 +233,7 @@ public class H5ScalarDS extends ScalarDS {
     public void init() {
         log.trace("init(): start");
 
-        if (rank > 0) {
+        if (inited) {
             resetSelection();
             log.trace("init(): Dataset already intialized");
             log.trace("init(): finish");
@@ -398,6 +398,8 @@ public class H5ScalarDS extends ScalarDS {
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
                     log.trace("init() rank={}, dims={}, maxDims={}", rank, dims, maxDims);
                 }
+
+                inited = true;
             }
             catch (HDF5Exception ex) {
                 log.debug("init(): ", ex);
@@ -438,6 +440,7 @@ public class H5ScalarDS extends ScalarDS {
 
             startDims = new long[rank];
             selectedDims = new long[rank];
+
             resetSelection();
         }
         else {
@@ -621,9 +624,8 @@ public class H5ScalarDS extends ScalarDS {
 
         byte[] theData = null;
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
 
         long did = open();
         if (did >= 0) {
@@ -791,9 +793,8 @@ public class H5ScalarDS extends ScalarDS {
         long tid = -1;
         long spaceIDs[] = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
-        if (rank <= 0) {
-            init(); // read data information into memory
-        }
+        if (!isInited())
+            init();
 
         if (isArrayOfCompound) {
             log.debug("read(): Cannot show data of type ARRAY of COMPOUND");
@@ -1127,9 +1128,8 @@ public class H5ScalarDS extends ScalarDS {
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         log.trace("getMetadata(): start");
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
 
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
@@ -1244,8 +1244,8 @@ public class H5ScalarDS extends ScalarDS {
                         if (vmaps > 0) {
                             for (long next = 0; next < vmaps; next++) {
                                 try {
-                                    long virtual_vspace = H5.H5Pget_virtual_vspace(pcid, next);
-                                    long virtual_srcspace = H5.H5Pget_virtual_srcspace(pcid, next);
+                                    H5.H5Pget_virtual_vspace(pcid, next);
+                                    H5.H5Pget_virtual_srcspace(pcid, next);
                                     String fname = H5.H5Pget_virtual_filename(pcid, next);
                                     String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
                                     storage_layout += "\n" + fname + " : " + dsetname;
@@ -2342,9 +2342,8 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public byte[] getPaletteRefs() {
-        if (rank <= 0) {
+        if (!isInited())
             init(); // init will be called to get refs
-        }
 
         return paletteRefs;
     }

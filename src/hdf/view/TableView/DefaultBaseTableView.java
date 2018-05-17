@@ -1084,10 +1084,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
         try {
             dataValue = dataObject.getData();
-            if (dataObject instanceof ScalarDS) {
-                ((ScalarDS) dataObject).convertFromUnsignedC();
-                dataValue = dataObject.getData();
-            }
+            dataObject.convertFromUnsignedC();
+            dataValue = dataObject.getData();
         }
         catch (Exception ex) {
             dataValue = null;

@@ -26,6 +26,8 @@ package hdf.object;
  * @author Jordan T. Henderson
  */
 public interface DataFormat {
+    public abstract boolean isInited();
+
     public abstract void init();
 
     /**
@@ -99,6 +101,29 @@ public interface DataFormat {
      *             if data can not be written
      */
     public abstract void write() throws Exception;
+
+    /**
+     * Converts the data values of this data object to appropriate Java integers if
+     * they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertFromUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
+     */
+    public Object convertFromUnsignedC();
+
+    /**
+     * Converts Java integer data values of this data object back to unsigned C-type
+     * integer data if they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
+     * @see #convertFromUnsignedC(Object data_in)
+     *
+     * @return the converted data buffer.
+     */
+    public Object convertToUnsignedC();
 
     /**
      * Returns the fill values for the data object.

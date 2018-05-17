@@ -1371,10 +1371,9 @@ public class DefaultImageView implements ImageView {
             return image;
         }
 
-        int rank = dataset.getRank();
-        if (rank <= 0) {
+        if (!dataset.isInited())
             dataset.init();
-        }
+
         isTrueColor = dataset.isTrueColor();
         is3D = (dataset.getRank() > 2) && !dataset.isTrueColor();
 

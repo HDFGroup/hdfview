@@ -271,10 +271,9 @@ public class TestH4File
                     }
 
                     // compound members
-                    int rank = vdata.getRank();
-                    if (rank <=0 ) {
+                    if (vdata.isInited())
                         vdata.init();
-                    }
+
                     n = vdata.getMemberCount();
                     String[] names = vdata.getMemberNames();
                     for (int i=0; i<n; i++)

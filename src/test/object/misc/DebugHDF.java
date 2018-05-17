@@ -2305,11 +2305,12 @@ public class DebugHDF {
 
         final CompoundDS dset = (CompoundDS)file.get(objName);
 
+        try {
+            if (!dset.isInited())
+                dset.init();
+        } catch (final Exception ex) {}
+
         int rank = dset.getRank();
-        try { if (rank<=0) {
-            dset.init();
-        } } catch (final Exception ex) {}
-        rank = dset.getRank();
 
 
         // 1)  I read a table from an H5 file; and use the 'select subset' code
@@ -3284,11 +3285,8 @@ public class DebugHDF {
     }
 
     private static void readHyperslab(final H5CompoundDS d) throws Exception {
-        int rank = d.getRank();
-        if (rank <=0) {
+        if (!d.isInited())
             d.init();
-            rank = d.getRank();
-        }
 
         d.getSelectedDims();
         final long selected[] = d.getSelectedDims();

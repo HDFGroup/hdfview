@@ -241,7 +241,7 @@ public class FitsDataset extends ScalarDS
             return;
         }
 
-        if (rank>0) {
+        if (inited) {
             return; // already called. Initialize only once
         }
 
@@ -300,6 +300,8 @@ public class FitsDataset extends ScalarDS
         if ((rank > 1) && isText) {
             selectedDims[1] = 1;
         }
+
+        inited = true;
     }
 
     /*

@@ -643,11 +643,12 @@ public class TestH5Object
 
         // tests for subset
         final H5CompoundDS compDS = (H5CompoundDS)dset;
-        int rank = compDS.getRank();
+
         try {
-            if (rank <= 0) { compDS.init(); }
+            if (!compDS.isInited()) compDS.init();
         } catch (final Exception ex) {}
-        rank = compDS.getRank();
+
+        int rank = compDS.getRank();
 
         // read only one column but all rows
         compDS.setAllMemberSelection(false); // unselect all members

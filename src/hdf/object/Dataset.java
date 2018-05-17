@@ -160,6 +160,9 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /** Flag to indicate if data values are loaded into memory. */
     protected boolean         isDataLoaded        = false;
 
+    /** Flag to indicate if this dataset has been initialized */
+    protected boolean         inited = false;
+
     /** The number of data points in the memory buffer. */
     protected long            nPoints             = 1;
 
@@ -252,7 +255,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final int getRank() {
-        if (rank < 0)
+        if (!inited)
             init();
 
         return rank;
@@ -265,7 +268,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long[] getDims() {
-        if (rank < 0) init();
+        if (!inited)
+            init();
 
         return dims;
     }
@@ -276,7 +280,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the max dimension sizes of the dataset.
      */
     public final long[] getMaxDims() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if (maxDims == null) return dims;
 
@@ -314,7 +318,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long[] getSelectedDims() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return selectedDims;
     }
@@ -347,7 +351,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long[] getStartDims() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return startDims;
     }
@@ -381,7 +385,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long[] getStride() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if (rank <= 0) {
             return null;
@@ -456,6 +460,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @throws Exception if buffer can not be written
      */
+    @Override
     public final void write() throws Exception {
         if (data != null) {
             write(data);
@@ -486,6 +491,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @throws Exception if dataset can not be copied
      */
     public abstract Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception;
+
+    @Override
+    public final boolean isInited() {
+        return inited;
+    }
 
     /**
      * Returns the data buffer of the dataset in memory.
@@ -595,17 +605,19 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     }
 
     /**
-     * @deprecated Not for public use in the future.
-     *             <p>
-     *             setData() is not safe to use because it changes memory buffer
-     *             of the dataset object. Dataset operations such as write/read
-     *             will fail if the buffer type or size is changed.
+     * Not for public use in the future.
+     * <p>
+     * setData() is not safe to use because it changes memory buffer
+     * of the dataset object. Dataset operations such as write/read
+     * will fail if the buffer type or size is changed.
      *
      * @param d  the object data
      */
     @Override
-    @Deprecated
     public final void setData(Object d) {
+        if (!(this instanceof Attribute))
+            throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
+
         data = d;
     }
 
@@ -658,7 +670,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long getHeight() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if ((selectedDims == null) || (selectedIndex == null)) {
             return 0;
@@ -699,7 +711,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long getWidth() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if ((selectedDims == null) || (selectedIndex == null)) {
             return 0;
@@ -744,7 +756,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final int[] getSelectedIndex() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return selectedIndex;
     }
@@ -759,7 +771,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final String getCompression() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return compression;
     }
@@ -770,7 +782,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the string representation of filter information.
      */
     public final String getFilters() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return filters;
     }
@@ -781,7 +793,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the string representation of storage layout information.
      */
     public final String getStorageLayout() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return storage_layout;
     }
@@ -792,7 +804,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the string representation of storage information.
      */
     public final String getStorage() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return storage;
     }
@@ -805,7 +817,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *         chunked.
      */
     public final long[] getChunkSize() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return chunkSize;
     }
@@ -1204,7 +1216,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the names of dimensions, or null if there is no dimension name.
      */
     public final String[] getDimNames() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return dimNames;
     }
