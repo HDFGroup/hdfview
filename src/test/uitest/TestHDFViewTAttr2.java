@@ -861,12 +861,12 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            SWTBotTable table = new SWTBotTable(tableShell.bot().widget(widgetOfType(Table.class)));
+            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            table.click(0, 1);
+            table.click(1, 1);
             assertTrue("openTAttr2GroupString() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(0,1)+"] did not match regex 'ab'",
-                    table.cell(0,1).matches("ab"));
+                    tableShell.bot().text(0).getText()+"] did not match regex 'ab'",
+                    tableShell.bot().text(0).getText().matches("ab"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -880,11 +880,12 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            table = new SWTBotTable(tableShell.bot().widget(widgetOfType(Table.class)));
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            table.click(0, 1);
-            assertTrue("openTAttr2GroupString() data ["+table.cell(0,1)+"] did not match regex 'ab'",
-                    table.cell(0,1).matches("ab"));
+            table.click(2, 2);
+            assertTrue("openTAttr2GroupString() data ["+
+                    tableShell.bot().text(0).getText()+"] did not match regex 'gh'",
+                    tableShell.bot().text(0).getText().matches("gh"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -898,11 +899,12 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            table = new SWTBotTable(tableShell.bot().widget(widgetOfType(Table.class)));
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            table.click(0, 1);
-            assertTrue("openTAttr2GroupString() data ["+table.cell(0,1)+"] did not match regex 'ab'",
-                    table.cell(0,1).matches("ab"));
+            table.click(4, 2);
+            assertTrue("openTAttr2GroupString() data ["+
+                    tableShell.bot().text(2).getText()+"] did not match regex 'RS'",
+                    tableShell.bot().text(2).getText().matches("RS"));
         }
         catch (Exception ex) {
             ex.printStackTrace();

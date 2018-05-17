@@ -131,10 +131,9 @@ public class TestH5File
                     }
 
                     // compound members
-                    int rank = h5DS.getRank();
-                    if (rank <=0 ) {
+                    if (!h5DS.isInited())
                         h5DS.init();
-                    }
+
                     n = h5DS.getMemberCount();
                     String[] names = h5DS.getMemberNames();
                     for (int i=0; i<n; i++)

@@ -2353,7 +2353,10 @@ public final class Tools {
      * @return true if bitmask is applied successfuly; otherwise, false.
      */
     public static final boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op) {
-        if (theData == null || Array.getLength(theData) <= 0 || theMask == null) return false;
+        if (     theData == null
+            || !(theData instanceof Array)
+            || ((theData instanceof Array) && (Array.getLength(theData) <= 0))
+            ||   theMask == null) return false;
 
         char nt = '0';
         String cName = theData.getClass().getName();

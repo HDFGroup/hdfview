@@ -69,6 +69,7 @@ public class NC2Dataset extends ScalarDS {
      *
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute() {
         return false;
     }
@@ -152,6 +153,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // Implementing DataFormat
+    @Override
     public List getMetadata() throws Exception {
         if (attributeList != null) {
             return attributeList;
@@ -178,6 +180,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // implementing DataFormat
+    @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException(
@@ -185,6 +188,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException(
@@ -192,6 +196,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
@@ -217,7 +222,7 @@ public class NC2Dataset extends ScalarDS {
             return;
         }
 
-        if (rank > 0) {
+        if (inited) {
             return; // already called. Initialize only once
         }
 
@@ -267,6 +272,8 @@ public class NC2Dataset extends ScalarDS {
         if ((rank > 1) && isText) {
             selectedDims[1] = 1;
         }
+
+        inited = true;
     }
 
     // Implementing ScalarDS

@@ -191,9 +191,9 @@ public class H4Vdata extends CompoundDS
 
         byte[] theData = null;
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
+
         if (numberOfMembers <= 0) {
             log.debug("readBytes(): VData contains no members");
             log.trace("readBytes(): finish");
@@ -247,9 +247,9 @@ public class H4Vdata extends CompoundDS
 
         List list = null;
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
+
         if (numberOfMembers <= 0) {
             log.debug("read(): VData contains no members");
             log.trace("read(): finish");
@@ -401,6 +401,16 @@ public class H4Vdata extends CompoundDS
 
         close(vid);
          */
+    }
+
+    @Override
+    public Object convertFromUnsignedC() {
+        throw new UnsupportedOperationException("H4Vdata:convertFromUnsignedC Unsupported operation.");
+    }
+
+    @Override
+    public Object convertToUnsignedC() {
+        throw new UnsupportedOperationException("H4Vdata:convertToUnsignedC Unsupported operation.");
     }
 
     // Implementing DataFormat
@@ -594,7 +604,8 @@ public class H4Vdata extends CompoundDS
     public void init()
     {
         log.trace("init(): start");
-        if (rank>0) {
+
+        if (inited) {
             log.trace("init(): Already initialized");
             log.trace("init(): finish");
             return; // already called. Initialize only once
@@ -657,6 +668,8 @@ public class H4Vdata extends CompoundDS
                 continue;
             }
         } // for (int i=0; i<numberOfMembers; i++)
+
+        inited = true;
 
         close(id);
         log.trace("init(): finish");

@@ -111,9 +111,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     protected void loadData(DataFormat dataObject) throws Exception {
         log.trace("loadData(): start");
 
-        if (dataObject.getRank() <= 0) {
+        if (!dataObject.isInited()) {
             dataObject.init();
-
             log.trace("loadData(): inited");
         }
 

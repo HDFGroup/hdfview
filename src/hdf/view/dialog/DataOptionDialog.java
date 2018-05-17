@@ -173,10 +173,9 @@ public class DataOptionDialog extends Dialog {
         bitmask = null;
         numberOfPalettes = 1;
 
-        rank = dataObject.getRank();
-        if (rank <= 0) {
+        if (!dataObject.isInited())
             dataObject.init();
-        }
+
         if (isH5 && (dataObject instanceof ScalarDS)) {
             byte[] palRefs = ((ScalarDS) dataObject).getPaletteRefs();
             if ((palRefs != null) && (palRefs.length > 8)) {

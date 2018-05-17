@@ -65,47 +65,36 @@ import hdf.object.h5.H5Datatype;
  * &#64;see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
  * </pre>
  *
+ *
+ * For an atomic datatype, the value of an Attribute will be a 1D array of integers,
+ * floats and strings. For a compound datatype, it will be a 1D array of strings
+ * with field members separated by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}"
+ * is a compound attribute of {int, float} of three data points.
+ *
  * @see hdf.object.Datatype
  *
  * @version 2.0 4/2/2018
  * @author Peter X. Cao, Jordan T. Henderson
  */
-public class Attribute extends HObject implements DataFormat, CompoundDataFormat {
+public class Attribute extends Dataset implements DataFormat, CompoundDataFormat {
 
     private static final long serialVersionUID = 2072473407027648309L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
 
-    private boolean           inited = false;
-
     /** The HObject to which this Attribute is attached */
     protected HObject         parentObject;
-
-    /** The datatype of the attribute. */
-    private final Datatype    type;
-
-    /** The rank of the data value of the attribute. */
-    private int               rank;
-
-    /** The dimension sizes of the attribute. */
-    private long[]            dims;
-
-    private long[]            selectedDims;
-
-    private long[]            startDims;
-
-    private long[]            selectedStride;
-
-    private final int[]       selectedIndex;
-
-    /** The value of the attribute. */
-    private Object            value;
 
     /** additional information and properties for the attribute */
     private Map<String, Object>  properties;
 
     /** Flag to indicate if the datatype is an unsigned integer. */
     private final boolean     isUnsigned;
+
+    /**
+     * Flag to indicate is the original unsigned C data is converted.
+     */
+    protected boolean         unsignedConverted;
 
     /** Flag to indicate if the data is text */
     protected final boolean   isTextData;
@@ -282,16 +271,18 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
         this.parentObject = parentObj;
 
-        type = attrType;
+        datatype = attrType;
         dims = attrDims;
-        value = attrValue;
+        data = attrValue;
         properties = new HashMap();
         rank = -1;
 
+        unsignedConverted = false;
+
         isScalar = (dims == null);
-        isUnsigned = (type.getDatatypeSign() == Datatype.SIGN_NONE);
-        isTextData = (type.getDatatypeClass() == Datatype.CLASS_STRING);
-        isCompound = (type.getDatatypeClass() == Datatype.CLASS_COMPOUND);
+        isUnsigned = (datatype.getDatatypeSign() == Datatype.SIGN_NONE);
+        isTextData = (datatype.getDatatypeClass() == Datatype.CLASS_STRING);
+        isCompound = (datatype.getDatatypeClass() == Datatype.CLASS_COMPOUND);
 
         if (dims == null) {
             rank = 1;
@@ -305,13 +296,8 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         startDims = new long[rank];
         selectedStride = new long[rank];
 
-        selectedIndex = new int[3];
-        selectedIndex[0] = 0;
-        selectedIndex[1] = 1;
-        selectedIndex[2] = 2;
-
         log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName,
-                type.getDatatypeDescription(), value, rank, isUnsigned, isScalar);
+                datatype.getDatatypeDescription(), data, rank, isUnsigned, isScalar);
 
         resetSelection();
 
@@ -543,30 +529,61 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     }
 
     /**
-     * Returns the value of the attribute. For an atomic datatype, this will be
-     * a 1D array of integers, floats and strings. For a compound datatype, it
-     * will be a 1D array of strings with field members separated by a comma. For
-     * example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of
-     * {int, float} of three data points.
+     * Converts the data values of this Attribute to appropriate Java integers if
+     * they are unsigned integers.
      *
-     * @return the value of the attribute, or null if failed to retrieve data
-     *         from file.
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertFromUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
      */
     @Override
-    public Object getData() throws Exception, OutOfMemoryError {
-        if (!inited) init();
+    public Object convertFromUnsignedC() {
+        log.trace("convertFromUnsignedC(): start");
 
-        /*
-         * TODO: For now, convert a compound Attribute's data (String[]) into a List for
-         * convenient processing
-         */
-        if (isCompound) {
-            List<String> valueList = Arrays.asList((String[]) value);
+        // Keep a copy of original buffer and the converted buffer
+        // so that they can be reused later to save memory
+        if ((data != null) && isUnsigned && !unsignedConverted) {
+            log.trace("convertFromUnsignedC(): convert");
 
-            return valueList;
+            originalBuf = data;
+            convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
+            data = convertedBuf;
+            unsignedConverted = true;
         }
 
-        return value;
+        log.trace("convertFromUnsignedC(): finish");
+
+        return data;
+    }
+
+    /**
+     * Converts Java integer data values of this Attribute back to unsigned C-type
+     * integer data if they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
+     * @see #convertFromUnsignedC(Object data_in)
+     *
+     * @return the converted data buffer.
+     */
+    @Override
+    public Object convertToUnsignedC() {
+        log.trace("convertToUnsignedC(): start");
+
+        // Keep a copy of original buffer and the converted buffer
+        // so that they can be reused later to save memory
+        if ((data != null) && isUnsigned) {
+            log.trace("convertToUnsignedC(): convert");
+
+            convertedBuf = data;
+            originalBuf = convertToUnsignedC(convertedBuf, originalBuf);
+            data = originalBuf;
+        }
+
+        log.trace("convertToUnsignedC(): finish");
+
+        return data;
     }
 
     @Override
@@ -577,22 +594,10 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         return null;
     }
 
-    /**
-     * Sets the value of the attribute. It returns null if it failed to retrieve
-     * the name from file.
-     *
-     * @param data
-     *            The value of the attribute to set
-     */
-    @Override
-    public void setData(Object data) {
-        value = data;
-    }
-
     @Override
     public void clearData() {
-        /* Currently not implemented for Attributes */
-        return;
+        super.clearData();
+        unsignedConverted = false;
     }
 
     private void resetSelection() {
@@ -678,65 +683,6 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     }
 
     /**
-     * Returns the rank (number of dimensions) of the attribute. It returns a
-     * negative number if it failed to retrieve the dimension information from
-     * file.
-     *
-     * @return the number of dimensions of the attribute.
-     */
-    @Override
-    public final int getRank() {
-        if (!inited) init();
-
-        return rank;
-    }
-
-    /**
-     * Returns the dimension sizes of the data value of the attribute. It
-     * returns null if it failed to retrieve the dimension information from file.
-     *
-     * @return the dimension sizes of the attribute.
-     */
-    @Override
-    public final long[] getDims() {
-        if (!inited) init();
-
-        return dims;
-    }
-
-    /**
-     * Returns the datatype of the attribute. It returns null if it failed to
-     * retrieve the datatype information from file.
-     *
-     * @return the datatype of the attribute.
-     */
-    @Override
-    public Datatype getDatatype() {
-        return type;
-    }
-
-    /**
-     * At the current time, Attributes do not support compression.
-     *
-     * @return null
-     */
-    @Override
-    public final String getCompression() {
-        return null;
-    }
-
-    /**
-     * Get Class of the original data buffer if converted.
-     *
-     * @return the Class of originalBuf
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    public final Class getOriginalClass() {
-        return value.getClass();
-    }
-
-    /**
      * @return true if the data is a single scalar point; otherwise, returns
      *         false.
      */
@@ -764,18 +710,25 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     public Object read() throws Exception, OutOfMemoryError {
         if (!inited) init();
 
-        throw new UnsupportedOperationException("Attribute:read Unsupported operation.");
+        /*
+         * TODO: For now, convert a compound Attribute's data (String[]) into a List for
+         * convenient processing
+         */
+        if (isCompound) {
+            List<String> valueList = Arrays.asList((String[]) data);
+
+            data = valueList;
+        }
+
+        return data;
     }
 
     @Override
     public void write(Object buf) throws Exception {
-        setData(buf);
-        write();
-    }
-
-    @Override
-    public void write() throws Exception {
         log.trace("write(): start");
+
+        if (!buf.equals(data))
+            setData(buf);
 
         if (!inited) init();
 
@@ -788,79 +741,6 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         ((MetaDataContainer) getParentObject()).writeMetadata(this);
 
         log.trace("write(): finish");
-    }
-
-    @Override
-    public long[] getSelectedDims() {
-        if (!inited) init();
-
-        /*
-         * Currently, Attributes do not support subsetting.
-         */
-        return dims;
-    }
-
-    @Override
-    public long[] getStartDims() {
-        if (!inited) init();
-
-        /*
-         * Currently, Attributes do not support subsetting.
-         */
-
-        if (startDims == null) {
-            startDims = new long[rank];
-            for (int i = 0; i < rank; i++) {
-                startDims[i] = 0;
-            }
-        }
-
-        return startDims;
-    }
-
-    @Override
-    public long[] getStride() {
-        if (!inited) init();
-
-        /*
-         * Currently, Attributes do not support subsetting.
-         */
-
-        if (selectedStride == null) {
-            selectedStride = new long[rank];
-            for (int i = 0; i < rank; i++) {
-                selectedStride[i] = 1;
-            }
-        }
-
-        return selectedStride;
-    }
-
-    @Override
-    public int[] getSelectedIndex() {
-        if (!inited) init();
-
-        return selectedIndex;
-    }
-
-    @Override
-    public long getHeight() {
-        if (!inited) init();
-
-        if ((selectedDims == null) || (selectedIndex == null)) return 0;
-
-        return selectedDims[selectedIndex[0]];
-    }
-
-    @Override
-    public long getWidth() {
-        if (!inited) init();
-
-        if ((selectedDims == null) || (selectedIndex == null)) return 0;
-
-        if ((selectedDims.length < 2) || (selectedIndex.length < 2)) return 1;
-
-        return selectedDims[selectedIndex[1]];
     }
 
     /**
@@ -1095,6 +975,48 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         return types;
     }
 
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public List getMetadata() throws Exception {
+        throw new UnsupportedOperationException("Attribute:getMetadata Unsupported operation.");
+    }
+
+    @Override
+    public void writeMetadata(Object metadata) throws Exception {
+        throw new UnsupportedOperationException("Attribute:writeMetadata Unsupported operation.");
+    }
+
+    @Override
+    public void removeMetadata(Object metadata) throws Exception {
+        throw new UnsupportedOperationException("Attribute:removeMetadata Unsupported operation.");
+    }
+
+    @Override
+    public void updateMetadata(Object metadata) throws Exception {
+        throw new UnsupportedOperationException("Attribute:updateMetadata Unsupported operation.");
+    }
+
+    @Override
+    public boolean hasAttribute() {
+        return false;
+    }
+
+    @Override
+    public final Datatype getDatatype() {
+        return datatype;
+    }
+
+    @Override
+    public byte[] readBytes() throws Exception {
+        throw new UnsupportedOperationException("Attribute:readBytes Unsupported operation.");
+    }
+
+    @Override
+    public Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception {
+        throw new UnsupportedOperationException("Attribute:copy Unsupported operation.");
+    }
+
     /**
      * Returns whether this Attribute is equal to the specified HObject by comparing
      * various properties.
@@ -1160,17 +1082,17 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
     public String toString(String delimiter, int maxItems) {
         log.trace("toString(): start");
 
-        if (value == null) {
+        if (data == null) {
             log.debug("toString(): value is null");
             log.trace("toString(): finish");
             return null;
         }
 
-        Class<? extends Object> valClass = value.getClass();
+        Class<? extends Object> valClass = data.getClass();
 
         if (!valClass.isArray()) {
             log.trace("toString(): finish - not array");
-            String strValue = value.toString();
+            String strValue = data.toString();
             if (maxItems > 0 && strValue.length() > maxItems) {
                 // truncate the extra characters
                 strValue = strValue.substring(0, maxItems);
@@ -1180,7 +1102,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
         // attribute value is an array
         StringBuffer sb = new StringBuffer();
-        int n = Array.getLength(value);
+        int n = Array.getLength(data);
         if (maxItems > 0)
             if (n > maxItems)
                 n = maxItems;
@@ -1205,7 +1127,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
             String theValue = null;
             switch (dname) {
                 case 'B':
-                    byte[] barray = (byte[]) value;
+                    byte[] barray = (byte[]) data;
                     short sValue = barray[0];
                     theValue = String.valueOf(sValue);
                     if (map.containsKey(theValue)) {
@@ -1225,7 +1147,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 case 'S':
-                    short[] sarray = (short[]) value;
+                    short[] sarray = (short[]) data;
                     int iValue = sarray[0];
                     theValue = String.valueOf(iValue);
                     if (map.containsKey(theValue)) {
@@ -1245,7 +1167,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 case 'I':
-                    int[] iarray = (int[]) value;
+                    int[] iarray = (int[]) data;
                     long lValue = iarray[0];
                     theValue = String.valueOf(lValue);
                     if (map.containsKey(theValue)) {
@@ -1265,7 +1187,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 case 'J':
-                    long[] larray = (long[]) value;
+                    long[] larray = (long[]) data;
                     Long l = larray[0];
                     theValue = Long.toString(l);
                     if (map.containsKey(theValue)) {
@@ -1285,10 +1207,10 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 default:
-                    sb.append(Array.get(value, 0));
+                    sb.append(Array.get(data, 0));
                     for (int i = 1; i < n; i++) {
                         sb.append(delimiter);
-                        sb.append(Array.get(value, i));
+                        sb.append(Array.get(data, i));
                     }
                     break;
             }
@@ -1300,7 +1222,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
 
             switch (dname) {
                 case 'B':
-                    byte[] barray = (byte[]) value;
+                    byte[] barray = (byte[]) data;
                     short sValue = barray[0];
                     if (sValue < 0) {
                         sValue += 256;
@@ -1316,7 +1238,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 case 'S':
-                    short[] sarray = (short[]) value;
+                    short[] sarray = (short[]) data;
                     int iValue = sarray[0];
                     if (iValue < 0) {
                         iValue += 65536;
@@ -1332,7 +1254,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 case 'I':
-                    int[] iarray = (int[]) value;
+                    int[] iarray = (int[]) data;
                     long lValue = iarray[0];
                     if (lValue < 0) {
                         lValue += 4294967296L;
@@ -1348,7 +1270,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 case 'J':
-                    long[] larray = (long[]) value;
+                    long[] larray = (long[]) data;
                     Long l = larray[0];
                     String theValue = Long.toString(l);
                     if (l < 0) {
@@ -1374,7 +1296,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     }
                     break;
                 default:
-                    String strValue = Array.get(value, 0).toString();
+                    String strValue = Array.get(data, 0).toString();
                     if (maxItems > 0 && strValue.length() > maxItems) {
                         // truncate the extra characters
                         strValue = strValue.substring(0, maxItems);
@@ -1382,7 +1304,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
                     sb.append(strValue);
                     for (int i = 1; i < n; i++) {
                         sb.append(delimiter);
-                        strValue = Array.get(value, i).toString();
+                        strValue = Array.get(data, i).toString();
                         if (maxItems > 0 && strValue.length() > maxItems) {
                             // truncate the extra characters
                             strValue = strValue.substring(0, maxItems);
@@ -1394,7 +1316,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
         }
         else {
             log.trace("toString: not enum or unsigned");
-            String strValue = Array.get(value, 0).toString();
+            String strValue = Array.get(data, 0).toString();
             if (maxItems > 0 && strValue.length() > maxItems) {
                 // truncate the extra characters
                 strValue = strValue.substring(0, maxItems);
@@ -1402,7 +1324,7 @@ public class Attribute extends HObject implements DataFormat, CompoundDataFormat
             sb.append(strValue);
             for (int i = 1; i < n; i++) {
                 sb.append(delimiter);
-                strValue = Array.get(value, i).toString();
+                strValue = Array.get(data, i).toString();
                 if (maxItems > 0 && strValue.length() > maxItems) {
                     // truncate the extra characters
                     strValue = strValue.substring(0, maxItems);
