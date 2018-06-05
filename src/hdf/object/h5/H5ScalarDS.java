@@ -150,9 +150,10 @@ public class H5ScalarDS extends ScalarDS {
 
         try {
             did = H5.H5Dopen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
+            log.trace("open(): did={}", did);
         }
         catch (HDF5Exception ex) {
-            log.debug("open(): Failed to open dataset {}", getPath() + getName());
+            log.debug("open(): Failed to open dataset {}", getPath() + getName(), ex);
             did = -1;
         }
 
@@ -167,6 +168,8 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void close(long did) {
+        log.trace("close(): start");
+
         if (did >= 0) {
             try {
                 H5.H5Fflush(did, HDF5Constants.H5F_SCOPE_LOCAL);
@@ -181,6 +184,8 @@ public class H5ScalarDS extends ScalarDS {
                 log.debug("close(): H5Dclose(did {}) failure: ", did, ex);
             }
         }
+
+        log.trace("close(): finish");
     }
 
     /**
@@ -390,13 +395,13 @@ public class H5ScalarDS extends ScalarDS {
                     rank = 1;
                     dims = new long[1];
                     dims[0] = 1;
-                    log.trace("init() rank is a scalar data point");
+                    log.trace("init(): rank is a scalar data point");
                 }
                 else {
                     dims = new long[rank];
                     maxDims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
-                    log.trace("init() rank={}, dims={}, maxDims={}", rank, dims, maxDims);
+                    log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
                 }
 
                 inited = true;
@@ -436,6 +441,7 @@ public class H5ScalarDS extends ScalarDS {
                 }
             }
 
+            log.trace("init(): close dataset");
             close(did);
 
             startDims = new long[rank];
@@ -484,7 +490,8 @@ public class H5ScalarDS extends ScalarDS {
                 finally {
                     try {
                         H5.H5Tclose(tid);
-                    } catch (HDF5Exception ex) {
+                    }
+                    catch (HDF5Exception ex) {
                         log.debug("hasAttribute(): H5Tclose(tid {}) failure: ", tid, ex);
                     }
                 }
@@ -576,7 +583,7 @@ public class H5ScalarDS extends ScalarDS {
                     datatype = new H5Datatype(tid);
                 }
                 catch (Exception ex) {
-                    log.debug("getDatatype(): ", ex);
+                    log.debug("getDatatype(): get datatype failure: ", ex);
                 }
                 finally {
                     try {
@@ -620,7 +627,7 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public byte[] readBytes() throws HDF5Exception {
-        log.trace("readBytes(0: start");
+        log.trace("readBytes(): start");
 
         byte[] theData = null;
 
@@ -656,6 +663,8 @@ public class H5ScalarDS extends ScalarDS {
                 if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Invalid int size");
 
                 theData = new byte[(int)size];
+
+                log.trace("readBytes(): H5Dread: did={} tid={} fspace={} mspace={}", did, tid, fspace, mspace);
                 H5.H5Dread(did, tid, mspace, fspace, HDF5Constants.H5P_DEFAULT, theData);
             }
             catch (Exception ex) {
@@ -813,7 +822,8 @@ public class H5ScalarDS extends ScalarDS {
             if (pdir == null) {
                 pdir = ".";
             }
-            System.setProperty("user.dir", pdir);//H5.H5Dchdir_ext(pdir);
+            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
+            log.trace("read(): External dataset: user.dir={}", pdir);
         }
 
         boolean isREF = false;
@@ -827,12 +837,14 @@ public class H5ScalarDS extends ScalarDS {
 
                 if (lsize[0] == 0) {
                     log.debug("read(): No data to read. Dataset or selected subset is empty.");
+                    log.trace("read(): finish");
                     throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
                 }
 
                 if (lsize[0] < Integer.MIN_VALUE || lsize[0] > Integer.MAX_VALUE) {
                     log.debug("read(): lsize outside valid Java int range; unsafe cast");
-                    throw new HDF5Exception("Dataset too large to read.");
+                    log.trace("read(): finish");
+                    throw new HDF5Exception("Invalid int size");
                 }
 
                 if (log.isDebugEnabled()) {
@@ -948,7 +960,6 @@ public class H5ScalarDS extends ScalarDS {
         return theData;
     }
 
-
     /**
      * Writes the given data buffer into this dataset in a file.
      *
@@ -986,9 +997,9 @@ public class H5ScalarDS extends ScalarDS {
 
         long[] lsize = { 1 };
         did = open();
-        log.trace("write(): dataset opened");
         if (did >= 0) {
             try {
+                log.trace("write(): dataset opened");
                 lsize[0] = selectHyperslab(did, spaceIDs);
                 tid = H5.H5Dget_type(did);
 
@@ -1128,8 +1139,10 @@ public class H5ScalarDS extends ScalarDS {
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         log.trace("getMetadata(): start");
 
-        if (!isInited())
+        if (!isInited()) {
             init();
+            log.trace("getMetadata(): inited");
+        }
 
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
@@ -1183,10 +1196,11 @@ public class H5ScalarDS extends ScalarDS {
                         storage_layout += " X " + chunkSize[i];
                     }
 
-                    if(nfilt > 0) {
-                        long    nelmts = 1;
-                        long    uncomp_size;
-                        long    datum_size = getDatatype().getDatatypeSize();
+                    if (nfilt > 0) {
+                        long nelmts = 1;
+                        long uncomp_size;
+                        long datum_size = getDatatype().getDatatypeSize();
+
                         if (datum_size < 0) {
                             long tmptid = -1;
                             try {
@@ -1199,19 +1213,19 @@ public class H5ScalarDS extends ScalarDS {
                             }
                         }
 
-                        for(int i = 0; i < rank; i++) {
+                        for (int i = 0; i < rank; i++) {
                             nelmts *= dims[i];
                         }
                         uncomp_size = nelmts * datum_size;
 
-                        /* compression ratio = uncompressed size /  compressed size */
+                        /* compression ratio = uncompressed size / compressed size */
 
-                        if(storage_size != 0) {
+                        if (storage_size != 0) {
                             double ratio = (double) uncomp_size / (double) storage_size;
                             DecimalFormat df = new DecimalFormat();
                             df.setMinimumFractionDigits(3);
                             df.setMaximumFractionDigits(3);
-                            compression +=  df.format(ratio) + ":1";
+                            compression += df.format(ratio) + ":1";
                         }
                     }
                 }
@@ -1271,7 +1285,7 @@ public class H5ScalarDS extends ScalarDS {
 
                 int[] flags = { 0, 0 };
                 long[] cd_nelmts = { 20 };
-                int[] cd_values = new int[(int) cd_nelmts[0]];;
+                int[] cd_values = new int[(int) cd_nelmts[0]];
                 String[] cd_name = { "", "" };
                 log.trace("getMetadata(): {} filters in pipeline", nfilt);
                 int filter = -1;
@@ -1333,6 +1347,7 @@ public class H5ScalarDS extends ScalarDS {
                             flag = H5.H5Zget_filter_info(filter);
                         }
                         catch (Exception ex) {
+                            log.debug("getMetadata(): H5Zget_filter_info failure: ", ex);
                             flag = -1;
                         }
                         if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) {
@@ -1664,7 +1679,7 @@ public class H5ScalarDS extends ScalarDS {
 
         H5File file = (H5File) pgroup.getFileFormat();
         if (file == null) {
-            log.debug("create(): Parent Group FileFormat is null");
+            log.debug("create(): parent group FileFormat is null");
             log.trace("create(): finish");
             return null;
         }
@@ -1682,6 +1697,7 @@ public class H5ScalarDS extends ScalarDS {
         }
 
         fullPath = path + name;
+        log.trace("create(): fullPath={}", fullPath);
 
         // setup chunking and compression
         boolean isExtentable = false;
@@ -1712,10 +1728,13 @@ public class H5ScalarDS extends ScalarDS {
 
         // prepare the dataspace and datatype
         int rank = dims.length;
+        log.trace("create(): rank={}", rank);
 
-        if ((tid = type.toNative()) >= 0) {
+        if ((tid = type.createNative()) >= 0) {
+            log.trace("create(): createNative={}", tid);
             try {
                 sid = H5.H5Screate_simple(rank, dims, maxdims);
+                log.trace("create(): H5Screate_simple={}", sid);
 
                 // figure out creation properties
                 plist = HDF5Constants.H5P_DEFAULT;
@@ -1727,6 +1746,7 @@ public class H5ScalarDS extends ScalarDS {
                 catch (Exception ex) {
                     log.debug("create(): parse fill value: ", ex);
                 }
+                log.trace("create(): parseFillValue={}", val_fill);
 
                 if (chunks != null || val_fill != null) {
                     plist = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
@@ -1748,8 +1768,9 @@ public class H5ScalarDS extends ScalarDS {
 
                 long fid = file.getFID();
 
-                log.trace("create(): create dataset");
+                log.trace("create(): create dataset fid={}", fid);
                 did = H5.H5Dcreate(fid, fullPath, tid, sid, HDF5Constants.H5P_DEFAULT, plist, HDF5Constants.H5P_DEFAULT);
+                log.trace("create(): create dataset did={}", did);
                 dataset = new H5ScalarDS(file, name, path);
             }
             finally {
@@ -1779,6 +1800,8 @@ public class H5ScalarDS extends ScalarDS {
                 }
             }
         }
+
+        log.trace("create(): dataset created");
 
         if (dataset != null) {
             pgroup.addToMemberList(dataset);
@@ -2324,7 +2347,7 @@ public class H5ScalarDS extends ScalarDS {
                 default:
                     log.debug("parseFillValue(): datatypeClass unknown");
                     break;
-            } // switch (tclass)
+            } // switch (datatypeClass)
         }
         catch (Exception ex) {
             log.debug("parseFillValue(): failure: ", ex);

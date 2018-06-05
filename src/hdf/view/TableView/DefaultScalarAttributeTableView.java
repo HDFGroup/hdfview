@@ -83,7 +83,7 @@ public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView im
             buffer = new StringBuffer();
 
             dtype = dataObject.getDatatype();
-            btype = dtype.getBasetype();
+            btype = dtype.getDatatypeBase();
 
             dims = dataObject.getSelectedDims();
 

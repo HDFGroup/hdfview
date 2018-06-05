@@ -412,6 +412,7 @@ public class H5File extends FileFormat {
         if (objID >= 0) {
             try {
                 try {
+                    log.debug("getAttribute(): get obj_info");
                     obj_info = H5.H5Oget_info(objID);
                 }
                 catch (Exception ex) {
@@ -435,6 +436,7 @@ public class H5File extends FileFormat {
                         aid = H5.H5Aopen_by_idx(objID, ".", idx_type, order, i, HDF5Constants.H5P_DEFAULT,
                                 HDF5Constants.H5P_DEFAULT);
                         sid = H5.H5Aget_space(aid);
+                        log.trace("getAttribute(): Attribute[{}] aid={} sid={}", i, aid, sid);
 
                         long dims[] = null;
                         int rank = H5.H5Sget_simple_extent_ndims(sid);
@@ -598,6 +600,7 @@ public class H5File extends FileFormat {
                             }
                         }
 
+                        log.debug("getAttribute(): Attribute[{}] data: {}", i, value);
                         attr.setData(value);
 
                     }
@@ -1024,6 +1027,7 @@ public class H5File extends FileFormat {
      */
     @Override
     public FileFormat createInstance(String filename, int access) throws Exception {
+        log.trace("createInstance() for {}", filename);
         return new H5File(filename, access);
     }
 
@@ -1040,6 +1044,7 @@ public class H5File extends FileFormat {
      */
     @Override
     public long open() throws Exception {
+        log.trace("open()");
         return open(true);
     }
 
@@ -1052,6 +1057,7 @@ public class H5File extends FileFormat {
     public long open(int... indexList) throws Exception {
         setIndexType(indexList[0]);
         setIndexOrder(indexList[1]);
+        log.trace("open() with proplist");
         return open(true);
     }
 
@@ -1366,7 +1372,7 @@ public class H5File extends FileFormat {
      */
     @Override
     public HObject get(String path) throws Exception {
-        log.trace("get(): start");
+        log.trace("get({}): start", path);
         HObject obj = null;
 
         if ((path == null) || (path.length() <= 0)) {
@@ -1528,10 +1534,10 @@ public class H5File extends FileFormat {
 
         try {
             H5Datatype t = (H5Datatype) createDatatype(tclass, tsize, torder, tsign, tbase);
-            if ((tid = t.toNative()) < 0) {
-                log.debug("createDatatype(): toNative failure");
+            if ((tid = t.createNative()) < 0) {
+                log.debug("createDatatype(): createNative() failure");
                 log.trace("createDatatype(): finish");
-                throw new Exception("toNative failed");
+                throw new Exception("createNative() failed");
             }
 
             H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
@@ -2029,7 +2035,7 @@ public class H5File extends FileFormat {
             return;
         }
 
-        if ((tid = attr.getDatatype().toNative()) >= 0) {
+        if ((tid = attr.getDatatype().createNative()) >= 0) {
             log.trace("writeAttribute(): tid {} from toNative :{}", tid, H5Datatype.getDatatypeDescription(tid));
             try {
                 if (attr.isScalar())
@@ -2285,7 +2291,7 @@ public class H5File extends FileFormat {
                 isReadOnly = true;
             }
             catch (Exception ex2) {
-                // Attemp to open the file as a split file or family file
+                // Attempt to open the file as a split file or family file
                 try {
                     File tmpf = new File(fullFileName);
                     String tmpname = tmpf.getName();
@@ -2343,6 +2349,7 @@ public class H5File extends FileFormat {
 
         if ((fid >= 0) && loadFullHierarchy) {
             // load the hierarchy of the file
+            log.trace("open(loadFullHeirarchy): load the hierarchy");
             loadIntoMemory();
         }
 
@@ -2354,6 +2361,7 @@ public class H5File extends FileFormat {
      * Loads the file structure into memory.
      */
     private void loadIntoMemory() {
+        log.trace("loadIntoMemory(): start");
         if (fid < 0) {
             log.debug("loadIntoMemory(): Invalid FID");
             return;
@@ -2367,7 +2375,9 @@ public class H5File extends FileFormat {
          * appropriately, as it currently assumes the root path to be null.
          */
         rootObject = new H5Group(this, "/", null, null);
+        log.trace("loadIntoMemory(): depth_first on root");
         depth_first(rootObject, 0);
+        log.trace("loadIntoMemory(): finish");
     }
 
     /**
@@ -2591,7 +2601,8 @@ public class H5File extends FileFormat {
 
             if(currentObject instanceof Group) {
                 queue.addAll(((Group) currentObject).getMemberList());
-            } else {
+            }
+            else {
                 continue;
             }
         }

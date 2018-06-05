@@ -719,12 +719,6 @@ public class H4GRImage extends ScalarDS
 
         isUnsigned = H4Datatype.isUnsigned(datatypeID);
 
-        if (idims == null) {
-            log.debug("init(): idims is null");
-            log.trace("init(): finish");
-            return;
-        }
-
         ncomp = grInfo[0];
         isTrueColor = (ncomp >= 3);
         interlace = grInfo[2];
@@ -931,7 +925,7 @@ public class H4GRImage extends ScalarDS
         long grid = -1;
         long vgid = -1;
         long gid = (file).getGRAccessID();
-        long tid = type.toNative();
+        long tid = type.createNative();
 
         if(tid >= 0) {
             try {

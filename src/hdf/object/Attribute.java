@@ -267,8 +267,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         super((parentObj == null) ? null : parentObj.getFileFormat(), attrName,
                 (parentObj == null) ? null : parentObj.getFullName(), null);
 
-        log.trace("Attribute: start");
-
         this.parentObject = parentObj;
 
         datatype = attrType;
@@ -296,12 +294,10 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         startDims = new long[rank];
         selectedStride = new long[rank];
 
-        log.trace("Attribute: {}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}", attrName,
-                datatype.getDatatypeDescription(), data, rank, isUnsigned, isScalar);
+        log.trace("attrName={}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}",
+                attrName, datatype.getDatatypeDescription(), data, rank, isUnsigned, isScalar);
 
         resetSelection();
-
-        log.trace("Attribute: finish");
     }
 
     /*

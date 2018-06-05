@@ -248,7 +248,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             dataValue = charData;
         }
         else if ((runtimeTypeClass == 'B') && dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
-            Datatype baseType = dataObject.getDatatype().getBasetype();
+            Datatype baseType = dataObject.getDatatype().getDatatypeBase();
             if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
                 dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
             }
@@ -1143,7 +1143,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * @return a new IEditableRule for the dataset
      */
     @Override
-    protected IEditableRule getDataEditingRule(DataFormat dataObject) {
+    protected IEditableRule getDataEditingRule(final DataFormat dataObject) {
         if (dataObject == null) return null;
 
         return new EditableRule() {
@@ -1549,7 +1549,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
-            btype = dtype.getBasetype();
+            btype = dtype.getDatatypeBase();
 
             dims = theDataset.getSelectedDims();
 
@@ -1621,7 +1621,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 rowCount = (int) dims[0];
                 colCount = 1;
             }
-            log.trace("ScalarDSDataProvider) finish");
+            log.trace("ScalarDSDataProvider: finish");
         }
 
         @Override
@@ -1759,7 +1759,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             buffer = new StringBuffer();
 
             dtype = theDataObject.getDatatype();
-            btype = dtype.getBasetype();
+            btype = dtype.getDatatypeBase();
 
             typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
@@ -1837,7 +1837,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         long tmptid = -1;
 
                         try {
-                            tmptid = dtype.toNative();
+                            tmptid = dtype.createNative();
                             retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
                         }
                         catch (HDF5Exception ex) {
@@ -1886,7 +1886,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     long tmptid = -1;
 
                     try {
-                        tmptid = dtype.toNative();
+                        tmptid = dtype.createNative();
                         retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
                     }
                     catch (HDF5Exception ex) {
@@ -1965,7 +1965,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
-                log.trace("ScalarDSCellSelectionListener: CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
@@ -1982,14 +1982,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 if (isRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
 
-                    log.trace("ScalarDSCellSelectionListener: CellSelected displayValues={}", displayValues);
+                    log.trace("ScalarDSCellSelectionListener:RegRef CellSelected displayValues={}", displayValues);
                     if (displayValues && val != null && ((String) val).compareTo("NULL") != 0) {
                         String reg = (String) val;
                         boolean isPointSelection = (reg.indexOf('-') <= 0);
 
                         // find the object location
                         String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf(' '));
-                        log.trace("ScalarDSCellSelectionListener: CellSelected: isPointSelection={} oidStr={}",
+                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: isPointSelection={} oidStr={}",
                                 isPointSelection, oidStr);
 
                         // decode the region selection
@@ -1997,7 +1997,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                         // no selection
                         if (regStr == null || regStr.length() <= 0) {
-                            log.debug("ScalarDSCellSelectionListener: CellSelected: no selection made");
+                            log.debug("ScalarDSCellSelectionListener:RegRef CellSelected: no selection made");
                             strVal = null;
                         }
                         else {
@@ -2009,11 +2009,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                 strVal = null;
                             }
                             else {
-                                log.trace("ScalarDSCellSelectionListener: CellSelected: nSelections={}", nSelections);
+                                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: nSelections={}", nSelections);
 
                                 HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
-                                if (obj == null || !(obj instanceof ScalarDS)) { // no
-                                    // selection
+                                if (obj == null || !(obj instanceof ScalarDS)) { // no selection
                                     strVal = null;
                                 }
                                 else {
@@ -2023,7 +2022,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                     }
                                     catch (Exception ex) {
                                         log.debug(
-                                                "ScalarDSCellSelectionListener: CellSelected: reference dset did not init()",
+                                                "ScalarDSCellSelectionListener:RegRef CellSelected: reference dset did not init()",
                                                 ex);
                                     }
                                     StringBuffer selectionSB = new StringBuffer();
@@ -2032,7 +2031,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
                                         log.trace(
-                                                "ScalarDSCellSelectionListener: CellSelected: st.hasMoreTokens() begin");
+                                                "ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() begin");
 
                                         int rank = dset.getRank();
                                         long start[] = dset.getStartDims();
@@ -2047,7 +2046,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                                         selectionSB.setLength(0);
                                         selectionSB.append(token);
-                                        log.trace("ScalarDSCellSelectionListener: CellSelected: selectionSB={}",
+                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: selectionSB={}",
                                                 selectionSB);
 
                                         token = token.replace('(', ' ');
@@ -2059,8 +2058,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                 count[x] = 1;
                                                 sizeStr = tmp[x].trim();
                                                 start[x] = Long.valueOf(sizeStr);
-                                                log.trace("ScalarDSCellSelectionListener: CellSelected: point sel={}",
-                                                        tmp[x]);
+                                                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: point sel={}", tmp[x]);
                                             }
                                         }
                                         else {
@@ -2068,17 +2066,16 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             String startStr = token.substring(0, token.indexOf('-'));
                                             String endStr = token.substring(token.indexOf('-') + 1);
                                             log.trace(
-                                                    "ScalarDSCellSelectionListener: CellSelected: rect sel with startStr={} endStr={}",
+                                                    "ScalarDSCellSelectionListener:RegRef CellSelected: rect sel with startStr={} endStr={}",
                                                     startStr, endStr);
                                             String[] tmp = startStr.split(",");
                                             log.trace(
-                                                    "ScalarDSCellSelectionListener: CellSelected: tmp with length={} rank={}",
-                                                    tmp.length,
-                                                    rank);
+                                                    "ScalarDSCellSelectionListener:RegRef CellSelected: tmp with length={} rank={}",
+                                                    tmp.length, rank);
                                             for (int x = 0; x < tmp.length; x++) {
                                                 sizeStr = tmp[x].trim();
                                                 start[x] = Long.valueOf(sizeStr);
-                                                log.trace("ScalarDSCellSelectionListener: CellSelected: rect start={}",
+                                                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: rect start={}",
                                                         tmp[x]);
                                             }
                                             tmp = endStr.split(",");
@@ -2086,12 +2083,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                 sizeStr = tmp[x].trim();
                                                 count[x] = Long.valueOf(sizeStr) - start[x] + 1;
                                                 log.trace(
-                                                        "ScalarDSCellSelectionListener: CellSelected: rect end={} count={}",
+                                                        "ScalarDSCellSelectionListener:RegRef CellSelected: rect end={} count={}",
                                                         tmp[x],
                                                         count[x]);
                                             }
                                         }
-                                        log.trace("ScalarDSCellSelectionListener: CellSelected: selection inited");
+                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: selection inited");
 
                                         Object dbuf = null;
                                         try {
@@ -2104,7 +2101,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         /* Convert dbuf to a displayable string */
                                         char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dbuf);
                                         log.trace(
-                                                "ScalarDSCellSelectionListener: CellSelected: cName={} runtimeTypeClass={}",
+                                                "ScalarDSCellSelectionListener:RegRef CellSelected: cName={} runtimeTypeClass={}",
                                                 dbuf.getClass().getName(), runtimeTypeClass);
 
                                         if (idx > 0) strvalSB.append(',');
@@ -2112,11 +2109,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         // convert numerical data into char
                                         // only possible cases are byte[]
                                         // and short[] (converted from
-                                        // unsigned
-                                        // byte)
+                                        // unsigned byte)
                                         Datatype dtype = dset.getDatatype();
-                                        Datatype baseType = dtype.getBasetype();
-                                        log.trace("ScalarDSCellSelectionListener: CellSelected: dtype={} baseType={}",
+                                        Datatype baseType = dtype.getDatatypeBase();
+                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: dtype={} baseType={}",
                                                 dtype.getDatatypeDescription(), baseType);
                                         if (baseType == null) baseType = dtype;
                                         if ((dtype.getDatatypeClass() == Datatype.CLASS_ARRAY
@@ -2124,7 +2120,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                 && ((runtimeTypeClass == 'B') || (runtimeTypeClass == 'S'))) {
                                             int n = Array.getLength(dbuf);
                                             log.trace(
-                                                    "ScalarDSCellSelectionListener: CellSelected charData length = {}",
+                                                    "ScalarDSCellSelectionListener:RegRef CellSelected charData length = {}",
                                                     n);
                                             char[] charData = new char[n];
                                             for (int i = 0; i < n; i++) {
@@ -2137,7 +2133,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             }
 
                                             strvalSB.append(charData);
-                                            log.trace("ScalarDSCellSelectionListener: CellSelected charData");
+                                            log.trace("ScalarDSCellSelectionListener:RegRef CellSelected charData");
                                         }
                                         else {
                                             // numerical values
@@ -2236,15 +2232,15 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                     strvalSB.append(theValue);
                                                 }
                                             }
-                                            log.trace("ScalarDSCellSelectionListener: CellSelected: byteString");
+                                            log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: byteString");
                                         }
                                         idx++;
                                         dset.clearData();
                                         log.trace(
-                                                "ScalarDSCellSelectionListener: CellSelected: st.hasMoreTokens() end");
+                                                "ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
                                     } // while (st.hasMoreTokens())
                                     strVal = strvalSB.toString();
-                                    log.trace("ScalarDSCellSelectionListener: CellSelected: st.hasMoreTokens() end");
+                                    log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
                                 }
                             }
                         }
@@ -2272,7 +2268,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 cellValueField.setText(strVal);
 
-                log.trace("ScalarDSCellSelectionListener: CellSelected finish");
+                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected finish");
             }
         }
     }

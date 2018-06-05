@@ -1782,6 +1782,8 @@ public class DefaultTreeView implements TreeView {
     private ArrayList<TreeItem> getItemsBreadthFirst(TreeItem item) {
         if (item == null) return null;
 
+        log.trace("getItemsBreadthFirst(): start");
+
         ArrayList<TreeItem> allItems = new ArrayList<>();
         Queue<TreeItem> currentChildren = new LinkedList<>();
         TreeItem currentItem = item;
@@ -1802,6 +1804,7 @@ public class DefaultTreeView implements TreeView {
             currentChildren.addAll(Arrays.asList(currentItem.getItems()));
         }
 
+        log.trace("getItemsBreadthFirst(): finish");
         return allItems;
     }
 
@@ -1815,6 +1818,8 @@ public class DefaultTreeView implements TreeView {
     private final List<Object> breadthFirstUserObjects(TreeItem item) {
         if (item == null) return null;
 
+        log.trace("breadthFirstUserObjects(): start");
+
         Vector<Object> list = new Vector<>();
         list.add(item.getData()); // Add this item to the list first
 
@@ -1826,6 +1831,7 @@ public class DefaultTreeView implements TreeView {
             list.add(theItem.getData());
         }
 
+        log.trace("breadthFirstUserObjects(): finish");
         return list;
     }
 

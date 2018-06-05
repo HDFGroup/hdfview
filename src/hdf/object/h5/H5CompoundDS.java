@@ -119,10 +119,10 @@ public class H5CompoundDS extends CompoundDS {
      */
     private List<Long> flatTypeList;
 
-    /** flag to indicate is the dataset is an external dataset */
+    /** flag to indicate if the dataset is an external dataset */
     private boolean isExternal = false;
 
-    /** flag to indicate is the dataset is a virtual dataset */
+    /** flag to indicate if the dataset is a virtual dataset */
     private boolean isVirtual = false;
     private List<String> virtualNameList;
 
@@ -216,13 +216,13 @@ public class H5CompoundDS extends CompoundDS {
                 H5.H5Fflush(did, HDF5Constants.H5F_SCOPE_LOCAL);
             }
             catch (Exception ex) {
-                log.debug("close(): H5Fflush({}, {}) failure: ", did, HDF5Constants.H5F_SCOPE_LOCAL, ex);
+                log.debug("close(): H5Fflush(did {}) failure: ", did, ex);
             }
             try {
                 H5.H5Dclose(did);
             }
             catch (HDF5Exception ex) {
-                log.debug("close(): H5Dclose({}) failure: ", did, ex);
+                log.debug("close(): H5Dclose(did {}) failure: ", did, ex);
             }
         }
 
@@ -281,14 +281,14 @@ public class H5CompoundDS extends CompoundDS {
 
         if (inited) {
             resetSelection();
-            log.trace("init(): Dataset already inited");
+            log.trace("init(): Dataset already initialized");
             log.trace("init(): finish");
             return; // already called. Initialize only once
         }
 
         long did = -1;
-        long sid = -1;
         long tid = -1;
+        long sid = -1;
         int tclass = -1;
         flatNameList = new Vector<>();
         flatTypeList = new Vector<>();
@@ -326,22 +326,21 @@ public class H5CompoundDS extends CompoundDS {
                             log.debug("init(): vds count error: ", err);
                         }
                     }
-                    log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal,
-                            isVirtual);
+                    log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal, isVirtual);
                 }
                 catch (Exception ex) {
                     log.debug("init(): check if it is an external or virtual dataset:", ex);
                 }
             }
             catch (Exception ex) {
-                log.info("init(): cannot get creation plist for dataset:", ex);
+                log.debug("init(): H5Dget_create_plist() failure: ", ex);
             }
             finally {
                 try {
                     H5.H5Pclose(pid);
                 }
                 catch (Exception ex) {
-                    log.debug("init(): H5Pclose({}) failure: ", pid, ex);
+                    log.debug("init(): H5Pclose(pid {}) failure: ", pid, ex);
                 }
             }
 
@@ -379,6 +378,7 @@ public class H5CompoundDS extends CompoundDS {
                     rank = 1;
                     dims = new long[1];
                     dims[0] = 1;
+                    log.trace("init(): rank is a scalar data point");
                 }
                 else {
                     dims = new long[rank];
@@ -445,20 +445,20 @@ public class H5CompoundDS extends CompoundDS {
                 memberNames = null;
                 memberTypes = null;
                 memberOrders = null;
-                log.debug("init():", ex);
+                log.debug("init(): ", ex);
             }
             finally {
                 try {
                     H5.H5Tclose(tid);
                 }
                 catch (HDF5Exception ex2) {
-                    log.debug("init(): H5Tclose({}) failure: ", tid, ex2);
+                    log.debug("init(): H5Tclose(tid {}) failure: ", tid, ex2);
                 }
                 try {
                     H5.H5Sclose(sid);
                 }
                 catch (HDF5Exception ex2) {
-                    log.debug("init(): H5Sclose({}) failure: ", sid, ex2);
+                    log.debug("init(): H5Sclose(sid {}) failure: ", sid, ex2);
                 }
 
                 if (memberTIDs != null) {
@@ -511,6 +511,7 @@ public class H5CompoundDS extends CompoundDS {
             }
         }
 
+        log.trace("hasAttribute(): nAttributes={}", obj_info.num_attrs);
         return (obj_info.num_attrs > 0);
     }
 
@@ -521,11 +522,14 @@ public class H5CompoundDS extends CompoundDS {
      */
     @Override
     public Datatype getDatatype() {
+        log.trace("getDatatype(): start");
+
         if (datatype == null) {
             log.trace("getDatatype(): datatype == null");
             datatype = new H5Datatype(Datatype.CLASS_COMPOUND, -1, -1, -1);
         }
 
+        log.trace("getDatatype(): finish");
         return datatype;
     }
 
@@ -588,8 +592,7 @@ public class H5CompoundDS extends CompoundDS {
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size = {}", size);
 
-                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE)
-                    throw new Exception("Dataset too large to read.");
+                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Invalid int size");
 
                 theData = new byte[(int) size];
 
@@ -616,7 +619,7 @@ public class H5CompoundDS extends CompoundDS {
                     H5.H5Tclose(tid);
                 }
                 catch (HDF5Exception ex2) {
-                    log.debug("readBytes(): H5Tclose({}) failure: ", tid, ex2);
+                    log.debug("readBytes(): H5Tclose(tid {}) failure: ", tid, ex2);
                 }
                 close(did);
             }
@@ -676,13 +679,13 @@ public class H5CompoundDS extends CompoundDS {
                 log.trace("read(): opened dataset size {} for {}", lsize[0], nPoints);
 
                 if (lsize[0] == 0) {
-                    log.debug("read(): No data to read");
+                    log.debug("read(): No data to read. Dataset or selected subset is empty.");
                     log.trace("read(): finish");
                     throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
                 }
 
                 if (lsize[0] < Integer.MIN_VALUE || lsize[0] > Integer.MAX_VALUE) {
-                    log.debug("read(): lsize outside valid int range; unsafe cast");
+                    log.debug("read(): lsize outside valid Java int range; unsafe cast");
                     log.trace("read(): finish");
                     throw new HDF5Exception("Invalid int size");
                 }
@@ -1106,7 +1109,7 @@ public class H5CompoundDS extends CompoundDS {
                         H5.H5Tclose(tmptid);
                     }
                     catch (Exception ex2) {
-                        log.debug("write(): H5Tclose(tmptid {}) failure:", tmptid, ex2);
+                        log.debug("write(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
                     }
                 }
                 for (int i = 0; i < n; i++) {
@@ -1266,6 +1269,8 @@ public class H5CompoundDS extends CompoundDS {
      *             If there is an error at the HDF5 library level.
      */
     private long selectHyperslab(long did, long[] spaceIDs) throws HDF5Exception {
+        log.trace("selectHyperslab(): start");
+
         long lsize = 1;
 
         boolean isAllSelected = true;
@@ -1328,7 +1333,7 @@ public class H5CompoundDS extends CompoundDS {
         }
 
         if (attributeList != null) {
-            log.debug("getMetadata(): attributeList != null");
+            log.trace("getMetadata(): attributeList != null");
             log.trace("getMetadata(): finish");
             return attributeList;
         }
@@ -1383,12 +1388,8 @@ public class H5CompoundDS extends CompoundDS {
                                 datum_size = H5.H5Tget_size(tmptid);
                             }
                             finally {
-                                try {
-                                    H5.H5Tclose(tmptid);
-                                }
-                                catch (Exception ex2) {
-                                    log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
-                                }
+                                try {H5.H5Tclose(tmptid);}
+                                catch (Exception ex2) {log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);}
                             }
                         }
 
@@ -1492,6 +1493,8 @@ public class H5CompoundDS extends CompoundDS {
                         }
                     }
                     catch (Throwable err) {
+                        log.debug("getMetadata(): filter[{}] error: ", i, err);
+                        log.trace("getMetadata(): filter[{}] continue", i);
                         filters += "ERROR";
                         continue;
                     }
@@ -1613,7 +1616,7 @@ public class H5CompoundDS extends CompoundDS {
 
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
-            log.debug("writeMetadata(): data not instanceof Attribute");
+            log.debug("writeMetadata(): Object not an Attribute");
             log.trace("writeMetadata(): finish");
             return;
         }
@@ -1650,7 +1653,7 @@ public class H5CompoundDS extends CompoundDS {
 
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
-            log.debug("removeMetadata(): data not instanceof Attribute");
+            log.debug("removeMetadata(): Object not an Attribute");
             log.trace("removeMetadata(): finish");
             return;
         }
@@ -1684,7 +1687,7 @@ public class H5CompoundDS extends CompoundDS {
 
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
-            log.debug("updateMetadata(): data not instanceof Attribute");
+            log.debug("updateMetadata(): Object not an Attribute");
             log.trace("updateMetadata(): finish");
             return;
         }
@@ -1963,7 +1966,7 @@ public class H5CompoundDS extends CompoundDS {
             // the member is an array
             if ((memberSize > 1) && (memberDatatypes[i].getDatatypeClass() != Datatype.CLASS_STRING)) {
                 long tmptid = -1;
-                if ((tmptid = memberDatatypes[i].toNative()) >= 0) {
+                if ((tmptid = memberDatatypes[i].createNative()) >= 0) {
                     try {
                         mTypes[i] = H5.H5Tarray_create(tmptid, memberRanks[i], memberDims[i]);
                     }
@@ -1978,7 +1981,7 @@ public class H5CompoundDS extends CompoundDS {
                 }
             }
             else {
-                mTypes[i] = memberDatatypes[i].toNative();
+                mTypes[i] = memberDatatypes[i].createNative();
             }
             try {
                 typeSize += H5.H5Tget_size(mTypes[i]);

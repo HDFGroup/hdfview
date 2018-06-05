@@ -183,10 +183,12 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return the converted data buffer.
      */
+    @Override
     public Object convertFromUnsignedC() {
         log.trace("convertFromUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
+        log.trace("convertFromUnsignedC(): datatype={}", datatype);
         if ((data != null) && isUnsigned && !unsignedConverted) {
             log.trace("convertFromUnsignedC(): convert");
             originalBuf = data;
@@ -216,10 +218,12 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return the converted data buffer.
      */
+    @Override
     public Object convertToUnsignedC() {
         log.trace("convertToUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
+        log.trace("convertToUnsignedC(): datatype={}", datatype);
         if ((data != null) && isUnsigned) {
             log.trace("convertToUnsignedC(): convert");
             convertedBuf = data;

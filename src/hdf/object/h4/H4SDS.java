@@ -717,9 +717,6 @@ public class H4SDS extends ScalarDS
             datatypeID = sdInfo[1];
             isText = ((datatypeID == HDFConstants.DFNT_CHAR) || (datatypeID == HDFConstants.DFNT_UCHAR8));
 
-            //idims = new int[rank];
-            //HDFLibrary.SDgetinfo(id, objName, idims, sdInfo);
-
             // get the dimension names
             try {
                 dimNames = new String[rank];
@@ -816,12 +813,6 @@ public class H4SDS extends ScalarDS
             close(id);
         }
         isUnsigned = H4Datatype.isUnsigned(datatypeID);
-
-        if (idims == null) {
-            log.debug("init(): idims is null");
-            log.trace("init(): finish");
-            return;
-        }
 
         dims = new long[rank];
         maxDims = new long[rank];
@@ -955,7 +946,7 @@ public class H4SDS extends ScalarDS
         long sdsid = -1;
         long vgid = -1;
         // datatype
-        long tid = type.toNative();
+        long tid = type.createNative();
 
         if(tid >= 0) {
             try {

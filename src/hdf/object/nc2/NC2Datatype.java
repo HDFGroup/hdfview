@@ -63,6 +63,7 @@ public class NC2Datatype extends Datatype {
      *
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute() {
         return false;
     }
@@ -185,7 +186,7 @@ public class NC2Datatype extends Datatype {
 
     // implementing Datatype
     @Override
-    public long toNative() {
+    public long createNative() {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = DataType.BYTE;
@@ -226,6 +227,7 @@ public class NC2Datatype extends Datatype {
     }
 
     //Implementing DataFormat
+    @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

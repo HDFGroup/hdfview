@@ -294,9 +294,9 @@ public class NewCompoundDatasetDialog extends Dialog {
                     long tsize = mTypes[i].getDatatypeSize();
                     int tsigned = mTypes[i].getDatatypeSign();
                     if (tclass == Datatype.CLASS_ARRAY) {
-                        tclass = mTypes[i].getBasetype().getDatatypeClass();
-                        tsize = mTypes[i].getBasetype().getDatatypeSize();
-                        tsigned = mTypes[i].getBasetype().getDatatypeSign();
+                        tclass = mTypes[i].getDatatypeBase().getDatatypeClass();
+                        tsize = mTypes[i].getDatatypeBase().getDatatypeSize();
+                        tsigned = mTypes[i].getDatatypeBase().getDatatypeSign();
                     }
                     if (tclass == Datatype.CLASS_CHAR) {
                         if (tsigned == Datatype.SIGN_NONE) {

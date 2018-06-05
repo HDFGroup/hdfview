@@ -2208,7 +2208,7 @@ public class DebugHDF {
         comp_data.add(strs);
 
         // create 1D string compound dataset using hdf-java 2.3
-        final long mtid = strType.toNative();
+        final long mtid = strType.createNative();
         final long tsize = H5.H5Tget_size(mtid);
         final long tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, tsize);
         H5.H5Tinsert(tid, mnames[0], 0, mtid);

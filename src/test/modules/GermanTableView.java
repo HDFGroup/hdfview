@@ -156,9 +156,9 @@ import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.ViewProperties.BITMASK_OP;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.TreeView;
-import hdf.view.ViewProperties.BITMASK_OP;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.MathConversionDialog;
 import hdf.view.dialog.NewDatasetDialog;
@@ -421,7 +421,7 @@ public class GermanTableView implements TableView {
         Datatype dtype = dataset.getDatatype();
         log.trace("dataset dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
         isDisplayTypeChar = (isDisplayTypeChar && (dtype.getDatatypeSize() == 1 || (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY && dtype
-                .getBasetype().getDatatypeClass() == Datatype.CLASS_CHAR)));
+                .getDatatypeBase().getDatatypeClass() == Datatype.CLASS_CHAR)));
 
         isEnumConverted = ViewProperties.isConvertEnum();
         log.trace("dataset isDisplayTypeChar={} isConvertEnum={}", isDisplayTypeChar, ViewProperties.isConvertEnum());
@@ -715,7 +715,7 @@ public class GermanTableView implements TableView {
             dataValue = charData;
         }
         else if ((NT == 'B') && theDataset.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
-            Datatype baseType = theDataset.getDatatype().getBasetype();
+            Datatype baseType = theDataset.getDatatype().getDatatypeBase();
             if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
                 dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
             }
@@ -3833,7 +3833,7 @@ public class GermanTableView implements TableView {
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
-            btype = dtype.getBasetype();
+            btype = dtype.getDatatypeBase();
 
             dims = theDataset.getSelectedDims();
 
@@ -4019,7 +4019,7 @@ public class GermanTableView implements TableView {
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
-            btype = dtype.getBasetype();
+            btype = dtype.getDatatypeBase();
 
             typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
@@ -4280,7 +4280,7 @@ public class GermanTableView implements TableView {
                                         // unsigned
                                         // byte)
                                         Datatype dtype = dset.getDatatype();
-                                        Datatype baseType = dtype.getBasetype();
+                                        Datatype baseType = dtype.getDatatypeBase();
                                         log.trace("NATTable CellSelected: dtype={} baseType={}",
                                                 dtype.getDatatypeDescription(), baseType);
                                         if (baseType == null) baseType = dtype;
@@ -4508,7 +4508,7 @@ public class GermanTableView implements TableView {
             }
 
             if (isArray) {
-                dtype = dtype.getBasetype();
+                dtype = dtype.getDatatypeBase();
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isString = (typeClass == Datatype.CLASS_STRING);
@@ -4731,7 +4731,7 @@ public class GermanTableView implements TableView {
             buffer.setLength(0);
 
             if (isArray) {
-                dtype = dtype.getBasetype();
+                dtype = dtype.getDatatypeBase();
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isStr = (typeClass == Datatype.CLASS_STRING);
@@ -4760,7 +4760,7 @@ public class GermanTableView implements TableView {
                         String[] outValues = new String[len];
 
                         try {
-                            H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                            H5Datatype.convertEnumValueToName(dtype.createNative(), value, outValues);
                         } catch (HDF5Exception ex) {
                             log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                             return buffer;
@@ -4790,7 +4790,7 @@ public class GermanTableView implements TableView {
                     String[] outValues = new String[1];
 
                     try {
-                        H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                        H5Datatype.convertEnumValueToName(dtype.createNative(), value, outValues);
                     } catch (HDF5Exception ex) {
                         log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                         return buffer;
@@ -5065,7 +5065,7 @@ public class GermanTableView implements TableView {
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
 
                     if (types[i].getDatatypeClass() == Datatype.CLASS_ARRAY) {
-                        Datatype baseType = types[i].getBasetype();
+                        Datatype baseType = types[i].getDatatypeBase();
 
                         if (baseType.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
                             // If member is type array of compound, list member names in column header
