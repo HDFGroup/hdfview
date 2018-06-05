@@ -180,6 +180,12 @@ public class NC2Datatype extends Datatype {
 
     // implementing Datatype
     @Override
+    public boolean isText() {
+        return false;
+    }
+
+    // implementing Datatype
+    @Override
     public boolean isUnsigned() {
         return false;
     }

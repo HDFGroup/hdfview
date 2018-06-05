@@ -65,7 +65,7 @@ public class TestH5Object
     private final static byte[] DATA_BYTE = new byte[DIM_SIZE];
     private final static String[] DATA_STR = new String[DIM_SIZE];
     private final static int[] DATA_ENUM = new int[DIM_SIZE];
-    private final static Vector<Object> DATA_COMP = new Vector<Object>(3);
+    private final static Vector<Object> DATA_COMP = new Vector<>(3);
 
     private static PrintStream out = null;
 
@@ -372,17 +372,15 @@ public class TestH5Object
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
         passed(message);
 
-        Group g00 = null;
         message = "Create a group with absolute path -- H5Group.create()";
         try {
-            g00 = file.createGroup("g0/g00", null);
+            file.createGroup("g0/g00", null);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
         passed(message);
 
-        Group g01 = null;
         message = "Create a group at non-root group -- H5Group.create()";
         try {
-            g01 = file.createGroup("/g0/g01/", g0);
+            file.createGroup("/g0/g01/", g0);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
         passed(message);
 
@@ -418,13 +416,11 @@ public class TestH5Object
             file.open();
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
-        // create groups
-        Datatype dtype = null;
         for (int i = 0; i < N; i++)
         {
             message = "Create a named datatype -- "+msgs[i];
             try {
-                dtype = file.createDatatype(dtype_cls[i],Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE, dtype_names[i]);
+                file.createDatatype(dtype_cls[i],Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE, dtype_names[i]);
             } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
             passed(message);
@@ -611,7 +607,7 @@ public class TestH5Object
             pgroup = (Group)file.get("/");
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
-        final Vector<Object> data = new Vector<Object>();
+        final Vector<Object> data = new Vector<>();
         data.add(0, DATA_INT);
         data.add(1, DATA_FLOAT);
         data.add(2, DATA_STR);
@@ -908,13 +904,12 @@ public class TestH5Object
         H5File file = null;
         String message = "";
 
-        long fid = 0;
         Group pgroup = null;
         message = "Get object name and path -- Group.getName(), Group.getPath()";
 
         try {
             file = (H5File)H5FILE.createInstance(fname, H5File.CREATE);
-            fid = file.open();
+            file.open();
             pgroup = (Group)file.get("/");
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -1126,20 +1121,18 @@ public class TestH5Object
      * @param fname the name of the file to open
      * @return zero if successful; otherwise returns one
      */
-    @SuppressWarnings("unused")
     private int test_H5Datatype_toNative(final String fname)
     {
         H5File file = null;
         String message = "";
 
-        Group pgroup = null;
         Datatype dtype = null;
         long tid=-1, tid2=-1;
 
         try {
             file = (H5File)H5FILE.createInstance(fname, H5File.CREATE);
             file.open();
-            pgroup = (Group)file.get("/");
+            file.get("/");
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
         message = "Decode/encode datatypes -- H5Datatype.toNative()";
@@ -1368,7 +1361,7 @@ public class TestH5Object
         List list = null;
         final int TEST_INT_VALUE = 999999999;
         long[] count, start, dims;
-        int rank, nmembers, nrows = 1;
+        int rank, nrows = 1;
         H5File file = null;
         CompoundDS dset;
         String message = "";
@@ -1393,7 +1386,7 @@ public class TestH5Object
                 count = dset.getSelectedDims();
                 start = dset.getStartDims();
                 dims = dset.getDims();
-                nmembers = dset.getMemberCount();
+                dset.getMemberCount();
                 nrows = (int)dims[0];
 
                 // select one row only
@@ -1436,7 +1429,7 @@ public class TestH5Object
                 count = dset.getSelectedDims();
                 start = dset.getStartDims();
                 dims = dset.getDims();
-                nmembers = dset.getMemberCount();
+                dset.getMemberCount();
                 for (int i = 0; i < rank; i++) {
                     start[i] = 0;
                     count[i] = 1;

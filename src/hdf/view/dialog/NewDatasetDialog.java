@@ -206,7 +206,7 @@ public class NewDatasetDialog extends Dialog {
             }
         });
 
-        groupList = new Vector<Group>();
+        groupList = new Vector<>();
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {

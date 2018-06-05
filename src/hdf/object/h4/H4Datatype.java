@@ -350,6 +350,11 @@ public class H4Datatype extends Datatype {
         return unsigned;
     }
 
+    @Override
+    public boolean isText() {
+        return false;
+    }
+
     /*
      * (non-Javadoc)
      * @see hdf.object.Datatype#createNative()

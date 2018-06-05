@@ -2806,7 +2806,8 @@ public class DefaultImageView implements ImageView {
 
                 if (isUnsigned && !isUnsignedConverted) {
                     strBuff.append(convertUnsignedPoint(idx));
-                } else {
+                }
+                else {
                     strBuff.append(Array.get(data, idx));
                 }
             }

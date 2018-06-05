@@ -1845,7 +1845,7 @@ public class H5CompoundDSTest {
         log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject");
         H5CompoundDS dset = null;
         H5Group rootGrp = null;
-        Vector<Object> compData = new Vector<Object>();
+        Vector<Object> compData = new Vector<>();
         final String compIntName = "/compoundInt";
         final String compFloatName = "/compoundFloat";
         final String compStrName = "/compoundStr";
@@ -2128,7 +2128,7 @@ public class H5CompoundDSTest {
         log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayIntArrayArrayObject");
         H5CompoundDS dset = null;
         H5Group rootGrp = null;
-        Vector<Object> compData = new Vector<Object>();
+        Vector<Object> compData = new Vector<>();
         final String compName = "/compound--{int[][], float[][]}";
         final int[] expectedInts = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
         final float[] expectedFloats = { .1f, .2f, .3f, .4f, .5f, .6f, .7f, .8f, .9f, .10f, .11f, .12f };
@@ -2249,7 +2249,7 @@ public class H5CompoundDSTest {
         log.debug("testCreateStringGroupLongArrayLongArrayLongArrayIntStringArrayDatatypeArrayIntArrayIntArrayArrayObject");
         H5CompoundDS dset = null;
         H5Group rootGrp = null;
-        Vector<Object> compData = new Vector<Object>();
+        Vector<Object> compData = new Vector<>();
         final String compName = "/compound compressed with gzip level 9";
         final long[] maxdims = { H5TestFile.DIMs[0] * 5, H5TestFile.DIMs[1] * 5 };
 
