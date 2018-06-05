@@ -166,7 +166,7 @@ public class H5Datatype extends Datatype {
      *            the base datatype of the new datatype
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) {
-        super(tclass, tsize, torder, tsign, tbase);
+        super(tclass, tsize, torder, tsign, tbase, null);
     }
 
     /**
@@ -225,6 +225,49 @@ public class H5Datatype extends Datatype {
         description = getDatatypeDescription(nativeID);
         log.trace("H5Datatype(int nativeID) description={}", description);
         fromNative(nativeID);
+    }
+
+    /**
+     * Opens access to a named datatype.
+     * <p>
+     * It calls H5.H5Topen(loc, name).
+     *
+     * @return the datatype identifier if successful; otherwise returns negative value.
+     *
+     * @see hdf.hdf5lib.H5#H5Topen(long, String, long)
+     */
+    @Override
+    public long open() {
+        log.trace("open(): start");
+        long tid = -1;
+
+        try {
+            tid = H5.H5Topen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
+        }
+        catch (HDF5Exception ex) {
+            tid = -1;
+        }
+
+        log.trace("open(): finish");
+        return tid;
+    }
+
+    /**
+     * Closes a datatype identifier.
+     * <p>
+     * It calls H5.H5close(tid).
+     *
+     * @param tid
+     *            the datatype ID to close
+     */
+    @Override
+    public void close(long tid) {
+        try {
+            H5.H5Tclose(tid);
+        }
+        catch (HDF5Exception ex) {
+            log.debug("close(): H5Tclose(tid {}) failure: ", tid, ex);
+        }
     }
 
     /*
@@ -464,8 +507,8 @@ public class H5Datatype extends Datatype {
                 tclass = H5.H5Tget_class(tid);
                 tsize = H5.H5Tget_size(tid);
                 torder = H5.H5Tget_order(tid);
-                isVLEN = (tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid);
-                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", tclass, tsize, torder, isVLEN);
+                is_VLEN = (tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid);
+                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", tclass, tsize, torder, is_VLEN);
             }
             catch (Exception ex) {
                 log.debug("fromNative(): failure: ", ex);
@@ -490,11 +533,11 @@ public class H5Datatype extends Datatype {
                 datatypeClass = CLASS_ARRAY;
                 try {
                     int ndims = H5.H5Tget_array_ndims(tid);
-                    dims = new long[ndims];
-                    H5.H5Tget_array_dims(tid, dims);
+                    arrayDims = new long[ndims];
+                    H5.H5Tget_array_dims(tid, arrayDims);
                     tmptid = H5.H5Tget_super(tid);
                     baseType = new H5Datatype(tmptid);
-                    isVLEN = (baseType.getDatatypeClass() == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tmptid);
+                    is_VLEN = (baseType.getDatatypeClass() == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tmptid);
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): array type failure: ", ex);
@@ -576,7 +619,7 @@ public class H5Datatype extends Datatype {
             }
             else if (tclass == HDF5Constants.H5T_STRING) {
                 try {
-                    isVLEN = H5.H5Tis_variable_str(tid);
+                    is_VLEN = H5.H5Tis_variable_str(tid);
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): var str type failure: ", ex);
@@ -652,7 +695,7 @@ public class H5Datatype extends Datatype {
                 log.debug("fromNative(): datatypeClass is unknown");
             }
 
-            if (isVLEN)
+            if (is_VLEN)
                 datatypeSize = -1;
             else
                 datatypeSize = tsize;
@@ -730,7 +773,7 @@ public class H5Datatype extends Datatype {
                 if (baseType != null) {
                     if ((tmptid = baseType.createNative()) >= 0) {
                         try {
-                            tid = H5.H5Tarray_create(tmptid, dims.length, dims);
+                            tid = H5.H5Tarray_create(tmptid, arrayDims.length, arrayDims);
                         }
                         finally {
                             close(tmptid);
@@ -819,12 +862,12 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_STRING:
                 tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-                if (isVLEN || datatypeSize < 0)
+                if (is_VLEN || datatypeSize < 0)
                     H5.H5Tset_size(tid, HDF5Constants.H5T_VARIABLE);
                 else
                     H5.H5Tset_size(tid, datatypeSize);
 
-                log.trace("createNative(): isVlenStr={}", isVLEN);
+                log.trace("createNative(): isVlenStr={}", is_VLEN);
                 // H5.H5Tset_strpad(tid, HDF5Constants.H5T_STR_NULLPAD);
                 break;
             case CLASS_REFERENCE:
@@ -1267,16 +1310,11 @@ public class H5Datatype extends Datatype {
                 log.debug("getDatatypeDescription(): H5Tget_sign(tid {}) failure:", tid, ex);
             }
             if (tsize == 1) {
-                try {
-                    if (tsign == HDF5Constants.H5T_SGN_NONE) {
-                        description = "8-bit unsigned integer";
-                    }
-                    else {
-                        description = "8-bit integer";
-                    }
+                if (tsign == HDF5Constants.H5T_SGN_NONE) {
+                    description = "8-bit unsigned integer";
                 }
-                catch (Exception ex) {
-                    description = "Unknown";
+                else {
+                    description = "8-bit integer";
                 }
             }
             else if (tsize == 2) {
@@ -1559,49 +1597,6 @@ public class H5Datatype extends Datatype {
         return unsigned;
     }
 
-    /**
-     * Opens access to a named datatype.
-     * <p>
-     * It calls H5.H5Topen(loc, name).
-     *
-     * @return the datatype identifier if successful; otherwise returns negative value.
-     *
-     * @see hdf.hdf5lib.H5#H5Topen(long, String, long)
-     */
-    @Override
-    public long open() {
-        log.trace("open(): start");
-        long tid = -1;
-
-        try {
-            tid = H5.H5Topen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
-        }
-        catch (HDF5Exception ex) {
-            tid = -1;
-        }
-
-        log.trace("open(): finish");
-        return tid;
-    }
-
-    /**
-     * Closes a datatype identifier.
-     * <p>
-     * It calls H5.H5close(tid).
-     *
-     * @param tid
-     *            the datatype ID to close
-     */
-    @Override
-    public void close(long tid) {
-        try {
-            H5.H5Tclose(tid);
-        }
-        catch (HDF5Exception ex) {
-            log.debug("close(): H5Tclose(tid {}) failure: ", tid, ex);
-        }
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -1724,4 +1719,10 @@ public class H5Datatype extends Datatype {
         H5File.renameObject(this, newName);
         super.setName(newName);
     }
+
+    @Override
+    public boolean isText() {
+        return (datatypeClass == HDF5Constants.H5T_STRING);
+    }
+
 }

@@ -171,6 +171,22 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     protected int datatypeSign;
 
     /**
+     * The base datatype of this datatype (null if this datatype is atomic).
+     */
+    protected Datatype baseType;
+
+    /**
+     * The dimensions of the ARRAY element of an ARRAY datatype.
+     */
+    protected long[] arrayDims;
+
+    /**
+     * Determines whether this datatype is a variable-length type.
+     */
+    protected boolean is_VLEN = false;
+    protected boolean is_variable_str = false;
+
+    /**
      * The (name, value) pairs of enum members.
      */
     protected String enumMembers;
@@ -194,22 +210,6 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * The list of field IDs of members of a compound Datatype.
      */
     protected List<Long> compoundMemberFieldIDs;
-
-    /**
-     * The base datatype of every element of the array (for CLASS_ARRAY
-     * datatype).
-     */
-    protected Datatype baseType;
-
-    /**
-     * The dimensions of the ARRAY element of an ARRAY datatype.
-     */
-    protected long[] dims;
-
-    /**
-     * Determines whether this datatype is a variable-length type.
-     */
-    protected boolean isVLEN = false;
 
 
     /**
@@ -348,7 +348,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         datatypeSign = tsign;
         enumMembers = null;
         baseType = tbase;
-        dims = null;
+        arrayDims = null;
 
         log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
                 datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
@@ -393,6 +393,28 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     public Datatype(long tid, Datatype pbase) {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
     }
+
+    /**
+     * Opens access to this named datatype. Sub-classes must replace this default implementation. For
+     * example, in H5Datatype, open() function H5.H5Topen(loc_id, name) to get the datatype identifier.
+     *
+     * @return the datatype identifier if successful; otherwise returns negative value.
+     */
+    @Override
+    public long open() {
+        return -1;
+    }
+
+    /**
+     * Closes a datatype identifier.
+     * <p>
+     * Sub-classes must replace this default implementation.
+     *
+     * @param id
+     *            the datatype identifier to close.
+     */
+    @Override
+    public abstract void close(long id);
 
     /**
      * Returns the class of the datatype. Valid values are:
@@ -452,7 +474,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Returns the datatype of the elements for this ARRAY datatype.
+     * Returns the datatype of the elements for this datatype.
      * <p>
      * For example, in a dataset of type ARRAY of integer, the datatype of the dataset is ARRAY. The
      * datatype of the base type is integer.
@@ -508,7 +530,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return dims the dimensions of the Array Datatype
      */
     public final long[] getArrayDims() {
-        return dims;
+        return arrayDims;
     }
 
     public final List<String> getCompoundMemberNames() {
@@ -625,36 +647,88 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public abstract boolean isUnsigned();
 
+    public abstract boolean isText();
+
+    /**
+     * Checks if this datatype is a variable-length string type.
+     *
+     * @return true if the datatype is variable-length string; false otherwise
+     */
+    public boolean isVarStr() {
+        return is_variable_str;
+    }
+
     /**
      * Checks if this datatype is a variable-length type.
      *
      * @return true if the datatype is variable-length; false otherwise
      */
     public boolean isVLEN() {
-        return isVLEN;
+        return is_VLEN;
     }
 
     /**
-     * Opens access to this named datatype. Sub-classes must replace this default implementation. For
-     * example, in H5Datatype, open() function H5.H5Topen(loc_id, name) to get the datatype identifier.
+     * Checks if this datatype is an compound type.
      *
-     * @return the datatype identifier if successful; otherwise returns negative value.
+     * @return true if the datatype is compound; false otherwise
      */
-    @Override
-    public long open() {
-        return -1;
+    public boolean isCompound() {
+        return (datatypeClass == Datatype.CLASS_COMPOUND);
     }
 
     /**
-     * Closes a datatype identifier.
-     * <p>
-     * Sub-classes must replace this default implementation.
+     * Checks if this datatype is an array type.
      *
-     * @param id
-     *            the datatype identifier to close.
+     * @return true if the datatype is array; false otherwise
      */
-    @Override
-    public abstract void close(long id);
+    public boolean isArray() {
+        return (datatypeClass == Datatype.CLASS_ARRAY);
+    }
+
+    /**
+     * Checks if this datatype is a string type.
+     *
+     * @return true if the datatype is string; false otherwise
+     */
+    public boolean isString() {
+        return (datatypeClass == Datatype.CLASS_STRING);
+    }
+
+    /**
+     * Checks if this datatype is a reference type.
+     *
+     * @return true if the datatype is reference; false otherwise
+     */
+    public boolean isRef() {
+        return (datatypeClass == Datatype.CLASS_REFERENCE);
+    }
+
+    /**
+     * Checks if this datatype is a enum type.
+     *
+     * @return true if the datatype is enum; false otherwise
+     */
+    public boolean isEnum() {
+        return (datatypeClass == Datatype.CLASS_ENUM);
+    }
+
+    /**
+     * Checks if this datatype is a opaque type.
+     *
+     * @return true if the datatype is opaque; false otherwise
+     */
+    public boolean isOpaque() {
+        return (datatypeClass == Datatype.CLASS_OPAQUE);
+    }
+
+    /**
+     * Checks if this datatype is a bitfield type.
+     *
+     * @return true if the datatype is bitfield; false otherwise
+     */
+    public boolean isBitField() {
+        return (datatypeClass == Datatype.CLASS_BITFIELD);
+    }
 
     /*
      * (non-Javadoc)

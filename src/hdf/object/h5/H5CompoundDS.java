@@ -1466,7 +1466,6 @@ public class H5CompoundDS extends CompoundDS {
                 int[] flags = { 0, 0 };
                 long[] cd_nelmts = { 20 };
                 int[] cd_values = new int[(int) cd_nelmts[0]];
-                ;
                 String[] cd_name = { "", "" };
                 log.trace("getMetadata(): {} filters in pipeline", nfilt);
                 int filter = -1;

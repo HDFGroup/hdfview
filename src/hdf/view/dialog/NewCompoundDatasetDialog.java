@@ -143,8 +143,8 @@ public class NewCompoundDatasetDialog extends Dialog {
         parentGroup = pGroup;
         objList = objs;
 
-        groupList = new Vector<Group>(objs.size());
-        compoundDSList = new Vector<CompoundDS>(objs.size());
+        groupList = new Vector<>(objs.size());
+        compoundDSList = new Vector<>(objs.size());
 
         fileformat = pGroup.getFileFormat();
     }

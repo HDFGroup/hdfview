@@ -225,7 +225,7 @@ public class DebugHDF {
         file.close();
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "rawtypes" })
     private static void testH5VlenAttr( String fname) throws Exception
     {
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
@@ -278,7 +278,7 @@ public class DebugHDF {
         dataset = (Dataset)root.getMemberList().get(0);
         List attrList = dataset.getMetadata();
         attr = (Attribute)attrList.get(0);
-        String[] value = (String[]) attr.getData();
+        attr.getData();
         testFile.close();
     }
 
@@ -687,8 +687,7 @@ public class DebugHDF {
 
     private static void testH5IO(final String filename) throws Exception {
         int SIZE = 10 * 1024 * 1024;
-        long fid = -1, did = -1, sid = -1, rank = 1;
-        long[] dims = { SIZE };
+        long fid = -1, did = -1, sid = -1;
         float[] buf = new float[SIZE];
 
         // for (int i = 0; i < buf.length; i++)
@@ -1045,7 +1044,7 @@ public class DebugHDF {
         final Group root = (Group) testFile.getRootObject();
 
         Datatype dtype = testFile.createDatatype( Datatype.CLASS_STRING, 64, Datatype.NATIVE, Datatype.NATIVE);
-        Dataset dataset = testFile.createScalarDS ("dset", root, dtype, dims, null, null, 0, data);
+        testFile.createScalarDS ("dset", root, dtype, dims, null, null, 0, data);
 
         testFile.close();
     }
@@ -1099,12 +1098,12 @@ public class DebugHDF {
 
         Datatype dtype = testFile.createDatatype(
             Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
-        Dataset dataset = testFile.createScalarDS
+        testFile.createScalarDS
             ("f32", root, dtype, dims2D, null, null, 0, data);
 
         dtype = testFile.createDatatype(
                 Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("f64", root, dtype, dims2D, null, null, 0, data2);
 
         testFile.close();
@@ -1450,7 +1449,7 @@ public class DebugHDF {
         return o;
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "rawtypes" })
     private static void testBEAttr(String fname) throws Exception
     {
         long[] dims2D = {20, 10};
@@ -1547,8 +1546,6 @@ public class DebugHDF {
     @SuppressWarnings("rawtypes")
     private static void testTofwerkReaderBug1213 (final String filename) throws IOException
     {
-        Object data = null;
-
         String gname = "/TimingData";
         String dname = "/TimingData/BufTimes";
 
@@ -1571,16 +1568,18 @@ public class DebugHDF {
 
             // open the file with read and write access
             h5File = (H5File) h5FileFormat.createInstance(file.getPath(), FileFormat.READ);
-            h5File.open();
             if (h5File == null)
             {
                 throw new IOException("Failed to open file: "+file.getPath());
             }
 
+            h5File.open();
+
+
             // open the file and retrieve the file structure
             Group root = (Group) h5File.getRootObject();
             java.util.List rootMembers = root.getMemberList();
-            java.util.List rootAttributes =root.getMetadata();
+            root.getMetadata();
 
 
             Group timingDataGroup = null;
@@ -1614,8 +1613,7 @@ public class DebugHDF {
             start[0] = 0;
             start[1] = 0;
 
-            // crash here
-            data = dataset.read();
+            dataset.read();
             h5File.close();
         }
         catch (Exception e)
@@ -1648,7 +1646,6 @@ public class DebugHDF {
         file.open();
         Group root = (Group) file.getRootObject();
 
-        int[] memRanks = new int[ncols];
         int[][] memDims = new int[ncols][1];
 
 
@@ -1666,11 +1663,10 @@ public class DebugHDF {
             memDims[i][0] = 1;
         }
 
-        H5CompoundDS dset = null;
         try {
-            dset = (H5CompoundDS)H5CompoundDS.create(
-                    name, root, dims, memberNames, memberDatatypes, memberRanks, memberDims);
-        } catch (final Exception ex) {
+            H5CompoundDS.create(name, root, dims, memberNames, memberDatatypes, memberRanks, memberDims);
+        }
+        catch (final Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1827,7 +1823,7 @@ public class DebugHDF {
         testFile.open();
         Group root = (Group) testFile.getRootObject();
         Datatype dtype = testFile.createDatatype(Datatype.CLASS_STRING, strLen, Datatype.NATIVE, Datatype.NATIVE);
-        Dataset dataset = testFile.createScalarDS ("/str", root, dtype, dims, null, null, 0, buf);
+        testFile.createScalarDS ("/str", root, dtype, dims, null, null, 0, buf);
 
         testFile.close();
     }
@@ -2018,9 +2014,6 @@ public class DebugHDF {
 
     private static void testH5Bug863(final String filename) throws Exception
     {
-        //H5File file = new H5File(filename, H5File.READ);
-        final int nloops = 1000000;
-
         while (true)
         {
             final H5File file = new H5File(filename, H5File.READ);
@@ -2145,7 +2138,6 @@ public class DebugHDF {
     private static void testCreateLongPath(final String fname) throws Exception {
         final int n = 5;
         H5File file=null;
-        final Group g;
         Group parent;
 
         file = new H5File(fname, H5File.CREATE);
@@ -2403,7 +2395,7 @@ public class DebugHDF {
         H5.H5Fclose(fid);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static void testGetObjID() throws Exception
     {
         final HashMap typeMap = new HashMap();
@@ -2510,6 +2502,7 @@ public class DebugHDF {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static void printHObject (final Group group) throws Exception
     {
         final List list = group.getMemberList();
@@ -2642,8 +2635,8 @@ public class DebugHDF {
     private static void testEnum(final String fileName) throws Exception
     {
         final long booleanEnum = H5.H5Tenum_create(HDF5Constants.H5T_STD_I8LE);
-        int status = H5.H5Tenum_insert(booleanEnum, "true", new int[] {1});
-        status = H5.H5Tenum_insert(booleanEnum, "false", new int[] {0});
+        H5.H5Tenum_insert(booleanEnum, "true", new int[] {1});
+        H5.H5Tenum_insert(booleanEnum, "false", new int[] {0});
 
         System.out.println(H5.H5Tget_member_name(booleanEnum, 0));
         System.out.println(H5.H5Tget_member_name(booleanEnum, 1));
@@ -2848,7 +2841,6 @@ public class DebugHDF {
     {
         final int size = value.size();
         final long[] dims = {size};
-        final int dataLen = 0;
         // set the data values
         final float[] dataFl = new float[size];
         for (int i=0; i<size; i++){
@@ -3284,6 +3276,7 @@ public class DebugHDF {
         } catch (final Exception ex) { ex.printStackTrace(); }
     }
 
+    @SuppressWarnings("rawtypes")
     private static void readHyperslab(final H5CompoundDS d) throws Exception {
         if (!d.isInited())
             d.init();
@@ -3324,7 +3317,7 @@ public class DebugHDF {
         } /* if (data != null) { */
     }
 
-    @SuppressWarnings({ "deprecation", "unchecked" })
+    @SuppressWarnings({ "deprecation", "unchecked", "rawtypes" })
     private static void create2Dcompound(String FNAME, String DNAME) throws Exception
     {
         final long DIM1 = 50;
@@ -3360,7 +3353,7 @@ public class DebugHDF {
         }
         dataIn.add(1, y);
 
-        final Dataset d = h5File.createCompoundDS(DNAME, root, dims, memberNames, memberDatatypes, memberSizes, dataIn);
+        h5File.createCompoundDS(DNAME, root, dims, memberNames, memberDatatypes, memberSizes, dataIn);
         h5File.close();
     }
 
@@ -3405,31 +3398,31 @@ public class DebugHDF {
         // create 2D 32-bit (4 bytes) integer dataset of 20 by 10
         Datatype dtype = testFile.createDatatype(
                 Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
-        Dataset dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("2D int", g1, dtype, dims2D, null, null, 0, dataInt);
 
         // create 2D 32-bit (4 bytes) integer dataset of 20 by 10
         dtype = testFile.createDatatype(
                 Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("2D uint", g1, dtype, dims2D, null, null, 0, dataInt);
 
         // create 3D 8-bit (1 byte) unsigned integer dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
                 Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("3D byte", g1, dtype, dims3D, null, null, 0, null);
 
         // create 2D 64-bit (8 bytes) double dataset of 20 by 10
         dtype = testFile.createDatatype(
                 Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("2D double", g2, dtype, dims2D, null, null, 0, dataDouble);
 
         // create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
                 Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("3D float", g2, dtype, dims3D, null, null, 0, null);
 
         // close file resource
@@ -3477,25 +3470,25 @@ public class DebugHDF {
         // Create 2D 32-bit (4 bytes) integer dataset of 20 by 10
         Datatype dtype = testFile.createDatatype(
                 Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
-        Dataset dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("2D 32-bit integer 20x10", g1, dtype, dims2D, null, null, 0, null);
 
         // Create 3D 8-bit (1 byte) unsigned integer dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
                 Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("3D 8-bit unsigned integer 20x10x5", g1, dtype, dims3D, null, null, 0, null);
 
         // Create 2D 64-bit (8 bytes) double dataset of 20 by 10
         dtype = testFile.createDatatype(
                 Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("2D 64-bit double 20x10", g2, dtype, dims2D, null, null, 0, null);
 
         // Create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
                 Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
-        dataset = testFile.createScalarDS
+        testFile.createScalarDS
                 ("3D 32-bit float  20x10x5", g2, dtype, dims3D, null, null, 0, null);
 
         // Create String dataset
@@ -3505,7 +3498,7 @@ public class DebugHDF {
             final int strlen = 5;
             dtype = testFile.createDatatype(
                 Datatype.CLASS_STRING, strlen, Datatype.NATIVE, -1);
-            dataset = testFile.createScalarDS
+            testFile.createScalarDS
                 ("String 2", g3, dtype, dims1D, null, null, 0, data3);
         }
         catch (final Exception ex)
@@ -3521,7 +3514,7 @@ public class DebugHDF {
         System.out.println( "Normal EOJ" );
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static final boolean create_test_file(final String fname)  throws Exception
     {
         H5File file=null;
@@ -3541,14 +3534,10 @@ public class DebugHDF {
         final String NAME_DATASET_SUB_SUB = "/g0/g00/dataset_float";
         final long DIM1 = 50;
         final long DIM2 = 10;
-        final long DIM3 = 20;
         final long[] DIMs = {DIM1, DIM2};
         final long[] CHUNKs = {DIM1/2, DIM2/2};
-        final int RANK = 2;
         final int STR_LEN = 20;
         final int DIM_SIZE = (int)(DIM1*DIM2);;
-        final String FNAME = "H:\\java\\java8\\xcao\\test\\bigdata.h5";
-        final String DNAME = "PI";
 
         final int[] DATA_INT = new int[DIM_SIZE];
         final float[] DATA_FLOAT = new float[DIM_SIZE];
@@ -3601,34 +3590,16 @@ public class DebugHDF {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static final boolean create_debug_file()  throws Exception
     {
         H5File file=null;
-        Group g0, g1, g00;
-
-        final String NAME_GROUP = "/g0";
-        final String NAME_GROUP_ATTR = "/g0_attr";
-        final String NAME_GROUP_SUB = "/g0/g00";
-        final String NAME_DATASET_INT = "/dataset_int";
-        final String NAME_DATASET_FLOAT = "/dataset_float";
-        final String NAME_DATASET_CHAR = "/dataset_byte";
-        final String NAME_DATASET_STR = "/dataset_str";
-        final String NAME_DATASET_ENUM = "/dataset_enum";
-        final String NAME_DATASET_ATTR = "/dataset_with_attr";
-        final String NAME_DATASET_COMPOUND = "/comp_dataset";
-        final String NAME_DATASET_SUB = "/g0/dataset_int";
-        final String NAME_DATASET_SUB_SUB = "/g0/g00/dataset_float";
         final long DIM1 = 50;
         final long DIM2 = 10;
-        final long DIM3 = 20;
         final long[] DIMs = {DIM1, DIM2};
         final long[] CHUNKs = {DIM1/2, DIM2/2};
-        final int RANK = 2;
         final int STR_LEN = 20;
         final int DIM_SIZE = (int)(DIM1*DIM2);;
-        final String FNAME = "H:\\java\\java8\\xcao\\test\\bigdata.h5";
-        final String DNAME = "PI";
 
         final int[] DATA_INT = new int[DIM_SIZE];
         final float[] DATA_FLOAT = new float[DIM_SIZE];
@@ -3840,7 +3811,7 @@ public class DebugHDF {
         }
 
         Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
-        Dataset dataset = file.createScalarDS (dname, null, dtype, dims2D, null, null, 0, dataIn);
+        file.createScalarDS (dname, null, dtype, dims2D, null, null, 0, dataIn);
 
         file.close();
     }
@@ -3865,11 +3836,12 @@ public class DebugHDF {
         }
 
         Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
-        Dataset dataset = file.createScalarDS (dname, null, dtype, dims, null, null, 0, dataIn);
+        file.createScalarDS (dname, null, dtype, dims, null, null, 0, dataIn);
 
         file.close();
     }
 
+    @SuppressWarnings("rawtypes")
     private static void testHDF4(String filename){
         System.out.println("filename" + filename);
         // "E:\work\data\1\1\test.hdf"
@@ -3882,7 +3854,7 @@ public class DebugHDF {
         // Create an instance obj H4File with read access
         try {
             H4File myfile = (H4File) h4file.createInstance(filename, FileFormat.READ);
-            long fid = myfile.open();
+            myfile.open();
             Group g = (Group) myfile.getRootObject();
             List list = g.getMemberList();
             int n = list.size();

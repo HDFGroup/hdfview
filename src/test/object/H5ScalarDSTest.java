@@ -524,7 +524,7 @@ public class H5ScalarDSTest {
             final int rank = testDataset.getRank();
             assertEquals(H5TestFile.RANK, rank);
 
-            // test the dimesin sizes
+            // test the dimension sizes
             final long[] dims = testDataset.getDims();
             assertNotNull(dims);
             for (int i = 0; i < rank; i++) {
@@ -632,7 +632,7 @@ public class H5ScalarDSTest {
                 // datasets
                 for (int j = 0; j < dnames.length; j++) {
                     dset = (Dataset) file.get(dnames[j]);
-                    final Object data = dset.getData();
+                    dset.getData();
                 }
             }
             catch (final Exception ex) {

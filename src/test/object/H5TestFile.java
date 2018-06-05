@@ -83,12 +83,8 @@ public class H5TestFile {
             new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1),
             new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE) };
 
-    // attributes
-    public final static Attribute ATTRIBUTE_STR = new Attribute(null, "strAttr", new H5Datatype(Datatype.CLASS_STRING,
-            STR_LEN, -1, -1), new long[] { 1 }, new String[] { "String attribute." });
-    public final static Attribute ATTRIBUTE_INT_ARRAY = new Attribute(null, "arrayInt", new H5Datatype(
-            Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1), new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                    10 });
+    public static Attribute ATTRIBUTE_STR = null;
+    public static Attribute ATTRIBUTE_INT_ARRAY = null;
 
     /**
      * Creates an HDF5 test file.
@@ -154,8 +150,10 @@ public class H5TestFile {
         g1 = file.createGroup(NAME_GROUP_ATTR, null);
         g00 = file.createGroup(NAME_GROUP_SUB, null);
 
-        ATTRIBUTE_STR.setParentObject(g1);
-        ATTRIBUTE_INT_ARRAY.setParentObject(g1);
+        // attributes
+        ATTRIBUTE_STR = new Attribute(g1, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(g1, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
@@ -175,8 +173,9 @@ public class H5TestFile {
 
         // attach attributes to all datasets
         for (int i = 0; i < dsets.length; i++) {
-            ATTRIBUTE_STR.setParentObject(dsets[i]);
-            ATTRIBUTE_INT_ARRAY.setParentObject(dsets[i]);
+            ATTRIBUTE_STR = new Attribute(dsets[i], "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+            ATTRIBUTE_INT_ARRAY = new Attribute(dsets[i], "arrayInt", typeInt, new long[] { 10 },
+                    new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
             ATTRIBUTE_STR.write();
             ATTRIBUTE_INT_ARRAY.write();
         }
@@ -195,26 +194,30 @@ public class H5TestFile {
         }
 
         Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_INT);
-        ATTRIBUTE_STR.setParentObject(dtype);
-        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE, NAME_DATATYPE_UINT);
-        ATTRIBUTE_STR.setParentObject(dtype);
-        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_FLOAT);
-        ATTRIBUTE_STR.setParentObject(dtype);
-        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1, NAME_DATATYPE_STR);
-        ATTRIBUTE_STR.setParentObject(dtype);
-        ATTRIBUTE_INT_ARRAY.setParentObject(dtype);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 

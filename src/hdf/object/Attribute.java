@@ -326,7 +326,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                         aid = H5.H5Aopen(pObjID, getName(), HDF5Constants.H5P_DEFAULT);
                 }
                 else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
-                    long attrIdx = -1;
 
                     /*
                      * TODO: Get type of HDF4 object this is attached to and retrieve attribute

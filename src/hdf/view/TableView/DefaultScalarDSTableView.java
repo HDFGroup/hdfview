@@ -1856,9 +1856,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             }
                         }
 
-                        if (retValues != null) for (int i = 0; i < outValues.length; i++) {
-                            if (i > 0) buffer.append(", ");
-                            buffer.append(outValues[i]);
+                        if (retValues != null) {
+                            for (int i = 0; i < outValues.length; i++) {
+                                if (i > 0) buffer.append(", ");
+                                buffer.append(outValues[i]);
+                            }
                         }
                     }
                     else {
@@ -1965,7 +1967,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
-                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                log.trace("ScalarDSCellSelectionListener: CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
