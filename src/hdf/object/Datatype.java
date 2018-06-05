@@ -17,24 +17,22 @@ package hdf.object;
 import java.util.List;
 
 /**
- * Datatype is an abstract class that defines datatype characteristics and APIs
- * for a data type.
+ * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
  * <p>
- * A datatype has four basic characteristics: class, size, byte order and sign.
- * These characteristics are defined in the
+ * A datatype has four basic characteristics: class, size, byte order and sign. These
+ * characteristics are defined in the
  * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>.
  * <p>
- * These characteristics apply to all the sub-classes. The sub-classes may have
- * different ways to describe a datatype. We here define the <strong> native
- * datatype</strong> to the datatype used by the sub-class. For example,
- * H5Datatype uses a datatype identifier (hid_t) to specify a datatype.
- * NC2Datatype uses ucar.nc2.DataType object to describe its datatype. "Native"
- * here is different from the "native" definition in the HDF5 library.
+ * These characteristics apply to all the sub-classes. The sub-classes may have different ways to
+ * describe a datatype. We here define the <strong> native datatype</strong> to the datatype used by
+ * the sub-class. For example, H5Datatype uses a datatype identifier (hid_t) to specify a datatype.
+ * NC2Datatype uses ucar.nc2.DataType object to describe its datatype. "Native" here is different
+ * from the "native" definition in the HDF5 library.
  * <p>
- * Two functions, toNative() and fromNative(), are defined to convert the
- * general characteristics to/from the native datatype. Sub-classes must implement
- * these functions so that the conversion will be done correctly.
- * The values of the CLASS member are not identical to HDF5 values for a datatype class.
+ * Two functions, createNative() and fromNative(), are defined to convert the general
+ * characteristics to/from the native datatype. Sub-classes must implement these functions so that
+ * the conversion will be done correctly. The values of the CLASS member are not identical to HDF5
+ * values for a datatype class.
  * <p>
  *
  * @version 1.1 9/4/2007
@@ -219,13 +217,13 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *
      * @param theFile
      *            the HDF file.
-     * @param name
+     * @param typeName
      *            the name of the datatype, e.g "12-bit Integer".
-     * @param path
+     * @param typePath
      *            the full group path of the datatype, e.g. "/datatypes/".
      */
-    public Datatype(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
+    public Datatype(FileFormat theFile, String typeName, String typePath) {
+        this(theFile, typeName, typePath, null);
     }
 
     /**
@@ -234,16 +232,16 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *
      * @param theFile
      *            the HDF file.
-     * @param name
+     * @param typeName
      *            the name of the datatype, e.g "12-bit Integer".
-     * @param path
+     * @param typePath
      *            the full group path of the datatype, e.g. "/datatypes/".
      * @param oid
      *            the oidof the datatype.
      */
     @Deprecated
-    public Datatype(FileFormat theFile, String name, String path, long[] oid) {
-        super(theFile, name, path, oid);
+    public Datatype(FileFormat theFile, String typeName, String typePath, long[] oid) {
+        super(theFile, typeName, typePath, oid);
     }
 
     /**
@@ -311,6 +309,39 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the base datatype of the new datatype
      */
     public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) {
+        this(tclass, tsize, torder, tsign, tbase, null);
+    }
+
+    /**
+     * Constructs a Datatype with specified class, size, byte order and sign.
+     * <p>
+     * The following is a list of a few example of H5Datatype.
+     * <ol>
+     * <li>to create unsigned native integer<br>
+     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * <li>to create 16-bit signed integer with big endian<br>
+     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * <li>to create native float<br>
+     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * <li>to create 64-bit double<br>
+     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * </ol>
+     *
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
+     *            ORDER_NONE
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     * @param tbase
+     *            the base datatype of the new datatype
+     * @param pbase
+     *            the parent datatype of the new datatype
+     */
+    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
         datatypeClass = tclass;
         datatypeSize = tsize;
         datatypeOrder = torder;
@@ -318,29 +349,49 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         enumMembers = null;
         baseType = tbase;
         dims = null;
-        log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}", datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
+
+        log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
+                datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
     }
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
      * <p>
-     * For example, if the datatype identifier is a 32-bit unsigned integer
-     * created from HDF5,
+     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
-     * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
+     * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4,
-     * NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
      *
      * @see #fromNative(long tid)
      * @param tid
      *            the native datatype identifier.
      */
     public Datatype(long tid) {
-        this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE);
+        this(tid, null);
+    }
+
+    /**
+     * Constructs a Datatype with a given native datatype identifier.
+     * <p>
+     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
+     *
+     * <pre>
+     * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
+     * Datatype dtype = new Datatype(tid);
+     * </pre>
+     *
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     *
+     * @see #fromNative(long tid)
+     * @param tid
+     *            the native datatype identifier.
+     */
+    public Datatype(long tid, Datatype pbase) {
+        this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
     }
 
     /**
@@ -401,14 +452,14 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Returns the datatype of array elements for an ARRAY datatype.
+     * Returns the datatype of the elements for this ARRAY datatype.
      * <p>
-     * For example, in a dataset of type ARRAY of integer, the datatype of the
-     * dataset is ARRAY. The datatype of the base type is integer.
+     * For example, in a dataset of type ARRAY of integer, the datatype of the dataset is ARRAY. The
+     * datatype of the base type is integer.
      *
-     * @return the datatype of array elements for an ARRAY datatype.
+     * @return the datatype of the contained datatype.
      */
-    public Datatype getBasetype() {
+    public Datatype getDatatypeBase() {
         return baseType;
     }
 
@@ -471,19 +522,17 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * Converts the datatype object to a native datatype.
      *
-     * Subclasses must implement it so that this datatype will be converted
-     * accordingly. Use close() to close the native identifier; otherwise, the
-     * datatype will be left open.
+     * Subclasses must implement it so that this datatype will be converted accordingly. Use close() to
+     * close the native identifier; otherwise, the datatype will be left open.
      * <p>
      * For example, a HDF5 datatype created from<br>
      *
      * <pre>
      * H5Dataype dtype = new H5Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
-     * int tid = dtype.toNative();
+     * int tid = dtype.createNative();
      * </pre>
      *
-     * There "tid" will be the HDF5 datatype id of a 32-bit unsigned integer,
-     * which is equivalent to
+     * There "tid" will be the HDF5 datatype id of a 64-bit unsigned integer, which is equivalent to
      *
      * <pre>
      * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
@@ -491,17 +540,14 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *
      * @return the identifier of the native datatype.
      */
-    public abstract long toNative();
+    public abstract long createNative();
 
     /**
-     * Set datatype characteristics (class, size, byte order and sign) from a
-     * given datatype identifier.
+     * Set datatype characteristics (class, size, byte order and sign) from a given datatype identifier.
      * <p>
-     * Sub-classes must implement it so that this datatype will be converted
-     * accordingly.
+     * Sub-classes must implement it so that this datatype will be converted accordingly.
      * <p>
-     * For example, if the type identifier is a 32-bit unsigned integer created
-     * from HDF5,
+     * For example, if the type identifier is a 64-bit unsigned integer created from HDF5,
      *
      * <pre>
      * H5Datatype dtype = new H5Datatype();
@@ -589,12 +635,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Opens access to this named datatype. Sub-classes must replace this default
-     * implementation. For example, in H5Datatype, open() function
-     * H5.H5Topen(loc_id, name) to get the datatype identifier.
+     * Opens access to this named datatype. Sub-classes must replace this default implementation. For
+     * example, in H5Datatype, open() function H5.H5Topen(loc_id, name) to get the datatype identifier.
      *
-     * @return the datatype identifier if successful; otherwise returns negative
-     *         value.
+     * @return the datatype identifier if successful; otherwise returns negative value.
      */
     @Override
     public long open() {

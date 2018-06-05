@@ -199,6 +199,8 @@ public class H5Group extends Group {
     public List getMetadata(int... attrPropList) throws HDF5Exception {
         log.trace("getMetadata(): start");
         if (attributeList == null) {
+            log.trace("getMetadata(): get attributeList");
+
             int indxType = fileFormat.getIndexType(null);
             int order = fileFormat.getIndexOrder(null);
 

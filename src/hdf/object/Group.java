@@ -74,15 +74,15 @@ public abstract class Group extends HObject implements MetaDataContainer {
      *
      * @param theFile
      *            the file containing the group.
-     * @param name
+     * @param grpName
      *            the name of this group, e.g. "grp01".
-     * @param path
+     * @param grpPath
      *            the full path of this group, e.g. "/groups/".
-     * @param parent
+     * @param grpParent
      *            the parent of this group.
      */
-    public Group(FileFormat theFile, String name, String path, Group parent) {
-        this(theFile, name, path, parent, null);
+    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent) {
+        this(theFile, grpName, grpPath, grpParent, null);
     }
 
     /**
@@ -91,21 +91,20 @@ public abstract class Group extends HObject implements MetaDataContainer {
      *
      * @param theFile
      *            the file containing the group.
-     * @param name
+     * @param grpName
      *            the name of this group, e.g. "grp01".
-     * @param path
+     * @param grpPath
      *            the full path of this group, e.g. "/groups/".
-     * @param parent
+     * @param grpParent
      *            the parent of this group.
      * @param oid
      *            the oid of this group.
      */
     @Deprecated
-    public Group(FileFormat theFile, String name, String path, Group parent,
-            long[] oid) {
-        super(theFile, name, path, oid);
+    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent, long[] oid) {
+        super(theFile, grpName, grpPath, oid);
 
-        this.parent = parent;
+        this.parent = grpParent;
     }
 
     /**

@@ -82,6 +82,8 @@ public abstract class HObject implements Serializable {
      */
     private static final long  serialVersionUID = -1723666708199882519L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObject.class);
+
     /**
      * The separator of object path, i.e. "/".
      */
@@ -245,6 +247,8 @@ public abstract class HObject implements Serializable {
         this.name = theName;
         this.path = thePath;
 
+        log.trace("name={} path={}", this.name, this.path);
+
         if (thePath != null) {
             this.fullName = thePath + theName;
         }
@@ -262,6 +266,8 @@ public abstract class HObject implements Serializable {
                     this.fullName = "/" + theName;
             }
         }
+
+        log.trace("fullName={}", this.fullName);
     }
 
     /**

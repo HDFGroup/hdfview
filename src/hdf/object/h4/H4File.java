@@ -329,7 +329,7 @@ public class H4File extends FileFormat {
         }
 
         try {
-            sdid = HDFLibrary.SDstart(fullFileName, flag);
+            sdid = HDFLibrary.SDstart(fullFileName, flag & ~HDFConstants.DFACC_CREATE);
 
             if (sdid < 0) log.debug("open(): SDstart failed!");
         }
@@ -531,7 +531,7 @@ public class H4File extends FileFormat {
         log.trace("writeAttribute(): start: obj={} attribute={} isSDglobalAttr={}", obj, attr, isSDglobalAttr);
 
         String attrName = attr.getName();
-        long attrType = attr.getDatatype().toNative();
+        long attrType = attr.getDatatype().createNative();
         long[] dims = attr.getDims();
         int count = 1;
         if (dims != null) {

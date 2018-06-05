@@ -133,13 +133,13 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the CompoundDS, e.g. "compDS".
-     * @param path
-     *            the path of the CompoundDS, e.g. "/g1".
+     * @param dsPath
+     *            the full path of the CompoundDS, e.g. "/g1".
      */
-    public CompoundDS(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
+    public CompoundDS(FileFormat theFile, String dsName, String dsPath) {
+        this(theFile, dsName, dsPath, null);
     }
 
     /**
@@ -148,16 +148,16 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the CompoundDS, e.g. "compDS".
-     * @param path
-     *            the path of the CompoundDS, e.g. "/g1".
+     * @param dsPath
+     *            the full path of the CompoundDS, e.g. "/g1".
      * @param oid
      *            the oid of the CompoundDS.
      */
     @Deprecated
-    public CompoundDS(FileFormat theFile, String name, String path, long[] oid) {
-        super(theFile, name, path, oid);
+    public CompoundDS(FileFormat theFile, String dsName, String dsPath, long[] oid) {
+        super(theFile, dsName, dsPath, oid);
 
         numberOfMembers = 0;
         memberNames = null;

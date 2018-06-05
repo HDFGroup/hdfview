@@ -1840,7 +1840,7 @@ public abstract class FileFormat extends File {
      * @return the object that has the given path; otherwise returns null
      */
     public final static HObject findObject(FileFormat file, String path) {
-        log.trace("findObject(): start");
+        log.trace("findObject({}): start", path);
 
         if ((file == null) || (path == null)) {
             log.debug("findObject(): file is null or path is null");

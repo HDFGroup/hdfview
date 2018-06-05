@@ -397,7 +397,7 @@ public abstract class DefaultBaseTableView implements TableView {
         log.trace("Data object getDatatypeClass()={}", dtype.getDatatypeClass());
         isDisplayTypeChar = (isDisplayTypeChar
                 && (dtype.getDatatypeSize() == 1 || (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY
-                && dtype.getBasetype().getDatatypeClass() == Datatype.CLASS_CHAR)));
+                && dtype.getDatatypeBase().getDatatypeClass() == Datatype.CLASS_CHAR)));
 
         isEnumConverted = ViewProperties.isConvertEnum();
 

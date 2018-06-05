@@ -305,7 +305,7 @@ public class H5DatatypeTest {
 
         // test integer datatype
         try {
-            tid = typeInt.toNative();
+            tid = typeInt.createNative();
         }
         catch (final Exception ex) {
             fail("testToNative() failed. " + ex);
@@ -327,7 +327,7 @@ public class H5DatatypeTest {
 
         // test float datatype
         try {
-            tid = typeFloat.toNative();
+            tid = typeFloat.createNative();
         }
         catch (final Exception ex) {
             fail("testToNative() failed. " + ex);
@@ -349,7 +349,7 @@ public class H5DatatypeTest {
 
         // test String datatype
         try {
-            tid = typeStr.toNative();
+            tid = typeStr.createNative();
         }
         catch (final Exception ex) {
             fail("testToNative() failed. " + ex);

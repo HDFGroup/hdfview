@@ -187,13 +187,13 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the Dataset, e.g. "dset1".
-     * @param path
+     * @param dsPath
      *            the full group path of this Dataset, e.g. "/arrays/".
      */
-    public Dataset(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
+    public Dataset(FileFormat theFile, String dsName, String dsPath) {
+        this(theFile, dsName, dsPath, null);
     }
 
     /**
@@ -202,16 +202,16 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the Dataset, e.g. "dset1".
-     * @param path
+     * @param dsPath
      *            the full group path of this Dataset, e.g. "/arrays/".
      * @param oid
      *            the oid of this Dataset.
      */
     @Deprecated
-    public Dataset(FileFormat theFile, String name, String path, long[] oid) {
-        super(theFile, name, path, oid);
+    public Dataset(FileFormat theFile, String dsName, String dsPath, long[] oid) {
+        super(theFile, dsName, dsPath, oid);
 
         rank = -1;
         data = null;

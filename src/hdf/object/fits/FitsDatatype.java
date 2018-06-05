@@ -207,7 +207,7 @@ public class FitsDatatype extends Datatype
 
     // implementing Datatype
     @Override
-    public long toNative() {
+    public long createNative() {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = BasicHDU.BITPIX_BYTE;
@@ -242,6 +242,7 @@ public class FitsDatatype extends Datatype
     public void close(long id) {;}
 
     // Implementing DataFormat
+    @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

@@ -617,7 +617,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
 
             if (isArray) {
-                dtype = dtype.getBasetype();
+                dtype = dtype.getDatatypeBase();
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isString = (typeClass == Datatype.CLASS_STRING);
@@ -864,7 +864,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             buffer.setLength(0);
 
             if (isArray) {
-                dtype = dtype.getBasetype();
+                dtype = dtype.getDatatypeBase();
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isStr = (typeClass == Datatype.CLASS_STRING);
@@ -896,7 +896,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         long tmptid = -1;
 
                         try {
-                            tmptid = dtype.toNative();
+                            tmptid = dtype.createNative();
                             retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
                         }
                         catch (HDF5Exception ex) {
@@ -941,7 +941,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     long tmptid = -1;
 
                     try {
-                        tmptid = dtype.toNative();
+                        tmptid = dtype.createNative();
                         retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
                     }
                     catch (HDF5Exception ex) {
@@ -1077,7 +1077,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
 
                     if (types[i].getDatatypeClass() == Datatype.CLASS_ARRAY) {
-                        Datatype baseType = types[i].getBasetype();
+                        Datatype baseType = types[i].getDatatypeBase();
 
                         if (baseType.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
                             // If member is type array of compound, list member names in column header

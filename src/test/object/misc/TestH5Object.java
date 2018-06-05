@@ -1146,7 +1146,7 @@ public class TestH5Object
 
         try {
             dtype = file.createDatatype(Datatype.CLASS_INTEGER,-1, -1, -1);
-            tid = dtype.toNative();
+            tid = dtype.createNative();
             if (!H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_INT)) {
                 failed(message, new HDF5Exception("Failed to convert native integer"), file);
                 return 1;
@@ -1158,7 +1158,7 @@ public class TestH5Object
 
         try {
             dtype = file.createDatatype(Datatype.CLASS_FLOAT,-1, -1, -1);
-            tid = dtype.toNative();
+            tid = dtype.createNative();
             if (!H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_FLOAT)) {
                 failed(message, new HDF5Exception("Failed to convert native float"), file);
                 return 1;
@@ -1170,7 +1170,7 @@ public class TestH5Object
 
         try {
             dtype = file.createDatatype(Datatype.CLASS_CHAR, 1, -1, -1);
-            tid = dtype.toNative();
+            tid = dtype.createNative();
             if (!H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_CHAR)) {
                 failed(message, new HDF5Exception("Failed to convert native char"), file);
                 return 1;
@@ -1182,7 +1182,7 @@ public class TestH5Object
 
         try {
             dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
-            tid = dtype.toNative();
+            tid = dtype.createNative();
             tid2 = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
             H5.H5Tset_size(tid2, STR_LEN);
             //H5.H5Tset_strpad(tid2, HDF5Constants.H5T_STR_NULLPAD); /* default is not NULL padding */
