@@ -129,14 +129,14 @@ public class TestTreeViewFiles extends AbstractWindowTest {
                         val.equals(attribute_names[i]));
             }
 
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(0, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(1, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(2, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(3, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 255, .*'", attrTable.cell(4, 3).matches("^. 255, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 65535, .*'", attrTable.cell(5, 3).matches("^. 65535, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 4294967295, .*'", attrTable.cell(6, 3).matches("^. 4294967295, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 18446744073709551615, .*'", attrTable.cell(7, 3).matches("^. 18446744073709551615, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^-1, .*'", attrTable.cell(0, 3).matches("^-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^-1, .*'", attrTable.cell(1, 3).matches("^-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^-1, .*'", attrTable.cell(2, 3).matches("^-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^-1, .*'", attrTable.cell(3, 3).matches("^-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^255, .*'", attrTable.cell(4, 3).matches("^255, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^65535, .*'", attrTable.cell(5, 3).matches("^65535, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^4294967295, .*'", attrTable.cell(6, 3).matches("^4294967295, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '^18446744073709551615, .*'", attrTable.cell(7, 3).matches("^18446744073709551615, .*"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
