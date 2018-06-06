@@ -88,11 +88,6 @@ public abstract class ScalarDS extends Dataset {
     protected boolean isText;
 
     /**
-     * Flag to indicate if the original C data is unsigned integer.
-     */
-    protected boolean isUnsigned;
-
-    /**
      * Flag to indicate is the original unsigned C data is converted.
      */
     protected boolean unsignedConverted;
@@ -154,7 +149,6 @@ public abstract class ScalarDS extends Dataset {
         isImage = false;
         isTrueColor = false;
         isText = false;
-        isUnsigned = false;
         interlace = -1;
         datatype = null;
         imageDataRange = null;
@@ -189,7 +183,7 @@ public abstract class ScalarDS extends Dataset {
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
         log.trace("convertFromUnsignedC(): datatype={}", datatype);
-        if ((data != null) && isUnsigned && !unsignedConverted) {
+        if ((data != null) && datatype.isUnsigned() && !unsignedConverted) {
             log.trace("convertFromUnsignedC(): convert");
             originalBuf = data;
             convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
@@ -224,7 +218,7 @@ public abstract class ScalarDS extends Dataset {
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
         log.trace("convertToUnsignedC(): datatype={}", datatype);
-        if ((data != null) && isUnsigned) {
+        if ((data != null) && datatype.isUnsigned()) {
             log.trace("convertToUnsignedC(): convert");
             convertedBuf = data;
             originalBuf = convertToUnsignedC(convertedBuf, originalBuf);
@@ -427,7 +421,7 @@ public abstract class ScalarDS extends Dataset {
      */
     @Override
     public boolean isTextData() {
-        return isText;
+        return (datatype != null) ? datatype.isText() : false;
     }
 
     /**
@@ -445,16 +439,6 @@ public abstract class ScalarDS extends Dataset {
      */
     public final int getInterlace() {
         return interlace;
-    }
-
-    /**
-     * Returns true if the original C data is unsigned integers.
-     *
-     * @return true if the original C data is unsigned integers.
-     */
-    @Override
-    public final boolean isUnsigned() {
-        return isUnsigned;
     }
 
     /**

@@ -154,6 +154,7 @@ public class H5TestFile {
         ATTRIBUTE_STR = new Attribute(g1, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(g1, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 

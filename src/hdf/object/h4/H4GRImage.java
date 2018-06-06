@@ -465,7 +465,7 @@ public class H4GRImage extends ScalarDS
 
         Object tmpData = buf;
         try {
-            if ( isUnsigned && unsignedConverted) {
+            if (getDatatype().isUnsigned() && unsignedConverted) {
                 tmpData = convertToUnsignedC(buf);
             }
             // assume external data files are located in the same directory as the main file.
@@ -716,8 +716,6 @@ public class H4GRImage extends ScalarDS
         finally {
             close(id);
         }
-
-        isUnsigned = H4Datatype.isUnsigned(datatypeID);
 
         ncomp = grInfo[0];
         isTrueColor = (ncomp >= 3);

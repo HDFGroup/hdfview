@@ -186,7 +186,7 @@ public class H4Datatype extends Datatype {
      *
      * @throws OutOfMemoryError
      *             if the array cannot be allocated
-    */
+     */
     public static final Object allocateArray(long datatype, int datasize) throws OutOfMemoryError {
         log.trace("allocateArray(): start");
 
@@ -316,7 +316,7 @@ public class H4Datatype extends Datatype {
      */
     @Override
     public boolean isUnsigned() {
-        return isUnsigned(createNative());
+        return (Datatype.SIGN_NONE == getDatatypeSign());
     }
 
     /**
@@ -352,7 +352,7 @@ public class H4Datatype extends Datatype {
 
     @Override
     public boolean isText() {
-        return false;
+        return (Datatype.CLASS_STRING == getDatatypeClass());
     }
 
     /*

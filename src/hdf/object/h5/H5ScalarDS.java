@@ -256,35 +256,40 @@ public class H5ScalarDS extends ScalarDS {
             long pid = -1;
             try {
                 pid = H5.H5Dget_create_plist(did);
-                int nfiles = H5.H5Pget_external_count(pid);
-                isExternal = (nfiles > 0);
-                int layout_type = H5.H5Pget_layout(pid);
-                if(isVirtual = (layout_type == HDF5Constants.H5D_VIRTUAL)) {
-                    try {
-                        long vmaps = H5.H5Pget_virtual_count(pid);
-                        if (vmaps > 0) {
-                            virtualNameList = new Vector<>();
-                            for (long next = 0; next < vmaps; next++) {
-                                try {
-                                    String fname = H5.H5Pget_virtual_filename(pid, next);
-                                    virtualNameList.add(fname);
-                                    log.trace("init(): virtualNameList[{}]={}", next, fname);
-                                }
-                                catch (Throwable err) {
-                                    log.trace("init(): vds[{}] continue", next);
-                                    continue;
+                try {
+                    int nfiles = H5.H5Pget_external_count(pid);
+                    isExternal = (nfiles > 0);
+                    int layout_type = H5.H5Pget_layout(pid);
+                    if (isVirtual = (layout_type == HDF5Constants.H5D_VIRTUAL)) {
+                        try {
+                            long vmaps = H5.H5Pget_virtual_count(pid);
+                            if (vmaps > 0) {
+                                virtualNameList = new Vector<>();
+                                for (long next = 0; next < vmaps; next++) {
+                                    try {
+                                        String fname = H5.H5Pget_virtual_filename(pid, next);
+                                        virtualNameList.add(fname);
+                                        log.trace("init(): virtualNameList[{}]={}", next, fname);
+                                    }
+                                    catch (Throwable err) {
+                                        log.trace("init(): vds[{}] continue", next);
+                                        continue;
+                                    }
                                 }
                             }
                         }
+                        catch (Throwable err) {
+                            log.debug("init(): vds count error: ", err);
+                        }
                     }
-                    catch (Throwable err) {
-                        log.debug("init(): vds count error: ", err);
-                    }
+                    log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal, isVirtual);
                 }
-                log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal, isVirtual);
+                catch (Exception ex) {
+                    log.debug("init(): check if it is an external or virtual dataset: ", ex);
+                }
             }
             catch (Exception ex) {
-                log.debug("init(): check if it is an external or virtual dataset: ", ex);
+                log.debug("init(): H5Dget_create_plist: ", ex);
             }
             finally {
                 try {
@@ -315,7 +320,6 @@ public class H5ScalarDS extends ScalarDS {
                         isArrayOfVLEN = (baseclass == HDF5Constants.H5T_VLEN);
                         isVLEN = isVLEN || ((baseclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(basetid));
                         isVLEN = isVLEN || H5.H5Tdetect_class(basetid, HDF5Constants.H5T_VLEN);
-                        isUnsigned = H5Datatype.isUnsigned(basetid);
                     }
                     catch (Exception ex) {
                         log.debug("init():  use the base datatype to define the array: ", ex);
@@ -329,8 +333,6 @@ public class H5ScalarDS extends ScalarDS {
                         }
                     }
                 }
-                else
-                    isUnsigned = H5Datatype.isUnsigned(tid);
 
                 isText = (tclass == HDF5Constants.H5T_STRING);
                 isVLEN = isVLEN || ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
@@ -338,7 +340,7 @@ public class H5ScalarDS extends ScalarDS {
                 isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
                 log.trace(
                         "init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
-                        tid, tclass, isText, isVLEN, isEnum, isUnsigned, isRegRef);
+                        tid, tclass, isText, isVLEN, isEnum, getDatatype().isUnsigned(), isRegRef);
 
                 // check if datatype in file is native datatype
                 try {
@@ -800,7 +802,7 @@ public class H5ScalarDS extends ScalarDS {
         Object theData = null;
         long did = -1;
         long tid = -1;
-        long spaceIDs[] = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
+        long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
         if (!isInited())
             init();
@@ -1023,7 +1025,7 @@ public class H5ScalarDS extends ScalarDS {
                 String cname = buf.getClass().getName();
                 char dname = cname.charAt(cname.lastIndexOf("[") + 1);
                 boolean doConversion = (((tsize == 1) && (dname == 'S')) || ((tsize == 2) && (dname == 'I'))
-                        || ((tsize == 4) && (dname == 'J')) || (isUnsigned && unsignedConverted));
+                        || ((tsize == 4) && (dname == 'J')) || (getDatatype().isUnsigned() && unsignedConverted));
                 log.trace("write(): tsize={} cname={} dname={} doConversion={}", tsize, cname, dname, doConversion);
 
                 tmpData = buf;
@@ -1354,7 +1356,8 @@ public class H5ScalarDS extends ScalarDS {
                             compression += ": H5Z_FILTER_CONFIG_DECODE_ENABLED";
                         }
                         else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
-                                || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED))) {
+                                || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
+                                        + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED))) {
                             compression += ": H5Z_FILTER_CONFIG_ENCODE_ENABLED";
                         }
                     }
@@ -1505,8 +1508,6 @@ public class H5ScalarDS extends ScalarDS {
             return;
         }
 
-        Attribute attr = (Attribute) info;
-        log.trace("updateMetadata(): {}", attr.getName());
         nAttributes = -1;
         log.trace("updateMetadata(): finish");
     }

@@ -399,8 +399,8 @@ public class AttributeTest {
     @Test
     public void testIsUnsigned() {
         log.debug("testIsUnsigned");
-        assertFalse(strAttr.isUnsigned());
-        assertFalse(arrayIntAttr.isUnsigned());
+        assertFalse(strAttr.getDatatype().isUnsigned());
+        assertFalse(arrayIntAttr.getDatatype().isUnsigned());
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

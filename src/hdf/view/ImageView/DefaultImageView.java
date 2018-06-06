@@ -229,9 +229,6 @@ public class DefaultImageView implements ImageView {
     /** the raw data of the image */
     private Object                  data;
 
-    /** flag to indicate if the original data type is unsigned integer */
-    private boolean                 isUnsigned;
-
     private boolean                 isUnsignedConverted = false;
 
     private double[]                dataRange;
@@ -317,7 +314,7 @@ public class DefaultImageView implements ImageView {
                 // reload the data when it is displayed next time
                 // because the display type (table or image) may be
                 // different.
-                if (!dataset.isImage()) {
+                if ((dataset != null) && !dataset.isImage()) {
                     dataset.clearData();
                 }
 
@@ -358,7 +355,6 @@ public class DefaultImageView implements ImageView {
         isTrueColor = false;
         is3D = false;
         isPlaneInterlace = false;
-        isUnsigned = false;
         data = null;
         NT = 0;
         showValues = ViewProperties.showImageValues();
@@ -1393,7 +1389,6 @@ public class DefaultImageView implements ImageView {
 
         // set number type, ...
         if (data != null) {
-            isUnsigned = dataset.isUnsigned();
             String cname = data.getClass().getName();
             NT = cname.charAt(cname.lastIndexOf("[") + 1);
         }
@@ -1508,17 +1503,16 @@ public class DefaultImageView implements ImageView {
 
         // data is unsigned short. Convert image byte data using auto-contrast
         // image algorithm
-        boolean isUnsigned = dataset.isUnsigned();
 
         if (gainBias == null) { // calculate auto_gain only once
             gainBias = new double[2];
-            Tools.autoContrastCompute(data, gainBias, isUnsigned);
+            Tools.autoContrastCompute(data, gainBias, dataset.getDatatype().isUnsigned());
         }
 
         if (gb == null)
             gb = gainBias;
 
-        autoGainData = Tools.autoContrastApply(data, autoGainData, gb, range, isUnsigned);
+        autoGainData = Tools.autoContrastApply(data, autoGainData, gb, range, dataset.getDatatype().isUnsigned());
 
         if (autoGainData != null) {
             if ((imageByteData == null)
@@ -2784,7 +2778,7 @@ public class DefaultImageView implements ImageView {
                     i2 = i0 + 2; // index for the third pixel
                 }
 
-                if (isUnsigned && !isUnsignedConverted) {
+                if (dataset.getDatatype().isUnsigned() && !isUnsignedConverted) {
                     r = String.valueOf(convertUnsignedPoint(i0));
                     g = String.valueOf(convertUnsignedPoint(i1));
                     b = String.valueOf(convertUnsignedPoint(i2));
@@ -2804,7 +2798,7 @@ public class DefaultImageView implements ImageView {
                 if (!dataset.isDefaultImageOrder())
                     idx = x * h + y;
 
-                if (isUnsigned && !isUnsignedConverted) {
+                if (dataset.getDatatype().isUnsigned() && !isUnsignedConverted) {
                     strBuff.append(convertUnsignedPoint(idx));
                 }
                 else {

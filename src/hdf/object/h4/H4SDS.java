@@ -480,7 +480,7 @@ public class H4SDS extends ScalarDS
 
         Object tmpData = buf;
         try {
-            if ( isUnsigned && unsignedConverted) {
+            if (getDatatype().isUnsigned() && unsignedConverted) {
                 tmpData = convertToUnsignedC(buf);
             }
             // assume external data files are located in the same directory as the main file.
@@ -812,7 +812,6 @@ public class H4SDS extends ScalarDS
         finally {
             close(id);
         }
-        isUnsigned = H4Datatype.isUnsigned(datatypeID);
 
         dims = new long[rank];
         maxDims = new long[rank];

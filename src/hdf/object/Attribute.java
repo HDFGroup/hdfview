@@ -88,9 +88,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     /** additional information and properties for the attribute */
     private Map<String, Object>  properties;
 
-    /** Flag to indicate if the datatype is an unsigned integer. */
-    private final boolean     isUnsigned;
-
     /**
      * Flag to indicate is the original unsigned C data is converted.
      */
@@ -278,9 +275,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         unsignedConverted = false;
 
         isScalar = (dims == null);
-        isUnsigned = (datatype.getDatatypeSign() == Datatype.SIGN_NONE);
-        isTextData = (datatype.getDatatypeClass() == Datatype.CLASS_STRING);
-        isCompound = (datatype.getDatatypeClass() == Datatype.CLASS_COMPOUND);
+        isTextData = (getDatatype().getDatatypeClass() == Datatype.CLASS_STRING);
+        isCompound = (getDatatype().getDatatypeClass() == Datatype.CLASS_COMPOUND);
 
         if (dims == null) {
             rank = 1;
@@ -295,7 +291,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         selectedStride = new long[rank];
 
         log.trace("attrName={}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}",
-                attrName, datatype.getDatatypeDescription(), data, rank, isUnsigned, isScalar);
+                attrName, getDatatype().getDatatypeDescription(), data, rank, getDatatype().isUnsigned(), isScalar);
 
         resetSelection();
     }
@@ -538,7 +534,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         // Keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        if ((data != null) && isUnsigned && !unsignedConverted) {
+        if ((data != null) && getDatatype().isUnsigned() && !unsignedConverted) {
             log.trace("convertFromUnsignedC(): convert");
 
             originalBuf = data;
@@ -568,7 +564,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         // Keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        if ((data != null) && isUnsigned) {
+        if ((data != null) && getDatatype().isUnsigned()) {
             log.trace("convertToUnsignedC(): convert");
 
             convertedBuf = data;
@@ -683,17 +679,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     public boolean isScalar() {
         return isScalar;
-    }
-
-    /**
-     * Checks if the data type of this attribute is an unsigned integer.
-     *
-     * @return true if the data type of the attribute is an unsigned integer;
-     *         otherwise returns false.
-     */
-    @Override
-    public boolean isUnsigned() {
-        return isUnsigned;
     }
 
     @Override
@@ -1102,10 +1087,10 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             if (n > maxItems)
                 n = maxItems;
 
-        boolean is_unsigned = (this.getDatatype().getDatatypeSign() == Datatype.SIGN_NONE);
-        boolean is_enum = (this.getDatatype().getDatatypeClass() == Datatype.CLASS_ENUM);
-        log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", is_enum, is_unsigned, n);
-        if(is_enum) {
+        log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", getDatatype().isEnum(),
+                getDatatype().isUnsigned(), n);
+
+        if (getDatatype().isEnum()) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
@@ -1210,7 +1195,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                     break;
             }
         }
-        else if (is_unsigned) {
+        else if (getDatatype().isUnsigned()) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
