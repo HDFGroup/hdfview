@@ -404,6 +404,17 @@ public abstract class DefaultBaseTableView implements TableView {
         log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar,
                 isEnumConverted);
 
+        if (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE) {
+            if (dataObject.getDatatype().getDatatypeSize() > 8) {
+                isReadOnly = true;
+                isRegRef = true;
+            }
+            else
+                isObjRef = true;
+        }
+
+        log.trace("Data object isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
+
         // Setup subset information
         log.trace("Setup subset information");
 
@@ -472,6 +483,20 @@ public abstract class DefaultBaseTableView implements TableView {
          * case with Attributes, then MenuItems may be incorrectly enabled.
          */
         shell.setMenuBar(createMenuBar(shell));
+
+        /*
+         * Set the default selection on the "Show Hexadecimal/Show Binary", etc. MenuItems.
+         * This step must be done after the menu bar has actually been created.
+         */
+        if (dataObject.getDatatype().isBitField() || dataObject.getDatatype().isOpaque()) {
+            showAsHex = true;
+            checkHex.setSelection(true);
+            checkScientificNotation.setSelection(false);
+            checkCustomNotation.setSelection(false);
+            checkBin.setSelection(false);
+            showAsBin = false;
+            numberFormat = normalFormat;
+        }
 
         /* Create the actual NatTable */
         try {
@@ -1084,7 +1109,14 @@ public abstract class DefaultBaseTableView implements TableView {
 
         try {
             dataValue = dataObject.getData();
-            dataObject.convertFromUnsignedC();
+
+            /*
+             * TODO: Converting data from unsigned C integers to Java integers
+             *       is currently unsupported for Compound Datasets.
+             */
+            if (!(dataObject instanceof CompoundDS))
+                dataObject.convertFromUnsignedC();
+
             dataValue = dataObject.getData();
         }
         catch (Exception ex) {

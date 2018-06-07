@@ -105,27 +105,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         log.trace("DefaultScalarDSTableView: start");
 
-        if (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE) {
-            if (dataObject.getDatatype().getDatatypeSize() > 8) {
-                isReadOnly = true;
-                isRegRef = true;
-            }
-            else
-                isObjRef = true;
-        }
-
-        if (dataObject.getDatatype().isBitField() || dataObject.getDatatype().isOpaque()) {
-            showAsHex = true;
-            checkHex.setSelection(true);
-            checkScientificNotation.setSelection(false);
-            checkCustomNotation.setSelection(false);
-            checkBin.setSelection(false);
-            showAsBin = false;
-            numberFormat = normalFormat;
-        }
-
-        log.trace("isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
-
         if (!shell.isDisposed()) {
             if (dataObject.isTextData())
                 shell.setImage(ViewProperties.getTextIcon());
