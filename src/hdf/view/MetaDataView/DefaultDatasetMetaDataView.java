@@ -312,7 +312,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                     if (mDims == null) {
                         rowData[i][2] = String.valueOf(orders[i]);
 
-                        if (isH4 && types[i].getDatatypeClass() == Datatype.CLASS_STRING) {
+                        if (isH4 && types[i].isString()) {
                             rowData[i][2] = String.valueOf(types[i].getDatatypeSize());
                         }
                     }

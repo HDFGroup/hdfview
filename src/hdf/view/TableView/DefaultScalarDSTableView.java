@@ -225,9 +225,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             dataValue = charData;
         }
-        else if ((runtimeTypeClass == 'B') && dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
+        else if ((runtimeTypeClass == 'B') && dataObject.getDatatype().isArray()) {
             Datatype baseType = dataObject.getDatatype().getDatatypeBase();
-            if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
+            if (baseType.isString()) {
                 dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
             }
         }
@@ -533,12 +533,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
         });
 
-        int type = dataObject.getDatatype().getDatatypeClass();
         char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
         boolean isInt = (runtimeTypeClass == 'B' || runtimeTypeClass == 'S' || runtimeTypeClass == 'I'
                 || runtimeTypeClass == 'J');
 
-        if (isInt || type == Datatype.CLASS_BITFIELD || type == Datatype.CLASS_OPAQUE) {
+        if (isInt || dataObject.getDatatype().isBitField() || dataObject.getDatatype().isOpaque()) {
             checkHex = new MenuItem(dataDisplayMenu, SWT.CHECK);
             checkHex.setText("Show Hexadecimal");
             checkHex.addSelectionListener(new SelectionAdapter() {
@@ -1061,7 +1060,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                  * Data is of a class type; mostly likely this is '[Ljava.lang.String', or
                  * string data.
                  */
-                if (type.getDatatypeClass() == Datatype.CLASS_STRING) {
+                if (type.isString()) {
                     return new DataValidator() {
                         @Override
                         public boolean validate(int colIndex, int rowIndex, Object newValue) {
@@ -1128,7 +1127,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             @Override
             public boolean isEditable(int columnIndex, int rowIndex) {
                 if (isReadOnly || isDisplayTypeChar || showAsBin || showAsHex
-                        || dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
+                        || dataObject.getDatatype().isArray()) {
                     return false;
                 }
                 else {
@@ -1545,7 +1544,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     || runtimeTypeClass == 'J');
             log.trace("ScalarDSDataProvider:runtimeTypeClass={}", runtimeTypeClass);
 
-            isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
+            isArray = dtype.isArray();
             log.trace("ScalarDSDataProvider:isArray={} start", isArray);
             if (isArray)
                 isUINT64 = (btype.isUnsigned() && (runtimeTypeClass == 'J'));
@@ -1557,13 +1556,13 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     || (theDataset.getSelectedIndex()[0] < theDataset.getSelectedIndex()[1]));
 
             if (isArray) {
-                if (dtype.isVLEN() && btype.getDatatypeClass() == Datatype.CLASS_STRING) {
+                if (dtype.isVLEN() && btype.isString()) {
                     isVLStr = true;
 
                     // Variable-length string arrays don't have a defined array size
                     arraySize = dtype.getArrayDims()[0];
                 }
-                else if (btype.getDatatypeClass() == Datatype.CLASS_ARRAY) {
+                else if (btype.isArray()) {
                     // Array of Array
                     long[] dims = btype.getArrayDims();
 
@@ -1584,7 +1583,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 arrayElements = new Object[(int) arraySize];
             }
             else {
-                if (dtype.isVLEN() && dtype.getDatatypeClass() == Datatype.CLASS_STRING) isVLStr = true;
+                if (dtype.isVLEN() && btype.isString())
+                    isVLStr = true;
 
                 arraySize = 0;
                 arrayElements = null;
@@ -1740,7 +1740,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
-            isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
+            isArray = dtype.isArray();
             log.trace("ScalarDSDisplayConverter:isArray={} start", isArray);
             isEnum = dtype.isEnum();
             if (isArray)
@@ -1761,7 +1761,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             if (isArray) {
                 int len = Array.getLength(value);
                 log.trace(
-                        "ScalarDSDataDisplayConverter:canonicalToDisplayValue(): isArray={} isEnum={} isBitfieldOrOpaque={} isUINT64={}",
+                        "ScalarDSDataDisplayConverter:canonicalToDisplayValue():ARRAY isArray={} isEnum={} isBitfieldOrOpaque={} isUINT64={}",
                         isArray, isEnum, isBitfieldOrOpaque, isUINT64);
 
                 if (showAsHex) {
@@ -1880,7 +1880,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         }
                     }
 
-                    if (retValues != null) buffer.append(outValues[0]);
+                    if (retValues != null)
+                        buffer.append(outValues[0]);
                 }
                 else
                     buffer.append(value);
@@ -2086,9 +2087,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         Datatype baseType = dtype.getDatatypeBase();
                                         log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: dtype={} baseType={}",
                                                 dtype.getDatatypeDescription(), baseType);
-                                        if (baseType == null) baseType = dtype;
-                                        if ((dtype.getDatatypeClass() == Datatype.CLASS_ARRAY
-                                                && baseType.getDatatypeClass() == Datatype.CLASS_CHAR)
+                                        if (baseType == null)
+                                            baseType = dtype;
+                                        if ((dtype.isArray() && baseType.isChar())
                                                 && ((runtimeTypeClass == 'B') || (runtimeTypeClass == 'S'))) {
                                             int n = Array.getLength(dbuf);
                                             log.trace(
@@ -2109,8 +2110,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         }
                                         else {
                                             // numerical values
-                                            if (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY) dtype = baseType;
                                             boolean is_unsigned = dtype.isUnsigned();
+                                            if (dtype.isArray())
+                                                is_unsigned = baseType.isUnsigned();
                                             int n = Array.getLength(dbuf);
                                             if (is_unsigned) {
                                                 switch (runtimeTypeClass) {

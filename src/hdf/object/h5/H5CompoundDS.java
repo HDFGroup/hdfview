@@ -526,7 +526,33 @@ public class H5CompoundDS extends CompoundDS {
 
         if (datatype == null) {
             log.trace("getDatatype(): datatype == null");
-            datatype = new H5Datatype(Datatype.CLASS_COMPOUND, -1, -1, -1);
+            long did = -1;
+            long tid = -1;
+
+            did = open();
+            if (did >= 0) {
+                try {
+                    tid = H5.H5Dget_type(did);
+                    datatype = new H5Datatype(tid);
+                }
+                catch (Exception ex) {
+                    log.debug("getDatatype(): ", ex);
+                }
+                finally {
+                    try {
+                        H5.H5Tclose(tid);
+                    }
+                    catch (HDF5Exception ex) {
+                        log.debug("getDatatype(): H5Tclose(tid {}) failure: ", tid, ex);
+                    }
+                    try {
+                        H5.H5Dclose(did);
+                    }
+                    catch (HDF5Exception ex) {
+                        log.debug("getDatatype(): H5Dclose(did {}) failure: ", did, ex);
+                    }
+                }
+            }
         }
 
         log.trace("getDatatype(): finish");

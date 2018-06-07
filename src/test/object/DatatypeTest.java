@@ -6,15 +6,16 @@ package test.object;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import hdf.hdf5lib.H5;
-import hdf.object.Datatype;
-import hdf.object.h5.H5Datatype;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import hdf.hdf5lib.H5;
+import hdf.object.Datatype;
+import hdf.object.h5.H5Datatype;
 
 /**
  * @author rsinha
@@ -147,7 +148,7 @@ public class DatatypeTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        baseTypes = new Datatype[n_orders * n_signs * (n_classes + 16)]; // INT, ENUM, BITFIELD, OPAQUE have 4 sizes
+        baseTypes = new H5Datatype[n_orders * n_signs * (n_classes + 16)]; // INT, ENUM, BITFIELD, OPAQUE have 4 sizes
         int counter = 0;
         for (int i = 0; i < n_classes; i++) {
             for (int j = 0; j < n_orders; j++) {

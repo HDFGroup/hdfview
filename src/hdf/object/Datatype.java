@@ -695,6 +695,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
+     * Checks if this datatype is a character type.
+     *
+     * @return true if the datatype is character; false otherwise
+     */
+    public boolean isChar() {
+        return (datatypeClass == Datatype.CLASS_CHAR);
+    }
+
+    /**
      * Checks if this datatype is a reference type.
      *
      * @return true if the datatype is reference; false otherwise

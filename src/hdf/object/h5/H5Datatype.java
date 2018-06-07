@@ -1722,7 +1722,7 @@ public class H5Datatype extends Datatype {
 
     @Override
     public boolean isText() {
-        return (datatypeClass == HDF5Constants.H5T_STRING);
+        return (datatypeClass == Datatype.CLASS_STRING);
     }
 
 }

@@ -1428,7 +1428,7 @@ public class DefaultImageView implements ImageView {
         }
 
         int typeClass = dataset.getDatatype().getDatatypeClass();
-        if (typeClass == Datatype.CLASS_INTEGER || typeClass == Datatype.CLASS_CHAR) {
+        if (typeClass == Datatype.CLASS_INTEGER || dataset.getDatatype().isChar()) {
             data = dataset.convertFromUnsignedC();
             isUnsignedConverted = true;
             doAutoGainContrast = doAutoGainContrast ||

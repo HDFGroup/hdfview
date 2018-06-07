@@ -91,36 +91,35 @@ public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView im
 
             char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
             if (runtimeTypeClass == ' ') {
-                log.debug("ScalarDSDataProvider: invalid data value runtime type class: runtimeTypeClass={}",
+                log.debug("ScalarAttributeDataProvider: invalid data value runtime type class: runtimeTypeClass={}",
                         runtimeTypeClass);
-                log.trace("ScalarDSDataProvider: finish");
+                log.trace("ScalarAttributeDataProvider: finish");
                 throw new IllegalStateException("Invalid data value runtime type class: " + runtimeTypeClass);
             }
 
             isInt = (runtimeTypeClass == 'B' || runtimeTypeClass == 'S' || runtimeTypeClass == 'I'
                     || runtimeTypeClass == 'J');
-            log.trace("ScalarDSDataProvider:runtimeTypeClass={}", runtimeTypeClass);
+            log.trace("ScalarAttributeDataProvider:runtimeTypeClass={}", runtimeTypeClass);
 
-            isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
-            log.trace("ScalarDSDataProvider:isArray={} start", isArray);
+            isArray = dtype.isArray();
+            log.trace("ScalarAttributeDataProvider:isArray={} start", isArray);
             if (isArray)
                 isUINT64 = (btype.isUnsigned() && (runtimeTypeClass == 'J'));
             else
                 isUINT64 = (dtype.isUnsigned() && (runtimeTypeClass == 'J'));
-
             isBitfieldOrOpaque = (dtype.isOpaque() || dtype.isBitField());
 
             isNaturalOrder = (dataObject.getRank() == 1
                     || (dataObject.getSelectedIndex()[0] < dataObject.getSelectedIndex()[1]));
 
             if (isArray) {
-                if (dtype.isVLEN() && btype.getDatatypeClass() == Datatype.CLASS_STRING) {
+                if (dtype.isVLEN() && btype.isString()) {
                     isVLStr = true;
 
                     // Variable-length string arrays don't have a defined array size
                     arraySize = dtype.getArrayDims()[0];
                 }
-                else if (btype.getDatatypeClass() == Datatype.CLASS_ARRAY) {
+                else if (btype.isArray()) {
                     // Array of Array
                     long[] dims = btype.getArrayDims();
 
@@ -141,7 +140,8 @@ public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView im
                 arrayElements = new Object[(int) arraySize];
             }
             else {
-                if (dtype.isVLEN() && dtype.getDatatypeClass() == Datatype.CLASS_STRING) isVLStr = true;
+                if (dtype.isVLEN() && btype.isString())
+                    isVLStr = true;
 
                 arraySize = 0;
                 arrayElements = null;
@@ -272,7 +272,6 @@ public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView im
             // }
 
             log.trace("ScalarAttributeDataProvider:getValueAt {} finish", theValue);
-
             return theValue;
         }
 

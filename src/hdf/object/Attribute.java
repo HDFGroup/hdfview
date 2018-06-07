@@ -275,7 +275,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         unsignedConverted = false;
 
         isScalar = (dims == null);
-        isTextData = (getDatatype().getDatatypeClass() == Datatype.CLASS_STRING);
+        isTextData = (getDatatype().isText());
         isCompound = (getDatatype().getDatatypeClass() == Datatype.CLASS_COMPOUND);
 
         if (dims == null) {

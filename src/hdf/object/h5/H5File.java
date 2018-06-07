@@ -467,10 +467,10 @@ public class H5File extends FileFormat {
                                 log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
                             }
                         }
-                        Datatype attrType = new H5Datatype(tid);
+                        H5Datatype attrType = new H5Datatype(tid);
                         Attribute attr = new Attribute(obj, nameA, attrType, dims);
                         attributeList.add(attr);
-                        log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attrType.getDatatypeDescription());
+                        log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attr.getDatatype().getDatatypeDescription());
 
                         boolean is_variable_str = false;
                         boolean isVLEN = false;
@@ -521,7 +521,7 @@ public class H5File extends FileFormat {
                             }
                             value = strs;
                         }
-                        else if (isCompound || (isScalar && tclass == HDF5Constants.H5T_ARRAY)) {
+                        else if (isCompound || (isScalar && attr.getDatatype().isArray())) {
                             String[] strs = new String[(int) lsize];
                             for (int j = 0; j < lsize; j++) {
                                 strs[j] = "";
@@ -558,7 +558,7 @@ public class H5File extends FileFormat {
                                 continue;
                             }
 
-                            if (tclass == HDF5Constants.H5T_ARRAY) {
+                            if (attr.getDatatype().isArray()) {
                                 long tmptid1 = -1, tmptid2 = -1;
                                 try {
                                     log.trace("getAttribute(): Attribute[{}] H5Aread ARRAY tid={}", i, tid);
@@ -2092,8 +2092,7 @@ public class H5File extends FileFormat {
                         }
                     }
                     else {
-                        if (attr.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE
-                                && attrValue instanceof String) {
+                        if (attr.getDatatype().isRef() && attrValue instanceof String) {
                             // reference is a path+name to the object
                             attrValue = H5.H5Rcreate(getFID(), (String) attrValue, HDF5Constants.H5R_OBJECT, -1);
                             log.trace("writeAttribute(): Attribute class is CLASS_REFERENCE");
