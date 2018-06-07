@@ -10,8 +10,10 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
@@ -255,6 +257,21 @@ public abstract class AbstractWindowTest {
                             window.setTestState(true);
 
                             shell = window.openMainWindow(fList, W, H, X, Y);
+
+                            // Force the HDFView window to open fullscreen on the active
+                            // monitor so that certain tests don't encounter weird issues
+                            // due to the window being too small
+                            Monitor[] monitors = shell.getDisplay().getMonitors();
+                            Monitor activeMonitor = null;
+
+                            Rectangle r = shell.getBounds();
+                            for (int i = 0; i < monitors.length; i++) {
+                                if (monitors[i].getBounds().intersects(r)) {
+                                    activeMonitor = monitors[i];
+                                }
+                            }
+
+                            shell.setBounds(activeMonitor.getBounds());
 
                             // wait for the test setup
                             swtBarrier.await();

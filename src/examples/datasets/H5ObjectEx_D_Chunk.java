@@ -102,7 +102,7 @@ public class H5ObjectEx_D_Chunk {
         // size to be the current size.
         try {
             filespace_id = H5.H5Screate_simple(RANK, dims, null);
-            type_id = typeInt.toNative();
+            type_id = typeInt.createNative();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -256,15 +256,15 @@ public class H5ObjectEx_D_Chunk {
                 int layout_type = H5.H5Pget_layout(dcpl_id);
                 System.out.print("Storage layout for " + DATASETNAME + " is: ");
                 switch (H5D_layout.get(layout_type)) {
-                case H5D_COMPACT:
-                    System.out.println("H5D_COMPACT");
-                    break;
-                case H5D_CONTIGUOUS:
-                    System.out.println("H5D_CONTIGUOUS");
-                    break;
-                case H5D_CHUNKED:
-                    System.out.println("H5D_CHUNKED");
-                    break;
+                    case H5D_COMPACT:
+                        System.out.println("H5D_COMPACT");
+                        break;
+                    case H5D_CONTIGUOUS:
+                        System.out.println("H5D_CONTIGUOUS");
+                        break;
+                    case H5D_CHUNKED:
+                        System.out.println("H5D_CHUNKED");
+                        break;
                 }
                 System.out.println();
             }

@@ -68,7 +68,7 @@ public class H5ObjectEx_D_Hyperslab {
         // size to be the current size.
         try {
             filespace_id = H5.H5Screate_simple(RANK, dims, null);
-            type_id = typeInt.toNative();
+            type_id = typeInt.createNative();
         }
         catch (Exception e) {
             e.printStackTrace();

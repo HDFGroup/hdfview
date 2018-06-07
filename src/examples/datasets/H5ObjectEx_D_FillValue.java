@@ -68,7 +68,7 @@ public class H5ObjectEx_D_FillValue {
         // Create dataspace with unlimited dimensions.
         try {
             dataspace_id = H5.H5Screate_simple(RANK, dims, maxdims);
-            type_id = typeInt.toNative();
+            type_id = typeInt.createNative();
         }
         catch (Exception e) {
             e.printStackTrace();

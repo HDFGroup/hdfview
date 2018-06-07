@@ -64,10 +64,10 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             // assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "9", val),
             // val.equals("9"));
 
-            table.click(12, 5);
+            table.click(4, 2);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "114", val),
-                    val.equals("114"));
+            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "15", val),
+                    val.equals("15"));
 
             tableShell.bot().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -83,10 +83,10 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            table.click(10, 2);
+            table.click(4, 2);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "91", val),
-                    val.equals("91"));
+            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "31", val),
+                    val.equals("31"));
 
             // TODO disabled until non-visible scrolling available
             // table.click(20, 2);

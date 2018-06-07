@@ -131,7 +131,7 @@ public class H5ObjectEx_D_Alloc {
         // Create the dataset using the dataset creation property list.
         try {
             filespace_id = H5.H5Screate_simple(RANK, dims, null);
-            type_id = typeInt.toNative();
+            type_id = typeInt.createNative();
             if ((file_id >= 0) && (filespace_id >= 0) && (type_id >= 0) && (dcpl_id >= 0)) {
                 dataset_id2 = H5.H5Dcreate(file_id, DATASETNAME2, type_id, filespace_id,
                         HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
