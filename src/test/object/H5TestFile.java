@@ -120,12 +120,19 @@ public class H5TestFile {
         }
 
         final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1);
+        typeInt.init(typeInt.createNative());
         final H5Datatype typeByte = new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, Datatype.SIGN_NONE);
+        typeByte.init(typeByte.createNative());
         final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1);
+        typeFloat.init(typeFloat.createNative());
         final H5Datatype typeStr = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
+        typeStr.init(typeStr.createNative());
         final H5Datatype typeChar = new H5Datatype(Datatype.CLASS_CHAR, 1, -1, -1);
+        typeChar.init(typeChar.createNative());
         final H5Datatype typeEnum = new H5Datatype(Datatype.CLASS_ENUM, DATATYPE_SIZE, -1, -1);
+        typeEnum.init(typeEnum.createNative());
         final H5Datatype typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, -1, -1, -1);
+        typeRef.init(typeRef.createNative());
 
         for (int i = 0; i < DIM_SIZE; i++) {
             DATA_INT[i] = i;
