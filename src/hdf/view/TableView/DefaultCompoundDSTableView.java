@@ -771,7 +771,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
                 theValue = str.trim();
             }
-            else if (typeClass == Datatype.CLASS_OPAQUE || typeClass == Datatype.CLASS_BITFIELD) {
+            else if (dtype.isOpaque() || dtype.isBitField()) {
                 int len = (int) dtype.getDatatypeSize();
                 byte[] elements = new byte[len];
 
@@ -965,7 +965,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 else
                     buffer.append(value);
             }
-            else if (typeClass == Datatype.CLASS_OPAQUE || typeClass == Datatype.CLASS_BITFIELD) {
+            else if (dtype.isOpaque() || dtype.isBitField()) {
                 for (int i = 0; i < ((byte[]) value).length; i++) {
                     if (i > 0) {
                         if (typeClass == Datatype.CLASS_BITFIELD)

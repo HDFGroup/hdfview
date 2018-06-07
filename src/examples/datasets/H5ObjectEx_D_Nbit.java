@@ -120,7 +120,7 @@ public class H5ObjectEx_D_Nbit {
 
             //Create the datatype to use with the N-Bit filter.  It has an uncompressed size of 32 bits,
             //but will have a size of 16 bits after being packed by the N-Bit filter.
-            type_id = typeInt.toNative();
+            type_id = typeInt.createNative();
             H5.H5Tset_precision(type_id, 16);
             H5.H5Tset_offset(type_id, 5);
 
@@ -208,26 +208,26 @@ public class H5ObjectEx_D_Nbit {
                         120, filter_name, filter_config);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
-                case H5Z_FILTER_DEFLATE:
-                    System.out.println("H5Z_FILTER_DEFLATE");
-                    break;
-                case H5Z_FILTER_SHUFFLE:
-                    System.out.println("H5Z_FILTER_SHUFFLE");
-                    break;
-                case H5Z_FILTER_FLETCHER32:
-                    System.out.println("H5Z_FILTER_FLETCHER32");
-                    break;
-                case H5Z_FILTER_SZIP:
-                    System.out.println("H5Z_FILTER_SZIP");
-                    break;
-                case H5Z_FILTER_NBIT:
-                    System.out.println("H5Z_FILTER_NBIT");
-                    break;
-                case H5Z_FILTER_SCALEOFFSET:
-                    System.out.println("H5Z_FILTER_SCALEOFFSET");
-                    break;
-                default:
-                    System.out.println("H5Z_FILTER_ERROR");
+                    case H5Z_FILTER_DEFLATE:
+                        System.out.println("H5Z_FILTER_DEFLATE");
+                        break;
+                    case H5Z_FILTER_SHUFFLE:
+                        System.out.println("H5Z_FILTER_SHUFFLE");
+                        break;
+                    case H5Z_FILTER_FLETCHER32:
+                        System.out.println("H5Z_FILTER_FLETCHER32");
+                        break;
+                    case H5Z_FILTER_SZIP:
+                        System.out.println("H5Z_FILTER_SZIP");
+                        break;
+                    case H5Z_FILTER_NBIT:
+                        System.out.println("H5Z_FILTER_NBIT");
+                        break;
+                    case H5Z_FILTER_SCALEOFFSET:
+                        System.out.println("H5Z_FILTER_SCALEOFFSET");
+                        break;
+                    default:
+                        System.out.println("H5Z_FILTER_ERROR");
                 }
                 System.out.println();
             }

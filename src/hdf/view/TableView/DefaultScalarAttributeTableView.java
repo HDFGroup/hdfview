@@ -108,8 +108,7 @@ public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView im
             else
                 isUINT64 = (dtype.isUnsigned() && (runtimeTypeClass == 'J'));
 
-            isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE
-                    || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
+            isBitfieldOrOpaque = (dtype.isOpaque() || dtype.isBitField());
 
             isNaturalOrder = (dataObject.getRank() == 1
                     || (dataObject.getSelectedIndex()[0] < dataObject.getSelectedIndex()[1]));

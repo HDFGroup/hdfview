@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotRadio;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
@@ -333,6 +335,26 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name3 = "enum3D";
         SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+
+        try {
+            // switch to ViewProperties Convert Enum
+            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
+            fileMenuItem.click();
+
+            SWTBotShell botshell = bot.shell("Preferences");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive("Preferences"));
+
+            SWTBotRadio enumButton = botshell.bot().radio("Convert Enum");
+            if (!enumButton.isEnabled())
+                enumButton.click();
+
+            botshell.bot().button("Apply and Close").click();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
 
         try {
             SWTBotTree filetree = bot.tree();

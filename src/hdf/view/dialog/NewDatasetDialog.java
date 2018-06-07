@@ -1108,7 +1108,7 @@ public class NewDatasetDialog extends Dialog {
         Dataset dataset = (Dataset) tableView.getDataObject();
         if (dataset instanceof ScalarDS) {
             ScalarDS sd = (ScalarDS) dataset;
-            if (sd.isUnsigned()) {
+            if (sd.getDatatype().isUnsigned()) {
                 theData = Dataset.convertToUnsignedC(theData, null);
             }
         }
@@ -1161,7 +1161,7 @@ public class NewDatasetDialog extends Dialog {
 
         // in version 2.4, unsigned image data is converted to signed data
         // to write data, the data needs to be converted back to unsigned.
-        if (dataset.isUnsigned()) {
+        if (dataset.getDatatype().isUnsigned()) {
             theData = Dataset.convertToUnsignedC(theData, null);
         }
 
@@ -1317,7 +1317,7 @@ public class NewDatasetDialog extends Dialog {
                 Rectangle parentBounds = parent.getBounds();
                 Point shellSize = helpShell.getSize();
                 helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                                      (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
                 helpShell.open();
 

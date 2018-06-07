@@ -1883,6 +1883,7 @@ public class H5CompoundDSTest {
             fail("H5CompoundDS.create() failed. " + ex);
         }
         assertNotNull(dset);
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject int DS created");
 
         // Compound dataset with one field -- a float array: {float[}
         compData.setSize(0);
@@ -1904,6 +1905,7 @@ public class H5CompoundDSTest {
             fail("H5CompoundDS.create() failed. " + ex);
         }
         assertNotNull(dset);
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject float DS created");
 
         // Compound dataset with one field -- a string: {string}
         compData.setSize(0);
@@ -1926,6 +1928,7 @@ public class H5CompoundDSTest {
             fail("H5CompoundDS.create() failed. " + ex);
         }
         assertNotNull(dset);
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject compound string DS created");
 
         // Compound dataset with three fields {int, float, string}
         compData.setSize(0);
@@ -1950,6 +1953,7 @@ public class H5CompoundDSTest {
             fail("H5CompoundDS.create() failed. " + ex);
         }
         assertNotNull(dset);
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject compound int-float-string DS created");
 
         // close the file and reopen it
         try {
@@ -1979,6 +1983,8 @@ public class H5CompoundDSTest {
         }
         assertNotNull(compData);
         int[] ints = (int[]) compData.get(0);
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject ints={}", ints);
+
         for (int i = 0; i < expectedInts.length; i++) {
             assertEquals(expectedInts[i], ints[i]);
         }

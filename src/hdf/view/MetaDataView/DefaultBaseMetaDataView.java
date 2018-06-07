@@ -849,7 +849,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (cIndex >= 0) {
             NT = cName.charAt(cIndex + 1);
         }
-        boolean isUnsigned = attr.isUnsigned();
+        boolean isUnsigned = attr.getDatatype().isUnsigned();
 
         log.trace("updateAttributeValue(): array_length={} cName={} NT={} isUnsigned={}", array_length, cName,
                 NT, isUnsigned);

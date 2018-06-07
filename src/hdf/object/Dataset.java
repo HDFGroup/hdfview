@@ -149,8 +149,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     protected Datatype        datatype;
 
     /**
-     * Array of strings that represent the dimension names. It is null if
-     * dimension names do not exist.
+     * Array of strings that represent the dimension names. It is null if dimension names do not exist.
      */
     protected String[]        dimNames;
 

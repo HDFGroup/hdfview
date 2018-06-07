@@ -1712,7 +1712,7 @@ public class GermanTableView implements TableView {
         log.trace("updateScalarData({}, {}): {} NT={}", row, col, cellValue, NT);
 
         ScalarDS sds = (ScalarDS) dataset;
-        boolean isUnsigned = sds.isUnsigned();
+        boolean isUnsigned = sds.getDatatype().isUnsigned();
         String cname = dataset.getOriginalClass().getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         log.trace("updateScalarData({}, {}): isUnsigned={} cname={} dname={}", row, col, isUnsigned, cname, dname);
@@ -3650,7 +3650,7 @@ public class GermanTableView implements TableView {
      *         otherwise.
      */
     private static DataValidator getScalarDSDataValidator(final ScalarDS theDataset) {
-        boolean isUnsigned = theDataset.isUnsigned();
+        boolean isUnsigned = theDataset.getDatatype().isUnsigned();
         String cname = theDataset.getOriginalClass().getName();
 
         //TODO: Add validation for array types when array editing is added

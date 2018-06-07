@@ -114,8 +114,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 isObjRef = true;
         }
 
-        if ((dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_BITFIELD)
-                || (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_OPAQUE)) {
+        if (dataObject.getDatatype().isBitField() || dataObject.getDatatype().isOpaque()) {
             showAsHex = true;
             checkHex.setSelection(true);
             checkScientificNotation.setSelection(false);
@@ -826,7 +825,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             log.trace("updateValueInMemory({}, {}): {} runtimeTypeClass={}", row, col, cellValue, runtimeTypeClass);
 
-            boolean isUnsigned = dataObject.isUnsigned();
+            boolean isUnsigned = dataObject.getDatatype().isUnsigned();
             String cname = dataObject.getOriginalClass().getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("updateValueInMemory({}, {}): isUnsigned={} cname={} dname={}", row,
@@ -948,7 +947,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @Override
     protected DataValidator getDataValidator(final DataFormat dataObject) {
-        boolean isUnsigned = dataObject.isUnsigned();
+        boolean isUnsigned = dataObject.getDatatype().isUnsigned();
         String cname = dataObject.getOriginalClass().getName();
 
         // TODO: Add validation for array types when array editing is added
@@ -1573,8 +1572,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 isUINT64 = (btype.isUnsigned() && (runtimeTypeClass == 'J'));
             else
                 isUINT64 = (dtype.isUnsigned() && (runtimeTypeClass == 'J'));
-            isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE
-                    || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
+            isBitfieldOrOpaque = (dtype.isOpaque() || dtype.isBitField());
 
             isNaturalOrder = (theDataset.getRank() == 1
                     || (theDataset.getSelectedIndex()[0] < theDataset.getSelectedIndex()[1]));
@@ -1765,13 +1763,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             isArray = dtype.getDatatypeClass() == Datatype.CLASS_ARRAY;
             log.trace("ScalarDSDisplayConverter:isArray={} start", isArray);
-            isEnum = dtype.getDatatypeClass() == Datatype.CLASS_ENUM;
+            isEnum = dtype.isEnum();
             if (isArray)
                 isUINT64 = (btype.isUnsigned() && (Tools.getJavaObjectRuntimeClass(dataValue) == 'J'));
             else
                 isUINT64 = (dtype.isUnsigned() && (Tools.getJavaObjectRuntimeClass(dataValue) == 'J'));
-            isBitfieldOrOpaque = (dtype.getDatatypeClass() == Datatype.CLASS_OPAQUE
-                    || dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD);
+            isBitfieldOrOpaque = (dtype.isOpaque() || dtype.isBitField());
             log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
         }
 
@@ -1822,10 +1819,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     for (int i = 0; i < ((byte[]) value).length; i++) {
                         if ((i + 1) % typeSize == 0) buffer.append(", ");
                         if (i > 0) {
-                            if (dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD)
-                                buffer.append(":");
-                            else
-                                buffer.append(" ");
+                            buffer.append(dtype.isBitField() ? ":" : " ");
                         }
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }
@@ -1915,10 +1909,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             else if (isBitfieldOrOpaque) {
                 for (int i = 0; i < ((byte[]) value).length; i++) {
                     if (i > 0) {
-                        if (dtype.getDatatypeClass() == Datatype.CLASS_BITFIELD)
-                            buffer.append(":");
-                        else
-                            buffer.append(" ");
+                        buffer.append(dtype.isBitField() ? ":" : " ");
                     }
                     buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                 }
@@ -2270,7 +2261,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 cellValueField.setText(strVal);
 
-                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected finish");
+                log.trace("ScalarDSCellSelectionListener: CellSelected finish");
             }
         }
     }
