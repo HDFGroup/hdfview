@@ -12,8 +12,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotRadio;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
@@ -345,7 +345,9 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Preferences"));
 
-            SWTBotRadio enumButton = botshell.bot().radio("Convert Enum");
+            botshell.bot().tree().getTreeItem("HDF Settings").click();
+
+            SWTBotCheckBox enumButton = botshell.bot().checkBox("Convert Enum");
             if (!enumButton.isEnabled())
                 enumButton.click();
 
