@@ -595,43 +595,43 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         String description = "Unknown";
 
         switch (datatypeClass) {
-        case CLASS_INTEGER:
-            if (datatypeSign == SIGN_NONE) {
+            case CLASS_INTEGER:
+                if (datatypeSign == SIGN_NONE) {
+                    description = String.valueOf(datatypeSize * 8)
+                            + "-bit unsigned integer";
+                }
+                else {
+                    description = String.valueOf(datatypeSize * 8) + "-bit integer";
+                }
+                break;
+            case CLASS_FLOAT:
                 description = String.valueOf(datatypeSize * 8)
-                        + "-bit unsigned integer";
-            }
-            else {
-                description = String.valueOf(datatypeSize * 8) + "-bit integer";
-            }
-            break;
-        case CLASS_FLOAT:
-            description = String.valueOf(datatypeSize * 8)
-                    + "-bit floating-point";
-            break;
-        case CLASS_STRING:
-            description = "String";
-            break;
-        case CLASS_REFERENCE:
-            description = "Object reference";
-            break;
-        case CLASS_BITFIELD:
-            description = "Bitfield";
-            break;
-        case CLASS_ENUM:
-            description = String.valueOf(datatypeSize * 8) + "-bit enum";
-            break;
-        case CLASS_ARRAY:
-            description = "Array";
-            break;
-        case CLASS_COMPOUND:
-            description = "Compound ";
-            break;
-        case CLASS_VLEN:
-            description = "Variable-length";
-            break;
-        default:
-            description = "Unknown";
-            break;
+                + "-bit floating-point";
+                break;
+            case CLASS_STRING:
+                description = "String";
+                break;
+            case CLASS_REFERENCE:
+                description = "Object reference";
+                break;
+            case CLASS_BITFIELD:
+                description = "Bitfield";
+                break;
+            case CLASS_ENUM:
+                description = String.valueOf(datatypeSize * 8) + "-bit enum";
+                break;
+            case CLASS_ARRAY:
+                description = "Array";
+                break;
+            case CLASS_COMPOUND:
+                description = "Compound ";
+                break;
+            case CLASS_VLEN:
+                description = "Variable-length";
+                break;
+            default:
+                description = "Unknown";
+                break;
         }
 
         log.trace("description={}", description);
@@ -648,6 +648,24 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     public abstract boolean isUnsigned();
 
     public abstract boolean isText();
+
+    /**
+     * Checks if this datatype is an integer type.
+     *
+     * @return true if the datatype is integer; false otherwise
+     */
+    public boolean isInteger() {
+        return (datatypeClass == Datatype.CLASS_INTEGER);
+    }
+
+    /**
+     * Checks if this datatype is a floating-point type.
+     *
+     * @return true if the datatype is floating-point; false otherwise
+     */
+    public boolean isFloat() {
+        return (datatypeClass == Datatype.CLASS_FLOAT);
+    }
 
     /**
      * Checks if this datatype is a variable-length string type.

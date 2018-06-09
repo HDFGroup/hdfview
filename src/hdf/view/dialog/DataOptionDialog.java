@@ -442,8 +442,7 @@ public class DataOptionDialog extends Dialog {
 
         // reset show char button
         Datatype dtype = dataObject.getDatatype();
-        int tclass = dtype.getDatatypeClass();
-        if (tclass == Datatype.CLASS_CHAR || tclass == Datatype.CLASS_INTEGER) {
+        if (dtype.isChar() || dtype.isInteger()) {
             int tsize = (int) dtype.getDatatypeSize();
 
             if(charCheckbox != null) {
@@ -773,9 +772,7 @@ public class DataOptionDialog extends Dialog {
                 dataRangeField.setEnabled(false);
                 fillValueField.setEnabled(false);
                 Datatype dtype = dataObject.getDatatype();
-                int tclass = dtype.getDatatypeClass();
-                charCheckbox.setEnabled((tclass == Datatype.CLASS_CHAR ||
-                        tclass == Datatype.CLASS_INTEGER) &&
+                charCheckbox.setEnabled((dtype.isChar() || dtype.isInteger()) &&
                         (dtype.getDatatypeSize() == 1));
             }
         });
@@ -792,9 +789,8 @@ public class DataOptionDialog extends Dialog {
             }
         });
 
-        if (tclass == Datatype.CLASS_CHAR
-                || (tclass == Datatype.CLASS_INTEGER && dataObject
-                .getDatatype().getDatatypeSize() == 1)) {
+        if (dataObject.getDatatype().isChar()
+                || (dataObject.getDatatype().isInteger() && dataObject.getDatatype().getDatatypeSize() == 1)) {
             charCheckbox.setEnabled(false);
         }
 
@@ -869,7 +865,7 @@ public class DataOptionDialog extends Dialog {
 
         double minmax[] = ((ScalarDS) dataObject).getImageDataRange();
         if (minmax != null) {
-            if (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_FLOAT)
+            if (dataObject.getDatatype().isFloat())
                 minmaxStr = minmax[0] + "," + minmax[1];
             else
                 minmaxStr = ((long) minmax[0]) + "," + ((long) minmax[1]);
@@ -1084,7 +1080,7 @@ public class DataOptionDialog extends Dialog {
                     );
         }
 
-        if (tclass == Datatype.CLASS_CHAR || (tclass == Datatype.CLASS_INTEGER && tsize <= 8)) {
+        if (dataObject.getDatatype().isChar() || (dataObject.getDatatype().isInteger() && tsize <= 8)) {
             extractBitButton.setEnabled(true);
             applyBitmaskButton.setEnabled(true);
             bitmaskHelp.setEnabled(true);

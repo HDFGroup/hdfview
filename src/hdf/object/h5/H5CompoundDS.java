@@ -1989,7 +1989,7 @@ public class H5CompoundDS extends CompoundDS {
 
             mTypes[i] = -1;
             // the member is an array
-            if ((memberSize > 1) && (memberDatatypes[i].getDatatypeClass() != Datatype.CLASS_STRING)) {
+            if ((memberSize > 1) && (!memberDatatypes[i].isString())) {
                 long tmptid = -1;
                 if ((tmptid = memberDatatypes[i].createNative()) >= 0) {
                     try {

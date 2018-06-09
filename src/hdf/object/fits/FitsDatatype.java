@@ -181,16 +181,16 @@ public class FitsDatatype extends Datatype
                 description = "64-bit float";
                 break;
             default:
-                if (datatypeClass==Datatype.CLASS_STRING) {
+                if (this.isString()) {
                     description = "String";
                 }
-                else if (datatypeClass==Datatype.CLASS_CHAR) {
+                else if (this.isChar()) {
                     description = "Char";
                 }
-                else if (datatypeClass==Datatype.CLASS_INTEGER) {
+                else if (this.isInteger()) {
                     description = "Integer";
                 }
-                else if (datatypeClass==Datatype.CLASS_FLOAT) {
+                else if (this.isFloat()) {
                     description = "Float";
                 }
                 break;
