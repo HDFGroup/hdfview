@@ -415,16 +415,6 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
-     * Returns true if this dataset is ASCII text.
-     *
-     * @return true if this dataset is ASCII text.
-     */
-    @Override
-    public boolean isTextData() {
-        return (datatype != null) ? datatype.isText() : false;
-    }
-
-    /**
      * Returns the interlace mode of a true color image (RGB).
      *
      * Valid values:

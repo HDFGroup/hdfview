@@ -475,10 +475,8 @@ public class H5File extends FileFormat {
                         boolean is_variable_str = false;
                         boolean isVLEN = false;
                         boolean isCompound = false;
-                        boolean isScalar = false;
                         int tclass = H5.H5Tget_class(tid);
 
-                        if (dims == null) isScalar = true;
                         try {
                             is_variable_str = H5.H5Tis_variable_str(tid);
                         }
@@ -489,7 +487,7 @@ public class H5File extends FileFormat {
                         isCompound = (tclass == HDF5Constants.H5T_COMPOUND);
                         log.trace(
                                 "getAttribute(): Attribute[{}] has size={} isCompound={} isScalar={} is_variable_str={} isVLEN={}",
-                                i, lsize, isCompound, isScalar, is_variable_str, isVLEN);
+                                i, lsize, isCompound, attr.isScalar(), is_variable_str, isVLEN);
 
                         // retrieve the attribute value
                         if (lsize <= 0) {
@@ -521,7 +519,7 @@ public class H5File extends FileFormat {
                             }
                             value = strs;
                         }
-                        else if (isCompound || (isScalar && attr.getDatatype().isArray())) {
+                        else if (isCompound || (attr.isScalar() && attr.getDatatype().isArray())) {
                             String[] strs = new String[(int) lsize];
                             for (int j = 0; j < lsize; j++) {
                                 strs[j] = "";
@@ -559,7 +557,6 @@ public class H5File extends FileFormat {
                             }
 
                             if (attr.getDatatype().isArray()) {
-                                long tmptid1 = -1, tmptid2 = -1;
                                 try {
                                     log.trace("getAttribute(): Attribute[{}] H5Aread ARRAY tid={}", i, tid);
                                     H5.H5Aread(aid, tid, value);
@@ -567,22 +564,6 @@ public class H5File extends FileFormat {
                                 catch (Exception ex) {
                                     log.debug("getAttribute(): Attribute[{}] H5Aread failure: ", i, ex);
                                     ex.printStackTrace();
-                                }
-                                finally {
-                                    try {
-                                        H5.H5Tclose(tmptid1);
-                                    }
-                                    catch (Exception ex) {
-                                        log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i,
-                                                tmptid1, ex);
-                                    }
-                                    try {
-                                        H5.H5Tclose(tmptid2);
-                                    }
-                                    catch (Exception ex) {
-                                        log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i,
-                                                tmptid2, ex);
-                                    }
                                 }
                             }
                             else {
@@ -602,7 +583,6 @@ public class H5File extends FileFormat {
 
                         log.debug("getAttribute(): Attribute[{}] data: {}", i, value);
                         attr.setData(value);
-
                     }
                     catch (HDF5Exception ex) {
                         log.debug("getAttribute(): Attribute[{}] inspection failure: ", i, ex);

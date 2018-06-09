@@ -93,14 +93,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     protected boolean         unsignedConverted;
 
-    /** Flag to indicate if the data is text */
-    protected final boolean   isTextData;
-
     /** Flag to indicate if the attribute data is a single scalar point */
     protected final boolean   isScalar;
-
-    /** Flag to indicate if the attribute has a compound datatype */
-    protected final boolean   isCompound;
 
     /** Fields for Compound datatype attributes */
 
@@ -267,24 +261,21 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         this.parentObject = parentObj;
 
         datatype = attrType;
-        dims = attrDims;
-        data = attrValue;
-        properties = new HashMap();
-        rank = -1;
-
-        unsignedConverted = false;
-
-        isScalar = (dims == null);
-        isTextData = (getDatatype().isText());
-        isCompound = (getDatatype().getDatatypeClass() == Datatype.CLASS_COMPOUND);
-
-        if (dims == null) {
+        if (attrDims == null) {
             rank = 1;
             dims = new long[] { 1 };
+            isScalar = true;
         }
         else {
+            dims = attrDims;
             rank = dims.length;
+            isScalar = false;
         }
+
+        data = attrValue;
+        properties = new HashMap();
+
+        unsignedConverted = false;
 
         selectedDims = new long[rank];
         startDims = new long[rank];
@@ -682,11 +673,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     }
 
     @Override
-    public boolean isTextData() {
-        return isTextData;
-    }
-
-    @Override
     public Object read() throws Exception, OutOfMemoryError {
         if (!inited) init();
 
@@ -694,7 +680,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
          * TODO: For now, convert a compound Attribute's data (String[]) into a List for
          * convenient processing
          */
-        if (isCompound) {
+        if (getDatatype().isCompound()) {
             List<String> valueList = Arrays.asList((String[]) data);
 
             data = valueList;

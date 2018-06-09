@@ -106,10 +106,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         log.trace("DefaultScalarDSTableView: start");
 
         if (!shell.isDisposed()) {
-            if (dataObject.isTextData())
-                shell.setImage(ViewProperties.getTextIcon());
-            else
-                shell.setImage(ViewProperties.getDatasetIcon());
+            shell.setImage(dataObject.getDatatype().isText() ? ViewProperties.getTextIcon() : ViewProperties.getDatasetIcon());
 
             shell.addDisposeListener(new DisposeListener() {
                 @Override
