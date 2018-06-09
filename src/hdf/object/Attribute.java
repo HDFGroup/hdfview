@@ -858,7 +858,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public int[] getSelectedMemberOrders() {
+        log.trace("getSelectedMemberOrders(): start");
+
         if (isMemberSelected == null) {
+            log.debug("getSelectedMemberOrders(): isMemberSelected array is null");
+            log.trace("getSelectedMemberOrders(): finish");
             return memberOrders;
         }
 
@@ -869,6 +873,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                 orders[idx++] = memberOrders[i];
             }
         }
+
+        log.trace("getSelectedMemberOrders(): finish");
 
         return orders;
     }
@@ -926,7 +932,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public Datatype[] getSelectedMemberTypes() {
+        log.trace("getSelectedMemberTypes(): start");
+
         if (isMemberSelected == null) {
+            log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
+            log.trace("getSelectedMemberTypes(): finish");
             return memberTypes;
         }
 
@@ -937,6 +947,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                 types[idx++] = memberTypes[i];
             }
         }
+
+        log.trace("getSelectedMemberTypes(): finish");
 
         return types;
     }

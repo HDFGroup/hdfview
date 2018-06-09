@@ -63,6 +63,8 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
         private final int          nSubColumns;
 
         public CompoundAttributeDataProvider(DataFormat dataObject) {
+            log.trace("CompoundAttributeDataProvider: start");
+
             CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
 
             stringBuffer = new StringBuffer();
@@ -74,6 +76,8 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
             nRows = (int) dataFormat.getHeight();
             nCols = (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount());
             nSubColumns = (nFields > 0) ? getColumnCount() / nFields : 0;
+
+            log.trace("CompoundAttributeDataProvider: finish");
         }
 
         @Override

@@ -563,6 +563,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private final int          nSubColumns;
 
         public CompoundDSDataProvider(DataFormat theDataset) {
+            log.trace("CompoundDSDataProvider: start");
+
             CompoundDataFormat dataFormat = (CompoundDataFormat) theDataset;
 
             stringBuffer = new StringBuffer();
@@ -574,6 +576,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             nRows = (int) dataFormat.getHeight();
             nCols = (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount());
             nSubColumns = (nFields > 0) ? getColumnCount() / nFields : 0;
+
+            log.trace("CompoundDSDataProvider: finish");
         }
 
         @Override
@@ -823,6 +827,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private final int          nSubColumns;
 
         public CompoundDSDataDisplayConverter(final DataFormat dataObject) {
+            log.trace("CompoundDSDataDisplayConverter: start");
+
             CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
 
             buffer = new StringBuffer();
@@ -831,10 +837,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             orders = dataFormat.getSelectedMemberOrders();
             nFields = ((List<?>) dataValue).size();
-            nSubColumns = (nFields > 0)
-                    ? (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount()) / nFields
-                            : 0;
-                    log.trace("CompoundDSDataDisplayConverter {} finish", nSubColumns);
+            nSubColumns = (nFields > 0) ? (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount()) / nFields : 0;
+
+            log.trace("CompoundDSDataDisplayConverter: finish");
         }
 
         @Override
