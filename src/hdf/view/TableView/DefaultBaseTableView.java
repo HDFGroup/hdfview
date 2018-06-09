@@ -1119,8 +1119,10 @@ public abstract class DefaultBaseTableView implements TableView {
             dataValue = dataObject.getData();
         }
         catch (Exception ex) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Error loading data", "Dataset getData: " + ex.getMessage());
+            log.debug("gotoFrame(): ", ex);
             dataValue = null;
-            Tools.showError(shell, "Select", ex.getMessage());
             return;
         }
         finally {
