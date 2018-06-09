@@ -680,7 +680,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
          * TODO: For now, convert a compound Attribute's data (String[]) into a List for
          * convenient processing
          */
-        if (getDatatype().isCompound()) {
+        if (getDatatype().isCompound() && !(data instanceof List)) {
             List<String> valueList = Arrays.asList((String[]) data);
 
             data = valueList;
