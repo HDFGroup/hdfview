@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
-import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
@@ -111,9 +110,7 @@ public class TableViewFactory extends DataViewFactory {
                 else if (dataObject instanceof CompoundDS)
                     dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
                 else if (dataObject instanceof Attribute) {
-                    int typeClass = ((Attribute) dataObject).getDatatype().getDatatypeClass();
-
-                    if (typeClass == Datatype.CLASS_COMPOUND)
+                    if (((Attribute) dataObject).getDatatype().isCompound())
                         dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
                     else
                         dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;

@@ -602,7 +602,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
 
             Datatype dtype = types[fieldIdx];
-            int typeClass = dtype.getDatatypeClass();
 
             boolean isArray = dtype.isArray();
             boolean isUINT64 = false;
@@ -620,12 +619,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     if (btype.isUnsigned())
                         isUINT64 = (cName.charAt(cIndex + 1) == 'J');
                 }
-                typeClass = btype.getDatatypeClass();
 
                 log.trace("CompoundDSDataProvider:getDataValue(): Array - isArray={} isString={} isUINT64={}", btype.isArray(),
                         btype.isString(), isUINT64);
 
-                if (typeClass == Datatype.CLASS_COMPOUND) {
+                if (btype.isCompound()) {
                     int numberOfMembers = btype.getCompoundMemberNames().size();
                     arrayElements = new Object[orders[fieldIdx] * numberOfMembers];
 
@@ -852,16 +850,14 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
 
             Datatype dtype = types[fieldIndex];
-            int typeClass = dtype.getDatatypeClass();
 
             buffer.setLength(0);
 
             if (dtype.isArray()) {
                 Datatype btype = dtype.getDatatypeBase();
-                typeClass = btype.getDatatypeClass();
                 log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue():Array - isArray={} isEnum={} isStr={}", btype.isArray(), btype.isEnum(), btype.isString());
 
-                if (typeClass == Datatype.CLASS_COMPOUND) {
+                if (btype.isCompound()) {
                     int numberOfMembers = dtype.getCompoundMemberNames().size();
 
                     for (int i = 0; i < orders[fieldIndex]; i++) {
@@ -1067,7 +1063,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     if (types[i].isArray()) {
                         Datatype baseType = types[i].getDatatypeBase();
 
-                        if (baseType.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
+                        if (baseType.isCompound()) {
                             // If member is type array of compound, list member names in column header
                             List<String> memberNames = baseType.getCompoundMemberNames();
 

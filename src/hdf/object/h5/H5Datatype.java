@@ -642,21 +642,21 @@ public class H5Datatype extends Datatype {
                         H5.H5Tget_member_value(tid, i, val);
                         enumStr += name + "=";
                         switch ((int)H5.H5Tget_size(tid)) {
-                        case 1:
-                            enumStr += (HDFNativeData.byteToByte(val[0]))[0];
-                            break;
-                        case 2:
-                            enumStr += (HDFNativeData.byteToShort(val))[0];
-                            break;
-                        case 4:
-                            enumStr += (HDFNativeData.byteToInt(val))[0];
-                            break;
-                        case 8:
-                            enumStr += (HDFNativeData.byteToLong(val))[0];
-                            break;
-                        default:
-                            enumStr += "?";
-                            break;
+                            case 1:
+                                enumStr += (HDFNativeData.byteToByte(val[0]))[0];
+                                break;
+                            case 2:
+                                enumStr += (HDFNativeData.byteToShort(val))[0];
+                                break;
+                            case 4:
+                                enumStr += (HDFNativeData.byteToInt(val))[0];
+                                break;
+                            case 8:
+                                enumStr += (HDFNativeData.byteToLong(val))[0];
+                                break;
+                            default:
+                                enumStr += "?";
+                                break;
                         }
                         if(i < nMember-1)
                             enumStr += ",";
@@ -1538,7 +1538,7 @@ public class H5Datatype extends Datatype {
         boolean unsigned = false;
         long tid = -1;
 
-        if (datatypeClass == Datatype.CLASS_COMPOUND) return false;
+        if (this.isCompound()) return false;
 
         tid = createNative();
 
