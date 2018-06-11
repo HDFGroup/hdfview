@@ -396,15 +396,14 @@ public abstract class DefaultBaseTableView implements TableView {
 
         log.trace("Data object getDatatypeClass()={}", dtype.getDatatypeClass());
         isDisplayTypeChar = (isDisplayTypeChar
-                && (dtype.getDatatypeSize() == 1 || (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY
-                && dtype.getDatatypeBase().getDatatypeClass() == Datatype.CLASS_CHAR)));
+                && (dtype.getDatatypeSize() == 1 || (dtype.isArray() && dtype.getDatatypeBase().isChar())));
 
         isEnumConverted = ViewProperties.isConvertEnum();
 
         log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar,
                 isEnumConverted);
 
-        if (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE) {
+        if (dataObject.getDatatype().isRef()) {
             if (dataObject.getDatatype().getDatatypeSize() > 8) {
                 isReadOnly = true;
                 isRegRef = true;
@@ -1120,8 +1119,10 @@ public abstract class DefaultBaseTableView implements TableView {
             dataValue = dataObject.getData();
         }
         catch (Exception ex) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Error loading data", "Dataset getData: " + ex.getMessage());
+            log.debug("gotoFrame(): ", ex);
             dataValue = null;
-            Tools.showError(shell, "Select", ex.getMessage());
             return;
         }
         finally {

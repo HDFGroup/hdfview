@@ -182,7 +182,7 @@ public abstract class ScalarDS extends Dataset {
         log.trace("convertFromUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        log.trace("convertFromUnsignedC(): datatype={}", datatype);
+        log.trace("convertFromUnsignedC(): unsigned={}", datatype.isUnsigned());
         if ((data != null) && datatype.isUnsigned() && !unsignedConverted) {
             log.trace("convertFromUnsignedC(): convert");
             originalBuf = data;
@@ -217,7 +217,7 @@ public abstract class ScalarDS extends Dataset {
         log.trace("convertToUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        log.trace("convertToUnsignedC(): datatype={}", datatype);
+        log.trace("convertToUnsignedC(): unsigned={}", datatype.isUnsigned());
         if ((data != null) && datatype.isUnsigned()) {
             log.trace("convertToUnsignedC(): convert");
             convertedBuf = data;
@@ -412,16 +412,6 @@ public abstract class ScalarDS extends Dataset {
 
     public final boolean isTrueColor() {
         return isTrueColor;
-    }
-
-    /**
-     * Returns true if this dataset is ASCII text.
-     *
-     * @return true if this dataset is ASCII text.
-     */
-    @Override
-    public boolean isTextData() {
-        return (datatype != null) ? datatype.isText() : false;
     }
 
     /**

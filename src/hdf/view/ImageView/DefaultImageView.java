@@ -94,7 +94,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeItem;
 
-import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
@@ -1427,8 +1426,7 @@ public class DefaultImageView implements ImageView {
             }
         }
 
-        int typeClass = dataset.getDatatype().getDatatypeClass();
-        if (typeClass == Datatype.CLASS_INTEGER || typeClass == Datatype.CLASS_CHAR) {
+        if (dataset.getDatatype().isInteger() || dataset.getDatatype().isChar()) {
             data = dataset.convertFromUnsignedC();
             isUnsignedConverted = true;
             doAutoGainContrast = doAutoGainContrast ||

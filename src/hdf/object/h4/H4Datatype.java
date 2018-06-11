@@ -371,9 +371,8 @@ public class H4Datatype extends Datatype {
         // figure the datatype
         switch (tclass) {
             case Datatype.CLASS_INTEGER:
-                int tsign = getDatatypeSign();
                 if (tsize == 1) {
-                    if (tsign == Datatype.SIGN_NONE) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT8;
                     }
                     else {
@@ -381,7 +380,7 @@ public class H4Datatype extends Datatype {
                     }
                 }
                 else if (tsize == 2) {
-                    if (tsign == Datatype.SIGN_NONE) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT16;
                     }
                     else {
@@ -389,7 +388,7 @@ public class H4Datatype extends Datatype {
                     }
                 }
                 else if ((tsize == 4) || (tsize == NATIVE)) {
-                    if (tsign == Datatype.SIGN_NONE) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT32;
                     }
                     else {
@@ -397,7 +396,7 @@ public class H4Datatype extends Datatype {
                     }
                 }
                 else if (tsize == 8) {
-                    if (tsign == Datatype.SIGN_NONE) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT64;
                     }
                     else {
@@ -417,8 +416,7 @@ public class H4Datatype extends Datatype {
                 }
                 break;
             case Datatype.CLASS_CHAR:
-                int tsign2 = getDatatypeSign();
-                if (tsign2 == Datatype.SIGN_NONE) {
+                if (isUnsigned()) {
                     tid = HDFConstants.DFNT_UCHAR;
                 }
                 else {

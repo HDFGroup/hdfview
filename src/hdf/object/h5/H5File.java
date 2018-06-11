@@ -467,18 +467,16 @@ public class H5File extends FileFormat {
                                 log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
                             }
                         }
-                        Datatype attrType = new H5Datatype(tid);
+                        H5Datatype attrType = new H5Datatype(tid);
                         Attribute attr = new Attribute(obj, nameA, attrType, dims);
                         attributeList.add(attr);
-                        log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attrType.getDatatypeDescription());
+                        log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attr.getDatatype().getDatatypeDescription());
 
                         boolean is_variable_str = false;
                         boolean isVLEN = false;
                         boolean isCompound = false;
-                        boolean isScalar = false;
                         int tclass = H5.H5Tget_class(tid);
 
-                        if (dims == null) isScalar = true;
                         try {
                             is_variable_str = H5.H5Tis_variable_str(tid);
                         }
@@ -489,7 +487,7 @@ public class H5File extends FileFormat {
                         isCompound = (tclass == HDF5Constants.H5T_COMPOUND);
                         log.trace(
                                 "getAttribute(): Attribute[{}] has size={} isCompound={} isScalar={} is_variable_str={} isVLEN={}",
-                                i, lsize, isCompound, isScalar, is_variable_str, isVLEN);
+                                i, lsize, isCompound, attr.isScalar(), is_variable_str, isVLEN);
 
                         // retrieve the attribute value
                         if (lsize <= 0) {
@@ -521,7 +519,7 @@ public class H5File extends FileFormat {
                             }
                             value = strs;
                         }
-                        else if (isCompound || (isScalar && tclass == HDF5Constants.H5T_ARRAY)) {
+                        else if (isCompound || (attr.isScalar() && attr.getDatatype().isArray())) {
                             String[] strs = new String[(int) lsize];
                             for (int j = 0; j < lsize; j++) {
                                 strs[j] = "";
@@ -558,8 +556,7 @@ public class H5File extends FileFormat {
                                 continue;
                             }
 
-                            if (tclass == HDF5Constants.H5T_ARRAY) {
-                                long tmptid1 = -1, tmptid2 = -1;
+                            if (attr.getDatatype().isArray()) {
                                 try {
                                     log.trace("getAttribute(): Attribute[{}] H5Aread ARRAY tid={}", i, tid);
                                     H5.H5Aread(aid, tid, value);
@@ -567,22 +564,6 @@ public class H5File extends FileFormat {
                                 catch (Exception ex) {
                                     log.debug("getAttribute(): Attribute[{}] H5Aread failure: ", i, ex);
                                     ex.printStackTrace();
-                                }
-                                finally {
-                                    try {
-                                        H5.H5Tclose(tmptid1);
-                                    }
-                                    catch (Exception ex) {
-                                        log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i,
-                                                tmptid1, ex);
-                                    }
-                                    try {
-                                        H5.H5Tclose(tmptid2);
-                                    }
-                                    catch (Exception ex) {
-                                        log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i,
-                                                tmptid2, ex);
-                                    }
                                 }
                             }
                             else {
@@ -602,7 +583,6 @@ public class H5File extends FileFormat {
 
                         log.debug("getAttribute(): Attribute[{}] data: {}", i, value);
                         attr.setData(value);
-
                     }
                     catch (HDF5Exception ex) {
                         log.debug("getAttribute(): Attribute[{}] inspection failure: ", i, ex);
@@ -2092,8 +2072,7 @@ public class H5File extends FileFormat {
                         }
                     }
                     else {
-                        if (attr.getDatatype().getDatatypeClass() == Datatype.CLASS_REFERENCE
-                                && attrValue instanceof String) {
+                        if (attr.getDatatype().isRef() && attrValue instanceof String) {
                             // reference is a path+name to the object
                             attrValue = H5.H5Rcreate(getFID(), (String) attrValue, HDF5Constants.H5R_OBJECT, -1);
                             log.trace("writeAttribute(): Attribute class is CLASS_REFERENCE");

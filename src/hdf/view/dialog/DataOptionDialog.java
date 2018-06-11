@@ -356,7 +356,7 @@ public class DataOptionDialog extends Dialog {
         boolean isImage = false;
 
         if (dataObject instanceof ScalarDS) {
-            if (!dataObject.isTextData()) {
+            if (!dataObject.getDatatype().isText()) {
                 ScalarDS sd = (ScalarDS) dataObject;
                 isImage = sd.isImageDisplay();
                 isTrueColorImage = sd.isTrueColor();
@@ -442,8 +442,7 @@ public class DataOptionDialog extends Dialog {
 
         // reset show char button
         Datatype dtype = dataObject.getDatatype();
-        int tclass = dtype.getDatatypeClass();
-        if (tclass == Datatype.CLASS_CHAR || tclass == Datatype.CLASS_INTEGER) {
+        if (dtype.isChar() || dtype.isInteger()) {
             int tsize = (int) dtype.getDatatypeSize();
 
             if(charCheckbox != null) {
@@ -578,7 +577,7 @@ public class DataOptionDialog extends Dialog {
         else {
             ScalarDS ds = (ScalarDS) dataObject;
 
-            if (!ds.isTextData()) {
+            if (!ds.getDatatype().isText()) {
                 StringTokenizer st = new StringTokenizer(dataRangeField.getText(), ",");
                 if (st.countTokens() == 2) {
                     double min = 0, max = 0;
@@ -773,9 +772,7 @@ public class DataOptionDialog extends Dialog {
                 dataRangeField.setEnabled(false);
                 fillValueField.setEnabled(false);
                 Datatype dtype = dataObject.getDatatype();
-                int tclass = dtype.getDatatypeClass();
-                charCheckbox.setEnabled((tclass == Datatype.CLASS_CHAR ||
-                        tclass == Datatype.CLASS_INTEGER) &&
+                charCheckbox.setEnabled((dtype.isChar() || dtype.isInteger()) &&
                         (dtype.getDatatypeSize() == 1));
             }
         });
@@ -792,9 +789,8 @@ public class DataOptionDialog extends Dialog {
             }
         });
 
-        if (tclass == Datatype.CLASS_CHAR
-                || (tclass == Datatype.CLASS_INTEGER && dataObject
-                .getDatatype().getDatatypeSize() == 1)) {
+        if (dataObject.getDatatype().isChar()
+                || (dataObject.getDatatype().isInteger() && dataObject.getDatatype().getDatatypeSize() == 1)) {
             charCheckbox.setEnabled(false);
         }
 
@@ -869,7 +865,7 @@ public class DataOptionDialog extends Dialog {
 
         double minmax[] = ((ScalarDS) dataObject).getImageDataRange();
         if (minmax != null) {
-            if (dataObject.getDatatype().getDatatypeClass() == Datatype.CLASS_FLOAT)
+            if (dataObject.getDatatype().isFloat())
                 minmaxStr = minmax[0] + "," + minmax[1];
             else
                 minmaxStr = ((long) minmax[0]) + "," + ((long) minmax[1]);
@@ -1046,7 +1042,7 @@ public class DataOptionDialog extends Dialog {
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
         int tsize = (int) dataObject.getDatatype().getDatatypeSize();
-        bitmaskButtons = (tsize >= 0 && !dataObject.isTextData()) ? new Button[8 * tsize] : new Button[0];
+        bitmaskButtons = (tsize >= 0 && !dataObject.getDatatype().isText()) ? new Button[8 * tsize] : new Button[0];
 
         for (int i = 0; i < bitmaskButtons.length; i++) {
             bitmaskButtons[i] = new Button(buttonComposite, SWT.RADIO);
@@ -1084,7 +1080,7 @@ public class DataOptionDialog extends Dialog {
                     );
         }
 
-        if (tclass == Datatype.CLASS_CHAR || (tclass == Datatype.CLASS_INTEGER && tsize <= 8)) {
+        if (dataObject.getDatatype().isChar() || (dataObject.getDatatype().isInteger() && tsize <= 8)) {
             extractBitButton.setEnabled(true);
             applyBitmaskButton.setEnabled(true);
             bitmaskHelp.setEnabled(true);
@@ -1671,7 +1667,7 @@ public class DataOptionDialog extends Dialog {
             Image preImage = null;
             ScalarDS sd = (ScalarDS) dataObject;
 
-            if (sd.isTextData()) {
+            if (sd.getDatatype().isText()) {
                 return null;
             }
 

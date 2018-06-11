@@ -1677,7 +1677,6 @@ public class DebugHDF {
     private static void testH5DreadNIO(final String filename) throws Exception
     {
         final String dname = "8kx8k";
-        final int NLOOPS = 20;
 
         final H5File file = new H5File(filename, H5File.READ);
         file.open();

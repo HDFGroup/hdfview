@@ -152,6 +152,7 @@ public class H5CompoundDSTest {
 
         testDataset = (H5CompoundDS) testFile.get(DNAME);
         assertNotNull("setUp testFile.get", testDataset);
+        testDataset.init();
     }
 
     @After

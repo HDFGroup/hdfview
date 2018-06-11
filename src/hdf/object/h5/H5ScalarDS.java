@@ -2297,7 +2297,7 @@ public class H5ScalarDS extends ScalarDS {
             val_str = Array.get(fillValue, 0).toString();
         }
 
-        if (datatypeClass != Datatype.CLASS_STRING) {
+        if (!type.isString()) {
             try {
                 val_dbl = Double.parseDouble(val_str);
             }

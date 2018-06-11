@@ -364,11 +364,4 @@ public interface DataFormat {
      */
     @SuppressWarnings("rawtypes")
     public abstract Class getOriginalClass();
-
-    /**
-     * Returns whether or not the data is text data.
-     *
-     * @return whether or not the data is text data.
-     */
-    public abstract boolean isTextData();
 }

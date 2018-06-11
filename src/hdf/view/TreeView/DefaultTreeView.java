@@ -1652,7 +1652,7 @@ public class DefaultTreeView implements TreeView {
                         return imageIcon;
                     }
                 }
-                else if (sd.isTextData()) {
+                else if (sd.getDatatype().isText()) {
                     if (hasAttribute) {
                         return textIconA;
                     }

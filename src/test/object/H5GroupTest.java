@@ -519,7 +519,7 @@ public class H5GroupTest {
         for (int i = 0; i < n; i++) {
             final Attribute attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
+            if (dtype.isString()) {
                 try {
                     assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
                     assertTrue(
@@ -593,7 +593,7 @@ public class H5GroupTest {
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
+            if (dtype.isString()) {
                 try {
                     final String[] strs = (String[]) attr.getData();
                     strs[0] = TEST_VALUE_STR;
@@ -664,7 +664,7 @@ public class H5GroupTest {
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
+            if (dtype.isString()) {
                 try {
                     assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
                     assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
@@ -720,7 +720,7 @@ public class H5GroupTest {
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
             final H5Datatype dtype = (H5Datatype) attr.getDatatype();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
+            if (dtype.isString()) {
                 try {
                     final String[] strs = (String[]) attr.getData();
                     strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0];

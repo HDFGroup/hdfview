@@ -128,7 +128,7 @@ public class DataFormatTest {
         }
         for (int ndx=0; ndx < mdataList.size(); ndx++){
             Attribute attrobj = (Attribute) mdataList.get(ndx);
-            if (attrobj.getDatatype().getDatatypeClass() == Datatype.CLASS_STRING) {
+            if (attrobj.getDatatype().isString()) {
                 String[] value = null;
 
                 try {
@@ -236,7 +236,7 @@ public class DataFormatTest {
 
         for (int ndx=0; ndx < mdataList.size(); ndx++){
             Attribute attrobj = (Attribute) mdataList.get(ndx);
-            if (attrobj.getDatatype().getDatatypeClass() == Datatype.CLASS_STRING) {
+            if (attrobj.getDatatype().isString()) {
                 String[] value = null;
 
                 try {

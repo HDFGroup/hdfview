@@ -63,6 +63,8 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
         private final int          nSubColumns;
 
         public CompoundAttributeDataProvider(DataFormat dataObject) {
+            log.trace("CompoundAttributeDataProvider: start");
+
             CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
 
             stringBuffer = new StringBuffer();
@@ -70,10 +72,12 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
             types = dataFormat.getSelectedMemberTypes();
 
             orders = dataFormat.getSelectedMemberOrders();
-            nFields = ((List<?>) dataValue).size();
+            nFields = dataFormat.getSelectedMemberCount();
             nRows = (int) dataFormat.getHeight();
             nCols = (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount());
             nSubColumns = (nFields > 0) ? getColumnCount() / nFields : 0;
+
+            log.trace("CompoundAttributeDataProvider: finish");
         }
 
         @Override
@@ -83,20 +87,18 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
 
             log.trace("CompoundAttributeDataProvider:getDataValue({},{}) start", row, col);
 
-            // if (nSubColumns > 1) { // multi-dimension compound dataset
-            // int colIdx = col / nFields;
-            // fieldIdx %= nFields;
-            // rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
-            // log.trace("CompoundAttributeDataProvider:getDataValue() row={} orders[{}]={}
-            // nSubColumns={} colIdx={}",
-            // row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
-            // }
-            // else {
-            // rowIdx = row * orders[fieldIdx];
-            // log.trace("CompoundAttributeDataProvider:getDataValue() row={}
-            // orders[{}]={}", row, fieldIdx,
-            // orders[fieldIdx]);
-            // }
+            if (nSubColumns > 1) { // multi-dimension compound dataset
+                int colIdx = col / nFields;
+                fieldIdx %= nFields;
+                rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
+                log.trace("CompoundAttributeDataProvider:getDataValue() row={} orders[{}]={} nSubColumns={} colIdx={}",
+                        row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
+            }
+            else {
+                rowIdx = row * orders[fieldIdx];
+                log.trace("CompoundAttributeDataProvider:getDataValue() row={} orders[{}]={}", row, fieldIdx,
+                        orders[fieldIdx]);
+            }
 
             log.trace("CompoundAttributeDataProvider:getDataValue() rowIdx={}", rowIdx);
 
@@ -109,17 +111,17 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
             colValue = colValue.replace("[", "").replace("]", "");
 
             String[] dataValues = colValue.split(",");
-            if (orders[col] > 1) {
+            if (orders[fieldIdx] > 1) {
                 stringBuffer.setLength(0);
 
                 stringBuffer.append("[");
 
                 int startIdx = 0;
-                for (int i = 0; i < col; i++) {
+                for (int i = 0; i < fieldIdx; i++) {
                     startIdx += orders[i];
                 }
 
-                for (int i = 0; i < orders[col]; i++) {
+                for (int i = 0; i < orders[fieldIdx]; i++) {
                     if (i > 0) stringBuffer.append(", ");
 
                     stringBuffer.append(dataValues[startIdx + i]);
