@@ -399,13 +399,13 @@ public class H5Datatype extends Datatype {
             return null;
         }
 
-        if (enumMemberCount <= 0) {
+        if (enumMembers == null || enumMembers.size() <= 0) {
             log.debug("convertEnumValueToName(): no members");
             log.trace("convertEnumValueToName(): finish");
             return null;
         }
 
-        log.trace("convertEnumValueToName(): inSize={} nMembers={} enums={}", inSize, enumMemberCount, enumMembers);
+        log.trace("convertEnumValueToName(): inSize={} nMembers={} enums={}", inSize, enumMembers.size(), enumMembers);
         outNames = new String[inSize];
         for (int i = 0; i < inSize; i++) {
             if (isArray) {
@@ -478,7 +478,7 @@ public class H5Datatype extends Datatype {
             return null;
         }
 
-        if (enumMemberCount <= 0) {
+        if (enumMembers == null || enumMembers.size() <= 0) {
             log.debug("convertEnumNameToValue(): no members");
             log.trace("convertEnumNameToValue(): finish");
             return null;
@@ -713,7 +713,7 @@ public class H5Datatype extends Datatype {
                     }
                 }
                 try {
-                    enumMemberCount = H5.H5Tget_nmembers(tid);
+                    int enumMemberCount = H5.H5Tget_nmembers(tid);
                     String name = null;
                     String enumStr = null;
                     byte[] val = new byte[(int)tsize];

@@ -191,11 +191,6 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     protected boolean is_variable_str = false;
 
     /**
-     * The count of enum members.
-     */
-    protected int enumMemberCount = 0;
-
-    /**
      * The (name, value) pairs of enum members.
      */
     protected Map<String, String> enumMembers;
