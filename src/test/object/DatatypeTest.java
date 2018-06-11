@@ -360,8 +360,8 @@ public class DatatypeTest {
     public void testSetEnumMembers() {
         log.debug("testSetEnumMembers");
         Datatype ed = new H5Datatype(Datatype.CLASS_ENUM, 2, Datatype.ORDER_NONE, Datatype.NSGN);
-        ed.setEnumMembers("low=20, high=40");
-        assertEquals(ed.getEnumMembers(), "low=20, high=40");
+        ed.setEnumMembers("high=40, low=20");
+        assertEquals("high=40, low=20", ed.getEnumMembersAsString());
     }
 
     /**

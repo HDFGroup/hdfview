@@ -1093,15 +1093,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
 
-            String enum_members = this.getDatatype().getEnumMembers();
-            log.trace("toString: is_enum enum_members={}", enum_members);
-            Map<String,String> map = new HashMap<>();
-            String[] entries = enum_members.split(",");
-            for (String entry : entries) {
-                String[] keyValue = entry.split("=");
-                map.put(keyValue[1],keyValue[0]);
-                log.trace("toString: is_enum value={} name={}", keyValue[1],keyValue[0]);
-            }
+            Map<String, String> map = this.getDatatype().getEnumMembers();
             String theValue = null;
             switch (dname) {
                 case 'B':

@@ -368,8 +368,8 @@ public class NewCompoundDatasetDialog extends Dialog {
                         ((Text) editors[i][2].getEditor()).setText(String.valueOf(tsize));
                     }
                     else if (tclass == Datatype.CLASS_ENUM) {
-                        ((Text) editors[i][2].getEditor()).setText(mTypes[i].getEnumMembers());
-                        table.getItem(i).setText(2, mTypes[i].getEnumMembers());
+                        ((Text) editors[i][2].getEditor()).setText(mTypes[i].getEnumMembersAsString());
+                        table.getItem(i).setText(2, mTypes[i].getEnumMembersAsString());
                     }
                     else {
                         ((Text) editors[i][2].getEditor()).setText(String.valueOf(mOrders[i]));

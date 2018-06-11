@@ -1212,7 +1212,7 @@ public class H5CompoundDS extends CompoundDS {
                             }
                             else if (isEnum && (Array.get(member_data, 0) instanceof String)) {
                                 log.trace("write(): {} Member[{}] convertEnumNameToValue", member_name, i);
-                                tmpData = H5Datatype.convertEnumNameToValue(atom_tid, (String[]) member_data, null);
+                                tmpData = H5Datatype.convertEnumNameToValue(atom_tid, (String[]) member_data);
                             }
 
                             if (tmpData != null) {

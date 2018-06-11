@@ -67,9 +67,6 @@ public class H5ScalarDS extends ScalarDS {
     /** flag to indicate if the dataset is a variable length */
     private boolean isVLEN = false;
 
-    /** flag to indicate if the dataset is enum */
-    private boolean isEnum = false;
-
     /** flag to indicate if the dataset is an external dataset */
     private boolean isExternal = false;
 
@@ -336,11 +333,10 @@ public class H5ScalarDS extends ScalarDS {
 
                 isText = (tclass == HDF5Constants.H5T_STRING);
                 isVLEN = isVLEN || ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
-                isEnum = (tclass == HDF5Constants.H5T_ENUM);
                 isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
                 log.trace(
                         "init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
-                        tid, tclass, isText, isVLEN, isEnum, getDatatype().isUnsigned(), isRegRef);
+                        tid, tclass, isText, isVLEN, getDatatype().isEnum(), getDatatype().isUnsigned(), isRegRef);
 
                 // check if datatype in file is native datatype
                 try {
@@ -482,8 +478,7 @@ public class H5ScalarDS extends ScalarDS {
                     int tclass = H5.H5Tget_class(tid);
                     isText = (tclass == HDF5Constants.H5T_STRING);
                     isVLEN = ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
-                    isEnum = (tclass == HDF5Constants.H5T_ENUM);
-                    log.trace("hasAttribute(): tclass type: isText={},isVLEN={},isEnum={}", isText, isVLEN, isEnum);
+                    log.trace("hasAttribute(): tclass type: isText={},isVLEN={},isEnum={}", isText, isVLEN, getDatatype().isEnum());
                 }
                 catch (Exception ex) {
                     obj_info.num_attrs = 0;
@@ -878,7 +873,7 @@ public class H5ScalarDS extends ScalarDS {
                 isREF = (H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_OBJ));
 
                 log.trace("read(): originalBuf={} isText={} isREF={} lsize[0]={} nPoints={}", originalBuf, isText, isREF, lsize[0], nPoints);
-                if ((originalBuf == null) || isEnum || isText || isREF || ((originalBuf != null) && (lsize[0] != nPoints))) {
+                if ((originalBuf == null) || getDatatype().isEnum() || isText || isREF || ((originalBuf != null) && (lsize[0] != nPoints))) {
                     try {
                         theData = H5Datatype.allocateArray(tid, (int) lsize[0]);
                     }
@@ -1037,8 +1032,8 @@ public class H5ScalarDS extends ScalarDS {
                 else if (isText && convertByteToString && !H5.H5Tis_variable_str(tid)) {
                     tmpData = stringToByte((String[]) buf, (int)H5.H5Tget_size(tid));
                 }
-                else if (isEnum && (Array.get(buf, 0) instanceof String)) {
-                    tmpData = H5Datatype.convertEnumNameToValue(tid, (String[]) buf, null);
+                else if (getDatatype().isEnum() && (Array.get(buf, 0) instanceof String)) {
+                    tmpData = H5Datatype.convertEnumNameToValue(tid, (String[]) buf);
                 }
 
                 H5.H5Dwrite(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, tmpData);

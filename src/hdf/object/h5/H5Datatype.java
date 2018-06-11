@@ -15,8 +15,11 @@
 package hdf.object.h5;
 
 import java.lang.reflect.Array;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Vector;
 
 import hdf.hdf5lib.H5;
@@ -220,11 +223,34 @@ public class H5Datatype extends Datatype {
      *            the native datatype identifier.
      */
     public H5Datatype(long nativeID) {
-        super(nativeID);
+        this(nativeID, null);
+    }
 
+    /**
+     * Constructs a Datatype with a given native datatype identifier.
+     * <p>
+     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
+     *
+     * <pre>
+     * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
+     * Datatype dtype = new Datatype(tid);
+     * </pre>
+     *
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     *
+     * @see #fromNative(long nativeID)
+     *
+     * @param nativeID
+     *            the native datatype identifier.
+     * @param pbase
+     *            the parent datatype of the new datatype
+     */
+    public H5Datatype(long nativeID, Datatype pbase) {
+        super(nativeID, pbase);
+        fromNative(nativeID);
         description = getDatatypeDescription(nativeID);
         log.trace("H5Datatype(int nativeID) description={}", description);
-        fromNative(nativeID);
+
     }
 
     /**
@@ -308,21 +334,19 @@ public class H5Datatype extends Datatype {
     /**
      * Converts values in an Enumeration Datatype to names.
      * <p>
-     * This method searches the identified enumeration datatype for the values appearing in <code>inValues</code> and
-     * returns the names corresponding to those values. If a given value is not found in the enumeration datatype, the
-     * name corresponding to that value will be set to <code>"ENUM ERR value"</code> in the string array that is returned.
+     * This method searches the identified enumeration datatype for the values appearing in
+     * <code>inValues</code> and returns the names corresponding to those values. If a given value is
+     * not found in the enumeration datatype, the name corresponding to that value will be set to
+     * <code>"ENUM ERR value"</code> in the string array that is returned.
      * <p>
-     * If the method fails in general, null will be returned instead of a String array. An empty <code>inValues</code>
-     * parameter, an <code>outNames</code> array with a different number of entries than the <code>inValues</code>
-     * array, or an invalid <code>tid</code> would all cause general failure.
+     * If the method fails in general, null will be returned instead of a String array. An empty
+     * <code>inValues</code> parameter or an invalid <code>tid</code> would cause
+     * general failure.
      *
      * @param tid
      *            The identifier of the enumeration datatype.
      * @param inValues
      *            The array of enumerations values to be converted.
-     * @param outNames
-     *            The array of names to be populated. If null, the array will be created. If <code>outNames</code> is
-     *            not null, the number of entries must be the same as the number of values in <code>inValues</code>.
      *
      * @return The string array of names if successful; otherwise return null.
      *
@@ -330,11 +354,35 @@ public class H5Datatype extends Datatype {
      *             If there is an error at the HDF5 library level.
      *
      */
-    public static final String[] convertEnumValueToName(long tid, Object inValues, String[] outNames)
-            throws HDF5Exception {
-        log.trace("convertEnumValueToName start");
-        int inSize = 0;
+    public static final String[] convertEnumValueToName(long tid, Object inValues) throws HDF5Exception {
+        H5Datatype datatype = new H5Datatype(tid);
+        return datatype.convertEnumValueToName(inValues);
+    }
 
+    /**
+     * Converts values in an Enumeration Datatype to names.
+     * <p>
+     * This method searches the identified enumeration datatype for the values appearing in
+     * <code>inValues</code> and returns the names corresponding to those values. If a given value is
+     * not found in the enumeration datatype, the name corresponding to that value will be set to
+     * <code>"ENUM ERR value"</code> in the string array that is returned.
+     * <p>
+     * If the method fails in general, null will be returned instead of a String array. An empty
+     * <code>inValues</code> parameter would cause general failure.
+     *
+     * @param inValues
+     *            The array of enumerations values to be converted.
+     *
+     * @return The string array of names if successful; otherwise return null.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
+     *
+     */
+    public String[] convertEnumValueToName(Object inValues) throws HDF5Exception {
+        log.trace("convertEnumValueToName() inValues={} start", inValues);
+        int inSize = 0;
+        String[] outNames = null;
         String cName = inValues.getClass().getName();
         boolean isArray = cName.lastIndexOf("[") >= 0;
         if (isArray) {
@@ -344,66 +392,37 @@ public class H5Datatype extends Datatype {
             inSize = 1;
         }
 
-        if ((inValues == null) || (inSize <= 0)
-                || ((outNames != null) && (inSize != Array.getLength(outNames)))) {
-            log.debug("convertEnumValueToName() failure: in/out values null or inSize not equal to outNames length");
-            log.debug("convertEnumValueToName(): inValues={} inSize={} outNames length={}", inValues, inSize, outNames.length);
+        if ((inValues == null) || (inSize <= 0)) {
+            log.debug("convertEnumValueToName() failure: in values null or inSize length invalid");
+            log.debug("convertEnumValueToName(): inValues={} inSize={}", inValues, inSize);
             log.trace("convertEnumValueToName(): finish");
             return null;
         }
 
-        int nMembers = H5.H5Tget_nmembers(tid);
-        if (nMembers <= 0) {
+        if (enumMemberCount <= 0) {
             log.debug("convertEnumValueToName(): no members");
             log.trace("convertEnumValueToName(): finish");
             return null;
         }
 
-        log.trace("convertEnumValueToName(): inSize={} nMembers={}", inSize, nMembers);
-        if (outNames == null) {
-            outNames = new String[inSize];
-        }
-        else {
-            // set values in existing array to null in case no match found
-            for (int i = 0; i < inSize; i++) {
-                outNames[i] = null;
-            }
-        }
-
-        String[] names = new String[nMembers];
-        int[] values = new int[nMembers];
-        int[] theValue = { 0 };
-
-        // Loop through the enumeration datatype and extract the names and
-        // values.
-        for (int i = 0; i < nMembers; i++) {
-            names[i] = H5.H5Tget_member_name(tid, i);
-            H5.H5Tget_member_value(tid, i, theValue);
-            values[i] = theValue[0];
-            log.trace("convertEnumValueToName(): extract member[{}] names[i]={} values[i]={}", i, names[i], values[i]);
-        }
-
-        int val = -1;
-
-        // Look for matches
+        log.trace("convertEnumValueToName(): inSize={} nMembers={} enums={}", inSize, enumMemberCount, enumMembers);
+        outNames = new String[inSize];
         for (int i = 0; i < inSize; i++) {
             if (isArray) {
-                val = (Integer) Array.get(inValues, i);
-            }
-            else {
-                val = (Integer) inValues;
-            }
-            boolean notfound = true;
-            for (int j = 0; j < nMembers; j++) {
-                if (val == values[j]) {
-                    outNames[i] = names[j];
-                    notfound = false;
-                    break;
+                if (enumMembers.containsKey(String.valueOf(Array.get(inValues, i)))) {
+                    outNames[i] = enumMembers.get(String.valueOf(Array.get(inValues, i)));
+                }
+                else {
+                    outNames[i] = "**ENUM ERR " + String.valueOf(Array.get(inValues, i)) + "**";
                 }
             }
-            if(notfound) {
-                log.debug("convertEnumValueToName(): default name");
-                outNames[i] = "**ENUM ERR "+String.valueOf(val)+"**";
+            else {
+                if (enumMembers.containsKey(String.valueOf(inValues))) {
+                    outNames[i] = enumMembers.get(String.valueOf(inValues));
+                }
+                else {
+                    outNames[i] = "**ENUM ERR " + String.valueOf(inValues) + "**";
+                }
             }
         }
 
@@ -421,8 +440,6 @@ public class H5Datatype extends Datatype {
      *            The identifier of the enumeration datatype.
      * @param in
      *            The array of enumerations names to be converted.
-     * @param out
-     *            The array of values to be populated.
      *
      * @return The int array of values if successful; otherwise return null.
      *
@@ -430,53 +447,86 @@ public class H5Datatype extends Datatype {
      *             If there is an error at the HDF5 library level.
      *
      */
-    public static final int[] convertEnumNameToValue(long tid, String[] in, int[] out) throws HDF5Exception {
-        log.trace("convertEnumNameToValue start");
+    public static final Object[] convertEnumNameToValue(long tid, String[] in) throws HDF5Exception {
+        H5Datatype datatype = new H5Datatype(tid);
+        return datatype.convertEnumNameToValue(in);
+    }
+
+    /**
+     * Converts names in an Enumeration Datatype to values.
+     * <p>
+     * This method searches the identified enumeration datatype for the names appearing in
+     * <code>inValues</code> and returns the values corresponding to those names.
+     *
+     * @param in
+     *            The array of enumerations names to be converted.
+     *
+     * @return The int array of values if successful; otherwise return null.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
+     *
+     */
+    public Object[] convertEnumNameToValue(String[] in) throws HDF5Exception {
+        log.trace("convertEnumNameToValue() start");
         int size = 0;
 
-        if ((in == null) || ((size = Array.getLength(in)) <= 0) || ((out != null) && (size != Array.getLength(out)))) {
-            log.debug("convertEnumNameToValue() failure: in/out values null or in size not equal to out size");
-            log.debug("convertEnumNameToValue(): in={} inSize={} out={} outSize={}", in.toString(), in.length, out.toString(), out.length);
-            log.trace("convertEnumValueToName(): finish");
+        if ((in == null) || ((size = Array.getLength(in)) <= 0)) {
+            log.debug("convertEnumNameToValue() failure: in values null or in size not valid");
+            log.debug("convertEnumNameToValue(): in={} inSize={}", in.toString(), in.length);
+            log.trace("convertEnumNameToValue(): finish");
             return null;
         }
 
-        int nMembers = H5.H5Tget_nmembers(tid);
-        if (nMembers <= 0) {
+        if (enumMemberCount <= 0) {
             log.debug("convertEnumNameToValue(): no members");
             log.trace("convertEnumNameToValue(): finish");
             return null;
         }
 
-        if (out == null) {
-            out = new int[size];
+        Object[] out = null;
+        if (datatypeSize == 1) {
+            out = new Byte[size];
+        }
+        else if (datatypeSize == 2) {
+            out = new Short[size];
+        }
+        else if (datatypeSize == 4) {
+            out = new Integer[size];
+        }
+        else if (datatypeSize == 8) {
+            out = new Long[size];
         }
         else {
-            // set values in existing array to -1 in case no match found
-            for (int i = 0; i < size; i++) {
-                out[i] = -1;
-            }
-        }
-
-        String[] names = new String[nMembers];
-        int[] values = new int[nMembers];
-        int[] theValue = { 0 };
-
-        // Loop through the enumeration datatype and extract the names and
-        // values.
-        for (int i = 0; i < nMembers; i++) {
-            names[i] = H5.H5Tget_member_name(tid, i);
-            H5.H5Tget_member_value(tid, i, theValue);
-            values[i] = theValue[0];
+            out = new Object[size];
         }
 
         for (int i = 0; i < size; i++) {
             if (in[i] == null || in[i].length() <= 0)
                 continue;
 
-            for (int j = 0; j < nMembers; j++) {
-                if (in[i].equalsIgnoreCase(names[j])) {
-                    out[i] = values[j];
+            for (Entry<String, String> entry : enumMembers.entrySet()) {
+                if (Objects.equals(in[i], entry.getValue())) {
+                    if (datatypeSize == 1) {
+                        log.trace("convertEnumNameToValue(): ENUM is H5T_NATIVE_INT8");
+                        out[i] = Byte.parseByte(entry.getKey());
+                    }
+                    else if (datatypeSize == 2) {
+                        log.trace("convertEnumNameToValue(): CLASS_INT-ENUM is H5T_NATIVE_INT16");
+                        out[i] = Short.parseShort(entry.getKey());
+                    }
+                    else if (datatypeSize == 4) {
+                        log.trace("convertEnumNameToValue(): CLASS_INT-ENUM is H5T_NATIVE_INT32");
+                        out[i] = Integer.parseInt(entry.getKey());
+                    }
+                    else if (datatypeSize == 8) {
+                        log.trace("convertEnumNameToValue(): CLASS_INT-ENUM is H5T_NATIVE_INT64");
+                        out[i] = Long.parseLong(entry.getKey());
+                    }
+                    else {
+                        log.debug("convertEnumNameToValue(): enum datatypeSize incorrect");
+                        out[i] = -1;
+                    }
                     break;
                 }
             }
@@ -632,36 +682,64 @@ public class H5Datatype extends Datatype {
             }
             else if (tclass == HDF5Constants.H5T_ENUM) {
                 datatypeClass = CLASS_ENUM;
+                long tmptid = -1;
+                long basetid = -1;
                 try {
-                    int nMember = H5.H5Tget_nmembers(tid);
+                    log.trace("fromNative(): enum type");
+                    basetid = H5.H5Tget_super(tid);
+                    tmptid = basetid;
+                    basetid = H5.H5Tget_native_type(tmptid);
+                    log.debug("fromNative(): enum type basetid={}", basetid);
+                    if (basetid >= 0) {
+                        baseType = new H5Datatype(tmptid, this);
+                        datatypeSign = baseType.getDatatypeSign();
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): enum type failure: ", ex);
+                }
+                finally {
+                    try {
+                        H5.H5Tclose(tmptid);
+                    }
+                    catch (Exception ex) {
+                        log.debug("fromNative(): enum H5Tclose(tmptid {}) failure: ", tmptid, ex);
+                    }
+                    try {
+                        H5.H5Tclose(basetid);
+                    }
+                    catch (Exception ex) {
+                        log.debug("fromNative(): enum H5Tclose(basetid {}) failure: ", basetid, ex);
+                    }
+                }
+                try {
+                    enumMemberCount = H5.H5Tget_nmembers(tid);
                     String name = null;
+                    String enumStr = null;
                     byte[] val = new byte[(int)tsize];
-                    String enumStr = "";
-                    for (int i = 0; i < nMember; i++) {
+                    enumMembers = new HashMap<>();
+                    for (int i = 0; i < enumMemberCount; i++) {
                         name = H5.H5Tget_member_name(tid, i);
                         H5.H5Tget_member_value(tid, i, val);
-                        enumStr += name + "=";
                         switch ((int)H5.H5Tget_size(tid)) {
                             case 1:
-                                enumStr += (HDFNativeData.byteToByte(val[0]))[0];
+                                enumStr = Byte.toString((HDFNativeData.byteToByte(val[0]))[0]);
                                 break;
                             case 2:
-                                enumStr += (HDFNativeData.byteToShort(val))[0];
+                                enumStr = Short.toString((HDFNativeData.byteToShort(val))[0]);
                                 break;
                             case 4:
-                                enumStr += (HDFNativeData.byteToInt(val))[0];
+                                enumStr = Integer.toString((HDFNativeData.byteToInt(val))[0]);
                                 break;
                             case 8:
-                                enumStr += (HDFNativeData.byteToLong(val))[0];
+                                enumStr = Long.toString((HDFNativeData.byteToLong(val))[0]);
                                 break;
                             default:
-                                enumStr += "?";
+                                enumStr = "-1";
                                 break;
                         }
-                        if(i < nMember-1)
-                            enumStr += ",";
+                        enumMembers.put(enumStr, name);
                     }
-                    enumMembers = enumStr;
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): enum type failure: ", ex);
@@ -743,6 +821,7 @@ public class H5Datatype extends Datatype {
      *
      * @see hdf.object.Datatype#createNative()
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public long createNative() {
         log.trace("createNative(): start");
@@ -949,7 +1028,6 @@ public class H5Datatype extends Datatype {
 
             try {
                 String memstr, memname;
-                int idx;
                 byte[] memval = null;
                 if (datatypeSize == 1) {
                     memval = HDFNativeData.byteToByte(new Byte((byte) 0));
@@ -963,85 +1041,42 @@ public class H5Datatype extends Datatype {
                 else if (datatypeSize == 8) {
                     memval = HDFNativeData.longToByte(new Long(0));
                 }
-                StringTokenizer token;
 
                 // using "0" and "1" as default
                 if (enumMembers == null) {
-                    token = new StringTokenizer("0,1", ",");
+                    enumMembers = new HashMap<>();
+                    enumMembers.put("1", "0");
+                    enumMembers.put("2", "1");
                     log.trace("createNative(): default string");
                 }
-                else {
-                    token = new StringTokenizer(enumMembers, ",");
-                    log.trace("createNative(): string {}", enumMembers);
-                }
+                Iterator entries = enumMembers.entrySet().iterator();
+                while (entries.hasNext()) {
+                    Entry thisEntry = (Entry) entries.next();
+                    memstr = (String) thisEntry.getKey();
+                    memname = (String) thisEntry.getValue();
 
-                while (token.hasMoreTokens()) {
-                    memstr = token.nextToken();
-
-                    if (memstr != null) {
-                        memstr = memstr.trim();
+                    if (datatypeSize == 1) {
+                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT8");
+                        Byte tval = Byte.parseByte(memstr);
+                        memval = HDFNativeData.byteToByte(tval);
                     }
-
-                    if ((memstr == null) || (memstr.length() < 1)) {
-                        continue;
+                    else if (datatypeSize == 2) {
+                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT16");
+                        Short tval = Short.parseShort(memstr);
+                        memval = HDFNativeData.shortToByte(tval);
                     }
-
-                    idx = memstr.indexOf('=');
-                    if (idx > 0) {
-                        memname = memstr.substring(0, idx);
-                        if (datatypeSize == 1) {
-                            log.trace("createNative(): ENUM is H5T_NATIVE_INT8");
-                            Byte tval = Byte.parseByte(memstr.substring(idx + 1));
-                            memval = HDFNativeData.byteToByte(tval);
-                        }
-                        else if (datatypeSize == 2) {
-                            log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT16");
-                            Short tval = Short.parseShort(memstr.substring(idx + 1));
-                            memval = HDFNativeData.shortToByte(tval);
-                        }
-                        else if (datatypeSize == 4) {
-                            log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT32");
-                            Integer tval = Integer.parseInt(memstr.substring(idx + 1));
-                            memval = HDFNativeData.intToByte(tval);
-                        }
-                        else if (datatypeSize == 8) {
-                            log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT64");
-                            Long tval = Long.parseLong(memstr.substring(idx + 1));
-                            memval = HDFNativeData.longToByte(tval);
-                        }
-                        else {
-                            log.debug("createNative(): enum datatypeSize incorrect");
-                        }
+                    else if (datatypeSize == 4) {
+                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT32");
+                        Integer tval = Integer.parseInt(memstr);
+                        memval = HDFNativeData.intToByte(tval);
+                    }
+                    else if (datatypeSize == 8) {
+                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT64");
+                        Long tval = Long.parseLong(memstr);
+                        memval = HDFNativeData.longToByte(tval);
                     }
                     else {
-                        memname = memstr;
-                        if (datatypeSize == 1) {
-                            log.trace("createNative(): ENUM is H5T_NATIVE_INT8");
-                            Byte tval = new Byte(memval[0]);
-                            tval++;
-                            memval = HDFNativeData.byteToByte(tval);
-                        }
-                        else if (datatypeSize == 2) {
-                            log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT16");
-                            Short tval = (HDFNativeData.byteToShort(memval))[0];
-                            tval++;
-                            memval = HDFNativeData.shortToByte(tval);
-                        }
-                        else if (datatypeSize == 4) {
-                            log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT32");
-                            Integer tval = (HDFNativeData.byteToInt(memval))[0];
-                            tval++;
-                            memval = HDFNativeData.intToByte(tval);
-                        }
-                        else if (datatypeSize == 8) {
-                            log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT64");
-                            Long tval = (HDFNativeData.byteToLong(memval))[0];
-                            tval++;
-                            memval = HDFNativeData.longToByte(tval);
-                        }
-                        else {
-                            log.debug("createNative(): enum datatypeSize incorrect");
-                        }
+                        log.debug("createNative(): enum datatypeSize incorrect");
                     }
                     log.trace("createNative(): H5Tenum_insert {} {}", memname, memval);
                     H5.H5Tenum_insert(tid, memname, memval);

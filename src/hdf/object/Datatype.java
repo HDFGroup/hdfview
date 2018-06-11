@@ -14,7 +14,11 @@
 
 package hdf.object;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
@@ -187,9 +191,14 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     protected boolean is_variable_str = false;
 
     /**
+     * The count of enum members.
+     */
+    protected int enumMemberCount = 0;
+
+    /**
      * The (name, value) pairs of enum members.
      */
-    protected String enumMembers;
+    protected Map<String, String> enumMembers;
 
     /**
      * The list of names of members of a compound Datatype.
@@ -502,26 +511,51 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the (name, value) pairs of enum members
      */
     public final void setEnumMembers(String enumStr) {
-        enumMembers = enumStr;
+        log.trace("setEnumMembers: is_enum enum_members={}", enumStr);
+        enumMembers = new HashMap<>();
+        String[] entries = enumStr.split(",");
+        for (String entry : entries) {
+            String[] keyValue = entry.split("=");
+            enumMembers.put(keyValue[1].trim(), keyValue[0].trim());
+            log.trace("setEnumMembers: is_enum value={} name={}", keyValue[1].trim(), keyValue[0].trim());
+        }
     }
 
     /**
-     * Returns the "name=value" pairs of enum members for enum datatype.
+     * Returns the Map<String,String> pairs of enum members for enum datatype.
+     *
+     * @return enumStr Map<String,String> pairs of enum members
+     */
+    public final Map<String, String> getEnumMembers() {
+        return enumMembers;
+    }
+
+    /**
+     * Returns the HashMap pairs of enum members for enum datatype.
      * <p>
      * For Example,
      * <dl>
-     * <dt>setEnumMembers("lowTemp=-40, highTemp=90")</dt>
-     * <dd>sets the value of enum member lowTemp to -40 and highTemp to 90.</dd>
-     * <dt>setEnumMembers("lowTemp, highTemp")</dt>
-     * <dd>sets enum members to defaults, i.e. lowTemp=0 and highTemp=1</dd>
-     * <dt>setEnumMembers("lowTemp=10, highTemp")</dt>
-     * <dd>sets enum member lowTemp to 10 and highTemp to 11.</dd>
+     * <dt>getEnumMembersAsString()</dt>
+     * <dd>returns "lowTemp=10, highTemp=40"</dt>
      * </dl>
      *
      * @return enumStr the (name, value) pairs of enum members
      */
-    public final String getEnumMembers() {
-        return enumMembers;
+    @SuppressWarnings("rawtypes")
+    public final String getEnumMembersAsString() {
+        String enumStr = new String();
+        Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
+        int i = enumMembers.size();
+        while (entries.hasNext()) {
+            Entry thisEntry = entries.next();
+            String memstr = (String) thisEntry.getKey();
+            String memname = (String) thisEntry.getValue();
+            enumStr += memname + "=" + memstr;
+            i--;
+            if (i > 0)
+                enumStr += ", ";
+        }
+        return enumStr;
     }
 
     /**
