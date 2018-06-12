@@ -48,7 +48,6 @@ import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.widgets.Composite;
 
-import hdf.hdf5lib.H5;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
 import hdf.object.CompoundDataFormat;
@@ -142,7 +141,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         if ((dataValue == null) || !(dataValue instanceof List)) {
             log.debug("loadData(): data value is null or data not a list");
             log.trace("loadData(): finish");
-            throw new RuntimeException("data value is null");
+            throw new RuntimeException("data value is null or not a list");
         }
 
         log.trace("loadData(): finish");
@@ -607,7 +606,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             Datatype dtype = types[fieldIdx];
 
-            boolean isArray = dtype.isArray();
             boolean isUINT64 = false;
 
             String cName = colValue.getClass().getName();
@@ -617,7 +615,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     isUINT64 = (cName.charAt(cIndex + 1) == 'J');
             }
 
-            if (isArray) {
+            if (dtype.isArray()) {
                 Datatype btype = dtype.getDatatypeBase();
                 if (cIndex >= 0) {
                     if (btype.isUnsigned())
@@ -882,33 +880,22 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     int len = Array.getLength(value);
 
                     if (isEnumConverted) {
-                        String[] outValues = new String[len];
                         String[] retValues = null;
-                        long tmptid = -1;
 
                         try {
-                            tmptid = dtype.createNative();
-                            retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                            retValues = ((H5Datatype) btype).convertEnumValueToName(value);
                         }
                         catch (HDF5Exception ex) {
                             log.trace(
                                     "CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                             retValues = null;
                         }
-                        finally {
-                            try {
-                                H5.H5Tclose(tmptid);
-                            }
-                            catch (Exception ex) {
-                                log.debug(
-                                        "CompoundDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ",
-                                        tmptid, ex);
-                            }
-                        }
 
-                        if (retValues != null) for (int i = 0; i < outValues.length; i++) {
-                            if (i > 0) buffer.append(", ");
-                            buffer.append(outValues[i]);
+                        if (retValues != null) {
+                            for (int i = 0; i < retValues.length; i++) {
+                                if (i > 0) buffer.append(", ");
+                                buffer.append(retValues[i]);
+                            }
                         }
                     }
                     else {
@@ -927,32 +914,19 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
             else if (dtype.isEnum()) {
                 if (isEnumConverted) {
-                    String[] outValues = new String[1];
                     String[] retValues = null;
-                    long tmptid = -1;
 
                     try {
-                        tmptid = dtype.createNative();
-                        retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                        retValues = ((H5Datatype) dtype).convertEnumValueToName(value);
                     }
                     catch (HDF5Exception ex) {
                         log.trace(
                                 "CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                         retValues = null;
                     }
-                    finally {
-                        try {
-                            H5.H5Tclose(tmptid);
-                        }
-                        catch (Exception ex) {
-                            log.debug(
-                                    "CompoundDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ",
-                                    tmptid, ex);
-                        }
-                    }
 
                     if (retValues != null)
-                        buffer.append(outValues[0]);
+                        buffer.append(retValues[0]);
                 }
                 else
                     buffer.append(value);

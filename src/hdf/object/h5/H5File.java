@@ -474,7 +474,6 @@ public class H5File extends FileFormat {
 
                         boolean is_variable_str = false;
                         boolean isVLEN = false;
-                        boolean isCompound = false;
                         int tclass = H5.H5Tget_class(tid);
 
                         try {
@@ -484,10 +483,9 @@ public class H5File extends FileFormat {
                             log.debug("getAttribute(): Attribute[{}] H5Tis_variable_str(tid {}) failure: ", i, tid, ex);
                         }
                         isVLEN = (tclass == HDF5Constants.H5T_VLEN);
-                        isCompound = (tclass == HDF5Constants.H5T_COMPOUND);
                         log.trace(
                                 "getAttribute(): Attribute[{}] has size={} isCompound={} isScalar={} is_variable_str={} isVLEN={}",
-                                i, lsize, isCompound, attr.isScalar(), is_variable_str, isVLEN);
+                                i, lsize, attr.getDatatype().isCompound(), attr.isScalar(), is_variable_str, isVLEN);
 
                         // retrieve the attribute value
                         if (lsize <= 0) {
@@ -519,7 +517,7 @@ public class H5File extends FileFormat {
                             }
                             value = strs;
                         }
-                        else if (isCompound || (attr.isScalar() && attr.getDatatype().isArray())) {
+                        else if (attr.getDatatype().isCompound() || (attr.isScalar() && attr.getDatatype().isArray())) {
                             String[] strs = new String[(int) lsize];
                             for (int j = 0; j < lsize; j++) {
                                 strs[j] = "";
@@ -571,11 +569,11 @@ public class H5File extends FileFormat {
                                 H5.H5Aread(aid, tid, value);
                             }
 
-                            if (tclass == HDF5Constants.H5T_STRING) {
+                            if (attr.getDatatype().isString()) {
                                 log.trace("getAttribute(): Attribute[{}] byteToString", i);
                                 value = Dataset.byteToString((byte[]) value, (int) H5.H5Tget_size(tid));
                             }
-                            else if (tclass == HDF5Constants.H5T_REFERENCE) {
+                            else if (attr.getDatatype().isRef()) {
                                 log.trace("getAttribute(): Attribute[{}] byteToLong", i);
                                 value = HDFNativeData.byteToLong((byte[]) value);
                             }

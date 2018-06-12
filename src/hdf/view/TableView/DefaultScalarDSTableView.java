@@ -57,7 +57,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
-import hdf.hdf5lib.H5;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
@@ -1802,34 +1801,21 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 }
                 else if (isEnum) {
                     if (isEnumConverted) {
-                        String[] outValues = new String[len];
                         String[] retValues = null;
-                        long tmptid = -1;
 
                         try {
-                            tmptid = dtype.createNative();
-                            retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                            retValues = ((H5Datatype) btype).convertEnumValueToName(value);
                         }
                         catch (HDF5Exception ex) {
                             log.trace(
-                                    "ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                                    "ScalarDSDataDisplayConverter:canonicalToDisplayValue():ARRAY Could not convert enum values to names: ex");
                             retValues = null;
-                        }
-                        finally {
-                            try {
-                                H5.H5Tclose(tmptid);
-                            }
-                            catch (Exception ex) {
-                                log.debug(
-                                        "ScalarDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ",
-                                        tmptid, ex);
-                            }
                         }
 
                         if (retValues != null) {
-                            for (int i = 0; i < outValues.length; i++) {
+                            for (int i = 0; i < retValues.length; i++) {
                                 if (i > 0) buffer.append(", ");
-                                buffer.append(outValues[i]);
+                                buffer.append(retValues[i]);
                             }
                         }
                     }
@@ -1853,32 +1839,19 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
             else if (isEnum) {
                 if (isEnumConverted) {
-                    String[] outValues = new String[1];
                     String[] retValues = null;
-                    long tmptid = -1;
 
                     try {
-                        tmptid = dtype.createNative();
-                        retValues = H5Datatype.convertEnumValueToName(tmptid, value, outValues);
+                        retValues = ((H5Datatype) dtype).convertEnumValueToName(value);
                     }
                     catch (HDF5Exception ex) {
                         log.trace(
                                 "ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                         retValues = null;
                     }
-                    finally {
-                        try {
-                            H5.H5Tclose(tmptid);
-                        }
-                        catch (Exception ex) {
-                            log.debug(
-                                    "ScalarDSDataDisplayConverter:canonicalToDisplayValue: enum H5Tclose(tmptid {}) failure: ",
-                                    tmptid, ex);
-                        }
-                    }
 
                     if (retValues != null)
-                        buffer.append(outValues[0]);
+                        buffer.append(retValues[0]);
                 }
                 else
                     buffer.append(value);

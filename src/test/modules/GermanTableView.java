@@ -4760,7 +4760,7 @@ public class GermanTableView implements TableView {
                         String[] outValues = new String[len];
 
                         try {
-                            H5Datatype.convertEnumValueToName(dtype.createNative(), value, outValues);
+                            outValues = ((H5Datatype) dtype).convertEnumValueToName(value);
                         } catch (HDF5Exception ex) {
                             log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                             return buffer;
@@ -4790,7 +4790,7 @@ public class GermanTableView implements TableView {
                     String[] outValues = new String[1];
 
                     try {
-                        H5Datatype.convertEnumValueToName(dtype.createNative(), value, outValues);
+                        outValues = ((H5Datatype) dtype).convertEnumValueToName(value);
                     } catch (HDF5Exception ex) {
                         log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                         return buffer;

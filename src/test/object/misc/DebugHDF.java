@@ -1425,7 +1425,7 @@ public class DebugHDF {
                 long did = ds.open();
                 long tid = H5.H5Dget_type(did);
 
-                long nativeDatatype = H5Datatype.toNative(tid);
+                long nativeDatatype = H5.H5Tget_native_type(tid);
 
                 long msid = H5.H5Screate_simple(ds.getRank(), selectionCount, null);
                 long fsid = H5.H5Dget_space(did);
