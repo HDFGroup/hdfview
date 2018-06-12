@@ -141,7 +141,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         if ((dataValue == null) || !(dataValue instanceof List)) {
             log.debug("loadData(): data value is null or data not a list");
             log.trace("loadData(): finish");
-            throw new RuntimeException("data value is null");
+            throw new RuntimeException("data value is null or not a list");
         }
 
         log.trace("loadData(): finish");

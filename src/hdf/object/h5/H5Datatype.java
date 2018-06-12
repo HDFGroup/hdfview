@@ -1209,7 +1209,7 @@ public class H5Datatype extends Datatype {
         }
         else if (tclass == HDF5Constants.H5T_COMPOUND) {
             log.trace("allocateArray(): class.H5T_COMPOUND={}", tclass);
-            return new byte[size];
+            return new byte[(int) (size * tsize)];
         }
         else if (tclass == HDF5Constants.H5T_FLOAT) {
             log.trace("allocateArray(): class.H5T_FLOAT={}", tclass);
