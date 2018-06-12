@@ -435,7 +435,6 @@ public class H5DatatypeTest {
         int orders[] = { Datatype.ORDER_LE, Datatype.ORDER_LE, Datatype.ORDER_BE };
         for (int i = 0; i < tids.length; i++) {
             type = new H5Datatype(tids[i]);
-            type.init(tids[i]);
             assertEquals("sizes#" + i, sizes[i], type.getDatatypeSize());
             assertEquals("signs#" + i, signs[i], type.getDatatypeSign());
             assertEquals("orders#" + i, orders[i], type.getDatatypeOrder());
