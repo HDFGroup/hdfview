@@ -139,7 +139,7 @@ public class H5Datatype extends Datatype {
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign) {
-        super(tclass, tsize, torder, tsign);
+        this(tclass, tsize, torder, tsign, null);
     }
 
     /**
@@ -169,7 +169,7 @@ public class H5Datatype extends Datatype {
      *            the base datatype of the new datatype
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) {
-        super(tclass, tsize, torder, tsign, tbase, null);
+        this(tclass, tsize, torder, tsign, tbase, null);
     }
 
     /**

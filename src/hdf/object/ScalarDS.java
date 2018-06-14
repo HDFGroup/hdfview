@@ -150,7 +150,6 @@ public abstract class ScalarDS extends Dataset {
         isTrueColor = false;
         isText = false;
         interlace = -1;
-        datatype = null;
         imageDataRange = null;
         isImageDisplay = false;
         isDefaultImageOrder = true;
@@ -182,8 +181,8 @@ public abstract class ScalarDS extends Dataset {
         log.trace("convertFromUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        log.trace("convertFromUnsignedC(): unsigned={}", datatype.isUnsigned());
-        if ((data != null) && datatype.isUnsigned() && !unsignedConverted) {
+        log.trace("convertFromUnsignedC(): unsigned={}", getDatatype().isUnsigned());
+        if ((data != null) && getDatatype().isUnsigned() && !unsignedConverted) {
             log.trace("convertFromUnsignedC(): convert");
             originalBuf = data;
             convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
@@ -217,8 +216,8 @@ public abstract class ScalarDS extends Dataset {
         log.trace("convertToUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        log.trace("convertToUnsignedC(): unsigned={}", datatype.isUnsigned());
-        if ((data != null) && datatype.isUnsigned()) {
+        log.trace("convertToUnsignedC(): unsigned={}", getDatatype().isUnsigned());
+        if ((data != null) && getDatatype().isUnsigned()) {
             log.trace("convertToUnsignedC(): convert");
             convertedBuf = data;
             originalBuf = convertToUnsignedC(convertedBuf, originalBuf);

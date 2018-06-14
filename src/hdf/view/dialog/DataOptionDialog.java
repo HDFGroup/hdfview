@@ -751,8 +751,6 @@ public class DataOptionDialog extends Dialog {
         displayAsGroup.setLayout(new GridLayout(1, true));
         displayAsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        int tclass = dataObject.getDatatype().getDatatypeClass();
-
         Composite spreadsheetComposite = new Composite(displayAsGroup, SWT.BORDER);
         spreadsheetComposite.setLayout(new GridLayout(2, false));
         spreadsheetComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -1365,7 +1363,7 @@ public class DataOptionDialog extends Dialog {
                 }
 
                 int idx = 0;
-                Vector<Object> choice4 = new Vector<Object>(rank);
+                Vector<Object> choice4 = new Vector<>(rank);
                 int[] choice4Index = new int[rank - 3];
                 for (int i = 0; i < rank; i++) {
                     if ((i != currentIndex[0]) && (i != currentIndex[1])

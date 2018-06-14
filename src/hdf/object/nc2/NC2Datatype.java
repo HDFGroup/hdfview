@@ -58,16 +58,6 @@ public class NC2Datatype extends Datatype {
         super(tclass, tsize, torder, tsign);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.DataFormat#hasAttribute()
-     */
-    @Override
-    public boolean hasAttribute() {
-        return false;
-    }
-
     /**
      * Create a Datatype with a given Netcdf native datatype.
      *
@@ -78,6 +68,16 @@ public class NC2Datatype extends Datatype {
         super(-1);
         nativeType = theType;
         fromNative(0);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.DataFormat#hasAttribute()
+     */
+    @Override
+    public boolean hasAttribute() {
+        return false;
     }
 
     /**
@@ -164,7 +164,7 @@ public class NC2Datatype extends Datatype {
         else if (nativeType.equals(DataType.STRING)) {
             datatypeClass = CLASS_STRING;
             datatypeSize = 80; // default length. need to figure out the actual
-                               // length
+            // length
         }
     }
 
