@@ -1407,11 +1407,11 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_ENUM:
-                description = "Enum";
+                description = String.valueOf(datatypeSize * 8) + "-bit enum";
 
-                if (enumMembers != null) {
-                    description = enumMembers.toString();
-                }
+                String members = getEnumMembersAsString();
+                if (members != null)
+                    description += " (" + members + ")";
 
                 break;
             case CLASS_VLEN:

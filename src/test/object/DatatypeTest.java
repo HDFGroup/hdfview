@@ -34,37 +34,43 @@ public class DatatypeTest {
     private int n_signs = 3;
     private int n_orders = 4;
     private int[] sizes = { 1, 2, 4, 8 };
-    private String[] descriptions = { "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer",
-            "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer",
-            "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer",
-            "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer",
-            "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer",
-            "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer",
-            "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer",
-            "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer",
-            "32-bit integer", "64-bit integer", "8-bit integer", "8-bit unsigned integer", "8-bit integer",
+    private String[] descriptions = { "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield",
+            "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield", "8-bit bitfield", "16-bit bitfield",
+            "32-bit bitfield", "64-bit bitfield", "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield",
+            "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield", "8-bit bitfield", "16-bit bitfield",
+            "32-bit bitfield", "64-bit bitfield", "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield",
+            "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield", "8-bit bitfield", "16-bit bitfield",
+            "32-bit bitfield", "64-bit bitfield", "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield",
+            "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield", "8-bit bitfield", "16-bit bitfield",
+            "32-bit bitfield", "64-bit bitfield", "8-bit integer", "8-bit unsigned integer", "8-bit integer",
             "8-bit integer", "8-bit unsigned integer", "8-bit integer", "8-bit integer", "8-bit unsigned integer",
-            "8-bit integer", "8-bit integer", "8-bit unsigned integer", "8-bit integer", "Compound {}", "Compound {}",
-            "Compound {}", "Compound {}", "Compound {}", "Compound {}", "Compound {}", "Compound {}", "Compound {}", "Compound {}",
-            "Compound {}", "Compound {}", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "8-bit enum ( 0=1 1=2)", "16-bit enum ( 0=1 1=2)", "32-bit enum ( 0=1 1=2)",
-            "64-bit enum ( 0=1 1=2)", "32-bit floating-point", "32-bit floating-point", "32-bit floating-point",
-            "32-bit floating-point", "32-bit floating-point", "32-bit floating-point", "32-bit floating-point",
-            "32-bit floating-point", "32-bit floating-point", "32-bit floating-point", "32-bit floating-point",
-            "32-bit floating-point", "32-bit floating-point", "32-bit floating-point", "32-bit floating-point",
-            "32-bit floating-point", "32-bit floating-point", "32-bit floating-point", "32-bit floating-point",
-            "32-bit floating-point", "32-bit floating-point", "32-bit floating-point", "32-bit floating-point",
-            "32-bit floating-point", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer",
+            "8-bit integer", "8-bit integer", "8-bit unsigned integer", "8-bit integer", "Compound", "Compound",
+            "Compound", "Compound", "Compound", "Compound", "Compound", "Compound", "Compound", "Compound",
+            "Compound", "Compound", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)",
+            "64-bit enum (0=1, 1=2)", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit floating-point", "16-bit floating-point", "32-bit floating-point",
+            "64-bit floating-point", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer",
             "8-bit unsigned integer", "16-bit unsigned integer", "32-bit unsigned integer", "64-bit unsigned integer",
             "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer",
             "32-bit integer", "64-bit integer", "8-bit unsigned integer", "16-bit unsigned integer",
@@ -75,15 +81,15 @@ public class DatatypeTest {
             "32-bit integer", "64-bit integer", "8-bit unsigned integer", "16-bit unsigned integer",
             "32-bit unsigned integer", "64-bit unsigned integer", "8-bit integer", "16-bit integer", "32-bit integer",
             "64-bit integer", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown",
-            "Unknown", "Unknown", "Unknown", "Unknown", "8-bit integer", "16-bit integer", "32-bit integer",
-            "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer",
-            "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer",
-            "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer",
-            "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer",
-            "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer",
-            "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer",
-            "64-bit integer", "8-bit integer", "16-bit integer", "32-bit integer", "64-bit integer", "8-bit integer",
-            "16-bit integer", "32-bit integer", "64-bit integer", "Object reference", "Object reference",
+            "Unknown", "Unknown", "Unknown", "Unknown", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque",
+            "8-byte Opaque", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "1-byte Opaque",
+            "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque",
+            "8-byte Opaque", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "1-byte Opaque",
+            "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque",
+            "8-byte Opaque", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "1-byte Opaque",
+            "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque",
+            "8-byte Opaque", "1-byte Opaque", "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "1-byte Opaque",
+            "2-byte Opaque", "4-byte Opaque", "8-byte Opaque", "Object reference", "Object reference",
             "Object reference", "Object reference", "Object reference", "Object reference", "Object reference",
             "Object reference", "Object reference", "Object reference", "Object reference", "Object reference",
             "String, length = 1, string padding = H5T_STR_NULLTERM",
@@ -109,9 +115,10 @@ public class DatatypeTest {
             "String, length = 1, string padding = H5T_STR_NULLTERM",
             "String, length = 2, string padding = H5T_STR_NULLTERM",
             "String, length = 1, string padding = H5T_STR_NULLTERM",
-            "String, length = 2, string padding = H5T_STR_NULLTERM", "Unknown", "Unknown", "Unknown", "Unknown",
-            "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown",
-            "Unknown", "Unknown" };
+            "String, length = 2, string padding = H5T_STR_NULLTERM",
+            "Variable-length", "Variable-length", "Variable-length", "Variable-length", "Variable-length",
+            "Variable-length", "Variable-length", "Variable-length", "Variable-length", "Variable-length",
+            "Variable-length", "Variable-length" };
 
     @BeforeClass
     public static void createFile() throws Exception {
@@ -159,10 +166,8 @@ public class DatatypeTest {
                         case Datatype.CLASS_ENUM:
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
-                            n_sizes = 4;
-                            break;
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 2;
+                            n_sizes = 4;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;
@@ -213,10 +218,8 @@ public class DatatypeTest {
                         case Datatype.CLASS_ENUM:
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
-                            n_sizes = 4;
-                            break;
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 2;
+                            n_sizes = 4;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;
@@ -252,10 +255,8 @@ public class DatatypeTest {
                         case Datatype.CLASS_ENUM:
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
-                            n_sizes = 4;
-                            break;
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 2;
+                            n_sizes = 4;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;
@@ -291,10 +292,8 @@ public class DatatypeTest {
                         case Datatype.CLASS_ENUM:
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
-                            n_sizes = 4;
-                            break;
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 2;
+                            n_sizes = 4;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;
@@ -330,10 +329,8 @@ public class DatatypeTest {
                         case Datatype.CLASS_ENUM:
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
-                            n_sizes = 4;
-                            break;
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 2;
+                            n_sizes = 4;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;
@@ -394,10 +391,8 @@ public class DatatypeTest {
                         case Datatype.CLASS_ENUM:
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
-                            n_sizes = 4;
-                            break;
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 2;
+                            n_sizes = 4;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;
@@ -434,10 +429,8 @@ public class DatatypeTest {
                         case Datatype.CLASS_ENUM:
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
-                            n_sizes = 4;
-                            break;
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 2;
+                            n_sizes = 4;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;

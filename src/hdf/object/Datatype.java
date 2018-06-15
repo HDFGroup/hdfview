@@ -524,6 +524,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return enumStr Map<String,String> pairs of enum members
      */
     public final Map<String, String> getEnumMembers() {
+        if (enumMembers == null) {
+            enumMembers = new HashMap<>();
+            enumMembers.put("1", "0");
+            enumMembers.put("2", "1");
+        }
+
         return enumMembers;
     }
 
@@ -540,6 +546,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
+        if (enumMembers == null) {
+            enumMembers = new HashMap<>();
+            enumMembers.put("1", "0");
+            enumMembers.put("2", "1");
+        }
+
         String enumStr = new String();
         Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
         int i = enumMembers.size();
