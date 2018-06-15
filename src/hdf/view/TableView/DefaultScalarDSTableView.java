@@ -2056,7 +2056,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         Datatype dtype = dset.getDatatype();
                                         Datatype baseType = dtype.getDatatypeBase();
                                         log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: dtype={} baseType={}",
-                                                dtype.getDatatypeDescription(), baseType);
+                                                dtype.getDescription(), baseType);
                                         if (baseType == null)
                                             baseType = dtype;
                                         if ((dtype.isArray() && baseType.isChar())

@@ -375,9 +375,9 @@ public class AttributeTest {
     @Test
     public void testGetType() {
         log.debug("testGetType");
-        assertTrue(strAttr.getDatatype().getDatatypeDescription()
+        assertTrue(strAttr.getDatatype().getDescription()
                 .equals("String, length = 20, string padding = H5T_STR_NULLTERM"));
-        assertTrue(arrayIntAttr.getDatatype().getDatatypeDescription().equals("32-bit integer"));
+        assertTrue(arrayIntAttr.getDatatype().getDescription().equals("32-bit integer"));
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

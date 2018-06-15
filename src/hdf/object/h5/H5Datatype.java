@@ -59,8 +59,6 @@ public class H5Datatype extends Datatype {
 
     private H5O_info_t obj_info;
 
-    private String description = null;
-
     /**
      * Constructs an named HDF5 data type object for a given file, dataset name and group path.
      * <p>
@@ -203,6 +201,7 @@ public class H5Datatype extends Datatype {
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
         super(tclass, tsize, torder, tsign, tbase, pbase);
+        datatypeDescription = getDescription();
     }
 
     /**
@@ -248,9 +247,7 @@ public class H5Datatype extends Datatype {
     public H5Datatype(long nativeID, Datatype pbase) {
         super(nativeID, pbase);
         fromNative(nativeID);
-        description = getDatatypeDescription(nativeID);
-        log.trace("H5Datatype(int nativeID) description={}", description);
-
+        datatypeDescription = getDescription();
     }
 
     /**
@@ -1293,21 +1290,162 @@ public class H5Datatype extends Datatype {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.Datatype#getDatatypeDescription()
+     * @see hdf.object.Datatype#getDescription()
      */
     @Override
-    public String getDatatypeDescription() {
-        if (description == null) {
-            long tid = createNative();
-            if (tid >= 0) {
-                description = getDatatypeDescription(tid);
-                close(tid);
-            }
-            else {
-                description = "Unknown";
-            }
+    public String getDescription() {
+        log.trace("getDescription(): start");
+
+        if (datatypeDescription != null) {
+            log.trace("getDescription(): finish");
+            return datatypeDescription;
         }
 
+        String description = null;
+        long tid = -1;
+
+        switch (datatypeClass) {
+            case CLASS_CHAR:
+                description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                break;
+            case CLASS_INTEGER:
+                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                break;
+            case CLASS_FLOAT:
+                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
+                break;
+            case CLASS_STRING:
+                description = "String, length = " + (isVarStr() ? "variable" : datatypeSize);
+
+                tid = createNative();
+                if (tid >= 0) {
+                    try {
+                        String strPadType;
+                        int strPad = H5.H5Tget_strpad(tid);
+
+                        if (strPad == HDF5Constants.H5T_STR_NULLTERM)
+                            strPadType = "H5T_STR_NULLTERM";
+                        else if (strPad == HDF5Constants.H5T_STR_NULLPAD)
+                            strPadType = "H5T_STR_NULLPAD";
+                        else if (strPad == HDF5Constants.H5T_STR_SPACEPAD)
+                            strPadType = "H5T_STR_SPACEPAD";
+                        else
+                            strPadType = null;
+
+                        if (strPadType != null)
+                            description += ", string padding = " + strPadType;
+                    }
+                    catch (Exception ex) {
+                        log.debug("H5Tget_strpad failure: ", ex);
+                    }
+                    finally {
+                        close(tid);
+                    }
+                }
+                else {
+                    log.debug("createNative() failure");
+                }
+
+                break;
+            case CLASS_BITFIELD:
+                description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
+                break;
+            case CLASS_OPAQUE:
+                description = String.valueOf(datatypeSize) + "-byte Opaque";
+                break;
+            case CLASS_COMPOUND:
+                description = "Compound";
+
+                if (compoundMemberTypes != null) {
+                    Iterator<String> member_names = null;
+                    Iterator<Datatype> member_types = compoundMemberTypes.iterator();
+
+                    if (compoundMemberNames != null)
+                        member_names = compoundMemberNames.iterator();
+
+                    description += " {";
+
+                    while (member_types.hasNext()) {
+                        if (member_names.hasNext()) {
+                            description += member_names.next() + " = ";
+                        }
+
+                        description += member_types.next().getDescription();
+
+                        if (member_types.hasNext())
+                            description += ", ";
+                    }
+
+                    description += "}";
+                }
+
+                break;
+            case CLASS_REFERENCE:
+                description = "Reference";
+
+                try {
+                    boolean is_reg_ref = false;
+
+                    tid = createNative();
+                    if (tid >= 0) {
+                        is_reg_ref = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
+
+                        if (is_reg_ref) {
+                            description = "Dataset region reference";
+                        }
+                        else {
+                            description = "Object reference";
+                        }
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("H5.H5Tequal failure: ", ex);
+                }
+                finally {
+                    close(tid);
+                }
+
+                break;
+            case CLASS_ENUM:
+                description = "Enum";
+
+                if (enumMembers != null) {
+                    description = enumMembers.toString();
+                }
+
+                break;
+            case CLASS_VLEN:
+                description = "Variable-length";
+
+                if (baseType != null) {
+                    description += " of " + baseType.getDescription();
+                }
+
+                break;
+            case CLASS_ARRAY:
+                description = "Array";
+
+                if (baseType != null) {
+                    description += " of " + baseType.getDescription();
+                }
+
+                if (arrayDims != null) {
+                    description += " [";
+                    for (int i = 0; i < arrayDims.length; i++) {
+                        description += arrayDims[i];
+                        if (i < arrayDims.length - 1)
+                            description += " x ";
+                    }
+                    description += "]";
+                }
+
+                break;
+            default:
+                description = "Unknown";
+                break;
+        }
+
+        log.trace("getDescription(): finish");
         return description;
     }
 
@@ -1563,32 +1701,6 @@ public class H5Datatype extends Datatype {
         return description;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.Datatype#isUnsigned()
-     */
-    @Override
-    public boolean isUnsigned() {
-        boolean unsigned = false;
-        long tid = -1;
-
-        if (this.isCompound()) return false;
-
-        tid = createNative();
-
-        if (tid >= 0) {
-            unsigned = isUnsigned(tid);
-            try {
-                H5.H5Tclose(tid);
-            }
-            catch (final Exception ex) {
-            }
-        }
-
-        return unsigned;
-    }
-
     /**
      * Checks if a datatype specified by the identifier is an unsigned integer.
      *
@@ -1621,7 +1733,7 @@ public class H5Datatype extends Datatype {
                 }
             }
             catch (Exception ex) {
-                log.debug("isUnsigned(): {} Datatype {} failure", getDatatypeDescription(tid), tid, ex);
+                log.debug("isUnsigned(): Datatype {} failure", tid, ex);
                 unsigned = false;
             }
         }

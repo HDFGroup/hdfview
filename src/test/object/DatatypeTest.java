@@ -155,27 +155,27 @@ public class DatatypeTest {
                 for (int k = 0; k < n_signs; k++) {
                     int n_sizes;
                     switch (classes[i]) {
-                    case Datatype.CLASS_INTEGER:
-                    case Datatype.CLASS_ENUM:
-                    case Datatype.CLASS_BITFIELD:
-                    case Datatype.CLASS_OPAQUE:
-                        n_sizes = 4;
-                        break;
-                    case Datatype.CLASS_FLOAT:
-                        n_sizes = 2;
-                        break;
-                    case Datatype.CLASS_STRING:
-                        n_sizes = 2;
-                        break;
-                    default:
-                        n_sizes = 1;
-                        break;
+                        case Datatype.CLASS_INTEGER:
+                        case Datatype.CLASS_ENUM:
+                        case Datatype.CLASS_BITFIELD:
+                        case Datatype.CLASS_OPAQUE:
+                            n_sizes = 4;
+                            break;
+                        case Datatype.CLASS_FLOAT:
+                            n_sizes = 2;
+                            break;
+                        case Datatype.CLASS_STRING:
+                            n_sizes = 2;
+                            break;
+                        default:
+                            n_sizes = 1;
+                            break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         baseTypes[counter] = new H5Datatype(classes[i], sizes[l], orders[j], signs[k]);
                         assertNotNull(baseTypes[counter]);
                         log.trace("counter={}: sizes={} for ({},{},{}) type of {}", counter, sizes[l], classes[i],
-                                orders[j], signs[k], baseTypes[counter].getDatatypeDescription());
+                                orders[j], signs[k], baseTypes[counter].getDescription());
                         counter++;
                     }
                 }
@@ -209,21 +209,21 @@ public class DatatypeTest {
                 for (int k = 0; k < n_signs; k++) {
                     int n_sizes;
                     switch (classes[i]) {
-                    case Datatype.CLASS_INTEGER:
-                    case Datatype.CLASS_ENUM:
-                    case Datatype.CLASS_BITFIELD:
-                    case Datatype.CLASS_OPAQUE:
-                        n_sizes = 4;
-                        break;
-                    case Datatype.CLASS_FLOAT:
-                        n_sizes = 2;
-                        break;
-                    case Datatype.CLASS_STRING:
-                        n_sizes = 2;
-                        break;
-                    default:
-                        n_sizes = 1;
-                        break;
+                        case Datatype.CLASS_INTEGER:
+                        case Datatype.CLASS_ENUM:
+                        case Datatype.CLASS_BITFIELD:
+                        case Datatype.CLASS_OPAQUE:
+                            n_sizes = 4;
+                            break;
+                        case Datatype.CLASS_FLOAT:
+                            n_sizes = 2;
+                            break;
+                        case Datatype.CLASS_STRING:
+                            n_sizes = 2;
+                            break;
+                        default:
+                            n_sizes = 1;
+                            break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         assertEquals("Class for size " + l + " [" + i + "," + j + "," + k + "]", classes[i],
@@ -248,21 +248,21 @@ public class DatatypeTest {
                 for (int k = 0; k < n_signs; k++) {
                     int n_sizes;
                     switch (classes[i]) {
-                    case Datatype.CLASS_INTEGER:
-                    case Datatype.CLASS_ENUM:
-                    case Datatype.CLASS_BITFIELD:
-                    case Datatype.CLASS_OPAQUE:
-                        n_sizes = 4;
-                        break;
-                    case Datatype.CLASS_FLOAT:
-                        n_sizes = 2;
-                        break;
-                    case Datatype.CLASS_STRING:
-                        n_sizes = 2;
-                        break;
-                    default:
-                        n_sizes = 1;
-                        break;
+                        case Datatype.CLASS_INTEGER:
+                        case Datatype.CLASS_ENUM:
+                        case Datatype.CLASS_BITFIELD:
+                        case Datatype.CLASS_OPAQUE:
+                            n_sizes = 4;
+                            break;
+                        case Datatype.CLASS_FLOAT:
+                            n_sizes = 2;
+                            break;
+                        case Datatype.CLASS_STRING:
+                            n_sizes = 2;
+                            break;
+                        default:
+                            n_sizes = 1;
+                            break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         assertEquals("Size for size " + l + " [" + i + "," + j + "," + k + "]", sizes[l],
@@ -287,21 +287,21 @@ public class DatatypeTest {
                 for (int k = 0; k < n_signs; k++) {
                     int n_sizes;
                     switch (classes[i]) {
-                    case Datatype.CLASS_INTEGER:
-                    case Datatype.CLASS_ENUM:
-                    case Datatype.CLASS_BITFIELD:
-                    case Datatype.CLASS_OPAQUE:
-                        n_sizes = 4;
-                        break;
-                    case Datatype.CLASS_FLOAT:
-                        n_sizes = 2;
-                        break;
-                    case Datatype.CLASS_STRING:
-                        n_sizes = 2;
-                        break;
-                    default:
-                        n_sizes = 1;
-                        break;
+                        case Datatype.CLASS_INTEGER:
+                        case Datatype.CLASS_ENUM:
+                        case Datatype.CLASS_BITFIELD:
+                        case Datatype.CLASS_OPAQUE:
+                            n_sizes = 4;
+                            break;
+                        case Datatype.CLASS_FLOAT:
+                            n_sizes = 2;
+                            break;
+                        case Datatype.CLASS_STRING:
+                            n_sizes = 2;
+                            break;
+                        default:
+                            n_sizes = 1;
+                            break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         assertEquals("Order for size " + l + " [" + i + "," + j + "," + k + "]", orders[j],
@@ -326,21 +326,21 @@ public class DatatypeTest {
                 for (int k = 0; k < n_signs; k++) {
                     int n_sizes;
                     switch (classes[i]) {
-                    case Datatype.CLASS_INTEGER:
-                    case Datatype.CLASS_ENUM:
-                    case Datatype.CLASS_BITFIELD:
-                    case Datatype.CLASS_OPAQUE:
-                        n_sizes = 4;
-                        break;
-                    case Datatype.CLASS_FLOAT:
-                        n_sizes = 2;
-                        break;
-                    case Datatype.CLASS_STRING:
-                        n_sizes = 2;
-                        break;
-                    default:
-                        n_sizes = 1;
-                        break;
+                        case Datatype.CLASS_INTEGER:
+                        case Datatype.CLASS_ENUM:
+                        case Datatype.CLASS_BITFIELD:
+                        case Datatype.CLASS_OPAQUE:
+                            n_sizes = 4;
+                            break;
+                        case Datatype.CLASS_FLOAT:
+                            n_sizes = 2;
+                            break;
+                        case Datatype.CLASS_STRING:
+                            n_sizes = 2;
+                            break;
+                        default:
+                            n_sizes = 1;
+                            break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         assertEquals("Sign for size " + l + " [" + i + "," + j + "," + k + "]", signs[k],
@@ -390,25 +390,25 @@ public class DatatypeTest {
                 for (int k = 0; k < n_signs; k++) {
                     int n_sizes;
                     switch (classes[i]) {
-                    case Datatype.CLASS_INTEGER:
-                    case Datatype.CLASS_ENUM:
-                    case Datatype.CLASS_BITFIELD:
-                    case Datatype.CLASS_OPAQUE:
-                        n_sizes = 4;
-                        break;
-                    case Datatype.CLASS_FLOAT:
-                        n_sizes = 2;
-                        break;
-                    case Datatype.CLASS_STRING:
-                        n_sizes = 2;
-                        break;
-                    default:
-                        n_sizes = 1;
-                        break;
+                        case Datatype.CLASS_INTEGER:
+                        case Datatype.CLASS_ENUM:
+                        case Datatype.CLASS_BITFIELD:
+                        case Datatype.CLASS_OPAQUE:
+                            n_sizes = 4;
+                            break;
+                        case Datatype.CLASS_FLOAT:
+                            n_sizes = 2;
+                            break;
+                        case Datatype.CLASS_STRING:
+                            n_sizes = 2;
+                            break;
+                        default:
+                            n_sizes = 1;
+                            break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         assertEquals(counter + ": Description for size " + l + " [" + i + "," + j + "," + k + "]",
-                                descriptions[counter], baseTypes[counter].getDatatypeDescription());
+                                descriptions[counter], baseTypes[counter].getDescription());
                         counter++;
                     }
                 }
@@ -430,21 +430,21 @@ public class DatatypeTest {
                 for (int k = 0; k < n_signs; k++) {
                     int n_sizes;
                     switch (classes[i]) {
-                    case Datatype.CLASS_INTEGER:
-                    case Datatype.CLASS_ENUM:
-                    case Datatype.CLASS_BITFIELD:
-                    case Datatype.CLASS_OPAQUE:
-                        n_sizes = 4;
-                        break;
-                    case Datatype.CLASS_FLOAT:
-                        n_sizes = 2;
-                        break;
-                    case Datatype.CLASS_STRING:
-                        n_sizes = 2;
-                        break;
-                    default:
-                        n_sizes = 1;
-                        break;
+                        case Datatype.CLASS_INTEGER:
+                        case Datatype.CLASS_ENUM:
+                        case Datatype.CLASS_BITFIELD:
+                        case Datatype.CLASS_OPAQUE:
+                            n_sizes = 4;
+                            break;
+                        case Datatype.CLASS_FLOAT:
+                            n_sizes = 2;
+                            break;
+                        case Datatype.CLASS_STRING:
+                            n_sizes = 2;
+                            break;
+                        default:
+                            n_sizes = 1;
+                            break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         boolean isSigned = baseTypes[counter++].isUnsigned();

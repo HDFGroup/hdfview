@@ -470,7 +470,7 @@ public class H5File extends FileFormat {
                         H5Datatype attrType = new H5Datatype(tid);
                         Attribute attr = new Attribute(obj, nameA, attrType, dims);
                         attributeList.add(attr);
-                        log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attr.getDatatype().getDatatypeDescription());
+                        log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attr.getDatatype().getDescription());
 
                         boolean is_variable_str = false;
                         boolean isVLEN = false;
@@ -1505,7 +1505,7 @@ public class H5File extends FileFormat {
     public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name)
             throws Exception {
         log.trace("createDatatype(): start: name={} class={} size={} order={} sign={}", name, tclass, tsize, torder, tsign);
-        if (tbase != null) log.trace("createDatatype(): baseType is {}", tbase.getDatatypeDescription());
+        if (tbase != null) log.trace("createDatatype(): baseType is {}", tbase.getDescription());
 
         long tid = -1;
         H5Datatype dtype = null;

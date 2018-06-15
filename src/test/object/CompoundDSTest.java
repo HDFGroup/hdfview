@@ -125,11 +125,11 @@ public class CompoundDSTest {
         }
         Datatype[] types = testDS.getMemberTypes();
         for (int i = 0; i < correctMemberCount; i++) {
-            if (!types[i].getDatatypeDescription().equals(
-                    H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDatatypeDescription())) {
+            if (!types[i].getDescription().equals(
+                    H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDescription())) {
                 fail("Member Type at position " + i + "should be "
-                        + H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDatatypeDescription()
-                        + ", while getMemberTypes returns " + types[i].getDatatypeDescription());
+                        + H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDescription()
+                        + ", while getMemberTypes returns " + types[i].getDescription());
             }
         }
         int[] orders = testDS.getMemberOrders();
@@ -190,16 +190,16 @@ public class CompoundDSTest {
                     fail("Member Order at position " + j + "should be " + 1
                             + ", while getMemberOrders returns " + orders[j]);
                 }
-                if (!types[j].getDatatypeDescription().equals(
+                if (!types[j].getDescription().equals(
                         H5TestFile.COMPOUND_MEMBER_DATATYPES[j]
-                                .getDatatypeDescription())) {
+                                .getDescription())) {
                     fail("Member Type at position "
                             + i
                             + "should be "
                             + H5TestFile.COMPOUND_MEMBER_DATATYPES[j]
-                                    .getDatatypeDescription()
-                            + ", while getMemberTypes returns "
-                            + types[j].getDatatypeDescription());
+                                    .getDescription()
+                                    + ", while getMemberTypes returns "
+                                    + types[j].getDescription());
                 }
             }
         }

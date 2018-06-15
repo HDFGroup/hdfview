@@ -4282,7 +4282,7 @@ public class GermanTableView implements TableView {
                                         Datatype dtype = dset.getDatatype();
                                         Datatype baseType = dtype.getDatatypeBase();
                                         log.trace("NATTable CellSelected: dtype={} baseType={}",
-                                                dtype.getDatatypeDescription(), baseType);
+                                                dtype.getDescription(), baseType);
                                         if (baseType == null) baseType = dtype;
                                         if ((dtype.getDatatypeClass() == Datatype.CLASS_ARRAY && baseType.getDatatypeClass() == Datatype.CLASS_CHAR)
                                                 && ((NT == 'B') || (NT == 'S'))) {
@@ -4561,7 +4561,7 @@ public class GermanTableView implements TableView {
                     }
                     else {
                         // Only support variable length strings
-                        log.debug("**CompoundDSDataProvider:getDataValue(): Unsupported Variable-length of {}", dtype.getDatatypeDescription());
+                        log.debug("**CompoundDSDataProvider:getDataValue(): Unsupported Variable-length of {}", dtype.getDescription());
                         stringBuffer.append("*unsupported*");
                     }
 
