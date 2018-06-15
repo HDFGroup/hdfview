@@ -153,7 +153,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         if (d instanceof ScalarDS) {
             ScalarDS sd = (ScalarDS) d;
             Datatype t = sd.getDatatype();
-            type = (t == null) ? "null" : t.getDatatypeDescription();
+            type = (t == null) ? "null" : t.getDescription();
         }
         else if (d instanceof CompoundDS) {
             if (isH4) {
@@ -324,7 +324,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                         }
                         rowData[i][2] = mStr;
                     }
-                    rowData[i][1] = (types[i] == null) ? "null" : types[i].getDatatypeDescription();
+                    rowData[i][1] = (types[i] == null) ? "null" : types[i].getDescription();
                 }
 
                 String[] columnNames = { "Name", "Type", "Array Size" };

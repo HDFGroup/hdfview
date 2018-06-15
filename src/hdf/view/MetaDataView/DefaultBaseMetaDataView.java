@@ -305,7 +305,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 attr = (Attribute) attrList.get(i);
 
                 log.trace("createAttributeInfoPane(): attr[{}] is {} of type {}", i, attr.getName(),
-                        attr.getDatatype().getDatatypeDescription());
+                        attr.getDatatype().getDescription());
 
                 addAttributeTableItem(attrTable, attr);
             } // for (int i=0; i<n; i++)
@@ -1020,7 +1020,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
 
         String attrName = attr.getName();
-        String attrType = attr.getDatatype().getDatatypeDescription();
+        String attrType = attr.getDatatype().getDescription();
         String attrSize;
         String attrValue = attr.toString(", ", 50);
         String[] rowData = new String[attrTableColNames.length];

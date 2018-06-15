@@ -282,7 +282,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         selectedStride = new long[rank];
 
         log.trace("attrName={}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}",
-                attrName, getDatatype().getDatatypeDescription(), data, rank, getDatatype().isUnsigned(), isScalar);
+                attrName, getDatatype().getDescription(), data, rank, getDatatype().isUnsigned(), isScalar);
 
         resetSelection();
     }

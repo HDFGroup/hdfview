@@ -348,7 +348,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             botshell.bot().tree().getTreeItem("HDF Settings").click();
 
             SWTBotCheckBox enumButton = botshell.bot().checkBox("Convert Enum");
-            if (!enumButton.isEnabled())
+            if (!enumButton.isChecked())
                 enumButton.click();
 
             botshell.bot().button("Apply and Close").click();

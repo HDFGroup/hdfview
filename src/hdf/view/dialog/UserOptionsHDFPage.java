@@ -60,6 +60,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     /**
      * Performs special processing when this page's Defaults button has been pressed.
      */
+    @Override
     public void performDefaults() {
         super.performDefaults();
         getPreferenceStore();
@@ -72,6 +73,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      * @return <code>false</code> to abort the container's OK processing and <code>true</code> to allow
      *         the OK to happen
      */
+    @Override
     public boolean performOk() {
         getPreferenceStore();
         log.trace("performOk: save HDF options");
@@ -184,6 +186,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      * @param parent the parent composite
      * @return the new control
      */
+    @Override
     protected Control createContents(Composite parent) {
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout(1, false));
@@ -275,6 +278,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Convert Enum");
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Convert enum data to strings. \n"
                         + "For example, a dataset of an enum type of (R=0, G=, B=2) \n"

@@ -52,6 +52,7 @@ public class FitsDatatype extends Datatype
      */
     public FitsDatatype(int tclass, int tsize, int torder, int tsign) {
         super(tclass, tsize, torder, tsign);
+        datatypeDescription = getDescription();
     }
 
     /**
@@ -63,6 +64,7 @@ public class FitsDatatype extends Datatype
         super(-1);
         nativeType = theType;
         fromNative(0);
+        datatypeDescription = getDescription();
     }
 
     /*
@@ -158,8 +160,11 @@ public class FitsDatatype extends Datatype
 
     // implementing Datatype
     @Override
-    public String getDatatypeDescription() {
-        String description = "Unknown data type.";
+    public String getDescription() {
+        if (datatypeDescription != null)
+            return datatypeDescription;
+
+        String description = null;
 
         switch ((int)nativeType) {
             case BasicHDU.BITPIX_BYTE:
@@ -192,6 +197,9 @@ public class FitsDatatype extends Datatype
                 }
                 else if (this.isFloat()) {
                     description = "Float";
+                }
+                else {
+                    description = "Unknown data type.";
                 }
                 break;
         }

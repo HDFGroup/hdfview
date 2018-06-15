@@ -2015,11 +2015,12 @@ public class H5CompoundDSTest {
         }
         assertNotNull(compData);
         float[] floats = (float[]) compData.get(0);
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject floats={}", floats);
         for (int i = 0; i < expectedFloats.length; i++) {
             assertEquals(expectedFloats[i], floats[i], Float.MIN_VALUE);
         }
         try {
-            testFile.delete(dset); // delete the new datast
+            testFile.delete(dset); // delete the new dataset
         }
         catch (final Exception ex) {
             fail("H5CompoundDS.create() failed. " + ex);
@@ -2035,6 +2036,7 @@ public class H5CompoundDSTest {
         }
         assertNotNull(dset);
         compData = null;
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject dset.init() for {}", compStrName);
         dset.init();
         try {
             compData = (Vector<Object>) dset.getData();
@@ -2044,6 +2046,7 @@ public class H5CompoundDSTest {
         }
         assertNotNull(compData);
         String[] strs = (String[]) compData.get(0);
+        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject strs={}", strs[0]);
         for (int i = 0; i < expectedStr.length; i++) {
             assertTrue(expectedStr[i].equals(strs[i]));
         }

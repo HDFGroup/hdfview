@@ -212,6 +212,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     public Dataset(FileFormat theFile, String dsName, String dsPath, long[] oid) {
         super(theFile, dsName, dsPath, oid);
 
+        datatype = null;
         rank = -1;
         data = null;
         dims = null;
@@ -819,6 +820,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         if (!inited) init();
 
         return chunkSize;
+    }
+
+    @Override
+    public Datatype getDatatype() {
+        return datatype;
     }
 
     /**

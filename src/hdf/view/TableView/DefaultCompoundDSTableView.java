@@ -680,7 +680,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     else {
                         // Only support variable length strings
                         log.debug("**CompoundDSDataProvider:getDataValue(): Array - Unsupported Variable-length of {}",
-                                btype.getDatatypeDescription());
+                                btype.getDescription());
                         stringBuffer.append("*unsupported*");
                     }
 

@@ -46,7 +46,7 @@ public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView impleme
 
         Text infoArea = new Text(datatypeInfoGroup, SWT.MULTI);
         infoArea.setFont(curFont);
-        infoArea.setText(((Datatype) dataObject).getDatatypeDescription());
+        infoArea.setText(((Datatype) dataObject).getDescription());
         infoArea.setEditable(false);
 
         log.trace("addObjectSpecificContent(): finish");

@@ -944,7 +944,6 @@ public class H4SDS extends ScalarDS
         long sdid = (file).getSDAccessID();
         long sdsid = -1;
         long vgid = -1;
-        // datatype
         long tid = type.createNative();
 
         if(tid >= 0) {

@@ -59,6 +59,7 @@ public class H4Datatype extends Datatype {
      */
     public H4Datatype(int tclass, int tsize, int torder, int tsign) {
         super(tclass, tsize, torder, tsign);
+        datatypeDescription = getDescription();
     }
 
     /**
@@ -85,6 +86,7 @@ public class H4Datatype extends Datatype {
         super(nativeID);
 
         fromNative(nativeID);
+        datatypeDescription = getDescription();
     }
 
     /*
@@ -245,8 +247,33 @@ public class H4Datatype extends Datatype {
      * @see hdf.object.Datatype#getDatatypeDescription()
      */
     @Override
-    public String getDatatypeDescription() {
-        return getDatatypeDescription(createNative());
+    public String getDescription() {
+        log.trace("getDescription(): start");
+
+        if (datatypeDescription != null) {
+            log.trace("getDescription(): finish");
+            return datatypeDescription;
+        }
+
+        String description = null;
+
+        switch (datatypeClass) {
+            case CLASS_CHAR:
+                description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "character";
+                break;
+            case CLASS_INTEGER:
+                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                break;
+            case CLASS_FLOAT:
+                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
+                break;
+            default:
+                description = "Unknown";
+                break;
+        }
+
+        log.trace("getDescription(): finish");
+        return description;
     }
 
     /**

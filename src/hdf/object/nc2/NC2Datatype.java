@@ -56,16 +56,7 @@ public class NC2Datatype extends Datatype {
      */
     public NC2Datatype(int tclass, int tsize, int torder, int tsign) {
         super(tclass, tsize, torder, tsign);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.DataFormat#hasAttribute()
-     */
-    @Override
-    public boolean hasAttribute() {
-        return false;
+        datatypeDescription = getDescription();
     }
 
     /**
@@ -78,6 +69,17 @@ public class NC2Datatype extends Datatype {
         super(-1);
         nativeType = theType;
         fromNative(0);
+        datatypeDescription = getDescription();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.DataFormat#hasAttribute()
+     */
+    @Override
+    public boolean hasAttribute() {
+        return false;
     }
 
     /**
@@ -164,13 +166,16 @@ public class NC2Datatype extends Datatype {
         else if (nativeType.equals(DataType.STRING)) {
             datatypeClass = CLASS_STRING;
             datatypeSize = 80; // default length. need to figure out the actual
-                               // length
+            // length
         }
     }
 
     // implementing Datatype
     @Override
-    public String getDatatypeDescription() {
+    public String getDescription() {
+        if (datatypeDescription != null)
+            return datatypeDescription;
+
         if (nativeType == null) {
             return "Unknown data type.";
         }

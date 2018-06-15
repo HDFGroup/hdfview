@@ -153,6 +153,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public static final int NSGN = 2;
 
+    protected String datatypeDescription = null;
+
     /**
      * The class of the datatype.
      */
@@ -522,6 +524,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return enumStr Map<String,String> pairs of enum members
      */
     public final Map<String, String> getEnumMembers() {
+        if (enumMembers == null) {
+            enumMembers = new HashMap<>();
+            enumMembers.put("1", "0");
+            enumMembers.put("2", "1");
+        }
+
         return enumMembers;
     }
 
@@ -538,6 +546,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
+        if (enumMembers == null) {
+            enumMembers = new HashMap<>();
+            enumMembers.put("1", "0");
+            enumMembers.put("2", "1");
+        }
+
         String enumStr = new String();
         Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
         int i = enumMembers.size();
@@ -618,24 +632,25 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *
      * @return a short text description of this datatype
      */
-    public String getDatatypeDescription() {
-        log.trace("getDatatypeDescription(): start");
+    public String getDescription() {
+        log.trace("getDescription(): start");
 
-        String description = "Unknown";
+        if (datatypeDescription != null) {
+            log.trace("getDescription(): finish");
+            return datatypeDescription;
+        }
+
+        String description = null;
 
         switch (datatypeClass) {
+            case CLASS_CHAR:
+                description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                break;
             case CLASS_INTEGER:
-                if (datatypeSign == SIGN_NONE) {
-                    description = String.valueOf(datatypeSize * 8)
-                            + "-bit unsigned integer";
-                }
-                else {
-                    description = String.valueOf(datatypeSize * 8) + "-bit integer";
-                }
+                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
             case CLASS_FLOAT:
-                description = String.valueOf(datatypeSize * 8)
-                + "-bit floating-point";
+                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
                 break;
             case CLASS_STRING:
                 description = "String";
@@ -644,7 +659,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 description = "Object reference";
                 break;
             case CLASS_BITFIELD:
-                description = "Bitfield";
+                description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
                 break;
             case CLASS_ENUM:
                 description = String.valueOf(datatypeSize * 8) + "-bit enum";
@@ -653,7 +668,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 description = "Array";
                 break;
             case CLASS_COMPOUND:
-                description = "Compound ";
+                description = "Compound";
                 break;
             case CLASS_VLEN:
                 description = "Variable-length";
@@ -663,18 +678,47 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 break;
         }
 
-        log.trace("description={}", description);
-        log.trace("getDatatypeDescription(): finish");
+        if (baseType != null) {
+            description += " of " + baseType.getDescription();
+        }
+
+        log.trace("getDescription(): finish");
         return description;
     }
 
     /**
-     * Checks if this datatype is an unsigned integer.
+     * Checks if this datatype is unsigned.
      *
-     * @return true if the datatype is an unsigned integer; otherwise, returns
-     *         false.
+     * @return true if the datatype is unsigned;
+     *         otherwise, returns false.
      */
-    public abstract boolean isUnsigned();
+    public boolean isUnsigned() {
+        if (baseType != null)
+            return baseType.isUnsigned();
+        else {
+            if (isCompound()) {
+                if (compoundMemberTypes != null) {
+                    boolean all_members_unsigned = true;
+
+                    Iterator<Datatype> cmpd_type_list_it = compoundMemberTypes.iterator();
+                    while (cmpd_type_list_it.hasNext()) {
+                        Datatype next = cmpd_type_list_it.next();
+
+                        all_members_unsigned = all_members_unsigned && next.isUnsigned();
+                    }
+
+                    return all_members_unsigned;
+                }
+                else {
+                    log.debug("isUnsigned(): compoundMemberTypes is null");
+                    return false;
+                }
+            }
+            else {
+                return (datatypeSign == Datatype.SIGN_NONE);
+            }
+        }
+    }
 
     public abstract boolean isText();
 
@@ -825,5 +869,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     @Override
     public void updateMetadata(Object info) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:updateMetadata.");
+    }
+
+    @Override
+    public String toString() {
+        return getDescription();
     }
 }
