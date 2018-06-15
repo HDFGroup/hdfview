@@ -64,9 +64,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     private byte[] paletteRefs;
 
-    /** flag to indicate if the dataset is a variable length */
-    private boolean isVLEN = false;
-
     /** flag to indicate if the dataset is an external dataset */
     private boolean isExternal = false;
 
@@ -81,9 +78,6 @@ public class H5ScalarDS extends ScalarDS {
      * flag to indicate if the datatype in file is the same as dataype in memory
      */
     private boolean isNativeDatatype = false;
-
-    /** flag to indicate is the datatype is reg. ref. */
-    private boolean isRegRef = false;
 
     /**
      * Constructs an instance of a H5 scalar dataset with given file, dataset name and path.
@@ -245,7 +239,6 @@ public class H5ScalarDS extends ScalarDS {
         long did = -1;
         long tid = -1;
         long sid = -1;
-        int tclass = -1;
 
         did = open();
         if (did >= 0) {
@@ -303,46 +296,27 @@ public class H5ScalarDS extends ScalarDS {
                 sid = H5.H5Dget_space(did);
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 tid = H5.H5Dget_type(did);
-                tclass = H5.H5Tget_class(tid);
-                log.debug("init(): H5Tget_class: {} is Array {}", tclass, HDF5Constants.H5T_ARRAY);
+                log.trace("init(): tid={} sid={} rank={}", tid, sid, rank);
+                datatype = new H5Datatype(tid);
 
                 long tmptid = 0;
-                if (tclass == HDF5Constants.H5T_ARRAY) {
-                    long basetid = -1;
-                    try {
-                        // use the base datatype to define the array
-                        basetid = H5.H5Tget_super(tid);
-                        int baseclass = H5.H5Tget_class(basetid);
-                        isArrayOfCompound = (baseclass == HDF5Constants.H5T_COMPOUND);
-                        isArrayOfVLEN = (baseclass == HDF5Constants.H5T_VLEN);
-                        isVLEN = isVLEN || ((baseclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(basetid));
-                        isVLEN = isVLEN || H5.H5Tdetect_class(basetid, HDF5Constants.H5T_VLEN);
-                    }
-                    catch (Exception ex) {
-                        log.debug("init():  use the base datatype to define the array: ", ex);
-                    }
-                    finally {
-                        try {
-                            H5.H5Tclose(basetid);
-                        }
-                        catch (Exception ex) {
-                            log.debug("init(): H5Tclose(basetid {}) failure: ", basetid, ex);
-                        }
+                if (datatype.isArray()) {
+                    H5Datatype basetype = (H5Datatype) datatype.getDatatypeBase();
+                    if (basetype != null) {
+                        isArrayOfCompound = basetype.isCompound();
+                        isArrayOfVLEN = basetype.isVLEN();
                     }
                 }
-
-                isText = (tclass == HDF5Constants.H5T_STRING);
-                isVLEN = isVLEN || ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
-                isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
                 log.trace(
                         "init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
-                        tid, tclass, isText, isVLEN, getDatatype().isEnum(), getDatatype().isUnsigned(), isRegRef);
+                        tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
+                        ((H5Datatype) datatype).isRegRef());
 
                 // check if datatype in file is native datatype
                 try {
                     tmptid = H5.H5Tget_native_type(tid);
                     isNativeDatatype = H5.H5Tequal(tid, tmptid);
-                    log.trace("init(): isNativeDatatype={}", isNativeDatatype);
+                    log.trace("init(): isNativeDatatype={} datatype.isUnsigned={}", isNativeDatatype, datatype.isUnsigned());
 
                     /* see if fill value is defined */
                     pid = H5.H5Dget_create_plist(did);
@@ -474,11 +448,9 @@ public class H5ScalarDS extends ScalarDS {
                     nAttributes = (int) obj_info.num_attrs;
 
                     tid = H5.H5Dget_type(did);
+                    H5Datatype DSdatatype = new H5Datatype(tid);
 
-                    int tclass = H5.H5Tget_class(tid);
-                    isText = (tclass == HDF5Constants.H5T_STRING);
-                    isVLEN = ((tclass == HDF5Constants.H5T_VLEN) || H5.H5Tis_variable_str(tid));
-                    log.trace("hasAttribute(): tclass type: isText={},isVLEN={},isEnum={}", isText, isVLEN, getDatatype().isEnum());
+                    log.trace("hasAttribute(): dataclass type: isText={},isVLEN={},isEnum={}", DSdatatype.isText(), DSdatatype.isVLEN(), DSdatatype.isEnum());
                 }
                 catch (Exception ex) {
                     obj_info.num_attrs = 0;
@@ -565,16 +537,19 @@ public class H5ScalarDS extends ScalarDS {
                     if (!isNativeDatatype) {
                         long tmptid = -1;
                         try {
-                            tmptid = tid;
-                            tid = H5.H5Tget_native_type(tmptid);
+                            tmptid = H5Datatype.toNative(tid);
+                            if (tmptid >= 0) {
+                                try {
+                                    H5.H5Tclose(tid);
+                                }
+                                catch (Exception ex2) {
+                                    log.debug("getDatatype(): H5Tclose(tid {}) failure: ", tid, ex2);
+                                }
+                                tid = tmptid;
+                            }
                         }
-                        finally {
-                            try {
-                                H5.H5Tclose(tmptid);
-                            }
-                            catch (Exception ex2) {
-                                log.debug("getDatatype(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
-                            }
+                        catch (Exception ex) {
+                            log.debug("getDatatype(): toNative: ", ex);
                         }
                     }
                     datatype = new H5Datatype(tid);
@@ -823,11 +798,11 @@ public class H5ScalarDS extends ScalarDS {
             log.trace("read(): External dataset: user.dir={}", pdir);
         }
 
-        boolean isREF = false;
         long[] lsize = { 1 };
         log.trace("read(): open dataset");
         did = open();
         if (did >= 0) {
+            H5Datatype DSdatatype = null;
             try {
                 lsize[0] = selectHyperslab(did, spaceIDs);
                 log.trace("read(): opened dataset size {} for {}", lsize[0], nPoints);
@@ -855,27 +830,17 @@ public class H5ScalarDS extends ScalarDS {
                     }
                 }
 
-                tid = H5.H5Dget_type(did);
-                log.trace("read(): H5Tget_native_type:");
-                log.trace("read(): isNativeDatatype={}", isNativeDatatype);
-                if (!isNativeDatatype) {
-                    long tmptid = -1;
-                    try {
-                        tmptid = tid;
-                        tid = H5.H5Tget_native_type(tmptid);
-                    }
-                    finally {
-                        try {H5.H5Tclose(tmptid);}
-                        catch (Exception ex2) {log.debug("read(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);}
-                    }
+                try {
+                    DSdatatype = (H5Datatype) this.getDatatype();
+                }
+                catch (Exception ex) {
+                    log.debug("read(): get datatype: ", ex);
                 }
 
-                isREF = (H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_OBJ));
-
-                log.trace("read(): originalBuf={} isText={} isREF={} lsize[0]={} nPoints={}", originalBuf, isText, isREF, lsize[0], nPoints);
-                if ((originalBuf == null) || getDatatype().isEnum() || isText || isREF || ((originalBuf != null) && (lsize[0] != nPoints))) {
+                log.trace("read(): originalBuf={} isText={} isREF={} lsize[0]={} nPoints={}", originalBuf, DSdatatype.isText(), DSdatatype.isRefObj(), lsize[0], nPoints);
+                if ((originalBuf == null) || DSdatatype.isEnum() || DSdatatype.isText() || DSdatatype.isRefObj() || ((originalBuf != null) && (lsize[0] != nPoints))) {
                     try {
-                        theData = H5Datatype.allocateArray(tid, (int) lsize[0]);
+                        theData = DSdatatype.allocateArray((int) lsize[0]);
                     }
                     catch (OutOfMemoryError err) {
                         log.debug("read(): Out of memory.");
@@ -888,16 +853,10 @@ public class H5ScalarDS extends ScalarDS {
                 }
 
                 if (theData != null) {
-                    if (isVLEN) {
+                    tid = DSdatatype.getNative(did);
+                    if (DSdatatype.isVLEN()) {
                         log.trace("read(): H5DreadVL");
-                        boolean is_variable_str = false;
-                        try {
-                            is_variable_str = H5.H5Tis_variable_str(tid);
-                        }
-                        catch (Exception ex) {
-                            log.debug("allocateArray(): H5Tis_variable_str(tid {}) failure: ", tid, ex);
-                        }
-                        if (is_variable_str)
+                        if (DSdatatype.isVarStr())
                             H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
                         else
                             H5.H5DreadVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
@@ -934,11 +893,11 @@ public class H5ScalarDS extends ScalarDS {
                     log.debug("read(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex2);
                 }
                 try {
-                    if (isText && convertByteToString && theData instanceof byte[]) {
+                    if (DSdatatype.isText() && convertByteToString && theData instanceof byte[]) {
                         log.trace("read(): H5Dread isText convertByteToString");
-                        theData = byteToString((byte[]) theData, (int)H5.H5Tget_size(tid));
+                        theData = byteToString((byte[]) theData, (int) DSdatatype.getDatatypeSize());
                     }
-                    else if (isREF) {
+                    else if (DSdatatype.isRefObj()) {
                         log.trace("read(): H5Dread isREF byteToLong");
                         theData = HDFNativeData.byteToLong((byte[]) theData);
                     }
@@ -980,21 +939,10 @@ public class H5ScalarDS extends ScalarDS {
             return;
         }
 
-        if (isVLEN && !isText) {
-            log.trace("write(): VL data={}", buf);
-            log.debug("write(): Cannot write non-string variable-length data");
-            log.trace("write(): finish");
-            throw (new HDF5Exception("Writing non-string variable-length data is not supported"));
-        }
-        else if (isRegRef) {
-            log.debug("write(): Cannot write region reference data");
-            log.trace("write(): finish");
-            throw (new HDF5Exception("Writing region references data is not supported"));
-        }
-
         long[] lsize = { 1 };
         did = open();
         if (did >= 0) {
+            H5Datatype DSdatatype = null;
             try {
                 log.trace("write(): dataset opened");
                 lsize[0] = selectHyperslab(did, spaceIDs);
@@ -1013,14 +961,31 @@ public class H5ScalarDS extends ScalarDS {
                     }
                 }
 
-                isText = (H5.H5Tget_class(tid) == HDF5Constants.H5T_STRING);
+                try {
+                    DSdatatype = (H5Datatype) this.getDatatype();
+                }
+                catch (Exception ex) {
+                    log.debug("read(): get datatype: ", ex);
+                }
+
+                if (DSdatatype.isVLEN() && !DSdatatype.isText()) {
+                    log.trace("write(): VL data={}", buf);
+                    log.debug("write(): Cannot write non-string variable-length data");
+                    log.trace("write(): finish");
+                    throw (new HDF5Exception("Writing non-string variable-length data is not supported"));
+                }
+                else if (DSdatatype.isRegRef()) {
+                    log.debug("write(): Cannot write region reference data");
+                    log.trace("write(): finish");
+                    throw (new HDF5Exception("Writing region references data is not supported"));
+                }
 
                 // check if need to convert integer data
-                int tsize = (int)H5.H5Tget_size(tid);
+                int tsize = (int) DSdatatype.getDatatypeSize();
                 String cname = buf.getClass().getName();
                 char dname = cname.charAt(cname.lastIndexOf("[") + 1);
                 boolean doConversion = (((tsize == 1) && (dname == 'S')) || ((tsize == 2) && (dname == 'I'))
-                        || ((tsize == 4) && (dname == 'J')) || (getDatatype().isUnsigned() && unsignedConverted));
+                        || ((tsize == 4) && (dname == 'J')) || (DSdatatype.isUnsigned() && unsignedConverted));
                 log.trace("write(): tsize={} cname={} dname={} doConversion={}", tsize, cname, dname, doConversion);
 
                 tmpData = buf;
@@ -1029,10 +994,10 @@ public class H5ScalarDS extends ScalarDS {
                 }
                 // do not convert v-len strings, regardless of conversion request
                 // type
-                else if (isText && convertByteToString && !H5.H5Tis_variable_str(tid)) {
-                    tmpData = stringToByte((String[]) buf, (int)H5.H5Tget_size(tid));
+                else if (DSdatatype.isText() && convertByteToString && !DSdatatype.isVarStr()) {
+                    tmpData = stringToByte((String[]) buf, tsize);
                 }
-                else if (getDatatype().isEnum() && (Array.get(buf, 0) instanceof String)) {
+                else if (DSdatatype.isEnum() && (Array.get(buf, 0) instanceof String)) {
                     tmpData = H5Datatype.convertEnumNameToValue(tid, (String[]) buf);
                 }
 
@@ -1898,6 +1863,7 @@ public class H5ScalarDS extends ScalarDS {
                 catch (Exception ex) {
                     log.debug("getAttrValue(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                 }
+                H5Datatype DSdatatype = new H5Datatype(atid);
 
                 asid = H5.H5Aget_space(aid);
                 long adims[] = null;
@@ -1920,13 +1886,13 @@ public class H5ScalarDS extends ScalarDS {
 
                 if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) throw new Exception("Invalid int size");
 
-                avalue = H5Datatype.allocateArray(atid, (int) lsize);
+                avalue = DSdatatype.allocateArray((int) lsize);
 
                 if (avalue != null) {
                     log.trace("getAttrValue(): read attribute id {} of size={}", atid, lsize);
                     H5.H5Aread(aid, atid, avalue);
 
-                    if (H5Datatype.isUnsigned(atid)) {
+                    if (DSdatatype.isUnsigned()) {
                         log.trace("getAttrValue(): id {} is unsigned", atid);
                         avalue = convertFromUnsignedC(avalue, null);
                     }
