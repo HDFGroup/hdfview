@@ -373,7 +373,7 @@ public class DatatypeTest {
     }
 
     /**
-     * Test method for {@link hdf.object.Datatype#getDatatypeDescription()} . RISHI SINHA - THE METHOD CALLED IS
+     * Test method for {@link hdf.object.Datatype#getDescription()} . RISHI SINHA - THE METHOD CALLED IS
      * ONE FOR H5 WHICH OVERRIDES THE BASE CALL.
      * <p>
      * We test for every combination of class, size and possible signs.
