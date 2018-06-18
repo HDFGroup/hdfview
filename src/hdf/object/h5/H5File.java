@@ -505,7 +505,7 @@ public class H5File extends FileFormat {
                             }
                             value = strs;
                         }
-                        else if (attr.getDatatype().isCompound() || (attr.isScalar() && attr.getDatatype().isArray())) {
+                        else if (attr.getDatatype().isCompound()) {
                             String[] strs = new String[(int) lsize];
                             for (int j = 0; j < lsize; j++) {
                                 strs[j] = "";
