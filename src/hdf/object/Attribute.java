@@ -1286,15 +1286,33 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         }
         else {
             log.trace("toString: not enum or unsigned");
-            String strValue = Array.get(data, 0).toString();
+            Object value = Array.get(data, 0);
+            String strValue;
+
+            if (value == null) {
+                strValue = "null";
+            }
+            else {
+                strValue = value.toString();
+            }
+
             if (maxItems > 0 && strValue.length() > maxItems) {
                 // truncate the extra characters
                 strValue = strValue.substring(0, maxItems);
             }
             sb.append(strValue);
+
             for (int i = 1; i < n; i++) {
                 sb.append(delimiter);
-                strValue = Array.get(data, i).toString();
+                value = Array.get(data, i);
+
+                if (value == null) {
+                    strValue = "null";
+                }
+                else {
+                    strValue = value.toString();
+                }
+
                 if (maxItems > 0 && strValue.length() > maxItems) {
                     // truncate the extra characters
                     strValue = strValue.substring(0, maxItems);

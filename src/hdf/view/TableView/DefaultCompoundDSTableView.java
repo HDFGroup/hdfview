@@ -849,7 +849,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
-            if (value instanceof String) return value;
+            if (value == null || value instanceof String) return value;
+
             log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
 
             Datatype dtype = types[fieldIndex];

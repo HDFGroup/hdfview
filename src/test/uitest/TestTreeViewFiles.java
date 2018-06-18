@@ -1,29 +1,27 @@
 package test.uitest;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -129,14 +127,14 @@ public class TestTreeViewFiles extends AbstractWindowTest {
                         val.equals(attribute_names[i]));
             }
 
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(0, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(1, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(2, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. -1, .*'", attrTable.cell(3, 3).matches("^. -1, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 255, .*'", attrTable.cell(4, 3).matches("^. 255, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 65535, .*'", attrTable.cell(5, 3).matches("^. 65535, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 4294967295, .*'", attrTable.cell(6, 3).matches("^. 4294967295, .*"));
-            assertTrue("openHDF5ScalarAttribute() data did not match regex '^. 18446744073709551615, .*'", attrTable.cell(7, 3).matches("^. 18446744073709551615, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '-1, .*'", attrTable.cell(0, 3).matches("-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '-1, .*'", attrTable.cell(1, 3).matches("-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '-1, .*'", attrTable.cell(2, 3).matches("-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '-1, .*'", attrTable.cell(3, 3).matches("-1, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '255, .*'", attrTable.cell(4, 3).matches("255, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '65535, .*'", attrTable.cell(5, 3).matches("65535, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '4294967295, .*'", attrTable.cell(6, 3).matches("4294967295, .*"));
+            assertTrue("openHDF5ScalarAttribute() data did not match regex '18446744073709551615, .*'", attrTable.cell(7, 3).matches("18446744073709551615, .*"));
         }
         catch (Exception ex) {
             ex.printStackTrace();

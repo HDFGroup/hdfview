@@ -1552,7 +1552,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     || (theDataset.getSelectedIndex()[0] < theDataset.getSelectedIndex()[1]));
 
             if (isArray) {
-                if (dtype.isVLEN() && btype.isString()) {
+                if (btype.isVarStr()) {
                     isVLStr = true;
 
                     // Variable-length string arrays don't have a defined array size
@@ -1579,7 +1579,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 arrayElements = new Object[(int) arraySize];
             }
             else {
-                if (dtype.isVLEN() && btype.isString())
+                if (dtype.isVarStr())
                     isVLStr = true;
 
                 arraySize = 0;
@@ -1749,7 +1749,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
-            if (value instanceof String) return value; // String value type doesn't need converting
+            if (value == null || value instanceof String) return value;
+
             log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
 
             buffer.setLength(0); // clear the old string
@@ -1913,6 +1914,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
                 String strVal = null;
+
+                if (val == null) return;
 
                 String[] columnNames = ((ScalarDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNames;
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;

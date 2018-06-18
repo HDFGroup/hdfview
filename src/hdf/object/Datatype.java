@@ -355,6 +355,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         enumMembers = null;
         baseType = tbase;
         arrayDims = null;
+        is_variable_str = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
+        is_VLEN = (datatypeClass == Datatype.CLASS_VLEN) || is_variable_str;
 
         log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
                 datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
