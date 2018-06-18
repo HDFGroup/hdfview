@@ -100,6 +100,8 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
                         orders[fieldIdx]);
             }
 
+            rowIdx = row;
+
             log.trace("CompoundAttributeDataProvider:getDataValue() rowIdx={}", rowIdx);
 
             String colValue = (String) ((List<?>) dataValue).get(rowIdx);
