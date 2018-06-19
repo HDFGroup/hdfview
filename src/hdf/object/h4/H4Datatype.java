@@ -276,66 +276,6 @@ public class H4Datatype extends Datatype {
         return description;
     }
 
-    /**
-     * Returns the short description of a given datatype.
-     *
-     * @param datatype
-     *            the data type
-     *
-     * @return a description String
-     */
-    public static final String getDatatypeDescription(long datatype) {
-        log.trace("getDatatypeDescription(): start");
-
-        String description = "Unknown";
-
-        switch((int) datatype) {
-            case HDFConstants.DFNT_CHAR:
-                description = "8-bit character";
-                break;
-            case HDFConstants.DFNT_UCHAR8:
-                description = "8-bit unsigned character";
-                break;
-            case HDFConstants.DFNT_UINT8:
-                description = "8-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_INT8:
-                description = "8-bit integer";
-                break;
-            case HDFConstants.DFNT_INT16:
-                description = "16-bit integer";
-                break;
-            case HDFConstants.DFNT_UINT16:
-                description = "16-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_INT32:
-                description = "32-bit integer";
-                break;
-            case HDFConstants.DFNT_UINT32:
-                description = "32-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_INT64:
-                description = "64-bit integer";
-                break;
-            case HDFConstants.DFNT_UINT64:
-                description = "64-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_FLOAT32:
-                description = "32-bit floating-point";
-                break;
-            case HDFConstants.DFNT_FLOAT64:
-                description = "64-bit floating-point";
-                break;
-            default:
-                log.debug("getDatatypeDescription(): unknown datatype {}", datatype);
-                description = "Unknown";
-                break;
-        }
-
-        log.trace("getDatatypeDescription(): finish");
-        return description;
-    }
-
     /*
      * (non-Javadoc)
      *

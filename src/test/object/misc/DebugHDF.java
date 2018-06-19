@@ -1426,11 +1426,12 @@ public class DebugHDF {
                 long tid = H5.H5Dget_type(did);
 
                 long nativeDatatype = H5.H5Tget_native_type(tid);
+                H5Datatype datatype = new H5Datatype(tid);
 
                 long msid = H5.H5Screate_simple(ds.getRank(), selectionCount, null);
                 long fsid = H5.H5Dget_space(did);
                 long[] lsize = { selectionCount[0] * (selectionCount.length > 1 ? selectionCount[1] : 1) };
-                Object theData = H5Datatype.allocateArray(nativeDatatype, (int) lsize[0]);
+                Object theData = datatype.allocateArray((int) lsize[0]);
                 H5.H5Sselect_hyperslab(fsid, HDF5Constants.H5S_SELECT_SET, selectionStart, selectionStride,
                         selectionCount, null);
                 H5.H5Dread(did, nativeDatatype, msid, fsid, HDF5Constants.H5P_DEFAULT, theData);
@@ -2216,6 +2217,7 @@ public class DebugHDF {
         }
         final long did = H5.H5Dcreate(file.getFID(), "/1D compound Strings", tid, sid, plist, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         try {H5.H5Pclose(plist);} catch (final Exception ex) {};
+        try {H5.H5Tclose(mtid);} catch (final Exception ex) {};
         try {H5.H5Tclose(tid);} catch (final Exception ex) {};
         try {H5.H5Sclose(sid);} catch (final Exception ex) {};
         try {H5.H5Dclose(did);} catch (final Exception ex) {};

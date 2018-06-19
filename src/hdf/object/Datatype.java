@@ -213,12 +213,6 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     protected List<Long> compoundMemberOffsets;
 
     /**
-     * The list of field IDs of members of a compound Datatype.
-     */
-    protected List<Long> compoundMemberFieldIDs;
-
-
-    /**
      * Constructs a named datatype with a given file, name and path.
      *
      * @param theFile
@@ -599,7 +593,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * int tid = dtype.createNative();
      * </pre>
      *
-     * There "tid" will be the HDF5 datatype id of a 64-bit unsigned integer, which is equivalent to
+     * The "tid" will be the HDF5 datatype id of a 64-bit unsigned integer, which is equivalent to
      *
      * <pre>
      * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
@@ -699,7 +693,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             return baseType.isUnsigned();
         else {
             if (isCompound()) {
-                if (compoundMemberTypes != null) {
+                if ((compoundMemberTypes != null) && (compoundMemberTypes.size() > 0)) {
                     boolean all_members_unsigned = true;
 
                     Iterator<Datatype> cmpd_type_list_it = compoundMemberTypes.iterator();

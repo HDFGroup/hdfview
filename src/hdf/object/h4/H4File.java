@@ -1592,7 +1592,15 @@ public class H4File extends FileFormat {
                 Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attrList.add(attr);
 
-                Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                Object buf = null;
+                try {
+                    buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                }
+                catch (OutOfMemoryError e) {
+                    log.debug("getGRglobalAttribute(): out of memory: ", e);
+                    buf = null;
+                }
+
                 try {
                     HDFLibrary.GRgetattr(grid, i, buf);
                 }
@@ -1672,7 +1680,15 @@ public class H4File extends FileFormat {
                 Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attrList.add(attr);
 
-                Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                Object buf = null;
+                try {
+                    buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                }
+                catch (OutOfMemoryError e) {
+                    log.debug("getSDSglobalAttribute(): out of memory: ", e);
+                    buf = null;
+                }
+
                 try {
                     HDFLibrary.SDreadattr(sdid, i, buf);
                 }
