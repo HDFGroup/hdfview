@@ -29,6 +29,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.object.Attribute;
+import hdf.object.CompoundDS;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 
@@ -325,46 +326,13 @@ public class H5Datatype extends Datatype {
                 obj_info.num_attrs = 0;
             }
             finally {
-                try {
-                    H5.H5Tclose(tid);
-                }
-                catch (Exception ex) {
-                    log.debug("hasAttribute(): H5Tclose(tid {}) failure:", tid, ex);
-                }
+                close(tid);
             }
         }
 
         log.trace("hasAttribute(): nAttributes={}", obj_info.num_attrs);
 
         return (obj_info.num_attrs > 0);
-    }
-
-    /**
-     * Converts values in an Enumeration Datatype to names.
-     * <p>
-     * This method searches the identified enumeration datatype for the values appearing in
-     * <code>inValues</code> and returns the names corresponding to those values. If a given value is
-     * not found in the enumeration datatype, the name corresponding to that value will be set to
-     * <code>"ENUM ERR value"</code> in the string array that is returned.
-     * <p>
-     * If the method fails in general, null will be returned instead of a String array. An empty
-     * <code>inValues</code> parameter or an invalid <code>tid</code> would cause
-     * general failure.
-     *
-     * @param tid
-     *            The identifier of the enumeration datatype.
-     * @param inValues
-     *            The array of enumerations values to be converted.
-     *
-     * @return The string array of names if successful; otherwise return null.
-     *
-     * @throws HDF5Exception
-     *             If there is an error at the HDF5 library level.
-     *
-     */
-    public static final String[] convertEnumValueToName(long tid, Object inValues) throws HDF5Exception {
-        H5Datatype datatype = new H5Datatype(tid);
-        return datatype.convertEnumValueToName(inValues);
     }
 
     /**
@@ -436,28 +404,6 @@ public class H5Datatype extends Datatype {
 
         log.trace("convertEnumValueToName(): finish");
         return outNames;
-    }
-
-    /**
-     * Converts names in an Enumeration Datatype to values.
-     * <p>
-     * This method searches the identified enumeration datatype for the names appearing in <code>inValues</code> and
-     * returns the values corresponding to those names.
-     *
-     * @param tid
-     *            The identifier of the enumeration datatype.
-     * @param in
-     *            The array of enumerations names to be converted.
-     *
-     * @return The int array of values if successful; otherwise return null.
-     *
-     * @throws HDF5Exception
-     *             If there is an error at the HDF5 library level.
-     *
-     */
-    public static final Object[] convertEnumNameToValue(long tid, String[] in) throws HDF5Exception {
-        H5Datatype datatype = new H5Datatype(tid);
-        return datatype.convertEnumNameToValue(in);
     }
 
     /**
@@ -591,10 +537,9 @@ public class H5Datatype extends Datatype {
                 long tmptid = -1;
                 datatypeClass = CLASS_ARRAY;
                 try {
-                    int arrayRank = H5.H5Tget_array_ndims(tid);
-                    arrayDims = new long[arrayRank];
+                    int ndims = H5.H5Tget_array_ndims(tid);
+                    arrayDims = new long[ndims];
                     H5.H5Tget_array_dims(tid, arrayDims);
-                    log.trace("fromNative(): array type ndims={} for dims={}", arrayRank, arrayDims);
                     tmptid = H5.H5Tget_super(tid);
                     baseType = new H5Datatype(tmptid);
                     datatypeSign = baseType.getDatatypeSign();
@@ -610,6 +555,7 @@ public class H5Datatype extends Datatype {
                         log.debug("fromNative(): array H5Tclose(tmptid {}) failure: ", tmptid, ex);
                     }
                 }
+                log.trace("fromNative(): array type finish");
             }
             else if (nativeClass == HDF5Constants.H5T_COMPOUND) {
                 datatypeClass = CLASS_COMPOUND;
@@ -619,7 +565,6 @@ public class H5Datatype extends Datatype {
                     compoundMemberNames = new Vector<>(nMembers);
                     compoundMemberTypes = new Vector<>(nMembers);
                     compoundMemberOffsets = new Vector<>(nMembers);
-                    compoundMemberFieldIDs = new Vector<>(nMembers);
                     log.trace("fromNative(): compound type nMembers={} start", nMembers);
 
                     for (int i = 0; i < nMembers; i++) {
@@ -630,7 +575,7 @@ public class H5Datatype extends Datatype {
                         H5Datatype membertype = null;
                         try {
                             memberID = H5.H5Tget_member_type(tid, i);
-                            membertype = new H5Datatype(memberID);
+                            membertype = new H5Datatype(memberID, this);
                         }
                         catch (Exception ex1) {
                             log.debug("fromNative(): compound type failure: ", ex1);
@@ -646,7 +591,6 @@ public class H5Datatype extends Datatype {
 
                         compoundMemberNames.add(i, memberName);
                         compoundMemberOffsets.add(i, memberOffset);
-                        compoundMemberFieldIDs.add(i, memberID);
                         compoundMemberTypes.add(i, membertype);
                     }
                 }
@@ -935,16 +879,31 @@ public class H5Datatype extends Datatype {
                     try {
                         tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
 
-                        for (int i = 0; i < compoundMemberNames.size(); i++) {
+                        for (int i = 0; i < compoundMemberTypes.size(); i++) {
                             String memberName = compoundMemberNames.get(i);
                             long memberOffset = compoundMemberOffsets.get(i);
-                            long memberID = compoundMemberFieldIDs.get(i);
+                            long memberID = -1;
+                            try {
+                                memberID = H5.H5Tget_member_type(tid, i);
+                                log.trace("createNative(): {} member[{}] with offset={} ID={}: ", memberName, i, memberOffset, memberID);
 
-                            H5.H5Tinsert(tid, memberName, memberOffset, memberID);
+                                H5.H5Tinsert(tid, memberName, memberOffset, memberID);
+                            }
+                            catch (Exception ex1) {
+                                log.debug("createNative(): compound type failure: ", ex1);
+                            }
+                            finally {
+                                try {
+                                    H5.H5Tclose(memberID);
+                                }
+                                catch (Exception ex2) {
+                                    log.debug("createNative(): compound H5Tclose(memberID {}) failure: ", memberID, ex2);
+                                }
+                            }
                         }
                     }
                     catch (Exception ex) {
-                        log.trace("createNative(): failure: ", ex);
+                        log.debug("createNative(): failure: ", ex);
                     }
                     break;
                 case CLASS_INTEGER:
@@ -1173,7 +1132,7 @@ public class H5Datatype extends Datatype {
      *
      * <pre>
      * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
-     * int[] data = (int[]) allocateArray(tid, 100, false);
+     * int[] data = (int[]) allocateArray(100);
      * </pre>
      *
      * returns a 32-bit integer array of size 100.
@@ -1286,173 +1245,6 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Allocates a one-dimensional array of byte, short, int, long, float, double, or String to store data in memory.
-     *
-     * For example,
-     *
-     * <pre>
-     * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
-     * int[] data = (int[]) allocateArray(tid, 100);
-     * </pre>
-     *
-     * returns a 32-bit integer array of size 100.
-     *
-     * @param tid
-     *            the datatype id.
-     * @param size
-     *            the total number of data points of the array.
-     *
-     * @return the array object if successful; otherwise, return null.
-     *
-     * @throws OutOfMemoryError
-     *            If there is a failure.
-     */
-    public static Object allocateArray(long tid, int size) throws OutOfMemoryError {
-        log.trace("allocateArray(): start: tid={} size={}", tid, size);
-        Object data = null;
-        boolean isVL = false;
-        boolean is_variable_str = false;
-        boolean is_reg_ref = false;
-
-        if (size < 0) {
-            log.debug("allocateArray(): size < 0");
-            log.trace("allocateArray(): finish");
-            return null;
-        }
-
-        // Scalar members have dimensionality zero, i.e. size =0
-        // what can we do about it, set the size to 1
-        if (size == 0) {
-            size = 1;
-        }
-
-        // data type information
-        int tclass = -1;
-        long tsize = -1;
-
-        try {
-            tclass = H5.H5Tget_class(tid);
-            tsize = H5.H5Tget_size(tid);
-            log.trace("allocateArray(): tclass={} : tsize={}", tclass, tsize);
-        }
-        catch (Exception ex) {
-            log.debug("allocateArray(): H5Tget_xxxx data type information failure: ", ex);
-        }
-
-        try {
-            is_variable_str = H5.H5Tis_variable_str(tid);
-        }
-        catch (Exception ex) {
-            log.debug("allocateArray(): H5Tis_variable_str(tid {}) failure: ", tid, ex);
-        }
-        isVL = (tclass == HDF5Constants.H5T_VLEN);
-
-        try {
-            is_reg_ref = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
-        }
-        catch (Exception ex) {
-            log.debug("allocateArray(): H5Tequal(tid {}, HDF5Constants.H5T_STD_REF_DSETREG) failure: ", tid, ex);
-        }
-
-        if (is_variable_str || isVL || is_reg_ref) {
-            log.trace("allocateArray(): is_variable_str={} || isVL={} || is_reg_ref={}", is_variable_str, isVL, is_reg_ref);
-            data = new String[size];
-            for (int i = 0; i < size; i++) {
-                ((String[]) data)[i] = "";
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_INTEGER) {
-            log.trace("allocateArray(): class.H5T_INTEGER={}", tclass);
-            if (tsize == 1) {
-                data = new byte[size];
-            }
-            else if (tsize == 2) {
-                data = new short[size];
-            }
-            else if (tsize == 4) {
-                data = new int[size];
-            }
-            else if (tsize == 8) {
-                data = new long[size];
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_ENUM) {
-            log.trace("allocateArray(): class.H5T_ENUM={}", tclass);
-            long superTid = -1;
-            try {
-                superTid = H5.H5Tget_super(tid);
-                data = allocateArray(superTid, size);
-            }
-            catch (Exception ex) {
-                log.debug("allocateArray(): H5T_ENUM class enum data type information failure: ", ex);
-            }
-            finally {
-                try {
-                    H5.H5Tclose(superTid);
-                }
-                catch (Exception ex) {
-                    log.debug("allocateArray(): H5T_ENUM H5Tclose(superTid {}) failure: ", superTid, ex);
-                }
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_COMPOUND) {
-            log.trace("allocateArray(): class.H5T_COMPOUND={}", tclass);
-            return new byte[(int) (size * tsize)];
-        }
-        else if (tclass == HDF5Constants.H5T_FLOAT) {
-            log.trace("allocateArray(): class.H5T_FLOAT={}", tclass);
-            if (tsize == 4) {
-                data = new float[size];
-            }
-            else if (tsize == 8) {
-                data = new double[size];
-            }
-        }
-        else if ((tclass == HDF5Constants.H5T_STRING) || (tclass == HDF5Constants.H5T_REFERENCE)) {
-            log.trace("allocateArray(): class.H5T_STRING || H5T_REFERENCE={}", tclass);
-            data = new byte[(int) (size * tsize)];
-        }
-        else if (tclass == HDF5Constants.H5T_ARRAY) {
-            // use the base datatype to define the array
-            long superTid = -1;
-            try {
-                int mn = H5.H5Tget_array_ndims(tid);
-                long[] marray = new long[mn];
-                H5.H5Tget_array_dims(tid, marray);
-                int asize = 1;
-                for (int j = 0; j < mn; j++) {
-                    asize *= marray[j];
-                }
-                log.trace("allocateArray(): class.H5T_ARRAY={} : members={} : asize={}", tclass, mn, asize);
-
-                superTid = H5.H5Tget_super(tid);
-                data = allocateArray(superTid, size * asize);
-            }
-            catch (Exception ex) {
-                log.debug("allocateArray(): H5T_ARRAY class failure: ", ex);
-            }
-            finally {
-                try {
-                    H5.H5Tclose(superTid);
-                }
-                catch (Exception ex) {
-                    log.debug("allocateArray(): H5T_ARRAY H5Tclose(superTid {}) failure: ", superTid, ex);
-                }
-            }
-        }
-        else if ((tclass == HDF5Constants.H5T_OPAQUE) || (tclass == HDF5Constants.H5T_BITFIELD)) {
-            log.trace("allocateArray(): class.H5T_OPAQUE || H5T_BITFIELD={}", tclass);
-            data = new byte[(int) (size * tsize)];
-        }
-        else {
-            log.debug("allocateArray(): class.????={}", tclass);
-            data = null;
-        }
-
-        return data;
-    }
-
-    /**
      * Returns the size (in bytes) of a given datatype identifier.
      * <p>
      * It basically just calls H5Tget_size(tid).
@@ -1508,9 +1300,9 @@ public class H5Datatype extends Datatype {
             case CLASS_STRING:
                 description = "String, length = " + (isVarStr() ? "variable" : datatypeSize);
 
-                tid = createNative();
-                if (tid >= 0) {
-                    try {
+                try {
+                    tid = createNative();
+                    if (tid >= 0) {
                         String strPadType;
                         int strPad = H5.H5Tget_strpad(tid);
 
@@ -1526,17 +1318,16 @@ public class H5Datatype extends Datatype {
                         if (strPadType != null)
                             description += ", string padding = " + strPadType;
                     }
-                    catch (Exception ex) {
-                        log.debug("H5Tget_strpad failure: ", ex);
-                    }
-                    finally {
-                        close(tid);
+                    else {
+                        log.debug("createNative() failure");
                     }
                 }
-                else {
-                    log.debug("createNative() failure");
+                catch (Exception ex) {
+                    log.debug("H5Tget_strpad failure: ", ex);
                 }
-
+                finally {
+                    close(tid);
+                }
                 break;
             case CLASS_BITFIELD:
                 description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
@@ -1547,7 +1338,7 @@ public class H5Datatype extends Datatype {
             case CLASS_COMPOUND:
                 description = "Compound";
 
-                if (compoundMemberTypes != null) {
+                if ((compoundMemberTypes != null) && (compoundMemberTypes.size() > 0)) {
                     Iterator<String> member_names = null;
                     Iterator<Datatype> member_types = compoundMemberTypes.iterator();
 
@@ -1637,258 +1428,6 @@ public class H5Datatype extends Datatype {
         }
 
         log.trace("getDescription(): finish");
-        return description;
-    }
-
-    /**
-     * Returns a short description of a given datatype ID.
-     *
-     * @param tid
-     *            the HDF5 datatype identifier
-     *
-     * @return a string describing the data type.
-     */
-    public static final String getDatatypeDescription(long tid) {
-        log.trace("getDatatypeDescription(): start");
-        String description = "Unknown";
-
-        // data type information
-        int tclass = -1;
-        long tsize = -1;
-        int tsign = -1;
-
-        try {
-            tclass = H5.H5Tget_class(tid);
-            tsize = H5.H5Tget_size(tid);
-        }
-        catch (Exception ex) {
-            log.debug("getDatatypeDescription(): Unknown: ", ex);
-        }
-
-        if (tclass == HDF5Constants.H5T_INTEGER) {
-            log.trace("getDatatypeDescription(): class H5T_INTEGER");
-            try {
-                tsign = H5.H5Tget_sign(tid);
-            }
-            catch (Exception ex) {
-                log.debug("getDatatypeDescription(): H5Tget_sign(tid {}) failure:", tid, ex);
-            }
-            if (tsize == 1) {
-                if (tsign == HDF5Constants.H5T_SGN_NONE) {
-                    description = "8-bit unsigned integer";
-                }
-                else {
-                    description = "8-bit integer";
-                }
-            }
-            else if (tsize == 2) {
-                if (tsign == HDF5Constants.H5T_SGN_NONE) {
-                    description = "16-bit unsigned integer";
-                }
-                else {
-                    description = "16-bit integer";
-                }
-            }
-            else if (tsize == 4) {
-                if (tsign == HDF5Constants.H5T_SGN_NONE) {
-                    description = "32-bit unsigned integer";
-                }
-                else {
-                    description = "32-bit integer";
-                }
-            }
-            else if (tsize == 8) {
-                if (tsign == HDF5Constants.H5T_SGN_NONE) {
-                    description = "64-bit unsigned integer";
-                }
-                else {
-                    description = "64-bit integer";
-                }
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_FLOAT) {
-            log.trace("getDatatypeDescription(): class H5T_FLOAT");
-            if (tsize == 4) {
-                description = "32-bit floating-point";
-            }
-            else if (tsize == 8) {
-                description = "64-bit floating-point";
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_STRING) {
-            log.trace("getDatatypeDescription(): class H5T_STRING");
-            try {
-                if (H5.H5Tis_variable_str(tid)) {
-                    description = "String, length = variable";
-                }
-                else {
-                    String strPadType;
-                    int strPad = H5.H5Tget_strpad(tid);
-
-                    if (strPad == HDF5Constants.H5T_STR_NULLTERM)
-                        strPadType = "H5T_STR_NULLTERM";
-                    else if (strPad == HDF5Constants.H5T_STR_NULLPAD)
-                        strPadType = "H5T_STR_NULLPAD";
-                    else if (strPad == HDF5Constants.H5T_STR_SPACEPAD)
-                        strPadType = "H5T_STR_SPACEPAD";
-                    else
-                        strPadType = null;
-
-                    description = "String, length = " + H5.H5Tget_size(tid);
-
-                    if (strPadType != null) description += ", string padding = " + strPadType;
-                }
-            }
-            catch (Exception ex) {
-                description = "String";
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_REFERENCE) {
-            log.trace("getDatatypeDescription(): class H5T_REFERENCE");
-            boolean is_reg_ref = false;
-            try {
-                is_reg_ref = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
-            }
-            catch (Exception ex) {
-                log.debug("getDatatypeDescription(): H5T_STD_REF_DSETREG: ", ex);
-            }
-
-            if (is_reg_ref) {
-                description = "Dataset region reference";
-            }
-            else {
-                description = "Object reference";
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_BITFIELD) {
-            log.trace("getDatatypeDescription(): class H5T_BITFIELD");
-            description = "Bitfield";
-        }
-        else if (tclass == HDF5Constants.H5T_ENUM) {
-            log.trace("getDatatypeDescription(): class H5T_ENUM");
-            byte[] evalue = new byte[(int) tsize];
-            String enames = " ( ";
-            try {
-                int n = H5.H5Tget_nmembers(tid);
-                for (int i = 0; i < n; i++) {
-                    H5.H5Tget_member_value(tid, i, evalue);
-                    enames += H5.H5Tget_member_name(tid, i);
-                    enames += "=";
-                    if (tsize == 1) {
-                        description = "8-bit enum";
-                        enames += (HDFNativeData.byteToByte(evalue[0]))[0];
-                    }
-                    else if (tsize == 2) {
-                        description = "16-bit enum";
-                        enames += (HDFNativeData.byteToShort(evalue))[0];
-                    }
-                    else if (tsize == 4) {
-                        description = "32-bit enum";
-                        enames += (HDFNativeData.byteToInt(evalue))[0];
-                    }
-                    else if (tsize == 8) {
-                        description = "64-bit enum";
-                        enames += (HDFNativeData.byteToLong(evalue))[0];
-                    }
-                    if(i < n-1)
-                        enames += " ";
-                }
-                enames += ")";
-                description += enames;
-            }
-            catch (Exception ex) {
-                log.debug("getDatatypeDescription(): H5T_ENUM: ", ex);
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_ARRAY) {
-            log.trace("getDatatypeDescription(): class H5T_ARRAY");
-            description = "Array of ";
-            // use the base datatype to define the array
-            long tmptid = -1;
-            try {
-                tmptid = H5.H5Tget_super(tid);
-                description += getDatatypeDescription(tmptid);
-                int ndims = H5.H5Tget_array_ndims(tid);
-                long adims[] = new long[ndims];
-                try {
-                    H5.H5Tget_array_dims(tid, adims);
-                }
-                catch (Exception ex) {
-                    log.debug("getDatatypeDescription(): H5T_ARRAY dims: ", ex);
-                }
-
-                description += " (" + adims[0];
-                for (int j = 1; j < ndims; j++)
-                    description += "x" + adims[j];
-                description += ")";
-            }
-            catch (Exception ex) {
-                log.debug("getDatatypeDescription(): H5T_ARRAY: ", ex);
-            }
-            finally {
-                try {
-                    H5.H5Tclose(tmptid);
-                }
-                catch (Exception ex) {
-                    log.debug("getDatatypeDescription(): H5T_ARRAY H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                }
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_COMPOUND) {
-            log.trace("getDatatypeDescription(): class H5T_COMPOUND");
-            description = "Compound ";
-            try {
-                description += "{";
-                int n = H5.H5Tget_nmembers(tid);
-                long mtid = -1;
-
-                for (int i = 0; i < n; i++) {
-                    mtid = H5.H5Tget_member_type(tid, i);
-                    if (i > 0)
-                        description += ",\n";
-                    description += getDatatypeDescription(mtid);
-                    try {
-                        H5.H5Tclose(mtid);
-                    }
-                    catch (Exception ex2) {
-                        log.debug("getDatatypeDescription(): H5T_COMPOUND H5Tclose(mtid {}) failure: ", mtid, ex2);
-                    }
-                    mtid = -1;
-                }
-                description += "}";
-            }
-            catch (Exception ex) {
-                log.debug("getDatatypeDescription(): H5T_COMPOUND: ", ex);
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_VLEN) {
-            log.trace("getDatatypeDescription(): class H5T_VLEN");
-            long tmptid = -1;
-            try {
-                tmptid = H5.H5Tget_super(tid);
-                description = "Variable-length of " + getDatatypeDescription(tmptid);
-            }
-            catch (Exception ex) {
-                description = "Variable-length";
-            }
-            finally {
-                try {
-                    H5.H5Tclose(tmptid);
-                }
-                catch (Exception ex) {
-                    log.debug("getDatatypeDescription(): H5T_VLEN H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                }
-            }
-        }
-        else if (tclass == HDF5Constants.H5T_OPAQUE) {
-            log.trace("getDatatypeDescription(): class H5T_OPAQUE");
-            description = "Opaque";
-        }
-        else {
-            description = "Unknown";
-        }
-
-        log.trace("getDatatypeDescription(): finish");
         return description;
     }
 
@@ -2073,5 +1612,147 @@ public class H5Datatype extends Datatype {
 
     public int getNativeStrPad() {
         return nativeStrPad;
+    }
+
+    /**
+     * Extracts compound information into flat structure.
+     * <p>
+     * For example, compound datatype "nest" has {nest1{a, b, c}, d, e} then extractCompoundInfo() will
+     * put the names of nested compound fields into a flat list as
+     *
+     * <pre>
+     * nest.nest1.a
+     * nest.nest1.b
+     * nest.nest1.c
+     * nest.d
+     * nest.e
+     * </pre>
+     *
+     * @param name
+     *            the name of the compound datatype
+     * @param names
+     *            the list to store the member names of the compound datatype
+     * @param flatListTypes
+     *            the list to store the nested member names of the compound datatype
+     */
+    public void extractCompoundInfo(String name, List<String> names, List<Datatype> flatListTypes) {
+        log.trace("extractCompoundInfo(): start: name={}", name);
+
+        Datatype mtype = null;
+        String mname = null;
+
+        log.trace("extractCompoundInfo(): nMembers={}", compoundMemberNames.size());
+
+        if (compoundMemberNames.size() <= 0) {
+            log.debug("extractCompoundInfo(): datatype has no members");
+            log.trace("extractCompoundInfo(): finish");
+            return;
+        }
+
+        for (int i = 0; i < compoundMemberNames.size(); i++) {
+            log.trace("extractCompoundInfo(): nMembers[{}]", i);
+
+            mtype = compoundMemberTypes.get(i);
+            log.trace("extractCompoundInfo():[{}] mtype={} with size={}", i, mtype.getDescription(), mtype.getDatatypeSize());
+
+            if (names != null) {
+                mname = name + compoundMemberNames.get(i);
+                log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
+            }
+
+            if (mtype.isCompound()) {
+                ((H5Datatype) mtype).extractCompoundInfo(mname + CompoundDS.separator, names, flatListTypes);
+                log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
+                continue;
+            }
+
+            if (names != null) {
+                names.add(mname);
+            }
+            flatListTypes.add(mtype);
+
+        } // for (int i=0; i<nMembers; i++)
+        log.trace("extractCompoundInfo(): finish");
+    } // extractCompoundInfo
+
+    /**
+     * Creates a datatype of a compound with one field.
+     * <p>
+     * This function is needed to read/write data field by field.
+     *
+     * @param atom_tid
+     *            The datatype identifier of the compound to create
+     * @param member_name
+     *            The name of the datatype
+     * @param compInfo
+     *            compInfo[0]--IN: class of member datatype; compInfo[1]--IN: size of member datatype;
+     *            compInfo[2]--OUT: non-zero if the base type of the compound field is unsigned; zero,
+     *            otherwise.
+     *
+     * @return the identifier of the compound datatype.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
+     */
+    public long createCompoundFieldType(String member_name) throws HDF5Exception {
+        log.trace("createCompoundFieldType(): start member_name={}", member_name);
+        long nested_tid = -1;
+        long tmp_tid1 = -1;
+        try {
+            if (isArray()) {
+                log.trace("createCompoundFieldType(): H5T_ARRAY {} Member has dims length {}", member_name, getArrayDims().length);
+                long basetid = baseType.createNative();
+                tmp_tid1 = H5.H5Tarray_create(basetid, getArrayDims().length, getArrayDims());
+                try {
+                    log.trace("createCompoundFieldType(sep): H5.H5Tclose:basetid={}", basetid);
+                    H5.H5Tclose(basetid);
+                }
+                catch (Exception ex) {
+                    log.debug("createCompoundFieldType(): H5Tclose(basetid {}) failure: ", basetid, ex);
+                }
+                log.trace("createCompoundFieldType(): H5T_ARRAY {} Member is base class {} of base size={}", member_name, getDatatypeBase().getDatatypeClass(),
+                        getDatatypeBase().getDatatypeSize());
+            }
+            else {
+                log.trace("createCompoundFieldType(): {} Member has basetype={}", member_name, baseType);
+                tmp_tid1 = createNative();
+            }
+
+            int sep = member_name.lastIndexOf(CompoundDS.separator);
+            log.trace("createCompoundFieldType(): sep={} datatypeSize={}", sep, datatypeSize);
+
+            while (sep > 0) {
+                String theName = member_name.substring(sep + 1);
+                log.trace("createCompoundFieldType(): sep={} with name={}", sep, theName);
+                nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
+                H5.H5Tinsert(nested_tid, theName, 0, tmp_tid1);
+                try {
+                    log.trace("createCompoundFieldType(sep): H5.H5Tclose:tmp_tid1={}", tmp_tid1);
+                    H5.H5Tclose(tmp_tid1);
+                }
+                catch (Exception ex) {
+                    log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex);
+                }
+                tmp_tid1 = nested_tid;
+                member_name = member_name.substring(0, sep);
+                sep = member_name.lastIndexOf(CompoundDS.separator);
+            }
+
+            nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
+
+            H5.H5Tinsert(nested_tid, member_name, 0, tmp_tid1);
+        }
+        finally {
+            try {
+                log.trace("createCompoundFieldType(): finally H5.H5Tclose:tmp_tid1={}", tmp_tid1);
+                H5.H5Tclose(tmp_tid1);
+            }
+            catch (HDF5Exception ex3) {
+                log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex3);
+            }
+        }
+
+        log.trace("createCompoundFieldType(): finish");
+        return nested_tid;
     }
 }

@@ -370,7 +370,7 @@ public class H4SDS extends ScalarDS
 
     // Implementing DataFormat
     @Override
-    public Object read() throws HDFException
+    public Object read() throws HDFException, OutOfMemoryError
     {
         log.trace("read(): start");
 
@@ -549,7 +549,15 @@ public class H4SDS extends ScalarDS
                 Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
-                Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                Object buf = null;
+                try {
+                    buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                }
+                catch (OutOfMemoryError e) {
+                    log.debug("getMetadata(): out of memory: ", e);
+                    buf = null;
+                }
+
                 try {
                     HDFLibrary.SDreadattr(id, i, buf);
                 }

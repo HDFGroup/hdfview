@@ -287,6 +287,7 @@ public class H4Vdata extends CompoundDS
             }
 
             int n = memberOrders[i]*(int)selectedDims[0];
+
             member_data = H4Datatype.allocateArray(memberTIDs[i], n);
 
             log.trace("read(): index={} isMemberSelected[i]={} memberOrders[i]={} array size={}", i, isMemberSelected[i], memberOrders[i], n);
@@ -476,7 +477,15 @@ public class H4Vdata extends CompoundDS
                         attr.setProperty("field", memberNames[j]);
                     attributeList.add(attr);
 
-                    Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                    Object buf = null;
+                    try {
+                        buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                    }
+                    catch (OutOfMemoryError e) {
+                        log.debug("getMetadata(): out of memory: ", e);
+                        buf = null;
+                    }
+
                     try {
                         HDFLibrary.VSgetattr(id, j, i, buf);
                     }

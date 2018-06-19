@@ -21,7 +21,6 @@ import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
-import hdf.object.Datatype;
 import hdf.view.ViewManager;
 
 public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableView implements TableView {
@@ -54,8 +53,6 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
 
         private final StringBuffer stringBuffer;
 
-        private final Datatype     types[];
-
         private final int          orders[];
         private final int          nFields;
         private final int          nRows;
@@ -69,8 +66,6 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
 
             stringBuffer = new StringBuffer();
 
-            types = dataFormat.getSelectedMemberTypes();
-
             orders = dataFormat.getSelectedMemberOrders();
             nFields = dataFormat.getSelectedMemberCount();
             nRows = (int) dataFormat.getHeight();
@@ -82,59 +77,63 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
 
         @Override
         public Object getDataValue(int col, int row) {
-            int fieldIdx = col;
-            int rowIdx = row;
+            try {
+                int fieldIdx = col;
+                int rowIdx = row;
 
-            log.trace("CompoundAttributeDataProvider:getDataValue({},{}) start", row, col);
+                log.trace("CompoundAttributeDataProvider:getDataValue({},{}) start", row, col);
 
-            if (nSubColumns > 1) { // multi-dimension compound dataset
-                int colIdx = col / nFields;
-                fieldIdx %= nFields;
-                rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
-                log.trace("CompoundAttributeDataProvider:getDataValue() row={} orders[{}]={} nSubColumns={} colIdx={}",
-                        row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
-            }
-            else {
-                rowIdx = row * orders[fieldIdx];
-                log.trace("CompoundAttributeDataProvider:getDataValue() row={} orders[{}]={}", row, fieldIdx,
-                        orders[fieldIdx]);
-            }
-
-            rowIdx = row;
-
-            log.trace("CompoundAttributeDataProvider:getDataValue() rowIdx={}", rowIdx);
-
-            String colValue = (String) ((List<?>) dataValue).get(rowIdx);
-            if (colValue == null) {
-                return "Null";
-            }
-
-            colValue = colValue.replace("{", "").replace("}", "");
-            colValue = colValue.replace("[", "").replace("]", "");
-
-            String[] dataValues = colValue.split(",");
-            if (orders[fieldIdx] > 1) {
-                stringBuffer.setLength(0);
-
-                stringBuffer.append("[");
-
-                int startIdx = 0;
-                for (int i = 0; i < fieldIdx; i++) {
-                    startIdx += orders[i];
+                if (nSubColumns > 1) { // multi-dimension compound dataset
+                    int colIdx = col / nFields;
+                    fieldIdx %= nFields;
+                    rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
+                    log.trace("CompoundAttributeDataProvider:getDataValue() row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
+                }
+                else {
+                    rowIdx = row * orders[fieldIdx];
+                    log.trace("CompoundAttributeDataProvider:getDataValue() row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
                 }
 
-                for (int i = 0; i < orders[fieldIdx]; i++) {
-                    if (i > 0) stringBuffer.append(", ");
+                rowIdx = row;
 
-                    stringBuffer.append(dataValues[startIdx + i]);
+                log.trace("CompoundAttributeDataProvider:getDataValue() rowIdx={}", rowIdx);
+
+                String colValue = (String) ((List<?>) dataValue).get(rowIdx);
+                if (colValue == null) {
+                    return "Null";
                 }
 
-                stringBuffer.append("]");
+                colValue = colValue.replace("{", "").replace("}", "");
+                colValue = colValue.replace("[", "").replace("]", "");
 
-                theValue = stringBuffer.toString();
+                String[] dataValues = colValue.split(",");
+                if (orders[fieldIdx] > 1) {
+                    stringBuffer.setLength(0);
+
+                    stringBuffer.append("[");
+
+                    int startIdx = 0;
+                    for (int i = 0; i < fieldIdx; i++) {
+                        startIdx += orders[i];
+                    }
+
+                    for (int i = 0; i < orders[fieldIdx]; i++) {
+                        if (i > 0) stringBuffer.append(", ");
+
+                        stringBuffer.append(dataValues[startIdx + i]);
+                    }
+
+                    stringBuffer.append("]");
+
+                    theValue = stringBuffer.toString();
+                }
+                else {
+                    theValue = dataValues[fieldIdx];
+                }
             }
-            else {
-                theValue = dataValues[fieldIdx];
+            catch (Exception ex) {
+                log.debug("CompoundAttributeDataProvider:getDataValue() failure: ", ex);
+                theValue = "*ERROR*";
             }
 
             return theValue;

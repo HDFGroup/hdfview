@@ -124,7 +124,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     /**
      * A list of datatypes of all compound fields including nested fields.
      */
-    private List<Long> flatTypeList;
+    private List<Datatype> flatTypeList;
 
     /**
      * The number of members of the compound attribute.
@@ -406,7 +406,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
                 if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
                     // initialize member information
-                    extractCompoundInfo(tid, "", flatNameList, flatTypeList);
+                    ((H5Datatype) getDatatype()).extractCompoundInfo("", flatNameList, flatTypeList);
                     numberOfMembers = flatNameList.size();
                     log.trace("init(): numberOfMembers={}", numberOfMembers);
 
@@ -419,7 +419,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
                     for (int i = 0; i < numberOfMembers; i++) {
                         isMemberSelected[i] = true;
-                        memberTIDs[i] = flatTypeList.get(i).longValue();
+                        memberTIDs[i] = flatTypeList.get(i).createNative();
                         memberTypes[i] = new H5Datatype(memberTIDs[i]);
                         memberNames[i] = flatNameList.get(i);
                         memberOrders[i] = 1;
@@ -1323,278 +1323,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         log.trace("toString: finish");
         return sb.toString();
-    }
-
-    /**
-     * Extracts compound information into flat structure.
-     * <p>
-     * For example, compound datatype "nest" has {nest1{a, b, c}, d, e} then
-     * extractCompoundInfo() will put the names of nested compound fields into a
-     * flat list as
-     *
-     * <pre>
-     * nest.nest1.a
-     * nest.nest1.b
-     * nest.nest1.c
-     * nest.d
-     * nest.e
-     * </pre>
-     *
-     * @param tid
-     *            the identifier of the compound datatype
-     * @param name
-     *            the name of the compound datatype
-     * @param names
-     *            the list to store the member names of the compound datatype
-     * @param flatTypeList2
-     *            the list to store the nested member names of the compound datatype
-     */
-    private void extractCompoundInfo(long tid, String name, List<String> names, List<Long> flatTypeList2) {
-        log.trace("extractCompoundInfo(): start: tid={}, name={}", tid, name);
-
-        int nMembers = 0, mclass = -1;
-        long mtype = -1;
-        String mname = null;
-
-        try {
-            nMembers = H5.H5Tget_nmembers(tid);
-        }
-        catch (Exception ex) {
-            log.debug("extractCompoundInfo(): H5Tget_nmembers(tid {}) failure", tid, ex);
-            nMembers = 0;
-        }
-        log.trace("extractCompoundInfo(): nMembers={}", nMembers);
-
-        if (nMembers <= 0) {
-            log.debug("extractCompoundInfo(): datatype has no members");
-            log.trace("extractCompoundInfo(): finish");
-            return;
-        }
-
-        long tmptid = -1;
-        for (int i = 0; i < nMembers; i++) {
-            log.trace("extractCompoundInfo(): nMembers[{}]", i);
-            try {
-                mtype = H5.H5Tget_member_type(tid, i);
-            }
-            catch (Exception ex) {
-                log.debug("extractCompoundInfo(): continue after H5Tget_member_type[{}] failure: ", i, ex);
-                continue;
-            }
-
-            try {
-                tmptid = mtype;
-                mtype = H5.H5Tget_native_type(tmptid);
-            }
-            catch (HDF5Exception ex) {
-                log.debug("extractCompoundInfo(): continue after H5Tget_native_type[{}] failure: ", i, ex);
-                continue;
-            }
-            finally {
-                try {
-                    H5.H5Tclose(tmptid);
-                }
-                catch (HDF5Exception ex) {
-                    log.debug("extractCompoundInfo(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                }
-            }
-
-            try {
-                mclass = H5.H5Tget_class(mtype);
-            }
-            catch (HDF5Exception ex) {
-                log.debug("extractCompoundInfo(): continue after H5Tget_class[{}] failure: ", i, ex);
-                continue;
-            }
-
-            if (names != null) {
-                mname = name + H5.H5Tget_member_name(tid, i);
-                log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
-            }
-
-            if (mclass == HDF5Constants.H5T_COMPOUND) {
-                extractCompoundInfo(mtype, mname + CompoundDS.separator, names, flatTypeList2);
-                log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
-                continue;
-            }
-            else if (mclass == HDF5Constants.H5T_ARRAY) {
-                try {
-                    tmptid = H5.H5Tget_super(mtype);
-                    int tmpclass = H5.H5Tget_class(tmptid);
-
-                    // cannot deal with ARRAY of ARRAY, support only ARRAY of atomic types
-                    if ((tmpclass == HDF5Constants.H5T_ARRAY)) {
-                        log.debug("extractCompoundInfo():[{}] unsupported ARRAY of ARRAY", i);
-                        continue;
-                    }
-                }
-                catch (Exception ex) {
-                    log.debug("extractCompoundInfo():[{}] continue after H5T_ARRAY id or class failure: ", i, ex);
-                    continue;
-                }
-                finally {
-                    try {
-                        H5.H5Tclose(tmptid);
-                    }
-                    catch (Exception ex) {
-                        log.debug("extractCompoundInfo():[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
-                    }
-                }
-            }
-
-            if (names != null) {
-                names.add(mname);
-            }
-            flatTypeList2.add(new Long(mtype));
-
-        } // for (int i=0; i<nMembers; i++)
-        log.trace("extractCompoundInfo(): finish");
-    } // extractNestedCompoundInfo
-
-    /**
-     * Creates a datatype of a compound with one field.
-     * <p>
-     * This function is needed to read/write data field by field.
-     *
-     * @param atom_tid
-     *            The datatype identifier of the compound to create
-     * @param member_name
-     *            The name of the datatype
-     * @param compInfo
-     *            compInfo[0]--IN: class of member datatype; compInfo[1]--IN: size
-     *            of member datatype; compInfo[2]--OUT: non-zero if the base type of
-     *            the compound field is unsigned; zero, otherwise.
-     *
-     * @return the identifier of the compound datatype.
-     *
-     * @throws HDF5Exception
-     *             If there is an error at the HDF5 library level.
-     */
-    private final long createCompoundFieldType(long atom_tid, String member_name, int[] compInfo) throws HDF5Exception {
-        log.trace("createCompoundFieldType(): start");
-
-        long nested_tid = -1;
-
-        long arrayType = -1;
-        long baseType = -1;
-        long tmp_tid1 = -1;
-        long tmp_tid4 = -1;
-
-        try {
-            int member_class = compInfo[0];
-            int member_size = compInfo[1];
-
-            log.trace("createCompoundFieldType(): {} Member is class {} of size={} with baseType={}", member_name,
-                    member_class, member_size, baseType);
-            if (member_class == HDF5Constants.H5T_ARRAY) {
-                int mn = H5.H5Tget_array_ndims(atom_tid);
-                long[] marray = new long[mn];
-                H5.H5Tget_array_dims(atom_tid, marray);
-                baseType = H5.H5Tget_super(atom_tid);
-                tmp_tid4 = H5.H5Tget_native_type(baseType);
-                arrayType = H5.H5Tarray_create(tmp_tid4, mn, marray);
-                log.trace("createCompoundFieldType(): H5T_ARRAY {} Member is class {} of size={} with baseType={}",
-                        member_name, member_class, member_size, baseType);
-            }
-
-            try {
-                if (baseType < 0) {
-                    if (H5Datatype.isUnsigned(atom_tid)) {
-                        compInfo[2] = 1;
-                    }
-                }
-                else {
-                    if (H5Datatype.isUnsigned(baseType)) {
-                        compInfo[2] = 1;
-                    }
-                }
-            }
-            catch (Exception ex2) {
-                log.debug("createCompoundFieldType(): baseType isUnsigned: ", ex2);
-            }
-            try {
-                H5.H5Tclose(baseType);
-                baseType = -1;
-            }
-            catch (HDF5Exception ex4) {
-                log.debug("createCompoundFieldType(): H5Tclose(baseType {}) failure: ", baseType, ex4);
-            }
-
-            member_size = (int) H5.H5Tget_size(atom_tid);
-            log.trace("createCompoundFieldType(): member_size={}", member_size);
-
-            // construct nested compound structure with a single field
-            String theName = member_name;
-            if (arrayType < 0) {
-                tmp_tid1 = H5.H5Tcopy(atom_tid);
-            }
-            else {
-                tmp_tid1 = H5.H5Tcopy(arrayType);
-            }
-            try {
-                H5.H5Tclose(arrayType);
-                arrayType = -1;
-            }
-            catch (HDF5Exception ex4) {
-                log.debug("createCompoundFieldType(): H5Tclose(arrayType {}) failure: ", arrayType, ex4);
-            }
-            int sep = member_name.lastIndexOf(CompoundDS.separator);
-            log.trace("createCompoundFieldType(): sep={}", sep);
-
-            while (sep > 0) {
-                theName = member_name.substring(sep + 1);
-                log.trace("createCompoundFieldType(): sep={} with name={}", sep, theName);
-                nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, member_size);
-                H5.H5Tinsert(nested_tid, theName, 0, tmp_tid1);
-                try {
-                    log.trace("createCompoundFieldType(sep): H5.H5Tclose:tmp_tid1={}", tmp_tid1);
-                    H5.H5Tclose(tmp_tid1);
-                }
-                catch (Exception ex) {
-                    log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex);
-                }
-                tmp_tid1 = nested_tid;
-                member_name = member_name.substring(0, sep);
-                sep = member_name.lastIndexOf(CompoundDS.separator);
-            }
-
-            nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, member_size);
-
-            H5.H5Tinsert(nested_tid, member_name, 0, tmp_tid1);
-        }
-        finally {
-            try {
-                log.trace("createCompoundFieldType(): finally H5.H5Tclose:tmp_tid1={}", tmp_tid1);
-                H5.H5Tclose(tmp_tid1);
-            }
-            catch (HDF5Exception ex3) {
-                log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex3);
-            }
-            try {
-                log.trace("createCompoundFieldType(): finally H5.H5Tclose:tmp_tid4={}", tmp_tid4);
-                H5.H5Tclose(tmp_tid4);
-            }
-            catch (HDF5Exception ex3) {
-                log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid4, ex3);
-            }
-            try {
-                log.trace("createCompoundFieldType(): finally H5.H5Tclose:baseType={}", baseType);
-                H5.H5Tclose(baseType);
-            }
-            catch (HDF5Exception ex4) {
-                log.debug("createCompoundFieldType(): H5Tclose(baseType {}) failure: ", baseType, ex4);
-            }
-            try {
-                log.trace("createCompoundFieldType(): finally H5.H5Tclose:arrayType={}", arrayType);
-                H5.H5Tclose(arrayType);
-            }
-            catch (HDF5Exception ex4) {
-                log.debug("createCompoundFieldType(): H5Tclose(arrayType {}) failure: ", arrayType, ex4);
-            }
-        }
-
-        log.trace("createCompoundFieldType(): finish");
-        return nested_tid;
     }
 
     /**

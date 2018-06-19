@@ -535,7 +535,13 @@ public class H5File extends FileFormat {
                             value = strs;
                         }
                         else {
-                            value = H5Datatype.allocateArray(tid, (int) lsize);
+                            try {
+                                value = ((H5Datatype) attr.getDatatype()).allocateArray((int) lsize);
+                            }
+                            catch (OutOfMemoryError e) {
+                                log.debug("getAttribute(): Attribute[{}] out of memory", i, e);
+                                value = null;
+                            }
                             if (value == null) {
                                 log.debug("getAttribute(): Attribute[{}] allocateArray returned null", i);
                                 log.trace("getAttribute(): Attribute[{}] continue", i);

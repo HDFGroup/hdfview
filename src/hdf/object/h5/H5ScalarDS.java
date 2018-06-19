@@ -323,7 +323,14 @@ public class H5ScalarDS extends ScalarDS {
                     int[] fillStatus = { 0 };
                     if (H5.H5Pfill_value_defined(pid, fillStatus) >= 0) {
                         if (fillStatus[0] == HDF5Constants.H5D_FILL_VALUE_USER_DEFINED) {
-                            fillValue = H5Datatype.allocateArray(tmptid, 1);
+                            try {
+                                fillValue = ((H5Datatype) getDatatype()).allocateArray(1);
+                            }
+                            catch (OutOfMemoryError e) {
+                                log.debug("init(): out of memory: ", e);
+                                fillValue = null;
+                            }
+
                             log.trace("init(): fillValue={}", fillValue);
                             try {
                                 H5.H5Pget_fill_value(pid, tmptid, fillValue);
@@ -532,7 +539,6 @@ public class H5ScalarDS extends ScalarDS {
             if (did >= 0) {
                 try {
                     tid = H5.H5Dget_type(did);
-
                     log.trace("getDatatype(): isNativeDatatype", isNativeDatatype);
                     if (!isNativeDatatype) {
                         long tmptid = -1;
@@ -998,7 +1004,7 @@ public class H5ScalarDS extends ScalarDS {
                     tmpData = stringToByte((String[]) buf, tsize);
                 }
                 else if (DSdatatype.isEnum() && (Array.get(buf, 0) instanceof String)) {
-                    tmpData = H5Datatype.convertEnumNameToValue(tid, (String[]) buf);
+                    tmpData = DSdatatype.convertEnumNameToValue((String[]) buf);
                 }
 
                 H5.H5Dwrite(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, tmpData);
@@ -1886,7 +1892,13 @@ public class H5ScalarDS extends ScalarDS {
 
                 if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) throw new Exception("Invalid int size");
 
-                avalue = DSdatatype.allocateArray((int) lsize);
+                try {
+                    avalue = DSdatatype.allocateArray((int) lsize);
+                }
+                catch (OutOfMemoryError e) {
+                    log.debug("getAttrValue(): out of memory: ", e);
+                    avalue = null;
+                }
 
                 if (avalue != null) {
                     log.trace("getAttrValue(): read attribute id {} of size={}", atid, lsize);

@@ -581,213 +581,213 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         @Override
         public Object getDataValue(int col, int row) {
-            int fieldIdx = col;
-            int rowIdx = row;
-            log.trace("CompoundDSDataProvider:getDataValue({},{}): start", row, col);
+            try {
+                int fieldIdx = col;
+                int rowIdx = row;
+                log.trace("CompoundDSDataProvider:getDataValue({},{}): start", row, col);
 
-            if (nSubColumns > 1) { // multi-dimension compound dataset
-                int colIdx = col / nFields;
-                fieldIdx %= nFields;
-                rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
-                log.trace("CompoundDSDataProvider:getDataValue(): row={} orders[{}]={} nSubColumns={} colIdx={}", row,
-                        fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
-            }
-            else {
-                rowIdx = row * orders[fieldIdx];
-                log.trace("CompoundDSDataProvider:getDataValue(): row={} orders[{}]={}", row, fieldIdx,
-                        orders[fieldIdx]);
-            }
-            log.trace("CompoundDSDataProvider:getDataValue(): rowIdx={}", rowIdx);
+                if (nSubColumns > 1) { // multi-dimension compound dataset
+                    int colIdx = col / nFields;
+                    fieldIdx %= nFields;
+                    rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
+                    log.trace("CompoundDSDataProvider:getDataValue(): row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
+                }
+                else {
+                    rowIdx = row * orders[fieldIdx];
+                    log.trace("CompoundDSDataProvider:getDataValue(): row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
+                }
+                log.trace("CompoundDSDataProvider:getDataValue(): rowIdx={}", rowIdx);
 
-            Object colValue = ((List<?>) dataValue).get(fieldIdx);
-            if (colValue == null) {
-                return "Null";
-            }
+                Object colValue = ((List<?>) dataValue).get(fieldIdx);
+                if (colValue == null) {
+                    return "Null";
+                }
 
-            Datatype dtype = types[fieldIdx];
+                Datatype dtype = types[fieldIdx];
+                if (dtype == null) {
+                    return "Null";
+                }
 
-            boolean isUINT64 = false;
+                boolean isUINT64 = false;
 
-            String cName = colValue.getClass().getName();
-            int cIndex = cName.lastIndexOf("[");
-            if (cIndex >= 0) {
-                if (dtype.isUnsigned())
-                    isUINT64 = (cName.charAt(cIndex + 1) == 'J');
-            }
-
-            if (dtype.isArray()) {
-                Datatype btype = dtype.getDatatypeBase();
+                String cName = colValue.getClass().getName();
+                int cIndex = cName.lastIndexOf("[");
                 if (cIndex >= 0) {
-                    if (btype.isUnsigned())
+                    if (dtype.isUnsigned())
                         isUINT64 = (cName.charAt(cIndex + 1) == 'J');
                 }
 
-                log.trace("CompoundDSDataProvider:getDataValue(): Array - isArray={} isString={} isUINT64={}", btype.isArray(),
-                        btype.isString(), isUINT64);
+                if (dtype.isArray()) {
+                    Datatype btype = dtype.getDatatypeBase();
+                    if (cIndex >= 0) {
+                        if (btype.isUnsigned()) isUINT64 = (cName.charAt(cIndex + 1) == 'J');
+                    }
 
-                if (btype.isCompound()) {
-                    int numberOfMembers = btype.getCompoundMemberNames().size();
-                    arrayElements = new Object[orders[fieldIdx] * numberOfMembers];
+                    log.trace("CompoundDSDataProvider:getDataValue(): Array - isArray={} isString={} isUINT64={}", btype.isArray(), btype.isString(), isUINT64);
 
-                    log.trace("CompoundDSDataProvider:getDataValue(): Array - Datatype.CLASS_COMPOUND with {} members",
-                            numberOfMembers);
-                    for (int i = 0; i < orders[fieldIdx]; i++) {
-                        try {
-                            Object field_data = null;
+                    if (btype.isCompound()) {
+                        int numberOfMembers = btype.getCompoundMemberNames().size();
+                        arrayElements = new Object[orders[fieldIdx] * numberOfMembers];
 
+                        log.trace("CompoundDSDataProvider:getDataValue(): Array - Datatype.CLASS_COMPOUND with {} members", numberOfMembers);
+                        for (int i = 0; i < orders[fieldIdx]; i++) {
                             try {
-                                field_data = Array.get(colValue, rowIdx + i);
-                            }
-                            catch (Exception ex) {
-                                log.debug("CompoundDSDataProvider:getDataValue(): Array - could not retrieve field_data: ", ex);
-                            }
-
-                            log.trace("CompoundDSDataProvider:getDataValue(): Array - fieldIdx = {}", i);
-                            for (int j = 0; j < numberOfMembers; j++) {
-                                Object theValue = null;
+                                Object field_data = null;
 
                                 try {
-                                    theValue = Array.get(field_data, j);
-                                    log.trace("CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}",
-                                            (i * numberOfMembers) + j, theValue.toString());
+                                    field_data = Array.get(colValue, rowIdx + i);
                                 }
                                 catch (Exception ex) {
-                                    theValue = "*unsupported*";
+                                    log.debug("CompoundDSDataProvider:getDataValue(): Array - could not retrieve field_data: ", ex);
                                 }
 
-                                arrayElements[(i * numberOfMembers) + j] = theValue;
+                                log.trace("CompoundDSDataProvider:getDataValue(): Array - fieldIdx = {}", i);
+                                for (int j = 0; j < numberOfMembers; j++) {
+                                    Object theValue = null;
+
+                                    try {
+                                        theValue = Array.get(field_data, j);
+                                        log.trace("CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", (i * numberOfMembers) + j, theValue.toString());
+                                    }
+                                    catch (Exception ex) {
+                                        theValue = "*unsupported*";
+                                    }
+
+                                    arrayElements[(i * numberOfMembers) + j] = theValue;
+                                }
+                            }
+                            catch (Exception ex) {
+                                log.trace("CompoundDSDataProvider:getDataValue(): Array - ", ex);
                             }
                         }
-                        catch (Exception ex) {
-                            log.trace("CompoundDSDataProvider:getDataValue(): Array - ", ex);
+
+                        theValue = arrayElements;
+                    }
+                    else if (btype.isVLEN()) {
+                        stringBuffer.setLength(0); // clear the old string
+
+                        log.trace("CompoundDSDataProvider:getDataValue(): Array - Datatype is VLEN");
+                        if (btype.isString()) {
+                            for (int i = 0; i < orders[fieldIdx]; i++) {
+                                if (i > 0) stringBuffer.append(", ");
+                                stringBuffer.append(((String[]) colValue)[rowIdx + i]);
+                                log.trace("CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", i, ((String[]) colValue)[rowIdx + i]);
+                            }
                         }
-                    }
-
-                    theValue = arrayElements;
-                }
-                else if (btype.isVLEN()) {
-                    stringBuffer.setLength(0); // clear the old string
-
-                    log.trace("CompoundDSDataProvider:getDataValue(): Array - Datatype is VLEN");
-                    if (btype.isString()) {
-                        for (int i = 0; i < orders[fieldIdx]; i++) {
-                            if (i > 0) stringBuffer.append(", ");
-                            stringBuffer.append(((String[]) colValue)[rowIdx + i]);
-                            log.trace("CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", i,
-                                    ((String[]) colValue)[rowIdx + i]);
-                        }
-                    }
-                    else {
-                        // Only support variable length strings
-                        log.debug("**CompoundDSDataProvider:getDataValue(): Array - Unsupported Variable-length of {}",
-                                btype.getDescription());
-                        stringBuffer.append("*unsupported*");
-                    }
-
-                    theValue = stringBuffer.toString();
-                }
-                else if (btype.isString()) {
-                    // ARRAY of strings
-                    int strlen = (int) btype.getDatatypeSize();
-                    int arraylen = (int) types[fieldIdx].getDatatypeSize();
-                    arrayElements = new Object[arraylen];
-
-                    log.trace("**CompoundDSDataProvider:getDataValue(): Array - size {}: isString={} of size {}",
-                            arraylen, btype.isString(), strlen);
-                    int arraycnt = arraylen / strlen;
-                    for (int i = 0; i < arraycnt; i++) {
-                        String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
-                        int idx = str.indexOf('\0');
-                        if (idx > 0) {
-                            str = str.substring(0, idx);
-                        }
-                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", i, str);
-
-                        arrayElements[i] = str.trim();
-                    }
-
-                    theValue = arrayElements;
-                }
-                else if (btype.isEnum()) {
-                    arrayElements = new Object[orders[fieldIdx]];
-
-                    log.trace("**CompoundDSDataProvider:getDataValue(): Array - ENUM");
-                    for (int i = 0; i < orders[fieldIdx]; i++) {
-                        arrayElements[i] = Array.get(colValue, rowIdx + i);
-                    }
-
-                    theValue = arrayElements;
-                }
-                else if (btype.isOpaque() || btype.isBitField()) {
-                    arrayElements = new Object[orders[fieldIdx]];
-
-                    log.trace("**CompoundDSDataProvider:getDataValue(): Array - OPAQUE or BITFILED");
-                    int len = (int) btype.getDatatypeSize();
-                    byte[] elements = new byte[len];
-
-                    for (int i = 0; i < orders[fieldIdx]; i++) {
-                        rowIdx *= len;
-
-                        for (int j = 0; i < len; i++) {
-                            elements[j] = Array.getByte(colValue, rowIdx + j);
+                        else {
+                            // Only support variable length strings
+                            log.debug("**CompoundDSDataProvider:getDataValue(): Array - Unsupported Variable-length of {}", btype.getDescription());
+                            stringBuffer.append("*unsupported*");
                         }
 
-                        arrayElements[i] = elements;
+                        theValue = stringBuffer.toString();
                     }
+                    else if (btype.isString()) {
+                        // ARRAY of strings
+                        int strlen = (int) btype.getDatatypeSize();
+                        int arraylen = (int) types[fieldIdx].getDatatypeSize();
+                        arrayElements = new Object[arraylen];
 
-                    theValue = arrayElements;
-                }
-                else {
-                    arrayElements = new Object[orders[fieldIdx]];
+                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - size {}: isString={} of size {}", arraylen, btype.isString(), strlen);
+                        int arraycnt = arraylen / strlen;
+                        for (int i = 0; i < arraycnt; i++) {
+                            String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
+                            int idx = str.indexOf('\0');
+                            if (idx > 0) {
+                                str = str.substring(0, idx);
+                            }
+                            log.trace("**CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", i, str);
 
-                    log.trace("**CompoundDSDataProvider:getDataValue(): Array - OTHER");
-                    if (isUINT64) {
-                        for (int i = 0; i < orders[fieldIdx]; i++) {
-                            arrayElements[i] = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx + i));
+                            arrayElements[i] = str.trim();
                         }
+
+                        theValue = arrayElements;
                     }
-                    else {
+                    else if (btype.isEnum()) {
+                        arrayElements = new Object[orders[fieldIdx]];
+
+                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - ENUM");
                         for (int i = 0; i < orders[fieldIdx]; i++) {
                             arrayElements[i] = Array.get(colValue, rowIdx + i);
                         }
+
+                        theValue = arrayElements;
+                    }
+                    else if (btype.isOpaque() || btype.isBitField()) {
+                        arrayElements = new Object[orders[fieldIdx]];
+
+                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - OPAQUE or BITFILED");
+                        int len = (int) btype.getDatatypeSize();
+                        byte[] elements = new byte[len];
+
+                        for (int i = 0; i < orders[fieldIdx]; i++) {
+                            rowIdx *= len;
+
+                            for (int j = 0; i < len; i++) {
+                                elements[j] = Array.getByte(colValue, rowIdx + j);
+                            }
+
+                            arrayElements[i] = elements;
+                        }
+
+                        theValue = arrayElements;
+                    }
+                    else {
+                        arrayElements = new Object[orders[fieldIdx]];
+
+                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - OTHER");
+                        if (isUINT64) {
+                            for (int i = 0; i < orders[fieldIdx]; i++) {
+                                arrayElements[i] = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx + i));
+                            }
+                        }
+                        else {
+                            for (int i = 0; i < orders[fieldIdx]; i++) {
+                                arrayElements[i] = Array.get(colValue, rowIdx + i);
+                            }
+                        }
+
+                        theValue = arrayElements;
+                    }
+                }
+                else if (dtype.isString() && colValue instanceof byte[]) {
+                    // strings
+                    int strlen = (int) dtype.getDatatypeSize();
+                    log.trace("**CompoundDSDataProvider:getDataValue(): isString={} of size {}", strlen);
+
+                    String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
+                    int idx = str.indexOf('\0');
+                    if (idx > 0) {
+                        str = str.substring(0, idx);
                     }
 
-                    theValue = arrayElements;
+                    theValue = str.trim();
                 }
-            }
-            else if (dtype.isString() && colValue instanceof byte[]) {
-                // strings
-                int strlen = (int) dtype.getDatatypeSize();
-                log.trace("**CompoundDSDataProvider:getDataValue(): isString={} of size {}", strlen);
+                else if (dtype.isOpaque() || dtype.isBitField()) {
+                    int len = (int) dtype.getDatatypeSize();
+                    byte[] elements = new byte[len];
 
-                String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
-                int idx = str.indexOf('\0');
-                if (idx > 0) {
-                    str = str.substring(0, idx);
-                }
+                    rowIdx *= len;
 
-                theValue = str.trim();
-            }
-            else if (dtype.isOpaque() || dtype.isBitField()) {
-                int len = (int) dtype.getDatatypeSize();
-                byte[] elements = new byte[len];
+                    for (int i = 0; i < len; i++) {
+                        elements[i] = Array.getByte(colValue, rowIdx + i);
+                    }
 
-                rowIdx *= len;
-
-                for (int i = 0; i < len; i++) {
-                    elements[i] = Array.getByte(colValue, rowIdx + i);
-                }
-
-                theValue = elements;
-            }
-            else {
-                // Flat numerical types
-                if (isUINT64) {
-                    theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx));
+                    theValue = elements;
                 }
                 else {
-                    theValue = Array.get(colValue, rowIdx);
+                    // Flat numerical types
+                    if (isUINT64) {
+                        theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx));
+                    }
+                    else {
+                        theValue = Array.get(colValue, rowIdx);
+                    }
                 }
+            }
+            catch (Exception ex) {
+                log.debug("getDataValue() failure: ", ex);
+                theValue = "*ERROR*";
             }
 
             return theValue;
@@ -853,101 +853,104 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
 
-            Datatype dtype = types[fieldIndex];
+            try {
+                Datatype dtype = types[fieldIndex];
 
-            buffer.setLength(0);
+                buffer.setLength(0);
 
-            if (dtype.isArray()) {
-                Datatype btype = dtype.getDatatypeBase();
-                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue():Array - isArray={} isEnum={} isStr={}", btype.isArray(), btype.isEnum(), btype.isString());
+                if (dtype.isArray()) {
+                    Datatype btype = dtype.getDatatypeBase();
+                    log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue():Array - isArray={} isEnum={} isStr={}", btype.isArray(), btype.isEnum(), btype.isString());
 
-                if (btype.isCompound()) {
-                    int numberOfMembers = dtype.getCompoundMemberNames().size();
+                    if (btype.isCompound()) {
+                        int numberOfMembers = dtype.getCompoundMemberNames().size();
 
-                    for (int i = 0; i < orders[fieldIndex]; i++) {
-                        if (i > 0) buffer.append(", ");
+                        for (int i = 0; i < orders[fieldIndex]; i++) {
+                            if (i > 0) buffer.append(", ");
 
-                        buffer.append("[");
+                            buffer.append("[");
 
-                        for (int j = 0; j < numberOfMembers; j++) {
-                            if (j > 0) buffer.append(", ");
-                            buffer.append(Array.get(value, (i * numberOfMembers) + j));
+                            for (int j = 0; j < numberOfMembers; j++) {
+                                if (j > 0) buffer.append(", ");
+                                buffer.append(Array.get(value, (i * numberOfMembers) + j));
+                            }
+
+                            buffer.append("]");
                         }
-
-                        buffer.append("]");
                     }
-                }
-                else if (btype.isEnum()) {
-                    int len = Array.getLength(value);
+                    else if (btype.isEnum()) {
+                        int len = Array.getLength(value);
 
-                    if (isEnumConverted) {
-                        String[] retValues = null;
+                        if (isEnumConverted) {
+                            String[] retValues = null;
 
-                        try {
-                            retValues = ((H5Datatype) btype).convertEnumValueToName(value);
+                            try {
+                                retValues = ((H5Datatype) btype).convertEnumValueToName(value);
+                            }
+                            catch (HDF5Exception ex) {
+                                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                                retValues = null;
+                            }
+
+                            if (retValues != null) {
+                                for (int i = 0; i < retValues.length; i++) {
+                                    if (i > 0) buffer.append(", ");
+                                    buffer.append(retValues[i]);
+                                }
+                            }
                         }
-                        catch (HDF5Exception ex) {
-                            log.trace(
-                                    "CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                            retValues = null;
-                        }
-
-                        if (retValues != null) {
-                            for (int i = 0; i < retValues.length; i++) {
+                        else {
+                            for (int i = 0; i < len; i++) {
                                 if (i > 0) buffer.append(", ");
-                                buffer.append(retValues[i]);
+                                buffer.append(Array.get(value, i));
                             }
                         }
                     }
                     else {
-                        for (int i = 0; i < len; i++) {
+                        for (int i = 0; i < orders[fieldIndex]; i++) {
                             if (i > 0) buffer.append(", ");
-                            buffer.append(Array.get(value, i));
+                            buffer.append(((Object[]) value)[i]);
                         }
                     }
                 }
+                else if (dtype.isEnum()) {
+                    if (isEnumConverted) {
+                        String[] retValues = null;
+
+                        try {
+                            retValues = ((H5Datatype) dtype).convertEnumValueToName(value);
+                        }
+                        catch (HDF5Exception ex) {
+                            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
+                            retValues = null;
+                        }
+
+                        if (retValues != null) buffer.append(retValues[0]);
+                    }
+                    else
+                        buffer.append(value);
+                }
+                else if (dtype.isOpaque() || dtype.isBitField()) {
+                    for (int i = 0; i < ((byte[]) value).length; i++) {
+                        if (i > 0) {
+                            buffer.append(dtype.isBitField() ? ":" : " ");
+                        }
+                        buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
+                    }
+                }
+                else if (numberFormat != null) {
+                    // show in scientific or custom notation
+                    buffer.append(numberFormat.format(value));
+                }
                 else {
-                    for (int i = 0; i < orders[fieldIndex]; i++) {
-                        if (i > 0) buffer.append(", ");
-                        buffer.append(((Object[]) value)[i]);
-                    }
-                }
-            }
-            else if (dtype.isEnum()) {
-                if (isEnumConverted) {
-                    String[] retValues = null;
-
-                    try {
-                        retValues = ((H5Datatype) dtype).convertEnumValueToName(value);
-                    }
-                    catch (HDF5Exception ex) {
-                        log.trace(
-                                "CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                        retValues = null;
-                    }
-
-                    if (retValues != null)
-                        buffer.append(retValues[0]);
-                }
-                else
                     buffer.append(value);
-            }
-            else if (dtype.isOpaque() || dtype.isBitField()) {
-                for (int i = 0; i < ((byte[]) value).length; i++) {
-                    if (i > 0) {
-                        buffer.append(dtype.isBitField() ? ":" : " ");
-                    }
-                    buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                 }
+                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} finish", buffer);
             }
-            else if (numberFormat != null) {
-                // show in scientific or custom notation
-                buffer.append(numberFormat.format(value));
+            catch (Exception ex) {
+                log.debug("canonicalToDisplayValue() failure: ", ex);
+                buffer.append("*ERROR*");
             }
-            else {
-                buffer.append(value);
-            }
-            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} finish", buffer);
 
             return buffer;
         }
@@ -1040,7 +1043,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     columnNames[idx] = new String(datasetMemberNames[i]);
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
 
-                    if (types[i].isArray()) {
+                    if ((types[i] != null) && (types[i].isArray())) {
                         Datatype baseType = types[i].getDatatypeBase();
 
                         if (baseType.isCompound()) {

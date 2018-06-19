@@ -836,6 +836,7 @@ public class NewAttributeDialog extends Dialog {
         }
         catch (Exception ex) {
             Tools.showError(shell, "Create", ex.getMessage());
+            log.debug("createAttribute(): ", ex);
             return false;
         }
 
@@ -861,6 +862,7 @@ public class NewAttributeDialog extends Dialog {
         }
         catch (Exception ex) {
             Tools.showError(shell, "Create", ex.getMessage());
+            log.debug("createAttribute(): ", ex);
             return false;
         }
 
