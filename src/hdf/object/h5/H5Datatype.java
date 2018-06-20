@@ -519,10 +519,7 @@ public class H5Datatype extends Datatype {
                 datatypeClass = CLASS_NO_CLASS;
             }
 
-            if (torder == HDF5Constants.H5T_ORDER_BE)
-                datatypeOrder = ORDER_BE;
-            else
-                datatypeOrder = ORDER_LE;
+            datatypeOrder = (torder == HDF5Constants.H5T_ORDER_BE) ? ORDER_BE : ORDER_LE;
 
             try {
                 isUchar = H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_UCHAR);
@@ -548,12 +545,7 @@ public class H5Datatype extends Datatype {
                     log.debug("fromNative(): array type failure: ", ex);
                 }
                 finally {
-                    try {
-                        H5.H5Tclose(tmptid);
-                    }
-                    catch (Exception ex) {
-                        log.debug("fromNative(): array H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                    }
+                    close(tmptid);
                 }
                 log.trace("fromNative(): array type finish");
             }
@@ -581,12 +573,7 @@ public class H5Datatype extends Datatype {
                             log.debug("fromNative(): compound type failure: ", ex1);
                         }
                         finally {
-                            try {
-                                H5.H5Tclose(memberID);
-                            }
-                            catch (Exception ex2) {
-                                log.debug("fromNative(): compound H5Tclose(memberID {}) failure: ", memberID, ex2);
-                            }
+                            close(memberID);
                         }
 
                         compoundMemberNames.add(i, memberName);
@@ -601,22 +588,14 @@ public class H5Datatype extends Datatype {
             }
             else if (isChar) {
                 datatypeClass = CLASS_CHAR;
-                if (isUchar)
-                    datatypeSign = SIGN_NONE;
-                else
-                    datatypeSign = SIGN_2;
+                datatypeSign = (isUchar) ? SIGN_NONE : SIGN_2;
             }
             else if (nativeClass == HDF5Constants.H5T_INTEGER) {
                 datatypeClass = CLASS_INTEGER;
                 try {
                     log.trace("fromNative(): integer type");
                     int tsign = H5.H5Tget_sign(tid);
-                    if (tsign == HDF5Constants.H5T_SGN_NONE) {
-                        datatypeSign = SIGN_NONE;
-                    }
-                    else
-                        datatypeSign = SIGN_2;
-
+                    datatypeSign = (tsign == HDF5Constants.H5T_SGN_NONE) ? SIGN_NONE : SIGN_2;
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): int type failure: ", ex);
@@ -671,18 +650,8 @@ public class H5Datatype extends Datatype {
                     log.debug("fromNative(): enum type failure: ", ex);
                 }
                 finally {
-                    try {
-                        H5.H5Tclose(tmptid);
-                    }
-                    catch (Exception ex) {
-                        log.debug("fromNative(): enum H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                    }
-                    try {
-                        H5.H5Tclose(basetid);
-                    }
-                    catch (Exception ex) {
-                        log.debug("fromNative(): enum H5Tclose(basetid {}) failure: ", basetid, ex);
-                    }
+                    close(tmptid);
+                    close(basetid);
                 }
                 try {
                     int enumMemberCount = H5.H5Tget_nmembers(tid);
@@ -731,12 +700,7 @@ public class H5Datatype extends Datatype {
                     log.debug("fromNative(): vlen type failure: ", ex);
                 }
                 finally {
-                    try {
-                        H5.H5Tclose(tmptid);
-                    }
-                    catch (Exception ex) {
-                        log.debug("fromNative(): vlen H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                    }
+                    close(tmptid);
                 }
             }
             else if (nativeClass == HDF5Constants.H5T_BITFIELD) {
@@ -749,10 +713,7 @@ public class H5Datatype extends Datatype {
                 log.debug("fromNative(): datatypeClass is unknown");
             }
 
-            if (is_VLEN)
-                datatypeSize = -1;
-            else
-                datatypeSize = tsize;
+            datatypeSize = (is_VLEN) ? -1 : tsize;
         }
         log.trace("fromNative(): datatypeClass={} baseType={} datatypeSize={}", datatypeClass, baseType, datatypeSize);
         log.trace("fromNative(): finish");
@@ -814,12 +775,7 @@ public class H5Datatype extends Datatype {
                 log.debug("getNative(): H5Tget_native_type() failure: ", ex);
             }
             finally {
-                try {
-                    H5.H5Tclose(tmptid);
-                }
-                catch (Exception ex2) {
-                    log.debug("getNative(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
-                }
+                close(tmptid);
             }
         }
         catch (Exception ex) {
@@ -893,12 +849,7 @@ public class H5Datatype extends Datatype {
                                 log.debug("createNative(): compound type failure: ", ex1);
                             }
                             finally {
-                                try {
-                                    H5.H5Tclose(memberID);
-                                }
-                                catch (Exception ex2) {
-                                    log.debug("createNative(): compound H5Tclose(memberID {}) failure: ", memberID, ex2);
-                                }
+                                close(memberID);
                             }
                         }
                     }
@@ -929,14 +880,8 @@ public class H5Datatype extends Datatype {
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT);
                     }
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_ORDER_BE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_ORDER_LE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
+                    log.trace("createNative(): CLASS_INT-ENUM order is " + ((datatypeOrder == Datatype.ORDER_BE) ? "H5T_ORDER_BE" : "H5T_ORDER_LE"));
+                    H5.H5Tset_order(tid, (datatypeOrder == Datatype.ORDER_BE) ? HDF5Constants.H5T_ORDER_BE : HDF5Constants.H5T_ORDER_LE);
 
                     if (datatypeSign == Datatype.SIGN_NONE) {
                         log.trace("createNative(): CLASS_INT-ENUM is H5T_SGN_NONE");
@@ -944,45 +889,25 @@ public class H5Datatype extends Datatype {
                     }
                     break;
                 case CLASS_FLOAT:
-                    if (datatypeSize == 8) {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_DOUBLE);
-                    }
-                    else {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
-                    }
+                    tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
+                    H5.H5Tset_order(tid, (datatypeOrder == Datatype.ORDER_BE) ? HDF5Constants.H5T_ORDER_BE : HDF5Constants.H5T_ORDER_LE);
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
                     break;
                 case CLASS_CHAR:
-                    if (datatypeSign == Datatype.SIGN_NONE) {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UCHAR);
-                    }
-                    else {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_CHAR);
-                    }
+                    tid = H5.H5Tcopy((datatypeSign == Datatype.SIGN_NONE) ? HDF5Constants.H5T_NATIVE_UCHAR : HDF5Constants.H5T_NATIVE_CHAR);
                     break;
                 case CLASS_STRING:
                     tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-                    if (is_VLEN || datatypeSize < 0)
-                        H5.H5Tset_size(tid, HDF5Constants.H5T_VARIABLE);
-                    else
-                        H5.H5Tset_size(tid, datatypeSize);
+                    H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
 
                     log.trace("createNative(): isVlenStr={}", is_VLEN);
-                    // H5.H5Tset_strpad(tid, HDF5Constants.H5T_STR_NULLPAD);
+
+                    H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
+
                     break;
                 case CLASS_REFERENCE:
-                    if (datatypeSize > H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ)) {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_DSETREG);
-                    }
-                    else {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_OBJ);
-                    }
+                    long obj_ref_type_size = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
+                    tid = H5.H5Tcopy((datatypeSize > obj_ref_type_size) ? HDF5Constants.H5T_STD_REF_DSETREG : HDF5Constants.H5T_STD_REF_OBJ);
                     break;
                 case CLASS_VLEN:
                     if (baseType != null) {
@@ -1022,14 +947,9 @@ public class H5Datatype extends Datatype {
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT);
                     }
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        log.trace("createNative(): CLASS_BITFIELD-OPAQUE is H5T_ORDER_BE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        log.trace("createNative(): CLASS_BITFIELD-OPAQUE is H5T_ORDER_LE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
+                    log.trace("createNative(): CLASS_BITFIELD-OPAQUE order is " + ((datatypeOrder == Datatype.ORDER_BE) ? "H5T_ORDER_BE" : "H5T_ORDER_LE"));
+                    H5.H5Tset_order(tid, (datatypeOrder == Datatype.ORDER_BE) ? HDF5Constants.H5T_ORDER_BE : HDF5Constants.H5T_ORDER_LE);
+
                     break;
                 default:
                     log.debug("createNative(): Unknown class");
@@ -1112,14 +1032,21 @@ public class H5Datatype extends Datatype {
             catch (Exception ex) {
                 log.debug("createNative(): set up enum members failure: ", ex);
             }
-
-            try {
-                H5.H5Tclose(ptid);
-            }
-            catch (Exception ex) {
-                log.debug("createNative(): H5Tclose(ptid {}) failure: ", ptid, ex);
+            finally {
+                close(ptid);
             }
         } // if (datatypeClass == CLASS_ENUM) {
+
+        try {
+            tmptid = tid;
+            tid = H5.H5Tget_native_type(tmptid);
+        }
+        catch (HDF5Exception ex) {
+            log.debug("createNative(): H5Tget_native_type{} failure: ", tmptid, ex);
+        }
+        finally {
+            close(tmptid);
+        }
 
         return tid;
     }
