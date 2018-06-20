@@ -791,7 +791,7 @@ public class H5ScalarDS extends ScalarDS {
          * attempting to read the dataset
          */
         if (DSdatatype.isArray()) {
-            Datatype baseType = DSdatatype.getDatatypeBase();
+            H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
 
             if (baseType != null) {
                 if (baseType.isCompound()) {
@@ -806,8 +806,10 @@ public class H5ScalarDS extends ScalarDS {
                     throw new HDF5Exception("Cannot show data with datatype of ARRAY of VL.");
                 }
             }
-            else
+            else {
                 log.debug("read(): ARRAY datatype has no base type");
+                throw new Exception("Dataset's datatype (ARRAY) has no base datatype");
+            }
         }
 
         if (isExternal) {
@@ -980,7 +982,7 @@ public class H5ScalarDS extends ScalarDS {
             DSdatatype = (H5Datatype) this.getDatatype();
         }
         catch (Exception ex) {
-            log.debug("read(): get datatype: ", ex);
+            log.debug("write(): get datatype: ", ex);
         }
 
         /*

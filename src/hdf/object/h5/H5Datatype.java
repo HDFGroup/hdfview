@@ -640,7 +640,7 @@ public class H5Datatype extends Datatype {
                     basetid = H5.H5Tget_super(tid);
                     tmptid = basetid;
                     basetid = H5.H5Tget_native_type(tmptid);
-                    log.debug("fromNative(): enum type basetid={}", basetid);
+                    log.trace("fromNative(): enum type basetid={}", basetid);
                     if (basetid >= 0) {
                         baseType = new H5Datatype(tmptid, this);
                         datatypeSign = baseType.getDatatypeSign();
