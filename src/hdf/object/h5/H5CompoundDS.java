@@ -828,7 +828,6 @@ public class H5CompoundDS extends CompoundDS {
                          * Actually read the data for this member now that everything has been setup
                          */
                         try {
-                            log.trace("read(): H5Dread({}) did={} spaceIDs[0]={} spaceIDs[1]={}", comp_tid, did, spaceIDs[0], spaceIDs[1]);
                             if (member_type.isVLEN()) {
                                 if (member_type.isVarStr()) {
                                     log.trace("read(): Member[{}]: H5Dread_VLStrings did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
