@@ -810,7 +810,7 @@ public class H5CompoundDS extends CompoundDS {
                     if (member_data != null) {
                         long comp_tid = -1;
                         try {
-                            comp_tid = member_type.createCompoundFieldType(member_name);
+                            comp_tid = member_type.createCompoundFieldType(flatNameList.get(i));
                         }
                         catch (HDF5Exception ex) {
                             log.debug("read(): unable to create compound field type for Member[{}] of type {}: ", i, member_type.getDescription(), ex);
@@ -1172,7 +1172,7 @@ public class H5CompoundDS extends CompoundDS {
                     if (tmpData != null) {
                         long comp_tid = -1;
                         try {
-                            comp_tid = member_type.createCompoundFieldType(member_name);
+                            comp_tid = member_type.createCompoundFieldType(flatNameList.get(i));
                         }
                         catch (HDF5Exception ex) {
                             log.debug("write(): unable to create compound field type for Member[{}]: ", i, ex);
