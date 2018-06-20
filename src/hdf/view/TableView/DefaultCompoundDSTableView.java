@@ -984,12 +984,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         .getDataValue(dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
 
                 String colIndex = "";
-                int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
 
-                if (numGroups > 1) {
-                    int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
-                    colIndex = "[" + String
-                            .valueOf((dataTable.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
+                if (dataObject.getWidth() > 1) {
+                    int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
+                    colIndex = "[" + String.valueOf((dataTable.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
                 }
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
@@ -1019,7 +1017,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private String[]       columnNames;
 
         private int            ncols;
-        private final int      numGroups;
         private final int      groupSize;
 
         public CompoundDSColumnHeaderDataProvider(DataFormat dataObject) {
@@ -1028,9 +1025,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             int datasetWidth = (int) dataFormat.getWidth();
             Datatype[] types = dataFormat.getSelectedMemberTypes();
             groupSize = dataFormat.getSelectedMemberCount();
-            numGroups = (datasetWidth * groupSize) / groupSize;
-            ncols = groupSize * numGroups;
-
+            ncols = groupSize * datasetWidth;
             String[] datasetMemberNames = dataFormat.getMemberNames();
             columnNames = new String[groupSize];
 
@@ -1065,31 +1060,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 }
             }
 
-            if (datasetWidth > 1) {
-                // Multi-dimension compound dataset, copy column names into new arrays
-                // of size (dataset width * count of selected dataset members)
-                String[] newColumnNames = new String[datasetWidth * columnNames.length];
-                String[] newColumnNamesFull = new String[datasetWidth * columnNames.length];
-                for (int i = 0; i < datasetWidth; i++) {
-                    for (int j = 0; j < columnNames.length; j++) {
-                        newColumnNames[i * columnNames.length + j] = columnNames[j];
-                        newColumnNamesFull[i * columnNames.length + j] = columnNames[j];
-                    }
-                }
-
-                columnNames = newColumnNames;
-                columnNamesFull = newColumnNamesFull;
-            }
-            else {
-                // Make a copy of column names so changes to column names don't affect the full
-                // column names
-                columnNamesFull = Arrays.copyOf(columnNames, columnNames.length);
-            }
+            // Make a copy of column names so changes to column names don't affect the full column names
+            columnNamesFull = Arrays.copyOf(columnNames, columnNames.length);
 
             // Simplify any nested field column names down to their base names. E.g., a
-            // nested field
-            // with the full name 'nested_name->a_name' has a simplified column name of
-            // 'a_name'
+            // nested field with the full name 'nested_name->a_name' has a simplified column
+            // name of 'a_name'
             for (int j = 0; j < columnNames.length; j++) {
                 int nestingPosition = columnNames[j].lastIndexOf("->");
 
@@ -1111,7 +1087,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            return columnNames[columnIndex];
+            return columnNames[columnIndex % groupSize];
         }
 
         @Override
@@ -1134,11 +1110,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
 
             final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNamesFull;
-            final int numGroups = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).numGroups;
-            final int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
+            final int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
 
             // Set up first-level column grouping
-            for (int i = 0; i < numGroups; i++) {
+            for (int i = 0; i < dataObject.getWidth(); i++) {
                 for (int j = 0; j < groupSize; j++) {
                     this.addColumnsIndexesToGroup("" + i, (i * groupSize) + j);
                 }

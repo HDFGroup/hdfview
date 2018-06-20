@@ -388,7 +388,7 @@ public class H5CompoundDS extends CompoundDS {
                     memberDims[i] = null;
 
                     try {
-                        memberTypes[i] = datatype.getCompoundMemberTypes().get(i);
+                        memberTypes[i] = flatTypeList.get(i);
                         log.trace("init()[{}]: memberTypes[{}]={}", i, i, memberTypes[i].getDescription());
 
                         if (memberTypes[i].isArray()) {
@@ -408,7 +408,7 @@ public class H5CompoundDS extends CompoundDS {
                     }
 
                     try {
-                        memberNames[i] = datatype.getCompoundMemberNames().get(i);
+                        memberNames[i] = flatNameList.get(i);
                         log.trace("init()[{}]: memberNames[{}]={}", i, i, memberNames[i]);
                     }
                     catch (Exception ex) {
