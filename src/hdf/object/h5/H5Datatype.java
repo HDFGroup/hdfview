@@ -1630,13 +1630,7 @@ public class H5Datatype extends Datatype {
                 log.trace("createCompoundFieldType(): H5T_ARRAY {} Member has dims length {}", member_name, getArrayDims().length);
                 long basetid = baseType.createNative();
                 tmp_tid1 = H5.H5Tarray_create(basetid, getArrayDims().length, getArrayDims());
-                try {
-                    log.trace("createCompoundFieldType(sep): H5.H5Tclose:basetid={}", basetid);
-                    H5.H5Tclose(basetid);
-                }
-                catch (Exception ex) {
-                    log.debug("createCompoundFieldType(): H5Tclose(basetid {}) failure: ", basetid, ex);
-                }
+                close(basetid);
                 log.trace("createCompoundFieldType(): H5T_ARRAY {} Member is base class {} of base size={}", member_name, getDatatypeBase().getDatatypeClass(),
                         getDatatypeBase().getDatatypeSize());
             }
@@ -1645,21 +1639,20 @@ public class H5Datatype extends Datatype {
                 tmp_tid1 = createNative();
             }
 
+            /*
+             * If this member is nested inside a compound, keep inserting
+             * it into a newly-created compound datatype until we reach
+             * the top-level compound type.
+             */
             int sep = member_name.lastIndexOf(CompoundDS.separator);
-            log.trace("createCompoundFieldType(): sep={} datatypeSize={}", sep, datatypeSize);
-
             while (sep > 0) {
                 String theName = member_name.substring(sep + 1);
-                log.trace("createCompoundFieldType(): sep={} with name={}", sep, theName);
+
+                log.trace("createCompoundFieldType(): member with name {} is nested inside compound", theName);
+
                 nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
                 H5.H5Tinsert(nested_tid, theName, 0, tmp_tid1);
-                try {
-                    log.trace("createCompoundFieldType(sep): H5.H5Tclose:tmp_tid1={}", tmp_tid1);
-                    H5.H5Tclose(tmp_tid1);
-                }
-                catch (Exception ex) {
-                    log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex);
-                }
+                close(tmp_tid1);
                 tmp_tid1 = nested_tid;
                 member_name = member_name.substring(0, sep);
                 sep = member_name.lastIndexOf(CompoundDS.separator);
@@ -1670,13 +1663,7 @@ public class H5Datatype extends Datatype {
             H5.H5Tinsert(nested_tid, member_name, 0, tmp_tid1);
         }
         finally {
-            try {
-                log.trace("createCompoundFieldType(): finally H5.H5Tclose:tmp_tid1={}", tmp_tid1);
-                H5.H5Tclose(tmp_tid1);
-            }
-            catch (HDF5Exception ex3) {
-                log.debug("createCompoundFieldType(): H5Tclose(tmp_tid {}) failure: ", tmp_tid1, ex3);
-            }
+            close(tmp_tid1);
         }
 
         log.trace("createCompoundFieldType(): finish");
