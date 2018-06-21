@@ -297,11 +297,13 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public void close(long tid) {
-        try {
-            H5.H5Tclose(tid);
-        }
-        catch (HDF5Exception ex) {
-            log.debug("close(): H5Tclose(tid {}) failure: ", tid, ex);
+        if (tid >= 0) {
+            try {
+                H5.H5Tclose(tid);
+            }
+            catch (HDF5Exception ex) {
+                log.debug("close(): H5Tclose(tid {}) failure: ", tid, ex);
+            }
         }
     }
 
@@ -746,42 +748,6 @@ public class H5Datatype extends Datatype {
         }
 
         return native_id;
-    }
-
-    /**
-     * Retrieves the native datatype identifier from a datatype object given the object id.
-     *
-     * Subclasses must override it so that this datatype will be converted accordingly. Use close() to
-     * close the native identifier; otherwise, the datatype will be left open.
-     * <p>
-     *
-     * @return the identifier of the native datatype.
-     */
-    /*
-     * TODO: update to handle objects of any type
-     */
-    public long getNative(long objectid) {
-        long tid = -1;
-        try {
-            tid = H5.H5Dget_type(objectid);
-            log.trace("getNative(): H5Tget_native_type:");
-            long tmptid = -1;
-            try {
-                tmptid = H5.H5Tget_native_type(tid);
-                if (!H5.H5Tequal(tid, tmptid))
-                    tid = tmptid;
-            }
-            catch (Exception ex) {
-                log.debug("getNative(): H5Tget_native_type() failure: ", ex);
-            }
-            finally {
-                close(tmptid);
-            }
-        }
-        catch (Exception ex) {
-            log.debug("getNative(): H5Xget_type() failure: ", ex);
-        }
-        return tid;
     }
 
     /*

@@ -16,7 +16,6 @@ package hdf.object.h5;
 
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -392,14 +391,17 @@ public class H5CompoundDS extends CompoundDS {
                         log.trace("init()[{}]: memberTypes[{}]={}", i, i, memberTypes[i].getDescription());
 
                         if (memberTypes[i].isArray()) {
-                            int n = memberTypes[i].getArrayDims().length;
-                            long mdim[] = new long[n];
-                            mdim = memberTypes[i].getArrayDims();
-                            int idim[] = new int[n];
-                            for (int j = 0; j < n; j++)
+                            long mdim[] = memberTypes[i].getArrayDims();
+                            int idim[] = new int[mdim.length];
+                            int arrayNpoints = 1;
+
+                            for (int j = 0; j < idim.length; j++) {
                                 idim[j] = (int) mdim[j];
+                                arrayNpoints *= idim[j];
+                            }
+
                             memberDims[i] = idim;
-                            memberOrders[i] = (int) (memberTypes[i].getDatatypeSize() / memberTypes[i].getDatatypeBase().getDatatypeSize());
+                            memberOrders[i] = arrayNpoints;
                         }
                     }
                     catch (Exception ex) {
@@ -828,8 +830,8 @@ public class H5CompoundDS extends CompoundDS {
                          * Actually read the data for this member now that everything has been setup
                          */
                         try {
-                            if (member_type.isVLEN()) {
-                                if (member_type.isVarStr()) {
+                            if (member_type.isVLEN() || (member_type.isArray() && member_base.isVLEN())) {
+                                if (member_type.isVarStr() || (member_type.isArray() && member_base.isVarStr())) {
                                     log.trace("read(): Member[{}]: H5Dread_VLStrings did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
                                     H5.H5Dread_VLStrings(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) member_data);
                                 }
@@ -1195,7 +1197,7 @@ public class H5CompoundDS extends CompoundDS {
                         catch (Exception ex) {
                             log.debug("write(): write failure: ", ex);
                             log.trace("write(): finish");
-                            throw new HDF5Exception(Arrays.toString(ex.getStackTrace()));
+                            throw new HDF5Exception(ex.getMessage());
                         }
                         finally {
                             DSdatatype.close(comp_tid);

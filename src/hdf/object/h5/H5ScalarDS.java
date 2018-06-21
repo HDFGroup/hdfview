@@ -16,7 +16,6 @@ package hdf.object.h5;
 
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -537,7 +536,7 @@ public class H5ScalarDS extends ScalarDS {
             if (did >= 0) {
                 try {
                     tid = H5.H5Dget_type(did);
-                    log.trace("getDatatype(): isNativeDatatype", isNativeDatatype);
+                    log.trace("getDatatype(): isNativeDatatype={}", isNativeDatatype);
                     if (!isNativeDatatype) {
                         long tmptid = -1;
                         try {
@@ -877,7 +876,7 @@ public class H5ScalarDS extends ScalarDS {
                 if (theData != null) {
                     long tid = -1;
                     try {
-                        tid = DSdatatype.getNative(did);
+                        tid = DSdatatype.createNative();
 
                         if (DSdatatype.isVLEN()) {
                             if (DSdatatype.isVarStr()) {
@@ -919,7 +918,7 @@ public class H5ScalarDS extends ScalarDS {
                     catch (Exception ex) {
                         log.debug("read(): read failure: ", ex);
                         log.trace("read(): finish");
-                        throw new HDF5Exception(Arrays.toString(ex.getStackTrace()));
+                        throw new HDF5Exception(ex.getMessage());
                     }
                     finally {
                         DSdatatype.close(tid);
@@ -1072,7 +1071,7 @@ public class H5ScalarDS extends ScalarDS {
                     catch (Exception ex) {
                         log.debug("write(): write failure: ", ex);
                         log.trace("write(): finish");
-                        throw new HDF5Exception(Arrays.toString(ex.getStackTrace()));
+                        throw new HDF5Exception(ex.getMessage());
                     }
                     finally {
                         DSdatatype.close(tid);
