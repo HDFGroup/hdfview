@@ -798,12 +798,6 @@ public class H5ScalarDS extends ScalarDS {
                     log.trace("read(): finish");
                     throw new HDF5Exception("Cannot show data with datatype of ARRAY of COMPOUND.");
                 }
-
-                if (baseType.isVLEN()) {
-                    log.debug("read(): Cannot show data of type ARRAY of VL");
-                    log.trace("read(): finish");
-                    throw new HDF5Exception("Cannot show data with datatype of ARRAY of VL.");
-                }
             }
             else {
                 log.debug("read(): ARRAY datatype has no base type");
@@ -878,8 +872,8 @@ public class H5ScalarDS extends ScalarDS {
                     try {
                         tid = DSdatatype.createNative();
 
-                        if (DSdatatype.isVLEN()) {
-                            if (DSdatatype.isVarStr()) {
+                        if (DSdatatype.isVLEN() || (DSdatatype.isArray() && DSdatatype.getDatatypeBase().isVLEN())) {
+                            if (DSdatatype.isVarStr() || (DSdatatype.isArray() && DSdatatype.getDatatypeBase().isVarStr())) {
                                 log.trace("read(): H5Dread_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}", did, tid, spaceIDs[0], spaceIDs[1]);
                                 H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
                             }
