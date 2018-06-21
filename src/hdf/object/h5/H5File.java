@@ -412,14 +412,14 @@ public class H5File extends FileFormat {
         if (objID >= 0) {
             try {
                 try {
-                    log.debug("getAttribute(): get obj_info");
+                    log.trace("getAttribute(): get obj_info");
                     obj_info = H5.H5Oget_info(objID);
                 }
                 catch (Exception ex) {
                     log.debug("getAttribute(): H5Oget_info(objID {}) failure: ", objID, ex);
                 }
                 if (obj_info.num_attrs <= 0) {
-                    log.debug("getAttribute(): no attributes");
+                    log.trace("getAttribute(): no attributes");
                     log.trace("getAttribute(): finish");
                     return (attributeList = new Vector<>());
                 }
