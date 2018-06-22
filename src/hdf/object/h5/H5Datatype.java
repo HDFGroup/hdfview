@@ -1596,46 +1596,53 @@ public class H5Datatype extends Datatype {
     public void extractCompoundInfo(String name, List<String> names, List<Datatype> flatListTypes) {
         log.trace("extractCompoundInfo(): start: name={}", name);
 
-        if (compoundMemberNames == null) {
-            log.debug("extractCompoundInfo(): compoundMemberNames is null");
-            log.trace("extractCompoundInfo(): finish");
-            return;
+        if (isArray() || isVLEN()) {
+            log.trace("extractCompoundInfo(): top-level types is ARRAY or VLEN; extracting compound info from base type");
+            ((H5Datatype) getDatatypeBase()).extractCompoundInfo(name, names, flatListTypes);
+        }
+        else {
+            if (compoundMemberNames == null) {
+                log.debug("extractCompoundInfo(): compoundMemberNames is null");
+                log.trace("extractCompoundInfo(): finish");
+                return;
+            }
+
+            Datatype mtype = null;
+            String mname = null;
+
+            log.trace("extractCompoundInfo(): nMembers={}", compoundMemberNames.size());
+
+            if (compoundMemberNames.size() <= 0) {
+                log.debug("extractCompoundInfo(): datatype has no members");
+                log.trace("extractCompoundInfo(): finish");
+                return;
+            }
+
+            for (int i = 0; i < compoundMemberNames.size(); i++) {
+                log.trace("extractCompoundInfo(): nMembers[{}]", i);
+
+                mtype = compoundMemberTypes.get(i);
+                log.trace("extractCompoundInfo():[{}] mtype={} with size={}", i, mtype.getDescription(), mtype.getDatatypeSize());
+
+                if (names != null) {
+                    mname = name + compoundMemberNames.get(i);
+                    log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
+                }
+
+                if (mtype.isCompound()) {
+                    ((H5Datatype) mtype).extractCompoundInfo(mname + CompoundDS.separator, names, flatListTypes);
+                    log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
+                    continue;
+                }
+
+                if (names != null) {
+                    names.add(mname);
+                }
+                flatListTypes.add(mtype);
+
+            } // for (int i=0; i<nMembers; i++)
         }
 
-        Datatype mtype = null;
-        String mname = null;
-
-        log.trace("extractCompoundInfo(): nMembers={}", compoundMemberNames.size());
-
-        if (compoundMemberNames.size() <= 0) {
-            log.debug("extractCompoundInfo(): datatype has no members");
-            log.trace("extractCompoundInfo(): finish");
-            return;
-        }
-
-        for (int i = 0; i < compoundMemberNames.size(); i++) {
-            log.trace("extractCompoundInfo(): nMembers[{}]", i);
-
-            mtype = compoundMemberTypes.get(i);
-            log.trace("extractCompoundInfo():[{}] mtype={} with size={}", i, mtype.getDescription(), mtype.getDatatypeSize());
-
-            if (names != null) {
-                mname = name + compoundMemberNames.get(i);
-                log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
-            }
-
-            if (mtype.isCompound()) {
-                ((H5Datatype) mtype).extractCompoundInfo(mname + CompoundDS.separator, names, flatListTypes);
-                log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
-                continue;
-            }
-
-            if (names != null) {
-                names.add(mname);
-            }
-            flatListTypes.add(mtype);
-
-        } // for (int i=0; i<nMembers; i++)
         log.trace("extractCompoundInfo(): finish");
     } // extractCompoundInfo
 
