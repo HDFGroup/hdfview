@@ -12,26 +12,34 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.MetaDataView;
 
+import hdf.object.Attribute;
 import hdf.object.HObject;
+import hdf.view.DataView;
 
 /**
- * The data view interface for displaying data objects
+ *
+ *The metadata view interface for displaying metadata information
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface DataView {
-    /** The unknown view type */
-    public final static int DATAVIEW_UNKNOWN = -1;
+public abstract interface MetaDataView extends DataView {
+    /** Add an attribute to a data object.
+     *
+     * @param obj  the attribute to add
+     *
+     * @return the Attribute object
+     */
+    public abstract Attribute addAttribute(HObject obj);
 
-    /** The table view type */
-    public final static int DATAVIEW_TABLE = 1;
+    /** Delete an attribute from a data object.
+     *
+     * @param obj  the attribute to delte
+     *
+     * @return the Attribute object
+     */
+    public abstract Attribute deleteAttribute(HObject obj);
 
-    /** The image view type */
-    public final static int DATAVIEW_IMAGE = 2;
-
-    /** @return the data object displayed in this data viewer */
-    public abstract HObject getDataObject();
 }

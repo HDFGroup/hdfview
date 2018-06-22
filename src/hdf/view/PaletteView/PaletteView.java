@@ -12,26 +12,16 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.PaletteView;
 
-import hdf.object.HObject;
+import hdf.view.DataView;
 
 /**
- * The data view interface for displaying data objects
+ *
+ * The palette view interface for displaying image palette
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface DataView {
-    /** The unknown view type */
-    public final static int DATAVIEW_UNKNOWN = -1;
-
-    /** The table view type */
-    public final static int DATAVIEW_TABLE = 1;
-
-    /** The image view type */
-    public final static int DATAVIEW_IMAGE = 2;
-
-    /** @return the data object displayed in this data viewer */
-    public abstract HObject getDataObject();
+public abstract interface PaletteView extends DataView {
 }

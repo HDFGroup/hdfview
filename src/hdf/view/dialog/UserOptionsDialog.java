@@ -12,26 +12,40 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.dialog;
 
-import hdf.object.HObject;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Shell;
 
 /**
- * The data view interface for displaying data objects
+ * UserOptionsDialog displays components for choosing user options.
  *
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * @author Jordan T. Henderson
+ * @version 2.4 2/13/2016
  */
-public abstract interface DataView {
-    /** The unknown view type */
-    public final static int DATAVIEW_UNKNOWN = -1;
+public class UserOptionsDialog extends PreferenceDialog {
 
-    /** The table view type */
-    public final static int DATAVIEW_TABLE = 1;
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
 
-    /** The image view type */
-    public final static int DATAVIEW_IMAGE = 2;
+    private Shell                         shell;
 
-    /** @return the data object displayed in this data viewer */
-    public abstract HObject getDataObject();
+    private Font                          curFont;
+
+    protected String                      rootDir = null;
+
+    protected String                      workDir = null;
+
+    public UserOptionsDialog(Shell parent, PreferenceManager mgr, String viewRoot) {
+        super(parent, mgr);
+
+        rootDir = viewRoot;
+    }
+
+    public void create() {
+        super.create();
+        getShell().setSize(getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+    }
 }

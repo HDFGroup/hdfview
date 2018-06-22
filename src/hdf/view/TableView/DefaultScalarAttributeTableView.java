@@ -12,26 +12,22 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
-import hdf.object.HObject;
+import java.util.HashMap;
 
-/**
- * The data view interface for displaying data objects
- *
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
- */
-public abstract interface DataView {
-    /** The unknown view type */
-    public final static int DATAVIEW_UNKNOWN = -1;
+import hdf.view.ViewManager;
 
-    /** The table view type */
-    public final static int DATAVIEW_TABLE = 1;
+public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
 
-    /** The image view type */
-    public final static int DATAVIEW_IMAGE = 2;
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
 
-    /** @return the data object displayed in this data viewer */
-    public abstract HObject getDataObject();
+    public DefaultScalarAttributeTableView(ViewManager theView) {
+        this(theView, null);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public DefaultScalarAttributeTableView(ViewManager theView, HashMap dataPropertiesMap) {
+        super(theView, dataPropertiesMap);
+    }
 }

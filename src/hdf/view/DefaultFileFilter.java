@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -30,7 +30,7 @@ public class DefaultFileFilter {
     private String description = null;
     private String fullDescription = null;
     private boolean useExtensionsInDescription = true;
-    
+
     /**
      * Creates a file filter. If no filters are added, then all files are
      * accepted.
@@ -38,9 +38,9 @@ public class DefaultFileFilter {
      * @see #addExtension
      */
     public DefaultFileFilter() {
-    	this.filters = new Hashtable<String, DefaultFileFilter>();
+        this.filters = new Hashtable<String, DefaultFileFilter>();
     }
-    
+
     /**
      * Creates a file filter that accepts files with the given extension.
      * Example: new DefaultFileFilter("jpg");
@@ -52,7 +52,7 @@ public class DefaultFileFilter {
     public DefaultFileFilter(String extension) {
         this(extension, null);
     }
-    
+
     /**
      * Creates a file filter that accepts the given file type. Example: new
      * DefaultFileFilter("jpg", "JPEG Image Images");
@@ -74,7 +74,7 @@ public class DefaultFileFilter {
             setDescription(description);
         }
     }
-    
+
     /**
      * Creates a file filter from the given string array. Example: new
      * DefaultFileFilter(String {"gif", "jpg"});
@@ -89,7 +89,7 @@ public class DefaultFileFilter {
     public DefaultFileFilter(String[] filters) {
         this(filters, null);
     }
-    
+
     /**
      * Creates a file filter from the given string array and description.
      * Example: new DefaultFileFilter(String {"gif", "jpg"},
@@ -114,18 +114,18 @@ public class DefaultFileFilter {
             setDescription(description);
         }
     }
-    
+
     /**
      * @return the file extensions associated with this DefaultFileFilter
      */
     public String getExtensions() {
         Enumeration<String> extensions = filters.keys();
         String extString = "";
-        
+
         while (extensions.hasMoreElements()) {
-        	extString += "*." + extensions.nextElement() + ";";
+            extString += "*." + extensions.nextElement() + ";";
         }
-        
+
         return extString;
     }
 
@@ -154,10 +154,10 @@ public class DefaultFileFilter {
             ext = st.nextToken().trim();
             filters.put(ext.toLowerCase(), this);
         }
-        
+
         fullDescription = null;
     }
-    
+
     /**
      * @return the human readable description of this filter. For example:
      * "JPEG and GIF Image Files (*.jpg, *.gif)"
@@ -201,7 +201,7 @@ public class DefaultFileFilter {
         this.description = description;
         fullDescription = null;
     }
-    
+
     /**
      * Determines whether the extension list (.jpg, .gif, etc) should show up in
      * the human readable description.
@@ -215,7 +215,7 @@ public class DefaultFileFilter {
         useExtensionsInDescription = b;
         fullDescription = null;
     }
-    
+
     /**
      * @return whether the extension list (.jpg, .gif, etc) should show up in
      * the human readable description.
@@ -226,7 +226,7 @@ public class DefaultFileFilter {
     public boolean isExtensionListInDescription() {
         return useExtensionsInDescription;
     }
-    
+
     /** @return a file filter for HDF4/5 file. */
     public static DefaultFileFilter getFileFilter() {
         // update extensions
@@ -239,7 +239,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for HDF4 file. */
     public static DefaultFileFilter getFileFilterHDF4() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -250,7 +250,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for HDF5 file. */
     public static DefaultFileFilter getFileFilterHDF5() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -260,7 +260,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for JPEG image files. */
     public static DefaultFileFilter getFileFilterJPEG() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -274,7 +274,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for TIFF image files. */
     public static DefaultFileFilter getFileFilterTIFF() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -284,7 +284,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for PNG image files. */
     public static DefaultFileFilter getFileFilterPNG() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -293,7 +293,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for BMP image files. */
     public static DefaultFileFilter getFileFilterBMP() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -303,7 +303,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for GIF image files. */
     public static DefaultFileFilter getFileFilterGIF() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -312,7 +312,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for GIF, JPEG, BMP, or PNG image files. */
     public static DefaultFileFilter getImageFileFilter() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -330,7 +330,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for text file. */
     public static DefaultFileFilter getFileFilterText() {
         DefaultFileFilter filter = new DefaultFileFilter();
@@ -340,7 +340,7 @@ public class DefaultFileFilter {
 
         return filter;
     }
-    
+
     /** @return a file filter for binary file. */
     public static DefaultFileFilter getFileFilterBinary() {
         DefaultFileFilter filter = new DefaultFileFilter();

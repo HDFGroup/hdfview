@@ -12,26 +12,28 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.TableView;
 
-import hdf.object.HObject;
+import hdf.view.DataView;
 
 /**
- * The data view interface for displaying data objects
+ *
+ * The table view interface for displaying data in table form
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface DataView {
-    /** The unknown view type */
-    public final static int DATAVIEW_UNKNOWN = -1;
+public abstract interface TableView extends DataView {
+    /** @return the table */
+    public abstract Object getTable();
 
-    /** The table view type */
-    public final static int DATAVIEW_TABLE = 1;
+    /** @return array of selected data */
+    public abstract Object getSelectedData();
 
-    /** The image view type */
-    public final static int DATAVIEW_IMAGE = 2;
+    public abstract int getSelectedColumnCount();
 
-    /** @return the data object displayed in this data viewer */
-    public abstract HObject getDataObject();
+    public abstract int getSelectedRowCount();
+
+    /** Write the change of a dataset into file. */
+    public abstract void updateValueInFile();
 }
