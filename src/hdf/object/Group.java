@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -31,7 +31,7 @@ import java.util.Vector;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Group extends HObject {
+public abstract class Group extends HObject implements MetaDataContainer {
 
     private static final long serialVersionUID = 3913174542591568052L;
 
@@ -74,15 +74,15 @@ public abstract class Group extends HObject {
      *
      * @param theFile
      *            the file containing the group.
-     * @param name
+     * @param grpName
      *            the name of this group, e.g. "grp01".
-     * @param path
+     * @param grpPath
      *            the full path of this group, e.g. "/groups/".
-     * @param parent
+     * @param grpParent
      *            the parent of this group.
      */
-    public Group(FileFormat theFile, String name, String path, Group parent) {
-        this(theFile, name, path, parent, null);
+    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent) {
+        this(theFile, grpName, grpPath, grpParent, null);
     }
 
     /**
@@ -91,21 +91,20 @@ public abstract class Group extends HObject {
      *
      * @param theFile
      *            the file containing the group.
-     * @param name
+     * @param grpName
      *            the name of this group, e.g. "grp01".
-     * @param path
+     * @param grpPath
      *            the full path of this group, e.g. "/groups/".
-     * @param parent
+     * @param grpParent
      *            the parent of this group.
      * @param oid
      *            the oid of this group.
      */
     @Deprecated
-    public Group(FileFormat theFile, String name, String path, Group parent,
-            long[] oid) {
-        super(theFile, name, path, oid);
+    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent, long[] oid) {
+        super(theFile, grpName, grpPath, oid);
 
-        this.parent = parent;
+        this.parent = grpParent;
     }
 
     /**
@@ -182,7 +181,7 @@ public abstract class Group extends HObject {
             Object uObj = null;
             while (it.hasNext()) {
                 uObj = it.next();
-                
+
                 if (uObj instanceof Group) {
                     g = (Group) uObj;
                     if (g.getPath() != null) // add this check to get rid of null exception

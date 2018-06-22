@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -22,18 +22,16 @@ import hdf.object.Datatype;
 /**
  * This class defines HDF4 data type characteristics and APIs for a data type.
  * <p>
- * This class provides several methods to convert an HDF4 datatype identifier to
- * a datatype object, and vice versa. A datatype object is described by four basic
- * fields: datatype class, size, byte order, and sign, while an HDF5 datatype is
- * presented by a datatype identifier.
+ * This class provides several methods to convert an HDF4 datatype identifier to a datatype object,
+ * and vice versa. A datatype object is described by four basic fields: datatype class, size, byte
+ * order, and sign, while an HDF5 datatype is presented by a datatype identifier.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H4Datatype extends Datatype
-{
+public class H4Datatype extends Datatype {
     private static final long serialVersionUID = -1342029403385521874L;
-    
+
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Datatype.class);
 
     /**
@@ -50,45 +48,60 @@ public class H4Datatype extends Datatype
      * <li>to create 64-bit double<br>
      * H4Datatype type = new H4Dataype(CLASS_FLOAT, 8, NATIVE, -1);
      * </ol>
-     * @param tclass the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
-     * @param tsize the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
-     * @param torder the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
-     * @param tsign the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
      */
-    public H4Datatype(int tclass, int tsize, int torder, int tsign)
-    {
+    public H4Datatype(int tclass, int tsize, int torder, int tsign) {
         super(tclass, tsize, torder, tsign);
+        datatypeDescription = getDescription();
     }
 
     /**
      * Constructs a H4Datatype with a given native datatype identifier.
      * <p>
      * For example,
+     *
      * <pre>
      * Datatype dtype = new H4Datatype(HDFConstants.DFNT_INT32);
      * </pre>
+     *
      * will construct a datatype equivalent to
+     *
+     * <pre>
      * new H4Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     * </pre>
      *
      * @see #fromNative(long nativeID)
      *
-     * @param nativeID the native datatype identifier.
+     * @param nativeID
+     *            the native datatype identifier.
      */
-    public H4Datatype(long nativeID)
-    {
+    public H4Datatype(long nativeID) {
         super(nativeID);
 
         fromNative(nativeID);
+        datatypeDescription = getDescription();
     }
 
     /*
      * (non-Javadoc)
+     *
      * @see hdf.object.DataFormat#hasAttribute()
      */
-    public boolean hasAttribute () { return false; }
+    @Override
+    public boolean hasAttribute() {
+        return false;
+    }
 
     /*
      * (non-Javadoc)
+     *
      * @see hdf.object.Datatype#fromNative(long)
      */
     @Override
@@ -99,8 +112,7 @@ public class H4Datatype extends Datatype
         datatypeOrder = NATIVE;
         datatypeSign = NATIVE;
 
-        switch((int)tid)
-        {
+        switch ((int) tid) {
             case HDFConstants.DFNT_CHAR:
                 datatypeClass = CLASS_CHAR;
                 datatypeSize = 1;
@@ -118,7 +130,7 @@ public class H4Datatype extends Datatype
                 datatypeClass = CLASS_INTEGER;
                 datatypeSize = 1;
                 datatypeSign = SIGN_NONE;
-                 break;
+                break;
             case HDFConstants.DFNT_INT16:
                 datatypeClass = CLASS_INTEGER;
                 datatypeSize = 2;
@@ -164,20 +176,20 @@ public class H4Datatype extends Datatype
     }
 
     /**
-     *  Allocate a 1D array large enough to hold a multidimensional
-     *  array of 'datasize' elements of 'datatype' numbers.
+     * Allocate a 1D array large enough to hold a multidimensional array of 'datasize' elements of
+     * 'datatype' numbers.
      *
-     *  @param datatype  the data type
-     *  @param datasize  the size of the data array
+     * @param datatype
+     *            the data type
+     * @param datasize
+     *            the size of the data array
      *
-     *  @return an array of 'datasize' numbers of datatype.
+     * @return an array of 'datasize' numbers of datatype.
      *
      * @throws OutOfMemoryError
      *             if the array cannot be allocated
-    */
-    public static final Object allocateArray(long datatype, int datasize)
-    throws OutOfMemoryError
-    {
+     */
+    public static final Object allocateArray(long datatype, int datasize) throws OutOfMemoryError {
         log.trace("allocateArray(): start");
 
         if (datasize <= 0) {
@@ -188,8 +200,7 @@ public class H4Datatype extends Datatype
 
         Object data = null;
 
-        switch((int)datatype)
-        {
+        switch ((int) datatype) {
             case HDFConstants.DFNT_CHAR:
             case HDFConstants.DFNT_UCHAR8:
             case HDFConstants.DFNT_UINT8:
@@ -232,100 +243,63 @@ public class H4Datatype extends Datatype
 
     /*
      * (non-Javadoc)
+     *
      * @see hdf.object.Datatype#getDatatypeDescription()
      */
     @Override
-    public String getDatatypeDescription()
-    {
-        return getDatatypeDescription(toNative());
-    }
+    public String getDescription() {
+        log.trace("getDescription(): start");
 
-    /**
-     *  Returns the short description of a given datatype.
-     *
-     *  @param datatype  the data type
-     *
-     *  @return  a description String
-     */
-    public static final String getDatatypeDescription(long datatype)
-    {
-        log.trace("getDatatypeDescription(): start");
+        if (datatypeDescription != null) {
+            log.trace("getDescription(): finish");
+            return datatypeDescription;
+        }
 
-        String description = "Unknown";
+        String description = null;
 
-        switch((int)datatype)
-        {
-            case HDFConstants.DFNT_CHAR:
-                description = "8-bit character";
+        switch (datatypeClass) {
+            case CLASS_CHAR:
+                description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "character";
                 break;
-            case HDFConstants.DFNT_UCHAR8:
-                description = "8-bit unsigned character";
+            case CLASS_INTEGER:
+                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
-            case HDFConstants.DFNT_UINT8:
-                description = "8-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_INT8:
-                description = "8-bit integer";
-                break;
-            case HDFConstants.DFNT_INT16:
-                description = "16-bit integer";
-                break;
-            case HDFConstants.DFNT_UINT16:
-                description = "16-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_INT32:
-                description = "32-bit integer";
-                break;
-            case HDFConstants.DFNT_UINT32:
-                description = "32-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_INT64:
-                description = "64-bit integer";
-                break;
-            case HDFConstants.DFNT_UINT64:
-                description = "64-bit unsigned integer";
-                break;
-            case HDFConstants.DFNT_FLOAT32:
-                description = "32-bit floating-point";
-                break;
-            case HDFConstants.DFNT_FLOAT64:
-                description = "64-bit floating-point";
+            case CLASS_FLOAT:
+                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
                 break;
             default:
-                log.debug("getDatatypeDescription(): unknown datatype {}", datatype);
                 description = "Unknown";
                 break;
         }
 
-        log.trace("getDatatypeDescription(): finish");
+        log.trace("getDescription(): finish");
         return description;
     }
 
     /*
      * (non-Javadoc)
+     *
      * @see hdf.object.Datatype#isUnsigned()
      */
     @Override
-    public boolean isUnsigned()
-    {
-        return isUnsigned(toNative());
+    public boolean isUnsigned() {
+        return (Datatype.SIGN_NONE == getDatatypeSign());
     }
 
     /**
-     *  Checks if the datatype is an unsigned integer.
+     * Checks if the datatype is an unsigned integer.
      *
-     *  @param datatype  the data type.
+     * @param datatype
+     *            the data type.
      *
-     *  @return True is the datatype is an unsigned integer; otherwise returns false.
+     * @return True is the datatype is an unsigned integer; otherwise returns false.
      */
-    public static final boolean isUnsigned(long datatype)
-    {
+    public static final boolean isUnsigned(long datatype) {
         log.trace("isUnsigned(): start");
 
-        boolean unsigned = false;;
+        boolean unsigned = false;
 
-        switch((int)datatype)
-        {
+        switch((int) datatype) {
             case HDFConstants.DFNT_UCHAR8:
             case HDFConstants.DFNT_UINT8:
             case HDFConstants.DFNT_UINT16:
@@ -343,53 +317,56 @@ public class H4Datatype extends Datatype
         return unsigned;
     }
 
+    @Override
+    public boolean isText() {
+        return (Datatype.CLASS_STRING == getDatatypeClass());
+    }
+
     /*
      * (non-Javadoc)
-     * @see hdf.object.Datatype#toNative()
+     * @see hdf.object.Datatype#createNative()
      */
     @Override
-    public long toNative()
+    public long createNative()
     {
-        log.trace("toNative(): start");
+        log.trace("createNative(): start");
 
         long tid = -1;
         int tclass = getDatatypeClass();
         int tsize = (int) getDatatypeSize();
 
         // figure the datatype
-        switch (tclass)
-        {
+        switch (tclass) {
             case Datatype.CLASS_INTEGER:
-                int tsign = getDatatypeSign();
-                if (tsize == 1)
-                {
-                    if (tsign == Datatype.SIGN_NONE) {
+                if (tsize == 1) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT8;
-                    } else {
+                    }
+                    else {
                         tid = HDFConstants.DFNT_INT8;
                     }
                 }
-                else if (tsize == 2)
-                {
-                    if (tsign == Datatype.SIGN_NONE) {
+                else if (tsize == 2) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT16;
-                    } else {
+                    }
+                    else {
                         tid = HDFConstants.DFNT_INT16;
                     }
                 }
-                else if ((tsize == 4) || (tsize == NATIVE))
-                {
-                    if (tsign == Datatype.SIGN_NONE) {
+                else if ((tsize == 4) || (tsize == NATIVE)) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT32;
-                    } else {
+                    }
+                    else {
                         tid = HDFConstants.DFNT_INT32;
                     }
                 }
-                else if (tsize == 8)
-                {
-                    if (tsign == Datatype.SIGN_NONE) {
+                else if (tsize == 8) {
+                    if (isUnsigned()) {
                         tid = HDFConstants.DFNT_UINT64;
-                    } else {
+                    }
+                    else {
                         tid = HDFConstants.DFNT_INT64;
                     }
                 }
@@ -397,39 +374,44 @@ public class H4Datatype extends Datatype
             case Datatype.CLASS_FLOAT:
                 if (tsize == Datatype.NATIVE) {
                     tid = HDFConstants.DFNT_FLOAT;
-                } else if (tsize == 4) {
+                }
+                else if (tsize == 4) {
                     tid = HDFConstants.DFNT_FLOAT32;
-                } else if (tsize == 8) {
+                }
+                else if (tsize == 8) {
                     tid = HDFConstants.DFNT_FLOAT64;
                 }
                 break;
             case Datatype.CLASS_CHAR:
-                int tsign2 = getDatatypeSign();
-                if (tsign2 == Datatype.SIGN_NONE) {
+                if (isUnsigned()) {
                     tid = HDFConstants.DFNT_UCHAR;
-                } else {
+                }
+                else {
                     tid = HDFConstants.DFNT_CHAR;
                 }
                 break;
             case Datatype.CLASS_STRING:
-                    tid = HDFConstants.DFNT_CHAR;
+                tid = HDFConstants.DFNT_CHAR;
                 break;
             default:
-                log.debug("toNative(): unknown datatype class {}", tclass);
+                log.debug("createNative(): unknown datatype class {}", tclass);
         }
 
-        log.trace("toNative(): finish");
+        log.trace("createNative(): finish");
         return tid;
     }
 
     /*
      * (non-Javadoc)
+     *
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(long id) {;}
+    public void close(long id) {
+        ;
+    }
 
-    //Implementing DataFormat
+    // Implementing DataFormat
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");

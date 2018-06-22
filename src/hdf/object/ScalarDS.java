@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -37,7 +37,7 @@ public abstract class ScalarDS extends Dataset {
 
     /************************************************************
      * The following constant strings are copied from           *
-     * https://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html *
+     * https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html *
      * to make the definition consistent with the image specs.  *
      ************************************************************/
 
@@ -86,11 +86,6 @@ public abstract class ScalarDS extends Dataset {
      * True if this dataset is ASCII text.
      */
     protected boolean isText;
-
-    /**
-     * Flag to indicate if the original C data is unsigned integer.
-     */
-    protected boolean isUnsigned;
 
     /**
      * Flag to indicate is the original unsigned C data is converted.
@@ -154,9 +149,7 @@ public abstract class ScalarDS extends Dataset {
         isImage = false;
         isTrueColor = false;
         isText = false;
-        isUnsigned = false;
         interlace = -1;
-        datatype = null;
         imageDataRange = null;
         isImageDisplay = false;
         isDefaultImageOrder = true;
@@ -183,11 +176,13 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return the converted data buffer.
      */
+    @Override
     public Object convertFromUnsignedC() {
         log.trace("convertFromUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        if ((data != null) && isUnsigned && !unsignedConverted) {
+        log.trace("convertFromUnsignedC(): unsigned={}", getDatatype().isUnsigned());
+        if ((data != null) && getDatatype().isUnsigned() && !unsignedConverted) {
             log.trace("convertFromUnsignedC(): convert");
             originalBuf = data;
             convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
@@ -216,11 +211,13 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return the converted data buffer.
      */
+    @Override
     public Object convertToUnsignedC() {
         log.trace("convertToUnsignedC(): start");
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
-        if ((data != null) && isUnsigned) {
+        log.trace("convertToUnsignedC(): unsigned={}", getDatatype().isUnsigned());
+        if ((data != null) && getDatatype().isUnsigned()) {
             log.trace("convertToUnsignedC(): convert");
             convertedBuf = data;
             originalBuf = convertToUnsignedC(convertedBuf, originalBuf);
@@ -312,8 +309,7 @@ public abstract class ScalarDS extends Dataset {
      * Returns true if this dataset is an image.
      * <p>
      * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For more
-     * details, read <a href="https://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification
-     * </a>
+     * details, read <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>
      *
      * @return true if the dataset is an image; otherwise, returns false.
      */
@@ -418,15 +414,6 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
-     * Returns true if this dataset is ASCII text.
-     *
-     * @return true if this dataset is ASCII text.
-     */
-    public final boolean isText() {
-        return isText;
-    }
-
-    /**
      * Returns the interlace mode of a true color image (RGB).
      *
      * Valid values:
@@ -444,15 +431,6 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
-     * Returns true if the original C data is unsigned integers.
-     *
-     * @return true if the original C data is unsigned integers.
-     */
-    public final boolean isUnsigned() {
-        return isUnsigned;
-    }
-
-    /**
      * Returns the (min, max) pair of image data range.
      *
      * @return the (min, max) pair of image data range.
@@ -466,6 +444,7 @@ public abstract class ScalarDS extends Dataset {
      *
      * @return the fill values for the dataset.
      */
+    @Override
     public final Object getFillValue() {
         return fillValue;
     }

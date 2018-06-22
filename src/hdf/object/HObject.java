@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -49,9 +49,9 @@ import java.io.Serializable;
  * should check the OID of the data object to avoid duplicate copies of the same
  * object.</b>
  * <p>
- * HDF4 objects are uniquely identified by the OID (tag_id, ref_id) pair.
- * The ref_id is the object reference count. The tag_id is a pre-defined number
- * to identify the type of object. For example, DFTAG_RI is for raster image,
+ * HDF4 objects are uniquely identified by the OID (tag_id, ref_id) pair. The
+ * ref_id is the object reference count. The tag_id is a pre-defined number to
+ * identify the type of object. For example, DFTAG_RI is for raster image,
  * DFTAG_SD is for scientific dataset, and DFTAG_VG is for Vgroup.
  * <p>
  * HDF5 objects are uniquely identified by the OID containing just the object
@@ -64,16 +64,16 @@ import java.io.Serializable;
  *     byte[] ref_buf = H5.H5Rcreate(h5file.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
  *     long[] oid = new long[1];
  *     oid[0] = HDFNativeData.byteToLong(ref_buf, 0);
- * }
- * catch (Exception ex) {
+ * } catch (Exception ex) {
  * }
  * </pre>
  *
- * @version 1.1 9/4/2007
- * @author Peter X. Cao
+ * @version 2.0 4/2/2018
+ * @author Peter X. Cao, Jordan T. Henderson
  * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
  */
-public abstract class HObject implements Serializable, DataFormat {
+public abstract class HObject implements Serializable {
+
     /**
      * The serialVersionUID is a universal version identifier for a Serializable
      * class. Deserialization uses this number to ensure that a loaded class
@@ -81,6 +81,8 @@ public abstract class HObject implements Serializable, DataFormat {
      * http://java.sun.com/j2se/1.5.0/docs/api/java/io/Serializable.html
      */
     private static final long  serialVersionUID = -1723666708199882519L;
+
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObject.class);
 
     /**
      * The separator of object path, i.e. "/".
@@ -245,6 +247,8 @@ public abstract class HObject implements Serializable, DataFormat {
         this.name = theName;
         this.path = thePath;
 
+        log.trace("name={} path={}", this.name, this.path);
+
         if (thePath != null) {
             this.fullName = thePath + theName;
         }
@@ -256,9 +260,14 @@ public abstract class HObject implements Serializable, DataFormat {
                 this.fullName = theName;
             }
             else {
-                this.fullName = "/" + theName;
+                if (this instanceof Attribute)
+                    this.fullName = theName;
+                else
+                    this.fullName = "/" + theName;
             }
         }
+
+        log.trace("fullName={}", this.fullName);
     }
 
     /**

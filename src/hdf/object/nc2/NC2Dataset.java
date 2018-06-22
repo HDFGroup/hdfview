@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -32,8 +32,7 @@ import ucar.nc2.Variable;
  * operations performed on the scalar dataset
  * <p>
  * The library predefines a modest number of datatypes. For details, read <a
- * href="http://hdfgroup.org/HDF5/doc/Datatypes.html"> The Datatype Interface
- * (H5T)</a>
+ * href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm">HDF5 Datatypes</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -70,6 +69,7 @@ public class NC2Dataset extends ScalarDS {
      *
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute() {
         return false;
     }
@@ -153,6 +153,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // Implementing DataFormat
+    @Override
     public List getMetadata() throws Exception {
         if (attributeList != null) {
             return attributeList;
@@ -179,6 +180,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // implementing DataFormat
+    @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException(
@@ -186,6 +188,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException(
@@ -193,6 +196,7 @@ public class NC2Dataset extends ScalarDS {
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
@@ -218,7 +222,7 @@ public class NC2Dataset extends ScalarDS {
             return;
         }
 
-        if (rank > 0) {
+        if (inited) {
             return; // already called. Initialize only once
         }
 
@@ -268,6 +272,8 @@ public class NC2Dataset extends ScalarDS {
         if ((rank > 1) && isText) {
             selectedDims[1] = 1;
         }
+
+        inited = true;
     }
 
     // Implementing ScalarDS

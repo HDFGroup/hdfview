@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.object;
 
@@ -11,20 +11,20 @@ import static org.junit.Assert.fail;
 
 import java.util.Enumeration;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5File;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.FileFormat;
+import hdf.object.h5.H5File;
+
 /**
  * @author rsinha
- * 
+ *
  */
 public class FileFormatTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormatTest.class);
@@ -64,6 +64,7 @@ public class FileFormatTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void openFiles() throws Exception {
         try {
@@ -110,12 +111,12 @@ public class FileFormatTest {
      * <li>Create a file that is new with FILE_CREATE_DELETE.
      * <li>Create a file that is new with FILE_CREATE_OPEN.
      * </ul>
-     * 
+     *
      */
     /*
      * RUTH - come back and update this with new method, createInstance public final void testCreateStringInt() {
      * FileFormat f = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-     * 
+     *
      * try { f.create(H5TestFile.NAME_FILE_H5, FileFormat.FILE_CREATE_OPEN); } catch (Exception ex) {
      * fail("Create Failed " + ex.getMessage()); } try { f.create(H5TestFile.NAME_FILE_H5,
      * FileFormat.FILE_CREATE_DELETE); } catch (Exception ex) { ; //Expected to fail. } try { f.create("simpleFile",
@@ -174,6 +175,7 @@ public class FileFormatTest {
      * <li>current file formats are HDF5, HDF.
      * </ul>
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testGetFileFormatKeys() {
         log.debug("testGetFileFormatKeys");
@@ -181,7 +183,7 @@ public class FileFormatTest {
         Enumeration<String> e = FileFormat.getFileFormatKeys();
 
         while (e.hasMoreElements())
-            assertNotNull(FileFormat.getFileFormat((String) e.nextElement()));
+            assertNotNull(FileFormat.getFileFormat(e.nextElement()));
 
         long nObjs = 0;
         try {

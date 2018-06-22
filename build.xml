@@ -7,13 +7,6 @@
   <property file="build.properties" />
   <property file="package.properties" />
 
-
-  <taskdef resource="net/sf/antcontrib/antlib.xml">
-    <classpath>
-      <pathelement location="${antextension.dir}/ant-contrib.jar" />
-    </classpath>
-  </taskdef>
-
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
     <filterchain>
@@ -24,7 +17,7 @@
     </filterchain>
   </loadfile>
 
-  <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings">
+  <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings" failonerror="false">
     <filterchain>
       <tokenfilter>
         <linetokenizer />
@@ -195,12 +188,14 @@
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
       <path refid="slf4j-classpath" />
+      <path refid="log-classpath" />
   </path>
   <path id="jar-classpath">
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
       <path refid="slf4j-classpath" />
+      <path refid="nop-classpath" />
   </path>
 
   <property name="main-class" value="hdf.view.HDFView" />
@@ -220,6 +215,7 @@
      HDF4 version:     ${hdf4.version}
      HDF5 version:     ${hdf5.version}
      Operating System: ${os.name} ${os.version} ${os.arch}
+     Debug Build:      ${build.debug}
   </echo>
 
   <target name="clean" description="Cleans up the build directory">
@@ -239,7 +235,7 @@
     <delete file="${build.dir}/${ant.project.name}-${app.version}.msi" />
   </target>
 
-  <target name="clean-build" depends="clean,jar" />
+  <target name="clean-build" depends="clean,objectjar,jar" />
 
   <target name="clean-package">
     <delete dir="${dist.dir}" />
@@ -262,17 +258,44 @@
     <javac srcdir="${build.dir}" destdir="${classes.dir}"
       includes="HDFVersions.java"
       includeantruntime="false"
+      debug="${build.debug}"
     />
 
     <javac srcdir="${src.dir}" destdir="${classes.dir}"
       classpathref="project-classpath"
       excludes="examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
       includeantruntime="false"
+      debug="${build.debug}"
     />
 
     <copy todir="${classes.dir}">
       <fileset dir="${src.dir}" excludes=" **/*.in **/*.java examples/** test/**" />
     </copy>
+  </target>
+
+  <target name="objectjar" depends="compile">
+    <mkdir dir="${jar.dir}" />
+
+      <pathconvert property="manifest.classpath" pathsep=" ">
+        <path refid="obj-classpath" />
+        <mapper>
+          <chainedmapper>
+            <flattenmapper />
+          </chainedmapper>
+        </mapper>
+      </pathconvert>
+
+      <jar destfile="${jar.dir}/hdfobject.jar"
+        basedir="${classes.dir}"
+        excludes="hdf/view/** examples/** test/** *.log *.h5 *.data">
+        <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
+        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
+
+        <manifest>
+          <attribute name="Main-Class" value="${main-class}" />
+          <attribute name="Class-Path" value="${manifest.classpath}" />
+        </manifest>
+      </jar>
   </target>
 
   <target name="jar" depends="compile">
@@ -289,10 +312,10 @@
 
     <jar destfile="${jar.dir}/${ant.project.name}.jar"
       basedir="${classes.dir}"
-      excludes="examples/** test/** *.log *.h5">
+      excludes="examples/** test/** *.log *.h5 *.data">
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
-      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.5.jar" />
+      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.os}/${machine.arch}" includes="swt.jar" />
 
       <zipfileset src="${lib.dir}/ext/swt/commons-logging.jar" excludes="META-INF/**/*"></zipfileset>
@@ -328,6 +351,7 @@
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
       <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
+      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
     </java>
   </target>
 
@@ -336,8 +360,8 @@
     <mkdir dir="${jar.dir}/lib/ext" />
     <copy todir="${jar.dir}/lib">
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar" />
-      <fileset dir="${hdf5.lib.dir}" includes="*.jar" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -352,7 +376,8 @@
   <target name="compile-examples" depends="jar,compile">
     <mkdir dir="${exclasses.dir}" />
     <javac srcdir="${examples.dir}" destdir="${classes.dir}"
-      includeantruntime="false">
+      includeantruntime="false"
+      debug="${build.debug}">
       <classpath>
         <path refid="project-classpath" />
         <path refid="application" />
@@ -364,22 +389,17 @@
   </target>
   <path id="example-classes" location="${exclasses.dir}" />
 
-  <classfileset id="reqdClasses" dir="${exclasses.dir}">
-    <rootfileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
-  </classfileset>
   <target name="run-examples" depends="compile-examples" description="Runs the examples">
-    <foreach target="run-one-example" param="exfile">
-      <path>
-        <fileset refid="reqdClasses" />
-      </path>
-    </foreach>
+    <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
   </target>
+
   <target name="run-one-example">
     <dirname property="exfile.dir" file="${exfile}" />
     <basename property="exdir.name" file="${exfile.dir}" />
     <basename property="exfile.name" file="${exfile}" suffix=".class" />
     <property name="exdir.rel" value="${exclasses.dir}" relative="yes" />
     <basename property="exdirrel.name" file="${exdir.rel}" />
+      <echo message="Test example: ${exfile.name}"/>
     <java fork="true" classname="${exdirrel.name}/${exdir.name}/${exfile.name}" dir="${classes.dir}">
         <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
         <jvmarg value="${XstartOnFirstThreadFlag}" />
@@ -390,6 +410,7 @@
           <pathelement path="${classes.dir}" />
         </classpath>
         <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+        <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
     </java>
   </target>
 
@@ -403,7 +424,12 @@
     <mkdir dir="${testclasses.dir}" />
     <javac srcdir="${test.dir}" destdir="${classes.dir}"
       includes="**/*.java"
-      includeantruntime="false">
+      includeantruntime="false"
+      debug="${build.debug}">
+
+      <compilerarg value="-Xlint:deprecation"/>
+      <compilerarg value="-Xlint:unchecked"/>
+
       <classpath>
         <path refid="project-classpath" />
         <path refid="unit-classpath" />
@@ -496,13 +522,14 @@
         <path refid="application" />
       </classpath>
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-      <test name="test.object.AllH5ObjectTests" todir="${report.dir}" outfile="TEST-AllH5ObjectTests">
+      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+      <test name="test.object.H5CompoundDSTest" todir="${report.dir}" outfile="TEST-test.object.H5CompoundDSTest">
         <formatter type="plain" />
       </test>
     </junit>
   </target>
 
-  <target name="junit" depends="jar,compile-test,clean-junit-uitest"
+  <target name="junit" depends="objectjar,compile-test,clean-junit-uitest"
           description="Runs the Object Library tests">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
@@ -516,6 +543,7 @@
         <path refid="application" />
       </classpath>
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
       <formatter type="xml" />
       <formatter type="plain" />
@@ -539,8 +567,8 @@
     <fail message="You must run this target with -Dtest=TestName" />
   </target>
 
-  <target name="runauitest" description="Runs the test you specify on the command
-      line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test-name">
+  <target name="runauitest" description="Runs the test you specify on the command line with -Dtest="
+       depends="jar, compile-test, clean-junit-uitest, ensure-test-name">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
@@ -556,6 +584,7 @@
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/uitest" />
+      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
       <formatter type="xml" />
       <formatter type="plain" />
@@ -582,6 +611,7 @@
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/uitest" />
+      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
       <formatter type="xml" />
       <formatter type="plain" />
@@ -609,6 +639,7 @@
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
       <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/modules" />
+      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
       <formatter type="xml" />
       <formatter type="plain" />
@@ -670,7 +701,7 @@
   <target name="deploy" depends="deployWindows, deployUnix, deployMac"
       description="Creates the release directory containing the fully-prepared application binaries, libraries, etc. ready to be packaged up for distribution" />
 
-  <target name="deployWindows" depends="jar,javadoc" if="isWindows">
+  <target name="deployWindows" depends="objectjar,jar,javadoc" if="isWindows">
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
@@ -680,11 +711,13 @@
     <!-- Copy the application and dependencies -->
     <copy todir="${release.dir}/lib">
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
+      <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
-      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
     </copy>
 
     <!-- Bundle jre -->
@@ -695,6 +728,13 @@
     <!-- Create the run batch file -->
     <concat destfile="${release.dir}/hdfview.bat">${batch.text}</concat>
 
+      <pathconvert targetos="windows" property="runscript.classpath" refid="jar-classpath">
+        <map from="${basedir}" to="%INSTALLDIR%"/>
+        <map from="${hdf.lib.dir}" to="%INSTALLDIR%\\lib"/>
+        <map from="${hdf5.lib.dir}" to="$INSTALLDIR\\lib"/>
+      </pathconvert>
+      <replace file="${release.dir}/hdfview.bat" token="@CLASSPATH@" value="${runscript.classpath}" />
+
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/doc/javadocs">
       <fileset dir="${javadoc.dir}" />
@@ -702,7 +742,7 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
-    <untar src="${docs.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">
@@ -710,7 +750,7 @@
     </copy>
   </target>
 
-  <target name="deployUnix" depends="jar,javadoc" if="isUnix">
+  <target name="deployUnix" depends="objectjar,jar,javadoc" if="isUnix">
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
@@ -721,8 +761,10 @@
     <!-- Copy the application and dependencies -->
     <copy todir="${release.dir}/lib">
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
+      <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
@@ -735,6 +777,7 @@
         <include name="libjpeg.so" />
         <include name="libszip.so" />
         <include name="libz.so" />
+        <exclude name="slf4j*.jar" />
       </fileset>
       <fileset dir="${hdf5.lib.dir}">
         <include name="*.jar" />
@@ -742,6 +785,7 @@
         <include name="libhdf5_java.so" />
         <include name="libszip.so" />
         <include name="libz.so" />
+        <exclude name="slf4j*.jar" />
       </fileset>
     </copy>
 
@@ -759,6 +803,13 @@
       <fileset dir="${release.dir}" includes="hdfview.sh" />
     </chmod>
 
+      <pathconvert property="runscript.classpath" refid="jar-classpath">
+        <map from="${basedir}" to="$INSTALLDIR" />
+        <map from="${hdf.lib.dir}" to="$INSTALLDIR/lib"/>
+        <map from="${hdf5.lib.dir}" to="$INSTALLDIR/lib"/>
+      </pathconvert>
+      <replace file="${release.dir}/hdfview.sh" token="@CLASSPATH@" value="${runscript.classpath}" />
+
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/share/doc/javadocs">
       <fileset dir="${javadoc.dir}" />
@@ -766,7 +817,9 @@
     <copy todir="${release.dir}/share/doc">
       <fileset dir="${docs.dir}" />
     </copy>
-    <untar src="${docs.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
+<!--
+      <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
+-->
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/share/samples">
@@ -774,7 +827,7 @@
     </copy>
   </target>
 
-  <target name="deployMac" depends="jar,javadoc" if="isMac">
+  <target name="deployMac" depends="objectjar,jar,javadoc" if="isMac">
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/lib" />
     <mkdir dir="${release.dir}/doc" />
@@ -783,11 +836,13 @@
     <!-- Copy the application and dependencies -->
     <copy todir="${release.dir}/lib">
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
+      <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
-      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
-      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a" />
+      <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
+      <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
     </copy>
@@ -799,7 +854,7 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
-    <untar src="${docs.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">
@@ -839,8 +894,8 @@
     <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
 
     <!-- Compress everything into one zip file -->
-    <condition property="win.extension" value="win32" else="win64">
-      <contains string="${os.arch}" substring="32" />
+    <condition property="win.extension" value="win64" else="win32">
+      <contains string="${os.arch}" substring="64" />
     </condition>
     <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip"
       basedir="${dist.dir}" />
@@ -868,7 +923,7 @@
     <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.sh" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}.0-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh${line.separator}    use --help for options" />
     <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/${app.version}.0/hdfview.sh to run ${ant.project.name}" />
 
     <!-- Compress everything into one tar.gz file -->
@@ -898,7 +953,7 @@
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
     <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_VERSION_STRING@" value="${hdfjava.version}" />
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X ${mac.uname}" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${mac.uname}" />
     <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
     <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
     <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />

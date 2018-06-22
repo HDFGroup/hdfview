@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -23,7 +23,7 @@ package hdf.object;
  * i.e. members of a compound datatype can be some other compound datatype.
  * <p>
  * For more details on compound datatypes,
- * see <b> <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
+ * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
  * <p>
  * Since Java cannot handle C-structured compound data, data in a compound dataset
  * is loaded in to an Java List. Each element of the list is a data array that
@@ -48,7 +48,7 @@ package hdf.object;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class CompoundDS extends Dataset {
+public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     private static final long serialVersionUID = -4880399929644095662L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
@@ -133,13 +133,13 @@ public abstract class CompoundDS extends Dataset {
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the CompoundDS, e.g. "compDS".
-     * @param path
-     *            the path of the CompoundDS, e.g. "/g1".
+     * @param dsPath
+     *            the full path of the CompoundDS, e.g. "/g1".
      */
-    public CompoundDS(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
+    public CompoundDS(FileFormat theFile, String dsName, String dsPath) {
+        this(theFile, dsName, dsPath, null);
     }
 
     /**
@@ -148,16 +148,16 @@ public abstract class CompoundDS extends Dataset {
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the CompoundDS, e.g. "compDS".
-     * @param path
-     *            the path of the CompoundDS, e.g. "/g1".
+     * @param dsPath
+     *            the full path of the CompoundDS, e.g. "/g1".
      * @param oid
      *            the oid of the CompoundDS.
      */
     @Deprecated
-    public CompoundDS(FileFormat theFile, String name, String path, long[] oid) {
-        super(theFile, name, path, oid);
+    public CompoundDS(FileFormat theFile, String dsName, String dsPath, long[] oid) {
+        super(theFile, dsName, dsPath, oid);
 
         numberOfMembers = 0;
         memberNames = null;
@@ -170,6 +170,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the number of members of the compound dataset.
      */
+    @Override
     public final int getMemberCount() {
         return numberOfMembers;
     }
@@ -186,6 +187,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the number of selected members.
      */
+    @Override
     public final int getSelectedMemberCount() {
         int count = 0;
 
@@ -210,6 +212,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the names of compound members.
      */
+    @Override
     public final String[] getMemberNames() {
         return memberNames;
     }
@@ -222,6 +225,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return true if the i-th memeber is selected; otherwise returns false.
      */
+    @Override
     public final boolean isMemberSelected(int idx) {
         if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
             return isMemberSelected[idx];
@@ -237,6 +241,7 @@ public abstract class CompoundDS extends Dataset {
      * @param idx
      *            the index of compound member.
      */
+    @Override
     public final void selectMember(int idx) {
         if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
             isMemberSelected[idx] = true;
@@ -246,18 +251,19 @@ public abstract class CompoundDS extends Dataset {
     /**
      * Selects/deselects all members.
      *
-     * @param isSelected
+     * @param selectAll
      *            The indicator to select or deselect all members. If true, all
      *            members are selected for read/write. If false, no member is
      *            selected for read/write.
      */
-    public final void setMemberSelection(boolean isSelected) {
+    @Override
+    public final void setAllMemberSelection(boolean selectAll) {
         if (isMemberSelected == null) {
             return;
         }
 
         for (int i = 0; i < isMemberSelected.length; i++) {
-            isMemberSelected[i] = isSelected;
+            isMemberSelected[i] = selectAll;
         }
     }
 
@@ -282,6 +288,7 @@ public abstract class CompoundDS extends Dataset {
      * @return the array containing the total number of elements of the members
      *         of compound.
      */
+    @Override
     public final int[] getMemberOrders() {
         return memberOrders;
     }
@@ -307,8 +314,13 @@ public abstract class CompoundDS extends Dataset {
      * @return array containing the total number of elements of the selected
      *         members of compound.
      */
+    @Override
     public final int[] getSelectedMemberOrders() {
+        log.trace("getSelectedMemberOrders(): start");
+
         if (isMemberSelected == null) {
+            log.debug("getSelectedMemberOrders(): isMemberSelected array is null");
+            log.trace("getSelectedMemberOrders(): finish");
             return memberOrders;
         }
 
@@ -319,6 +331,8 @@ public abstract class CompoundDS extends Dataset {
                 orders[idx++] = memberOrders[i];
             }
         }
+
+        log.trace("getSelectedMemberOrders(): finish");
 
         return orders;
     }
@@ -344,6 +358,7 @@ public abstract class CompoundDS extends Dataset {
      * @return the dimension sizes of the i-th member, null if the compound
      *         member is not an array.
      */
+    @Override
     public final int[] getMemberDims(int i) {
         if (memberDims == null) {
             return null;
@@ -361,6 +376,7 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return the array of datatype objects of the compound members.
      */
+    @Override
     public final Datatype[] getMemberTypes() {
         return memberTypes;
     }
@@ -370,8 +386,13 @@ public abstract class CompoundDS extends Dataset {
      *
      * @return an array of datatype objects of selected compound members.
      */
+    @Override
     public final Datatype[] getSelectedMemberTypes() {
+        log.trace("getSelectedMemberTypes(): start");
+
         if (isMemberSelected == null) {
+            log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
+            log.trace("getSelectedMemberTypes(): finish");
             return memberTypes;
         }
 
@@ -382,6 +403,8 @@ public abstract class CompoundDS extends Dataset {
                 types[idx++] = memberTypes[i];
             }
         }
+
+        log.trace("getSelectedMemberTypes(): finish");
 
         return types;
     }

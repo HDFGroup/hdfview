@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -141,6 +141,7 @@ public class H4SDS extends ScalarDS
      * @param path the full path of this H4SDS.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4SDS(
         FileFormat theFile,
         String name,
@@ -156,6 +157,7 @@ public class H4SDS extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
@@ -208,7 +210,7 @@ public class H4SDS extends ScalarDS
     // To do: Implementing Dataset
     @Override
     public Dataset copy(Group pgroup, String dname, long[] dims, Object buff)
-    throws Exception
+            throws Exception
     {
         log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
 
@@ -244,10 +246,9 @@ public class H4SDS extends ScalarDS
         }
 
         if (dims == null) {
-            theRank = getRank();
-            if (theRank <=0) {
+            if (!isInited())
                 init();
-            }
+
             theRank = getRank();
 
             dims = getDims();
@@ -268,8 +269,8 @@ public class H4SDS extends ScalarDS
         // create the new dataset and attach it to the parent group
         tid = datatypeID;
         dstdid = HDFLibrary.SDcreate(
-            ((H4File)pgroup.getFileFormat()).getSDAccessID(),
-            dname, tid, theRank, count);
+                ((H4File)pgroup.getFileFormat()).getSDAccessID(),
+                dname, tid, theRank, count);
         if (dstdid < 0) {
             log.debug("copy(): Invalid dest SDID");
             log.trace("copy(): finish");
@@ -324,9 +325,8 @@ public class H4SDS extends ScalarDS
 
         byte[] theData = null;
 
-        if (rank <=0 ) {
+        if (!isInited())
             init();
-        }
 
         long id = open();
         if (id < 0) {
@@ -370,15 +370,14 @@ public class H4SDS extends ScalarDS
 
     // Implementing DataFormat
     @Override
-    public Object read() throws HDFException
+    public Object read() throws HDFException, OutOfMemoryError
     {
         log.trace("read(): start");
 
         Object theData = null;
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
 
         long id = open();
         if (id < 0) {
@@ -445,6 +444,7 @@ public class H4SDS extends ScalarDS
     }
 
     // Implementing DataFormat
+    @SuppressWarnings("deprecation")
     @Override
     public void write(Object buf) throws HDFException
     {
@@ -480,14 +480,14 @@ public class H4SDS extends ScalarDS
 
         Object tmpData = buf;
         try {
-            if ( isUnsigned && unsignedConverted) {
+            if (getDatatype().isUnsigned() && unsignedConverted) {
                 tmpData = convertToUnsignedC(buf);
             }
             // assume external data files are located in the same directory as the main file.
             HDFLibrary.HXsetdir(getFileFormat().getParent());
 
             HDFLibrary.SDwritedata(id, start, stride, select, tmpData);
-        //} catch (Exception ex) {ex.printStackTrace();
+            //} catch (Exception ex) {ex.printStackTrace();
         }
         catch (Exception ex) {
             log.debug("write(): failure: ", ex);
@@ -501,6 +501,7 @@ public class H4SDS extends ScalarDS
     }
 
     // Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
@@ -545,10 +546,18 @@ public class H4SDS extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
-                Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                Object buf = null;
+                try {
+                    buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                }
+                catch (OutOfMemoryError e) {
+                    log.debug("getMetadata(): out of memory: ", e);
+                    buf = null;
+                }
+
                 try {
                     HDFLibrary.SDreadattr(id, i, buf);
                 }
@@ -567,20 +576,20 @@ public class H4SDS extends ScalarDS
                         fillValue = buf;
                     }
 
-                    attr.setValue(buf);
+                    attr.setData(buf);
                 }
 
             } // for (int i=0; i<n; i++)
 
             // retrieve attribute of dimension
             // BUG !! HDFLibrary.SDgetdimstrs(dimID, argv, 80) does not return anything
-/*
+            /*
             for (int i=0; i< rank; i++) {
                 int dimID = HDFLibrary.SDgetdimid(id, i);
                 String[] argv = {" ", " ", " "};
                 HDFLibrary.SDgetdimstrs(dimID, argv, 80);
             }
-*/
+             */
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);
@@ -594,6 +603,7 @@ public class H4SDS extends ScalarDS
     }
 
     // To do: implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
@@ -624,11 +634,13 @@ public class H4SDS extends ScalarDS
     }
 
     // To do: implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws HDFException {
         log.trace("removeMetadata(): disabled");
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
     }
@@ -675,12 +687,13 @@ public class H4SDS extends ScalarDS
     /**
      * Initializes the H4SDS such as dimension size of this dataset.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void init()
     {
         log.trace("init(): start");
 
-        if (rank>0) {
+        if (inited) {
             log.trace("init(): Already initialized");
             log.trace("init(): finish");
             return; // already called. Initialize only once
@@ -711,9 +724,6 @@ public class H4SDS extends ScalarDS
 
             datatypeID = sdInfo[1];
             isText = ((datatypeID == HDFConstants.DFNT_CHAR) || (datatypeID == HDFConstants.DFNT_UCHAR8));
-
-            //idims = new int[rank];
-            //HDFLibrary.SDgetinfo(id, objName, idims, sdInfo);
 
             // get the dimension names
             try {
@@ -802,19 +812,13 @@ public class H4SDS extends ScalarDS
                 log.debug("init(): get chunk information failure: ", ex);
             }
 
+            inited = true;
         }
         catch (HDFException ex) {
             log.debug("init(): failure: ", ex);
         }
         finally {
             close(id);
-        }
-        isUnsigned = H4Datatype.isUnsigned(datatypeID);
-
-        if (idims == null) {
-            log.debug("init(): idims is null");
-            log.trace("init(): finish");
-            return;
         }
 
         dims = new long[rank];
@@ -948,8 +952,7 @@ public class H4SDS extends ScalarDS
         long sdid = (file).getSDAccessID();
         long sdsid = -1;
         long vgid = -1;
-        // datatype
-        long tid = type.toNative();
+        long tid = type.createNative();
 
         if(tid >= 0) {
             try {
@@ -975,7 +978,7 @@ public class H4SDS extends ScalarDS
                     idims[0] = (int)dims[0];
                     data = new byte[tsize*vsize];
                 }
-                */
+                 */
 
             }
             catch (Exception ex) {
@@ -1074,9 +1077,9 @@ public class H4SDS extends ScalarDS
             long[] chunks,
             int gzip,
             Object data) throws Exception
-   {
+    {
         return create(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
-   }
+    }
 
     /**
      * copy attributes from one SDS to another SDS

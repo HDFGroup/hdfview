@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -26,15 +26,24 @@ import java.awt.image.PixelGrabber;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +52,6 @@ import java.util.StringTokenizer;
 import javax.imageio.ImageIO;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -73,6 +81,13 @@ public final class Tools {
     public static final long       MAX_UINT32      = 4294967295L;
     public static final long       MAX_INT64       = 9223372036854775807L;
     public static final BigInteger MAX_UINT64      = new BigInteger("18446744073709551615");
+
+    private static final int       FLOAT_BUFFER_SIZE = 524288;
+    private static final int       INT_BUFFER_SIZE = 524288;
+    private static final int       SHORT_BUFFER_SIZE = 1048576;
+    private static final int       LONG_BUFFER_SIZE = 262144;
+    private static final int       DOUBLE_BUFFER_SIZE = 262144;
+    private static final int       BYTE_BUFFER_SIZE = 2097152;
 
     /** Key for JPEG image file type. */
     public static final String     FILE_TYPE_JPEG  = "JPEG";
@@ -640,8 +655,8 @@ public final class Tools {
 
         for (int i=0; i<len; i++) {
             int idx = imageData[i] & 0xff;
-            int r = ((int)(palette[0][idx] & 0xff))<<16;
-            int g = ((int)(palette[1][idx] & 0xff))<<8;
+            int r = (palette[0][idx] & 0xff)<<16;
+            int g = (palette[1][idx] & 0xff)<<8;
             int b = palette[2][idx] & 0xff;
 
             pixels[i] = 0xff000000 | r | g | b;
@@ -1082,8 +1097,9 @@ public final class Tools {
                     if (isConstructorMatched) {
                         try {
                             instance = constructor.newInstance(initargs);
-                        } catch (Exception ex) {
-                            log.debug("Error creating instance of {}: {}", cls, ex.getMessage());
+                        }
+                        catch (Exception ex) {
+                            log.debug("Error creating instance of {}: ", cls, ex);
                             ex.printStackTrace();
                         }
                         break;
@@ -1559,7 +1575,7 @@ public final class Tools {
 
                 if (hasFillValue) fill = ((float[]) fillValue)[0];
                 for (int i = 0; i < n; i++) {
-                    if ((hasFillValue && f[i] == fill) || isNaNINF((double) f[i])) continue;
+                    if ((hasFillValue && f[i] == fill) || isNaNINF(f[i])) continue;
                     if (minmax[0] > f[i]) {
                         minmax[0] = f[i];
                     }
@@ -1770,6 +1786,415 @@ public final class Tools {
         return retval;
     }
 
+    public static void saveAsBinary(DataOutputStream out, Object data, ByteOrder order) throws Exception {
+        String cname = data.getClass().getName();
+        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        ByteBuffer bb = null;
+
+        int size = Array.getLength(data);
+
+        if (dname == 'B') {
+            byte[] bdata = new byte[size];
+            bdata = (byte[]) data;
+
+            bb = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
+            bb.order(order);
+
+            int remainingSize = size - BYTE_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + BYTE_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = BYTE_BUFFER_SIZE;
+                }
+                bb.clear();
+                bb.put(bdata, (iterationNumber * BYTE_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue);
+                remainingSize = remainingSize - BYTE_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -BYTE_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'S') {
+            short[] sdata = new short[size];
+            sdata = (short[]) data;
+            bb = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
+            bb.order(order);
+
+            ShortBuffer sb = bb.asShortBuffer();
+            int remainingSize = size - SHORT_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + SHORT_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = SHORT_BUFFER_SIZE;
+                }
+                bb.clear();
+                sb.clear();
+                sb.put(sdata, (iterationNumber * SHORT_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 2);
+                remainingSize = remainingSize - SHORT_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -SHORT_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'I') {
+            int[] idata = new int[size];
+            idata = (int[]) data;
+            bb = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
+            bb.order(order);
+
+            IntBuffer ib = bb.asIntBuffer();
+            int remainingSize = size - INT_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + INT_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = INT_BUFFER_SIZE;
+                }
+                bb.clear();
+                ib.clear();
+                ib.put(idata, (iterationNumber * INT_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 4);
+                remainingSize = remainingSize - INT_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -INT_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'J') {
+            long[] ldata = new long[size];
+            ldata = (long[]) data;
+
+            bb = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
+            bb.order(order);
+
+            LongBuffer lb = bb.asLongBuffer();
+            int remainingSize = size - LONG_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + LONG_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = LONG_BUFFER_SIZE;
+                }
+                bb.clear();
+                lb.clear();
+                lb.put(ldata, (iterationNumber * LONG_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 8);
+                remainingSize = remainingSize - LONG_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -LONG_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'F') {
+            float[] fdata = new float[size];
+            fdata = (float[]) data;
+
+            bb = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
+            bb.order(order);
+
+            FloatBuffer fb = bb.asFloatBuffer();
+            int remainingSize = size - FLOAT_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + FLOAT_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = FLOAT_BUFFER_SIZE;
+                }
+                bb.clear();
+                fb.clear();
+                fb.put(fdata, (iterationNumber * FLOAT_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 4);
+                remainingSize = remainingSize - FLOAT_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -FLOAT_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+        else if (dname == 'D') {
+            double[] ddata = new double[size];
+            ddata = (double[]) data;
+
+            bb = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
+            bb.order(order);
+
+            DoubleBuffer db = bb.asDoubleBuffer();
+            int remainingSize = size - DOUBLE_BUFFER_SIZE;
+            int allocValue = 0;
+            int iterationNumber = 0;
+            do {
+                if (remainingSize <= 0) {
+                    allocValue = remainingSize + DOUBLE_BUFFER_SIZE;
+                }
+                else {
+                    allocValue = DOUBLE_BUFFER_SIZE;
+                }
+                bb.clear();
+                db.clear();
+                db.put(ddata, (iterationNumber * DOUBLE_BUFFER_SIZE), allocValue);
+                out.write(bb.array(), 0, allocValue * 8);
+                remainingSize = remainingSize - DOUBLE_BUFFER_SIZE;
+                iterationNumber++;
+            } while (remainingSize > -DOUBLE_BUFFER_SIZE);
+
+            out.flush();
+            out.close();
+        }
+    }
+
+    /**
+     * Reads data from a binary file into a buffer.
+     *
+     * @param dataOut
+     *            the output stream
+     * @param fileName
+     *            the file to read binary data from
+     * @param order
+     *            the new byte order, either BIG_ENDIAN or LITTLE_ENDIAN
+     *
+     * @return true if successful; otherwise, false.
+     */
+    public static boolean getBinaryDataFromFile(Object dataOut, String fileName, ByteOrder order) {
+        if (dataOut == null) return false;
+
+        String fname = fileName;
+        FileInputStream inputFile = null;
+        BufferedInputStream in = null;
+        ByteBuffer byteBuffer = null;
+        boolean valChanged = false;
+
+        try {
+            inputFile = new FileInputStream(fname);
+            long fileSize = inputFile.getChannel().size();
+            in = new BufferedInputStream(inputFile);
+
+            int datasetSize = Array.getLength(dataOut);
+            String cname = dataOut.getClass().getName();
+            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+
+            if (dname == 'B') {
+                long datasetByteSize = datasetSize;
+                byteBuffer = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
+                byteBuffer.order(order);
+
+                int bufferSize = (int) Math.min(fileSize, datasetByteSize);
+
+                int remainingSize = bufferSize - (BYTE_BUFFER_SIZE);
+                int allocValue = 0;
+                int iterationNumber = 0;
+                byte[] byteArray = new byte[BYTE_BUFFER_SIZE];
+                do {
+                    if (remainingSize <= 0) {
+                        allocValue = remainingSize + (BYTE_BUFFER_SIZE);
+                    }
+                    else {
+                        allocValue = (BYTE_BUFFER_SIZE);
+                    }
+
+                    in.read(byteBuffer.array(), 0, allocValue);
+
+                    byteBuffer.get(byteArray, 0, allocValue);
+                    System.arraycopy(byteArray, 0, dataOut, (iterationNumber * BYTE_BUFFER_SIZE), allocValue);
+                    byteBuffer.clear();
+                    remainingSize = remainingSize - (BYTE_BUFFER_SIZE);
+                    iterationNumber++;
+                } while (remainingSize > -(BYTE_BUFFER_SIZE));
+
+                valChanged = true;
+            }
+            else if (dname == 'S') {
+                long datasetShortSize = datasetSize * 2;
+                byteBuffer = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
+                byteBuffer.order(order);
+
+                int bufferSize = (int) Math.min(fileSize, datasetShortSize);
+                int remainingSize = bufferSize - (SHORT_BUFFER_SIZE * 2);
+                int allocValue = 0;
+                int iterationNumber = 0;
+                ShortBuffer sb = byteBuffer.asShortBuffer();
+                short[] shortArray = new short[SHORT_BUFFER_SIZE];
+
+                do {
+                    if (remainingSize <= 0) {
+                        allocValue = remainingSize + (SHORT_BUFFER_SIZE * 2);
+                    }
+                    else {
+                        allocValue = (SHORT_BUFFER_SIZE * 2);
+                    }
+                    in.read(byteBuffer.array(), 0, allocValue);
+                    sb.get(shortArray, 0, allocValue / 2);
+                    System.arraycopy(shortArray, 0, dataOut, (iterationNumber * SHORT_BUFFER_SIZE), allocValue / 2);
+                    byteBuffer.clear();
+                    sb.clear();
+                    remainingSize = remainingSize - (SHORT_BUFFER_SIZE * 2);
+                    iterationNumber++;
+                } while (remainingSize > -(SHORT_BUFFER_SIZE * 2));
+
+                valChanged = true;
+            }
+            else if (dname == 'I') {
+                long datasetIntSize = datasetSize * 4;
+                byteBuffer = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
+                byteBuffer.order(order);
+
+                int bufferSize = (int) Math.min(fileSize, datasetIntSize);
+                int remainingSize = bufferSize - (INT_BUFFER_SIZE * 4);
+                int allocValue = 0;
+                int iterationNumber = 0;
+                int[] intArray = new int[INT_BUFFER_SIZE];
+                byte[] tmpBuf = byteBuffer.array();
+                IntBuffer ib = byteBuffer.asIntBuffer();
+
+                do {
+                    if (remainingSize <= 0) {
+                        allocValue = remainingSize + (INT_BUFFER_SIZE * 4);
+                    }
+                    else {
+                        allocValue = (INT_BUFFER_SIZE * 4);
+                    }
+                    in.read(tmpBuf, 0, allocValue);
+                    ib.get(intArray, 0, allocValue / 4);
+                    System.arraycopy(intArray, 0, dataOut, (iterationNumber * INT_BUFFER_SIZE), allocValue / 4);
+                    byteBuffer.clear();
+                    ib.clear();
+                    remainingSize = remainingSize - (INT_BUFFER_SIZE * 4);
+                    iterationNumber++;
+                } while (remainingSize > -(INT_BUFFER_SIZE * 4));
+
+                valChanged = true;
+            }
+            else if (dname == 'J') {
+                long datasetLongSize = datasetSize * 8;
+                byteBuffer = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
+                byteBuffer.order(order);
+
+                int bufferSize = (int) Math.min(fileSize, datasetLongSize);
+                int remainingSize = bufferSize - (LONG_BUFFER_SIZE * 8);
+                int allocValue = 0;
+                int iterationNumber = 0;
+                long[] longArray = new long[LONG_BUFFER_SIZE];
+                LongBuffer lb = byteBuffer.asLongBuffer();
+
+                do {
+                    if (remainingSize <= 0) {
+                        allocValue = remainingSize + (LONG_BUFFER_SIZE * 8);
+                    }
+                    else {
+                        allocValue = (LONG_BUFFER_SIZE * 8);
+                    }
+
+                    in.read(byteBuffer.array(), 0, allocValue);
+                    lb.get(longArray, 0, allocValue / 8);
+                    System.arraycopy(longArray, 0, dataOut, (iterationNumber * LONG_BUFFER_SIZE), allocValue / 8);
+                    byteBuffer.clear();
+                    lb.clear();
+                    remainingSize = remainingSize - (LONG_BUFFER_SIZE * 8);
+                    iterationNumber++;
+                } while (remainingSize > -(LONG_BUFFER_SIZE * 8));
+
+                valChanged = true;
+            }
+            else if (dname == 'F') {
+                long datasetFloatSize = datasetSize * 4;
+                byteBuffer = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
+                byteBuffer.order(order);
+
+                int bufferSize = (int) Math.min(fileSize, datasetFloatSize);
+                int remainingSize = bufferSize - (FLOAT_BUFFER_SIZE * 4);
+                int allocValue = 0;
+                int iterationNumber = 0;
+                FloatBuffer fb = byteBuffer.asFloatBuffer();
+                float[] floatArray = new float[FLOAT_BUFFER_SIZE];
+                do {
+                    if (remainingSize <= 0) {
+                        allocValue = remainingSize + (FLOAT_BUFFER_SIZE * 4);
+                    }
+                    else {
+                        allocValue = (FLOAT_BUFFER_SIZE * 4);
+                    }
+
+                    in.read(byteBuffer.array(), 0, allocValue);
+                    fb.get(floatArray, 0, allocValue / 4);
+                    System.arraycopy(floatArray, 0, dataOut, (iterationNumber * FLOAT_BUFFER_SIZE), allocValue / 4);
+                    byteBuffer.clear();
+                    fb.clear();
+                    remainingSize = remainingSize - (FLOAT_BUFFER_SIZE * 4);
+                    iterationNumber++;
+                } while (remainingSize > -(FLOAT_BUFFER_SIZE * 4));
+
+                valChanged = true;
+            }
+            else if (dname == 'D') {
+                long datasetDoubleSize = datasetSize * 8;
+                byteBuffer = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
+                byteBuffer.order(order);
+
+                int bufferSize = (int) Math.min(fileSize, datasetDoubleSize);
+                int remainingSize = bufferSize - (DOUBLE_BUFFER_SIZE * 8);
+                int allocValue = 0;
+                int iterationNumber = 0;
+                DoubleBuffer db = byteBuffer.asDoubleBuffer();
+                double[] doubleArray = new double[DOUBLE_BUFFER_SIZE];
+
+                do {
+                    if (remainingSize <= 0) {
+                        allocValue = remainingSize + (DOUBLE_BUFFER_SIZE * 8);
+                    }
+                    else {
+                        allocValue = (DOUBLE_BUFFER_SIZE * 8);
+                    }
+
+                    in.read(byteBuffer.array(), 0, allocValue);
+                    db.get(doubleArray, 0, allocValue / 8);
+                    System.arraycopy(doubleArray, 0, dataOut, (iterationNumber * DOUBLE_BUFFER_SIZE), allocValue / 8);
+                    byteBuffer.clear();
+                    db.clear();
+                    remainingSize = remainingSize - (DOUBLE_BUFFER_SIZE * 8);
+                    iterationNumber++;
+                } while (remainingSize > -(DOUBLE_BUFFER_SIZE * 8));
+
+                valChanged = true;
+            }
+        }
+        catch (Exception es) {
+            es.printStackTrace();
+        }
+        finally {
+            try {
+                in.close();
+                inputFile.close();
+            }
+            catch (IOException ex) {
+                log.debug("close binary file {}:", fname, ex);
+            }
+        }
+
+        return valChanged;
+    }
+
     /**
      * Returns a string representation of the long argument as an unsigned
      * integer in base 2. This is different from Long.toBinaryString(long i).
@@ -1928,7 +2353,10 @@ public final class Tools {
      * @return true if bitmask is applied successfuly; otherwise, false.
      */
     public static final boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op) {
-        if (theData == null || Array.getLength(theData) <= 0 || theMask == null) return false;
+        if (     theData == null
+            || !(theData instanceof Array)
+            || ((theData instanceof Array) && (Array.getLength(theData) <= 0))
+            ||   theMask == null) return false;
 
         char nt = '0';
         String cName = theData.getClass().getName();
@@ -2334,13 +2762,13 @@ public final class Tools {
 
         if (header != null) {
             if (
-            // HDF4
-            ((header[0] == 14) && (header[1] == 3) && (header[2] == 19) && (header[3] == 1))
-            /*
-             * // netCDF || (header[0]==67 && header[1]==68 && header[2]==70 &&
-             * header[3]==1)
-             */
-            ) {
+                    // HDF4
+                    ((header[0] == 14) && (header[1] == 3) && (header[2] == 19) && (header[3] == 1))
+                    /*
+                     * // netCDF || (header[0]==67 && header[1]==68 && header[2]==70 &&
+                     * header[3]==1)
+                     */
+                    ) {
                 ish4 = true;
             }
             else {
@@ -2462,8 +2890,8 @@ public final class Tools {
 
         if (header != null) {
             if (
-            // netCDF
-            (header[0] == 67) && (header[1] == 68) && (header[2] == 70)
+                    // netCDF
+                    (header[0] == 67) && (header[1] == 68) && (header[2] == 70)
                     && (header[3] == 1)) {
                 isnc = true;
             }
@@ -2541,6 +2969,7 @@ public final class Tools {
      */
     public static FileFormat createNewFile(String filename, String dir,
             String type, List<FileFormat> openFiles) throws Exception {
+        log.trace("createNewFile: {} start", filename);
         File f = new File(filename);
 
         String fname = f.getAbsolutePath();
@@ -2579,6 +3008,7 @@ public final class Tools {
         if (f.exists() && f.isDirectory()) {
             throw new Exception("File is a directory.");
         }
+        log.trace("createNewFile: {} not a directory", filename);
 
         File pfile = f.getParentFile();
         if (pfile == null) {
@@ -2590,11 +3020,12 @@ public final class Tools {
         }
 
         // check if the file is in use
+        log.trace("createNewFile: {} check if the file is in use", filename);
         if (openFiles != null) {
             FileFormat theFile = null;
             Iterator<FileFormat> iterator = openFiles.iterator();
             while (iterator.hasNext()) {
-                theFile = (FileFormat) iterator.next();
+                theFile = iterator.next();
                 if (theFile.getFilePath().equals(fname)) {
                     throw new Exception("Unable to create the new file. \nThe file is being used.");
                 }
@@ -2602,20 +3033,21 @@ public final class Tools {
         }
 
         if (f.exists()) {
-            Shell tempShell = new Shell(display);
+            log.trace("createNewFile: {} file exists", filename);
 
-            if(!MessageDialog.openConfirm(tempShell, "Create New File", "File exists. Do you want to replace it?")) {
-                tempShell.dispose();
+            if (!MessageDialog.openConfirm(display.getShells()[0], "Create New File",
+                    "File exists. Do you want to replace it?")) {
                 return null;
             }
-
-            tempShell.dispose();
         }
 
         try {
             int aFlag = FileFormat.FILE_CREATE_DELETE;
-            if (ViewProperties.isEarlyLib())
+            if (!ViewProperties.getEarlyLib().equalsIgnoreCase("Latest")) {
                 aFlag = FileFormat.FILE_CREATE_DELETE | FileFormat.FILE_CREATE_EARLY_LIB;
+                FileFormat.getFileFormat(type).setNewLibBounds(ViewProperties.getEarlyLib(), ViewProperties.getLateLib());
+            }
+            log.trace("createNewFile: {} FileFormat create", filename);
             FileFormat theFile = FileFormat.getFileFormat(type).createFile(fname, aFlag);
             return theFile;
         }
@@ -2662,26 +3094,27 @@ public final class Tools {
     }
 
     /**
-     * Since Java does not allow array indices to be larger than int type,
-     * check the given value to see if it is within the valid range of a
-     * Java int.
+     * Since Java does not allow array indices to be larger than int type, check the
+     * given value to see if it is within the valid range of a Java int.
      *
      * @param value
-     *         The value to check
+     *            The value to check
      *
      * @return false if the value is outside the range of a Java int, true
      *         otherwise.
      */
-    public static boolean checkIsValidJavaInt(final long value) {
+    public static boolean checkValidJavaArrayIndex(final long value) {
         if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) return false;
 
         return true;
     }
 
     public static boolean checkValidByte(String value) {
+        if (value == null) return false;
+
         try {
-            Byte b = Byte.parseByte(value);
-            return (b >= Byte.MIN_VALUE && b <= Byte.MAX_VALUE);
+            Byte.parseByte(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2689,9 +3122,11 @@ public final class Tools {
     }
 
     public static boolean checkValidUByte(String value) {
+        if (value == null) return false;
+
         try {
-            Long l = Long.parseLong(value);
-            return (l >= 0 && l <= MAX_UINT8);
+            Long.parseLong(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2699,9 +3134,11 @@ public final class Tools {
     }
 
     public static boolean checkValidShort(String value) {
+        if (value == null) return false;
+
         try {
-            Short s = Short.parseShort(value);
-            return (s >= Short.MIN_VALUE && s <= Short.MAX_VALUE);
+            Short.parseShort(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2709,9 +3146,11 @@ public final class Tools {
     }
 
     public static boolean checkValidUShort(String value) {
+        if (value == null) return false;
+
         try {
-            Long l = Long.parseLong(value);
-            return (l >= 0 && l <= MAX_UINT16);
+            Long.parseLong(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2719,9 +3158,11 @@ public final class Tools {
     }
 
     public static boolean checkValidInt(String value) {
+        if (value == null) return false;
+
         try {
-            Integer i = Integer.parseInt(value);
-            return (i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE);
+            Integer.parseInt(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2729,9 +3170,11 @@ public final class Tools {
     }
 
     public static boolean checkValidUInt(String value) {
+        if (value == null) return false;
+
         try {
-            Long l = Long.parseLong(value);
-            return (l >= 0 && l <= MAX_UINT32);
+            Long.parseLong(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2739,9 +3182,11 @@ public final class Tools {
     }
 
     public static boolean checkValidLong(String value) {
+        if (value == null) return false;
+
         try {
-            Long l = Long.parseLong(value);
-            return (l >= Long.MIN_VALUE && l <= Long.MAX_VALUE);
+            Long.parseLong(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2749,9 +3194,11 @@ public final class Tools {
     }
 
     public static boolean checkValidULong(String value) {
+        if (value == null) return false;
+
         try {
-            BigInteger big = new BigInteger(value);
-            return (big.compareTo(BigInteger.ZERO) >= 0 && big.compareTo(MAX_UINT64) <= 0);
+            new BigInteger(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2759,9 +3206,11 @@ public final class Tools {
     }
 
     public static boolean checkValidDouble(String value) {
+        if (value == null) return false;
+
         try {
-            Double d = Double.parseDouble(value);
-            return (d >= Double.MIN_VALUE && d <= Double.MAX_VALUE);
+            Double.parseDouble(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2769,9 +3218,11 @@ public final class Tools {
     }
 
     public static boolean checkValidFloat(String value) {
+        if (value == null) return false;
+
         try {
-            Float f = Float.parseFloat(value);
-            return (f >= Float.MIN_VALUE && f <= Float.MAX_VALUE);
+            Float.parseFloat(value);
+            return true;
         }
         catch (Exception ex) {
             return false;
@@ -2779,15 +3230,73 @@ public final class Tools {
     }
 
     /**
+     * Retrieves the Java Runtime Class of the given Object. B = byte array, S =
+     * short array, I = int array, J = long array, F = float array, and D = double
+     * array
+     *
+     * @return the Java Runtime Class of the given Object.
+     */
+    public static char getJavaObjectRuntimeClass(Object o) {
+        if (o == null) return ' ';
+
+        String cName = o.getClass().getName();
+        int cIndex = cName.lastIndexOf("[");
+        if (cIndex >= 0) {
+            return cName.charAt(cIndex + 1);
+        }
+
+        return ' ';
+    }
+
+    /**
      * Show an SWT error dialog with the given error message.
      * @param parent
      *           The parent Shell of the MessageDialog
-     * @param errorMsg
-     *           The error message to display in the MessageDialog
      * @param title
      *           The title to set for the MessageDialog
+     * @param errorMsg
+     *           The error message to display in the MessageDialog
      */
-    public static void showError(Shell parent, String errorMsg, String title) {
-        MessageDialog.openError(parent, (title == null) ? "null" : title, (errorMsg == null) ? "null" : errorMsg);
+    public static void showError(Shell parent, String title, String errorMsg) {
+        MessageDialog.openError(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (errorMsg == null) ? "UNKNOWN" : errorMsg);
+    }
+
+    /**
+     * Show an SWT Information dialog with the given message.
+     * @param parent
+     *           The parent Shell of the MessageDialog
+     * @param title
+     *           The title to set for the MessageDialog
+     * @param infoMsg
+     *           The message to display in the MessageDialog
+     */
+    public static void showInformation(Shell parent, String title, String infoMsg) {
+        MessageDialog.openInformation(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (infoMsg == null) ? "UNKNOWN" : infoMsg);
+    }
+
+    /**
+     * Show an SWT Confirm dialog with the given message.
+     * @param parent
+     *           The parent Shell of the MessageDialog
+     * @param title
+     *           The title to set for the MessageDialog
+     * @param confMsg
+     *           The message to display in the MessageDialog
+     */
+    public static boolean showConfirm(Shell parent, String title, String confMsg) {
+        return MessageDialog.openConfirm(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (confMsg == null) ? "UNKNOWN" : confMsg);
+    }
+
+    /**
+     * Show an SWT Warning dialog with the given message.
+     * @param parent
+     *           The parent Shell of the MessageDialog
+     * @param title
+     *           The title to set for the MessageDialog
+     * @param warnMsg
+     *           The message to display in the MessageDialog
+     */
+    public static void showWarning(Shell parent, String title, String warnMsg) {
+        MessageDialog.openWarning(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (warnMsg == null) ? "UNKNOWN" : warnMsg);
     }
 }

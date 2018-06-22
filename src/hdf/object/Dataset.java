@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -27,7 +27,7 @@ import java.util.Vector;
  * these calls from users.
  * <p>
  * For more details on dataset,
- * see <b> <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
+ * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
  * <p>
  *
  * @see hdf.object.ScalarDS
@@ -36,7 +36,7 @@ import java.util.Vector;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Dataset extends HObject {
+public abstract class Dataset extends HObject implements MetaDataContainer, DataFormat {
     private static final long serialVersionUID    = -3360885430038261178L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
@@ -149,8 +149,7 @@ public abstract class Dataset extends HObject {
     protected Datatype        datatype;
 
     /**
-     * Array of strings that represent the dimension names. It is null if
-     * dimension names do not exist.
+     * Array of strings that represent the dimension names. It is null if dimension names do not exist.
      */
     protected String[]        dimNames;
 
@@ -159,6 +158,9 @@ public abstract class Dataset extends HObject {
 
     /** Flag to indicate if data values are loaded into memory. */
     protected boolean         isDataLoaded        = false;
+
+    /** Flag to indicate if this dataset has been initialized */
+    protected boolean         inited = false;
 
     /** The number of data points in the memory buffer. */
     protected long            nPoints             = 1;
@@ -184,13 +186,13 @@ public abstract class Dataset extends HObject {
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the Dataset, e.g. "dset1".
-     * @param path
+     * @param dsPath
      *            the full group path of this Dataset, e.g. "/arrays/".
      */
-    public Dataset(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
+    public Dataset(FileFormat theFile, String dsName, String dsPath) {
+        this(theFile, dsName, dsPath, null);
     }
 
     /**
@@ -199,18 +201,19 @@ public abstract class Dataset extends HObject {
      *
      * @param theFile
      *            the file that contains the dataset.
-     * @param name
+     * @param dsName
      *            the name of the Dataset, e.g. "dset1".
-     * @param path
+     * @param dsPath
      *            the full group path of this Dataset, e.g. "/arrays/".
      * @param oid
      *            the oid of this Dataset.
      */
     @Deprecated
-    public Dataset(FileFormat theFile, String name, String path, long[] oid) {
-        super(theFile, name, path, oid);
+    public Dataset(FileFormat theFile, String dsName, String dsPath, long[] oid) {
+        super(theFile, dsName, dsPath, oid);
 
-        rank = 0;
+        datatype = null;
+        rank = -1;
         data = null;
         dims = null;
         maxDims = null;
@@ -246,60 +249,14 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Retrieves datatype and dataspace information from file and sets the
-     * dataset in memory.
-     * <p>
-     * The init() is designed to support lazy operation in a dataset object. When
-     * a data object is retrieved from file, the datatype, dataspace and raw
-     * data are not loaded into memory. When it is asked to read the raw data
-     * from file, init() is first called to get the datatype and dataspace
-     * information, then load the raw data from file.
-     * <p>
-     * init() is also used to reset the selection of a dataset (start, stride and
-     * count) to the default, which is the entire dataset for 1D or 2D datasets.
-     * In the following example, init() at step 1) retrieves datatype and
-     * dataspace information from file. getData() at step 3) reads only one data
-     * point. init() at step 4) resets the selection to the whole dataset.
-     * getData() at step 4) reads the values of whole dataset into memory.
-     *
-     * <pre>
-     * dset = (Dataset) file.get(NAME_DATASET);
-     *
-     * // 1) get datatype and dataspace information from file
-     * dset.init();
-     * rank = dset.getRank(); // rank = 2, a 2D dataset
-     * count = dset.getSelectedDims();
-     * start = dset.getStartDims();
-     * dims = dset.getDims();
-     *
-     * // 2) select only one data point
-     * for (int i = 0; i &lt; rank; i++) {
-     *     start[0] = 0;
-     *     count[i] = 1;
-     * }
-     *
-     * // 3) read one data point
-     * data = dset.getData();
-     *
-     * // 4) reset selection to the whole dataset
-     * dset.init();
-     *
-     * // 5) clean the memory data buffer
-     * dset.clearData();
-     *
-     * // 6) Read the whole dataset
-     * data = dset.getData();
-     * </pre>
-     */
-    public abstract void init();
-
-    /**
      * Returns the rank (number of dimensions) of the dataset.
      *
      * @return the number of dimensions of the dataset.
      */
+    @Override
     public final int getRank() {
-        if (rank < 0) init();
+        if (!inited)
+            init();
 
         return rank;
     }
@@ -309,8 +266,10 @@ public abstract class Dataset extends HObject {
      *
      * @return the dimension sizes of the dataset.
      */
+    @Override
     public final long[] getDims() {
-        if (rank < 0) init();
+        if (!inited)
+            init();
 
         return dims;
     }
@@ -321,7 +280,7 @@ public abstract class Dataset extends HObject {
      * @return the max dimension sizes of the dataset.
      */
     public final long[] getMaxDims() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if (maxDims == null) return dims;
 
@@ -357,8 +316,9 @@ public abstract class Dataset extends HObject {
      *
      * @return the dimension sizes of the selected subset.
      */
+    @Override
     public final long[] getSelectedDims() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return selectedDims;
     }
@@ -389,8 +349,9 @@ public abstract class Dataset extends HObject {
      *
      * @return the starting position of a selected subset.
      */
+    @Override
     public final long[] getStartDims() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return startDims;
     }
@@ -422,8 +383,9 @@ public abstract class Dataset extends HObject {
      *
      * @return the selectedStride of the selected dataset.
      */
+    @Override
     public final long[] getStride() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if (rank <= 0) {
             return null;
@@ -476,99 +438,6 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Reads the data from file.
-     * <p>
-     * read() reads the data from file to a memory buffer and returns the memory
-     * buffer. The dataset object does not hold the memory buffer. To store the
-     * memory buffer in the dataset object, one must call getData().
-     * <p>
-     * By default, the whole dataset is read into memory. Users can also select
-     * a subset to read. Subsetting is done in an implicit way.
-     * <p>
-     * <b>How to Select a Subset</b>
-     * <p>
-     * A selection is specified by three arrays: start, stride and count.
-     * <ol>
-     * <li>start: offset of a selection
-     * <li>stride: determines how many elements to move in each dimension
-     * <li>count: number of elements to select in each dimension
-     * </ol>
-     * getStartDims(), getStride() and getSelectedDims() returns the start,
-     * stride and count arrays respectively. Applications can make a selection
-     * by changing the values of the arrays.
-     * <p>
-     * The following example shows how to make a subset. In the example, the
-     * dataset is a 4-dimensional array of [200][100][50][10], i.e. dims[0]=200;
-     * dims[1]=100; dims[2]=50; dims[3]=10; <br>
-     * We want to select every other data point in dims[1] and dims[2]
-     *
-     * <pre>
-     * int rank = dataset.getRank(); // number of dimensions of the dataset
-     * long[] dims = dataset.getDims(); // the dimension sizes of the dataset
-     * long[] selected = dataset.getSelectedDims(); // the selected size of the dataset
-     * long[] start = dataset.getStartDims(); // the offset of the selection
-     * long[] stride = dataset.getStride(); // the stride of the dataset
-     * int[] selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for display
-     *
-     * // select dim1 and dim2 as 2D data for display, and slice through dim0
-     * selectedIndex[0] = 1;
-     * selectedIndex[1] = 2;
-     * selectedIndex[1] = 0;
-     *
-     * // reset the selection arrays
-     * for (int i = 0; i &lt; rank; i++) {
-     *     start[i] = 0;
-     *     selected[i] = 1;
-     *     stride[i] = 1;
-     * }
-     *
-     * // set stride to 2 on dim1 and dim2 so that every other data point is
-     * // selected.
-     * stride[1] = 2;
-     * stride[2] = 2;
-     *
-     * // set the selection size of dim1 and dim2
-     * selected[1] = dims[1] / stride[1];
-     * selected[2] = dims[1] / stride[2];
-     *
-     * // when dataset.getData() is called, the selection above will be used since
-     * // the dimension arrays are passed by reference. Changes of these arrays
-     * // outside the dataset object directly change the values of these array
-     * // in the dataset object.
-     * </pre>
-     * <p>
-     * For ScalarDS, the memory data buffer is a one-dimensional array of byte,
-     * short, int, float, double or String type based on the datatype of the
-     * dataset.
-     * <p>
-     * For CompoundDS, the memory data object is an java.util.List object. Each
-     * element of the list is a data array that corresponds to a compound field.
-     * <p>
-     * For example, if compound dataset "comp" has the following nested
-     * structure, and member datatypes
-     *
-     * <pre>
-     * comp --&gt; m01 (int)
-     * comp --&gt; m02 (float)
-     * comp --&gt; nest1 --&gt; m11 (char)
-     * comp --&gt; nest1 --&gt; m12 (String)
-     * comp --&gt; nest1 --&gt; nest2 --&gt; m21 (long)
-     * comp --&gt; nest1 --&gt; nest2 --&gt; m22 (double)
-     * </pre>
-     *
-     * getData() returns a list of six arrays: {int[], float[], char[],
-     * String[], long[] and double[]}.
-     *
-     * @return the data read from file.
-     *
-     * @see #getData()
-     *
-     * @throws Exception if object can not be read
-     * @throws OutOfMemoryError if memory is exhausted
-     */
-    public abstract Object read() throws Exception, OutOfMemoryError;
-
-    /**
      * Reads the raw data of the dataset from file to a byte array.
      * <p>
      * readBytes() reads raw data to an array of bytes instead of array of its
@@ -587,20 +456,11 @@ public abstract class Dataset extends HObject {
     public abstract byte[] readBytes() throws Exception;
 
     /**
-     * Writes a memory buffer to the dataset in file.
-     *
-     * @param buf
-     *            the data to write
-     *
-     * @throws Exception if data can not be written
-     */
-    public abstract void write(Object buf) throws Exception;
-
-    /**
      * Writes the memory buffer of this dataset to file.
      *
      * @throws Exception if buffer can not be written
      */
+    @Override
     public final void write() throws Exception {
         if (data != null) {
             write(data);
@@ -632,12 +492,10 @@ public abstract class Dataset extends HObject {
      */
     public abstract Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception;
 
-    /**
-     * Returns the datatype object of the dataset.
-     *
-     * @return the datatype object of the dataset.
-     */
-    public abstract Datatype getDatatype();
+    @Override
+    public final boolean isInited() {
+        return inited;
+    }
 
     /**
      * Returns the data buffer of the dataset in memory.
@@ -728,6 +586,7 @@ public abstract class Dataset extends HObject {
      * @throws Exception if object can not be read
      * @throws OutOfMemoryError if memory is exhausted
      */
+    @Override
     public final Object getData() throws Exception, OutOfMemoryError {
         if (!isDataLoaded) {
             log.trace("getData: read");
@@ -746,16 +605,19 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * @deprecated Not for public use in the future.
-     *             <p>
-     *             setData() is not safe to use because it changes memory buffer
-     *             of the dataset object. Dataset operations such as write/read
-     *             will fail if the buffer type or size is changed.
+     * Not for public use in the future.
+     * <p>
+     * setData() is not safe to use because it changes memory buffer
+     * of the dataset object. Dataset operations such as write/read
+     * will fail if the buffer type or size is changed.
      *
      * @param d  the object data
      */
-    @Deprecated
+    @Override
     public final void setData(Object d) {
+        if (!(this instanceof Attribute))
+            throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
+
         data = d;
     }
 
@@ -771,6 +633,7 @@ public abstract class Dataset extends HObject {
      * @see #getData()
      * @see #read()
      */
+    @Override
     public void clearData() {
         isDataLoaded = false;
     }
@@ -805,8 +668,9 @@ public abstract class Dataset extends HObject {
      *
      * @return the size of dimension of the vertical axis.
      */
+    @Override
     public final long getHeight() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if ((selectedDims == null) || (selectedIndex == null)) {
             return 0;
@@ -845,8 +709,9 @@ public abstract class Dataset extends HObject {
      *
      * @return the size of dimension of the horizontal axis.
      */
+    @Override
     public final long getWidth() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         if ((selectedDims == null) || (selectedIndex == null)) {
             return 0;
@@ -889,8 +754,9 @@ public abstract class Dataset extends HObject {
      *
      * @return the array of the indices of display order.
      */
+    @Override
     public final int[] getSelectedIndex() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return selectedIndex;
     }
@@ -903,8 +769,9 @@ public abstract class Dataset extends HObject {
      *
      * @return the string representation of compression information.
      */
+    @Override
     public final String getCompression() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return compression;
     }
@@ -915,7 +782,7 @@ public abstract class Dataset extends HObject {
      * @return the string representation of filter information.
      */
     public final String getFilters() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return filters;
     }
@@ -926,7 +793,7 @@ public abstract class Dataset extends HObject {
      * @return the string representation of storage layout information.
      */
     public final String getStorageLayout() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return storage_layout;
     }
@@ -937,7 +804,7 @@ public abstract class Dataset extends HObject {
      * @return the string representation of storage information.
      */
     public final String getStorage() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return storage;
     }
@@ -950,9 +817,14 @@ public abstract class Dataset extends HObject {
      *         chunked.
      */
     public final long[] getChunkSize() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return chunkSize;
+    }
+
+    @Override
+    public Datatype getDatatype() {
+        return datatype;
     }
 
     /**
@@ -1349,7 +1221,7 @@ public abstract class Dataset extends HObject {
      * @return the names of dimensions, or null if there is no dimension name.
      */
     public final String[] getDimNames() {
-        if (rank < 0) init();
+        if (!inited) init();
 
         return dimNames;
     }
@@ -1385,6 +1257,7 @@ public abstract class Dataset extends HObject {
      *
      * @return the Class of originalBuf
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public final Class getOriginalClass() {
         return originalBuf.getClass();

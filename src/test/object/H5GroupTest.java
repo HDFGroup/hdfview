@@ -16,6 +16,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Vector;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
@@ -29,15 +35,9 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 /**
  * @author xcao
- * 
+ *
  */
 public class H5GroupTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5GroupTest.class);
@@ -87,6 +87,7 @@ public class H5GroupTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void openFiles() throws Exception {
         try {
@@ -157,6 +158,7 @@ public class H5GroupTest {
         final String newName = "tmpName";
 
         // test set name to null
+        H5.H5error_off();
         try {
             testGroup.setName(null);
         }
@@ -171,6 +173,7 @@ public class H5GroupTest {
         catch (final Exception ex) {
             ; // Expected - intentional
         }
+        H5.H5error_on();
 
         try {
             testGroup.setName(newName);
@@ -192,7 +195,9 @@ public class H5GroupTest {
         // test the old name
         H5Group tmpDset = null;
         try {
+            H5.H5error_off();
             tmpDset = (H5Group) testFile.get(GNAME);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("setName() get(oldname) failed. " + ex);
@@ -234,7 +239,9 @@ public class H5GroupTest {
         final String newPath = "tmpName";
 
         try {
+            H5.H5error_off();
             testGroup.setPath(newPath);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("setPath() failed. " + ex);
@@ -323,6 +330,7 @@ public class H5GroupTest {
      * <li>make sure that the attribute list is empty
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testClear() {
         log.debug("testClear");
@@ -397,8 +405,10 @@ public class H5GroupTest {
             grp.close(gid);
         }
 
+        H5.H5error_off();
         final H5Group grp = new H5Group(file, "NO_SUCH_DATASET", "NO_SUCH_PATH", pgroup);
         final long gid = grp.open();
+        H5.H5error_on();
         assertTrue(gid <= 0);
         long nObjs = 0;
         try {
@@ -426,22 +436,15 @@ public class H5GroupTest {
      * <li>Construct an H5Group object that does not exist in file
      * </ul>
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testH5GroupFileFormatStringStringGroupLongArray() {
-        // RISHI SINHA Why are we testing a deprecated API.
         log.debug("testH5GroupFileFormatStringStringGroupLongArray");
         Group pgroup = null;
         final String[] names = { null, GNAME_SUB, GNAME_SUB.substring(4) };
         final String[] paths = { GNAME_SUB, null, H5TestFile.NAME_GROUP };
 
-        final H5File file = (H5File) testGroup.getFileFormat(); // RISHI SINHA
-                                                                // Why
-                                                                // recreating
-                                                                // these objects
-                                                                // as we have
-                                                                // these objects
-                                                                // in this class
-                                                                // already.
+        final H5File file = (H5File) testGroup.getFileFormat();
         assertNotNull(file);
 
         try {
@@ -454,7 +457,6 @@ public class H5GroupTest {
 
         long[] oid = null;
         for (int idx = 0; idx < names.length; idx++) {
-
             try {
                 final byte[] ref_buf = H5.H5Rcreate(file.getFID(), GNAME_SUB, HDF5Constants.H5R_OBJECT, -1);
                 final long l = HDFNativeData.byteToLong(ref_buf, 0);
@@ -474,8 +476,10 @@ public class H5GroupTest {
         }
 
         // test a non-existing dataset
+        H5.H5error_off();
         final H5Group grp = new H5Group(file, "NO_SUCH_DATASET", "NO_SUCH_PATH", pgroup, null);
         final long gid = grp.open();
+        H5.H5error_on();
         assertTrue(gid <= 0);
         long nObjs = 0;
         try {
@@ -496,6 +500,7 @@ public class H5GroupTest {
      * <li>Check the content of the attributes
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testGetMetadata() {
         log.debug("testGetMetadata");
@@ -513,19 +518,36 @@ public class H5GroupTest {
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
             final Attribute attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
-                assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
-                assertTrue(((String[]) H5TestFile.ATTRIBUTE_STR.getValue())[0].equals(((String[]) attr.getValue())[0]));
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            if (dtype.isString()) {
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
+                    assertTrue(
+                            ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0].equals(((String[]) attr.getData())[0]));
+                } catch (Exception ex) {
+                    log.trace("testGetMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testGetMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
-                assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
-                final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getValue();
-                assertNotNull(expected);
-                final int[] ints = (int[]) attr.getValue();
-                assertNotNull(ints);
-                for (int j = 0; j < expected.length; j++) {
-                    assertEquals(expected[j], ints[j]);
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
+                    final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
+                    assertNotNull(expected);
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < expected.length; j++) {
+                        assertEquals(expected[j], ints[j]);
+                    }
+                } catch (Exception ex) {
+                    log.trace("testGetMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testGetMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
         } // for (int i=0; i<n; i++) {
@@ -550,6 +572,7 @@ public class H5GroupTest {
      * <li>Restore to the orginal state
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testWriteMetadata() {
         log.debug("testWriteMetadata");
@@ -569,20 +592,36 @@ public class H5GroupTest {
         int n = attrs.size();
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
-                final String[] strs = (String[]) attr.getValue();
-                strs[0] = TEST_VALUE_STR;
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            if (dtype.isString()) {
+                try {
+                    final String[] strs = (String[]) attr.getData();
+                    strs[0] = TEST_VALUE_STR;
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
-                final int[] ints = (int[]) attr.getValue();
-                assertNotNull(ints);
-                for (int j = 0; j < ints.length; j++) {
-                    ints[j] = TEST_VALUE_INT;
+                try {
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < ints.length; j++) {
+                        ints[j] = TEST_VALUE_INT;
+                    }
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
             try {
-                testGroup.writeMetadata(attr);
+                attr.write();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -590,9 +629,10 @@ public class H5GroupTest {
         } // for (int i=0; i<n; i++) {
 
         // attache a new attribute
-        attr = new Attribute("float attribute", typeFloat, new long[] { 1 }, new float[] { TEST_VALUE_FLOAT });
+        attr = new Attribute(testGroup, "float attribute", typeFloat, new long[] { 1 },
+                new float[] { TEST_VALUE_FLOAT });
         try {
-            testGroup.writeMetadata(attr);
+            attr.write();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
@@ -623,23 +663,47 @@ public class H5GroupTest {
         Attribute newAttr = null;
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
-                assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
-                assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getValue())[0]));
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            if (dtype.isString()) {
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_STR.getName().equals(attr.getName()));
+                    assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
-                assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
-                final int[] ints = (int[]) attr.getValue();
-                assertNotNull(ints);
-                for (int j = 0; j < ints.length; j++) {
-                    assertEquals(TEST_VALUE_INT, ints[j]);
+                try {
+                    assertTrue(H5TestFile.ATTRIBUTE_INT_ARRAY.getName().equals(attr.getName()));
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < ints.length; j++) {
+                        assertEquals(TEST_VALUE_INT, ints[j]);
+                    }
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_FLOAT) {
-                newAttr = attr;
-                final float[] floats = (float[]) attr.getValue();
-                assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
+                try {
+                    newAttr = attr;
+                    final float[] floats = (float[]) attr.getData();
+                    assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
         } // for (int i=0; i<n; i++) {
 
@@ -655,21 +719,37 @@ public class H5GroupTest {
         n = attrs.size();
         for (int i = 0; i < n; i++) {
             attr = (Attribute) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getType();
-            if (dtype.getDatatypeClass() == Datatype.CLASS_STRING) {
-                final String[] strs = (String[]) attr.getValue();
-                strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getValue())[0];
+            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            if (dtype.isString()) {
+                try {
+                    final String[] strs = (String[]) attr.getData();
+                    strs[0] = ((String[]) H5TestFile.ATTRIBUTE_STR.getData())[0];
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
+                }
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
-                final int[] ints = (int[]) attr.getValue();
-                assertNotNull(ints);
-                for (int j = 0; j < ints.length; j++) {
-                    final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getValue();
-                    ints[j] = expected[j];
+                try {
+                    final int[] ints = (int[]) attr.getData();
+                    assertNotNull(ints);
+                    for (int j = 0; j < ints.length; j++) {
+                        final int[] expected = (int[]) H5TestFile.ATTRIBUTE_INT_ARRAY.getData();
+                        ints[j] = expected[j];
+                    }
+                } catch (Exception ex) {
+                    log.trace("testWriteMetadata(): getData() failure:", ex);
+                    fail("getData() failure " + ex);
+                } catch (OutOfMemoryError e) {
+                    log.trace("testWriteMetadata(): Out of memory");
+                    fail("Out of memory");
                 }
             }
             try {
-                testGroup.writeMetadata(attr);
+                attr.write();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -695,6 +775,7 @@ public class H5GroupTest {
      * <li>Restore to the orginal state
      * </ul>
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testRemoveMetadata() {
         log.debug("testRemoveMetadata");
@@ -741,10 +822,12 @@ public class H5GroupTest {
         assertNotNull(attrs);
         assertFalse(attrs.size() > 0);
 
-        // restor to the original
+        // restore to the original
         try {
-            testGroup.writeMetadata(H5TestFile.ATTRIBUTE_STR);
-            testGroup.writeMetadata(H5TestFile.ATTRIBUTE_INT_ARRAY);
+            H5TestFile.ATTRIBUTE_STR.setParentObject(testGroup);
+            H5TestFile.ATTRIBUTE_INT_ARRAY.setParentObject(testGroup);
+            H5TestFile.ATTRIBUTE_STR.write();
+            H5TestFile.ATTRIBUTE_INT_ARRAY.write();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
@@ -817,7 +900,9 @@ public class H5GroupTest {
 
         grp = null;
         try {
+            H5.H5error_off();
             grp = (Group) testFile.get(nameNew);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("testFile.get(deleted_newname) failed. " + ex);
@@ -871,6 +956,7 @@ public class H5GroupTest {
             fail("H5.H5Pcreate() failed. " + ex);
         }
 
+        H5.H5error_off();
         try {
             final Group rootGrp = (Group) testFile.get("/");
             grp = H5Group.create(nameNew, rootGrp, gcpl);
@@ -878,6 +964,7 @@ public class H5GroupTest {
         catch (final Exception ex) {
             ; // Expected -intentional as the order of gplist is invalid.
         }
+        H5.H5error_on();
         assertNull(grp);
 
         try {
@@ -900,11 +987,13 @@ public class H5GroupTest {
         assertNotNull(grp2);
         assertNotNull(grp3);
 
+        H5.H5error_off();
         try {
             H5.H5Pclose(gcpl);
         }
         catch (final Exception ex) {
         }
+        H5.H5error_on();
 
         try {
             testFile.close(); // Close and reopen file.
@@ -960,7 +1049,9 @@ public class H5GroupTest {
 
         grp = null;
         try {
+            H5.H5error_off();
             grp = (Group) testFile.get(nameNew);
+            H5.H5error_on();
         }
         catch (final Exception ex) {
             fail("testFile.get(deleted_newgroup) failed. " + ex);

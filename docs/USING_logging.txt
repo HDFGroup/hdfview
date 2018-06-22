@@ -3,11 +3,11 @@
 ************************************************************************
 
 HDFView has implemented logging in the java code with support for the
-slf4j 1.7.5 package. HDFView by default uses the slf4j-nop-1.7.5.jar.
+slf4j 1.7.* package. HDFView by default uses the slf4j-nop-1.7.*.jar.
 This suppresses any logging information. See http://www.slf4j.org/ for
 more information on the slf4j package.
 
-To enable logging in HDFView, you must include the slf4j-simple-1.7.5
+To enable logging in HDFView, you must include the slf4j-simple-1.7.*
 jar (or other slf4j compatible jar file) by overriding the default jar file.
 
 HDFView:
@@ -18,12 +18,12 @@ HDFView:
   Windows:
       start "HDFView" "%JAVABIN%\javaw.exe" -Xmx1024M -Djava.library.path="%INSTALLDIR%\lib;%INSTALLDIR%\lib\ext" -Dhdfview.root="%INSTALLDIR%" -jar "%INSTALLDIR%\lib\jhdfview.jar" -root "%INSTALLDIR%\share" %1
     to
-      start "HDFView" "%JAVABIN%\javaw.exe" -Xmx1024M -Djava.library.path="%INSTALLDIR%\lib;%INSTALLDIR%\lib\ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="%INSTALLDIR%" -cp "%INSTALLDIR%\lib\jhdfview.jar;%INSTALLDIR%\lib\ext\slf4j-simple-1.7.5.jar;%INSTALLDIR%\lib\slf4j-api-1.7.5.jar;%INSTALLDIR%\lib" hdf.view.HDFView -root "%INSTALLDIR%\share" %1
+      start "HDFView" "%JAVABIN%\javaw.exe" -Xmx1024M -Djava.library.path="%INSTALLDIR%\lib;%INSTALLDIR%\lib\ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="%INSTALLDIR%" -cp "%INSTALLDIR%\lib\jhdfview.jar;%INSTALLDIR%\lib\ext\slf4j-simple-1.7.25.jar;%INSTALLDIR%\lib\slf4j-api-1.7.25.jar;%INSTALLDIR%\lib" hdf.view.HDFView -root "%INSTALLDIR%\share" %1
 
   Linux:
       $JAVABIN/java -Xmx1024M -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dhdfview.root="$INSTALLDIR" -jar "$INSTALLDIR/lib/jhdfview.jar" -root "$INSTALLDIR/share" $*
     to
-      $JAVABIN/java -Xmx1024M -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="$INSTALLDIR -cp $INSTALLDIR/lib/jhdfview.jar:$INSTALLDIR/lib/ext/slf4j-simple-1.7.5.jar:$INSTALLDIR/lib/slf4j-api-1.7.5.jar:$INSTALLDIR/lib hdf.view.HDFView -root $INSTALLDIR/share $*
+      $JAVABIN/java -Xmx1024M -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="$INSTALLDIR -cp $INSTALLDIR/lib/jhdfview.jar:$INSTALLDIR/lib/ext/slf4j-simple-1.7.25.jar:$INSTALLDIR/lib/slf4j-api-1.7.25.jar:$INSTALLDIR/lib hdf.view.HDFView -root $INSTALLDIR/share $*
 
 NOTE that the "-jar $INSTALLDIR/lib/jhdfview.jar" section is changed to
      "-cp <list of jars>" and add the -Dorg.slf4j.simpleLogger.defaultLogLevel

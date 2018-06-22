@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -39,12 +39,13 @@ import hdf.object.HObject;
  * <p>
  * For more information on HDF5 Groups,
  *
- * <a href="https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html#t=HDF5_Users_Guide%2FHDF5_UG_Title%2FHDF5_UG_Title.htm">HDF5 User's Guide</a>
+ * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public class H5Group extends Group {
+
     private static final long serialVersionUID = -951164512330444150L;
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
@@ -116,6 +117,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute() {
         obj_info.num_attrs = nAttributes;
 
@@ -182,6 +184,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws HDF5Exception {
         return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
@@ -196,26 +199,22 @@ public class H5Group extends Group {
     public List getMetadata(int... attrPropList) throws HDF5Exception {
         log.trace("getMetadata(): start");
         if (attributeList == null) {
-            long gid = open();
-            if(gid >= 0) {
-                int indxType = fileFormat.getIndexType(null);
-                int order = fileFormat.getIndexOrder(null);
+            log.trace("getMetadata(): get attributeList");
 
-                if (attrPropList.length > 0) {
-                    indxType = attrPropList[0];
-                    if (attrPropList.length > 1) {
-                        order = attrPropList[1];
-                    }
-                }
-                try {
-                    attributeList = H5File.getAttribute(gid, indxType, order);
-                }
-                finally {
-                    close(gid);
+            int indxType = fileFormat.getIndexType(null);
+            int order = fileFormat.getIndexOrder(null);
+
+            if (attrPropList.length > 0) {
+                indxType = attrPropList[0];
+                if (attrPropList.length > 1) {
+                    order = attrPropList[1];
                 }
             }
-            else {
-                log.debug("getMetadata(): failed to open group");
+            try {
+                attributeList = H5File.getAttribute(this, indxType, order);
+            }
+            catch (Exception ex) {
+                log.debug("getMetadata(): H5File.getAttribute failure: ", ex);
             }
         }
 
@@ -235,6 +234,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
+    @Override
     @SuppressWarnings("unchecked")
     public void writeMetadata(Object info) throws Exception {
         log.trace("writeMetadata(): start");
@@ -269,6 +269,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public void removeMetadata(Object info) throws HDF5Exception {
         log.trace("removeMetadata(): start");
@@ -305,6 +306,7 @@ public class H5Group extends Group {
      *
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
+    @Override
     public void updateMetadata(Object info) throws HDF5Exception {
         log.trace("updateMetadata(): start");
         // only attribute metadata is supported.

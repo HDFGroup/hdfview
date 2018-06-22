@@ -1,36 +1,30 @@
 package test.uitest;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import java.io.File;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestTreeViewExport extends AbstractWindowTest {
+    private String filename = "testds";
+    private String file_ext = ".h5";
+    private String groupname = "testgroupname";
 
     private File createImportHDF5Dataset(String datasetname) {
-        String filename = "testds";
-        String file_ext = ".h5";
-        String groupname = "testgroupname";
         String datasetdimsize = "8 x 64";
         File hdf_file = createHDF5File(filename);
 
@@ -96,9 +90,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
 
         return hdf_file;
@@ -127,7 +123,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
 
             table.click(1, 1);
-            tableShell.bot().menu("Table").menu("Import Data from Text File").click();
+            tableShell.bot().menu("Import/Export Data").menu("Import Data from").menu("Text File").click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
@@ -142,7 +138,10 @@ public class TestTreeViewExport extends AbstractWindowTest {
             shell.bot().button("   &OK   ").click();
             shell.bot().waitUntil(Conditions.shellCloses(shell));
 
-            shell = bot.shell("Import Data");
+            shellMatcher = WithRegex.withRegex(".*Import.*");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            shell = bot.shells()[2];
             shell.activate();
 
             shell.bot().button("OK").click();
@@ -150,19 +149,21 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
     }
 
     @Test
     public void saveHDF5DatasetText() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String fname = "tintsize";
+        String f_ext = ".h5";
         String groupsetname = "DS64BITS";
         SWTBotShell exportShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(fname, f_ext.equals(".h5") ? false : true);
         File export_file = null;
 
         try {
@@ -179,7 +180,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("saveHDF5DatasetText()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("saveHDF5DatasetText() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("saveHDF5DatasetText() filetree is missing file '" + fname + f_ext + "'", items[0].getText().compareTo(fname + f_ext) == 0);
             assertTrue("saveHDF5DatasetText() filetree is missing group '" + groupsetname + "'", items[0].getNode(0).getText().compareTo("DS08BITS")==0);
 
             items[0].getNode(3).click();
@@ -203,9 +204,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(exportShell != null && exportShell.isOpen()) {
@@ -222,11 +225,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
     @Test
     public void saveHDF5DatasetBinary() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String fname = "tintsize";
+        String f_ext = ".h5";
         String groupsetname = "DU64BITS";
         SWTBotShell exportShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(fname, f_ext.equals(".h5") ? false : true);
         File export_file = null;
 
         try {
@@ -243,7 +246,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("saveHDF5DatasetBinary()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("saveHDF5DatasetBinary() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("saveHDF5DatasetBinary() filetree is missing file '" + fname + f_ext + "'", items[0].getText().compareTo(fname + f_ext) == 0);
             assertTrue("saveHDF5DatasetBinary() filetree is missing group '" + groupsetname + "'", items[0].getNode(0).getText().compareTo("DS08BITS")==0);
 
             items[0].getNode(3).click();
@@ -267,9 +270,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(exportShell != null && exportShell.isOpen()) {
@@ -286,12 +291,29 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
     @Test
     public void importHDF5DatasetWithTab() {
-        String filename = "testds";
-        String file_ext = ".h5";
-        String groupname = "testgroupname";
-        String datasetname = "testdstab";
+        String datasetname = "testdatasetab";
         SWTBotShell tableShell = null;
-        File hdf_file = createImportHDF5Dataset("testdstab");
+
+        try {
+            // switch to ViewProperties.DELIMITER_TAB
+            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
+            fileMenuItem.click();
+
+            SWTBotShell botshell = bot.shell("Preferences");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive("Preferences"));
+
+            SWTBotCombo combo = botshell.bot().comboBox(4);
+            combo.setSelection("Tab");
+
+            botshell.bot().button("Apply and Close").click();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+
+        File hdf_file = createImportHDF5Dataset(datasetname);
         importHDF5Dataset(hdf_file, "DS64BITS.ttxt");
 
         try {
@@ -330,14 +352,16 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             tableShell.bot().menu("Table").menu("Close").click();
 
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("Changes Detected");
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*Changes Detected");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             SWTBotShell saveShell = bot.shells()[2];
@@ -353,18 +377,33 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Test
     public void importHDF5DatasetWithComma() {
-        String filename = "testds";
-        String file_ext = ".h5";
-        String groupname = "testgroupname";
-        String datasetname = "testdscomma";
+        String datasetname = "testdatasetcomma";
         SWTBotShell tableShell = null;
-        File hdf_file = createImportHDF5Dataset("testdscomma");
-        importHDF5Dataset(hdf_file, "DS64BITS.xtxt");
+
         try {
             //switch to ViewProperties.DELIMITER_COMMA
+            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
+            fileMenuItem.click();
 
+            SWTBotShell botshell = bot.shell("Preferences");
+            botshell.activate();
+            bot.waitUntil(Conditions.shellIsActive("Preferences"));
+
+            SWTBotCombo combo = botshell.bot().comboBox(4);
+            combo.setSelection("Comma");
+
+            botshell.bot().button("Apply and Close").click();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+
+        File hdf_file = createImportHDF5Dataset(datasetname);
+        importHDF5Dataset(hdf_file, "DS64BITS.xtxt");
+        try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
@@ -400,9 +439,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             tableShell.bot().menu("Table").menu("Close").click();
@@ -417,7 +458,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(saveShell));
 
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdf_file, false);
             }
             catch (Exception ex) {}
         }

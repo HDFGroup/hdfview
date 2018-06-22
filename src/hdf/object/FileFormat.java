@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
 
 /**
  * FileFormat defines general interfaces for working with files whose data is
@@ -151,7 +152,7 @@ public abstract class FileFormat extends File {
      * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    private static final Map<String, FileFormat> FileList = new Hashtable<String, FileFormat>(10);
+    private static final Map<String, FileFormat> FileList = new Hashtable<>(10);
 
     /**
      * A list of file extensions for the supported file formats. This list of
@@ -248,14 +249,14 @@ public abstract class FileFormat extends File {
             }
         }
 
-        // add Fits to default modules
-        if (FileFormat.getFileFormat("Fits") == null) {
+        // add FITS to default modules
+        if (FileFormat.getFileFormat("FITS") == null) {
             try {
                 @SuppressWarnings("rawtypes")
                 Class fileclass = Class.forName("hdf.object.fits.FitsFile");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
-                    FileFormat.addFileFormat("Fits", fileformat);
+                    FileFormat.addFileFormat("FITS", fileformat);
                     log.debug("Fits file format added");
                 }
             }
@@ -305,7 +306,7 @@ public abstract class FileFormat extends File {
             }
             catch (Exception ex) {
                 log.debug("File {} getAbsolutePath failure: ", filename, ex);
-           }
+            }
         }
         isReadOnly = false;
         log.trace("fullFileName={} isReadOnly={}", fullFileName, isReadOnly);
@@ -482,7 +483,7 @@ public abstract class FileFormat extends File {
         }
 
         StringTokenizer currentExt = new StringTokenizer(extensions, ",");
-        Vector<String> tokens = new Vector<String>(currentExt.countTokens() + 5);
+        Vector<String> tokens = new Vector<>(currentExt.countTokens() + 5);
 
         while (currentExt.hasMoreTokens()) {
             tokens.add(currentExt.nextToken().trim().toLowerCase());
@@ -1349,13 +1350,13 @@ public abstract class FileFormat extends File {
      */
     public Dataset createCompoundDS(String name, Group pgroup, long[] dims, long[] maxdims, long[] chunks, int gzip,
             String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception
-            // REVIEW DOCS for createCompoundDS(). Check and document exceptions.
-            {
-                // If the implementing subclass doesn't have this method then that
-                // format doesn't support Compound DataSets and we throw an
-                // exception.
-                throw new UnsupportedOperationException("Dataset FileFormat.createCompoundDS(...) is not implemented.");
-            }
+    // REVIEW DOCS for createCompoundDS(). Check and document exceptions.
+    {
+        // If the implementing subclass doesn't have this method then that
+        // format doesn't support Compound DataSets and we throw an
+        // exception.
+        throw new UnsupportedOperationException("Dataset FileFormat.createCompoundDS(...) is not implemented.");
+    }
 
     /**
      * Creates a new image in a file.
@@ -1839,7 +1840,7 @@ public abstract class FileFormat extends File {
      * @return the object that has the given path; otherwise returns null
      */
     public final static HObject findObject(FileFormat file, String path) {
-        log.trace("findObject(): start");
+        log.trace("findObject({}): start", path);
 
         if ((file == null) || (path == null)) {
             log.debug("findObject(): file is null or path is null");
@@ -1901,7 +1902,7 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public long open(int... indexList) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:open.");
     }
 
     /**
@@ -1930,7 +1931,7 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public Group createGroup(String name, Group pgroup, long... gplist) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:createGroup.");
     }
 
     /***
@@ -1955,7 +1956,7 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public long createGcpl(int creationorder, int maxcompact, int mindense) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:createGcpl.");
     }
 
     /**
@@ -1977,7 +1978,7 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public HObject createLink(Group linkGroup, String name, Object currentObj) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:createLink.");
     }
 
     /**
@@ -1996,7 +1997,7 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:exportDataset.");
     }
 
     /**
@@ -2013,22 +2014,37 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public void renameAttribute(HObject obj, String oldAttrName, String newAttrName) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:renameAttribute.");
     }
 
     /**
-     * Sets the bounds of library versions.
+     * Sets the bounds of new library versions.
      *
-     * @param low
+     * @param lowStr
      *            The earliest version of the library.
-     * @param high
+     * @param highStr
      *            The latest version of the library.
      *
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setLibBounds(int low, int high) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+    public void setNewLibBounds(String lowStr, String highStr) throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setNewLibBounds.");
+    }
+
+    /**
+     * Sets the bounds of library versions.
+     *
+     * @param lowStr
+     *            The earliest version of the library.
+     * @param highStr
+     *            The latest version of the library.
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
+    public void setLibBounds(String lowStr, String highStr) throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setLibBounds.");
     }
 
     /**
@@ -2040,30 +2056,34 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing class.
      */
     public int[] getLibBounds() throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBounds.");
+    }
+
+    public String getLibBoundsDescription() {
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBoundsDescription.");
     }
 
     public static int getIndexTypeValue(String strtype) {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexTypeValue.");
     }
 
     public int getIndexType(String strtype) {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexType.");
     }
 
     public void setIndexType(int indexType) {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexType.");
     }
 
     public static int getIndexOrderValue(String strorder) {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrderValue.");
     }
 
     public int getIndexOrder(String strorder) {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrder.");
     }
 
     public void setIndexOrder(int indexOrder) {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexOrder.");
     }
 }

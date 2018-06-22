@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -18,8 +18,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -44,8 +42,6 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -60,28 +56,35 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import hdf.HDFVersions;
-import hdf.object.CompoundDS;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
 import hdf.object.FileFormat;
-import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.ScalarDS;
-import hdf.object.h5.H5Link;
+import hdf.view.ViewProperties.DataViewType;
+import hdf.view.HelpView.HelpView;
+import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.TableView.TableView;
+import hdf.view.TreeView.DefaultTreeView;
+import hdf.view.TreeView.TreeView;
+import hdf.view.dialog.ImageConversionDialog;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.UserOptionsDialog;
+import hdf.view.dialog.UserOptionsGeneralPage;
+import hdf.view.dialog.UserOptionsHDFPage;
+import hdf.view.dialog.UserOptionsNode;
+import hdf.view.dialog.UserOptionsViewModulesPage;
+
 
 /**
  * HDFView is the main class of this HDF visual tool. It is used to layout the
@@ -128,9 +131,6 @@ public class HDFView implements ViewManager {
     /* A list of tree table implementations. */
     private static List<?>             tableViews;
 
-    /* A list of Text view implementations. */
-    private static List<String>        textViews;
-
     /* A list of metadata view implementations. */
     private static List<?>             metaDataViews;
 
@@ -150,19 +150,19 @@ public class HDFView implements ViewManager {
     //private final List<?>            editGUIs;
 
     /* GUI component: the TreeView */
-    private TreeView                   treeView;
+    private TreeView                   treeView = null;
 
     private static final String        HDF4_VERSION = HDFVersions.HDF4_VERSION;
     private static final String        HDF5_VERSION = HDFVersions.HDF5_VERSION;
     private static final String        HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
-    private static final String        HDFVIEW_USERSGUIDE_URL = "http://www.hdfgroup.org/products/java/hdfview/UsersGuide/index.html";
+    private static final String        HDFVIEW_USERSGUIDE_URL = "https://support.hdfgroup.org/products/java/hdfview/index.html";
     private static final String        JAVA_COMPILER = "jdk 1.7";
     private static final String        JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
 
     private static final String        aboutHDFView = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
-    + "For " + System.getProperty("os.name") + "\n\n"
-    + "Copyright " + '\u00a9' + " 2006-2017 The HDF Group.\n"
-    + "All rights reserved.";
+            + "For " + System.getProperty("os.name") + "\n\n"
+            + "Copyright " + '\u00a9' + " 2006-2017 The HDF Group.\n"
+            + "All rights reserved.";
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
     private ToolBar                    toolBar;
@@ -170,8 +170,8 @@ public class HDFView implements ViewManager {
     /* GUI component: The text area for showing status messages */
     private Text                       status;
 
-    /* GUI component: The area for quick attribute view */
-    private Composite                  attributeArea;
+    /* GUI component: The area for quick general view */
+    private ScrolledComposite          generalArea;
 
     /* GUI component: To add and display URLs */
     private Combo                      url_bar;
@@ -190,10 +190,6 @@ public class HDFView implements ViewManager {
 
     private UserOptionsDialog          userOptionDialog;
 
-//    private Constructor<?>             ctrSrbFileDialog     = null;
-//
-//    private Dialog                     srbFileDialog         = null;
-
     /**
      * Constructs HDFView with a given root directory, where the HDFView is
      * installed, and opens the given files in the viewer.
@@ -207,13 +203,8 @@ public class HDFView implements ViewManager {
         if (display == null || display.isDisposed()) display = new Display();
 
         rootDir = root;
-        //userOptionsDialog = null;
-        //ctrSrbFileDialog = null;
 
         //editGUIs = new Vector<Object>();
-
-        ViewProperties.loadIcons();
-        ViewProperties.loadExtClass();
 
         props = new ViewProperties(rootDir);
         try {
@@ -222,6 +213,8 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             log.debug("Failed to load View Properties from {}", rootDir);
         }
+
+        ViewProperties.loadIcons();
 
         currentDir = ViewProperties.getWorkDir();
         if (currentDir == null) currentDir = System.getProperty("user.home");
@@ -241,47 +234,11 @@ public class HDFView implements ViewManager {
 
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
-        textViews = ViewProperties.getTextViewList();
         tableViews = ViewProperties.getTableViewList();
         imageViews = ViewProperties.getImageViewList();
         paletteViews = ViewProperties.getPaletteViewList();
         helpViews = ViewProperties.getHelpViewList();
 
-        int n = treeViews.size();
-        Class<?> theClass = null;
-        for (int i = 0; i < n; i++) {
-            // Use the first available treeview
-            String className = treeViews.get(i);
-
-            // Enables use of JHDF5 in JNLP (Web Start) applications, the system
-            // class loader with reflection first.
-            try {
-                theClass = Class.forName(className);
-            }
-            catch (Exception ex) {
-                try {
-                    theClass = ViewProperties.loadExtClass().loadClass(className);
-                }
-                catch (Exception ex2) {
-                    theClass = null;
-                }
-            }
-
-            if (theClass != null) break;
-        }
-
-        if (theClass != null) {
-            try {
-                @SuppressWarnings("rawtypes")
-                Class[] paramClass = { Class.forName("hdf.view.ViewManager") };
-                Constructor<?> constructor = theClass.getConstructor(paramClass);
-                Object[] paramObj = { this };
-                treeView = (TreeView) constructor.newInstance(paramObj);
-            }
-            catch (Exception ex) {
-                treeView = null;
-            }
-        }
         log.debug("Constructor exit");
     }
 
@@ -380,15 +337,8 @@ public class HDFView implements ViewManager {
         }
 
         if (width <= 300) {
-            winDim.x = (int) (0.9 * (double) mainWindow.getSize().y);
+            winDim.x = (int) (0.9 * mainWindow.getSize().y);
         }
-
-        // TEST
-        //if (treeView.getClass().getName().startsWith("ext.erdc")) {
-        //    topSplitPane.setDividerLocation(500);
-        //    winDim.x = (int) (0.9 * mainWindow.getSize().x);
-        //    winDim.y = (int) (winDim.x * 0.618);
-        //}
 
         mainWindow.setLocation(x, y);
         mainWindow.setSize(winDim.x + 200, winDim.y);
@@ -409,12 +359,12 @@ public class HDFView implements ViewManager {
             // not break the main UI loop
             // ===================================================
             try {
-               if (!display.readAndDispatch()) {
-                  display.sleep();
-               }
+                if (!display.readAndDispatch()) {
+                    display.sleep();
+                }
             }
             catch (Exception e) {
-               e.printStackTrace();
+                e.printStackTrace();
             }
         }
 
@@ -444,6 +394,7 @@ public class HDFView implements ViewManager {
         shell.setText("HDFView " + HDFVIEW_VERSION);
         shell.setLayout(new GridLayout(3, false));
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 ViewProperties.setRecentFiles(new Vector<>(Arrays.asList(url_bar.getItems())));
 
@@ -501,6 +452,7 @@ public class HDFView implements ViewManager {
         item.setText("&Open\tCtrl-O");
         item.setAccelerator(SWT.MOD1 + 'O');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 openLocalFile(null, FileFormat.WRITE);
             }
@@ -511,25 +463,12 @@ public class HDFView implements ViewManager {
             item.setText("Open &Read-Only");
             item.setAccelerator(SWT.MOD1 + 'R');
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     openLocalFile(null, FileFormat.READ);
                 }
             });
         }
-
-        // boolean isSrbSupported = true;
-        // try {
-        // Class.forName("hdf.srb.H5SRB");
-        // Class.forName("hdf.srb.SRBFileDialog");
-        // } catch (Throwable ex) {isSrbSupported = false;}
-        //
-        // if (isSrbSupported) {
-        // item = new JMenuItem( "Open from iRODS");
-        // item.setMnemonic(KeyEvent.VK_S);
-        // item.addActionListener(this);
-        // item.setActionCommand("Open from irods");
-        // fileMenu.add(item);
-        // }
 
         new MenuItem(fileMenu, SWT.SEPARATOR);
 
@@ -543,6 +482,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&4");
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (currentDir != null) {
                     currentDir += File.separator;
@@ -572,6 +512,7 @@ public class HDFView implements ViewManager {
                 if(filename == null) return;
 
                 try {
+                    log.trace("HDFView create hdf4 file");
                     FileFormat theFile = Tools.createNewFile(filename, currentDir,
                             FileFormat.FILE_TYPE_HDF4, getTreeView().getCurrentFiles());
 
@@ -580,7 +521,7 @@ public class HDFView implements ViewManager {
                     currentDir = theFile.getParent();
                 }
                 catch (Exception ex) {
-                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage());
                     return;
                 }
 
@@ -598,7 +539,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage() + "\n" + filename);
                 }
             }
         });
@@ -607,6 +548,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&5");
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (currentDir != null) {
                     currentDir += File.separator;
@@ -636,6 +578,7 @@ public class HDFView implements ViewManager {
                 if(filename == null) return;
 
                 try {
+                    log.trace("HDFView create hdf5 file");
                     FileFormat theFile = Tools.createNewFile(filename, currentDir,
                             FileFormat.FILE_TYPE_HDF5, getTreeView().getCurrentFiles());
 
@@ -644,7 +587,7 @@ public class HDFView implements ViewManager {
                     currentDir = theFile.getParent();
                 }
                 catch (Exception ex) {
-                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage());
                     return;
                 }
 
@@ -662,7 +605,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage() + "\n" + filename, mainWindow.getText());
+                    Tools.showError(mainWindow, "New", ex.getMessage() + "\n" + filename);
                 }
             }
         });
@@ -672,6 +615,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("&Close");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeFile(treeView.getSelectedFile());
             }
@@ -680,6 +624,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("Close &All");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeAllWindows();
 
@@ -693,7 +638,8 @@ public class HDFView implements ViewManager {
 
                 currentFile = null;
 
-                for (Control control : attributeArea.getChildren()) control.dispose();
+                for (Control control : generalArea.getChildren()) control.dispose();
+                generalArea.setContent(null);
 
                 url_bar.setText("");
             }
@@ -704,14 +650,15 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("&Save");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
-                    Tools.showError(mainWindow, "No files currently open.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently open.");
                     return;
                 }
 
                 if (treeView.getSelectedFile() == null) {
-                    Tools.showError(mainWindow, "No files currently selected.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently selected.");
                     return;
                 }
 
@@ -723,14 +670,15 @@ public class HDFView implements ViewManager {
         item = new MenuItem(fileMenu, SWT.PUSH);
         item.setText("S&ave As");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if (treeView.getCurrentFiles().size() <= 0) {
-                    Tools.showError(mainWindow, "No files currently open.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently open.");
                     return;
                 }
 
                 if (treeView.getSelectedFile() == null) {
-                    Tools.showError(mainWindow, "No files currently selected.", shell.getText());
+                    Tools.showError(mainWindow, "Save", "No files currently selected.");
                     return;
                 }
 
@@ -739,7 +687,7 @@ public class HDFView implements ViewManager {
                 }
                 catch (Exception ex) {
                     display.beep();
-                    Tools.showError(mainWindow, ex.getMessage(), shell.getText());
+                    Tools.showError(mainWindow, "Save", ex.getMessage());
                 }
             }
         });
@@ -750,6 +698,7 @@ public class HDFView implements ViewManager {
         item.setText("E&xit\tCtrl-Q");
         item.setAccelerator(SWT.MOD1 + 'Q');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 mainWindow.dispose();
             }
@@ -764,6 +713,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("&Cascade");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 cascadeWindows();
             }
@@ -772,6 +722,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("&Tile");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 tileWindows();
             }
@@ -782,6 +733,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText("Close &All");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeAllWindows();
             }
@@ -804,6 +756,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(convertMenu, SWT.PUSH);
         item.setText("HDF4");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF4);
             }
@@ -813,6 +766,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(convertMenu, SWT.PUSH);
         item.setText("HDF5");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF5);
             }
@@ -824,26 +778,46 @@ public class HDFView implements ViewManager {
         item = new MenuItem(toolsMenu, SWT.PUSH);
         item.setText("User &Options");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
-                userOptionDialog = new UserOptionsDialog(shell, rootDir);
+                // Create the preference manager
+                PreferenceManager mgr = new PreferenceManager();
 
+                // Create the nodes
+                UserOptionsNode one = new UserOptionsNode("general", new UserOptionsGeneralPage());
+                UserOptionsNode two = new UserOptionsNode("hdf", new UserOptionsHDFPage());
+                UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
+
+                // Add the nodes
+                mgr.addToRoot(one);
+                mgr.addToRoot(two);
+                mgr.addToRoot(three);
+
+                // Create the preferences dialog
+                userOptionDialog = new UserOptionsDialog(shell, mgr, rootDir);
+
+                // Set the preference store
+                userOptionDialog.setPreferenceStore(props);
+                userOptionDialog.create();
+
+                // Open the dialog
                 userOptionDialog.open();
 
-                if (userOptionDialog.isWorkDirChanged())
-                    currentDir = ViewProperties.getWorkDir();
+                //if (userOptionDialog.isWorkDirChanged())
+                currentDir = ViewProperties.getWorkDir();
 
-                if (userOptionDialog.isFontChanged()) {
-                    Font font = null;
+                //if (userOptionDialog.isFontChanged()) {
+                Font font = null;
 
-                    try {
-                        font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
-                    }
-                    catch (Exception ex) {
-                        font = null;
-                    }
-
-                    updateFont(font);
+                try {
+                    font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
                 }
+                catch (Exception ex) {
+                    font = null;
+                }
+
+                updateFont(font);
+                //}
             }
         });
 
@@ -852,6 +826,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(toolsMenu, SWT.PUSH);
         item.setText("&Register File Format");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 registerFileFormat();
             }
@@ -860,6 +835,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(toolsMenu, SWT.PUSH);
         item.setText("&Unregister File Format");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 unregisterFileFormat();
             }
@@ -874,6 +850,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("&User's Guide");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 org.eclipse.swt.program.Program.launch(HDFVIEW_USERSGUIDE_URL);
             }
@@ -895,6 +872,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&4 Library Version");
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
@@ -904,6 +882,7 @@ public class HDFView implements ViewManager {
         item.setText("HDF&5 Library Version");
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
@@ -912,6 +891,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("&Java Version");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new JavaVersionDialog(mainWindow).open();
             }
@@ -922,6 +902,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("Supported Fi&le Formats");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new SupportedFileFormatsDialog(mainWindow).open();
             }
@@ -932,6 +913,7 @@ public class HDFView implements ViewManager {
         item = new MenuItem(helpMenu, SWT.PUSH);
         item.setText("&About...");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new AboutDialog(mainWindow).open();
             }
@@ -951,8 +933,22 @@ public class HDFView implements ViewManager {
         openItem.setToolTipText("Open");
         openItem.setImage(ViewProperties.getFileopenIcon());
         openItem.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 openLocalFile(null, FileFormat.WRITE);
+            }
+        });
+
+        /*
+         * TODO: Create new Icon for read-only open button.
+         */
+        ToolItem openRItem = new ToolItem(toolBar, SWT.PUSH);
+        openRItem.setToolTipText("Open Read-Only");
+        openRItem.setImage(ViewProperties.getFileopenIcon());
+        openRItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                openLocalFile(null, FileFormat.READ);
             }
         });
 
@@ -962,6 +958,7 @@ public class HDFView implements ViewManager {
         closeItem.setImage(ViewProperties.getFilecloseIcon());
         closeItem.setToolTipText("Close");
         closeItem.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 closeFile(treeView.getSelectedFile());
             }
@@ -997,7 +994,7 @@ public class HDFView implements ViewManager {
                     org.eclipse.swt.program.Program.launch(ugPath);
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Help", ex.getMessage());
                 }
             }
         });
@@ -1008,6 +1005,7 @@ public class HDFView implements ViewManager {
         hdf4Item.setImage(ViewProperties.getH4Icon());
         hdf4Item.setToolTipText("HDF4 Library Version");
         hdf4Item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
@@ -1023,6 +1021,7 @@ public class HDFView implements ViewManager {
         hdf5Item.setImage(ViewProperties.getH5Icon());
         hdf5Item.setToolTipText("HDF5 Library Version");
         hdf5Item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
@@ -1048,6 +1047,7 @@ public class HDFView implements ViewManager {
         recentFilesButton.setToolTipText("List of recent files");
         recentFilesButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         recentFilesButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 url_bar.setListVisible(true);
             }
@@ -1061,6 +1061,7 @@ public class HDFView implements ViewManager {
         url_bar.deselectAll();
         url_bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         url_bar.addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent e) {
                 if(e.keyCode == SWT.CR) {
                     String filename = url_bar.getText();
@@ -1080,6 +1081,7 @@ public class HDFView implements ViewManager {
             }
         });
         url_bar.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String filename = url_bar.getText();
 
@@ -1100,6 +1102,7 @@ public class HDFView implements ViewManager {
         clearTextButton.setText("Clear Text");
         clearTextButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         clearTextButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 url_bar.setText("");
                 url_bar.deselectAll();
@@ -1121,7 +1124,7 @@ public class HDFView implements ViewManager {
         Composite statusArea = new Composite(content, SWT.NONE);
         statusArea.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-        SashForm contentArea = new SashForm(container, SWT.HORIZONTAL);
+        final SashForm contentArea = new SashForm(container, SWT.HORIZONTAL);
         contentArea.setSashWidth(10);
 
         // Add TreeView and DataView to content area pane
@@ -1130,27 +1133,43 @@ public class HDFView implements ViewManager {
         treeArea.setExpandHorizontal(true);
         treeArea.setExpandVertical(true);
 
-        attributeArea = new Composite(contentArea, SWT.BORDER);
-        attributeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-        attributeArea.setLayout(new GridLayout(1, true));
+        generalArea = new ScrolledComposite(contentArea, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        generalArea.setExpandHorizontal(true);
+        generalArea.setExpandVertical(true);
+        generalArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+        generalArea.setMinHeight(contentArea.getSize().y - 2);
 
-        // Could not load user's treeview, use default treeview.
-        if (treeView == null) treeView = new DefaultTreeView(this, treeArea);
+        // Create status area for displaying messages and metadata
+        status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
+        status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+        status.setEditable(false);
+        status.setFont(currentFont);
 
-        treeArea.setContent(treeView.getTree());
+        contentArea.addListener(SWT.Resize, new Listener() {
+            @Override
+            public void handleEvent(Event arg0) {
+                generalArea.setMinHeight(contentArea.getSize().y - 2);
+            }
+        });
 
         // Add drag and drop support for opening files
         DropTarget target = new DropTarget(treeArea, DND.DROP_COPY);
         final FileTransfer fileTransfer = FileTransfer.getInstance();
         target.setTransfer(new Transfer[] { fileTransfer });
         target.addDropListener(new DropTargetListener() {
+            @Override
             public void dragEnter(DropTargetEvent e) {
                 e.detail = DND.DROP_COPY;
             }
+            @Override
             public void dragOver(DropTargetEvent e) {}
+            @Override
             public void dragOperationChanged(DropTargetEvent e) { }
+            @Override
             public void dragLeave(DropTargetEvent e) {}
+            @Override
             public void dropAccept(DropTargetEvent e) {}
+            @Override
             public void drop(DropTargetEvent e) {
                 if (fileTransfer.isSupportedType(e.currentDataType)) {
                     String[] files = (String[]) e.data;
@@ -1161,17 +1180,36 @@ public class HDFView implements ViewManager {
             }
         });
 
-        // Create status area for displaying messages and metadata
-        status = new Text(statusArea, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
-        status.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-        status.setEditable(false);
-        status.setFont(currentFont);
-
         showStatus("HDFView root - " + rootDir);
         showStatus("User property file - " + ViewProperties.getPropertyFile());
 
-        content.setWeights(new int[] {9, 1});
-        contentArea.setWeights(new int[] {1, 3});
+        content.setWeights(new int[] { 9, 1 });
+        contentArea.setWeights(new int[] { 1, 3 });
+
+        log.trace("createContentArea(): load TreeView");
+
+        DataViewFactory treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
+        if (treeViewFactory == null) {
+            log.debug("createContentArea(): TreeView Factory is null");
+            return;
+        }
+
+        try {
+            treeView = treeViewFactory.getTreeView(treeArea, this);
+
+            if (treeView == null) {
+                log.debug("createContentArea(): error occurred while instantiating TreeView class");
+                this.showStatus("Error occurred while instantiating TreeView class - see log for more info");
+                return;
+            }
+        }
+        catch (ClassNotFoundException ex) {
+            log.debug("createContentArea(): no suitable TreeView class found");
+            this.showStatus("Unable to find suitable TreeView class");
+            return;
+        }
+
+        treeArea.setContent(treeView.getTree());
 
         log.info("Content Area created");
     }
@@ -1198,13 +1236,6 @@ public class HDFView implements ViewManager {
     }
 
     /**
-     * @return a list of textview implementations.
-     */
-    public static final List<?> getListOfTextViews() {
-        return textViews;
-    }
-
-    /**
      * @return a list of metaDataview implementations.
      */
     public static final List<?> getListOfMetaDataViews() {
@@ -1218,6 +1249,7 @@ public class HDFView implements ViewManager {
         return paletteViews;
     }
 
+    @Override
     public TreeView getTreeView() {
         return treeView;
     }
@@ -1232,664 +1264,68 @@ public class HDFView implements ViewManager {
      * @param msg
      *            the message to display.
      */
+    @Override
     public void showStatus(String msg) {
+        if (status == null) {
+            log.debug("showStatus(): status area is null");
+            return;
+        }
+
         status.append(msg);
         status.append("\n");
     }
 
     public void showMetaData(final HObject obj) {
-        for (Control control : attributeArea.getChildren()) control.dispose();
+        for (Control control : generalArea.getChildren()) control.dispose();
+        generalArea.setContent(null);
 
         if (obj == null) return;
 
-        log.trace("showMetaData: start");
+        log.trace("showMetaData(): start");
 
-        // Get the metadata information before adding GUI components */
-        int numAttributes = 0;
+        DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        if (metaDataViewFactory == null) return;
+
+        MetaDataView theView;
         try {
-            numAttributes = obj.getMetadata().size();
-        }
-        catch (Exception ex) {
-            log.debug("Error retrieving metadata of object " + obj.getName() + ":", ex);
-        }
+            theView = metaDataViewFactory.getMetaDataView(generalArea, this, obj);
 
-        boolean isRoot = ((obj instanceof Group) && ((Group) obj).isRoot());
-        boolean isH4 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
-        boolean isH5 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        FileFormat theFile = obj.getFileFormat();
-        String typeStr = "Unknown";
-        String fileInfo = "";
-
-        org.eclipse.swt.widgets.Group generalInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-        generalInfoGroup.setFont(currentFont);
-        generalInfoGroup.setText("General Object Info");
-        generalInfoGroup.setLayout(new GridLayout(2, false));
-        generalInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-        Label label;
-
-        if(isRoot) {
-            log.trace("showMetaData: isRoot");
-            long size = 0;
-            try {
-                size = (new File(obj.getFile())).length();
-            }
-            catch (Exception ex) {
-                size = -1;
-            }
-            size /= 1024;
-
-            int groupCount = 0, datasetCount = 0;
-
-            HObject root = theFile.getRootObject();
-            HObject theObj = null;
-            Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
-
-            while(it.hasNext()) {
-                theObj = it.next();
-
-                if(theObj instanceof Group) {
-                    groupCount++;
-                } else {
-                    datasetCount++;
-                }
-            }
-
-            fileInfo = "size=" + size + "K,  groups=" + groupCount + ",  datasets=" + datasetCount;
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("File Name: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(obj.getName());
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("File Path: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText((new File(obj.getFile())).getParent());
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("File Type: ");
-
-            if (isH5) {
-                typeStr = "HDF5,  " + fileInfo;
-            }
-            else if (isH4) {
-                typeStr = "HDF4,  " + fileInfo;
-            }
-            else {
-                typeStr = fileInfo;
-            }
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(typeStr);
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Number of Attributes: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(String.valueOf(numAttributes));
-
-            if (isH5) {
-                int[] libver = null;
-
-                try {
-                    libver = obj.getFileFormat().getLibBounds();
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                if (((libver[0] == 0) || (libver[0] == 1)) && (libver[1] == 1)) {
-                    label = new Label(generalInfoGroup, SWT.LEFT);
-                    label.setFont(currentFont);
-                    label.setText("Library version: ");
-                }
-
-                String libversion = null;
-                if ((libver[0] == 0) && (libver[1] == 1))
-                    libversion = "Earliest and Latest";
-                else if ((libver[0] == 1) && (libver[1] == 1)) libversion = "Latest and Latest";
-                else {
-                    libversion = "";
-                }
-
-                if (libversion.length() > 0) {
-                    label = new Label(generalInfoGroup, SWT.RIGHT);
-                    label.setFont(currentFont);
-                    label.setText(libversion);
-                }
-
-                Button userBlockButton = new Button(generalInfoGroup, SWT.PUSH);
-                userBlockButton.setText("Show User Block");
-                userBlockButton.addSelectionListener(new SelectionAdapter() {
-                    public void widgetSelected(SelectionEvent e) {
-                        new UserBlockDialog(mainWindow, SWT.NONE, obj).open();
-                    }
-                });
+            if (theView == null) {
+                log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
+                this.showStatus("Error occurred while instantiating MetaDataView class - see log for more info");
+                return;
             }
         }
-        else {
-            log.trace("showMetaData: is not root");
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Name: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(obj.getName());
-
-            if(isH5) {
-                if (obj.getLinkTargetObjName() != null) {
-                    final HObject theObj = obj;
-
-                    label = new Label(generalInfoGroup, SWT.LEFT);
-                    label.setFont(currentFont);
-                    label.setText("Link To Target: ");
-
-                    final Text linkTarget = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
-                    linkTarget.setFont(currentFont);
-                    linkTarget.setText(obj.getLinkTargetObjName());
-                    linkTarget.addTraverseListener(new TraverseListener() {
-                        public void keyTraversed(TraverseEvent e) {
-                            if (e.detail == SWT.TRAVERSE_RETURN) {
-                                Group pgroup = null;
-                                try {
-                                    pgroup = (Group) theObj.getFileFormat().get(theObj.getPath());
-                                }
-                                catch (Exception ex) {
-                                    log.debug("parent group:", ex);
-                                }
-                                if (pgroup == null) {
-                                    Tools.showError(mainWindow, "Parent group is null.", mainWindow.getText());
-                                    return;
-                                }
-
-                                String target_name = linkTarget.getText();
-                                if (target_name != null) target_name = target_name.trim();
-
-                                int linkType = Group.LINK_TYPE_SOFT;
-                                if (theObj.getLinkTargetObjName().contains(FileFormat.FILE_OBJ_SEP))
-                                    linkType = Group.LINK_TYPE_EXTERNAL;
-                                else if (target_name.equals("/")) { // do not allow to link to the root
-                                    Tools.showError(mainWindow, "Link to root not allowed.", mainWindow.getText());
-                                    return;
-                                }
-
-                                // no change
-                                if (target_name.equals(theObj.getLinkTargetObjName())) return;
-
-                                // invalid name
-                                if (target_name == null || target_name.length() < 1) return;
-
-                                try {
-                                    theObj.getFileFormat().createLink(pgroup, theObj.getName(), target_name, linkType);
-                                    theObj.setLinkTargetObjName(target_name);
-                                }
-                                catch (Exception ex) {
-                                    Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
-                                    return;
-                                }
-
-                                MessageDialog.openInformation(mainWindow, mainWindow.getText(), "Link target changed.");
-                            }
-                        }
-                    });
-                }
-            }
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Path: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(obj.getPath());
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Type: ");
-
-            if(isH5) {
-                if (obj instanceof Group) {
-                    typeStr = "HDF5 Group";
-                }
-                else if (obj instanceof ScalarDS) {
-                    typeStr = "HDF5 Scalar Dataset";
-                }
-                else if (obj instanceof CompoundDS) {
-                    typeStr = "HDF5 Compound Dataset";
-                }
-                else if (obj instanceof Datatype) {
-                    typeStr = "HDF5 Named Datatype";
-                }
-            }
-            else if(isH4) {
-                if (obj instanceof Group) {
-                    typeStr = "HDF4 Group";
-                }
-                else if (obj instanceof ScalarDS) {
-                    ScalarDS ds = (ScalarDS) obj;
-                    if (ds.isImage()) {
-                        typeStr = "HDF4 Raster Image";
-                    }
-                    else {
-                        typeStr = "HDF4 SDS";
-                    }
-                }
-                else if (obj instanceof CompoundDS) {
-                    typeStr = "HDF4 Vdata";
-                }
-            }
-            else {
-                if (obj instanceof Group) {
-                    typeStr = "Group";
-                }
-                else if (obj instanceof ScalarDS) {
-                    typeStr = "Scalar Dataset";
-                }
-                else if (obj instanceof CompoundDS) {
-                    typeStr = "Compound Dataset";
-                }
-            }
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(typeStr);
-
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Number of Attributes: ");
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(String.valueOf(numAttributes));
-
-            if (isH5) {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Object Ref:       ");
-            }
-            else {
-                label = new Label(generalInfoGroup, SWT.LEFT);
-                label.setFont(currentFont);
-                label.setText("Tag, Ref:        ");
-            }
-
-            // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
-            String oidStr = null;
-            long[] OID = obj.getOID();
-            if (OID != null) {
-                oidStr = String.valueOf(OID[0]);
-                if (isH4) oidStr += ", " + OID[1];
-            }
-
-            label = new Label(generalInfoGroup, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(oidStr);
+        catch (ClassNotFoundException ex) {
+            log.debug("showMetaData(): no suitable MetaDataView class found");
+            this.showStatus("Unable to find suitable MetaDataView class");
+            return;
         }
 
-        log.trace("showMetaData: object extra info");
-        // Add any extra information depending on object type
-        if (obj instanceof Group) {
-            log.trace("showMetaData: group object extra info");
-            Group g = (Group) obj;
-            List<?> mlist = g.getMemberList();
-            int n = mlist.size();
+        // String viewName = (String) HDFView.getListOfMetaDataViews().get(0);
+        //
+        // try {
+        // Class<?> theClass = Class.forName(viewName);
+        // if ("hdf.view.DefaultMetaDataView".equals(viewName)) {
+        // Object[] initargs = { generalArea, this, obj };
+        // Tools.newInstance(theClass, initargs);
+        // }
+        // else {
+        // Object[] initargs = { this, obj };
+        // Tools.newInstance(theClass, initargs);
+        // }
+        // }
+        // catch (Exception ex) {
+        // this.showStatus(ex.toString());
+        // }
 
-            if (mlist != null && n > 0) {
-                org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-                groupInfoGroup.setFont(currentFont);
-                groupInfoGroup.setText("Group Members");
-                groupInfoGroup.setLayout(new GridLayout(1, true));
-                groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-                if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
-                    label = new Label(groupInfoGroup, SWT.RIGHT);
-                    label.setFont(currentFont);
-                    label.setText("Number of members: " + n);
-                }
-                else {
-                    label = new Label(groupInfoGroup, SWT.RIGHT);
-                    label.setFont(currentFont);
-                    label.setText("Number of members: " + n + " (in memory),"
-                            + "" + g.getNumberOfMembersInFile() + " (in file)");
-                }
-
-                String rowData[][] = new String[n][2];
-                for (int i = 0; i < n; i++) {
-                    HObject theObj = (HObject) mlist.get(i);
-                    rowData[i][0] = theObj.getName();
-                    if (theObj instanceof Group) {
-                        rowData[i][1] = "Group";
-                    }
-                    else if (theObj instanceof Dataset) {
-                        rowData[i][1] = "Dataset";
-                    }
-                    else if (theObj instanceof Datatype) {
-                        rowData[i][1] = "Datatype";
-                    }
-                    else if (theObj instanceof H5Link) {
-                        rowData[i][1] = "Link";
-                    }
-                    else
-                        rowData[i][1] = "Unknown";
-                }
-
-                String[] columnNames = { "Name", "Type" };
-
-                Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
-                memberTable.setLinesVisible(true);
-                memberTable.setHeaderVisible(true);
-                memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-                memberTable.setFont(currentFont);
-
-                for(int i = 0; i < columnNames.length; i++) {
-                    TableColumn column = new TableColumn(memberTable, SWT.NONE);
-                    column.setText(columnNames[i]);
-                    column.setMoveable(false);
-                }
-
-                for(int i = 0; i < rowData.length; i++) {
-                    TableItem item = new TableItem(memberTable, SWT.NONE);
-                    item.setFont(currentFont);
-                    item.setText(0, rowData[i][0]);
-                    item.setText(1, rowData[i][1]);
-                }
-
-                for(int i = 0; i < columnNames.length; i++) {
-                    memberTable.getColumn(i).pack();
-                }
-
-                // set cell height for large fonts
-                //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
-                //table.setRowHeight(cellRowHeight);
-            }
-        }
-        else if (obj instanceof Dataset) {
-            log.trace("showMetaData: Dataset object extra info");
-            Dataset d = (Dataset) obj;
-            if (d.getRank() <= 0) {
-                d.init();
-            }
-
-            org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-            datasetInfoGroup.setFont(currentFont);
-            datasetInfoGroup.setText("Dataspace and Datatype");
-            datasetInfoGroup.setLayout(new GridLayout(1, true));
-            datasetInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            // Create composite for displaying dataset dimensions, dimension size,
-            // max dimension size, and data type
-            Composite dimensionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
-            dimensionComposite.setLayout(new GridLayout(2, false));
-            dimensionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("No. of Dimension(s): ");
-
-            Text text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText("" + d.getRank());
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Dimension Size(s): ");
-
-            // Set Dimension Size
-            String dimStr = null;
-            String maxDimStr = null;
-            long dims[] = d.getDims();
-            long maxDims[] = d.getMaxDims();
-            if (dims != null) {
-                String[] dimNames = d.getDimNames();
-                boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
-                StringBuffer sb = new StringBuffer();
-                StringBuffer sb2 = new StringBuffer();
-
-                sb.append(dims[0]);
-                if (hasDimNames) {
-                    sb.append(" (");
-                    sb.append(dimNames[0]);
-                    sb.append(")");
-                }
-
-                if (maxDims[0] < 0)
-                    sb2.append("Unlimited");
-                else
-                    sb2.append(maxDims[0]);
-
-                for (int i = 1; i < dims.length; i++) {
-                    sb.append(" x ");
-                    sb.append(dims[i]);
-                    if (hasDimNames) {
-                        sb.append(" (");
-                        sb.append(dimNames[i]);
-                        sb.append(")");
-                    }
-
-                    sb2.append(" x ");
-                    if (maxDims[i] < 0)
-                        sb2.append("Unlimited");
-                    else
-                        sb2.append(maxDims[i]);
-
-                }
-                dimStr = sb.toString();
-                maxDimStr = sb2.toString();
-            }
-
-            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText((dimStr == null) ? "null" : dimStr);
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Max Dimension Size(s): ");
-
-            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText((maxDimStr == null) ? "null" : maxDimStr);
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            label = new Label(dimensionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Data Type: ");
-
-            String type = null;
-            if (d instanceof ScalarDS) {
-                ScalarDS sd = (ScalarDS) d;
-                Datatype t = sd.getDatatype();
-                type = (t == null) ? "null" : t.getDatatypeDescription();
-            }
-            else if (d instanceof CompoundDS) {
-                if (isH4) {
-                    type = "Vdata";
-                }
-                else {
-                    type = "Compound";
-                }
-            }
-
-            text = new Text(dimensionComposite, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(currentFont);
-            text.setText(type);
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-
-            // Create composite for possible compound dataset info
-            if (d instanceof CompoundDS) {
-                log.trace("showMetaData: dataset Compound object extra info");
-                CompoundDS compound = (CompoundDS) d;
-
-                int n = compound.getMemberCount();
-                if (n > 0) {
-                    String rowData[][] = new String[n][3];
-                    String names[] = compound.getMemberNames();
-                    Datatype types[] = compound.getMemberTypes();
-                    int orders[] = compound.getMemberOrders();
-
-                    for (int i = 0; i < n; i++) {
-                        rowData[i][0] = new String(names[i]);
-
-                        if (rowData[i][0].contains(CompoundDS.separator)) {
-                            rowData[i][0] = rowData[i][0].replaceAll(CompoundDS.separator, "->");
-                        }
-
-                        int mDims[] = compound.getMemberDims(i);
-                        if (mDims == null) {
-                            rowData[i][2] = String.valueOf(orders[i]);
-
-                            if (isH4 && types[i].getDatatypeClass() == Datatype.CLASS_STRING) {
-                                rowData[i][2] = String.valueOf(types[i].getDatatypeSize());
-                            }
-                        }
-                        else {
-                            String mStr = String.valueOf(mDims[0]);
-                            int m = mDims.length;
-                            for (int j = 1; j < m; j++) {
-                                mStr += " x " + mDims[j];
-                            }
-                            rowData[i][2] = mStr;
-                        }
-                        rowData[i][1] = (types[i] == null) ? "null" : types[i].getDatatypeDescription();
-                    }
-
-                    String[] columnNames = { "Name", "Type", "Array Size" };
-
-                    Table memberTable = new Table(datasetInfoGroup, SWT.BORDER);
-                    memberTable.setLinesVisible(true);
-                    memberTable.setHeaderVisible(true);
-                    memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-                    memberTable.setFont(currentFont);
-
-                    for(int i = 0; i < columnNames.length; i++) {
-                        TableColumn column = new TableColumn(memberTable, SWT.NONE);
-                        column.setText(columnNames[i]);
-                        column.setMoveable(false);
-                    }
-
-                    for(int i = 0; i < rowData.length; i++) {
-                        TableItem item = new TableItem(memberTable, SWT.NONE);
-                        item.setFont(currentFont);
-                        item.setText(0, rowData[i][0]);
-                        item.setText(1, rowData[i][1]);
-                        item.setText(2, rowData[i][2]);
-                    }
-
-                    for(int i = 0; i < columnNames.length; i++) {
-                        memberTable.getColumn(i).pack();
-                    }
-
-                    // set cell height for large fonts
-                    //int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
-                    //table.setRowHeight(cellRowHeight);
-                } // if (n > 0)
-            } // if (d instanceof Compound)
-
-
-            // Create composite for displaying dataset storage layout, compression, filters,
-            // storage type, and fill value
-            Composite compressionComposite = new Composite(datasetInfoGroup, SWT.BORDER);
-            compressionComposite.setLayout(new GridLayout(2, false));
-            compressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            // Add compression and data layout information
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Storage Layout: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getStorageLayout());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Compression: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getCompression());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Filters: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getFilters());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Storage: ");
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(d.getStorage());
-
-            label = new Label(compressionComposite, SWT.LEFT);
-            label.setFont(currentFont);
-            label.setText("Fill value: ");
-
-            Object fillValue = null;
-            String fillValueInfo = "NONE";
-            if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
-            if (fillValue != null) {
-                if (fillValue.getClass().isArray()) {
-                    int len = Array.getLength(fillValue);
-                    fillValueInfo = Array.get(fillValue, 0).toString();
-                    for (int i = 1; i < len; i++) {
-                        fillValueInfo += ", ";
-                        fillValueInfo += Array.get(fillValue, i).toString();
-                    }
-                }
-                else
-                    fillValueInfo = fillValue.toString();
-            }
-
-            label = new Label(compressionComposite, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText(fillValueInfo);
-        }
-        else if (obj instanceof Datatype) {
-            log.trace("showMetaData: Datatype object extra info");
-            org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(attributeArea, SWT.NONE);
-            datatypeInfoGroup.setFont(currentFont);
-            datatypeInfoGroup.setText("Type");
-            datatypeInfoGroup.setLayout(new FillLayout());
-            datatypeInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-            Text infoArea = new Text(datatypeInfoGroup, SWT.MULTI);
-            infoArea.setFont(currentFont);
-            infoArea.setText(((Datatype) obj).getDatatypeDescription());
-            infoArea.setEditable(false);
-        }
-
-        attributeArea.layout();
-
-        log.trace("showMetaData: finish");
+        log.trace("showMetaData(): finish");
     }
 
     public void closeFile(FileFormat theFile) {
         if (theFile == null) {
             display.beep();
-            Tools.showError(mainWindow, "Select a file to close", mainWindow.getText());
+            Tools.showError(mainWindow, "Close", "Select a file to close");
             return;
         }
 
@@ -1897,12 +1333,14 @@ public class HDFView implements ViewManager {
         Shell[] views = display.getShells();
         if (views != null) {
             for (int i = 0; i < views.length; i++) {
-                DataView view = (DataView) views[i].getData();
+                Object shellData = views[i].getData();
 
-                if (view != null) {
-                    HObject obj = view.getDataObject();
+                if (!(shellData instanceof DataView)) continue;
 
-                    if (obj == null) continue;
+                if ((DataView) shellData != null) {
+                    HObject obj = ((DataView) shellData).getDataObject();
+
+                    if (obj == null || obj.getFileFormat() == null) continue;
 
                     if (obj.getFileFormat().equals(theFile)) {
                         views[i].dispose();
@@ -1914,7 +1352,7 @@ public class HDFView implements ViewManager {
 
         int index = url_bar.getSelectionIndex();
         if (index >= 0) {
-            String fName = (String) url_bar.getItem(url_bar.getSelectionIndex());
+            String fName = url_bar.getItem(url_bar.getSelectionIndex());
             if (theFile.getFilePath().equals(fName)) {
                 currentFile = null;
                 url_bar.setText("");
@@ -1928,7 +1366,8 @@ public class HDFView implements ViewManager {
 
         theFile = null;
 
-        for (Control control : attributeArea.getChildren()) control.dispose();
+        for (Control control : generalArea.getChildren()) control.dispose();
+        generalArea.setContent(null);
 
         System.gc();
     }
@@ -1980,20 +1419,16 @@ public class HDFView implements ViewManager {
                         FileFormat file = tableView.getDataObject().getFileFormat();
                         if (file.equals(theFile)) tableView.updateValueInFile();
                     }
-                    else if (theView instanceof TextView) {
-                        TextView textView = (TextView) theView;
-                        FileFormat file = textView.getDataObject().getFileFormat();
-                        if (file.equals(theFile)) textView.updateValueInFile();
-                    }
                 }
             }
         }
         catch (Exception ex) {
             display.beep();
-            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, "Save", ex.getMessage());
         }
     }
 
+    @Override
     public void addDataView(DataView dataView) {
         if (dataView == null || dataView instanceof MetaDataView) {
             return;
@@ -2003,7 +1438,7 @@ public class HDFView implements ViewManager {
         Shell[] shellList = display.getShells();
         if (shellList != null) {
             for (int i = 0; i < shellList.length; i++) {
-                if (dataView.equals((DataView) shellList[i].getData())
+                if (dataView.equals(shellList[i].getData())
                         && shellList[i].isVisible()) {
                     showWindow(shellList[i]);
                     return;
@@ -2017,11 +1452,13 @@ public class HDFView implements ViewManager {
         }
 
         HObject obj = dataView.getDataObject();
-        String fullPath = obj.getPath() + obj.getName();
+        String fullPath = ((obj.getPath() == null) ? "" : obj.getPath())
+                + ((obj.getName() == null) ? "" : obj.getName());
 
         MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText(fullPath);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 Shell[] sList = display.getShells();
 
@@ -2042,6 +1479,7 @@ public class HDFView implements ViewManager {
         mainWindow.setCursor(null);
     }
 
+    @Override
     public void removeDataView(DataView dataView) {
         if (mainWindow.isDisposed()) return;
 
@@ -2061,6 +1499,7 @@ public class HDFView implements ViewManager {
         }
     }
 
+    @Override
     public DataView getDataView(HObject dataObject) {
         Shell[] openShells = display.getShells();
         DataView view = null;
@@ -2072,6 +1511,8 @@ public class HDFView implements ViewManager {
 
             if (view != null) {
                 currentObj = view.getDataObject();
+                if (currentObj == null) continue;
+
                 currentFile = currentObj.getFileFormat();
 
                 if (currentObj.equals(dataObject) && currentFile.equals(dataObject.getFileFormat()))
@@ -2138,6 +1579,7 @@ public class HDFView implements ViewManager {
      */
     private void showWindow(final Shell shell) {
         shell.getDisplay().asyncExec(new Runnable() {
+            @Override
             public void run() {
                 shell.forceActive();
             }
@@ -2243,7 +1685,7 @@ public class HDFView implements ViewManager {
         if (filename != null) {
             File file = new File(filename);
             if(!file.exists()) {
-                Tools.showError(mainWindow, "File " + filename + " does not exist.", "Open File");
+                Tools.showError(mainWindow, "Open", "File " + filename + " does not exist.");
                 return;
             }
 
@@ -2273,7 +1715,7 @@ public class HDFView implements ViewManager {
                 catch (Throwable ex2) {
                     display.beep();
                     url_bar.deselectAll();
-                    Tools.showError(mainWindow, "Failed to open file " + filename + "\n" + ex2, mainWindow.getText());
+                    Tools.showError(mainWindow, "Open", "Failed to open file " + filename + "\n" + ex2);
                     currentFile = null;
                 }
             }
@@ -2300,7 +1742,7 @@ public class HDFView implements ViewManager {
                     chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
 
                     if(!chosenFiles[i].exists()) {
-                        Tools.showError(mainWindow, "File " + chosenFiles[i].getName() + " does not exist.", "Open File");
+                        Tools.showError(mainWindow, "Open", "File " + chosenFiles[i].getName() + " does not exist.");
                         continue;
                     }
 
@@ -2330,21 +1772,22 @@ public class HDFView implements ViewManager {
                         catch (Throwable ex2) {
                             display.beep();
                             url_bar.deselectAll();
-                            Tools.showError(mainWindow, "Failed to open file " + selectedFilenames[i] + "\n" + ex2, mainWindow.getText());
+                            Tools.showError(mainWindow, "Open", "Failed to open file " + selectedFilenames[i] + "\n" + ex2);
                             currentFile = null;
                         }
                     }
                 }
 
                 currentFile = chosenFiles[0].getAbsolutePath();
-            } else {
+            }
+            else {
                 // Prepend test file directory to filename
                 String fName = currentDir + File.separator + new InputDialog(mainWindow, "Enter a file name", "").open();
 
                 File chosenFile = new File(fName);
 
                 if(!chosenFile.exists()) {
-                    Tools.showError(mainWindow, "File " + chosenFile.getName() + " does not exist.", "Open File");
+                    Tools.showError(mainWindow, "Open", "File " + chosenFile.getName() + " does not exist.");
                     return;
                 }
 
@@ -2374,7 +1817,7 @@ public class HDFView implements ViewManager {
                     catch (Throwable ex2) {
                         display.beep();
                         url_bar.deselectAll();
-                        Tools.showError(mainWindow, "Failed to open file " + chosenFile + "\n" + ex2, mainWindow.getText());
+                        Tools.showError(mainWindow, "Open", "Failed to open file " + chosenFile + "\n" + ex2);
                         currentFile = null;
                     }
                 }
@@ -2427,7 +1870,7 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             url = null;
             display.beep();
-            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, "Open", ex.getMessage());
             return null;
         }
 
@@ -2441,7 +1884,7 @@ public class HDFView implements ViewManager {
         catch (Exception ex) {
             in = null;
             display.beep();
-            Tools.showError(mainWindow, ex.getMessage(), mainWindow.getText());
+            Tools.showError(mainWindow, "Open", ex.getMessage());
 
             try {
                 out.close();
@@ -2484,47 +1927,6 @@ public class HDFView implements ViewManager {
         return localFile;
     }
 
-    /** Open file from SRB server */
-    /*private void openFromSRB() throws Exception {
-        if (ctrSrbFileDialog == null) {
-            Class<?> theClass = null;
-
-            try {
-                theClass = Class.forName("hdf.srb.SRBFileDialog");
-            }
-            catch (Exception ex) {
-                theClass = null;
-                showStatus(ex.toString());
-                throw (new ClassNotFoundException("Cannot find SRBFileDialog"));
-            }
-
-            try {
-                @SuppressWarnings("rawtypes")
-                Class[] paramClass = { Class.forName("java.awt.Frame") };
-                ctrSrbFileDialog = theClass.getConstructor(paramClass);
-            }
-            catch (Exception ex) {
-                ctrSrbFileDialog = null;
-                throw (new InstantiationException("Cannot construct SRBFileDialog"));
-            }
-        }
-
-        if (srbFileDialog == null) {
-            //try {
-            //    Object[] paramObj = { (java.awt.Frame) this };
-            //   srbFileDialog = (JDialog) ctrSrbFileDialog.newInstance(paramObj);
-            //}
-            //catch (Exception ex) {
-            //    throw ex;
-            //}
-        }
-        else {
-            //srbFileDialog.setVisible(true);
-        }
-
-        // currentFile = srbFileDialog.getName();
-    }*/
-
     private void convertFile(String typeFrom, String typeTo) {
         ImageConversionDialog dialog = new ImageConversionDialog(mainWindow, typeFrom, typeTo,
                 currentDir, treeView.getCurrentFiles());
@@ -2558,11 +1960,11 @@ public class HDFView implements ViewManager {
 
     private void registerFileFormat() {
         String msg = "Register a new file format by \nKEY:FILE_FORMAT:FILE_EXTENSION\n"
-            + "where, KEY: the unique identifier for the file format"
-            + "\n           FILE_FORMAT: the full class name of the file format"
-            + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
-            + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
-            + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
+                + "where, KEY: the unique identifier for the file format"
+                + "\n           FILE_FORMAT: the full class name of the file format"
+                + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
+                + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
+                + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
 
         // TODO:Add custom HDFLarge icon to dialog
         InputDialog dialog = new InputDialog(mainWindow, "Register a file format", msg, SWT.ICON_INFORMATION);
@@ -2575,9 +1977,8 @@ public class HDFView implements ViewManager {
         int idx2 = str.lastIndexOf(':');
 
         if ((idx1 < 0) || (idx2 <= idx1)) {
-            Tools.showError(mainWindow, "Failed to register " + str
-                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION",
-                    "Register File Format");
+            Tools.showError(mainWindow, "Register File Format", "Failed to register " + str
+                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION");
             return;
         }
 
@@ -2592,14 +1993,13 @@ public class HDFView implements ViewManager {
         while (local_enum.hasMoreElements()) {
             theKey = (String) local_enum.nextElement();
             if (theKey.endsWith(key)) {
-                Tools.showError(mainWindow, "Invalid key: " + key + " is taken.", "Register File Format");
+                Tools.showError(mainWindow, "Register File Format", "Invalid key: " + key + " is taken.");
                 return;
             }
 
             theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
             if (theClassName.endsWith(className)) {
-                Tools.showError(mainWindow, "The file format has already been registered: " + className,
-                        "Register File Format");
+                Tools.showError(mainWindow, "Register File Format", "The file format has already been registered: " + className);
                 return;
             }
         }
@@ -2630,7 +2030,7 @@ public class HDFView implements ViewManager {
             }
         }
         catch (Throwable ex) {
-            Tools.showError(mainWindow, "Failed to register " + str + "\n\n" + ex, "Register File Format");
+            Tools.showError(mainWindow, "Register File Format", "Failed to register " + str + "\n\n" + ex);
             return;
         }
 
@@ -2647,7 +2047,7 @@ public class HDFView implements ViewManager {
         ArrayList<Object> keyList = new ArrayList<>();
 
         while (keys.hasMoreElements())
-            keyList.add((Object) keys.nextElement());
+            keyList.add(keys.nextElement());
 
         String theKey = new UnregisterFileFormatDialog(mainWindow, SWT.NONE, keyList).open();
 
@@ -2729,6 +2129,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             shell.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
@@ -2771,6 +2172,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     dialog.dispose();
                 }
@@ -2842,6 +2244,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     dialog.dispose();
                 }
@@ -2905,6 +2308,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     dialog.dispose();
                 }
@@ -2964,6 +2368,7 @@ public class HDFView implements ViewManager {
             formatChoiceCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
             formatChoiceCombo.select(0);
             formatChoiceCombo.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     formatChoice = formatChoiceCombo.getItem(formatChoiceCombo.getSelectionIndex());
                 }
@@ -2978,6 +2383,7 @@ public class HDFView implements ViewManager {
             okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
@@ -2988,6 +2394,7 @@ public class HDFView implements ViewManager {
             cancelButton.setText(" &Cancel ");
             cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     shell.dispose();
                 }
@@ -3001,7 +2408,7 @@ public class HDFView implements ViewManager {
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
@@ -3012,337 +2419,6 @@ public class HDFView implements ViewManager {
             }
 
             return formatChoice;
-        }
-    }
-
-    private class UserBlockDialog extends Dialog {
-        private Shell          shell;
-
-        private final HObject  obj;
-
-        private byte[]         userBlock;
-
-        private final String[] displayChoices = { "Text", "Binary", "Octal", "Hexadecimal", "Decimal" };
-
-        private Button         jamButton;
-        private Text           userBlockArea;
-
-        public UserBlockDialog(Shell parent, int style, HObject obj) {
-            super(parent, style);
-
-            this.obj = obj;
-
-            userBlock = Tools.getHDF5UserBlock(obj.getFile());
-        }
-
-        public void open() {
-            Shell parent = getParent();
-            shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE);
-            shell.setFont(currentFont);
-            shell.setText("User Block - " + obj);
-            shell.setLayout(new GridLayout(5, false));
-
-
-            Label label = new Label(shell, SWT.RIGHT);
-            label.setFont(currentFont);
-            label.setText("Display As: ");
-
-            Combo userBlockDisplayChoice = new Combo(shell, SWT.SINGLE | SWT.READ_ONLY);
-            userBlockDisplayChoice.setFont(currentFont);
-            userBlockDisplayChoice.setItems(displayChoices);
-            userBlockDisplayChoice.select(0);
-            userBlockDisplayChoice.addSelectionListener(new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
-                    Combo source = (Combo) e.widget;
-                    int type = 0;
-
-                    String typeName = (String) source.getItem(source.getSelectionIndex());
-
-                    jamButton.setEnabled(false);
-                    userBlockArea.setEditable(false);
-
-                    if (typeName.equalsIgnoreCase("Text")) {
-                        type = 0;
-                        jamButton.setEnabled(true);
-                        userBlockArea.setEditable(true);
-                    }
-                    else if (typeName.equalsIgnoreCase("Binary")) {
-                        type = 2;
-                    }
-                    else if (typeName.equalsIgnoreCase("Octal")) {
-                        type = 8;
-                    }
-                    else if (typeName.equalsIgnoreCase("Hexadecimal")) {
-                        type = 16;
-                    }
-                    else if (typeName.equalsIgnoreCase("Decimal")) {
-                        type = 10;
-                    }
-
-                    showUserBlockAs(type);
-                }
-            });
-
-            Label dummyLabel = new Label(shell, SWT.RIGHT);
-            dummyLabel.setFont(currentFont);
-            dummyLabel.setText("");
-            dummyLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-            Label sizeLabel = new Label(shell, SWT.RIGHT);
-            sizeLabel.setFont(currentFont);
-            sizeLabel.setText("Header Size (Bytes): 0");
-
-            jamButton = new Button(shell, SWT.PUSH);
-            jamButton.setFont(currentFont);
-            jamButton.setText("Save User Block");
-            jamButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-            jamButton.addSelectionListener(new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
-                    writeUserBlock();
-                }
-            });
-
-            ScrolledComposite userBlockScroller = new ScrolledComposite(shell, SWT.V_SCROLL | SWT.BORDER);
-            userBlockScroller.setExpandHorizontal(true);
-            userBlockScroller.setExpandVertical(true);
-            userBlockScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
-
-            userBlockArea = new Text(userBlockScroller, SWT.MULTI | SWT.WRAP);
-            userBlockArea.setEditable(true);
-            userBlockArea.setFont(currentFont);
-            userBlockScroller.setContent(userBlockArea);
-
-            Button closeButton = new Button(shell, SWT.CENTER);
-            closeButton.setFont(currentFont);
-            closeButton.setText(" &Close ");
-            closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 5, 1));
-            closeButton.addSelectionListener(new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
-                    shell.dispose();
-                }
-            });
-
-            if (userBlock != null) {
-                int headSize = showUserBlockAs(0);
-                sizeLabel.setText("Header Size (Bytes): " + headSize);
-            }
-            else {
-                userBlockDisplayChoice.setEnabled(false);
-            }
-
-
-            shell.pack();
-
-            Rectangle parentBounds = parent.getBounds();
-
-            Point shellSize = new Point((int) (0.5 * parentBounds.width), (int) (0.5 * parentBounds.height));
-            shell.setSize(shellSize);
-
-            shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-
-            shell.open();
-
-            Display display = parent.getDisplay();
-            while(!shell.isDisposed()) {
-                if (!display.readAndDispatch())
-                    display.sleep();
-            }
-        }
-
-        private int showUserBlockAs(int radix) {
-            if (userBlock == null) return 0;
-
-            int headerSize = 0;
-
-            String userBlockInfo = null;
-            if ((radix == 2) || (radix == 8) || (radix == 16) || (radix == 10)) {
-                StringBuffer sb = new StringBuffer();
-                for (headerSize = 0; headerSize < userBlock.length; headerSize++) {
-                    int intValue = (int) userBlock[headerSize];
-                    if (intValue < 0) {
-                        intValue += 256;
-                    }
-                    else if (intValue == 0) {
-                        break; // null end
-                    }
-                    sb.append(Integer.toString(intValue, radix));
-                    sb.append(" ");
-                }
-                userBlockInfo = sb.toString();
-            }
-            else {
-                userBlockInfo = new String(userBlock).trim();
-                if (userBlockInfo != null) {
-                    headerSize = userBlockInfo.length();
-                }
-            }
-
-            userBlockArea.setText(userBlockInfo);
-
-            return headerSize;
-        }
-
-        private void writeUserBlock() {
-            if (!obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                return;
-            }
-
-            int blkSize0 = 0;
-            if (userBlock != null) {
-                blkSize0 = userBlock.length;
-                // The super block space is allocated by offset 0, 512, 1024, 2048, etc
-                if (blkSize0 > 0) {
-                    int offset = 512;
-                    while (offset < blkSize0) {
-                        offset *= 2;
-                    }
-                    blkSize0 = offset;
-                }
-            }
-
-            int blkSize1 = 0;
-            String userBlockStr = userBlockArea.getText();
-            if (userBlockStr == null) {
-                if (blkSize0 <= 0) {
-                    return; // nothing to write
-                }
-                else {
-                    userBlockStr = " "; // want to wipe out old userblock content
-                }
-            }
-            byte buf[] = null;
-            buf = userBlockStr.getBytes();
-
-            blkSize1 = buf.length;
-            if (blkSize1 <= blkSize0) {
-                java.io.RandomAccessFile raf = null;
-                try {
-                    raf = new java.io.RandomAccessFile(obj.getFile(), "rw");
-                }
-                catch (Exception ex) {
-                    Tools.showError(shell, "Can't open output file: " + obj.getFile(), shell.getText());
-                    return;
-                }
-
-                try {
-                    raf.seek(0);
-                    raf.write(buf, 0, buf.length);
-                    raf.seek(buf.length);
-                    if (blkSize0 > buf.length) {
-                        byte[] padBuf = new byte[blkSize0 - buf.length];
-                        raf.write(padBuf, 0, padBuf.length);
-                    }
-                }
-                catch (Exception ex) {
-                    log.debug("raf write:", ex);
-                }
-                try {
-                    raf.close();
-                }
-                catch (Exception ex) {
-                    log.debug("raf close:", ex);
-                }
-
-                MessageDialog.openInformation(shell, shell.getText(), "Saving user block is successful.");
-            }
-            else {
-                // must rewrite the whole file
-                MessageDialog confirm = new MessageDialog(shell, shell.getText(), null,
-                        "The user block to write is " + blkSize1 + " (bytes),\n"
-                        + "which is larger than the user block space in file " + blkSize0 + " (bytes).\n"
-                        + "To expand the user block, the file must be rewriten.\n\n"
-                        + "Do you want to replace the current file? Click "
-                        + "\n\"Yes\" to replace the current file," + "\n\"No\" to save to a different file, "
-                        + "\n\"Cancel\" to quit without saving the change.\n\n ",
-                        MessageDialog.QUESTION_WITH_CANCEL, new String[] { "Yes", "No", "Cancel" }, 0);
-                int op = confirm.open();
-
-                if(op == 2) return;
-
-                String fin = obj.getFile();
-
-                String fout = fin + "~copy.h5";
-                if (fin.endsWith(".h5")) {
-                    fout = fin.substring(0, fin.length() - 3) + "~copy.h5";
-                }
-                else if (fin.endsWith(".hdf5")) {
-                    fout = fin.substring(0, fin.length() - 5) + "~copy.h5";
-                }
-
-                File outFile = null;
-
-                if (op == 1) {
-                    FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
-                    fChooser.setFileName(fout);
-
-                    DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
-                    fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
-                    fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
-                    fChooser.setFilterIndex(1);
-
-                    if(fChooser.open() == null) return;
-
-                    File chosenFile = new File(fChooser.getFileName());
-
-                    outFile = chosenFile;
-                    fout = outFile.getAbsolutePath();
-                }
-                else {
-                    outFile = new File(fout);
-                }
-
-                if (!outFile.exists()) {
-                    try {
-                        outFile.createNewFile();
-                    }
-                    catch (Exception ex) {
-                        Tools.showError(shell, "Failed to write user block into file.", shell.getText());
-                        return;
-                    }
-                }
-
-                // close the file
-                TreeView view = getTreeView();
-
-                try {
-                    view.closeFile(view.getSelectedFile());
-                }
-                catch (Exception ex) {
-                    log.debug("Error closing file {}", fin);
-                }
-
-                if (Tools.setHDF5UserBlock(fin, fout, buf)) {
-                    if (op == 1) {
-                        fin = fout; // open the new file
-                    }
-                    else {
-                        File oldFile = new File(fin);
-                        boolean status = oldFile.delete();
-                        if (status) {
-                            outFile.renameTo(oldFile);
-                        }
-                        else {
-                            Tools.showError(shell, "Cannot replace the current file.\nPlease save to a different file.", shell.getText());
-                            outFile.delete();
-                        }
-                    }
-                }
-                else {
-                    Tools.showError(shell, "Failed to write user block into file.", shell.getText());
-                    outFile.delete();
-                }
-
-                // reopen the file
-                shell.dispose();
-
-                try {
-                    view.openFile(fin, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
-                }
-                catch (Exception ex) {
-                    log.debug("Error opening file {}", fin);
-                }
-            }
         }
     }
 
@@ -3364,19 +2440,19 @@ public class HDFView implements ViewManager {
 
         String rootDir = System.getProperty("hdfview.workdir");
         log.trace("main: rootDir = {} ", rootDir);
-        if(rootDir == null) rootDir = System.getProperty("user.dir");
+        if(rootDir == null)
+            rootDir = System.getProperty("user.dir");
 
         File tmpFile = null;
         Monitor primaryMonitor = display.getPrimaryMonitor();
         Point margin = new Point(primaryMonitor.getBounds().width,
-                          primaryMonitor.getBounds().height);
-
+                primaryMonitor.getBounds().height);
 
         int j = args.length;
-        int W = margin.x / 2,
-            H = margin.y,
-            X = 0,
-            Y = 0;
+        int W = margin.x / 2;
+        int H = margin.y;
+        int X = 0;
+        int Y = 0;
 
         for(int i = 0; i < args.length; i++) {
             if ("-root".equalsIgnoreCase(args[i])) {
@@ -3385,12 +2461,10 @@ public class HDFView implements ViewManager {
                     j--;
                     tmpFile = new File(args[++i]);
 
-                    if(tmpFile.isDirectory()) {
+                    if(tmpFile.isDirectory())
                         rootDir = tmpFile.getPath();
-                    }
-                    else if(tmpFile.isFile()) {
+                    else if(tmpFile.isFile())
                         rootDir = tmpFile.getParent();
-                    }
                 }
                 catch (Exception ex) {}
             }
@@ -3441,7 +2515,7 @@ public class HDFView implements ViewManager {
             }
             else if("-java.version".equalsIgnoreCase(args[i])) {
                 /* Set icon to ViewProperties.getLargeHdfIcon() */
-                MessageDialog.openInformation(mainWindow, mainWindow.getText(), JAVA_VER_INFO);
+                Tools.showInformation(mainWindow, "Java Version", JAVA_VER_INFO);
                 System.exit(0);
             }
         }
@@ -3468,6 +2542,7 @@ public class HDFView implements ViewManager {
         final int the_X = X, the_Y = Y, the_W = W, the_H = H;
 
         display.syncExec(new Runnable() {
+            @Override
             public void run() {
                 HDFView app = new HDFView(the_rootDir);
 

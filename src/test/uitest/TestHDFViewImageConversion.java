@@ -1,6 +1,7 @@
 package test.uitest;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -8,6 +9,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Test;
@@ -54,15 +56,19 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             items[0].getNode(0).click();
 
             // Test metadata
-			val = bot.labelInGroup("General Object Info", 1).getText();
+
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.textWithLabel("Name: ").getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image name", JPGFILE, val),
                     val.equals(JPGFILE));       // Test dataset name
 
-			val = bot.textInGroup("Dataspace and Datatype", 0).getText();
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image rank", "2", val),
                     val.equals("2"));           // Test rank
 
-			val = bot.textInGroup("Dataspace and Datatype", 1).getText();
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image dimension sizes", "533 x 533", val),
                     val.equals("533 x 533"));   // Test dimension sizes
 
@@ -88,9 +94,11 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {
@@ -136,19 +144,21 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             assertTrue("convertImageToHDF5() filetree is missing image '" + JPGFILE + "'",
                     items[0].getNode(0).getText().compareTo(JPGFILE) == 0);
 
-
             // Test metadata
             items[0].getNode(0).click();
 
-			val = bot.labelInGroup("General Object Info", 1).getText();
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.textWithLabel("Name: ").getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image name", JPGFILE, val),
                     val.equals(JPGFILE));           // Test dataset name
 
-			val = bot.textInGroup("Dataspace and Datatype", 0).getText();
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image rank", "3", val),
                     val.equals("3"));               // Test rank
 
-			val = bot.textInGroup("Dataspace and Datatype", 1).getText();
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 1).getText();
             assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image dimension sizes", "533 x 533 x 3", val),
                     val.equals("533 x 533 x 3"));   // Test dimension sizes
 
@@ -174,9 +184,11 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {

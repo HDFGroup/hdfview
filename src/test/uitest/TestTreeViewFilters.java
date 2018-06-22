@@ -1,48 +1,25 @@
 package test.uitest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.command.LayerCommandUtil;
-import org.eclipse.nebula.widgets.nattable.layer.ILayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
-import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
-import org.eclipse.nebula.widgets.nattable.viewport.command.ShowColumnInViewportCommand;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
-
-import static org.hamcrest.Matcher.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
 import org.junit.Ignore;
+import org.junit.Test;
 
 public class TestTreeViewFilters extends AbstractWindowTest {
-    @Ignore
+    @Test
     public void openHDF5Filters() {
         String filename = "tfilters";
         String file_ext = ".h5";
@@ -81,15 +58,16 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             //SelectionLayer selectionLayer = ((BodyLayerStack)((GridLayer)nTable.getLayer()).getBodyLayer()).getSelectionLayer();
             //ViewportLayer viewportLayer = new ViewportLayer(ntable.getViewportLayer());
             //ntable.getUnderlyingLayer().doCommand(new ShowColumnInViewportCommand(selectionLayer, 10));
-            table.click(1, 10);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "9", val),
-                    val.equals("9"));
+            // TODO disabled until non-visible scrolling available
+            // table.click(1, 10);
+            // val = tableShell.bot().text(0).getText();
+            // assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "9", val),
+            // val.equals("9"));
 
-            table.click(12, 5);
+            table.click(4, 2);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "114", val),
-                    val.equals("114"));
+            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "15", val),
+                    val.equals("15"));
 
             tableShell.bot().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -105,24 +83,27 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            table.click(10, 2);
+            table.click(4, 2);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "91", val),
-                    val.equals("91"));
+            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "31", val),
+                    val.equals("31"));
 
-            table.click(20, 2);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "191", val),
-                    val.equals("191"));
+            // TODO disabled until non-visible scrolling available
+            // table.click(20, 2);
+            // val = tableShell.bot().text(0).getText();
+            // assertTrue(constructWrongValueMessage("openHDF5Filters()", "wrong data", "191", val),
+            // val.equals("191"));
 
             tableShell.bot().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -142,7 +123,6 @@ public class TestTreeViewFilters extends AbstractWindowTest {
         String filename = "tfilters";
         String file_ext = ".h5";
         String filtername = "fletcher32";
-        SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
@@ -156,37 +136,40 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             items[0].getNode(10).setFocus();
             items[0].getNode(10).click();
-            org.hamcrest.Matcher<Shell> shellMatcher=org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withText("Dataspace and Datatype");
-            bot.waitUntil(Conditions.waitForWidget(shellMatcher));
-            SWTBotLabel label = bot.label("Storage Layout: ");
-            assertFalse("label is null", label == null);
-            Widget widget = SWTUtils.nextWidget(label.widget);
-            SWTBotLabel data = new SWTBotLabel((Label)widget, null);
-            String val = data.getText();
+
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            String val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
+            assertTrue("label matches", val.equals("Storage Layout: "));
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
             assertTrue(constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val),
                     val.equals("CHUNKED: 10 X 5"));
-            label = bot.label("Filters: ");
-            widget = SWTUtils.nextWidget(label.widget);
-            data = new SWTBotLabel((Label)widget, null);
-            val = data.getText();
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
+            assertTrue("label matches", val.equals("Filters: "));
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(constructWrongValueMessage("checkHDF5Filters()", "wrong data", "USERDEFINED myfilter(405): 5, 6", val),
                     val.equals("USERDEFINED myfilter(405): 5, 6"));
 
             items[0].getNode(14).setFocus();
             items[0].getNode(14).click();
-            bot.waitUntil(Conditions.waitForWidget(shellMatcher));
-            label = bot.label("Storage Layout: ");
-            widget = SWTUtils.nextWidget(label.widget);
-            data = new SWTBotLabel((Label)widget, null);
-            val = data.getText();
+
+            tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
+            assertTrue("label matches", val.equals("Storage Layout: "));
+            val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
             assertTrue(constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val),
                     val.equals("CHUNKED: 10 X 5"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {

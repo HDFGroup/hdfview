@@ -2,6 +2,7 @@ package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -117,9 +118,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -223,9 +226,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -329,9 +334,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -435,9 +442,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -541,9 +550,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -650,9 +661,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -759,9 +772,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -868,9 +883,11 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
