@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -37,6 +37,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+
 
 /**
  * H5File is an implementation of the FileFormat class for HDF5 files.
@@ -111,8 +112,10 @@ public class H5File extends FileFormat {
      * The library version bounds
      */
     private int[] libver;
-
-    private boolean attrFlag;
+    public static final int LIBVER_LATEST = HDF5Constants.H5F_LIBVER_LATEST;
+    public static final int LIBVER_EARLIEST = HDF5Constants.H5F_LIBVER_EARLIEST;
+    public static final int LIBVER_V18 = HDF5Constants.H5F_LIBVER_V18;
+    public static final int LIBVER_V110 = HDF5Constants.H5F_LIBVER_V110;
 
     /***************************************************************************
      * Constructor
@@ -170,7 +173,16 @@ public class H5File extends FileFormat {
         // Call FileFormat ctor to set absolute path name
         super(fileName);
         libver = new int[2];
-        attrFlag = false;
+
+        if ((access & FILE_CREATE_OPEN) == FILE_CREATE_OPEN) {
+            File f = new File(fileName);
+            if (f.exists()) {
+                access = WRITE;
+            }
+            else {
+                access = CREATE;
+            }
+        }
 
         // set metadata for the instance
         rootObject = null;
@@ -327,276 +339,272 @@ public class H5File extends FileFormat {
     /**
      * Returns a list of attributes for the specified object.
      * <p>
-     * This method returns a list containing the attributes associated with the identified object. If there are no
-     * associated attributes, an empty list will be returned.
+     * This method returns a list containing the attributes associated with the
+     * identified object. If there are no associated attributes, an empty list will
+     * be returned.
      * <p>
-     * Attribute names exceeding 256 characters will be truncated in the returned list.
+     * Attribute names exceeding 256 characters will be truncated in the returned
+     * list.
      *
-     * @param objID
-     *            The identifier for the object whose attributes are to be returned.
+     * @param obj
+     *            The HObject whose attributes are to be returned.
      *
      * @return The list of the object's attributes.
      *
      * @throws HDF5Exception
-     *             If an underlying HDF library routine is unable to perform a step necessary to retrieve the
-     *             attributes. A variety of failures throw this exception.
+     *             If an underlying HDF library routine is unable to perform a step
+     *             necessary to retrieve the attributes. A variety of failures throw
+     *             this exception.
      *
      * @see #getAttribute(long,int,int)
      */
-    public static final List<Attribute> getAttribute(long objID) throws HDF5Exception {
-        return H5File.getAttribute(objID, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC);
+    public static final List<Attribute> getAttribute(HObject obj) throws HDF5Exception {
+        return H5File.getAttribute(obj, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC);
     }
 
     /**
-     * Returns a list of attributes for the specified object, in creation or alphabetical order.
+     * Returns a list of attributes for the specified object, in creation or
+     * alphabetical order.
      * <p>
-     * This method returns a list containing the attributes associated with the identified object. If there are no
-     * associated attributes, an empty list will be returned. The list of attributes returned can be in increasing or
+     * This method returns a list containing the attributes associated with the
+     * identified object. If there are no associated attributes, an empty list will
+     * be returned. The list of attributes returned can be in increasing or
      * decreasing, creation or alphabetical order.
      * <p>
-     * Attribute names exceeding 256 characters will be truncated in the returned list.
+     * Attribute names exceeding 256 characters will be truncated in the returned
+     * list.
      *
-     * @param objID
-     *            The identifier for the object whose attributes are to be returned.
+     * @param obj
+     *            The HObject whose attributes are to be returned.
      * @param idx_type
      *            The type of index. Valid values are:
      *            <ul>
-     *            <li>H5_INDEX_NAME: An alpha-numeric index by attribute name <li>H5_INDEX_CRT_ORDER: An index by
-     *            creation order
+     *            <li>H5_INDEX_NAME: An alpha-numeric index by attribute name
+     *            <li>H5_INDEX_CRT_ORDER: An index by creation order
      *            </ul>
      * @param order
      *            The index traversal order. Valid values are:
      *            <ul>
-     *            <li>H5_ITER_INC: A top-down iteration incrementing the index position at each step. <li>H5_ITER_DEC: A
-     *            bottom-up iteration decrementing the index position at each step.
+     *            <li>H5_ITER_INC: A top-down iteration incrementing the index
+     *            position at each step.
+     *            <li>H5_ITER_DEC: A bottom-up iteration decrementing the index
+     *            position at each step.
      *            </ul>
      *
      * @return The list of the object's attributes.
      *
      * @throws HDF5Exception
-     *             If an underlying HDF library routine is unable to perform a step necessary to retrieve the
-     *             attributes. A variety of failures throw this exception.
+     *             If an underlying HDF library routine is unable to perform a step
+     *             necessary to retrieve the attributes. A variety of failures throw
+     *             this exception.
      */
 
-    public static final List<Attribute> getAttribute(long objID, int idx_type, int order) throws HDF5Exception {
-        log.trace("getAttribute(): start: objID={} idx_type={} order={}", objID, idx_type, order);
+    public static final List<Attribute> getAttribute(HObject obj, int idx_type, int order) throws HDF5Exception {
+        log.trace("getAttribute(): start: obj={} idx_type={} order={}", obj, idx_type, order);
         List<Attribute> attributeList = null;
+        long objID = -1;
         long aid = -1;
         long sid = -1;
         long tid = -1;
         H5O_info_t obj_info = null;
 
-        try {
-            obj_info = H5.H5Oget_info(objID);
-        }
-        catch (Exception ex) {
-            log.debug("getAttribute(): H5Oget_info(objID {}) failure: ", objID, ex);
-        }
-        if (obj_info.num_attrs <= 0) {
-            log.debug("getAttribute(): no attributes");
-            log.trace("getAttribute(): finish");
-            return (attributeList = new Vector<Attribute>());
-        }
-
-        int n = (int) obj_info.num_attrs;
-        attributeList = new Vector<Attribute>(n);
-        log.trace("getAttribute(): num_attrs={}", n);
-
-        for (int i = 0; i < n; i++) {
-            long lsize = 1;
-            log.trace("getAttribute(): attribute[{}]", i);
-
+        objID = obj.open();
+        if (objID >= 0) {
             try {
-                aid = H5.H5Aopen_by_idx(objID, ".", idx_type, order, i, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
-                sid = H5.H5Aget_space(aid);
-
-                long dims[] = null;
-                int rank = H5.H5Sget_simple_extent_ndims(sid);
-
-                if (rank > 0) {
-                    dims = new long[rank];
-                    H5.H5Sget_simple_extent_dims(sid, dims, null);
-                    log.trace("getAttribute(): Attribute[{}] rank={}, dims={}", i, rank, dims);
-                    for (int j = 0; j < dims.length; j++) {
-                        lsize *= dims[j];
-                    }
-                }
-                String nameA = H5.H5Aget_name(aid);
-                log.trace("getAttribute(): Attribute[{}] is {}", i, nameA);
-
-                long tmptid = -1;
                 try {
-                    tmptid = H5.H5Aget_type(aid);
-                    tid = H5.H5Tget_native_type(tmptid);
-                    log.trace("getAttribute(): Attribute[{}] tid={} native tmptid={} from aid={}", i, tid, tmptid, aid);
-                }
-                finally {
-                    try {
-                        H5.H5Tclose(tmptid);
-                    }
-                    catch (Exception ex) {
-                        log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
-                    }
-                }
-                Datatype attrType = new H5Datatype(tid);
-                Attribute attr = new Attribute(nameA, attrType, dims);
-                attributeList.add(attr);
-                log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attrType.getDatatypeDescription());
-
-                boolean is_variable_str = false;
-                boolean isVLEN = false;
-                boolean isCompound = false;
-                boolean isScalar = false;
-                int tclass = H5.H5Tget_class(tid);
-
-                if (dims == null)
-                    isScalar = true;
-                try {
-                    is_variable_str = H5.H5Tis_variable_str(tid);
+                    log.trace("getAttribute(): get obj_info");
+                    obj_info = H5.H5Oget_info(objID);
                 }
                 catch (Exception ex) {
-                    log.debug("getAttribute(): Attribute[{}] H5Tis_variable_str(tid {}) failure: ", i, tid, ex);
+                    log.debug("getAttribute(): H5Oget_info(objID {}) failure: ", objID, ex);
                 }
-                isVLEN = (tclass == HDF5Constants.H5T_VLEN);
-                isCompound = (tclass == HDF5Constants.H5T_COMPOUND);
-                log.trace(
-                        "getAttribute(): Attribute[{}] has size={} isCompound={} isScalar={} is_variable_str={} isVLEN={}",
-                        i, lsize, isCompound, isScalar, is_variable_str, isVLEN);
-
-                // retrieve the attribute value
-                if (lsize <= 0) {
-                    log.debug("getAttribute(): Attribute[{}] lsize <= 0", i);
-                    log.trace("getAttribute(): Attribute[{}] continue", i);
-                    continue;
+                if (obj_info.num_attrs <= 0) {
+                    log.trace("getAttribute(): no attributes");
+                    log.trace("getAttribute(): finish");
+                    return (attributeList = new Vector<>());
                 }
 
-                if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) {
-                    log.debug("getAttribute(): Attribute[{}] lsize outside valid Java int range; unsafe cast", i);
-                    log.trace("getAttribute(): Attribute[{}] continue", i);
-                    continue;
-                }
+                int n = (int) obj_info.num_attrs;
+                attributeList = new Vector<>(n);
+                log.trace("getAttribute(): num_attrs={}", n);
 
-                Object value = null;
-                if (is_variable_str) {
-                    String[] strs = new String[(int) lsize];
-                    for (int j = 0; j < lsize; j++) {
-                        strs[j] = "";
-                    }
+                for (int i = 0; i < n; i++) {
+                    long lsize = 1;
+                    log.trace("getAttribute(): attribute[{}]", i);
+
                     try {
-                        log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
-                        H5.H5AreadVL(aid, tid, strs);
-                    }
-                    catch (Exception ex) {
-                        log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
-                        ex.printStackTrace();
-                    }
-                    value = strs;
-                }
-                else if (isCompound || (isScalar && tclass == HDF5Constants.H5T_ARRAY)) {
-                    String[] strs = new String[(int) lsize];
-                    for (int j = 0; j < lsize; j++) {
-                        strs[j] = "";
-                    }
-                    try {
-                        log.trace("getAttribute: attribute[{}] H5AreadComplex", i);
-                        H5.H5AreadComplex(aid, tid, strs);
-                    }
-                    catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    value = strs;
-                }
-                else if (isVLEN) {
-                    String[] strs = new String[(int) lsize];
-                    for (int j = 0; j < lsize; j++) {
-                        strs[j] = "";
-                    }
-                    try {
-                        log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
-                        H5.H5AreadComplex(aid, tid, strs);
-                    }
-                    catch (Exception ex) {
-                        log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
-                        ex.printStackTrace();
-                    }
-                    value = strs;
-                }
-                else {
-                    value = H5Datatype.allocateArray(tid, (int) lsize);
-                    if (value == null) {
-                        log.debug("getAttribute(): Attribute[{}] allocateArray returned null", i);
-                        log.trace("getAttribute(): Attribute[{}] continue", i);
-                        continue;
-                    }
+                        aid = H5.H5Aopen_by_idx(objID, ".", idx_type, order, i, HDF5Constants.H5P_DEFAULT,
+                                HDF5Constants.H5P_DEFAULT);
+                        sid = H5.H5Aget_space(aid);
+                        log.trace("getAttribute(): Attribute[{}] aid={} sid={}", i, aid, sid);
 
-                    if (tclass == HDF5Constants.H5T_ARRAY) {
-                        long tmptid1 = -1, tmptid2 = -1;
-                        try {
-                            log.trace("getAttribute(): Attribute[{}] H5Aread ARRAY tid={}", i, tid);
-                            H5.H5Aread(aid, tid, value);
+                        long dims[] = null;
+                        int rank = H5.H5Sget_simple_extent_ndims(sid);
+
+                        if (rank > 0) {
+                            dims = new long[rank];
+                            H5.H5Sget_simple_extent_dims(sid, dims, null);
+                            log.trace("getAttribute(): Attribute[{}] rank={}, dims={}", i, rank, dims);
+                            for (int j = 0; j < dims.length; j++) {
+                                lsize *= dims[j];
+                            }
                         }
-                        catch (Exception ex) {
-                            log.debug("getAttribute(): Attribute[{}] H5Aread failure: ", i, ex);
-                            ex.printStackTrace();
+                        String nameA = H5.H5Aget_name(aid);
+                        log.trace("getAttribute(): Attribute[{}] is {}", i, nameA);
+
+                        long tmptid = -1;
+                        try {
+                            tmptid = H5.H5Aget_type(aid);
+                            tid = H5.H5Tget_native_type(tmptid);
+                            log.trace("getAttribute(): Attribute[{}] tid={} native tmptid={} from aid={}", i, tid,
+                                    tmptid, aid);
                         }
                         finally {
                             try {
-                                H5.H5Tclose(tmptid1);
+                                H5.H5Tclose(tmptid);
                             }
                             catch (Exception ex) {
-                                log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i, tmptid1, ex);
-                            }
-                            try {
-                                H5.H5Tclose(tmptid2);
-                            }
-                            catch (Exception ex) {
-                                log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i, tmptid2, ex);
+                                log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
                             }
                         }
-                    }
-                    else {
-                        log.trace("getAttribute(): Attribute[{}] H5Aread", i);
-                        H5.H5Aread(aid, tid, value);
-                    }
+                        H5Datatype attrType = new H5Datatype(tid);
+                        Attribute attr = new Attribute(obj, nameA, attrType, dims);
+                        attributeList.add(attr);
+                        log.debug("getAttribute(): Attribute[{}] Datatype={}", i, attr.getDatatype().getDescription());
+                        log.trace(
+                                "getAttribute(): Attribute[{}] has size={} isCompound={} isScalar={} is_variable_str={} isVLEN={}",
+                                i, lsize, attr.getDatatype().isCompound(), attr.isScalar(), attr.getDatatype().isVarStr(), attr.getDatatype().isVLEN());
 
-                    if (tclass == HDF5Constants.H5T_STRING) {
-                        log.trace("getAttribute(): Attribute[{}] byteToString", i);
-                        value = Dataset.byteToString((byte[]) value, (int)H5.H5Tget_size(tid));
-                    }
-                    else if (tclass == HDF5Constants.H5T_REFERENCE) {
-                        log.trace("getAttribute(): Attribute[{}] byteToLong", i);
-                        value = HDFNativeData.byteToLong((byte[]) value);
-                    }
-                }
+                        // retrieve the attribute value
+                        if (lsize <= 0) {
+                            log.debug("getAttribute(): Attribute[{}] lsize <= 0", i);
+                            log.trace("getAttribute(): Attribute[{}] continue", i);
+                            continue;
+                        }
 
-                attr.setValue(value);
+                        if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) {
+                            log.debug("getAttribute(): Attribute[{}] lsize outside valid Java int range; unsafe cast",
+                                    i);
+                            log.trace("getAttribute(): Attribute[{}] continue", i);
+                            continue;
+                        }
 
-            }
-            catch (HDF5Exception ex) {
-                log.debug("getAttribute(): Attribute[{}] inspection failure: ", i, ex);
+                        Object value = null;
+                        if (attr.getDatatype().isVarStr()) {
+                            String[] strs = new String[(int) lsize];
+                            for (int j = 0; j < lsize; j++) {
+                                strs[j] = "";
+                            }
+                            try {
+                                log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
+                                H5.H5AreadVL(aid, tid, strs);
+                            }
+                            catch (Exception ex) {
+                                log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
+                                ex.printStackTrace();
+                            }
+                            value = strs;
+                        }
+                        else if (attr.getDatatype().isCompound()) {
+                            String[] strs = new String[(int) lsize];
+                            for (int j = 0; j < lsize; j++) {
+                                strs[j] = "";
+                            }
+                            try {
+                                log.trace("getAttribute: attribute[{}] H5AreadComplex", i);
+                                H5.H5AreadComplex(aid, tid, strs);
+                            }
+                            catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                            value = strs;
+                        }
+                        else if (attr.getDatatype().isVLEN()) {
+                            String[] strs = new String[(int) lsize];
+                            for (int j = 0; j < lsize; j++) {
+                                strs[j] = "";
+                            }
+                            try {
+                                log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
+                                H5.H5AreadComplex(aid, tid, strs);
+                            }
+                            catch (Exception ex) {
+                                log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
+                                ex.printStackTrace();
+                            }
+                            value = strs;
+                        }
+                        else {
+                            try {
+                                value = ((H5Datatype) attr.getDatatype()).allocateArray((int) lsize);
+                            }
+                            catch (OutOfMemoryError e) {
+                                log.debug("getAttribute(): Attribute[{}] out of memory", i, e);
+                                value = null;
+                            }
+                            if (value == null) {
+                                log.debug("getAttribute(): Attribute[{}] allocateArray returned null", i);
+                                log.trace("getAttribute(): Attribute[{}] continue", i);
+                                continue;
+                            }
+
+                            if (attr.getDatatype().isArray()) {
+                                try {
+                                    log.trace("getAttribute(): Attribute[{}] H5Aread ARRAY tid={}", i, tid);
+                                    H5.H5Aread(aid, tid, value);
+                                }
+                                catch (Exception ex) {
+                                    log.debug("getAttribute(): Attribute[{}] H5Aread failure: ", i, ex);
+                                    ex.printStackTrace();
+                                }
+                            }
+                            else {
+                                log.trace("getAttribute(): Attribute[{}] H5Aread", i);
+                                H5.H5Aread(aid, tid, value);
+                            }
+
+                            if (attr.getDatatype().isString()) {
+                                log.trace("getAttribute(): Attribute[{}] byteToString", i);
+                                value = Dataset.byteToString((byte[]) value, (int) H5.H5Tget_size(tid));
+                            }
+                            else if (attr.getDatatype().isRef()) {
+                                log.trace("getAttribute(): Attribute[{}] byteToLong", i);
+                                value = HDFNativeData.byteToLong((byte[]) value);
+                            }
+                        }
+
+                        log.debug("getAttribute(): Attribute[{}] data: {}", i, value);
+                        attr.setData(value);
+                    }
+                    catch (HDF5Exception ex) {
+                        log.debug("getAttribute(): Attribute[{}] inspection failure: ", i, ex);
+                    }
+                    finally {
+                        try {
+                            H5.H5Tclose(tid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("getAttribute(): Attribute[{}] H5Tclose(tid {}) failure: ", i, tid, ex);
+                        }
+                        try {
+                            H5.H5Sclose(sid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("getAttribute(): Attribute[{}] H5Sclose(sid {}) failure: ", i, sid, ex);
+                        }
+                        try {
+                            H5.H5Aclose(aid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("getAttribute(): Attribute[{}] H5Aclose(aid {}) failure: ", i, aid, ex);
+                        }
+                    }
+                } // for (int i=0; i<obj_info.num_attrs; i++)
             }
             finally {
-                try {
-                    H5.H5Tclose(tid);
-                }
-                catch (Exception ex) {
-                    log.debug("getAttribute(): Attribute[{}] H5Tclose(tid {}) failure: ", i, tid, ex);
-                }
-                try {
-                    H5.H5Sclose(sid);
-                }
-                catch (Exception ex) {
-                    log.debug("getAttribute(): Attribute[{}] H5Sclose(sid {}) failure: ", i, sid, ex);
-                }
-                try {
-                    H5.H5Aclose(aid);
-                }
-                catch (Exception ex) {
-                    log.debug("getAttribute(): Attribute[{}] H5Aclose(aid {}) failure: ", i, aid, ex);
-                }
+                obj.close(objID);
             }
-        } // for (int i=0; i<obj_info.num_attrs; i++)
+        }
 
         log.trace("getAttribute(): finish");
         return attributeList;
@@ -609,8 +617,8 @@ public class H5File extends FileFormat {
      * attributes to an HDF5 image dataset with a single call. The {@link #writeAttribute(HObject, Attribute, boolean)}
      * method may be used to write image attributes that are not handled by this method.
      * <p>
-     * For more information about HDF5 image attributes, see the <a
-     * href="https://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>.
+     * For more information about HDF5 image attributes, see the
+     * <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>.
      * <p>
      * This method can be called to create attributes for 24-bit true color and indexed images. The
      * <code>selectionFlag</code> parameter controls whether this will be an indexed or true color image. If
@@ -673,47 +681,41 @@ public class H5File extends FileFormat {
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
-        Attribute attr = new Attribute(attrName, attrType, null);
-        attr.setValue(classValue);
-        dataset.writeMetadata(attr);
+        Attribute attr = new Attribute(dataset, attrName, attrType, null);
+        attr.write(classValue);
 
         attrName = "IMAGE_VERSION";
         String[] versionValue = { "1.2" };
         attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, -1, -1);
-        attr = new Attribute(attrName, attrType, null);
-        attr.setValue(versionValue);
-        dataset.writeMetadata(attr);
+        attr = new Attribute(dataset, attrName, attrType, null);
+        attr.write(versionValue);
 
         long[] attrDims = { 2 };
         attrName = "IMAGE_MINMAXRANGE";
         byte[] attrValueInt = { 0, (byte) 255 };
         attrType = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-        attr = new Attribute(attrName, attrType, attrDims);
-        attr.setValue(attrValueInt);
-        dataset.writeMetadata(attr);
+        attr = new Attribute(dataset, attrName, attrType, attrDims);
+        attr.write(attrValueInt);
 
         attrName = "IMAGE_SUBCLASS";
         String[] subclassValue = { subclass };
         attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, -1, -1);
-        attr = new Attribute(attrName, attrType, null);
-        attr.setValue(subclassValue);
-        dataset.writeMetadata(attr);
+        attr = new Attribute(dataset, attrName, attrType, null);
+        attr.write(subclassValue);
 
         if ((selectionFlag == ScalarDS.INTERLACE_PIXEL) || (selectionFlag == ScalarDS.INTERLACE_PLANE)) {
             attrName = "INTERLACE_MODE";
             String[] interlaceValue = { interlaceMode };
             attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, -1, -1);
-            attr = new Attribute(attrName, attrType, null);
-            attr.setValue(interlaceValue);
-            dataset.writeMetadata(attr);
+            attr = new Attribute(dataset, attrName, attrType, null);
+            attr.write(interlaceValue);
         }
         else {
             attrName = "PALETTE";
             long[] palRef = { 0 }; // set ref to null
             attrType = new H5Datatype(Datatype.CLASS_REFERENCE, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-            attr = new Attribute(attrName, attrType, null);
-            attr.setValue(palRef);
-            dataset.writeMetadata(attr);
+            attr = new Attribute(dataset, attrName, attrType, null);
+            attr.write(palRef);
         }
         log.trace("createImageAttributes(): finish");
     }
@@ -764,8 +766,8 @@ public class H5File extends FileFormat {
         // the source file and new file
         long tid = -1;
         HObject srcObj, newObj;
-        Hashtable<String, long[]> oidMap = new Hashtable<String, long[]>();
-        List<ScalarDS> refDatasets = new Vector<ScalarDS>();
+        Hashtable<String, long[]> oidMap = new Hashtable<>();
+        List<ScalarDS> refDatasets = new Vector<>();
         while (newIt.hasNext() && srcIt.hasNext()) {
             srcObj = srcIt.next();
             newObj = newIt.next();
@@ -967,8 +969,9 @@ public class H5File extends FileFormat {
         if (doCreateFile) {
             long fapl = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
 
-            if ((createFlag & FILE_CREATE_EARLY_LIB) != FILE_CREATE_EARLY_LIB) {
-                H5.H5Pset_libver_bounds(fapl, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST);
+            if ((createFlag & FILE_CREATE_EARLY_LIB) == FILE_CREATE_EARLY_LIB) {
+                int[] newlibver = getLibBounds();
+                H5.H5Pset_libver_bounds(fapl, newlibver[0], newlibver[1]);
             }
 
             long fileid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl);
@@ -996,6 +999,7 @@ public class H5File extends FileFormat {
      */
     @Override
     public FileFormat createInstance(String filename, int access) throws Exception {
+        log.trace("createInstance() for {}", filename);
         return new H5File(filename, access);
     }
 
@@ -1012,6 +1016,7 @@ public class H5File extends FileFormat {
      */
     @Override
     public long open() throws Exception {
+        log.trace("open()");
         return open(true);
     }
 
@@ -1024,21 +1029,76 @@ public class H5File extends FileFormat {
     public long open(int... indexList) throws Exception {
         setIndexType(indexList[0]);
         setIndexOrder(indexList[1]);
+        log.trace("open() with proplist");
         return open(true);
     }
 
     /**
-     * Sets the bounds of library versions.
+     * Sets the bounds of new library versions.
      *
-     * @param low
+     * @param lowStr
      *            The earliest version of the library.
-     * @param high
+     * @param highStr
      *            The latest version of the library.
      *
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
-    public void setLibBounds(int low, int high) throws Exception {
+    @Override
+    public void setNewLibBounds(String lowStr, String highStr) throws Exception {
+        int low = -1, high = -1;
+
+        if (lowStr == null) {
+            low = HDF5Constants.H5F_LIBVER_EARLIEST;
+        }
+        else if(lowStr.equals("Earliest")) {
+            low = HDF5Constants.H5F_LIBVER_EARLIEST;
+        }
+        else if(lowStr.equals("V18")) {
+            low = HDF5Constants.H5F_LIBVER_V18;
+        }
+        else if(lowStr.equals("V110")) {
+            low = HDF5Constants.H5F_LIBVER_V110;
+        }
+        else if(lowStr.equals("Latest")) {
+            low = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        else {
+            low = HDF5Constants.H5F_LIBVER_EARLIEST;
+        }
+
+        if (highStr == null) {
+            high = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        else if(highStr.equals("V18")) {
+            high = HDF5Constants.H5F_LIBVER_V18;
+        }
+        else if(highStr.equals("V110")) {
+            high = HDF5Constants.H5F_LIBVER_V110;
+        }
+        else if(highStr.equals("Latest")) {
+            high = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        else {
+            high = HDF5Constants.H5F_LIBVER_LATEST;
+        }
+        libver[0] = low;
+        libver[1] = high;
+    }
+
+    /**
+     * Sets the bounds of library versions.
+     *
+     * @param lowStr
+     *            The earliest version of the library.
+     * @param highStr
+     *            The latest version of the library.
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
+     */
+    @Override
+    public void setLibBounds(String lowStr, String highStr) throws Exception {
         long fapl = HDF5Constants.H5P_DEFAULT;
 
         if (fid < 0)
@@ -1047,11 +1107,42 @@ public class H5File extends FileFormat {
         fapl = H5.H5Fget_access_plist(fid);
 
         try {
-            if (low < 0)
-                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            int low = -1, high = -1;
 
-            if (high < 0)
+            if (lowStr == null) {
+                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            }
+            else if(lowStr.equals("Earliest")) {
+                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            }
+            else if(lowStr.equals("V18")) {
+                low = HDF5Constants.H5F_LIBVER_V18;
+            }
+            else if(lowStr.equals("V110")) {
+                low = HDF5Constants.H5F_LIBVER_V110;
+            }
+            else if(lowStr.equals("Latest")) {
+                low = HDF5Constants.H5F_LIBVER_LATEST;
+            }
+            else {
+                low = HDF5Constants.H5F_LIBVER_EARLIEST;
+            }
+
+            if (highStr == null) {
                 high = HDF5Constants.H5F_LIBVER_LATEST;
+            }
+            else if(highStr.equals("V18")) {
+                high = HDF5Constants.H5F_LIBVER_V18;
+            }
+            else if(highStr.equals("V110")) {
+                high = HDF5Constants.H5F_LIBVER_V110;
+            }
+            else if(highStr.equals("Latest")) {
+                high = HDF5Constants.H5F_LIBVER_LATEST;
+            }
+            else {
+                high = HDF5Constants.H5F_LIBVER_LATEST;
+            }
 
             H5.H5Pset_libver_bounds(fapl, low, high);
             H5.H5Pget_libver_bounds(fapl, libver);
@@ -1074,8 +1165,45 @@ public class H5File extends FileFormat {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
+    @Override
     public int[] getLibBounds() throws Exception {
         return libver;
+    }
+
+    /**
+     * Gets the bounds of library versions as text.
+     *
+     * @return libversion The earliest and latest version of the library.
+     */
+    @Override
+    public String getLibBoundsDescription() {
+        String libversion = "";
+
+        if (libver[0] == HDF5Constants.H5F_LIBVER_EARLIEST) {
+            libversion = "Earliest and ";
+        }
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_V18) {
+            libversion = "V18 and ";
+        }
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_V110) {
+            libversion = "V110 and ";
+        }
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_LATEST) {
+            libversion = "Latest and ";
+        }
+        if (libver[1] == HDF5Constants.H5F_LIBVER_EARLIEST) {
+            libversion += "Earliest";
+        }
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_V18) {
+            libversion += "V18";
+        }
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_V110) {
+            libversion += "V110";
+        }
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_LATEST) {
+            libversion += "Latest";
+        }
+        return libversion;
     }
 
     /**
@@ -1216,7 +1344,7 @@ public class H5File extends FileFormat {
      */
     @Override
     public HObject get(String path) throws Exception {
-        log.trace("get(): start");
+        log.trace("get({}): start", path);
         HObject obj = null;
 
         if ((path == null) || (path.length() <= 0)) {
@@ -1371,17 +1499,18 @@ public class H5File extends FileFormat {
     public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name)
             throws Exception {
         log.trace("createDatatype(): start: name={} class={} size={} order={} sign={}", name, tclass, tsize, torder, tsign);
-        if (tbase != null) log.trace("createDatatype(): baseType is {}", tbase.getDatatypeDescription());
+        if (tbase != null)
+            log.trace("createDatatype(): baseType is {}", tbase.getDescription());
 
         long tid = -1;
         H5Datatype dtype = null;
 
         try {
             H5Datatype t = (H5Datatype) createDatatype(tclass, tsize, torder, tsign, tbase);
-            if ((tid = t.toNative()) < 0) {
-                log.debug("createDatatype(): toNative failure");
+            if ((tid = t.createNative()) < 0) {
+                log.debug("createDatatype(): createNative() failure");
                 log.trace("createDatatype(): finish");
-                throw new Exception("toNative failed");
+                throw new Exception("createNative() failed");
             }
 
             H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
@@ -1534,6 +1663,7 @@ public class H5File extends FileFormat {
      * @see hdf.object.h5.H5Group#create(java.lang.String, hdf.object.Group, long...)
      *
      */
+    @Override
     public Group createGroup(String name, Group pgroup, long... gplist) throws Exception {
         // create new group at the root
         if (pgroup == null) {
@@ -1549,6 +1679,7 @@ public class H5File extends FileFormat {
      * @see hdf.object.FileFormat#createGcpl(int, int, int)
      *
      */
+    @Override
     public long createGcpl(int creationorder, int maxcompact, int mindense) throws Exception {
         log.trace("createGcpl(): start");
         long gcpl = -1;
@@ -1612,6 +1743,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
+    @Override
     public HObject createLink(Group parentGroup, String name, HObject currentObj, int lType) throws Exception {
         log.trace("createLink(): start: name={}", name);
         HObject obj = null;
@@ -1709,6 +1841,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
+    @Override
     public HObject createLink(Group parentGroup, String name, String currentObj, int lType) throws Exception {
         log.trace("createLink(): start: name={}", name);
         HObject obj = null;
@@ -1811,7 +1944,7 @@ public class H5File extends FileFormat {
         List<HObject> members = dstGroup.getMemberList();
         int n = members.size();
         for (int i = 0; i < n; i++) {
-            HObject obj = (HObject) members.get(i);
+            HObject obj = members.get(i);
             String name = obj.getName();
             while (name.equals(dstName))
                 dstName += "~copy";
@@ -1875,13 +2008,13 @@ public class H5File extends FileFormat {
             return;
         }
 
-        if ((tid = attr.getType().toNative()) >= 0) {
-            log.trace("writeAttribute(): tid {} from toNative", tid);
+        if ((tid = attr.getDatatype().createNative()) >= 0) {
+            log.trace("writeAttribute(): tid {} from toNative :{}", tid, attr.getDatatype().getDescription());
             try {
                 if (attr.isScalar())
                     sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
                 else
-                    sid = H5.H5Screate_simple(attr.getRank(), attr.getDataDims(), null);
+                    sid = H5.H5Screate_simple(attr.getRank(), attr.getDims(), null);
 
                 if (attrExisted) {
                     aid = H5.H5Aopen_by_name(objID, obj_name, name, HDF5Constants.H5P_DEFAULT,
@@ -1893,12 +2026,19 @@ public class H5File extends FileFormat {
                 log.trace("writeAttribute(): aid {} opened/created", aid);
 
                 // update value of the attribute
-                Object attrValue = attr.getValue();
+                Object attrValue;
+                try {
+                    attrValue = attr.getData();
+                }
+                catch (Exception ex) {
+                    attrValue = null;
+                    log.trace("writeAttribute(): getData() failure:", ex);
+                }
+
                 log.trace("writeAttribute(): getValue");
                 if (attrValue != null) {
-                    boolean isVlen = (H5.H5Tget_class(tid) == HDF5Constants.H5T_VLEN || H5.H5Tis_variable_str(tid));
-                    if (isVlen) {
-                        log.trace("writeAttribute(): isvlen={}", isVlen);
+                    if (attr.getDatatype().isVLEN()) {
+                        log.trace("writeAttribute(): isVLEN");
                         try {
                             /*
                              * must use native type to write attribute data to file (see bug 1069)
@@ -1911,8 +2051,8 @@ public class H5File extends FileFormat {
                             catch (Exception ex) {
                                 log.debug("writeAttribute(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                             }
-                            log.trace("writeAttribute(): H5.H5AwriteVL", name);
-                            if ((attrValue instanceof String) || (attr.getDataDims().length == 1)) {
+                            log.trace("writeAttribute(): H5.H5AwriteVL, {} : {}", name, attr.getDatatype().getDescription());
+                            if ((attrValue instanceof String) || (attr.getDims().length == 1)) {
                                 H5.H5AwriteVL(aid, tid, (String[]) attrValue);
                             }
                             else {
@@ -1924,20 +2064,20 @@ public class H5File extends FileFormat {
                         }
                     }
                     else {
-                        if (attr.getType().getDatatypeClass() == Datatype.CLASS_REFERENCE && attrValue instanceof String) {
+                        if (attr.getDatatype().isRef() && attrValue instanceof String) {
                             // reference is a path+name to the object
                             attrValue = H5.H5Rcreate(getFID(), (String) attrValue, HDF5Constants.H5R_OBJECT, -1);
                             log.trace("writeAttribute(): Attribute class is CLASS_REFERENCE");
                         }
                         else if (Array.get(attrValue, 0) instanceof String) {
-                            long size = H5.H5Tget_size(tid);
+                            long size = attr.getDatatype().getDatatypeSize();
                             int len = ((String[]) attrValue).length;
                             byte[] bval = Dataset.stringToByte((String[]) attrValue, (int)size);
-                            if (bval != null && bval.length == (int)size * len) {
+                            if (bval != null && bval.length == size * len) {
                                 bval[bval.length - 1] = 0;
                                 attrValue = bval;
                             }
-                            log.trace("writeAttribute(): Array", name);
+                            log.trace("writeAttribute(): String={}: {}", attrValue, name);
                         }
 
                         try {
@@ -1952,7 +2092,7 @@ public class H5File extends FileFormat {
                             catch (Exception ex) {
                                 log.debug("writeAttribute(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                             }
-                            log.trace("writeAttribute(): H5.H5Awrite");
+                            log.trace("writeAttribute(): H5.H5Awrite, {} :{}", name, attr.getDatatype().getDescription());
                             H5.H5Awrite(aid, tid, attrValue);
                         }
                         catch (Exception ex) {
@@ -2122,7 +2262,7 @@ public class H5File extends FileFormat {
                 isReadOnly = true;
             }
             catch (Exception ex2) {
-                // Attemp to open the file as a split file or family file
+                // Attempt to open the file as a split file or family file
                 try {
                     File tmpf = new File(fullFileName);
                     String tmpname = tmpf.getName();
@@ -2180,6 +2320,7 @@ public class H5File extends FileFormat {
 
         if ((fid >= 0) && loadFullHierarchy) {
             // load the hierarchy of the file
+            log.trace("open(loadFullHeirarchy): load the hierarchy");
             loadIntoMemory();
         }
 
@@ -2191,13 +2332,23 @@ public class H5File extends FileFormat {
      * Loads the file structure into memory.
      */
     private void loadIntoMemory() {
+        log.trace("loadIntoMemory(): start");
         if (fid < 0) {
             log.debug("loadIntoMemory(): Invalid FID");
             return;
         }
 
+        /*
+         * TODO: Root group's name should be changed to 'this.getName()' and all
+         * previous accesses of this field should now use getPath() instead of getName()
+         * to get the root group. The root group actually does have a path of "/". The
+         * depth_first method will have to be changed to setup other object paths
+         * appropriately, as it currently assumes the root path to be null.
+         */
         rootObject = new H5Group(this, "/", null, null);
+        log.trace("loadIntoMemory(): depth_first on root");
         depth_first(rootObject, 0);
+        log.trace("loadIntoMemory(): finish");
     }
 
     /**
@@ -2210,6 +2361,7 @@ public class H5File extends FileFormat {
      * @param parentObject
      *            the parent object.
      */
+    @SuppressWarnings("deprecation")
     private int depth_first(HObject parentObject, int nTotal) {
         log.trace("depth_first({}): start", parentObject);
 
@@ -2408,8 +2560,8 @@ public class H5File extends FileFormat {
      * object.
      */
     private static List<HObject> getMembersBreadthFirst(HObject obj) {
-        List<HObject> allMembers = new Vector<HObject>();
-        Queue<HObject> queue = new LinkedList<HObject>();
+        List<HObject> allMembers = new Vector<>();
+        Queue<HObject> queue = new LinkedList<>();
         HObject currentObject = obj;
 
         queue.add(currentObject);
@@ -2420,7 +2572,8 @@ public class H5File extends FileFormat {
 
             if(currentObject instanceof Group) {
                 queue.addAll(((Group) currentObject).getMemberList());
-            } else {
+            }
+            else {
                 continue;
             }
         }
@@ -2875,6 +3028,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *            If there is a failure.
      */
+    @Override
     public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order)
             throws Exception {
         H5.H5export_dataset(file_export_name, file_name, object_path, binary_order);
@@ -2893,12 +3047,10 @@ public class H5File extends FileFormat {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
+    @Override
     public void renameAttribute(HObject obj, String oldAttrName, String newAttrName) throws Exception {
         log.trace("renameAttribute(): rename {} to {}", oldAttrName, newAttrName);
-        if (!attrFlag) {
-            attrFlag = true;
-            H5.H5Arename_by_name(obj.getFID(), obj.getName(), oldAttrName, newAttrName, HDF5Constants.H5P_DEFAULT);
-        }
+        H5.H5Arename_by_name(obj.getFID(), obj.getFullName(), oldAttrName, newAttrName, HDF5Constants.H5P_DEFAULT);
     }
 
     /**
@@ -2954,6 +3106,7 @@ public class H5File extends FileFormat {
         return HDF5Constants.H5_ITER_UNKNOWN;
     }
 
+    @Override
     public int getIndexType(String strtype) {
         if (strtype != null) {
             if (strtype.compareTo("H5_INDEX_NAME") == 0)
@@ -2969,10 +3122,12 @@ public class H5File extends FileFormat {
         return indexType;
     }
 
+    @Override
     public void setIndexType(int indexType) {
         this.indexType = indexType;
     }
 
+    @Override
     public int getIndexOrder(String strorder) {
         if (strorder != null) {
             if (strorder.compareTo("H5_ITER_INC") == 0)
@@ -2992,6 +3147,7 @@ public class H5File extends FileFormat {
         return indexOrder;
     }
 
+    @Override
     public void setIndexOrder(int indexOrder) {
         this.indexOrder = indexOrder;
     }

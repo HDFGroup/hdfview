@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -68,6 +68,7 @@ public class H4Group extends Group
      * @param parent the parent of this group.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4Group(
         FileFormat theFile,
         String name,
@@ -82,11 +83,12 @@ public class H4Group extends Group
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
             long vgid = open();
-            
+
             if (vgid > 0) {
                 try {
                     nAttributes = HDFLibrary.Vnattrs(vgid);
@@ -96,7 +98,7 @@ public class H4Group extends Group
                     log.debug("hasAttribute(): failure: ", ex);
                     nAttributes = 0;
                 }
-                
+
                 log.trace("hasAttribute(): nAttributes={}", nAttributes);
 
                 close(vgid);
@@ -107,11 +109,12 @@ public class H4Group extends Group
     }
 
     // Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
         log.trace("getMetadata(): start");
-        
+
         if (attributeList != null) {
             log.trace("getMetadata(): attributeList != null");
             log.trace("getMetadata(): finish");
@@ -120,7 +123,7 @@ public class H4Group extends Group
         else {
             attributeList = new Vector();
         }
-        
+
         // Library methods cannot be called on HDF4 dummy root group since it has a ref of 0
         if (oid[1] > 0) {
             long vgid = open();
@@ -157,10 +160,16 @@ public class H4Group extends Group
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     attributeList.add(attr);
 
-                    Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                    Object buf = null;
+                    try {
+                        buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                    }
+                    catch (OutOfMemoryError e) {
+                        log.debug("getMetadata(): out of memory: ", e);
+                    }
 
                     try {
                         HDFLibrary.Vgetattr(vgid, i, buf);
@@ -176,7 +185,7 @@ public class H4Group extends Group
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                         }
 
-                        attr.setValue(buf);
+                        attr.setData(buf);
                     }
                 }
             }
@@ -193,11 +202,12 @@ public class H4Group extends Group
     }
 
     // To do: implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
         log.trace("writeMetadata(): start");
-        
+
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
@@ -207,7 +217,7 @@ public class H4Group extends Group
 
         try {
             getFileFormat().writeAttribute(this, (Attribute)info, true);
-            
+
             if (attributeList == null) {
                 attributeList = new Vector();
             }
@@ -218,17 +228,19 @@ public class H4Group extends Group
         catch (Exception ex) {
             log.debug("writeMetadata(): failure: ", ex);
         }
-        
+
         log.trace("writeMetadata(): finish");
     }
 
 
     // To do: implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws HDFException {
         log.trace("removeMetadata(): disabled");
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
     }
@@ -238,13 +250,13 @@ public class H4Group extends Group
     public long open()
     {
         log.trace("open(): start: for file={} with ref={}", getFID(), oid[1]);
-        
+
         if (oid[1] <= 0) {
             log.debug("open(): oid[1] <= 0");
             log.trace("open(): finish");
             return -1; // Library methods cannot be called on HDF4 dummy group with ref 0
         }
-        
+
         long vgid = -1;
 
         // try to open with write permission
@@ -300,10 +312,10 @@ public class H4Group extends Group
      * @throws Exception if the group can not be created
      */
     public static H4Group create(String name, Group pgroup)
-        throws Exception
+            throws Exception
     {
         log.trace("create(): start: name={} parentGroup={}", name, pgroup);
-        
+
         H4Group group = null;
         if ((pgroup == null) ||
             (name == null)) {

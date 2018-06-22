@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -126,11 +126,12 @@ public class H4Vdata extends CompoundDS
      * @param path the full path of this H4Vdata.
      * @param oid the unique identifier of this data object.
      */
+    @SuppressWarnings("deprecation")
     public H4Vdata(
-        FileFormat theFile,
-        String name,
-        String path,
-        long[] oid)
+            FileFormat theFile,
+            String name,
+            String path,
+            long[] oid)
     {
         super (theFile, name, path, oid);
         numberOfRecords = 0;
@@ -142,11 +143,12 @@ public class H4Vdata extends CompoundDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute ()
     {
         if (nAttributes < 0) {
             long id = open();
-            
+
             if (id >= 0) {
                 try {
                     nAttributes = HDFLibrary.VSnattrs(id);
@@ -176,6 +178,11 @@ public class H4Vdata extends CompoundDS
         return datatype;
     }
 
+    @Override
+    public Object getFillValue() {
+        return null;
+    }
+
     // Implementing Dataset
     @Override
     public byte[] readBytes() throws HDFException
@@ -184,9 +191,9 @@ public class H4Vdata extends CompoundDS
 
         byte[] theData = null;
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
+
         if (numberOfMembers <= 0) {
             log.debug("readBytes(): VData contains no members");
             log.trace("readBytes(): finish");
@@ -215,10 +222,10 @@ public class H4Vdata extends CompoundDS
             int size =recordSize[0] * (int)selectedDims[0];
             theData = new byte[size];
             HDFLibrary.VSread(
-                id,
-                theData,
-                (int)selectedDims[0],
-                HDFConstants.FULL_INTERLACE);
+                    id,
+                    theData,
+                    (int)selectedDims[0],
+                    HDFConstants.FULL_INTERLACE);
         }
         catch (Exception ex) {
             log.debug("readBytes(): failure: ", ex);
@@ -232,7 +239,7 @@ public class H4Vdata extends CompoundDS
     }
 
     // Implementing DataFormat
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     @Override
     public Object read() throws HDFException
     {
@@ -240,9 +247,9 @@ public class H4Vdata extends CompoundDS
 
         List list = null;
 
-        if (rank <= 0) {
+        if (!isInited())
             init();
-        }
+
         if (numberOfMembers <= 0) {
             log.debug("read(): VData contains no members");
             log.trace("read(): finish");
@@ -280,6 +287,7 @@ public class H4Vdata extends CompoundDS
             }
 
             int n = memberOrders[i]*(int)selectedDims[0];
+
             member_data = H4Datatype.allocateArray(memberTIDs[i], n);
 
             log.trace("read(): index={} isMemberSelected[i]={} memberOrders[i]={} array size={}", i, isMemberSelected[i], memberOrders[i], n);
@@ -294,12 +302,12 @@ public class H4Vdata extends CompoundDS
 
             try {
                 HDFLibrary.VSread(
-                    id,
-                    member_data,
-                    (int)selectedDims[0],
-                    HDFConstants.FULL_INTERLACE);
+                        id,
+                        member_data,
+                        (int)selectedDims[0],
+                        HDFConstants.FULL_INTERLACE);
                 if ((memberTIDs[i] == HDFConstants.DFNT_CHAR) ||
-                    (memberTIDs[i] ==  HDFConstants.DFNT_UCHAR8)) {
+                        (memberTIDs[i] ==  HDFConstants.DFNT_UCHAR8)) {
                     // convert characters to string
                     log.trace("read(): convert characters to string");
                     member_data = Dataset.byteToString((byte[])member_data, memberOrders[i]);
@@ -340,7 +348,7 @@ public class H4Vdata extends CompoundDS
         //first write, the user must read all the fields to a buffer, update
         //the buffer, then write the entire record back to the vdata.
         log.trace("write(): disabled");
-/*
+        /*
         if (buf == null || numberOfMembers <= 0 || !(buf instanceof List))
             return; // no data to write
 
@@ -393,10 +401,21 @@ public class H4Vdata extends CompoundDS
         } // for (int i=0; i<numberOfMembers; i++)
 
         close(vid);
-*/
+         */
+    }
+
+    @Override
+    public Object convertFromUnsignedC() {
+        throw new UnsupportedOperationException("H4Vdata:convertFromUnsignedC Unsupported operation.");
+    }
+
+    @Override
+    public Object convertToUnsignedC() {
+        throw new UnsupportedOperationException("H4Vdata:convertToUnsignedC Unsupported operation.");
     }
 
     // Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
@@ -453,12 +472,20 @@ public class H4Vdata extends CompoundDS
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    Attribute attr = new Attribute(attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     if (j>=0)
                         attr.setProperty("field", memberNames[j]);
                     attributeList.add(attr);
 
-                    Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                    Object buf = null;
+                    try {
+                        buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                    }
+                    catch (OutOfMemoryError e) {
+                        log.debug("getMetadata(): out of memory: ", e);
+                        buf = null;
+                    }
+
                     try {
                         HDFLibrary.VSgetattr(id, j, i, buf);
                     }
@@ -469,11 +496,11 @@ public class H4Vdata extends CompoundDS
 
                     if (buf != null) {
                         if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
-                            (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
+                                (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                         }
 
-                        attr.setValue(buf);
+                        attr.setData(buf);
                         nleft--;
                     }
                 } // for (int i=0; i<n; i++)
@@ -493,6 +520,7 @@ public class H4Vdata extends CompoundDS
     }
 
     // To do: Implementing DataFormat
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
@@ -523,12 +551,14 @@ public class H4Vdata extends CompoundDS
     }
 
     // To do: Implementing DataFormat
+    @Override
     public void removeMetadata(Object info) throws HDFException
     {
         log.trace("removeMetadata(): disabled");
     }
 
     // implementing DataFormat
+    @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
     }
@@ -583,7 +613,8 @@ public class H4Vdata extends CompoundDS
     public void init()
     {
         log.trace("init(): start");
-        if (rank>0) {
+
+        if (inited) {
             log.trace("init(): Already initialized");
             log.trace("init(): finish");
             return; // already called. Initialize only once
@@ -605,12 +636,12 @@ public class H4Vdata extends CompoundDS
             numberOfRecords = 0;
         }
 
-//        Still need to get information if there is no record, see bug 1738
-//        if ((numberOfMembers <=0) || (numberOfRecords <= 0)) {
-//            // no table field is defined or no records
-//            close(id);
-//            return;
-//        }
+        //        Still need to get information if there is no record, see bug 1738
+        //        if ((numberOfMembers <=0) || (numberOfRecords <= 0)) {
+        //            // no table field is defined or no records
+        //            close(id);
+        //            return;
+        //        }
 
         // a Vdata table is an one dimension array of records.
         // each record has the same fields
@@ -646,6 +677,8 @@ public class H4Vdata extends CompoundDS
                 continue;
             }
         } // for (int i=0; i<numberOfMembers; i++)
+
+        inited = true;
 
         close(id);
         log.trace("init(): finish");
@@ -687,6 +720,7 @@ public class H4Vdata extends CompoundDS
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 
+    @Override
     public Dataset copy(Group pgroup, String name, long[] dims, Object data)
             throws Exception {
         throw new UnsupportedOperationException(

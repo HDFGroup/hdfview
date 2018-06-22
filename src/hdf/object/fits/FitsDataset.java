@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -36,7 +36,7 @@ import nom.tam.fits.HeaderCard;
  * and operations performed on the scalar dataset
  * <p>
  * The library predefines a modest number of datatypes. For details, read
- * <a href="http://hdfgroup.org/HDF5/doc/Datatypes.html">
+ * https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm
  * The Datatype Interface (H5T)</a>
  * <p>
  * @version 1.1 9/4/2007
@@ -77,6 +77,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute () { return false; }
 
     /*
@@ -85,7 +86,7 @@ public class FitsDataset extends ScalarDS
      */
     @Override
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
-    throws Exception {
+            throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -144,6 +145,8 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#getMetadata()
      */
+    @SuppressWarnings("rawtypes")
+    @Override
     public List getMetadata() throws Exception {
         if (attributeList != null) {
             return attributeList;
@@ -168,7 +171,7 @@ public class FitsDataset extends ScalarDS
         while (it.hasNext()) {
             value = "";
             hc = (HeaderCard)it.next();
-            attr = new Attribute(hc.getKey(), dtype, dims);
+            attr = new Attribute(this, hc.getKey(), dtype, dims);
             String tvalue = hc.getValue();
             if (tvalue != null) {
                 value += tvalue;
@@ -177,7 +180,7 @@ public class FitsDataset extends ScalarDS
             if (tvalue != null) {
                 value += " / " + tvalue;
             }
-            attr.setValue(value);
+            attr.setData(value);
             attributeList.add(attr);
         }
 
@@ -188,6 +191,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
+    @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
@@ -197,6 +201,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
+    @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
@@ -206,6 +211,7 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
+    @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
@@ -235,7 +241,7 @@ public class FitsDataset extends ScalarDS
             return;
         }
 
-        if (rank>0) {
+        if (inited) {
             return; // already called. Initialize only once
         }
 
@@ -294,6 +300,8 @@ public class FitsDataset extends ScalarDS
         if ((rank > 1) && isText) {
             selectedDims[1] = 1;
         }
+
+        inited = true;
     }
 
     /*

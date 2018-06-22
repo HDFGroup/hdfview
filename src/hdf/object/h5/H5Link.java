@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -19,6 +19,7 @@ import java.util.List;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 
 /**
  * An H5Link object represents an existing HDF5 object in file.
@@ -32,7 +33,7 @@ import hdf.object.HObject;
  * @author Nidhi Gupta
  */
 
-public class H5Link extends HObject {
+public class H5Link extends HObject implements MetaDataContainer {
     private static final long serialVersionUID = -8137277460521594367L;
 
     @SuppressWarnings("unused")
@@ -49,9 +50,10 @@ public class H5Link extends HObject {
      *            the full path of this link, e.g. "/groups/".
      */
     public H5Link(FileFormat theFile, String name, String path) {
-       this (theFile, name, path, null);
+        this (theFile, name, path, null);
     }
 
+    @SuppressWarnings("deprecation")
     public H5Link(FileFormat theFile, String theName, String thePath,
             long[] oid) {
         super(theFile, theName, thePath, oid);

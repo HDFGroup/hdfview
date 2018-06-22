@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -52,6 +52,7 @@ public class FitsDatatype extends Datatype
      */
     public FitsDatatype(int tclass, int tsize, int torder, int tsign) {
         super(tclass, tsize, torder, tsign);
+        datatypeDescription = getDescription();
     }
 
     /**
@@ -63,12 +64,14 @@ public class FitsDatatype extends Datatype
         super(-1);
         nativeType = theType;
         fromNative(0);
+        datatypeDescription = getDescription();
     }
 
     /*
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
+    @Override
     public boolean hasAttribute () { return false; }
 
     /**
@@ -157,8 +160,11 @@ public class FitsDatatype extends Datatype
 
     // implementing Datatype
     @Override
-    public String getDatatypeDescription() {
-        String description = "Unknown data type.";
+    public String getDescription() {
+        if (datatypeDescription != null)
+            return datatypeDescription;
+
+        String description = null;
 
         switch ((int)nativeType) {
             case BasicHDU.BITPIX_BYTE:
@@ -180,22 +186,31 @@ public class FitsDatatype extends Datatype
                 description = "64-bit float";
                 break;
             default:
-                if (datatypeClass==Datatype.CLASS_STRING) {
+                if (this.isString()) {
                     description = "String";
                 }
-                else if (datatypeClass==Datatype.CLASS_CHAR) {
+                else if (this.isChar()) {
                     description = "Char";
                 }
-                else if (datatypeClass==Datatype.CLASS_INTEGER) {
+                else if (this.isInteger()) {
                     description = "Integer";
                 }
-                else if (datatypeClass==Datatype.CLASS_FLOAT) {
+                else if (this.isFloat()) {
                     description = "Float";
+                }
+                else {
+                    description = "Unknown data type.";
                 }
                 break;
         }
 
         return description;
+    }
+
+    // implementing Datatype
+    @Override
+    public boolean isText() {
+        return false;
     }
 
     // implementing Datatype
@@ -206,7 +221,7 @@ public class FitsDatatype extends Datatype
 
     // implementing Datatype
     @Override
-    public long toNative() {
+    public long createNative() {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = BasicHDU.BITPIX_BYTE;
@@ -240,7 +255,8 @@ public class FitsDatatype extends Datatype
     @Override
     public void close(long id) {;}
 
-  //Implementing DataFormat
+    // Implementing DataFormat
+    @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
