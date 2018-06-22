@@ -229,7 +229,48 @@ public class H5Datatype extends Datatype {
      *            the parent datatype of the new datatype
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
+        this(tclass, tsize, torder, tsign, tbase, pbase, null);
+    }
+
+    /**
+     * Constructs a Datatype with specified class, size, byte order and sign.
+     * <p>
+     * The following is a list of a few example of H5Datatype.
+     * <ol>
+     * <li>to create unsigned native integer<br>
+     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * <li>to create 16-bit signed integer with big endian<br>
+     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * <li>to create native float<br>
+     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * <li>to create 64-bit double<br>
+     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * </ol>
+     *
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
+     *            ORDER_NONE
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     * @param tbase
+     *            the base datatype of the new datatype
+     * @param pbase
+     *            the parent datatype of the new datatype
+     */
+    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase, List<H5Datatype> members) {
         super(tclass, tsize, torder, tsign, tbase, pbase);
+        if (members == null) {
+            compoundMemberTypes = new Vector<>();
+        }
+        else {
+            compoundMemberTypes = new Vector<>(members.size());
+            compoundMemberTypes.addAll(members);
+        }
+
         datatypeDescription = getDescription();
     }
 
@@ -598,6 +639,7 @@ public class H5Datatype extends Datatype {
                         compoundMemberNames.add(i, memberName);
                         compoundMemberOffsets.add(i, memberOffset);
                         compoundMemberTypes.add(i, membertype);
+                        log.trace("fromNative(): compound type [{}] name={} finish", i, memberName);
                     }
                 }
                 catch (HDF5LibraryException ex) {
