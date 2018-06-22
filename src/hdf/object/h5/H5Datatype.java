@@ -1306,7 +1306,7 @@ public class H5Datatype extends Datatype {
                     description += " {";
 
                     while (member_types.hasNext()) {
-                        if (member_names.hasNext()) {
+                        if (member_names != null && member_names.hasNext()) {
                             description += member_names.next() + " = ";
                         }
 
@@ -1595,6 +1595,12 @@ public class H5Datatype extends Datatype {
      */
     public void extractCompoundInfo(String name, List<String> names, List<Datatype> flatListTypes) {
         log.trace("extractCompoundInfo(): start: name={}", name);
+
+        if (compoundMemberNames == null) {
+            log.debug("extractCompoundInfo(): compoundMemberNames is null");
+            log.trace("extractCompoundInfo(): finish");
+            return;
+        }
 
         Datatype mtype = null;
         String mname = null;
