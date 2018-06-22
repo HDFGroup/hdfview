@@ -992,8 +992,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             table.click(1, 1);
             assertTrue("openTAttr2GroupVlen() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex '1'",
-                    tableShell.bot().text(0).getText().matches("1"));
+                    tableShell.bot().text(0).getText()+"] did not match regex '{1}'",
+                    tableShell.bot().text(0).getText().equals("{1}"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -1010,8 +1010,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             table.click(2, 2);
-            assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(0).getText()+"] did not match regex '4, 5'",
-                    tableShell.bot().text(0).getText().matches("4, 5"));
+            assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(0).getText()+"] did not match regex '{4, 5}'",
+                    tableShell.bot().text(0).getText().equals("{4, 5}"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -1028,8 +1028,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             table.click(3, 3);
-            assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(2).getText()+"] did not match regex '30, 31, 32'",
-                    tableShell.bot().text(2).getText().matches("30, 31, 32"));
+            assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(2).getText()+"] did not match regex '{30, 31, 32}'",
+                    tableShell.bot().text(2).getText().equals("{30, 31, 32}"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
