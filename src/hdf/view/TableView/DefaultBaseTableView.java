@@ -89,6 +89,7 @@ import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuAction;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -100,6 +101,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -455,11 +457,19 @@ public abstract class DefaultBaseTableView implements TableView {
         cellLabel.setAlignment(SWT.CENTER);
         cellLabel.setFont(curFont);
 
-        cellValueField = new Text(cellValueComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
+        final ScrolledComposite cellValueFieldScroller = new ScrolledComposite(cellValueComposite, SWT.V_SCROLL | SWT.H_SCROLL);
+        cellValueFieldScroller.setLayout(new FillLayout());
+
+        cellValueField = new Text(cellValueFieldScroller, SWT.MULTI | SWT.BORDER | SWT.WRAP);
         cellValueField.setEditable(false);
         cellValueField.setBackground(new Color(display, 255, 255, 240));
         cellValueField.setEnabled(false);
         cellValueField.setFont(curFont);
+
+        cellValueFieldScroller.setContent(cellValueField);
+        cellValueFieldScroller.setExpandHorizontal(true);
+        cellValueFieldScroller.setExpandVertical(true);
+        cellValueFieldScroller.setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         cellValueComposite.setWeights(new int[] { 1, 5 });
 

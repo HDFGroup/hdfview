@@ -873,14 +873,8 @@ public class H5ScalarDS extends ScalarDS {
                         tid = DSdatatype.createNative();
 
                         if (DSdatatype.isVLEN() || (DSdatatype.isArray() && DSdatatype.getDatatypeBase().isVLEN())) {
-                            if (DSdatatype.isVarStr() || (DSdatatype.isArray() && DSdatatype.getDatatypeBase().isVarStr())) {
-                                log.trace("read(): H5Dread_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}", did, tid, spaceIDs[0], spaceIDs[1]);
-                                H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
-                            }
-                            else {
-                                log.trace("read(): H5DreadVL did={} tid={} spaceIDs[0]={} spaceIDs[1]={}", did, tid, spaceIDs[0], spaceIDs[1]);
-                                H5.H5DreadVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
-                            }
+                            log.trace("read(): H5DreadVL did={} tid={} spaceIDs[0]={} spaceIDs[1]={}", did, tid, spaceIDs[0], spaceIDs[1]);
+                            H5.H5DreadVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) theData);
                         }
                         else {
                             log.trace("read(): H5Dread did={} tid={} spaceIDs[0]={} spaceIDs[1]={}", did, tid, spaceIDs[0], spaceIDs[1]);

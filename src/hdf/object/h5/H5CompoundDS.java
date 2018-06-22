@@ -657,13 +657,13 @@ public class H5CompoundDS extends CompoundDS {
             H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
 
             if (baseType != null) {
-                if (baseType.isCompound()) {
+                if (DSdatatype.isArray() && baseType.isCompound()) {
                     log.debug("read(): cannot read dataset of type ARRAY of COMPOUND");
                     log.trace("read(): finish");
                     throw new HDF5Exception("Unsupported dataset of type ARRAY of COMPOUND");
                 }
 
-                if (baseType.isCompound()) {
+                if (DSdatatype.isVLEN() && baseType.isCompound()) {
                     log.debug("read(): cannot read dataset of type VLEN of COMPOUND");
                     log.trace("read(): finish");
                     throw new HDF5Exception("Unsupported dataset of type VLEN of COMPOUND");
@@ -831,14 +831,8 @@ public class H5CompoundDS extends CompoundDS {
                          */
                         try {
                             if (member_type.isVLEN() || (member_type.isArray() && member_base.isVLEN())) {
-                                if (member_type.isVarStr() || (member_type.isArray() && member_base.isVarStr())) {
-                                    log.trace("read(): Member[{}]: H5Dread_VLStrings did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
-                                    H5.H5Dread_VLStrings(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) member_data);
-                                }
-                                else {
-                                    log.trace("read(): Member[{}]: H5DreadVL did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
-                                    H5.H5DreadVL(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) member_data);
-                                }
+                                log.trace("read(): Member[{}]: H5DreadVL did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
+                                H5.H5DreadVL(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) member_data);
                             }
                             else if ((member_base != null) && member_base.isCompound()) {
                                 log.trace("read(): Member[{}]: H5Dread did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);

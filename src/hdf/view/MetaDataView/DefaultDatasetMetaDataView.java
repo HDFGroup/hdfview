@@ -282,24 +282,37 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             CompoundDS compound = (CompoundDS) d;
 
             int n = compound.getMemberCount();
-            if (n > 0) {
-                log.trace("addObjectSpecificContent(): number of compound members={}", n);
+            log.trace("addObjectSpecificContent(): number of compound members={}", n);
 
+            // Add a dummy label to take up some vertical space between sections
+            label = new Label(generalObjectInfoPane, SWT.LEFT);
+            label.setText("");
+            label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+            org.eclipse.swt.widgets.Group compoundMembersGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
+            compoundMembersGroup.setFont(curFont);
+            compoundMembersGroup.setText("Compound Dataset Members");
+            compoundMembersGroup.setLayout(new FillLayout(SWT.VERTICAL));
+            compoundMembersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+            Table memberTable = new Table(compoundMembersGroup, SWT.BORDER);
+            memberTable.setLinesVisible(true);
+            memberTable.setHeaderVisible(true);
+            memberTable.setFont(curFont);
+
+            String[] columnNames = { "Name", "Type", "Array Size" };
+
+            for (int i = 0; i < columnNames.length; i++) {
+                TableColumn column = new TableColumn(memberTable, SWT.NONE);
+                column.setText(columnNames[i]);
+                column.setMoveable(false);
+            }
+
+            if (n > 0) {
                 String rowData[][] = new String[n][3];
                 String names[] = compound.getMemberNames();
                 Datatype types[] = compound.getMemberTypes();
                 int orders[] = compound.getMemberOrders();
-
-                // Add a dummy label to take up some vertical space between sections
-                label = new Label(generalObjectInfoPane, SWT.LEFT);
-                label.setText("");
-                label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-
-                org.eclipse.swt.widgets.Group compoundMembersGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
-                compoundMembersGroup.setFont(curFont);
-                compoundMembersGroup.setText("Compound Dataset Members");
-                compoundMembersGroup.setLayout(new FillLayout(SWT.VERTICAL));
-                compoundMembersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
                 for (int i = 0; i < n; i++) {
                     rowData[i][0] = new String(names[i]);
@@ -327,19 +340,6 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                     rowData[i][1] = (types[i] == null) ? "null" : types[i].getDescription();
                 }
 
-                String[] columnNames = { "Name", "Type", "Array Size" };
-
-                Table memberTable = new Table(compoundMembersGroup, SWT.BORDER);
-                memberTable.setLinesVisible(true);
-                memberTable.setHeaderVisible(true);
-                memberTable.setFont(curFont);
-
-                for (int i = 0; i < columnNames.length; i++) {
-                    TableColumn column = new TableColumn(memberTable, SWT.NONE);
-                    column.setText(columnNames[i]);
-                    column.setMoveable(false);
-                }
-
                 for (int i = 0; i < rowData.length; i++) {
                     TableItem item = new TableItem(memberTable, SWT.NONE);
                     item.setFont(curFont);
@@ -356,10 +356,10 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                 // int cellRowHeight = Math.max(16,
                 // table.getFontMetrics(table.getFont()).getHeight());
                 // table.setRowHeight(cellRowHeight);
-
-                // Prevent conflict from equal vertical grabbing
-                datasetLayoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
             } // if (n > 0)
+
+            // Prevent conflict from equal vertical grabbing
+            datasetLayoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         }
 
         log.trace("addObjectSpecificContent(): finish");
