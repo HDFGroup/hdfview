@@ -13,9 +13,9 @@ import hdf.object.h5.H5File;
 
 /**
  * Creates an HDF5 file for unit tests.
- * 
+ *
  * @author xcao
- * 
+ *
  */
 public class H5TestFile {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5TestFile.class);
@@ -83,18 +83,14 @@ public class H5TestFile {
             new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1),
             new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE) };
 
-    // attributes
-    public final static Attribute ATTRIBUTE_STR = new Attribute("strAttr", new H5Datatype(Datatype.CLASS_STRING,
-            STR_LEN, -1, -1), new long[] { 1 }, new String[] { "String attribute." });
-    public final static Attribute ATTRIBUTE_INT_ARRAY = new Attribute("arrayInt", new H5Datatype(
-            Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1), new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9,
-            10 });
+    public static Attribute ATTRIBUTE_STR = null;
+    public static Attribute ATTRIBUTE_INT_ARRAY = null;
 
     /**
      * Creates an HDF5 test file.
      * <p>
      * The test file contains the following objects:
-     * 
+     *
      * <pre>
      * /dataset_byte            Dataset {50, 10}
      *           /dataset_comp            Dataset {50, 10}
@@ -109,9 +105,10 @@ public class H5TestFile {
      *           /g0/g00/dataset_float    Dataset {50, 10}
      *           /g0_attr                 Group
      * </pre>
-     * 
+     *
      * @throws Exception
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final H5File createTestFile(String fileName) throws Exception {
         log.debug("createTestFile {}", fileName);
         H5File file = null;
@@ -143,7 +140,7 @@ public class H5TestFile {
         DATA_COMP.add(1, DATA_FLOAT);
         DATA_COMP.add(2, DATA_STR);
         DATA_COMP.add(3, DATA_LONG);
-        
+
         log.debug("filename: " + fileName);
 
         file = new H5File(fileName, FileFormat.CREATE);
@@ -153,8 +150,13 @@ public class H5TestFile {
         g1 = file.createGroup(NAME_GROUP_ATTR, null);
         g00 = file.createGroup(NAME_GROUP_SUB, null);
 
-        g1.writeMetadata(ATTRIBUTE_STR);
-        g1.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        // attributes
+        ATTRIBUTE_STR = new Attribute(g1, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(g1, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dsets[0] = file.createScalarDS(NAME_DATASET_INT, null, typeInt, DIMs, null, CHUNKs, 9, DATA_INT);
         dsets[1] = file.createScalarDS(NAME_DATASET_FLOAT, null, typeFloat, DIMs, null, CHUNKs, 9, DATA_FLOAT);
@@ -172,8 +174,11 @@ public class H5TestFile {
 
         // attach attributes to all datasets
         for (int i = 0; i < dsets.length; i++) {
-            dsets[i].writeMetadata(ATTRIBUTE_STR);
-            dsets[i].writeMetadata(ATTRIBUTE_INT_ARRAY);
+            ATTRIBUTE_STR = new Attribute(dsets[i], "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+            ATTRIBUTE_INT_ARRAY = new Attribute(dsets[i], "arrayInt", typeInt, new long[] { 10 },
+                    new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+            ATTRIBUTE_STR.write();
+            ATTRIBUTE_INT_ARRAY.write();
         }
 
         // create a wave palette and attach it to the image
@@ -185,26 +190,37 @@ public class H5TestFile {
         for (int i = 0; i < n; i++) {
             final Attribute attr = (Attribute) attrs.get(i);
             if ("PALETTE".equals(attr.getName())) {
-                attr.setValue(oid);
-                dsets[7].writeMetadata(attr);
+                attr.write(oid);
             }
         }
 
         Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_INT);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE, NAME_DATATYPE_UINT);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_FLOAT);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1, NAME_DATATYPE_STR);
-        dtype.writeMetadata(ATTRIBUTE_STR);
-        dtype.writeMetadata(ATTRIBUTE_INT_ARRAY);
+        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+                new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        ATTRIBUTE_STR.write();
+        ATTRIBUTE_INT_ARRAY.write();
 
         file.createLink(g0, NAME_HARD_LINK_TO_IMAGE, dsets[7]);
 
@@ -240,7 +256,7 @@ public class H5TestFile {
      * The palette values are stored in a two-dimensional byte array and arrange by color components of red, green and
      * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
      * components respectively.
-     * 
+     *
      * @return the wave palette in the form of byte[3][256]
      */
     private static final byte[] createWavePalette() {

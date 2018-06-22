@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.object;
 
@@ -11,21 +11,21 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Dataset;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5File;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.Dataset;
+import hdf.object.FileFormat;
+import hdf.object.h5.H5File;
+
 /**
  * @author rsinha
- * 
+ *
  */
 public class DatasetTest {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatasetTest.class);
@@ -69,6 +69,7 @@ public class DatasetTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void openFiles() throws Exception {
         try {
@@ -129,41 +130,23 @@ public class DatasetTest {
     public void testMetadataAssociatedWithDataset() {
         log.debug("testMetadataAssociatedWithDataset");
         for (int i = 0; i < dsetNames.length; i++) {
+            log.debug("testMetadataAssociatedWithDataset current={} is  {}", i, dSets[i].getName());
             assertNull(dSets[i].getChunkSize());
             assertTrue(dSets[i].getCompression().equals("NONE"));
-            assertTrue(dSets[i].getConvertByteToString()); // by default,
-                                                           // strings are
-                                                           // converted
+            assertTrue(dSets[i].getConvertByteToString()); // by default, strings are converted
             assertNull(dSets[i].getDimNames());
+            log.debug("testMetadataAssociatedWithDataset current dims={}", dSets[i].getDims());
             assertTrue(Arrays.equals(dSets[i].getDims(), H5TestFile.DIMs));
-            if (H5TestFile.NAME_DATASET_STR.equals("/" + dSets[i].getName())) {
-                assertEquals(dSets[i].getHeight(), H5TestFile.DIM2);
-            }
-            else {
-                assertEquals(dSets[i].getHeight(), H5TestFile.DIM1);
-            }
+            assertEquals(dSets[i].getHeight(), H5TestFile.DIM1);
             assertEquals(dSets[i].getRank(), H5TestFile.RANK);
             long[] array = new long[2];
-            if (H5TestFile.NAME_DATASET_STR.equals("/" + dSets[i].getName())) {
-                array[0] = 1;
-                array[1] = 10;
-            }
-            else {
-                array[0] = 50;
-                array[1] = 10;
-            }
+            array[0] = 50;
+            array[1] = 10;
             assertTrue(Arrays.equals(dSets[i].getSelectedDims(), array));
             int[] arrayInt = new int[3];
-            if (H5TestFile.NAME_DATASET_STR.equals("/" + dSets[i].getName())) {
-                arrayInt[0] = 1;
-                arrayInt[1] = 0;
-                arrayInt[2] = 2;
-            }
-            else {
-                arrayInt[0] = 0;
-                arrayInt[1] = 1;
-                arrayInt[2] = 2;
-            }
+            arrayInt[0] = 0;
+            arrayInt[1] = 1;
+            arrayInt[2] = 2;
             assertTrue(Arrays.equals(dSets[i].getSelectedIndex(), arrayInt));
             array[0] = 0;
             array[1] = 0;
@@ -171,12 +154,7 @@ public class DatasetTest {
             array[0] = 1;
             array[1] = 1;
             assertTrue(Arrays.equals(dSets[i].getStride(), array));
-            if (H5TestFile.NAME_DATASET_STR.equals("/" + dSets[i].getName())) {
-                assertEquals(dSets[i].getWidth(), 1);
-            }
-            else {
-                assertEquals(dSets[i].getWidth(), H5TestFile.DIM2);
-            }
+            assertEquals(dSets[i].getWidth(), H5TestFile.DIM2);
         }
         long nObjs = 0;
         try {

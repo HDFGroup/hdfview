@@ -1,34 +1,16 @@
 package test.uitest;
 
-import static org.hamcrest.Matcher.*;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
 
-import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
-import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.Ignore;
 
 public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
     @Test
@@ -71,9 +53,11 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -128,9 +112,11 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
@@ -162,16 +148,11 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
 
             items[0].click();
-            items[0].contextMenu("Show Attributes").click();
 
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("Properties.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
+            tabItem.activate();
 
-            SWTBotShell metaDataShell = bot.shells()[1];
-            metaDataShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(metaDataShell.getText()));
-
-            metaDataShell.bot().button("  &Add  ").click();
+            bot.button("Add Attribute").click();
 
             SWTBotShell daShell = bot.shell("New Attribute...");
             daShell.activate();
@@ -185,9 +166,6 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             daShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(daShell));
 
-            metaDataShell.bot().button("   &Close   ").click();
-            bot.waitUntil(Conditions.shellCloses(metaDataShell));
-
             items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
@@ -196,9 +174,11 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {

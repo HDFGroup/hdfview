@@ -2,10 +2,13 @@ package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -55,9 +58,12 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             bot.waitUntil(shellCloses(libVersionShell));
 
-			val = bot.labelInGroup("General Object Info", 9).getText();
-            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and Latest", val),
-                    val.equals("Earliest and Latest"));
+            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            tabItem.activate();
+
+            val = bot.textWithLabel("Library version bounds: ").getText();
+            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and V18", val),
+                    val.equals("Earliest and V18"));
 
             items[0].contextMenu("Set Lib version bounds").click();
 
@@ -68,17 +74,21 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             libVersionShell.bot().button("   &OK   ").click();
 
-            bot.waitUntil(shellCloses(libVersionShell));
+            SWTBotShell libVersionErrorShell = bot.shells()[2];
+            libVersionErrorShell.activate();
+            libVersionErrorShell.bot().button("OK").click();
+            bot.waitUntil(Conditions.shellCloses(libVersionErrorShell));
 
-			val = bot.labelInGroup("General Object Info", 9).getText();
-            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Latest and Latest", val),
-                    val.equals("Latest and Latest"));
+            libVersionShell.bot().button(" &Cancel ").click();
+            bot.waitUntil(shellCloses(libVersionShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
         finally {
             try {

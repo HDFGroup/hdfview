@@ -7,7 +7,7 @@
  * The full copyright notice, including terms governing use, modification,   *
  * and redistribution, is contained in the files COPYING and Copyright.html. *
  * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see http://hdfgroup.org/products/hdf-java/doc/Copyright.html.         *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -150,19 +150,18 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
-import hdf.view.ViewProperties.BITMASK_OP;
-
-import hdf.view.TableView;
+import hdf.view.Chart;
+import hdf.view.DefaultFileFilter;
+import hdf.view.HDFView;
+import hdf.view.Tools;
 import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
-import hdf.view.Tools;
-import hdf.view.DefaultFileFilter;
-import hdf.view.InputDialog;
-import hdf.view.TreeView;
-import hdf.view.NewDatasetDialog;
-import hdf.view.MathConversionDialog;
-import hdf.view.HDFView;
-import hdf.view.Chart;
+import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.TableView.TableView;
+import hdf.view.TreeView.TreeView;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.MathConversionDialog;
+import hdf.view.dialog.NewDatasetDialog;
 
 /**
  * TableView displays an HDF dataset as a two-dimensional table.
@@ -303,12 +302,13 @@ public class GermanTableView implements TableView {
         shell.setLayout(new GridLayout(1, true));
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (isValueChanged && !isReadOnly) {
                     MessageBox confirm = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
                     confirm.setText(shell.getText());
                     confirm.setMessage("\"" + dataset.getName() + "\" hat sich geändert.\n"
-                    + "Möchten Sie die Änderungen speichern?");
+                            + "Möchten Sie die Änderungen speichern?");
                     if (confirm.open() == SWT.YES) {
                         updateValueInFile();
                     }
@@ -389,7 +389,7 @@ public class GermanTableView implements TableView {
         long tsize = 1;
 
         if (dims == null) {
-            Tools.showError(shell, "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Null Dimensionen.", shell.getText());
+            Tools.showError(shell, "Test", "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Null Dimensionen.");
             return;
         }
 
@@ -398,7 +398,7 @@ public class GermanTableView implements TableView {
 
         log.trace("dataset size={} Height={} Width={}", tsize, dataset.getHeight(), dataset.getWidth());
         if (dataset.getHeight() <= 0 || dataset.getWidth() <= 0 || tsize <= 0) {
-            Tools.showError(shell, "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Dimension der Größe 0.", shell.getText());
+            Tools.showError(shell, "Test", "Dataset '" + dataset.getName() + "' konnte nicht geöffnet werden. Dataset hat Dimension der Größe 0.");
             return;
         }
 
@@ -421,7 +421,7 @@ public class GermanTableView implements TableView {
         Datatype dtype = dataset.getDatatype();
         log.trace("dataset dtype.getDatatypeClass()={}", dtype.getDatatypeClass());
         isDisplayTypeChar = (isDisplayTypeChar && (dtype.getDatatypeSize() == 1 || (dtype.getDatatypeClass() == Datatype.CLASS_ARRAY && dtype
-                .getBasetype().getDatatypeClass() == Datatype.CLASS_CHAR)));
+                .getDatatypeBase().getDatatypeClass() == Datatype.CLASS_CHAR)));
 
         isEnumConverted = ViewProperties.isConvertEnum();
         log.trace("dataset isDisplayTypeChar={} isConvertEnum={}", isDisplayTypeChar, ViewProperties.isConvertEnum());
@@ -613,12 +613,10 @@ public class GermanTableView implements TableView {
         return selectionLayer.getSelectedColumnPositions().length;
     }
 
-    @Override
     public SelectionLayer getSelectionLayer() {
         return selectionLayer;
     }
 
-    @Override
     public DataLayer getDataLayer() {
         return dataLayer;
     }
@@ -642,7 +640,7 @@ public class GermanTableView implements TableView {
                 log.trace("createTable(): dataset inited");
             }
             catch (Exception ex) {
-                Tools.showError(shell, ex.getMessage(), "createTable:" + shell.getText());
+                Tools.showError(shell, "Test", "createTable:" + ex.getMessage());
                 dataValue = null;
                 log.debug("createTable(): ", ex);
                 log.trace("createTable(): finish");
@@ -654,7 +652,7 @@ public class GermanTableView implements TableView {
         try {
             dataValue = theDataset.getData();
             if (dataValue == null) {
-                Tools.showError(shell, "Keine Daten lesen", "ScalarDS createTable:" + shell.getText());
+                Tools.showError(shell, "Test", "ScalarDS createTable:" + "Keine Daten lesen");
                 log.debug("createTable(): no data read");
                 log.trace("createTable(): finish");
                 return null;
@@ -677,7 +675,7 @@ public class GermanTableView implements TableView {
             dataValue = theDataset.getData();
         }
         catch (Throwable ex) {
-            Tools.showError(shell, ex.getMessage(), "ScalarDS createTable:" + shell.getText());
+            Tools.showError(shell, "Test", "ScalarDS createTable:" + ex.getMessage());
             log.debug("createTable(): ", ex);
             log.trace("createTable(): finish");
             dataValue = null;
@@ -717,7 +715,7 @@ public class GermanTableView implements TableView {
             dataValue = charData;
         }
         else if ((NT == 'B') && theDataset.getDatatype().getDatatypeClass() == Datatype.CLASS_ARRAY) {
-            Datatype baseType = theDataset.getDatatype().getBasetype();
+            Datatype baseType = theDataset.getDatatype().getDatatypeBase();
             if (baseType.getDatatypeClass() == Datatype.CLASS_STRING) {
                 dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
             }
@@ -803,7 +801,7 @@ public class GermanTableView implements TableView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), "TableView " + shell.getText());
+            Tools.showError(shell, "Test", "TableView " + ex.getMessage());
             log.debug("createTable(): ", ex);
             dataValue = null;
         }
@@ -822,7 +820,7 @@ public class GermanTableView implements TableView {
         final IDataProvider bodyDataProvider = new CompoundDSDataProvider(theDataset);
         dataLayer = new DataLayer(bodyDataProvider);
         final ColumnGroupExpandCollapseLayer expandCollapseLayer =
-            new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
+                new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
         selectionLayer = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
@@ -889,13 +887,14 @@ public class GermanTableView implements TableView {
         MenuItem item = new MenuItem(menu, SWT.PUSH);
         item.setText("Export der Daten in Textdatei");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     saveAsText();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -909,6 +908,7 @@ public class GermanTableView implements TableView {
             item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
             item.setText("Native Um");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 1;
 
@@ -917,7 +917,7 @@ public class GermanTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -925,6 +925,7 @@ public class GermanTableView implements TableView {
             item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
             item.setText("Little Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 2;
 
@@ -933,7 +934,7 @@ public class GermanTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -941,6 +942,7 @@ public class GermanTableView implements TableView {
             item = new MenuItem(exportAsBinaryMenu, SWT.PUSH);
             item.setText("Big Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 3;
 
@@ -949,7 +951,7 @@ public class GermanTableView implements TableView {
                     }
                     catch (Exception ex) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -963,6 +965,7 @@ public class GermanTableView implements TableView {
         item.setText("Importieren Sie Daten aus Textdatei");
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String currentDir = dataset.getFileFormat().getParent();
 
@@ -978,7 +981,7 @@ public class GermanTableView implements TableView {
 
                 File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
                 if (!chosenFile.exists()) {
-                    Tools.showError(shell, "Datei " + chosenFile.getName() + " existiert nicht.", "Importieren Sie Daten aus Textdatei");
+                    Tools.showError(shell, "Test", "Importieren Sie Daten aus Textdatei\nDatei " + chosenFile.getName() + " existiert nicht.");
                     return;
                 }
 
@@ -995,6 +998,7 @@ public class GermanTableView implements TableView {
             checkFixedDataLength = new MenuItem(menu, SWT.CHECK);
             checkFixedDataLength.setText("Feste Datenlänge");
             checkFixedDataLength.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (!checkFixedDataLength.getSelection()) {
                         fixedDataLength = -1;
@@ -1003,7 +1007,7 @@ public class GermanTableView implements TableView {
 
                     String str = new InputDialog(shell, "",
                             "Geben Sie feste Daten Länge beim Importieren von Daten\n\n"
-                                        + "Z. b., zu einem text von \"12345678\"\n\t\teingeben 2, die Daten werden 12, 34, 56, 78\n\t\teingeben 4, die Daten werden 1234, 5678\n").open();
+                                    + "Z. b., zu einem text von \"12345678\"\n\t\teingeben 2, die Daten werden 12, 34, 56, 78\n\t\teingeben 4, die Daten werden 1234, 5678\n").open();
 
                     if ((str == null) || (str.length() < 1)) {
                         checkFixedDataLength.setSelection(false);
@@ -1032,6 +1036,7 @@ public class GermanTableView implements TableView {
             item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
             item.setText("Native Um");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 1;
 
@@ -1039,7 +1044,7 @@ public class GermanTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -1047,6 +1052,7 @@ public class GermanTableView implements TableView {
             item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
             item.setText("Little Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 2;
 
@@ -1054,7 +1060,7 @@ public class GermanTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -1062,6 +1068,7 @@ public class GermanTableView implements TableView {
             item = new MenuItem(importFromBinaryMenu, SWT.PUSH);
             item.setText("Big Endian");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     binaryOrder = 3;
 
@@ -1069,7 +1076,7 @@ public class GermanTableView implements TableView {
                         importBinaryData();
                     }
                     catch (Exception ex) {
-                        Tools.showError(shell, ex.getMessage(), shell.getText());
+                        Tools.showError(shell, "Test", ex.getMessage());
                     }
                 }
             });
@@ -1083,6 +1090,7 @@ public class GermanTableView implements TableView {
         item.setText("Kopieren");
         item.setAccelerator(SWT.CTRL | 'C');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 copyData();
             }
@@ -1093,6 +1101,7 @@ public class GermanTableView implements TableView {
         item.setAccelerator(SWT.CTRL | 'V');
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 pasteData();
             }
@@ -1104,6 +1113,7 @@ public class GermanTableView implements TableView {
         item.setText("Kopieren auf neue Dataset");
         item.setEnabled(isEditable && (dataset instanceof ScalarDS));
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 if ((selectionLayer.getSelectedColumnPositions().length <= 0) || (selectionLayer.getSelectedRowCount() <= 0)) {
                     MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
@@ -1128,7 +1138,7 @@ public class GermanTableView implements TableView {
                 NewDatasetDialog dialog = new NewDatasetDialog(shell, pGroup, list, GermanTableView.this);
                 dialog.open();
 
-                HObject obj = (HObject) dialog.getObject();
+                HObject obj = dialog.getObject();
                 if (obj != null) {
                     Group pgroup = dialog.getParentGroup();
                     try {
@@ -1148,13 +1158,14 @@ public class GermanTableView implements TableView {
         item.setAccelerator(SWT.CTRL | 'U');
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     updateValueInFile();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1165,13 +1176,14 @@ public class GermanTableView implements TableView {
         item.setText("Alle auswählen");
         item.setAccelerator(SWT.CTRL | 'A');
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     table.doCommand(new SelectAllCommand());
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1181,6 +1193,7 @@ public class GermanTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Anzeigen Lineplot");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 showLineplot();
             }
@@ -1189,6 +1202,7 @@ public class GermanTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Statistik anzeigen");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     Object theData = getSelectedData();
@@ -1196,7 +1210,7 @@ public class GermanTableView implements TableView {
                     if (dataset instanceof CompoundDS) {
                         int cols = selectionLayer.getFullySelectedColumnPositions().length;
                         if (cols != 1) {
-                            Tools.showError(shell, "Bitte wählen Sie eine Colunm eine Zeit für zusammengesetzte Dataset.", shell.getText());
+                            Tools.showError(shell, "Test", "Bitte wählen Sie eine Colunm eine Zeit für zusammengesetzte Dataset.");
                             return;
                         }
                     }
@@ -1210,7 +1224,7 @@ public class GermanTableView implements TableView {
                     Tools.findMinMax(theData, minmax, fillValue);
                     if (Tools.computeStatistics(theData, stat, fillValue) > 0) {
                         String stats = "Min                      = " + minmax[0] + "\nMax                      = " + minmax[1]
-                                     + "\nMean                     = " + stat[0] + "\nStandardabweichung = " + stat[1];
+                                + "\nMean                     = " + stat[0] + "\nStandardabweichung = " + stat[1];
                         MessageBox info = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
                         info.setText("Statistiken");
                         info.setMessage(stats);
@@ -1222,7 +1236,7 @@ public class GermanTableView implements TableView {
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1233,13 +1247,14 @@ public class GermanTableView implements TableView {
         item.setText("Math-Umwandlung");
         item.setEnabled(isEditable);
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     mathConversion();
                 }
                 catch (Exception ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
                 }
             }
         });
@@ -1250,6 +1265,7 @@ public class GermanTableView implements TableView {
             checkScientificNotation = new MenuItem(menu, SWT.CHECK);
             checkScientificNotation.setText("Wissenschaftliche Notation anzeigen");
             checkScientificNotation.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (checkScientificNotation.getSelection()) {
                         if(checkCustomNotation != null)
@@ -1272,6 +1288,7 @@ public class GermanTableView implements TableView {
             checkCustomNotation = new MenuItem(menu, SWT.CHECK);
             checkCustomNotation.setText("Benutzerdefinierte Notation Anzeigen");
             checkCustomNotation.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (checkCustomNotation.getSelection()) {
                         if(checkScientificNotation != null)
@@ -1295,6 +1312,7 @@ public class GermanTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Erstellen von benutzerdefinierten Notation");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 String msg = "Erstellen Sie ein Format von Muster \nINTEGER . FRACTION E EXPONENT\nmit # für optionale Ziffern und 0 für erforderlich Ziffern"
                         + "\nwo,    INTEGER: das Muster für den ganzzahligen Teil"
@@ -1322,6 +1340,7 @@ public class GermanTableView implements TableView {
             checkHex = new MenuItem(menu, SWT.CHECK);
             checkHex.setText("Hexadezimal Anzeigen");
             checkHex.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     showAsHex = checkHex.getSelection();
                     if (showAsHex) {
@@ -1342,6 +1361,7 @@ public class GermanTableView implements TableView {
             checkBin = new MenuItem(menu, SWT.CHECK);
             checkBin.setText("Binär Anzeigen");
             checkBin.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     showAsBin = checkBin.getSelection();
                     if (showAsBin) {
@@ -1365,6 +1385,7 @@ public class GermanTableView implements TableView {
         item = new MenuItem(menu, SWT.PUSH);
         item.setText("Schließen");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 shell.dispose();
             }
@@ -1383,6 +1404,7 @@ public class GermanTableView implements TableView {
         item.setImage(ViewProperties.getChartIcon());
         item.setToolTipText("Linie zeichnen");
         item.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 showLineplot();
             }
@@ -1396,6 +1418,7 @@ public class GermanTableView implements TableView {
             item.setImage(ViewProperties.getFirstIcon());
             item.setToolTipText("Erste");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     firstPage();
                 }
@@ -1406,6 +1429,7 @@ public class GermanTableView implements TableView {
             item.setImage(ViewProperties.getPreviousIcon());
             item.setToolTipText("Zurück");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     previousPage();
                 }
@@ -1417,6 +1441,7 @@ public class GermanTableView implements TableView {
             frameField.setFont(curFont);
             frameField.setText(String.valueOf(curFrame));
             frameField.addTraverseListener(new TraverseListener() {
+                @Override
                 public void keyTraversed(TraverseEvent e) {
                     if (e.detail == SWT.TRAVERSE_RETURN) {
                         try {
@@ -1463,6 +1488,7 @@ public class GermanTableView implements TableView {
             item.setImage(ViewProperties.getNextIcon());
             item.setToolTipText("Nächste");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     nextPage();
                 }
@@ -1473,6 +1499,7 @@ public class GermanTableView implements TableView {
             item.setImage(ViewProperties.getLastIcon());
             item.setToolTipText("Letzte");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     lastPage();
                 }
@@ -1561,7 +1588,7 @@ public class GermanTableView implements TableView {
 
         if ((idx < 0) || (idx >= dims[selectedIndex[2]])) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Die Frame-Nummer muss zwischen " + indexBase + " und " + (dims[selectedIndex[2]] - 1 + indexBase), shell.getText());
+            Tools.showError(shell, "Test", "Die Frame-Nummer muss zwischen " + indexBase + " und " + (dims[selectedIndex[2]] - 1 + indexBase));
             return;
         }
 
@@ -1582,7 +1609,7 @@ public class GermanTableView implements TableView {
         }
         catch (Exception ex) {
             dataValue = null;
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Test", ex.getMessage());
             return;
         }
         finally {
@@ -1611,7 +1638,7 @@ public class GermanTableView implements TableView {
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Test", ex.getMessage());
             log.debug("updateValueInFile(): ", ex);
             log.trace("updateValueInFile(): finish");
             return;
@@ -1643,7 +1670,7 @@ public class GermanTableView implements TableView {
         }
 
         // No need to update if values are the same
-        if (cellValue.equals((String) dataLayer.getDataValue(col, row).toString())) {
+        if (cellValue.equals(dataLayer.getDataValue(col, row).toString())) {
             log.debug("updateValueInMemory(): cell value not updated; new value same as old value");
             log.trace("updateValueInMemory(): finish");
             return;
@@ -1685,7 +1712,7 @@ public class GermanTableView implements TableView {
         log.trace("updateScalarData({}, {}): {} NT={}", row, col, cellValue, NT);
 
         ScalarDS sds = (ScalarDS) dataset;
-        boolean isUnsigned = sds.isUnsigned();
+        boolean isUnsigned = sds.getDatatype().isUnsigned();
         String cname = dataset.getOriginalClass().getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         log.trace("updateScalarData({}, {}): isUnsigned={} cname={} dname={}", row, col, isUnsigned, cname, dname);
@@ -1808,7 +1835,7 @@ public class GermanTableView implements TableView {
         StringTokenizer st = new StringTokenizer(cellValue, ",");
         if (st.countTokens() < morder) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Anzahl der Datenpunkte < " + morder + ".", shell.getText());
+            Tools.showError(shell, "Test", "Anzahl der Datenpunkte < " + morder + ".");
             log.debug("updateCompoundData({}, {}): number of data points < {}", morder, row, col);
             log.trace("updateCompoundData({}, {}): finish", row, col);
             return;
@@ -1882,7 +1909,7 @@ public class GermanTableView implements TableView {
 
         Rectangle selection = selectionLayer.getLastSelectedRegion();
         if (selection == null) {
-            Tools.showError(shell, "Wählen Sie die zu kopierenden Daten aus.", shell.getText());
+            Tools.showError(shell, "Test", "Wählen Sie die zu kopierenden Daten aus.");
             return;
         }
 
@@ -1910,7 +1937,7 @@ public class GermanTableView implements TableView {
         }
         catch (java.lang.OutOfMemoryError err) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Das Kopieren von Daten auf Zwischenspeicher fehlgeschlagen. \nMit Export oder Import Daten für das Kopieren oder Einfügen von großen Daten.", shell.getText());
+            Tools.showError(shell, "Test", "Das Kopieren von Daten auf Zwischenspeicher fehlgeschlagen. \nMit Export oder Import Daten für das Kopieren oder Einfügen von großen Daten.");
             return;
         }
 
@@ -1992,7 +2019,7 @@ public class GermanTableView implements TableView {
         }
         catch (Throwable ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, ex.getMessage(), shell.getText());
+            Tools.showError(shell, "Test", ex.getMessage());
         }
     }
 
@@ -2103,7 +2130,7 @@ public class GermanTableView implements TableView {
 
         if (selectedData == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Nicht unterstützte Datentypen.", shell.getText());
+            Tools.showError(shell, "Test", "Nicht unterstützte Datentypen.");
             return null;
         }
         log.trace("GermanTableView getSelectedScalarData: selectedData is type {}", NT);
@@ -2137,7 +2164,7 @@ public class GermanTableView implements TableView {
 
         if ((cols <= 0) || (rows <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+            Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
             return null;
         }
 
@@ -2179,7 +2206,7 @@ public class GermanTableView implements TableView {
         }
         else {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Nicht unterstützte Datentypen.", shell.getText());
+            Tools.showError(shell, "Test", "Nicht unterstützte Datentypen.");
             return null;
         }
         log.trace("getSelectedCompoundData(): selectedData={}", selectedData);
@@ -2204,7 +2231,7 @@ public class GermanTableView implements TableView {
         int cols = selectionLayer.getSelectedColumnPositions().length;
         if ((dataset instanceof CompoundDS) && (cols > 1)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Bitte wählen Sie eine Colunm eine Zeit für mathematische Umrechnung für zusammengesetzte Dataset.", shell.getText());
+            Tools.showError(shell, "Test", "Bitte wählen Sie eine Colunm eine Zeit für mathematische Umrechnung für zusammengesetzte Dataset.");
             log.debug("mathConversion(): more than one column selected for CompoundDS");
             log.trace("mathConversion(): finish");
             return;
@@ -2213,7 +2240,7 @@ public class GermanTableView implements TableView {
         Object theData = getSelectedData();
         if (theData == null) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+            Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
             log.debug("mathConversion(): no data selected");
             log.trace("mathConversion(): finish");
             return;
@@ -2286,7 +2313,7 @@ public class GermanTableView implements TableView {
 
         HObject obj = FileFormat.findObject(dataset.getFileFormat(), oid);
         if (obj == null || !(obj instanceof ScalarDS)) {
-            Tools.showError(shell, "Objektreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten", shell.getText());
+            Tools.showError(shell, "Test", "Objektreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten");
             log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
             log.trace("showObjRefData(): finish");
             return;
@@ -2304,12 +2331,12 @@ public class GermanTableView implements TableView {
             Class[] paramClass = { FileFormat.class, String.class, String.class };
             constructor = dset.getClass().getConstructor(paramClass);
             paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
-            dset_copy = (ScalarDS) constructor.newInstance(paramObj);
+            dset_copy = constructor.newInstance(paramObj);
             data = dset_copy.getData();
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): couldn't show data: ", ex);
-            Tools.showError(shell, ex.getMessage(), "Objektverweis: " + shell.getText());
+            Tools.showError(shell, "Test", "Objektverweis: " + ex.getMessage());
             data = null;
         }
 
@@ -2322,9 +2349,6 @@ public class GermanTableView implements TableView {
         String viewName = null;
 
         switch (viewType) {
-            case TEXT:
-                viewName = (String) HDFView.getListOfTextViews().get(0);
-                break;
             case IMAGE:
                 viewName = HDFView.getListOfImageViews().get(0);
                 break;
@@ -2351,9 +2375,6 @@ public class GermanTableView implements TableView {
         if (theClass == null) {
             log.trace("showObjRefData(): Using default dataview");
             switch (viewType) {
-                case TEXT:
-                    viewName = "hdf.view.DefaultTextView";
-                    break;
                 case IMAGE:
                     viewName = "hdf.view.DefaultImageView";
                     break;
@@ -2370,7 +2391,7 @@ public class GermanTableView implements TableView {
             catch (Exception ex) {
                 log.debug("showObjRefData(): no suitable display class found");
                 log.trace("showObjRefData(): finish");
-                Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden", shell.getText());
+                Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden");
                 return;
             }
         }
@@ -2384,7 +2405,7 @@ public class GermanTableView implements TableView {
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): Could not show reference data: ", ex);
-            Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: " + ex.toString(), shell.getText());
+            Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: " + ex.toString());
         }
 
         log.trace("showObjRefData(): finish");
@@ -2413,7 +2434,7 @@ public class GermanTableView implements TableView {
         log.trace("showRegRefData(): start: reg={}", reg);
 
         if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
-            Tools.showError(shell, "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten", shell.getText());
+            Tools.showError(shell, "Test", "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten");
             log.debug("showRegRefData(): ref is null or invalid");
             log.trace("showRegRefData(): finish");
             return;
@@ -2428,7 +2449,7 @@ public class GermanTableView implements TableView {
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
         if (regStr == null || regStr.length() <= 0) {
-            Tools.showError(shell, "Region-Referenzdaten konnten nicht angezeigt werden.", shell.getText());
+            Tools.showError(shell, "Test", "Region-Referenzdaten konnten nicht angezeigt werden.");
             log.debug("showRegRefData(): no region selection made");
             log.trace("showRegRefData(): finish");
             return; // no selection
@@ -2439,7 +2460,7 @@ public class GermanTableView implements TableView {
         StringTokenizer st = new StringTokenizer(regStr);
         int nSelections = st.countTokens();
         if (nSelections <= 0) {
-            Tools.showError(shell, "Region-Referenzdaten konnten nicht angezeigt werden.", shell.getText());
+            Tools.showError(shell, "Test", "Region-Referenzdaten konnten nicht angezeigt werden.");
             log.debug("showRegRefData(): no region selection made");
             log.trace("showRegRefData(): finish");
             return; // no selection
@@ -2448,7 +2469,7 @@ public class GermanTableView implements TableView {
 
         HObject obj = FileFormat.findObject(dataset.getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
-            Tools.showError(shell, "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten", shell.getText());
+            Tools.showError(shell, "Test", "Gebietsreferenzdaten konnten nicht angezeigt werden: ungültige oder null-Daten");
             log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
             log.debug("showRegRefData(): finish");
             return;
@@ -2478,7 +2499,7 @@ public class GermanTableView implements TableView {
         while (st.hasMoreTokens()) {
             log.trace("showRegRefData(): st.hasMoreTokens() begin");
             try {
-                dset_copy = (ScalarDS) constructor.newInstance(paramObj);
+                dset_copy = constructor.newInstance(paramObj);
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): constructor newInstance failure: ", ex);
@@ -2551,16 +2572,13 @@ public class GermanTableView implements TableView {
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): getData failure: ", ex);
-                Tools.showError(shell, ex.getMessage(), "Region Reference: " + shell.getText());
+                Tools.showError(shell, "Test", "Region Reference: " + ex.getMessage());
             }
 
             Class<?> theClass = null;
             String viewName = null;
 
             switch (viewType) {
-                case TEXT:
-                    viewName = (String) HDFView.getListOfTextViews().get(0);
-                    break;
                 case IMAGE:
                     viewName = HDFView.getListOfImageViews().get(0);
                     break;
@@ -2587,9 +2605,6 @@ public class GermanTableView implements TableView {
             if (theClass == null) {
                 log.trace("showRegRefData(): Using default dataview");
                 switch (viewType) {
-                    case TEXT:
-                        viewName = "hdf.view.DefaultTextView";
-                        break;
                     case IMAGE:
                         viewName = "hdf.view.DefaultImageView";
                         break;
@@ -2606,7 +2621,7 @@ public class GermanTableView implements TableView {
                 catch (Exception ex) {
                     log.debug("showRegRefData(): no suitable display class found");
                     log.trace("showRegRefData(): finish");
-                    Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden", shell.getText());
+                    Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: keine geeignete Anzeigeklasse gefunden");
                     return;
                 }
             }
@@ -2620,7 +2635,7 @@ public class GermanTableView implements TableView {
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): Could not show reference data: ", ex);
-                Tools.showError(shell, "Referenzdaten konnten nicht angezeigt werden: " + ex.toString(), shell.getText());
+                Tools.showError(shell, "Test", "Referenzdaten konnten nicht angezeigt werden: " + ex.toString());
             }
 
             log.trace("showRegRefData(): st.hasMoreTokens() end");
@@ -2748,7 +2763,7 @@ public class GermanTableView implements TableView {
                     } // while (tokenizer1.hasMoreTokens() && index < size)
                 }
                 catch (Exception ex) {
-                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                    Tools.showError(shell, "Test", ex.getMessage());
 
                     try {
                         in.close();
@@ -2805,7 +2820,7 @@ public class GermanTableView implements TableView {
 
         File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
         if (!chosenFile.exists()) {
-            Tools.showError(shell, "Datei " + chosenFile.getName() + " existiert nicht.", "Daten aus Binärdatei importieren");
+            Tools.showError(shell, "Test", "Daten aus Binärdatei importieren\nDatei " + chosenFile.getName() + " existiert nicht.");
             return;
         }
 
@@ -3093,7 +3108,7 @@ public class GermanTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.", shell.getText());
+                        Tools.showError(shell, "Test", "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.");
                         return;
                     }
                 }
@@ -3179,7 +3194,7 @@ public class GermanTableView implements TableView {
                     theFile = (FileFormat) iterator.next();
                     if (theFile.getFilePath().equals(fname)) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.", shell.getText());
+                        Tools.showError(shell, "Test", "Daten konnten nicht in der Datei gespeichert \"" + fname + "\". \nDie Datei wird gerade verwendet.");
                         return;
                     }
                 }
@@ -3417,7 +3432,7 @@ public class GermanTableView implements TableView {
 
         if ((rows == null) || (cols == null) || (rows.length <= 0) || (cols.length <= 0)) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Wählen Sie Zeilen oder Spalten mit dem Zeichnen einer Linie zeichnen.", shell.getText());
+            Tools.showError(shell, "Test", "Wählen Sie Zeilen oder Spalten mit dem Zeichnen einer Linie zeichnen.");
             return;
         }
 
@@ -3559,8 +3574,8 @@ public class GermanTableView implements TableView {
         }
         else if (yRange[0] > yRange[1]) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Kann ein Grundstück für die ausgewählten Daten. \n" + "Bitte überprüfen Sie den Datenbereich: ("
-                    + yRange[0] + ", " + yRange[1] + ").", shell.getText());
+            Tools.showError(shell, "Test", "Kann ein Grundstück für die ausgewählten Daten. \n" + "Bitte überprüfen Sie den Datenbereich: ("
+                    + yRange[0] + ", " + yRange[1] + ").");
             data = null;
             return;
         }
@@ -3635,7 +3650,7 @@ public class GermanTableView implements TableView {
      *         otherwise.
      */
     private static DataValidator getScalarDSDataValidator(final ScalarDS theDataset) {
-        boolean isUnsigned = theDataset.isUnsigned();
+        boolean isUnsigned = theDataset.getDatatype().isUnsigned();
         String cname = theDataset.getOriginalClass().getName();
 
         //TODO: Add validation for array types when array editing is added
@@ -3818,7 +3833,7 @@ public class GermanTableView implements TableView {
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
-            btype = dtype.getBasetype();
+            btype = dtype.getDatatypeBase();
 
             dims = theDataset.getSelectedDims();
 
@@ -4004,7 +4019,7 @@ public class GermanTableView implements TableView {
             buffer = new StringBuffer();
 
             dtype = theDataset.getDatatype();
-            btype = dtype.getBasetype();
+            btype = dtype.getDatatypeBase();
 
             typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
 
@@ -4171,7 +4186,7 @@ public class GermanTableView implements TableView {
 
                                 HObject obj = FileFormat.findObject(dataset.getFileFormat(), oidStr);
                                 if (obj == null || !(obj instanceof ScalarDS)) { // no
-                                                                                 // selection
+                                    // selection
                                     strVal = null;
                                 }
                                 else {
@@ -4245,7 +4260,7 @@ public class GermanTableView implements TableView {
                                             dbuf = dset.getData();
                                         }
                                         catch (Exception ex) {
-                                            Tools.showError(shell, ex.getMessage(), "Region Reference:" + shell.getText());
+                                            Tools.showError(shell, "Test", "Region Reference:" + ex.getMessage());
                                         }
 
                                         // Convert dbuf to a displayable
@@ -4265,9 +4280,9 @@ public class GermanTableView implements TableView {
                                         // unsigned
                                         // byte)
                                         Datatype dtype = dset.getDatatype();
-                                        Datatype baseType = dtype.getBasetype();
+                                        Datatype baseType = dtype.getDatatypeBase();
                                         log.trace("NATTable CellSelected: dtype={} baseType={}",
-                                                dtype.getDatatypeDescription(), baseType);
+                                                dtype.getDescription(), baseType);
                                         if (baseType == null) baseType = dtype;
                                         if ((dtype.getDatatypeClass() == Datatype.CLASS_ARRAY && baseType.getDatatypeClass() == Datatype.CLASS_CHAR)
                                                 && ((NT == 'B') || (NT == 'S'))) {
@@ -4343,7 +4358,7 @@ public class GermanTableView implements TableView {
                                                         break;
                                                     case 'J':
                                                         long[] larray = (long[]) dbuf;
-                                                        Long l = (Long) larray[0];
+                                                        Long l = larray[0];
                                                         String theValue = Long.toString(l);
                                                         if (l < 0) {
                                                             l = (l << 1) >>> 1;
@@ -4355,7 +4370,7 @@ public class GermanTableView implements TableView {
                                                         strvalSB.append(theValue);
                                                         for (int i = 1; i < n; i++) {
                                                             strvalSB.append(',');
-                                                            l = (Long) larray[i];
+                                                            l = larray[i];
                                                             theValue = Long.toString(l);
                                                             if (l < 0) {
                                                                 l = (l << 1) >>> 1;
@@ -4493,7 +4508,7 @@ public class GermanTableView implements TableView {
             }
 
             if (isArray) {
-                dtype = dtype.getBasetype();
+                dtype = dtype.getDatatypeBase();
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isString = (typeClass == Datatype.CLASS_STRING);
@@ -4546,7 +4561,7 @@ public class GermanTableView implements TableView {
                     }
                     else {
                         // Only support variable length strings
-                        log.debug("**CompoundDSDataProvider:getDataValue(): Unsupported Variable-length of {}", dtype.getDatatypeDescription());
+                        log.debug("**CompoundDSDataProvider:getDataValue(): Unsupported Variable-length of {}", dtype.getDescription());
                         stringBuffer.append("*unsupported*");
                     }
 
@@ -4591,7 +4606,7 @@ public class GermanTableView implements TableView {
                         rowIdx *= len;
 
                         for (int j = 0; i < len; i++) {
-                            elements[j] = Array.getByte(colValue, (int) rowIdx + j);
+                            elements[j] = Array.getByte(colValue, rowIdx + j);
                         }
 
                         arrayElements[i] = elements;
@@ -4636,7 +4651,7 @@ public class GermanTableView implements TableView {
                 rowIdx *= len;
 
                 for (int i = 0; i < len; i++) {
-                    elements[i] = Array.getByte(colValue, (int) rowIdx + i);
+                    elements[i] = Array.getByte(colValue, rowIdx + i);
                 }
 
                 theValue = elements;
@@ -4644,7 +4659,7 @@ public class GermanTableView implements TableView {
             else {
                 // Flat numerical types
                 if (isUINT64) {
-                    theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, (int) rowIdx));
+                    theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx));
                 }
                 else {
                     theValue = Array.get(colValue, rowIdx);
@@ -4716,7 +4731,7 @@ public class GermanTableView implements TableView {
             buffer.setLength(0);
 
             if (isArray) {
-                dtype = dtype.getBasetype();
+                dtype = dtype.getDatatypeBase();
                 typeClass = dtype.getDatatypeClass();
                 isEnum = (typeClass == Datatype.CLASS_ENUM);
                 isStr = (typeClass == Datatype.CLASS_STRING);
@@ -4745,7 +4760,7 @@ public class GermanTableView implements TableView {
                         String[] outValues = new String[len];
 
                         try {
-                            H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                            outValues = ((H5Datatype) dtype).convertEnumValueToName(value);
                         } catch (HDF5Exception ex) {
                             log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                             return buffer;
@@ -4775,7 +4790,7 @@ public class GermanTableView implements TableView {
                     String[] outValues = new String[1];
 
                     try {
-                        H5Datatype.convertEnumValueToName(dtype.toNative(), value, outValues);
+                        outValues = ((H5Datatype) dtype).convertEnumValueToName(value);
                     } catch (HDF5Exception ex) {
                         log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
                         return buffer;
@@ -5050,7 +5065,7 @@ public class GermanTableView implements TableView {
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
 
                     if (types[i].getDatatypeClass() == Datatype.CLASS_ARRAY) {
-                        Datatype baseType = types[i].getBasetype();
+                        Datatype baseType = types[i].getDatatypeBase();
 
                         if (baseType.getDatatypeClass() == Datatype.CLASS_COMPOUND) {
                             // If member is type array of compound, list member names in column header
@@ -5217,12 +5232,12 @@ public class GermanTableView implements TableView {
                     // Add data display conversion capability
                     displayConverter = (dataset instanceof ScalarDS) ?
                             new ScalarDSDataDisplayConverter((ScalarDS) dataset) :
-                            new CompoundDSDataDisplayConverter((CompoundDS) dataset);
-                    configRegistry.registerConfigAttribute(
-                            CellConfigAttributes.DISPLAY_CONVERTER,
-                            displayConverter,
-                            DisplayMode.NORMAL,
-                            GridRegion.BODY);
+                                new CompoundDSDataDisplayConverter((CompoundDS) dataset);
+                            configRegistry.registerConfigAttribute(
+                                    CellConfigAttributes.DISPLAY_CONVERTER,
+                                    displayConverter,
+                                    DisplayMode.NORMAL,
+                                    GridRegion.BODY);
                 }
             });
 
@@ -5245,12 +5260,12 @@ public class GermanTableView implements TableView {
                                 catch (Exception ex) {
                                     log.debug("show reference data: ", ex);
                                     theData = null;
-                                    Tools.showError(shell, ex.getMessage(), shell.getText());
+                                    Tools.showError(shell, "Test", ex.getMessage());
                                 }
 
                                 if (theData == null) {
                                     shell.getDisplay().beep();
-                                    Tools.showError(shell, "Keine Daten ausgewählt.", shell.getText());
+                                    Tools.showError(shell, "Test", "Keine Daten ausgewählt.");
                                     return;
                                 }
 
@@ -5266,7 +5281,7 @@ public class GermanTableView implements TableView {
                                 Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
                                 if (selectedRows == null || selectedRows.length <= 0) {
                                     log.debug("show reference data: no data selected");
-                                    Tools.showError(shell, "Keine Daten ausgewählt.", shell.getText());
+                                    Tools.showError(shell, "Test", "Keine Daten ausgewählt.");
                                     return;
                                 }
                                 int len = Array.getLength(selectedRows);
@@ -5300,8 +5315,8 @@ public class GermanTableView implements TableView {
                         configRegistry.registerConfigAttribute(
                                 EditConfigAttributes.DATA_VALIDATOR,
                                 (dataset instanceof ScalarDS) ? getScalarDSDataValidator((ScalarDS) dataset) : getCompoundDSDataValidator((CompoundDS) dataset),
-                                DisplayMode.EDIT,
-                                GridRegion.BODY);
+                                        DisplayMode.EDIT,
+                                        GridRegion.BODY);
 
                         configRegistry.registerConfigAttribute(
                                 EditConfigAttributes.VALIDATION_ERROR_HANDLER,
@@ -5317,10 +5332,10 @@ public class GermanTableView implements TableView {
                     @Override
                     public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
                         uiBindingRegistry.registerFirstDoubleClickBinding(
-                            new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
+                                new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
 
                         uiBindingRegistry.registerFirstKeyBinding(
-                            new LetterOrDigitKeyEventMatcher(), new KeyEditAction());
+                                new LetterOrDigitKeyEventMatcher(), new KeyEditAction());
                     }
                 });
             }
@@ -5375,6 +5390,7 @@ public class GermanTableView implements TableView {
             colButton.setText("Säule");
             colButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             colButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     colBox.setEnabled(true);
                     rowBox.setEnabled(false);
@@ -5386,6 +5402,7 @@ public class GermanTableView implements TableView {
             rowButton.setText("Reihe");
             rowButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
             rowButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     rowBox.setEnabled(true);
                     colBox.setEnabled(false);
@@ -5437,6 +5454,7 @@ public class GermanTableView implements TableView {
             okButton.setText("   &OK   ");
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     if (colButton.getSelection()) {
                         idx_xaxis = colBox.getSelectionIndex() - 1;
@@ -5456,6 +5474,7 @@ public class GermanTableView implements TableView {
             cancelButton.setText(" &Stornieren ");
             cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     plotType = NO_PLOT;
                     linePlotOptionShell.dispose();
@@ -5478,7 +5497,7 @@ public class GermanTableView implements TableView {
             Rectangle parentBounds = parent.getBounds();
             Point shellSize = linePlotOptionShell.getSize();
             linePlotOptionShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             linePlotOptionShell.open();
 
@@ -5512,6 +5531,7 @@ public class GermanTableView implements TableView {
             MenuItem item = new MenuItem(menu, SWT.PUSH);
             item.setText("Als &Tabelle anzeigen");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     viewType = ViewType.TABLE;
 
@@ -5520,7 +5540,7 @@ public class GermanTableView implements TableView {
                     Object theData = getSelectedData();
                     if (theData == null) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         return;
                     }
 
@@ -5537,7 +5557,7 @@ public class GermanTableView implements TableView {
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
                     if (selectedRows == null || selectedRows.length <= 0) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
                         return;
                     }
@@ -5561,6 +5581,7 @@ public class GermanTableView implements TableView {
             item = new MenuItem(menu, SWT.PUSH);
             item.setText("Anzeigen As &Image");
             item.addSelectionListener(new SelectionAdapter() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
                     viewType = ViewType.IMAGE;
 
@@ -5569,7 +5590,7 @@ public class GermanTableView implements TableView {
                     Object theData = getSelectedData();
                     if (theData == null) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         return;
                     }
 
@@ -5586,7 +5607,7 @@ public class GermanTableView implements TableView {
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
                     if (selectedRows == null || selectedRows.length <= 0) {
                         shell.getDisplay().beep();
-                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
+                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
                         log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
                         return;
                     }
@@ -5607,52 +5628,52 @@ public class GermanTableView implements TableView {
                 }
             });
 
-//            item = new MenuItem(menu, SWT.PUSH);
-//            item.setText("Show As &Text");
-//            item.addSelectionListener(new SelectionAdapter() {
-//                public void widgetSelected(SelectionEvent e) {
-//                    viewType = ViewType.IMAGE;
-//
-//                    log.trace("show reference data: Show data as {}: ", viewType);
-//
-//                    Object theData = getSelectedData();
-//                    if (theData == null) {
-//                        shell.getDisplay().beep();
-//                        Tools.showError(shell, "Keine Daten ausgewählt ist.", shell.getText());
-//                        return;
-//                    }
-//
-//                    // Since NatTable returns the selected row positions as a Set<Range>, convert this to
-//                    // an Integer[]
-//                    Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-//                    Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
-//                    Iterator<Range> i1 = rowPositions.iterator();
-//                    while(i1.hasNext()) {
-//                        selectedRowPos.addAll(i1.next().getMembers());
-//                    }
-//
-//                    Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
-//                    int[] selectedCols = selectionLayer.getFullySelectedColumnPositions();
-//                    if (selectedRows == null || selectedRows.length <= 0) {
-//                        log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
-//                        return;
-//                    }
-//
-//                    int len = Array.getLength(selectedRows) * Array.getLength(selectedCols);
-//                    log.trace("show reference data: Show data as {}: len={}", viewType, len);
-//
-//                    for (int i = 0; i < len; i++) {
-//                        if (isRegRef) {
-//                            log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
-//                            showRegRefData((String) Array.get(theData, i));
-//                        }
-//                        else if (isObjRef) {
-//                            log.trace("show reference data: Show data[{}] as {}: isObjRef={}", i, viewType, isObjRef);
-//                            showObjRefData(Array.getLong(theData, i));
-//                        }
-//                    }
-//                }
-//            });
+            //            item = new MenuItem(menu, SWT.PUSH);
+            //            item.setText("Show As &Text");
+            //            item.addSelectionListener(new SelectionAdapter() {
+            //                public void widgetSelected(SelectionEvent e) {
+            //                    viewType = ViewType.IMAGE;
+            //
+            //                    log.trace("show reference data: Show data as {}: ", viewType);
+            //
+            //                    Object theData = getSelectedData();
+            //                    if (theData == null) {
+            //                        shell.getDisplay().beep();
+            //                        Tools.showError(shell, "Test", "Keine Daten ausgewählt ist.");
+            //                        return;
+            //                    }
+            //
+            //                    // Since NatTable returns the selected row positions as a Set<Range>, convert this to
+            //                    // an Integer[]
+            //                    Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+            //                    Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+            //                    Iterator<Range> i1 = rowPositions.iterator();
+            //                    while(i1.hasNext()) {
+            //                        selectedRowPos.addAll(i1.next().getMembers());
+            //                    }
+            //
+            //                    Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
+            //                    int[] selectedCols = selectionLayer.getFullySelectedColumnPositions();
+            //                    if (selectedRows == null || selectedRows.length <= 0) {
+            //                        log.trace("show reference data: Show data as {}: selectedRows is empty", viewType);
+            //                        return;
+            //                    }
+            //
+            //                    int len = Array.getLength(selectedRows) * Array.getLength(selectedCols);
+            //                    log.trace("show reference data: Show data as {}: len={}", viewType, len);
+            //
+            //                    for (int i = 0; i < len; i++) {
+            //                        if (isRegRef) {
+            //                            log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
+            //                            showRegRefData((String) Array.get(theData, i));
+            //                        }
+            //                        else if (isObjRef) {
+            //                            log.trace("show reference data: Show data[{}] as {}: isObjRef={}", i, viewType, isObjRef);
+            //                            showObjRefData(Array.getLong(theData, i));
+            //                        }
+            //                    }
+            //                }
+            //            });
 
             return new PopupMenuBuilder(table, menu);
         }
@@ -5661,7 +5682,7 @@ public class GermanTableView implements TableView {
         public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
             uiBindingRegistry.registerMouseDownBinding(
                     new MouseEventMatcher(SWT.NONE, GridRegion.BODY, MouseEventMatcher.RIGHT_BUTTON),
-                                          new PopupMenuAction(this.contextMenu));
+                    new PopupMenuAction(this.contextMenu));
         }
     }
 }
