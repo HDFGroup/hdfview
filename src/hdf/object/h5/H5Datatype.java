@@ -869,9 +869,34 @@ public class H5Datatype extends Datatype {
                         tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
 
                         for (int i = 0; i < compoundMemberTypes.size(); i++) {
-                            H5Datatype memberType = (H5Datatype) compoundMemberTypes.get(i);
-                            String memberName = compoundMemberNames.get(i);
-                            long memberOffset = compoundMemberOffsets.get(i);
+                            H5Datatype memberType = null;
+                            String memberName = null;
+                            long memberOffset = -1;
+
+                            try {
+                                memberType = (H5Datatype) compoundMemberTypes.get(i);
+                            }
+                            catch (Exception ex) {
+                                log.debug("createNative(): get compound member[{}] type failure: ", i, ex);
+                                memberType = null;
+                            }
+
+                            try {
+                                memberName = compoundMemberNames.get(i);
+                            }
+                            catch (Exception ex) {
+                                log.debug("createNative(): get compound member[{}] name failure: ", i, ex);
+                                memberName = null;
+                            }
+
+                            try {
+                                memberOffset = compoundMemberOffsets.get(i);
+                            }
+                            catch (Exception ex) {
+                                log.debug("createNative(): get compound member[{}] offset failure: ", i, ex);
+                                memberOffset = -1;
+                            }
+
                             long memberID = -1;
                             try {
                                 memberID = memberType.createNative();
@@ -879,8 +904,8 @@ public class H5Datatype extends Datatype {
 
                                 H5.H5Tinsert(tid, memberName, memberOffset, memberID);
                             }
-                            catch (Exception ex1) {
-                                log.debug("createNative(): compound type failure: ", ex1);
+                            catch (Exception ex) {
+                                log.debug("createNative(): compound type member[{}] insertion failure: ", i, ex);
                             }
                             finally {
                                 close(memberID);
@@ -1304,6 +1329,11 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_OPAQUE:
                 description = String.valueOf(datatypeSize) + "-byte Opaque";
+
+                if (opaqueTag != null) {
+                    description += ", tag = " + opaqueTag;
+                }
+
                 break;
             case CLASS_COMPOUND:
                 description = "Compound";
@@ -1318,7 +1348,7 @@ public class H5Datatype extends Datatype {
                     description += " {";
 
                     while (member_types.hasNext()) {
-                        if (member_names.hasNext()) {
+                        if (member_names != null && member_names.hasNext()) {
                             description += member_names.next() + " = ";
                         }
 
@@ -1608,40 +1638,53 @@ public class H5Datatype extends Datatype {
     public void extractCompoundInfo(String name, List<String> names, List<Datatype> flatListTypes) {
         log.trace("extractCompoundInfo(): start: name={}", name);
 
-        Datatype mtype = null;
-        String mname = null;
+        if (isArray() || isVLEN()) {
+            log.trace("extractCompoundInfo(): top-level types is ARRAY or VLEN; extracting compound info from base type");
+            ((H5Datatype) getDatatypeBase()).extractCompoundInfo(name, names, flatListTypes);
+        }
+        else {
+            if (compoundMemberNames == null) {
+                log.debug("extractCompoundInfo(): compoundMemberNames is null");
+                log.trace("extractCompoundInfo(): finish");
+                return;
+            }
 
-        log.trace("extractCompoundInfo(): nMembers={}", compoundMemberNames.size());
+            Datatype mtype = null;
+            String mname = null;
 
-        if (compoundMemberNames.size() <= 0) {
-            log.debug("extractCompoundInfo(): datatype has no members");
-            log.trace("extractCompoundInfo(): finish");
-            return;
+            log.trace("extractCompoundInfo(): nMembers={}", compoundMemberNames.size());
+
+            if (compoundMemberNames.size() <= 0) {
+                log.debug("extractCompoundInfo(): datatype has no members");
+                log.trace("extractCompoundInfo(): finish");
+                return;
+            }
+
+            for (int i = 0; i < compoundMemberNames.size(); i++) {
+                log.trace("extractCompoundInfo(): nMembers[{}]", i);
+
+                mtype = compoundMemberTypes.get(i);
+                log.trace("extractCompoundInfo():[{}] mtype={} with size={}", i, mtype.getDescription(), mtype.getDatatypeSize());
+
+                if (names != null) {
+                    mname = name + compoundMemberNames.get(i);
+                    log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
+                }
+
+                if (mtype.isCompound()) {
+                    ((H5Datatype) mtype).extractCompoundInfo(mname + CompoundDS.separator, names, flatListTypes);
+                    log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
+                    continue;
+                }
+
+                if (names != null) {
+                    names.add(mname);
+                }
+                flatListTypes.add(mtype);
+
+            } // for (int i=0; i<nMembers; i++)
         }
 
-        for (int i = 0; i < compoundMemberNames.size(); i++) {
-            log.trace("extractCompoundInfo(): nMembers[{}]", i);
-
-            mtype = compoundMemberTypes.get(i);
-            log.trace("extractCompoundInfo():[{}] mtype={} with size={}", i, mtype.getDescription(), mtype.getDatatypeSize());
-
-            if (names != null) {
-                mname = name + compoundMemberNames.get(i);
-                log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
-            }
-
-            if (mtype.isCompound()) {
-                ((H5Datatype) mtype).extractCompoundInfo(mname + CompoundDS.separator, names, flatListTypes);
-                log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
-                continue;
-            }
-
-            if (names != null) {
-                names.add(mname);
-            }
-            flatListTypes.add(mtype);
-
-        } // for (int i=0; i<nMembers; i++)
         log.trace("extractCompoundInfo(): finish");
     } // extractCompoundInfo
 
@@ -1669,7 +1712,7 @@ public class H5Datatype extends Datatype {
         long nested_tid = -1;
         long tmp_tid1 = -1;
         try {
-            log.trace("createCompoundFieldType(): {} Member is class {} of size={} with baseType={}", member_name, getDatatypeClass(), getDatatypeSize(), getDatatypeBase());
+            log.trace("createCompoundFieldType(): {} Member is type {} of size={} with baseType={}", member_name, getDescription(), getDatatypeSize(), getDatatypeBase());
             tmp_tid1 = createNative();
 
             /*

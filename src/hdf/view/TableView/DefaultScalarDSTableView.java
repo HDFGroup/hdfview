@@ -48,6 +48,7 @@ import org.eclipse.nebula.widgets.nattable.selection.command.SelectCellCommand;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -2223,6 +2224,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     strVal = dataDisplayConverter.canonicalToDisplayValue(val).toString();
 
                 cellValueField.setText(strVal);
+                ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
                 log.trace("ScalarDSCellSelectionListener: CellSelected finish");
             }

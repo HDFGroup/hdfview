@@ -46,6 +46,8 @@ import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
 
 import hdf.hdf5lib.exceptions.HDF5Exception;
@@ -997,6 +999,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 cellValueField.setText(
                         dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val)
                         .toString());
+                ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
                 log.trace("NATTable CellSelected finish");
             }

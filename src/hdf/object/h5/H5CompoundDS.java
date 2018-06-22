@@ -657,13 +657,13 @@ public class H5CompoundDS extends CompoundDS {
             H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
 
             if (baseType != null) {
-                if (baseType.isCompound()) {
+                if (DSdatatype.isArray() && baseType.isCompound()) {
                     log.debug("read(): cannot read dataset of type ARRAY of COMPOUND");
                     log.trace("read(): finish");
                     throw new HDF5Exception("Unsupported dataset of type ARRAY of COMPOUND");
                 }
 
-                if (baseType.isCompound()) {
+                if (DSdatatype.isVLEN() && baseType.isCompound()) {
                     log.debug("read(): cannot read dataset of type VLEN of COMPOUND");
                     log.trace("read(): finish");
                     throw new HDF5Exception("Unsupported dataset of type VLEN of COMPOUND");
@@ -777,6 +777,24 @@ public class H5CompoundDS extends CompoundDS {
                         continue;
                     }
 
+                    /*
+                     * Check for any unsupported datatypes before continuing with
+                     * this compound member
+                     */
+                    if (member_type.isRegRef() || (member_type.isArray() && member_base.isArray())) {
+                        String[] nullValues = new String[(int) totalSelectedSpacePoints];
+                        String errorStr = "*unsupported*";
+
+                        for (int j = 0; j < totalSelectedSpacePoints; j++)
+                            nullValues[j] = errorStr;
+
+                        memberDataList.add(nullValues);
+
+                        log.debug("read(): {} Member[{}] of type {} is unsupported.", member_name, i, member_type.getDescription());
+
+                        continue;
+                    }
+
                     try {
                         member_data = member_type.allocateArray((int) totalSelectedSpacePoints);
                     }
@@ -824,7 +842,6 @@ public class H5CompoundDS extends CompoundDS {
                                 log.trace("read(): Member[{}]: H5Dread did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
                                 H5.H5Dread(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, member_data);
                             }
-                            log.trace("read(): member_data=***{}***", member_data);
                         }
                         catch (HDF5DataFiltersException exfltr) {
                             log.debug("read(): {} Member[{}] read failure:", member_name, i, exfltr);
