@@ -865,7 +865,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue():Array - isArray={} isEnum={} isStr={}", btype.isArray(), btype.isEnum(), btype.isString());
 
                     if (btype.isCompound()) {
-                        int numberOfMembers = dtype.getCompoundMemberNames().size();
+                        int numberOfMembers = btype.getCompoundMemberNames().size();
 
                         for (int i = 0; i < orders[fieldIndex]; i++) {
                             if (i > 0) buffer.append(", ");
