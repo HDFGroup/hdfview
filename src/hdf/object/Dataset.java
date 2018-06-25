@@ -1141,7 +1141,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             // str = bigstr.substring(offset, offset+length);
 
             idx = str.indexOf('\0');
-            if (idx > 0) {
+            if (idx >= 0) {
                 str = str.substring(0, idx);
             }
 
