@@ -523,7 +523,7 @@
       </classpath>
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-      <test name="test.object.H5ScalarDSTest" todir="${report.dir}" outfile="TEST-H5ScalarDSTest">
+      <test name="test.object.H5CompoundDSTest" todir="${report.dir}" outfile="TEST-test.object.H5CompoundDSTest">
         <formatter type="plain" />
       </test>
     </junit>

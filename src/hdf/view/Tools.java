@@ -3231,8 +3231,8 @@ public final class Tools {
 
     /**
      * Retrieves the Java Runtime Class of the given Object. B = byte array, S =
-     * short array, I = int array, J = long array, F = float array, and D = double
-     * array
+     * short array, I = int array, J = long array, F = float array, D = double
+     * array, L = class or interface
      *
      * @return the Java Runtime Class of the given Object.
      */
@@ -3240,6 +3240,9 @@ public final class Tools {
         if (o == null) return ' ';
 
         String cName = o.getClass().getName();
+
+        if (cName.equals("java.lang.String")) return 'L';
+
         int cIndex = cName.lastIndexOf("[");
         if (cIndex >= 0) {
             return cName.charAt(cIndex + 1);
