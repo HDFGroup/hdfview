@@ -687,13 +687,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     else if (btype.isString()) {
                         // ARRAY of strings
                         int strlen = (int) btype.getDatatypeSize();
-                        int arraylen = (int) types[fieldIdx].getDatatypeSize();
+                        int arraylen = (int) types[fieldIdx].getDatatypeSize() / strlen;
                         arrayElements = new Object[arraylen];
 
                         log.trace("**CompoundDSDataProvider:getDataValue(): Array - size {}: isString={} of size {}", arraylen, btype.isString(), strlen);
-                        int arraycnt = arraylen / strlen;
-                        for (int i = 0; i < arraycnt; i++) {
-                            String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
+                        for (int i = 0; i < arraylen; i++) {
+                            String str = new String(((byte[]) colValue), (rowIdx * strlen) + (i * strlen), strlen);
                             int idx = str.indexOf('\0');
                             if (idx > 0) {
                                 str = str.substring(0, idx);
