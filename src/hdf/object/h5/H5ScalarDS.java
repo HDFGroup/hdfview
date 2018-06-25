@@ -792,14 +792,7 @@ public class H5ScalarDS extends ScalarDS {
         if (DSdatatype.isArray()) {
             H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
 
-            if (baseType != null) {
-                if (baseType.isCompound()) {
-                    log.debug("read(): Cannot show data of type ARRAY of COMPOUND");
-                    log.trace("read(): finish");
-                    throw new HDF5Exception("Cannot show data with datatype of ARRAY of COMPOUND.");
-                }
-            }
-            else {
+            if (baseType == null) {
                 log.debug("read(): ARRAY datatype has no base type");
                 throw new Exception("Dataset's datatype (ARRAY) has no base datatype");
             }
