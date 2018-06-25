@@ -649,32 +649,6 @@ public class H5CompoundDS extends CompoundDS {
             log.debug("read(): get datatype: ", ex);
         }
 
-        /*
-         * Check for any unsupported datatypes and fail early before
-         * attempting to read the dataset
-         */
-        if (DSdatatype.isArray() || DSdatatype.isVLEN()) {
-            H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
-
-            if (baseType != null) {
-                if (DSdatatype.isArray() && baseType.isCompound()) {
-                    log.debug("read(): cannot read dataset of type ARRAY of COMPOUND");
-                    log.trace("read(): finish");
-                    throw new HDF5Exception("Unsupported dataset of type ARRAY of COMPOUND");
-                }
-
-                if (DSdatatype.isVLEN() && baseType.isCompound()) {
-                    log.debug("read(): cannot read dataset of type VLEN of COMPOUND");
-                    log.trace("read(): finish");
-                    throw new HDF5Exception("Unsupported dataset of type VLEN of COMPOUND");
-                }
-            }
-            else {
-                log.debug("read(): ARRAY or VLEN datatype has no base type");
-                throw new Exception("Dataset's datatype (ARRAY or VLEN) has no base datatype");
-            }
-        }
-
         if (isExternal) {
             String pdir = this.getFileFormat().getAbsoluteFile().getParent();
 
