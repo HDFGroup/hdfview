@@ -630,6 +630,7 @@ public class DefaultTreeView implements TreeView {
 
         MenuItem newObjectMenuItem = new MenuItem(menu, SWT.CASCADE);
         newObjectMenuItem.setText("New");
+        editGUIs.add(newObjectMenuItem);
 
         new MenuItem(menu, SWT.SEPARATOR);
 
@@ -771,7 +772,14 @@ public class DefaultTreeView implements TreeView {
                 if (dialog.isReloadFile()) {
                     selectedFile.setIndexType(dialog.getIndexType());
                     selectedFile.setIndexOrder(dialog.getIndexOrder());
-                    ((HDFView) viewer).reloadFile(selectedFile);
+
+                    try {
+                        reopenFile(selectedFile, -1);
+                    }
+                    catch (Exception ex) {
+                        log.debug("reload file {} failure after indexing change: ", selectedFile.getAbsolutePath(), ex);
+                        Tools.showError(shell, "File reload error", "Error reloading file " + selectedFile.getAbsolutePath() + " after changing indexing: " + ex.getMessage());
+                    }
                 }
             }
         });
@@ -825,7 +833,7 @@ public class DefaultTreeView implements TreeView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
-                    ((HDFView) viewer).closeFile(getSelectedFile());
+                    ((HDFView) viewer).closeFile(selectedFile);
                 }
                 catch (Exception ex) {
                     Tools.showError(shell, "Close", ex.getMessage());
@@ -838,7 +846,49 @@ public class DefaultTreeView implements TreeView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                ((HDFView) viewer).reloadFile(selectedFile);
+                try {
+                    reopenFile(selectedFile, -1);
+                }
+                catch (Exception ex) {
+                    log.debug("reload file {} failure: ", selectedFile.getAbsolutePath(), ex);
+                    Tools.showError(shell, "File reload error", "Error reloading file " + selectedFile.getAbsolutePath() + ": " + ex.getMessage());
+                }
+            }
+        });
+
+        item = new MenuItem(menu, SWT.CASCADE);
+        item.setText("Reload File As");
+
+        Menu reloadFileMenu = new Menu(item);
+        item.setMenu(reloadFileMenu);
+
+        item = new MenuItem(reloadFileMenu, SWT.PUSH);
+        item.setText("Read-Only");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    reopenFile(selectedFile, FileFormat.READ);
+                }
+                catch (Exception ex) {
+                    log.debug("reload file {} as read-only failure: ", selectedFile.getAbsolutePath(), ex);
+                    Tools.showError(shell, "File reload error", "Error reloading file " + selectedFile.getAbsolutePath() + " read-only: " + ex.getMessage());
+                }
+            }
+        });
+
+        item = new MenuItem(reloadFileMenu, SWT.PUSH);
+        item.setText("Read/Write");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    reopenFile(selectedFile, FileFormat.WRITE);
+                }
+                catch (Exception ex) {
+                    log.debug("reload file {} as read/write failure: ", selectedFile.getAbsolutePath(), ex);
+                    Tools.showError(shell, "File reload error", "Error reloading file " + selectedFile.getAbsolutePath() + " read/write: " + ex.getMessage());
+                }
             }
         });
 
@@ -867,6 +917,7 @@ public class DefaultTreeView implements TreeView {
                 addNewObject(OBJECT_TYPE.GROUP);
             }
         });
+        editGUIs.add(item);
 
         addDatasetMenuItem = new MenuItem(newObjectMenu, SWT.PUSH);
         addDatasetMenuItem.setText("Dataset");
@@ -877,6 +928,7 @@ public class DefaultTreeView implements TreeView {
                 addNewObject(OBJECT_TYPE.DATASET);
             }
         });
+        editGUIs.add(addDatasetMenuItem);
 
         item = new MenuItem(newObjectMenu, SWT.PUSH);
         item.setText("Image");
@@ -887,6 +939,7 @@ public class DefaultTreeView implements TreeView {
                 addNewObject(OBJECT_TYPE.IMAGE);
             }
         });
+        editGUIs.add(item);
 
         addTableMenuItem = new MenuItem(newObjectMenu, SWT.PUSH);
         addTableMenuItem.setText("Compound DS");
@@ -897,6 +950,7 @@ public class DefaultTreeView implements TreeView {
                 addNewObject(OBJECT_TYPE.TABLE);
             }
         });
+        editGUIs.add(addTableMenuItem);
 
         addDatatypeMenuItem = new MenuItem(newObjectMenu, SWT.PUSH);
         addDatatypeMenuItem.setText("Datatype");
@@ -907,6 +961,7 @@ public class DefaultTreeView implements TreeView {
                 addNewObject(OBJECT_TYPE.DATATYPE);
             }
         });
+        editGUIs.add(addDatatypeMenuItem);
 
         addLinkMenuItem = new MenuItem(newObjectMenu, SWT.PUSH);
         addLinkMenuItem.setText("Link");
@@ -917,6 +972,7 @@ public class DefaultTreeView implements TreeView {
                 addNewObject(OBJECT_TYPE.LINK);
             }
         });
+        editGUIs.add(addLinkMenuItem);
 
 
         // Add export dataset menu
@@ -1001,7 +1057,7 @@ public class DefaultTreeView implements TreeView {
                 boolean isReadOnly = selectedObject.getFileFormat().isReadOnly();
                 boolean isWritable = !isReadOnly;
 
-                setEnabled(editGUIs, !isReadOnly);
+                setEnabled(editGUIs, isWritable);
 
                 if (selectedObject instanceof Group) {
                     boolean state = !(((Group) selectedObject).isRoot());
@@ -1009,12 +1065,10 @@ public class DefaultTreeView implements TreeView {
                     popupMenu.getItem(0).setEnabled(false); // "Open" menuitem
                     popupMenu.getItem(1).setEnabled(false); // "Open as" menuitem
                     popupMenu.getItem(2).setEnabled(false); // "Open Source Files" menuitem
-                    popupMenu.getItem(4).setEnabled(isWritable); // "New" menuitem
                     popupMenu.getItem(6).setEnabled(
                             (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
                             && state && isWritable); // "Cut" menuitem
                     popupMenu.getItem(7).setEnabled(state); // "Copy" menuitem
-                    popupMenu.getItem(8).setEnabled(isWritable); // "Paste" menuitem
                     popupMenu.getItem(9).setEnabled(state && isWritable); // "Delete" menuitem
                     popupMenu.getItem(10).setEnabled(false); // "Export Dataset" menuitem
                     popupMenu.getItem(12).setEnabled(state && isWritable); // "Save to" menuitem
@@ -1025,12 +1079,10 @@ public class DefaultTreeView implements TreeView {
                     popupMenu.getItem(1).setEnabled(true); // "Open as" menuitem
                     popupMenu.getItem(2).setEnabled(
                             (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))); // "Open Source Files" menuitem
-                    popupMenu.getItem(4).setEnabled(isWritable); // "New" menuitem
                     popupMenu.getItem(6).setEnabled(
                             (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
                             && isWritable); // "Cut" menuitem
                     popupMenu.getItem(7).setEnabled(true); // "Copy" menuitem
-                    popupMenu.getItem(8).setEnabled(isWritable); // "Paste" menuitem
                     popupMenu.getItem(9).setEnabled(isWritable); // "Delete" menuitem
                     popupMenu.getItem(10).setEnabled(true); // "Export Dataset" menuitem
                     popupMenu.getItem(12).setEnabled(true); // "Save to" menuitem
@@ -1039,32 +1091,24 @@ public class DefaultTreeView implements TreeView {
 
                 // Adding table is only supported by HDF5
                 if ((selectedFile != null) && selectedFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                    addDatasetMenuItem.setText("Dataset");
-                    addTableMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
-                    addDatatypeMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
-                    addLinkMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
                     //openVirtualFilesMenuItem.setEnabled(true); // Should be moved to createPopupMenu() since swt doesn't support MenuItem.setVisible
 
                     boolean state = false;
                     if ((selectedObject instanceof Group)) {
                         state = (((Group) selectedObject).isRoot());
-                        //separator.setVisible(isWritable && state);
                         setLibVerBoundsItem.setEnabled(isWritable && state);
                     }
                     else {
-                        // separator.setVisible(false);
                         setLibVerBoundsItem.setEnabled(false);
                     }
 
                     changeIndexItem.setEnabled(state);
                 }
                 else {
-                    //addDatasetMenuItem.setText("SDS");
                     addTableMenuItem.setEnabled(false);
                     addDatatypeMenuItem.setEnabled(false);
                     addLinkMenuItem.setEnabled(false);
                     //openVirtualFilesMenuItem.setEnabled(false);
-                    //separator.setVisible(false);
                     setLibVerBoundsItem.setEnabled(false);
                     changeIndexItem.setEnabled(false);
                 }
@@ -2352,7 +2396,7 @@ public class DefaultTreeView implements TreeView {
             fileFormat.setMaxMembers(ViewProperties.getMaxMembers());
             fileFormat.setStartMembers(ViewProperties.getStartMembers());
             if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                if(isNewFile) {
+                if (isNewFile) {
                     currentIndexType = fileFormat.getIndexType(ViewProperties.getIndexType());
                     currentIndexOrder = fileFormat.getIndexOrder(ViewProperties.getIndexOrder());
                 }
@@ -2398,17 +2442,23 @@ public class DefaultTreeView implements TreeView {
     }
 
     @Override
-    public FileFormat reopenFile(FileFormat fileFormat) throws Exception {
-        closeFile(fileFormat);
-
+    public FileFormat reopenFile(FileFormat fileFormat, int newFileAccessMode) throws Exception {
         if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
             this.currentIndexType = fileFormat.getIndexType(null);
             this.currentIndexOrder = fileFormat.getIndexOrder(null);
         }
-        if (fileFormat.isReadOnly())
-            return openFile(fileFormat.getAbsolutePath(), FileFormat.READ);
+
+        closeFile(fileFormat);
+        ((HDFView) viewer).showMetaData(null);
+
+        if (newFileAccessMode < 0) {
+            if (ViewProperties.isReadOnly())
+                return openFile(fileFormat.getAbsolutePath(), FileFormat.READ);
+            else
+                return openFile(fileFormat.getAbsolutePath(), FileFormat.WRITE);
+        }
         else
-            return openFile(fileFormat.getAbsolutePath(), FileFormat.WRITE);
+            return openFile(fileFormat.getAbsolutePath(), newFileAccessMode);
     }
 
     /**
@@ -2835,7 +2885,14 @@ public class DefaultTreeView implements TreeView {
 
         while (!files.isEmpty()) {
             FileFormat theFile = files.remove();
-            ((HDFView) viewer).reloadFile(theFile);
+
+            try {
+                reopenFile(theFile, -1);
+            }
+            catch (Exception ex) {
+                log.debug("reloading file {} failure after font change: ", theFile.getAbsolutePath(), ex);
+                Tools.showError(shell, "File reload error", "Error reloading file " + theFile.getAbsolutePath() + ": " + ex.getMessage());
+            }
         }
     }
 

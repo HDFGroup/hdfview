@@ -83,7 +83,6 @@ import hdf.view.dialog.UserOptionsDialog;
 import hdf.view.dialog.UserOptionsGeneralPage;
 import hdf.view.dialog.UserOptionsHDFPage;
 import hdf.view.dialog.UserOptionsNode;
-import hdf.view.dialog.UserOptionsViewModulesPage;
 
 
 /**
@@ -454,21 +453,33 @@ public class HDFView implements ViewManager {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openLocalFile(null, FileFormat.WRITE);
+                openLocalFile(null, -1);
             }
         });
 
-        if(!ViewProperties.isReadOnly()) {
-            item = new MenuItem(fileMenu, SWT.PUSH);
-            item.setText("Open &Read-Only");
-            item.setAccelerator(SWT.MOD1 + 'R');
-            item.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    openLocalFile(null, FileFormat.READ);
-                }
-            });
-        }
+        item = new MenuItem(fileMenu, SWT.CASCADE);
+        item.setText("Open As");
+
+        Menu openAsMenu = new Menu(item);
+        item.setMenu(openAsMenu);
+
+        item = new MenuItem(openAsMenu, SWT.PUSH);
+        item.setText("Read-Only");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                openLocalFile(null, FileFormat.READ);
+            }
+        });
+
+        item = new MenuItem(openAsMenu, SWT.PUSH);
+        item.setText("Read/Write");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                openLocalFile(null, FileFormat.WRITE);
+            }
+        });
 
         new MenuItem(fileMenu, SWT.SEPARATOR);
 
@@ -786,12 +797,22 @@ public class HDFView implements ViewManager {
                 // Create the nodes
                 UserOptionsNode one = new UserOptionsNode("general", new UserOptionsGeneralPage());
                 UserOptionsNode two = new UserOptionsNode("hdf", new UserOptionsHDFPage());
-                UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
+
+                /*
+                 * TODO: Disabled until module loading is supported
+                 */
+                /*
+                 * UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
+                 */
 
                 // Add the nodes
                 mgr.addToRoot(one);
                 mgr.addToRoot(two);
-                mgr.addToRoot(three);
+
+                /*
+                 * TODO: Disabled until module loading is supported
+                 */
+                /* mgr.addToRoot(three); */
 
                 // Create the preferences dialog
                 userOptionDialog = new UserOptionsDialog(shell, mgr, rootDir);
@@ -935,20 +956,7 @@ public class HDFView implements ViewManager {
         openItem.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openLocalFile(null, FileFormat.WRITE);
-            }
-        });
-
-        /*
-         * TODO: Create new Icon for read-only open button.
-         */
-        ToolItem openRItem = new ToolItem(toolBar, SWT.PUSH);
-        openRItem.setToolTipText("Open Read-Only");
-        openRItem.setImage(ViewProperties.getFileopenIcon());
-        openRItem.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                openLocalFile(null, FileFormat.READ);
+                openLocalFile(null, -1);
             }
         });
 
@@ -1069,13 +1077,13 @@ public class HDFView implements ViewManager {
                         return;
                     }
 
-                    if(!(filename.startsWith("http://") || filename.startsWith("https://") || filename.startsWith("ftp://"))) {
-                        openLocalFile(filename, FileFormat.WRITE);
+                    if (!(filename.startsWith("http://") || filename.startsWith("https://") || filename.startsWith("ftp://"))) {
+                        openLocalFile(filename, -1);
                     }
                     else {
                         String remoteFile = openRemoteFile(filename);
 
-                        if (remoteFile != null) openLocalFile(remoteFile, FileFormat.WRITE);
+                        if (remoteFile != null) openLocalFile(remoteFile, -1);
                     }
                 }
             }
@@ -1084,14 +1092,17 @@ public class HDFView implements ViewManager {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 String filename = url_bar.getText();
+                if (filename == null || filename.length() < 1 || filename.equals(currentFile)) {
+                    return;
+                }
 
-                if(filename.length() <= 0) return;
-
-                if(!(filename.startsWith("http://") || filename.startsWith("ftp://"))) {
-                    openLocalFile(filename, FileFormat.WRITE);
+                if (!(filename.startsWith("http://") || filename.startsWith("https://") || filename.startsWith("ftp://"))) {
+                    openLocalFile(filename, -1);
                 }
                 else {
-                    openRemoteFile(filename);
+                    String remoteFile = openRemoteFile(filename);
+
+                    if (remoteFile != null) openLocalFile(remoteFile, -1);
                 }
             }
         });
@@ -1174,7 +1185,7 @@ public class HDFView implements ViewManager {
                 if (fileTransfer.isSupportedType(e.currentDataType)) {
                     String[] files = (String[]) e.data;
                     for (int i = 0; i < files.length; i++) {
-                        openLocalFile(files[i], FileFormat.WRITE);
+                        openLocalFile(files[i], -1);
                     }
                 }
             }
@@ -1370,34 +1381,6 @@ public class HDFView implements ViewManager {
         generalArea.setContent(null);
 
         System.gc();
-    }
-
-    public void reloadFile(FileFormat theFile) {
-        int temp_index_type = 0;
-        int temp_index_order = 0;
-
-        if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-            temp_index_type = theFile.getIndexType(null);
-            temp_index_order = theFile.getIndexOrder(null);
-        }
-
-        closeFile(theFile);
-
-        if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-            theFile.setIndexType(temp_index_type);
-            theFile.setIndexOrder(temp_index_order);
-        }
-
-        try {
-            FileFormat newFile = treeView.reopenFile(theFile);
-
-            if (newFile != null) {
-                currentFile = newFile.getAbsolutePath();
-            } else {
-                currentFile = null;
-            }
-        }
-        catch (Exception ex) {}
     }
 
     /**
@@ -1676,8 +1659,20 @@ public class HDFView implements ViewManager {
     /** Open local file */
     private void openLocalFile(String filename, int fileAccessID) {
         log.trace("openLocalFile {},{}",filename, fileAccessID);
+
+        /*
+         * If given a specific access mode, use it without changing it. If not given a
+         * specific access mode, check the current status of the "is read only" property
+         * to determine how to open the file. This is to allow one time overrides of the
+         * default file access mode when opening a file.
+         */
         int accessMode = fileAccessID;
-        if (ViewProperties.isReadOnly()) accessMode = FileFormat.READ;
+        if (accessMode < 0) {
+            if (ViewProperties.isReadOnly())
+                accessMode = FileFormat.READ;
+            else
+                accessMode = FileFormat.WRITE;
+        }
 
         String[] selectedFilenames = null;
         File[] chosenFiles = null;
@@ -1691,7 +1686,7 @@ public class HDFView implements ViewManager {
 
             if(file.isDirectory()) {
                 currentDir = filename;
-                openLocalFile(null, FileFormat.WRITE); //TODO: needs to be edited
+                openLocalFile(null, -1);
             }
             else {
                 currentFile = filename;

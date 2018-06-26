@@ -214,7 +214,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -235,7 +235,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -393,7 +393,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -446,7 +446,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -606,7 +606,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -685,7 +685,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
