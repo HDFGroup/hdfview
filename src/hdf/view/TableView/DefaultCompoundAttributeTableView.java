@@ -98,9 +98,10 @@ public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableVie
 
                 log.trace("CompoundAttributeDataProvider:getDataValue() rowIdx={}", rowIdx);
 
-                String colValue = (String) ((List<?>) dataValue).get(rowIdx);
+                int listIndex = ((col + (row * nCols)) / nFields);
+                String colValue = (String) ((List<?>) dataValue).get(listIndex);
                 if (colValue == null) {
-                    return "Null";
+                    return "null";
                 }
 
                 colValue = colValue.replace("{", "").replace("}", "");
