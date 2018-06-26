@@ -171,10 +171,10 @@ public class ViewProperties extends PreferenceStore {
     private static boolean          showRegRefValues       = false;
 
     /**
-     * flag to indicate if default open file mode is read only. By default, use
-     * read/write.
+     * flag to indicate if default open file mode is read only. By default, use read
+     * only to prevent accidental modifications to the file.
      */
-    private static boolean          isReadOnly             = false;
+    private static boolean          isReadOnly             = true;
 
     private static String EarlyLib = "Latest";
 
@@ -293,6 +293,7 @@ public class ViewProperties extends PreferenceStore {
         setDefault("regref.showvalues", false);
         setDefault("index.base1", false);
         setDefault("font.size", 12);
+        setDefault("file.mode", "r");
     }
 
     /**

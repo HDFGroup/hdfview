@@ -66,6 +66,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     /**
      * Performs special processing when this page's Defaults button has been pressed.
      */
+    @Override
     public void performDefaults() {
         super.performDefaults();
     }
@@ -76,6 +77,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      * @return <code>false</code> to abort the container's OK processing and
      * <code>true</code> to allow the OK to happen
      */
+    @Override
     public boolean performOk() {
         getPreferenceStore();
         log.trace("performOk: save General options");
@@ -289,6 +291,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      * @param parent the parent composite
      * @return the new control
      */
+    @Override
     protected Control createContents(Composite parent) {
         shell = parent.getShell();
         Composite composite = new Composite(parent, SWT.NONE);
@@ -305,6 +308,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         checkCurrentUserDir.setText("\"Current Working Directory\" or");
         checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkCurrentUserDir.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean isCheckCurrentUserDirSelected = checkCurrentUserDir.getSelection();
                 workField.setEnabled(!isCheckCurrentUserDirSelected);
@@ -321,6 +325,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         currentDirButton.setText("Browse...");
         currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         currentDirButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final DirectoryDialog dChooser = new DirectoryDialog(shell);
                 dChooser.setFilterPath(workDir);
@@ -353,6 +358,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         browseButton.setText("Browse...");
         browseButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         browseButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(rootDir);
@@ -375,11 +381,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
             }
         });
 
-        Composite fileOptionComposite = new Composite(composite, SWT.NONE);
-        fileOptionComposite.setLayout(new GridLayout(3, true));
-        fileOptionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-        org.eclipse.swt.widgets.Group fileAccessModeGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
+        org.eclipse.swt.widgets.Group fileAccessModeGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         fileAccessModeGroup.setLayout(new GridLayout(2, true));
         fileAccessModeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         fileAccessModeGroup.setFont(curFont);
@@ -453,6 +455,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Auto Contrast");
         helpButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 final String msg = "Auto Contrast does the following to compute a gain/bias \n"
                         + "that will stretch the pixels in the image to fit the pixel \n"
@@ -533,6 +536,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         checkReadAll.setText("Open All");
         checkReadAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkReadAll.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 startMemberField.setEnabled(!checkReadAll.getSelection());
                 maxMemberField.setEnabled(!checkReadAll.getSelection());
