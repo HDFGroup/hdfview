@@ -271,7 +271,6 @@ public class ViewProperties extends PreferenceStore {
                     propertyFile = null;
                 }
             }
-            log.trace("h5v propertyFile is {}", propertyFile);
         }
         setFilename(propertyFile);
         log.trace("propertyFile is {}", propertyFile);
