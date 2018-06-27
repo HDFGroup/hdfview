@@ -440,6 +440,7 @@ public class NewAttributeDialog extends Dialog {
     private boolean createAttribute() {
         int tclass = -1, tsize = -1, torder = -1, tsign = -1;
         boolean isVLen = false;
+        boolean isVlenStr = false;
         log.trace("createAttribute start");
 
         Object value = null;
@@ -525,8 +526,9 @@ public class NewAttributeDialog extends Dialog {
             Tools.showWarning(shell, "Create", "Multi-dimensional Variable Length Float Attributes will be created without data.");
         }
         else if (idx == 7) {
-            isVLen = true;
             tclass = Datatype.CLASS_STRING;
+            isVlenStr = true;
+            tsize = -1;
         }
         log.trace("Attribute: isVLen={} and tclass={} and torder={} and tsign={}", isVLen, tclass, torder, tsign);
 
@@ -562,21 +564,23 @@ public class NewAttributeDialog extends Dialog {
         else {
             if (tclass == Datatype.CLASS_STRING) {
                 int stringLength = 0;
-                try {
-                    stringLength = Integer.parseInt(lengthField.getText());
-                }
-                catch (NumberFormatException ex) {
-                    stringLength = -1;
-                }
+                if (!isVlenStr) {
+                    try {
+                        stringLength = Integer.parseInt(lengthField.getText());
+                    }
+                    catch (NumberFormatException ex) {
+                        stringLength = -1;
+                    }
 
-                if (stringLength <= 0) {
-                    stringLength = DEFAULT_STRING_ATTRIBUTE_LENGTH;
-                }
-                if (strValue.length() > stringLength) {
-                    strValue = strValue.substring(0, stringLength);
-                }
+                    if (stringLength <= 0) {
+                        stringLength = DEFAULT_STRING_ATTRIBUTE_LENGTH;
+                    }
+                    if (strValue.length() > stringLength) {
+                        strValue = strValue.substring(0, stringLength);
+                    }
 
-                tsize = stringLength;
+                    tsize = stringLength;
+                }
 
                 String[] strArray = { strValue };
                 value = strArray;
