@@ -1687,6 +1687,7 @@ public class DefaultTreeView implements TreeView {
         if(obj instanceof Dataset) {
             if (obj instanceof ScalarDS) {
                 ScalarDS sd = (ScalarDS) obj;
+                Datatype dt = sd.getDatatype();
 
                 if (sd.isImage()) {
                     if (hasAttribute) {
@@ -1696,7 +1697,7 @@ public class DefaultTreeView implements TreeView {
                         return imageIcon;
                     }
                 }
-                else if (sd.getDatatype().isText()) {
+                else if ((dt != null) && dt.isText()) {
                     if (hasAttribute) {
                         return textIconA;
                     }
