@@ -72,7 +72,7 @@ public abstract interface TreeView {
      * @throws Exception if a failure occurred
      */
     public abstract FileFormat openFile(String filename, int accessID) throws Exception;
-    public abstract FileFormat reopenFile(FileFormat theFile) throws Exception;
+    public abstract FileFormat reopenFile(FileFormat theFile, int newFileAccessMode) throws Exception;
 
     /**
      * close a file

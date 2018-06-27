@@ -24,7 +24,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
         try {
             closeFile(hdf_file, false);
 
-            bot.toolbarButtonWithTooltip("Open").click();
+            bot.menu("Open As").menu("Read/Write").click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();

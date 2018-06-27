@@ -259,18 +259,20 @@ public class H4Group extends Group
 
         long vgid = -1;
 
-        // try to open with write permission
-        try {
-            vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
-            log.trace("open(): Vattach write id={}", vgid);
-        }
-        catch (HDFException ex) {
-            log.debug("open(): Vattach failure: ", ex);
-            vgid = -1;
+        if (!getFileFormat().isReadOnly()) {
+            // try to open with write permission
+            try {
+                vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
+                log.trace("open(): Vattach write id={}", vgid);
+            }
+            catch (HDFException ex) {
+                log.debug("open(): Vattach failure: ", ex);
+                vgid = -1;
+            }
         }
 
         // try to open with read-only permission
-        if (vgid < 0) {
+        if (getFileFormat().isReadOnly() || vgid < 0) {
             try {
                 vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "r");
                 log.trace("open(): Vattach readonly id={}", vgid);

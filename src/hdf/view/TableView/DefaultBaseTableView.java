@@ -1596,26 +1596,20 @@ public abstract class DefaultBaseTableView implements TableView {
         String delName = ViewProperties.getDataDelimiter();
         String delimiter = "";
 
-        // delimiter must include a tab to be consistent with copy/paste for
-        // compound fields
-        if (dataObject instanceof CompoundDS)
+        if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB)) {
             delimiter = "\t";
-        else {
-            if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB)) {
-                delimiter = "\t";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE)) {
-                delimiter = " " + delimiter;
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA)) {
-                delimiter = ",";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON)) {
-                delimiter = ":";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON)) {
-                delimiter = ";";
-            }
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE)) {
+            delimiter = " " + delimiter;
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA)) {
+            delimiter = ",";
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON)) {
+            delimiter = ":";
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON)) {
+            delimiter = ";";
         }
         String token = null;
         int r = r0;
@@ -1641,17 +1635,15 @@ public abstract class DefaultBaseTableView implements TableView {
                     tokenizer1 = new StringTokenizer(line, delimiter);
                     while (tokenizer1.hasMoreTokens() && (c < cols)) {
                         token = tokenizer1.nextToken();
-                        if (dataObject instanceof ScalarDS) {
-                            StringTokenizer tokenizer2 = new StringTokenizer(token);
+                        StringTokenizer tokenizer2 = new StringTokenizer(token);
+                        if (tokenizer2.hasMoreTokens()) {
                             while (tokenizer2.hasMoreTokens() && (c < cols)) {
                                 updateValueInMemory(tokenizer2.nextToken(), r, c);
                                 c++;
                             }
                         }
-                        else {
-                            updateValueInMemory(token, r, c);
+                        else
                             c++;
-                        }
                     } // while (tokenizer1.hasMoreTokens() && index < size)
                 }
                 catch (Exception ex) {
