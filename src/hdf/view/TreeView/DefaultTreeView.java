@@ -468,6 +468,8 @@ public class DefaultTreeView implements TreeView {
                     log.trace("tree.addMenuDetectListener(): selectedFile={}", selectedFile.getAbsolutePath());
                 }
 
+                ((HDFView) viewer).showMetaData(selectedObject);
+
                 popupMenu.setLocation(display.map(tree, null, pt));
                 popupMenu.setVisible(true);
             }
