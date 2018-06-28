@@ -82,6 +82,22 @@ public class TableViewFactory extends DataViewFactory {
 
         if (dataObject == null) return null;
 
+        /*
+         * TODO: hard-coded until module loading is enabled in order to avoid class load failures for default classes
+         */
+        if (dataObject instanceof ScalarDS)
+            dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+        else if (dataObject instanceof CompoundDS)
+            dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
+        else if (dataObject instanceof Attribute) {
+            if (((Attribute) dataObject).getDatatype().isCompound())
+                dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
+            else
+                dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
+        }
+        else
+            dataViewName = null;
+
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
