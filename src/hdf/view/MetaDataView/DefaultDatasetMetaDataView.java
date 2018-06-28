@@ -149,18 +149,22 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         label.setFont(curFont);
         label.setText("Data Type: ");
 
-        String type = null;
-        if (d instanceof ScalarDS) {
-            ScalarDS sd = (ScalarDS) d;
-            Datatype t = sd.getDatatype();
-            type = (t == null) ? "null" : t.getDescription();
-        }
-        else if (d instanceof CompoundDS) {
+        Datatype t = d.getDatatype();
+        String type = (t == null) ? "null" : t.getDescription();
+        if (d instanceof CompoundDS) {
             if (isH4) {
                 type = "Vdata";
             }
             else {
-                type = "Compound";
+                /*
+                 * For Compounds, Arrays of Compounds, Vlens of Compounds, etc. we want to show
+                 * the fully-qualified type, minus the compound members, since we already show
+                 * the Compound datatype's members in a table.
+                 */
+                int bracketIndex = type.indexOf('{');
+                if (bracketIndex >= 0) {
+                    type = type.substring(0, bracketIndex);
+                }
             }
         }
 
