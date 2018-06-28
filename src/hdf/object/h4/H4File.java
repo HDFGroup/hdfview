@@ -162,15 +162,15 @@ public class H4File extends FileFormat {
             flag = access;
         }
 
-        log.trace("File: {} isReadOnly={} accessType={}", fileName, isReadOnly, flag);
+        if (log != null) log.trace("File: {} isReadOnly={} accessType={}", fileName, isReadOnly, flag);
 
         String shwAll = System.getProperty("h4showall");
         if (shwAll != null) {
             showAll = true;
-            log.debug("show all is on");
+            if (log != null) log.debug("show all is on");
         }
         else {
-            log.debug("show all is off");
+            if (log != null) log.debug("show all is off");
         }
     }
 

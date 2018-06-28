@@ -171,10 +171,10 @@ public class ViewProperties extends PreferenceStore {
     private static boolean          showRegRefValues       = false;
 
     /**
-     * flag to indicate if default open file mode is read only. By default, use
-     * read/write.
+     * flag to indicate if default open file mode is read only. By default, use read
+     * only to prevent accidental modifications to the file.
      */
-    private static boolean          isReadOnly             = false;
+    private static boolean          isReadOnly             = true;
 
     private static String EarlyLib = "Latest";
 
@@ -271,7 +271,6 @@ public class ViewProperties extends PreferenceStore {
                     propertyFile = null;
                 }
             }
-            log.trace("h5v propertyFile is {}", propertyFile);
         }
         setFilename(propertyFile);
         log.trace("propertyFile is {}", propertyFile);
@@ -286,13 +285,27 @@ public class ViewProperties extends PreferenceStore {
 
         recentFiles = new Vector<>(MAX_RECENT_FILES + 5);
 
+        setDefault("users.guide", System.getProperty("user.dir") + "/UsersGuide/index.html");
+        setDefault("image.contrast", false);
         setDefault("image.showvalues", false);
+        setDefault("file.mode", "r");
         setDefault("lib.lowversion", "Earliest");
         setDefault("lib.highversion", "Latest");
         setDefault("enum.conversion", false);
         setDefault("regref.showvalues", false);
         setDefault("index.base1", false);
+        setDefault("image.origin", ORIGIN_UL);
+        setDefault("h5file.indexType", "H5_INDEX_NAME");
+        setDefault("h5file.indexOrder", "H5_ITER_INC");
+        setDefault("h4toh5.converter", "");
+        setDefault("work.dir", "user.home");
+        setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
         setDefault("font.size", 12);
+        setDefault("font.type", "Serif");
+        setDefault("max.members", Integer.MAX_VALUE);
+        setDefault("recent.file", "");
+        setDefault("palette.file", "");
+        setDefault("data.delimiter", DELIMITER_TAB);
     }
 
     /**
@@ -1208,17 +1221,17 @@ public class ViewProperties extends PreferenceStore {
         }
 
         propVal = getString("users.guide");
-        if (propVal != null)
+        if (!isDefault("users.guide"))
             usersGuide = propVal;
 
         propVal = getString("image.contrast");
-        if (propVal != null)
+        if (!isDefault("image.contrast"))
             isAutoContrast = ("auto".equalsIgnoreCase(propVal));
 
         showImageValues = getBoolean("image.showvalues");
 
         propVal = getString("file.mode");
-        if (propVal != null)
+        if (!isDefault("file.mode"))
             isReadOnly = ("r".equalsIgnoreCase(propVal));
 
         EarlyLib = getString("lib.lowversion");
@@ -1232,31 +1245,31 @@ public class ViewProperties extends PreferenceStore {
         isIndexBase1 = getBoolean("index.base1");
 
         propVal = getString("data.delimiter");
-        if ((propVal != null) && (propVal.length() > 0))
+        if (!isDefault("data.delimiter"))
             delimiter = propVal;
 
         propVal = getString("image.origin");
-        if ((propVal != null) && (propVal.length() > 0))
+        if (!isDefault("image.origin"))
             origin = propVal;
 
         propVal = getString("h5file.indexType");
-        if ((propVal != null) && (propVal.length() > 0))
+        if (!isDefault("h5file.indexType"))
             indexType = propVal;
 
         propVal = getString("h5file.indexOrder");
-        if ((propVal != null) && (propVal.length() > 0))
+        if (!isDefault("h5file.indexOrder"))
             indexOrder = propVal;
 
         propVal = getString("h4toh5.converter");
-        if ((propVal != null) && (propVal.length() > 0))
+        if (!isDefault("h4toh5.converter"))
             h4toh5 = propVal;
 
         propVal = getString("work.dir");
-        if ((propVal != null) && (propVal.length() > 0))
+        if (!isDefault("work.dir"))
             workDir = propVal;
 
         propVal = getString("file.extension");
-        if ((propVal != null) && (propVal.length() > 0)) {
+        if (!isDefault("file.extension")) {
             fileExt = propVal;
             FileFormat.addFileExtension(fileExt);
         }
@@ -1264,7 +1277,7 @@ public class ViewProperties extends PreferenceStore {
         fontSize = getInt("font.size");
 
         propVal = getString("font.type");
-        if ((propVal != null) && (propVal.length() > 0))
+        if (!isDefault("font.type"))
             fontType = propVal.trim();
 
         max_members = getInt("max.members");

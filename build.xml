@@ -11,7 +11,7 @@
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
     <filterchain>
       <tokenfilter>
-        <stringtokenizer delims="-" />
+        <stringtokenizer delims="-\r\n" suppressdelims="true" />
         <containsregex pattern="[0-9]+\.[0-9]+" />
       </tokenfilter>
     </filterchain>

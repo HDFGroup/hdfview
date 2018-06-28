@@ -75,7 +75,7 @@ public abstract class AbstractWindowTest {
         File hdf_file = new File(workDir, name + file_ext);
 
         try {
-            bot.toolbarButtonWithTooltip("Open").click();
+            bot.menu("Open As").menu("Read/Write").click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
@@ -239,7 +239,7 @@ public abstract class AbstractWindowTest {
                 @Override
                 public void run() {
                     try {
-                        Vector<File> fList = new Vector<File>();
+                        Vector<File> fList = new Vector<>();
                         String rootDir = System.getProperty("hdfview.workdir");
                         if(rootDir == null) rootDir = System.getProperty("user.dir");
 

@@ -613,7 +613,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             /* Reload the file for good measure */
             items[0].click();
-            items[0].contextMenu().menu("&Reload File").click();
+            items[0].contextMenu().menu("&Reload File As").menu("Read/Write").click();
 
             items = bot.tree().getAllItems();
             items[0].contextMenu("Expand All").click();
@@ -876,7 +876,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             /* Reload the file for good measure to make sure the changes are saved */
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = bot.tree().getAllItems();
             items[0].contextMenu("Expand All").click();
@@ -977,7 +977,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             /* Reload the file for good measure to make sure the changes are saved */
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu("Reload File As").menu("Read/Write").click();
 
             items = bot.tree().getAllItems();
             items[0].contextMenu("Expand All").click();
@@ -1837,7 +1837,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             closeFile(hdf_file, false);
 
-            bot.menu("File").menu("Open &Read-Only").click();
+            bot.menu("File").menu("Open As").menu("Read-Only").click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
