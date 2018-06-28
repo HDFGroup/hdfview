@@ -162,8 +162,9 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                  * the Compound datatype's members in a table.
                  */
                 int bracketIndex = type.indexOf('{');
-                if (bracketIndex >= 0) {
-                    type = type.substring(0, bracketIndex);
+                int lastBracketIndex = type.lastIndexOf('}');
+                if (bracketIndex >= 0 && lastBracketIndex >= 0) {
+                    type = type.replace(type.substring(bracketIndex, lastBracketIndex + 1), "");
                 }
             }
         }
