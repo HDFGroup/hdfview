@@ -487,10 +487,6 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         /* Create the Shell's MenuBar */
-        /*
-         * TODO: If read-only access is not set correctly at this point, as may be the
-         * case with Attributes, then MenuItems may be incorrectly enabled.
-         */
         shell.setMenuBar(createMenuBar(shell));
 
         /*
