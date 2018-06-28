@@ -2868,35 +2868,6 @@ public class DefaultTreeView implements TreeView {
         curFont = font;
 
         tree.setFont(font);
-
-        // On certain platforms, calling tree.setFont() does not update
-        // the font of currently visible TreeItems. Since setting the
-        // font on all TreeItems causes a bug, all files must be reloaded.
-        LinkedList<FileFormat> files = new LinkedList<>();
-        TreeItem[] items = tree.getItems();
-
-        for (int i = 0; i < items.length; i++) {
-            FileFormat theFile = ((HObject) items[i].getData()).getFileFormat();
-            files.add(theFile);
-
-            try {
-                closeFile(theFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        while (!files.isEmpty()) {
-            FileFormat theFile = files.remove();
-
-            try {
-                reopenFile(theFile, -1);
-            }
-            catch (Exception ex) {
-                log.debug("reloading file {} failure after font change: ", theFile.getAbsolutePath(), ex);
-                Tools.showError(shell, "File reload error", "Error reloading file " + theFile.getAbsolutePath() + ": " + ex.getMessage());
-            }
-        }
     }
 
     /**

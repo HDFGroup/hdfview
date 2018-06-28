@@ -1719,6 +1719,7 @@ public class HDFView implements ViewManager {
             if (!isTesting) {
                 log.trace("openLocalFile filename is null");
                 FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
+                fChooser.setText(mainWindow.getText() + " - Open File " + ((accessMode == FileFormat.READ) ? "Read-only" : "Read/Write"));
                 fChooser.setFilterPath(currentDir);
 
                 DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
