@@ -657,7 +657,7 @@
     </junitreport>
   </target>
 
-  <target name="javadoc">
+  <target name="javadoc" depends="jar">
     <javadoc packagenames="hdf.*"
       use="true" author="true" version="true"
       access="package"

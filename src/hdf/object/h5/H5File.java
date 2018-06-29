@@ -356,7 +356,7 @@ public class H5File extends FileFormat {
      *             necessary to retrieve the attributes. A variety of failures throw
      *             this exception.
      *
-     * @see #getAttribute(long,int,int)
+     * @see #getAttribute(HObject,int,int)
      */
     public static final List<Attribute> getAttribute(HObject obj) throws HDF5Exception {
         return H5File.getAttribute(obj, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC);
