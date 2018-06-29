@@ -51,7 +51,7 @@ public class DataValidatorFactory {
                 validator = new ArrayDataValidator(dtype);
             else if (dtype.isInteger() || dtype.isFloat())
                 validator = new NumericalDataValidator(dtype);
-            else if (dtype.isVLEN())
+            else if (dtype.isVLEN() && !dtype.isVarStr())
                 validator = new VlenDataValidator(dtype);
             else if (dtype.isString())
                 validator = new StringDataValidator(dtype);
