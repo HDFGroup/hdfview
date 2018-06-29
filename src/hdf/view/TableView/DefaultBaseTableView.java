@@ -2153,7 +2153,10 @@ public abstract class DefaultBaseTableView implements TableView {
                         // Add data validator and validation error handler
                         DataValidator validator = null;
                         try {
-                            validator = new DataValidatorFactory().getDataValidator(dataObject.getDatatype());
+                            if (dataObject instanceof CompoundDS)
+                                validator = DataValidatorFactory.getDataValidator((CompoundDS) dataObject);
+                            else
+                                validator = DataValidatorFactory.getDataValidator(dataObject.getDatatype());
                         }
                         catch (Exception ex) {
                             log.debug("EditingGridLayer: no DataValidator retrieved, data editing will be disabled");

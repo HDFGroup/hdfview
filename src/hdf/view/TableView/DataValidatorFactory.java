@@ -14,16 +14,18 @@
 
 package hdf.view.TableView;
 
+import java.math.BigInteger;
 import java.util.StringTokenizer;
 
 import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
 import org.eclipse.nebula.widgets.nattable.data.validate.ValidationFailedException;
 
+import hdf.object.CompoundDS;
 import hdf.object.Datatype;
 
 /**
- * A Factory class to return a DataValidator class for a NatTable instance
- * based upon the Datatype that it is supplied.
+ * A Factory class to return a DataValidator class for a NatTable instance based
+ * upon the Datatype that it is supplied.
  *
  * @author Jordan T. Henderson
  * @version 1.0 6/28/2018
@@ -33,30 +35,29 @@ public class DataValidatorFactory {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
 
-    public DataValidator getDataValidator(Datatype dtype) throws Exception {
+    public static DataValidator getDataValidator(Datatype dtype) throws Exception {
+        if (dtype == null)
+            throw new Exception("DataValidatorFactory supplied with an invalid Datatype");
+
         DataValidator validator = null;
 
-        if (dtype == null)
-            throw new Exception("Must supply a valid datatype for the DataValidator");
-
-        log.trace("getDataValidator(): start");
-
-        log.trace("getDataValidator(): Datatype is {}", dtype.getDescription());
+        log.trace("getDataValidator(Datatype): start");
 
         try {
             if (dtype.isCompound())
-                validator = new CompoundDataValidator(dtype);
+                throw new Exception("Incorrect method getDataValidator(Datatype) called for CompoundDS; use getDataValidator(CompoundDS) instead");
+
             if (dtype.isArray())
-                validator = new ArrayDataValidator(dtype.getDatatypeBase());
+                validator = new ArrayDataValidator(dtype);
             else if (dtype.isInteger() || dtype.isFloat())
                 validator = new NumericalDataValidator(dtype);
             else if (dtype.isVLEN())
-                validator = new VlenDataValidator(dtype.getDatatypeBase());
+                validator = new VlenDataValidator(dtype);
             else if (dtype.isString())
                 validator = new StringDataValidator(dtype);
         }
         catch (Exception ex) {
-            log.debug("getDataValidator(): error occurred in retrieving a DataValidator: ", ex);
+            log.debug("getDataValidator(Datatype): error occurred in retrieving a DataValidator: ", ex);
             validator = null;
         }
 
@@ -72,7 +73,40 @@ public class DataValidatorFactory {
             };
         }
 
-        log.trace("getDataValidator(): finish");
+        log.trace("getDataValidator(Datatype): finish");
+
+        return validator;
+    }
+
+    public static DataValidator getDataValidator(CompoundDS compoundDataset) throws Exception {
+        if (compoundDataset == null)
+            throw new Exception("Must supply a valid CompoundDS to the DataValidatorFactory");
+
+        DataValidator validator = null;
+
+        log.trace("getDataValidator(CompoundDS): start");
+
+        try {
+            validator = new CompoundDataValidator(compoundDataset);
+        }
+        catch (Exception ex) {
+            log.debug("getDataValidator(CompoundDS): error occurred in retrieving a DataValidator: ", ex);
+            validator = null;
+        }
+
+        /*
+         * By default, never validate if a proper DataValidator was not found.
+         */
+        if (validator == null) {
+            validator = new DataValidator() {
+                @Override
+                public boolean validate(int arg0, int arg1, Object arg2) {
+                    throw new ValidationFailedException("A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
+                }
+            };
+        }
+
+        log.trace("getDataValidator(CompoundDS): finish");
 
         return validator;
     }
@@ -85,24 +119,30 @@ public class DataValidatorFactory {
      * Compound datatype, and grabbing the correct validator from the stored
      * list of validators.
      */
-    private class CompoundDataValidator extends DataValidator {
+    private static class CompoundDataValidator extends DataValidator {
 
         private final DataValidator[] memberValidators;
         private final int numSelectedMembers;
 
-        CompoundDataValidator(Datatype dtype) throws Exception {
-            if (dtype == null || !dtype.isCompound())
-                throw new Exception("CompoundDataValidator must have a valid base Datatype");
+        CompoundDataValidator(CompoundDS dset) throws Exception {
+            if (dset == null)
+                throw new Exception("CompoundDataValidator supplied with an invalid CompoundDS");
+
+            Datatype dtype = dset.getDatatype();
+            if (dtype == null)
+                throw new Exception("CompoundDataValidator's CompoundDS has an invalid Datatype");
 
             log.trace("CompoundDataValidator: Datatype is {}", dtype.getDescription());
 
-            /*
-             * TODO: need the actual dataset here
-             */
-            memberValidators = null;
-            numSelectedMembers = 0;
+            Datatype[] selectedMembers = dset.getSelectedMemberTypes();
+            numSelectedMembers = selectedMembers.length;
+            memberValidators = new DataValidator[numSelectedMembers];
 
             log.trace("CompoundDataValidator: number of selected members {}", numSelectedMembers);
+
+            for (int i = 0; i < numSelectedMembers; i++) {
+                memberValidators[i] = DataValidatorFactory.getDataValidator(selectedMembers[i]);
+            }
         }
 
         @Override
@@ -120,24 +160,28 @@ public class DataValidatorFactory {
      * an ARRAY datatype by calling the appropriate validator (as determined
      * by the supplied datatype) on each of the array's elements.
      */
-    private class ArrayDataValidator extends DataValidator {
+    private static class ArrayDataValidator extends DataValidator {
 
         private final DataValidator baseValidator;
 
         ArrayDataValidator(Datatype dtype) throws Exception {
-            if (dtype == null)
-                throw new Exception("ArrayDataValidator must have a valid base Datatype");
+            if (dtype == null || !dtype.isArray())
+                throw new Exception("ArrayDataValidator supplied with an invalid array Datatype");
 
-            log.trace("ArrayDataValidator: base Datatype is {}", dtype.getDescription());
+            Datatype baseType = dtype.getDatatypeBase();
+            if (baseType == null)
+                throw new Exception("ArrayDataValidator's Array Datatype has an invalid base Datatype");
 
-            if (dtype.isArray())
-                this.baseValidator = new ArrayDataValidator(dtype.getDatatypeBase());
-            else if (dtype.isInteger() || dtype.isFloat())
-                this.baseValidator = new NumericalDataValidator(dtype);
-            else if (dtype.isVLEN())
-                this.baseValidator = new VlenDataValidator(dtype.getDatatypeBase());
-            else if (dtype.isString())
-                this.baseValidator = new StringDataValidator(dtype);
+            log.trace("ArrayDataValidator: base Datatype is {}", baseType.getDescription());
+
+            if (baseType.isArray())
+                this.baseValidator = new ArrayDataValidator(baseType);
+            else if (baseType.isInteger() || baseType.isFloat())
+                this.baseValidator = new NumericalDataValidator(baseType);
+            else if (baseType.isVLEN())
+                this.baseValidator = new VlenDataValidator(baseType);
+            else if (baseType.isString())
+                this.baseValidator = new StringDataValidator(baseType);
             else
                 throw new Exception("Unable to find a suitable base validator class for this ArrayDataValidator");
         }
@@ -163,24 +207,28 @@ public class DataValidatorFactory {
      * a variable-length Datatype (note that this DataValidator should not
      * be used for String Datatypes that are variable-length).
      */
-    protected class VlenDataValidator extends DataValidator {
+    private static class VlenDataValidator extends DataValidator {
 
         private final DataValidator baseValidator;
 
         VlenDataValidator(Datatype dtype) throws Exception {
-            if (dtype == null)
-                throw new Exception("VlenDataValidator must have a valid base Datatype");
+            if (dtype == null || !dtype.isVLEN())
+                throw new Exception("VlenDataValidator supplied with an invalid valid VLEN Datatype");
 
-            log.trace("VlenDataValidator: base Datatype is {}", dtype.getDescription());
+            Datatype baseType = dtype.getDatatypeBase();
+            if (baseType == null)
+                throw new Exception("VlenDataValidator's VLEN Datatype has an invalid base Datatype");
 
-            if (dtype.isArray())
-                this.baseValidator = new ArrayDataValidator(dtype.getDatatypeBase());
-            else if (dtype.isInteger() || dtype.isFloat())
-                this.baseValidator = new NumericalDataValidator(dtype);
-            else if (dtype.isVLEN())
-                this.baseValidator = new VlenDataValidator(dtype.getDatatypeBase());
-            else if (dtype.isString())
-                this.baseValidator = new StringDataValidator(dtype);
+            log.trace("VlenDataValidator: base Datatype is {}", baseType.getDescription());
+
+            if (baseType.isArray())
+                this.baseValidator = new ArrayDataValidator(baseType);
+            else if (baseType.isInteger() || baseType.isFloat())
+                this.baseValidator = new NumericalDataValidator(baseType);
+            else if (baseType.isVLEN())
+                this.baseValidator = new VlenDataValidator(baseType);
+            else if (baseType.isString())
+                this.baseValidator = new StringDataValidator(baseType);
             else
                 throw new Exception("Unable to find a suitable base validator class for this VlenDataValidator");
         }
@@ -205,13 +253,13 @@ public class DataValidatorFactory {
      * NatTable DataValidator to validate entered input for a dataset with
      * a numerical Datatype.
      */
-    protected class NumericalDataValidator extends DataValidator {
+    private static class NumericalDataValidator extends DataValidator {
 
         private final Datatype datasetDatatype;
 
         NumericalDataValidator(Datatype dtype) throws Exception {
             if (dtype == null || (!dtype.isInteger() && !dtype.isFloat()))
-                throw new Exception("NumericalDataValidator must have a valid base numerical Datatype");
+                throw new Exception("NumericalDataValidator supplied with an invalid numerical Datatype");
 
             log.trace("NumericalDataValidator: base Datatype is {}", dtype.getDescription());
 
@@ -228,8 +276,14 @@ public class DataValidatorFactory {
                     case 1:
                         if (datasetDatatype.isUnsigned()) {
                             /*
-                             * TODO:
+                             * First try to parse as a larger type in order to catch a NumberFormatException
                              */
+                            Short shortValue = Short.parseShort((String) newValue);
+                            if (shortValue < 0)
+                                throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                            if (shortValue > (Byte.MAX_VALUE * 2) + 1)
+                                throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
                         }
                         else {
                             Byte.parseByte((String) newValue);
@@ -239,8 +293,14 @@ public class DataValidatorFactory {
                     case 2:
                         if (datasetDatatype.isUnsigned()) {
                             /*
-                             * TODO:
+                             * First try to parse as a larger type in order to catch a NumberFormatException
                              */
+                            Integer intValue = Integer.parseInt((String) newValue);
+                            if (intValue < 0)
+                                throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                            if (intValue > (Short.MAX_VALUE * 2) + 1)
+                                throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
                         }
                         else {
                             Short.parseShort((String) newValue);
@@ -251,8 +311,14 @@ public class DataValidatorFactory {
                         if (datasetDatatype.isInteger()) {
                             if (datasetDatatype.isUnsigned()) {
                                 /*
-                                 * TODO:
+                                 * First try to parse as a larger type in order to catch a NumberFormatException
                                  */
+                                Long longValue = Long.parseLong((String) newValue);
+                                if (longValue < 0)
+                                    throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                                if (longValue > ((long) Integer.MAX_VALUE * 2) + 1)
+                                    throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
                             }
                             else {
                                 Integer.parseInt((String) newValue, 10);
@@ -268,8 +334,15 @@ public class DataValidatorFactory {
                         if (datasetDatatype.isInteger()) {
                             if (datasetDatatype.isUnsigned()) {
                                 /*
-                                 * TODO:
+                                 * First try to parse as a larger type in order to catch a NumberFormatException
                                  */
+                                BigInteger bigValue = new BigInteger((String) newValue);
+                                if (bigValue.compareTo(BigInteger.ZERO) < 0)
+                                    throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                                BigInteger maxRange = BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(2)).add(BigInteger.valueOf(1));
+                                if (bigValue.compareTo(maxRange) > 0)
+                                    throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
                             }
                             else {
                                 Long.parseLong((String) newValue);
@@ -287,7 +360,7 @@ public class DataValidatorFactory {
             }
             catch (Exception ex) {
                 throw new ValidationFailedException("Failed to update value at " + "(" + rowIndex + ", "
-                        + colIndex + ") to '" + newValue.toString() + "': " + ex.getMessage());
+                        + colIndex + ") to '" + newValue.toString() + "': " + ex.toString());
             }
 
             return true;
@@ -298,13 +371,13 @@ public class DataValidatorFactory {
      * NatTable DataValidator to validate entered input for a dataset with
      * a String Datatype (including Strings of variable-length).
      */
-    protected class StringDataValidator extends DataValidator {
+    private static class StringDataValidator extends DataValidator {
 
         private final Datatype datasetDatatype;
 
         StringDataValidator(Datatype dtype) throws Exception {
             if (dtype == null || !dtype.isString())
-                throw new Exception("StringDataValidator must have a valid base String Datatype");
+                throw new Exception("StringDataValidator supplied with an invalid String Datatype");
 
             log.trace("StringDataValidator: base Datatype is {}", dtype.getDescription());
 
