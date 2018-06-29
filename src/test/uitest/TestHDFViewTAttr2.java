@@ -1330,8 +1330,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                     table.cell(27,0).matches("vlen"));
 
             assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(27,3)+"] did not match regex '1, 2, 3'",
-                    table.cell(27,3).matches("1, 2, 3"));
+                    table.cell(27, 3) + "] did not match regex '{1}, {2, 3}'", table.cell(27, 3).matches("\\{1\\}, \\{2, 3\\}"));
 
             table.click(28, 0);
             assertTrue("openTAttr2Attribute() data ["+table.cell(28,0)+
@@ -1339,8 +1338,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                     table.cell(28,0).matches("vlen2D"));
 
             assertTrue("openTAttr2Attribute() data ["+table.cell(28,3)+
-                    "] did not match regex '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11'",
-                    table.cell(28,3).matches("0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11"));
+                    "] did not match regex '{0}, {1}, {2, 3}, {4, 5}, {6, 7, 8}, {9, 10, 11}'",
+                    table.cell(28, 3).matches("\\{0\\}, \\{1\\}, \\{2, 3\\}, \\{4, 5\\}, \\{6, 7, 8\\}, \\{9, 10, 11\\}"));
 
             table.click(29, 0);
             assertTrue("openTAttr2Attribute() data ["+table.cell(29,0)+
@@ -1348,8 +1347,9 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                     table.cell(29,0).matches("vlen3D"));
 
             assertTrue("openTAttr2Attribute() data ["+table.cell(29,3)+
-                    "] did not match regex '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59'",
-                    table.cell(29,3).matches("0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59"));
+                    "] did not match regex '{0}, {1}, {2}, {3}, {4}, {5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}, {16, 17}, {18, 19, 20}, {21, 22, 23}, {24, 25, 26}, {27, 28, 29}, {30, 31, 32}, {33, 34, 35}, {36, 37, 38, 39}, {40, 41, 42, 43}, {44, 45, 46, 47}, {48, 49, 50, 51}, {52, 53, 54, 55}, {56, 57, 58, 59}'",
+                    table.cell(29, 3).matches(
+                            "\\{0\\}, \\{1\\}, \\{2\\}, \\{3\\}, \\{4\\}, \\{5\\}, \\{6, 7\\}, \\{8, 9\\}, \\{10, 11\\}, \\{12, 13\\}, \\{14, 15\\}, \\{16, 17\\}, \\{18, 19, 20\\}, \\{21, 22, 23\\}, \\{24, 25, 26\\}, \\{27, 28, 29\\}, \\{30, 31, 32\\}, \\{33, 34, 35\\}, \\{36, 37, 38, 39\\}, \\{40, 41, 42, 43\\}, \\{44, 45, 46, 47\\}, \\{48, 49, 50, 51\\}, \\{52, 53, 54, 55\\}, \\{56, 57, 58, 59\\}"));
         }
         catch (Exception ex) {
             ex.printStackTrace();

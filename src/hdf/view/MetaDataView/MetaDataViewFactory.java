@@ -79,6 +79,20 @@ public class MetaDataViewFactory extends DataViewFactory {
 
         dataViewName = (String) metaDataViewList.get(0);
 
+        /*
+         * TODO: hard-coded until module loading is enabled in order to avoid class load failures for default classes
+         */
+        if (theObj instanceof Group)
+            dataViewName = ViewProperties.DEFAULT_GROUP_METADATAVIEW_NAME;
+        else if (theObj instanceof Dataset)
+            dataViewName = ViewProperties.DEFAULT_DATASET_METADATAVIEW_NAME;
+        else if (theObj instanceof Datatype)
+            dataViewName = ViewProperties.DEFAULT_DATATYPE_METADATAVIEW_NAME;
+        else if (theObj instanceof H5Link)
+            dataViewName = ViewProperties.DEFAULT_LINK_METADATAVIEW_NAME;
+        else
+            dataViewName = null;
+
         /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
