@@ -657,7 +657,7 @@
     </junitreport>
   </target>
 
-  <target name="javadoc">
+  <target name="javadoc" depends="jar">
     <javadoc packagenames="hdf.*"
       use="true" author="true" version="true"
       access="package"
@@ -678,7 +678,7 @@
       </doctitle>
 
       <bottom>
-        <![CDATA[Copyright © 2017. All Rights Reserved.]]>
+        <![CDATA[Copyright © 2018. All Rights Reserved.]]>
       </bottom>
 
       <group title="object packages" packages="hdf.object.*" />
@@ -1162,7 +1162,7 @@
       shortversion="${app.version}"
       icon="${lib.dir}/macosx/${ant.project.name}.icns"
       signature="????"
-      copyright="Copyright © 2006-2017 by The HDF Group. All rights reserved."
+      copyright="Copyright © 2006-2018 by The HDF Group. All rights reserved."
       applicationCategory="public.app-category.developer-tools"
       mainclassname="${main-class}">
 

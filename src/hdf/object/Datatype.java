@@ -379,18 +379,22 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * Constructs a Datatype with a given native datatype identifier.
      * <p>
-     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
+     * For example, if the datatype identifier is a 32-bit unsigned integer created
+     * from HDF5,
      *
      * <pre>
      * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4,
+     * NATIVE, SIGN_NONE);
      *
      * @see #fromNative(long tid)
      * @param tid
      *            the native datatype identifier.
+     * @param pbase
+     *            the parent datatype of the new datatype
      */
     public Datatype(long tid, Datatype pbase) {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
@@ -515,9 +519,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Returns the Map<String,String> pairs of enum members for enum datatype.
+     * Returns the Map&lt;String,String&gt; pairs of enum members for enum datatype.
      *
-     * @return enumStr Map<String,String> pairs of enum members
+     * @return enumStr Map&lt;String,String%gt; pairs of enum members
      */
     public final Map<String, String> getEnumMembers() {
         if (enumMembers == null) {
@@ -535,7 +539,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * For Example,
      * <dl>
      * <dt>getEnumMembersAsString()</dt>
-     * <dd>returns "lowTemp=10, highTemp=40"</dt>
+     * <dd>returns "lowTemp=10, highTemp=40"</dd>
      * </dl>
      *
      * @return enumStr the (name, value) pairs of enum members

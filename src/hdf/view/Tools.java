@@ -3114,6 +3114,8 @@ public final class Tools {
      * short array, I = int array, J = long array, F = float array, D = double
      * array, L = class or interface
      *
+     * @param o
+     *            the Object to determine the Runtime Class of
      * @return the Java Runtime Class of the given Object.
      */
     public static char getJavaObjectRuntimeClass(Object o) {
@@ -3159,12 +3161,14 @@ public final class Tools {
 
     /**
      * Show an SWT Confirm dialog with the given message.
+     *
      * @param parent
-     *           The parent Shell of the MessageDialog
+     *            The parent Shell of the MessageDialog
      * @param title
-     *           The title to set for the MessageDialog
+     *            The title to set for the MessageDialog
      * @param confMsg
-     *           The message to display in the MessageDialog
+     *            The message to display in the MessageDialog
+     * @return The status of the dialog after closing
      */
     public static boolean showConfirm(Shell parent, String title, String confMsg) {
         return MessageDialog.openConfirm(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (confMsg == null) ? "UNKNOWN" : confMsg);
