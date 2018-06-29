@@ -487,10 +487,6 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         /* Create the Shell's MenuBar */
-        /*
-         * TODO: If read-only access is not set correctly at this point, as may be the
-         * case with Attributes, then MenuItems may be incorrectly enabled.
-         */
         shell.setMenuBar(createMenuBar(shell));
 
         /*
@@ -993,8 +989,6 @@ public abstract class DefaultBaseTableView implements TableView {
     protected abstract void showRegRefData(String reg);
 
     protected abstract DisplayConverter getDataDisplayConverter(DataFormat dataObject);
-
-    protected abstract DataValidator getDataValidator(DataFormat dataObject);
 
     protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
 
@@ -2157,7 +2151,17 @@ public abstract class DefaultBaseTableView implements TableView {
                         }
 
                         // Add data validator and validation error handler
-                        DataValidator validator = getDataValidator(dataObject);
+                        DataValidator validator = null;
+                        try {
+                            if (dataObject instanceof CompoundDS)
+                                validator = DataValidatorFactory.getDataValidator((CompoundDS) dataObject);
+                            else
+                                validator = DataValidatorFactory.getDataValidator(dataObject.getDatatype());
+                        }
+                        catch (Exception ex) {
+                            log.debug("EditingGridLayer: no DataValidator retrieved, data editing will be disabled");
+                        }
+
                         if (validator != null) {
                             configRegistry.registerConfigAttribute(EditConfigAttributes.DATA_VALIDATOR, validator,
                                     DisplayMode.EDIT, GridRegion.BODY);

@@ -28,7 +28,6 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
-import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
@@ -507,17 +506,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         if (dataObject == null) return null;
 
         return new CompoundDSDataDisplayConverter(dataObject);
-    }
-
-    // TODO: implement DataValidator to validate based upon current column index
-    @Override
-    protected DataValidator getDataValidator(final DataFormat dataObject) {
-        return new DataValidator() {
-            @Override
-            public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                return true;
-            }
-        };
     }
 
     /**
