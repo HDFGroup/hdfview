@@ -780,6 +780,7 @@ public class NewDatasetDialog extends Dialog {
         String name = null;
         Group pgroup = null;
         boolean isVLen = false;
+        boolean isVlenStr = false;
         int rank = -1, gzip = -1, tclass = -1, tsize = -1, torder = -1, tsign = -1;
         long dims[], maxdims[] = null, chunks[] = null;
 
@@ -842,17 +843,15 @@ public class NewDatasetDialog extends Dialog {
             tclass = Datatype.CLASS_FLOAT;
         }
         else if (idx == 8) {
-            isVLen = true;
             tclass = Datatype.CLASS_STRING;
+            isVlenStr = true;
+            tsize = -1;
         }
 
         // set datatype size/order
         idx = sizeChoice.getSelectionIndex();
         if (tclass == Datatype.CLASS_STRING) {
-            if (isVLen) {
-                tsize = -1;
-            }
-            else {
+            if (!isVlenStr) {
                 int stringLength = 0;
                 try {
                     stringLength = Integer.parseInt(stringLengthField.getText());

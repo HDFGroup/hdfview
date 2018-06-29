@@ -154,7 +154,7 @@ public class NewDatatypeDialog extends Dialog {
             }
         });
 
-        groupList = new Vector<Group>(objList.size());
+        groupList = new Vector<>(objList.size());
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
@@ -388,6 +388,7 @@ public class NewDatatypeDialog extends Dialog {
         String name = null;
         Group pgroup = null;
         boolean isVLen = false;
+        boolean isVlenStr = false;
         int tclass = -1, tsize = -1, torder = -1, tsign = -1;
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
@@ -445,17 +446,15 @@ public class NewDatatypeDialog extends Dialog {
             tclass = Datatype.CLASS_FLOAT;
         }
         else if (idx == 7) {
-            isVLen = true;
             tclass = Datatype.CLASS_STRING;
+            isVlenStr = true;
+            tsize = -1;
         }
 
         // set datatype size/order
         idx = sizeChoice.getSelectionIndex();
         if (tclass == Datatype.CLASS_STRING) {
-            if (isVLen) {
-                tsize = -1;
-            }
-            else {
+            if (!isVlenStr) {
                 int stringLength = 0;
                 try {
                     stringLength = Integer.parseInt(stringLengthField.getText());
