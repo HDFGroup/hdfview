@@ -66,7 +66,6 @@ import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
-import org.eclipse.nebula.widgets.nattable.data.validate.ValidationFailedException;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.action.KeyEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
@@ -3650,143 +3649,13 @@ public class GermanTableView implements TableView {
      *         otherwise.
      */
     private static DataValidator getScalarDSDataValidator(final ScalarDS theDataset) {
-        boolean isUnsigned = theDataset.getDatatype().isUnsigned();
-        String cname = theDataset.getOriginalClass().getName();
-
-        //TODO: Add validation for array types when array editing is added
-
-        switch(cname.charAt(cname.lastIndexOf("[") + 1)) {
-            case 'B':
-                if (isUnsigned) {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidUByte(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-                else {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidByte(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-            case 'S':
-                if (isUnsigned) {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidUShort(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-                else {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidShort(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-            case 'I':
-                if (isUnsigned) {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidUInt(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-                else {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidInt(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-            case 'J':
-                if (isUnsigned) {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidULong(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-                else {
-                    return new DataValidator() {
-                        @Override
-                        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                            if (!Tools.checkValidLong(newValue.toString()))
-                                throw new ValidationFailedException("Failed to update value at "
-                                        + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                            return true;
-                        }
-                    };
-                }
-            case 'F':
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidFloat(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            case 'D':
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        if (!Tools.checkValidDouble(newValue.toString()))
-                            throw new ValidationFailedException("Failed to update value at "
-                                    + "(" + rowIndex + ", " + colIndex + ") to '" + newValue.toString() + "'");
-
-                        return true;
-                    }
-                };
-            default:
-                // Default: never validate
-                return new DataValidator() {
-                    @Override
-                    public boolean validate(int colIndex, int rowIndex, Object newValue) {
-                        return false;
-                    }
-                };
-        }
+        // Default: never validate
+        return new DataValidator() {
+            @Override
+            public boolean validate(int colIndex, int rowIndex, Object newValue) {
+                return false;
+            }
+        };
     }
 
     private static DataValidator getCompoundDSDataValidator(final CompoundDS theDataset) {

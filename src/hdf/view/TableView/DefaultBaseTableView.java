@@ -990,8 +990,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected abstract DisplayConverter getDataDisplayConverter(DataFormat dataObject);
 
-    protected abstract DataValidator getDataValidator(DataFormat dataObject);
-
     protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
 
     @Override
@@ -2153,7 +2151,14 @@ public abstract class DefaultBaseTableView implements TableView {
                         }
 
                         // Add data validator and validation error handler
-                        DataValidator validator = getDataValidator(dataObject);
+                        DataValidator validator = null;
+                        try {
+                            validator = new DataValidatorFactory().getDataValidator(dataObject.getDatatype());
+                        }
+                        catch (Exception ex) {
+                            log.debug("EditingGridLayer: no DataValidator retrieved, data editing will be disabled");
+                        }
+
                         if (validator != null) {
                             configRegistry.registerConfigAttribute(EditConfigAttributes.DATA_VALIDATOR, validator,
                                     DisplayMode.EDIT, GridRegion.BODY);
