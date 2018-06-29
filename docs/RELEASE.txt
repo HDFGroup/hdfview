@@ -23,10 +23,10 @@ Major Enhancements
         -- The main HDFView window still displays open files and their
            structure on the left hand side
 
-        -- The right side of the window now displays the general metadata of
-           the selected object, such as the object name, path, type, number of
-           attributes, etc. In addition, the following extra information is
-           displayed for these specific objects:
+        -- The right side of the window now displays a tabbed dialog with the
+           general metadata of the selected object, such as the object name,
+           path, type, number of attributes, etc. In addition, the following
+           extra information is displayed for these specific objects:
             -- Datasets: Dataspace, Datatype, Chunking Information, Compression
                Ratio, Applied Filters, Allocated Storage and Fill Value are
                displayed. If the Dataset is a Compound Dataset, the datasets'
@@ -42,11 +42,16 @@ Major Enhancements
         -- As a result of now showing the metadata immediately when an
            object is selected, the 'Show Properties' menu item shown when
            right-clicking on an object in the tree has now been replaced
-           with a 'Show Attributes' item to specifically show just the
+           with a 'Attributes' tabbed dialog page to specifically show just the
            attributes of the data object. The 'User Block' tab in the old
            'Show Properties' window has been removed and is now a clickable
            button that has been moved out to the metadata display when the
-           selected object is the root group of a file.
+           selected object is the root group of a file. Clickable buttons are
+           available for adding or deleting attributes.
+
+           The Attributes tab is shown by default. Double-clicking an attribute
+           will bring up a table view of the data.
+
            The storage layout for HDF5 files are now shown in place of the
            Chunking status.
 
@@ -55,7 +60,10 @@ Major Enhancements
            double clicking on the column header for that entry. If the
            Compound Datatype of the Dataset has nested Compound Datatype
            members inside of it, those members will be collapsable as well,
-           as indicated by their individual column headers
+           as indicated by their individual column headers.
+
+    * The text view class has been removed, text datasets are viewed in the
+           standard table view.
 
     * Added support for split files and family files
         -- When opening split files, the file containing all the metadata
@@ -68,7 +76,14 @@ Major Enhancements
         -- Currently only Integer and Float data is supported
 
     * Added the ability to open multiple files at once using either the
-      file browser or by dragging and dropping
+        file browser or by dragging and dropping
+
+    * Complete overhaul of the object library. The datatype class now
+        supports a parent-child type structure that more closely matches
+        the datatype structure of a hdf5 file. This has refactored
+        datatype references in all the other classes. An HObject class
+        is the common ancestor of all classes.
+
 
 
 Major Bug Fixes
