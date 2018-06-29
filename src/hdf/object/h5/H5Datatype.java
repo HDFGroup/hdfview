@@ -1078,8 +1078,8 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Allocates a one-dimensional array of byte, short, int, long, float, double, or String to store
-     * data in memory.
+     * Allocates a one-dimensional array of byte, short, int, long, float, double,
+     * or String to store data in memory.
      *
      * For example,
      *
@@ -1090,7 +1090,7 @@ public class H5Datatype extends Datatype {
      *
      * returns a 32-bit integer array of size 100.
      *
-     * @param size
+     * @param spaceSize
      *            the total number of data points of the array.
      *
      * @return the array object if successful; otherwise, return null.
@@ -1651,14 +1651,8 @@ public class H5Datatype extends Datatype {
      * <p>
      * This function is needed to read/write data field by field.
      *
-     * @param atom_tid
-     *            The datatype identifier of the compound to create
      * @param member_name
      *            The name of the datatype
-     * @param compInfo
-     *            compInfo[0]--IN: class of member datatype; compInfo[1]--IN: size of member datatype;
-     *            compInfo[2]--OUT: non-zero if the base type of the compound field is unsigned; zero,
-     *            otherwise.
      *
      * @return the identifier of the compound datatype.
      *

@@ -119,7 +119,6 @@ public interface DataFormat {
      *
      * @see hdf.object.Dataset#convertToUnsignedC(Object)
      * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
-     * @see #convertFromUnsignedC(Object data_in)
      *
      * @return the converted data buffer.
      */
