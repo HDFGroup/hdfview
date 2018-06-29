@@ -647,10 +647,6 @@ public class H5Datatype extends Datatype {
                 }
                 log.trace("fromNative(): compound type finish");
             }
-            else if (isChar) {
-                datatypeClass = CLASS_CHAR;
-                datatypeSign = (isUchar) ? SIGN_NONE : SIGN_2;
-            }
             else if (nativeClass == HDF5Constants.H5T_INTEGER) {
                 datatypeClass = CLASS_INTEGER;
                 try {
@@ -664,6 +660,10 @@ public class H5Datatype extends Datatype {
             }
             else if (nativeClass == HDF5Constants.H5T_FLOAT) {
                 datatypeClass = CLASS_FLOAT;
+            }
+            else if (isChar) {
+                datatypeClass = CLASS_CHAR;
+                datatypeSign = (isUchar) ? SIGN_NONE : SIGN_2;
             }
             else if (nativeClass == HDF5Constants.H5T_STRING) {
                 datatypeClass = CLASS_STRING;

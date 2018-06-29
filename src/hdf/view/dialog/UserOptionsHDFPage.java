@@ -34,7 +34,7 @@ import hdf.view.ViewProperties;
 public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsHDFPage.class);
 
-    private Text fileExtField, maxMemberField, startMemberField;
+    private Text fileExtField;
     private Button checkConvertEnum, checkShowRegRefValues, helpButton;
     private Button nativeOrder, decOrder, checkIndexCreateOrder;
     private Button checkIndexType, checkIndexOrder, checkIndexNative;
@@ -191,11 +191,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout(1, false));
 
-        Composite fileOptionComposite = new Composite(composite, SWT.NONE);
-        fileOptionComposite.setLayout(new GridLayout());
-        fileOptionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-        org.eclipse.swt.widgets.Group fileExtensionGroup = new org.eclipse.swt.widgets.Group(fileOptionComposite, SWT.NONE);
+        org.eclipse.swt.widgets.Group fileExtensionGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         fileExtensionGroup.setLayout(new GridLayout(2, true));
         fileExtensionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         fileExtensionGroup.setFont(curFont);

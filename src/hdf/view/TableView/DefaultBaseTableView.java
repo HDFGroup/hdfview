@@ -487,10 +487,6 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         /* Create the Shell's MenuBar */
-        /*
-         * TODO: If read-only access is not set correctly at this point, as may be the
-         * case with Attributes, then MenuItems may be incorrectly enabled.
-         */
         shell.setMenuBar(createMenuBar(shell));
 
         /*
@@ -993,8 +989,6 @@ public abstract class DefaultBaseTableView implements TableView {
     protected abstract void showRegRefData(String reg);
 
     protected abstract DisplayConverter getDataDisplayConverter(DataFormat dataObject);
-
-    protected abstract DataValidator getDataValidator(DataFormat dataObject);
 
     protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
 
@@ -1596,26 +1590,20 @@ public abstract class DefaultBaseTableView implements TableView {
         String delName = ViewProperties.getDataDelimiter();
         String delimiter = "";
 
-        // delimiter must include a tab to be consistent with copy/paste for
-        // compound fields
-        if (dataObject instanceof CompoundDS)
+        if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB)) {
             delimiter = "\t";
-        else {
-            if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB)) {
-                delimiter = "\t";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE)) {
-                delimiter = " " + delimiter;
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA)) {
-                delimiter = ",";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON)) {
-                delimiter = ":";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON)) {
-                delimiter = ";";
-            }
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE)) {
+            delimiter = " " + delimiter;
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA)) {
+            delimiter = ",";
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON)) {
+            delimiter = ":";
+        }
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON)) {
+            delimiter = ";";
         }
         String token = null;
         int r = r0;
@@ -1641,17 +1629,15 @@ public abstract class DefaultBaseTableView implements TableView {
                     tokenizer1 = new StringTokenizer(line, delimiter);
                     while (tokenizer1.hasMoreTokens() && (c < cols)) {
                         token = tokenizer1.nextToken();
-                        if (dataObject instanceof ScalarDS) {
-                            StringTokenizer tokenizer2 = new StringTokenizer(token);
+                        StringTokenizer tokenizer2 = new StringTokenizer(token);
+                        if (tokenizer2.hasMoreTokens()) {
                             while (tokenizer2.hasMoreTokens() && (c < cols)) {
                                 updateValueInMemory(tokenizer2.nextToken(), r, c);
                                 c++;
                             }
                         }
-                        else {
-                            updateValueInMemory(token, r, c);
+                        else
                             c++;
-                        }
                     } // while (tokenizer1.hasMoreTokens() && index < size)
                 }
                 catch (Exception ex) {
@@ -2165,7 +2151,17 @@ public abstract class DefaultBaseTableView implements TableView {
                         }
 
                         // Add data validator and validation error handler
-                        DataValidator validator = getDataValidator(dataObject);
+                        DataValidator validator = null;
+                        try {
+                            if (dataObject instanceof CompoundDS)
+                                validator = DataValidatorFactory.getDataValidator((CompoundDS) dataObject);
+                            else
+                                validator = DataValidatorFactory.getDataValidator(dataObject.getDatatype());
+                        }
+                        catch (Exception ex) {
+                            log.debug("EditingGridLayer: no DataValidator retrieved, data editing will be disabled");
+                        }
+
                         if (validator != null) {
                             configRegistry.registerConfigAttribute(EditConfigAttributes.DATA_VALIDATOR, validator,
                                     DisplayMode.EDIT, GridRegion.BODY);

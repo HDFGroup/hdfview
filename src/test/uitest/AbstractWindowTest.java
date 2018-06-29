@@ -3,6 +3,7 @@ package test.uitest;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Vector;
@@ -75,7 +76,7 @@ public abstract class AbstractWindowTest {
         File hdf_file = new File(workDir, name + file_ext);
 
         try {
-            bot.toolbarButtonWithTooltip("Open").click();
+            bot.menu("Open As").menu("Read/Write").click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
@@ -219,9 +220,11 @@ public abstract class AbstractWindowTest {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
     }
 
@@ -239,7 +242,7 @@ public abstract class AbstractWindowTest {
                 @Override
                 public void run() {
                     try {
-                        Vector<File> fList = new Vector<File>();
+                        Vector<File> fList = new Vector<>();
                         String rootDir = System.getProperty("hdfview.workdir");
                         if(rootDir == null) rootDir = System.getProperty("user.dir");
 

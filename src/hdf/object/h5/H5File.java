@@ -526,7 +526,7 @@ public class H5File extends FileFormat {
                             }
                             try {
                                 log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
-                                H5.H5AreadComplex(aid, tid, strs);
+                                H5.H5AreadVL(aid, tid, strs);
                             }
                             catch (Exception ex) {
                                 log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);

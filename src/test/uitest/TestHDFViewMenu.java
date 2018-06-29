@@ -277,7 +277,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         try {
             closeFile(hdf_file, false);
 
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("Open Read-Only");
+            SWTBotMenu fileMenuItem = bot.menu("File").menu("Open As").menu("Read-Only");
             fileMenuItem.click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
