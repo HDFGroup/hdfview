@@ -189,6 +189,7 @@
         <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT"
                   Value="$(var.productName)-$(var.productVersion).0 has been installed on your computer." />
         <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.productName)-$(var.productVersion).0" />
+        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
 
         <Property Id="WixShellExecTarget" Value="[#HDFViewBat]" />
         <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
