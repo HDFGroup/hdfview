@@ -960,8 +960,6 @@ public abstract class FileFormat extends File {
      * @see #createInstance(String, int)
      * @see #getInstance(String)
      * @see #getRootObject()
-     *
-     * @return the file identifier.
      */
     public abstract long open() throws Exception;
 
@@ -1659,8 +1657,6 @@ public abstract class FileFormat extends File {
      *
      * @return
      *            The dataset created.
-     *
-     * @return the dataset that has been created
      *
      * @throws Exception if the dataset cannot be created
      */

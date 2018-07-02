@@ -571,7 +571,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     }
 
     private Menu createAttributePopupMenu(final Table table) {
-        Menu menu = new Menu(table);
+        final Menu menu = new Menu(table);
         MenuItem item;
 
         item = new MenuItem(menu, SWT.PUSH);

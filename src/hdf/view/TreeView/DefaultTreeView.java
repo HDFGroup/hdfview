@@ -3095,7 +3095,7 @@ public class DefaultTreeView implements TreeView {
             label.setFont(curFont);
             label.setText("Earliest Version: ");
 
-            Combo earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+            final Combo earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
             earliestCombo.setFont(curFont);
             earliestCombo.setItems(lowValues);
             earliestCombo.select(0);
@@ -3105,7 +3105,7 @@ public class DefaultTreeView implements TreeView {
             label.setFont(curFont);
             label.setText("Latest Version: ");
 
-            Combo latestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+            final Combo latestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
             latestCombo.setFont(curFont);
             latestCombo.setItems(highValues);
             latestCombo.select(0);
