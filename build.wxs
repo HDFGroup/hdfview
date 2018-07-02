@@ -2,8 +2,8 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <!-- Set product upgrade code for later upgrade of HDFView -->
 	<?define ProductUpgradeCode = "75386B8B-ABB3-492A-EF6B-75A62D699B65"?>
-	
-	
+
+
 	<!-- Set variables to determine whether target platform is 32- or 64-bit -->
 	<?if $(sys.BUILDARCH) = x64 ?>
       <?define Win64 = "yes" ?>
@@ -12,18 +12,17 @@
       <?define Win64 = "no" ?>
       <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
     <?endif ?>
-    
-    
-    <!-- Give an error if product name and version were not
-    passed to candle.exe from within ANT -->
+
+
+    <!-- Give an error if product name and version were not passed to candle.exe from within ANT -->
     <?ifndef productName ?>
     	<?error productName must be defined. ?>
     <?endif?>
 	<?ifndef productVersion ?>
     	<?error productVersion must be defined. ?>
     <?endif?>
-    
-    
+
+
     <Product Name="$(var.productName) $(var.productVersion)"
              Manufacturer="The HDF Group"
              Language="1033"
@@ -31,8 +30,8 @@
              UpgradeCode="$(var.ProductUpgradeCode)"
              Codepage="1252"
              Version="$(var.productVersion)">
-             
-             
+
+
         <Package Id="*"
                  Keywords="Installer"
                  Description="A visual tool for browsing and editing HDF files."
@@ -41,8 +40,8 @@
                  Languages="1033"
                  Compressed="yes"
                  SummaryCodepage="1252" />
-        
-        
+
+
         <Upgrade Id="$(var.ProductUpgradeCode)">
             <UpgradeVersion Minimum="$(var.productVersion).0" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" />
             <UpgradeVersion Minimum="1.0.0" IncludeMinimum="yes" Maximum="$(var.productVersion).0" IncludeMaximum="no" Property="OLDERVERSIONBEINGUPGRADED" />
@@ -51,27 +50,27 @@
         <InstallExecuteSequence>
             <RemoveExistingProducts After="InstallValidate" />
         </InstallExecuteSequence>
-                 
-                 
+
+
         <Media Id="1"
                Cabinet="media.cab"
                EmbedCab="yes" />
-        
-        
+
+
         <!-- Reference to HDF icon to be used later -->
         <Icon Id="hdf_icon" SourceFile="src\hdf\view\icons\hdf.ico"/>
-               
-        
+
+
         <!-- Property to set the default program installation folder name -->
         <Property Id="ApplicationFolderName" Value="HDF_Group\$(var.productName)\$(var.productVersion).0" />
-        
-        
+
+
         <!-- Property to set the default installation type selection for per-machine
              vs per-user installs. Default is per-machine system-wide install,
              which generally requires admin rights. -->
         <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
-        
-        
+
+
         <!-- Generate folder structure for install -->
         <Directory Id="TARGETDIR" Name="SourceDir">
             <!-- Folder to install main application to -->
@@ -82,24 +81,24 @@
                     </Directory>
                 </Directory>
             </Directory>
-            
+
             <!-- Folder to install to for Start Menu shortcut -->
             <Directory Id="ProgramMenuFolder">
                 <Directory Id="ApplicationProgramsFolder" Name="$(var.productName)-$(var.productVersion).0"/>
             </Directory>
-            
+
             <!-- Folder to install to for Desktop shortcut -->
             <Directory Id="DesktopFolder" Name="Desktop"/>
         </Directory>
-        
-        
+
+
         <!-- Register main application and add hdf file associations -->
         <Feature Id="MainApplication" Title="Main Application" Level="1">
             <ComponentGroupRef Id="MediaGroup" />
             <Component Id="FILE_ASSOCIATIONS" Guid="{1C4371C4-80EA-4B1C-8B1B-A634513F67DE}" Directory="APPLICATIONFOLDER" KeyPath="yes">
                 <!-- Manually add hdfview.bat since heat file-scraping doesn't assign it an Id -->
                 <File Id="HDFViewBat" Source="$(var.releasedir)\hdfview.bat" />
-                
+
                 <!-- Associate HDFView with the file extensions: hdf, hdf4, h4, hdf5, h5, he2, he5 -->
                 <ProgId Id="HDF_FILE">
                     <Extension Id="hdf" ContentType="application/hdf">
@@ -138,8 +137,8 @@
                 </ProgId>
             </Component>
         </Feature>
-        
-        
+
+
         <!-- Feature for adding Start Menu and Desktop Shortcuts if wanted -->
         <Feature Id="Shortcuts" Title="Create Start Menu and Desktop Shortcuts" Level="1">
             <Component Id="StartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="A9B52E31-0ABA-4AC6-8723-9128E5574F8C">
@@ -164,8 +163,8 @@
                <RegistryValue Root="HKCU" Key="Software\HDF_Group\$(var.productName)-$(var.productVersion).0" Name="App" Type="integer" Value="1" KeyPath="yes"/>
            </Component>
         </Feature>
-        
-        
+
+
         <!-- Set up UI -->
         <UI>
             <UIRef Id="WixUI_Advanced" />
@@ -174,31 +173,29 @@
                 Event="DoAction" 
                 Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
         </UI>
-        
-        
-        <!-- Customize exit dialog text and ask user if they want to launch 
-             HDFView after install -->
+
+
+        <!-- Customize exit dialog text and ask user if they want to launch HDFView after install -->
         <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT"
                   Value="$(var.productName)-$(var.productVersion).0 has been installed on your computer." />
         <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.productName)-$(var.productVersion).0" />
-        
+
         <Property Id="WixShellExecTarget" Value="[#HDFViewBat]" />
         <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
-        
-        
-        <!-- Override default Program Files/Program Files (x86) folder due to
-             a bug in WixUI_Advanced -->
+
+
+        <!-- Override default Program Files/Program Files (x86) folder due to a bug in WixUI_Advanced -->
         <CustomAction Id="Overwrite_WixSetDefaultPerMachineFolder" Property="WixPerMachineFolder" Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]" Execute="immediate" />
         <InstallUISequence>
             <Custom Action="Overwrite_WixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
         </InstallUISequence>
-        
-        
+
+
         <!-- Add HDF icon for HDFView to Add/Remove Programs in Windows -->
         <Property Id="ARPPRODUCTICON" Value="hdf_icon" />
-        
-        
+
+
         <!-- Replace default bitmaps in installer -->
-        
+
     </Product>
 </Wix>
