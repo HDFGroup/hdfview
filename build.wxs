@@ -135,6 +135,16 @@
                         <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
                     </Extension>
                 </ProgId>
+                <ProgId Id="FITS_FILE">
+                    <Extension Id="fits" ContentType="application/fits">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
+                <ProgId Id="NC_FILE">
+                    <Extension Id="nc" ContentType="application/nc">
+                        <Verb Id="open" Command="Open" TargetFile="HDFViewBat" Argument='"%1"' />
+                    </Extension>
+                </ProgId>
             </Component>
         </Feature>
 
@@ -188,6 +198,12 @@
         <CustomAction Id="Overwrite_WixSetDefaultPerMachineFolder" Property="WixPerMachineFolder" Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]" Execute="immediate" />
         <InstallUISequence>
             <Custom Action="Overwrite_WixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+        </InstallUISequence>
+
+        <!-- Override default Local AppData folder due to the default path including an unwanted "Apps" subfolder -->
+        <CustomAction Id="Overwrite_WixSetDefaultPerUserFolder" Property="WixPerUserFolder" Value="[LocalAppDataFolder][ApplicationFolderName]" Execute="immediate" />
+        <InstallUISequence>
+            <Custom Action="Overwrite_WixSetDefaultPerUserFolder" After="WixSetDefaultPerUserFolder" />
         </InstallUISequence>
 
 
