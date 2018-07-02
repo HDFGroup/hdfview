@@ -39,6 +39,7 @@
                  Platform="$(sys.BUILDARCH)"
                  Languages="1033"
                  Compressed="yes"
+                 InstallerVersion="500"
                  SummaryCodepage="1252" />
 
 
