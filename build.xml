@@ -742,7 +742,9 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
+<!--
     <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+-->
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">
@@ -854,7 +856,9 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
+<!--
     <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+-->
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">
@@ -969,20 +973,38 @@
 
     <!-- Create .dmg file -->
     <exec dir="${dist.dir}" executable="hdiutil">
-      <arg line="create -volname ${ant.project.name}Installer -srcfolder . -ov -format UDZO ${ant.project.name}-${app.version}.dmg" />
+        <arg value="create" />
+        <arg value="-volname" />
+        <arg value="${ant.project.name}Installer" />
+        <arg value="-srcfolder" />
+        <arg value="." />
+        <arg value="-ov" />
+        <arg value="-format" />
+        <arg value="UDZO" />
+        <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
     <exec dir="${dist.dir}" executable="hdiutil">
-      <arg line="internet-enable -yes ${ant.project.name}-${app.version}.dmg" />
+        <arg value="internet-enable" />
+        <arg value="-yes" />
+        <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
     <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}-${app.version}.dmg" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.INSTALLSIG}" />
+      <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
     <!-- verify gatekeeper -->
     <exec executable="spctl" dir="${dist.dir}" failonerror="true">
-      <arg line="-vvvv --assess --type install ${ant.project.name}-${app.version}.dmg" />
+      <arg value="-vvvv" />
+      <arg value="--assess" />
+      <arg value="--type" />
+      <arg value="install" />
+      <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
   </target>
 
@@ -1195,55 +1217,90 @@
 
     <!-- Sign the app -->
     <exec executable="chmod">
-      <arg line="a+w ${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+        <arg value="a+w" />
+        <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
     </exec>
 
     <apply executable="codesign">
       <!-- note: this loops through the contents of dir -->
-      <arg line="-v -f -s ${env.SIGNER}" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="&quot;${env.SIGNER}&quot;" />
       <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
     </apply>
 
     <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.SIGNER}" />
+      <arg value="${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
     </exec>
 
     <apply executable="codesign">
       <!-- note: this loops through the contents of dir -->
-      <arg line="-v -f -s ${env.SIGNER}" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.SIGNER}" />
       <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/Java" />
     </apply>
 
     <apply executable="codesign">
       <!-- note: this loops through the contents of dir -->
-      <arg line="-v -f -s ${env.SIGNER}" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.SIGNER}" />
       <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/MacOS" excludes="${ant.project.name}" />
     </apply>
 
     <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/_CodeSignature/CodeResources" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.SIGNER}" />
+      <arg value="${ant.project.name}.app/Contents/_CodeSignature/CodeResources" />
     </exec>
 
     <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Info.plist" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.SIGNER}" />
+      <arg value="${ant.project.name}.app/Contents/Info.plist" />
     </exec>
 
     <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app/Contents/Pkginfo" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.SIGNER}" />
+      <arg value="${ant.project.name}.app/Contents/Pkginfo" />
     </exec>
 
     <exec executable="codesign" dir="${dist.dir}">
-      <arg line="-v -f -s ${env.SIGNER} ${ant.project.name}.app" />
+      <arg value="-v" />
+      <arg value="-f" />
+      <arg value="-s" />
+      <arg value="${env.SIGNER}" />
+      <arg value="${ant.project.name}.app" />
     </exec>
 
     <!-- verify codesign -->
     <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-      <arg line="-vvvv ${ant.project.name}.app" />
-    </exec>
+        <arg value="-vvvv" />
+        <arg value="${ant.project.name}.app" />
+      </exec>
 
     <!-- verify gatekeeper -->
     <exec executable="spctl" dir="${dist.dir}" failonerror="true">
-      <arg line="-vvvv --assess --type execute ${ant.project.name}.app" />
+        <arg value="-vvvv" />
+        <arg value="--assess" />
+        <arg value="--type" />
+        <arg value="execute" />
+        <arg value="${ant.project.name}.app" />
     </exec>
   </target>
 
