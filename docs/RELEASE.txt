@@ -13,6 +13,13 @@ You can obtain them from:
          https://www.microsoft.com/en-us/download/details.aspx?id=48145
 
 
+Windows ONLY: HDFView was built with VS 2015, and it requires that
+the Visual C++ Redistributable Packages be installed on your machine.
+If you cannot access HDF5 files then you do not have these packages.
+You can obtain them from:
+         https://www.microsoft.com/en-us/download/details.aspx?id=48145
+
+
 JDK
 =============================================================================
 This release was built and tested with JDK 1.7.

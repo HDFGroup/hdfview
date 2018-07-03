@@ -744,7 +744,9 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
+<!--
     <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+-->
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">
@@ -856,7 +858,9 @@
     <copy todir="${release.dir}/doc">
       <fileset dir="${docs.dir}" />
     </copy>
+<!--
     <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
+-->
 
     <!-- Copy the samples -->
     <copy todir="${release.dir}/samples">
