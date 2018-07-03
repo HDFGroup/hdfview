@@ -7,6 +7,8 @@
   <property file="build.properties" />
   <property file="package.properties" />
 
+  <record name="antoutput.log" action="start" append="true" loglevel="verbose" />
+
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
     <filterchain>
