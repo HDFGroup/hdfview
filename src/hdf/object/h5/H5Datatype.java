@@ -260,6 +260,8 @@ public class H5Datatype extends Datatype {
      *            the base datatype of the new datatype
      * @param pbase
      *            the parent datatype of the new datatype
+     * @param members
+     *            the list of member datatypes
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase, List<H5Datatype> members) {
         super(tclass, tsize, torder, tsign, tbase, pbase);
