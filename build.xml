@@ -996,7 +996,7 @@
       <arg value="-v" />
       <arg value="-f" />
       <arg value="-s" />
-      <arg value="${env.SIGNER}" />
+      <arg value="${env.INSTALLSIG}" />
       <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
