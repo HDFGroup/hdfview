@@ -996,7 +996,7 @@
       <arg value="-v" />
       <arg value="-f" />
       <arg value="-s" />
-      <arg value="${env.INSTALLSIG}" />
+      <arg value="${env.SIGNER}" />
       <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
@@ -1228,7 +1228,7 @@
       <arg value="-v" />
       <arg value="-f" />
       <arg value="-s" />
-      <arg value="&quot;${env.SIGNER}&quot;" />
+      <arg value="${env.SIGNER}" />
       <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
     </apply>
 
