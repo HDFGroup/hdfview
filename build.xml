@@ -1228,7 +1228,7 @@
       <arg value="-v" />
       <arg value="-f" />
       <arg value="-s" />
-      <arg value="&quot;${env.SIGNER}&quot;" />
+      <arg value="${env.SIGNER}" />
       <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
     </apply>
 
