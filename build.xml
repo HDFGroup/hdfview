@@ -992,11 +992,12 @@
         <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
+    <!-- sign .dmg file on 10.11.5 or higher -->
     <exec executable="codesign" dir="${dist.dir}">
       <arg value="-v" />
       <arg value="-f" />
       <arg value="-s" />
-      <arg value="${env.INSTALLSIG}" />
+      <arg value="${env.SIGNER}" />
       <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
