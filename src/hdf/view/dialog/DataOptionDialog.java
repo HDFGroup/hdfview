@@ -1039,7 +1039,21 @@ public class DataOptionDialog extends Dialog {
         buttonComposite.setLayout(new GridLayout(16, true));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
-        int tsize = (int) dataObject.getDatatype().getDatatypeSize();
+        int tsize;
+
+        if (dataObject.getDatatype().isArray()) {
+            Datatype baseType = dataObject.getDatatype().getDatatypeBase();
+
+            while (baseType.isArray()) {
+                baseType = baseType.getDatatypeBase();
+            }
+
+            tsize = (int) baseType.getDatatypeSize();
+        }
+        else {
+            tsize = (int) dataObject.getDatatype().getDatatypeSize();
+        }
+
         bitmaskButtons = (tsize >= 0 && !dataObject.getDatatype().isText()) ? new Button[8 * tsize] : new Button[0];
 
         for (int i = 0; i < bitmaskButtons.length; i++) {
@@ -1048,34 +1062,34 @@ public class DataOptionDialog extends Dialog {
             bitmaskButtons[i].setText(String.valueOf(bitmaskButtons.length - i - 1));
             bitmaskButtons[i].setEnabled(false);
             bitmaskButtons[i].addSelectionListener(
-                    new SelectionAdapter() {
-                        @Override
-                        public void widgetSelected(SelectionEvent e) {
-                            if(extractBitButton.getSelection()) {
-                                Button source = (Button) e.widget;
+                new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        if(extractBitButton.getSelection()) {
+                            Button source = (Button) e.widget;
 
-                                // Don't allow non-adjacent selection of bits when extracting bits
-                                int n = 0;
+                            // Don't allow non-adjacent selection of bits when extracting bits
+                            int n = 0;
 
-                                if(bitmaskButtons[0].getSelection()) n = 1;
+                            if(bitmaskButtons[0].getSelection()) n = 1;
 
-                                for(int i = 1; i < bitmaskButtons.length; i++) {
-                                    if(bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
-                                        n++;
-                                    }
+                            for(int i = 1; i < bitmaskButtons.length; i++) {
+                                if(bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
+                                    n++;
                                 }
+                            }
 
-                                if(n > 1) {
-                                    Tools.showError(shell, "Select",
-                                            "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
-
-                                    source.setSelection(false);
-                                    return;
-                                }
+                            if(n > 1) {
+                                Tools.showError(shell, "Select",
+                                        "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
+  
+                                source.setSelection(false);
+                                return;
                             }
                         }
                     }
-                    );
+                }
+            );
         }
 
         if (dataObject.getDatatype().isChar() || (dataObject.getDatatype().isInteger() && tsize <= 8)) {
