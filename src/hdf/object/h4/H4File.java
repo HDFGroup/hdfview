@@ -1505,7 +1505,7 @@ public class H4File extends FileFormat {
                         }
 
                         if (b && (str[0].length() > 0)) {
-                            long attrDims[] = { str[0].length() };
+                            long attrDims[] = { str.length };
                             Attribute newAttr = new Attribute(getRootObject(), annName + " #" + i,
                                     new H4Datatype(HDFConstants.DFNT_CHAR), attrDims);
                             attrList.add(newAttr);
@@ -1589,8 +1589,6 @@ public class H4File extends FileFormat {
                 }
 
                 long[] attrDims = { attrInfo[1] };
-                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
-                attrList.add(attr);
 
                 Object buf = null;
                 try {
@@ -1613,11 +1611,12 @@ public class H4File extends FileFormat {
                     if ((attrInfo[0] == HDFConstants.DFNT_CHAR)
                             || (attrInfo[0] == HDFConstants.DFNT_UCHAR8)) {
                         buf = Dataset.byteToString((byte[]) buf, attrInfo[1]);
+                        attrDims[0] = ((String[]) buf).length;
                     }
-
-                    attr.setData(buf);
                 }
 
+                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims, buf);
+                attrList.add(attr);
             } // for (int i=0; i<numberOfAttributes; i++)
         } // if (b && numberOfAttributes>0)
 
@@ -1677,8 +1676,6 @@ public class H4File extends FileFormat {
                 }
 
                 long[] attrDims = { attrInfo[1] };
-                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims);
-                attrList.add(attr);
 
                 Object buf = null;
                 try {
@@ -1701,11 +1698,12 @@ public class H4File extends FileFormat {
                     if ((attrInfo[0] == HDFConstants.DFNT_CHAR)
                             || (attrInfo[0] == HDFConstants.DFNT_UCHAR8)) {
                         buf = Dataset.byteToString((byte[]) buf, attrInfo[1]);
+                        attrDims[0] = ((String[]) buf).length;
                     }
-
-                    attr.setData(buf);
                 }
 
+                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims, buf);
+                attrList.add(attr);
             } // for (int i=0; i<numberOfAttributes; i++)
         } // if (b && numberOfAttributes>0)
 

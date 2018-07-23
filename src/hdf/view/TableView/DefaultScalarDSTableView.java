@@ -1408,6 +1408,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.trace("ScalarDSDataProvider:getValueAt isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray,
                     showAsHex, showAsBin);
 
+            if (dataValue instanceof String) return dataValue;
+
             try {
                 if (isArray) {
                     log.trace("ScalarDSDataProvider:getValueAt ARRAY dataset size={} isDisplayTypeChar={} isUINT64={}", arraySize, isDisplayTypeChar, isUINT64);
