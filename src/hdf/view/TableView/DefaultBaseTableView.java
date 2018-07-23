@@ -369,7 +369,7 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dims == null) {
             log.debug("data object has null dimensions");
             log.trace("finish");
-            Tools.showError(shell, "Create", "Could not open data object '" + ((HObject) dataObject).getName()
+            Tools.showError(shell, "Error", "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has null dimensions.");
             shell.dispose();
             return;
@@ -384,7 +384,7 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
             log.debug("data object has dimension of size 0");
             log.trace("finish");
-            Tools.showError(shell, "Create", "Could not open data object '" + ((HObject) dataObject).getName()
+            Tools.showError(shell, "Error", "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has dimension of size 0.");
             shell.dispose();
             return;

@@ -3143,7 +3143,16 @@ public final class Tools {
      *           The error message to display in the MessageDialog
      */
     public static void showError(Shell parent, String title, String errorMsg) {
-        MessageDialog.openError(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (errorMsg == null) ? "UNKNOWN" : errorMsg);
+        String dlgTitlePrefix = "";
+        String dlgTitleSuffix = (title == null) ? "" : title;
+
+        if (parent != null) {
+            dlgTitlePrefix = parent.getText();
+            if (dlgTitlePrefix.length() > 0)
+                dlgTitlePrefix += " - ";
+        }
+
+        MessageDialog.openError(parent, dlgTitlePrefix + dlgTitleSuffix, (errorMsg == null) ? "UNKNOWN" : errorMsg);
     }
 
     /**
@@ -3156,7 +3165,16 @@ public final class Tools {
      *           The message to display in the MessageDialog
      */
     public static void showInformation(Shell parent, String title, String infoMsg) {
-        MessageDialog.openInformation(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (infoMsg == null) ? "UNKNOWN" : infoMsg);
+        String dlgTitlePrefix = "";
+        String dlgTitleSuffix = (title == null) ? "" : title;
+
+        if (parent != null) {
+            dlgTitlePrefix = parent.getText();
+            if (dlgTitlePrefix.length() > 0)
+                dlgTitlePrefix += " - ";
+        }
+
+        MessageDialog.openInformation(parent, dlgTitlePrefix + dlgTitleSuffix, (infoMsg == null) ? "UNKNOWN" : infoMsg);
     }
 
     /**
@@ -3171,7 +3189,16 @@ public final class Tools {
      * @return The status of the dialog after closing
      */
     public static boolean showConfirm(Shell parent, String title, String confMsg) {
-        return MessageDialog.openConfirm(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (confMsg == null) ? "UNKNOWN" : confMsg);
+        String dlgTitlePrefix = "";
+        String dlgTitleSuffix = (title == null) ? "" : title;
+
+        if (parent != null) {
+            dlgTitlePrefix = parent.getText();
+            if (dlgTitlePrefix.length() > 0)
+                dlgTitlePrefix += " - ";
+        }
+
+        return MessageDialog.openConfirm(parent, dlgTitlePrefix + dlgTitleSuffix, (confMsg == null) ? "UNKNOWN" : confMsg);
     }
 
     /**
@@ -3184,6 +3211,15 @@ public final class Tools {
      *           The message to display in the MessageDialog
      */
     public static void showWarning(Shell parent, String title, String warnMsg) {
-        MessageDialog.openWarning(parent, (title == null) ? parent.getText() : parent.getText() + " - " + title, (warnMsg == null) ? "UNKNOWN" : warnMsg);
+        String dlgTitlePrefix = "";
+        String dlgTitleSuffix = (title == null) ? "" : title;
+
+        if (parent != null) {
+            dlgTitlePrefix = parent.getText();
+            if (dlgTitlePrefix.length() > 0)
+                dlgTitlePrefix += " - ";
+        }
+
+        MessageDialog.openWarning(parent, dlgTitlePrefix + dlgTitleSuffix, (warnMsg == null) ? "UNKNOWN" : warnMsg);
     }
 }
