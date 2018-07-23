@@ -1585,7 +1585,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             for (int i = 0; i < len; i++) {
                                 if (i > 0) buffer.append(", ");
                                 Long l = Long.valueOf(((Object[]) value)[i].toString());
-                                buffer.append(Tools.toHexString(l, (int) (typeSize / len)));
+                                buffer.append(Tools.toHexString(l, (int) (typeSize)));
                             }
                         }
                     }
@@ -1600,7 +1600,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             for (int i = 0; i < len; i++) {
                                 if (i > 0) buffer.append(", ");
                                 Long l = Long.valueOf(((Object[]) value)[i].toString());
-                                buffer.append(Tools.toBinaryString(l, (int) (typeSize / len)));
+                                buffer.append(Tools.toBinaryString(l, (int) (typeSize)));
                             }
                         }
                     }
