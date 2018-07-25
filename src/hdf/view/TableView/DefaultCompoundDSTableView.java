@@ -1028,8 +1028,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     columnNames[idx] = new String(datasetMemberNames[i]);
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
 
-                    if ((types[i] != null) && (types[i].isArray())) {
-                        Datatype baseType = types[i].getDatatypeBase();
+                    if ((types[idx] != null) && (types[idx].isArray())) {
+                        Datatype baseType = types[idx].getDatatypeBase();
 
                         if (baseType.isCompound()) {
                             // If member is type array of compound, list member names in column header
