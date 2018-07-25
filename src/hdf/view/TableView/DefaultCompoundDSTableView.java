@@ -1061,7 +1061,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
                 // If this is a nested field, this column's name is whatever follows the last
                 // nesting character '->'
-                if (nestingPosition >= 0) columnNames[j] = columnNames[j].substring(nestingPosition + 2);
+                if (nestingPosition >= 0)
+                    columnNames[j] = columnNames[j].substring(nestingPosition + 2);
             }
         }
 
@@ -1115,7 +1116,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
                 if (nestingPosition >= 0) {
                     String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
-                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
+                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition);
 
                     if (groupTitleStartPosition == 0) {
                         /* Singly nested member */
@@ -1127,7 +1128,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     else if (groupTitleStartPosition > 0) {
                         /* Member nested at second level or beyond, skip past leading '->' */
                         columnGroupHeaderLayer.addColumnsIndexesToGroup(
-                                "" + allColumnNames[i].substring(groupTitleStartPosition + 2, nestingPosition) + "{"
+                                "" + allColumnNames[i].substring(0, groupTitleStartPosition) + "{"
                                         + columnGroupName + "}",
                                         i);
                     }
