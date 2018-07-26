@@ -1018,6 +1018,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             ncols = groupSize * datasetWidth;
             String[] datasetMemberNames = dataFormat.getMemberNames();
             columnNames = new String[groupSize];
+            log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
 
             // Copy selected dataset member names
             int idx = 0;
@@ -1102,6 +1103,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNamesFull;
             final int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
+            log.trace("CompoundDSNestedColumnHeaderLayer: groupSize={} -- allColumnNames={}", groupSize, allColumnNames);
 
             // Set up first-level column grouping
             for (int i = 0; i < dataObject.getWidth(); i++) {
@@ -1111,30 +1113,26 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
 
             // Set up any further-nested column groups
-            for (int i = 0; i < allColumnNames.length; i++) {
-                int nestingPosition = allColumnNames[i].lastIndexOf("->");
+            for (int k = 0; k < dataObject.getWidth(); k++) {
+                for (int i = 0; i < allColumnNames.length; i++) {
+                    int colindex = i + k * allColumnNames.length;
+                    int nestingPosition = allColumnNames[i].lastIndexOf("->");
 
-                if (nestingPosition >= 0) {
-                    String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
-                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition);
+                    if (nestingPosition >= 0) {
+                        String columnGroupName = columnGroupModel.getColumnGroupByIndex(colindex).getName();
+                        int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition);
 
-                    if (groupTitleStartPosition == 0) {
-                        /* Singly nested member */
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup(
-                                "" + allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) + "{"
-                                        + columnGroupName + "}",
-                                        i);
-                    }
-                    else if (groupTitleStartPosition > 0) {
-                        /* Member nested at second level or beyond, skip past leading '->' */
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup(
-                                "" + allColumnNames[i].substring(0, groupTitleStartPosition) + "{"
-                                        + columnGroupName + "}",
-                                        i);
-                    }
-                    else {
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup(
-                                "" + allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
+                        if (groupTitleStartPosition == 0) {
+                            /* Singly nested member */
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) + "{" + columnGroupName + "}", colindex);
+                        }
+                        else if (groupTitleStartPosition > 0) {
+                            /* Member nested at second level or beyond, skip past leading '->' */
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(0, groupTitleStartPosition) + "{" + columnGroupName + "}", colindex);
+                        }
+                        else {
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", colindex);
+                        }
                     }
                 }
             }
