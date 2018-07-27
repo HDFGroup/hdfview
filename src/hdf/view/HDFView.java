@@ -1690,7 +1690,6 @@ public class HDFView implements ViewManager {
             }
             else {
                 currentFile = filename;
-
                 try {
                     treeView.openFile(filename, accessMode);
                 }
