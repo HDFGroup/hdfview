@@ -1,0 +1,38 @@
+@HDFJAVA_PACKAGE_NAME@ @HDFVIEW_PACKAGE_VERSION_STRING@ with hdf4-java:hdf5-java versions @HDFJAVA_PACKAGE_VERSION_STRING@
+------------------------------------------------------------------------------
+
+This directory contains the binary (release) distribution of
+@HDFJAVA_PACKAGE_NAME@ @HDFVIEW_PACKAGE_VERSION@ that was compiled on:
+      @BINARY_PLATFORM@
+
+with:  Java JDK @JDK_VERSION@
+
+It was built with the following options:
+   -- @LIB_TYPE@ HDF @HDF4_VERSION_STRING@
+   -- @LIB_TYPE@ HDF5 @HDF5_VERSION_STRING@
+
+===========================================================================
+Note: By default @HDFJAVA_PACKAGE_NAME@ runs on the included Java JRE @JRE_VERSION@.
+     This can be modified by changing JAVABIN in @HDFJAVA_PACKAGE_NAME@@FILE_SEP@@HDFVIEW_PACKAGE_VERSION_STRING@@FILE_SEP@@EXECUTABLE@
+===========================================================================
+
+The contents of this directory are:
+
+   COPYING                 - Copyright notice
+   README.txt              - This file
+   @BINARY_FILE@
+
+@INSTALL_TYPE@
+===========================================================================
+@INSTALL_PREFIX_HEADER@
+1. Execute @INSTALL_OR_RUN_FILE@
+@OPTIONAL_STEP@
+===========================================================================
+
+Documentation for this release can be found at the following URL:
+   https://support.hdfgroup.org/products/java/release/hdfview3.html/.
+
+See the HDF-JAVA home page for further details:
+   https://www.hdfgroup.org/downloads/hdfview/
+
+Bugs should be reported to help@hdfgroup.org.
