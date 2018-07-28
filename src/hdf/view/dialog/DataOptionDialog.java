@@ -16,9 +16,13 @@ package hdf.view.dialog;
 
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DirectColorModel;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.ImageProducer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 import java.util.BitSet;
@@ -66,6 +70,9 @@ import hdf.object.ScalarDS;
 import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
+import hdf.view.ImageView.DefaultImageView;
+import hdf.view.ImageView.DefaultImageView.FlipFilter;
+import hdf.view.ImageView.DefaultImageView.Rotate90Filter;
 
 /**
  * DataOptionDialog is an dialog window used to select display options. Display options include
@@ -1588,6 +1595,16 @@ public class DataOptionDialog extends Dialog {
 
             try {
                 previewImage = createPreviewImage();
+
+                String origStr = ViewProperties.getImageOrigin();
+                if (ViewProperties.ORIGIN_LL.equalsIgnoreCase(origStr))
+                    flip(DefaultImageView.FLIP_VERTICAL);
+                else if (ViewProperties.ORIGIN_UR.equalsIgnoreCase(origStr))
+                    flip(DefaultImageView.FLIP_HORIZONTAL);
+                else if (ViewProperties.ORIGIN_LR.equalsIgnoreCase(origStr)) {
+                    rotate(DefaultImageView.ROTATE_CW_90);
+                    rotate(DefaultImageView.ROTATE_CW_90);
+                }
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1845,6 +1862,32 @@ public class DataOptionDialog extends Dialog {
             }
 
             this.redraw();
+        }
+
+        private boolean applyImageFilter(ImageFilter filter) {
+            boolean status = true;
+            ImageProducer imageProducer = previewImage.getSource();
+
+            try {
+                previewImage = Tools.toBufferedImage(Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(imageProducer, filter)));
+            }
+            catch (Throwable err) {
+                shell.getDisplay().beep();
+                Tools.showError(shell, "Apply Image Filter", err.getMessage());
+                status = false;
+            }
+
+            return status;
+        }
+
+        private void flip(int direction) {
+            applyImageFilter(new FlipFilter(direction));
+        }
+
+        private void rotate(int direction) {
+            if (!(direction == DefaultImageView.ROTATE_CW_90 || direction == DefaultImageView.ROTATE_CCW_90)) return;
+
+            applyImageFilter(new Rotate90Filter(direction));
         }
 
         /**
