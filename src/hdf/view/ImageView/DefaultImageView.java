@@ -436,15 +436,6 @@ public class DefaultImageView implements ImageView {
         originalRange[0] = dataRange[0];
         originalRange[1] = dataRange[1];
 
-        if (imageOrigin == Origin.LOWER_LEFT)
-            flip(FLIP_VERTICAL);
-        else if (imageOrigin == Origin.UPPER_RIGHT)
-            flip(FLIP_HORIZONTAL);
-        if (imageOrigin == Origin.LOWER_RIGHT) {
-            rotate(ROTATE_CW_90);
-            rotate(ROTATE_CW_90);
-        }
-
         // set title
         StringBuffer sb = new StringBuffer(hobject.getName());
         sb.append("  at  ");
@@ -526,6 +517,15 @@ public class DefaultImageView implements ImageView {
 
         imageComponent = new ImageComponent(imageScroller, SWT.DOUBLE_BUFFERED, image);
         imageScroller.setContent(imageComponent);
+
+        if (imageOrigin == Origin.LOWER_LEFT)
+            flip(FLIP_VERTICAL);
+        else if (imageOrigin == Origin.UPPER_RIGHT)
+            flip(FLIP_HORIZONTAL);
+        if (imageOrigin == Origin.LOWER_RIGHT) {
+            rotate(ROTATE_CW_90);
+            rotate(ROTATE_CW_90);
+        }
 
         // add palette canvas to show the palette
         if (imagePalette != null) {
@@ -2273,7 +2273,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Throwable err) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Apply", err.getMessage());
+            Tools.showError(shell, "Apply Image Filter", err.getMessage());
             status = false;
         }
 
