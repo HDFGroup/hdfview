@@ -21,18 +21,18 @@ import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
-import hdf.view.ViewManager;
+import hdf.view.DataView.DataViewManager;
 
 public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableView implements TableView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundAttributeTableView.class);
 
-    public DefaultCompoundAttributeTableView(ViewManager theView) {
+    public DefaultCompoundAttributeTableView(DataViewManager theView) {
         this(theView, null);
     }
 
     @SuppressWarnings("rawtypes")
-    public DefaultCompoundAttributeTableView(ViewManager theView, HashMap dataPropertiesMap) {
+    public DefaultCompoundAttributeTableView(DataViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
     }
 

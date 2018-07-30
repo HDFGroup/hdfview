@@ -16,18 +16,18 @@ package hdf.view.TableView;
 
 import java.util.HashMap;
 
-import hdf.view.ViewManager;
+import hdf.view.DataView.DataViewManager;
 
 public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
 
-    public DefaultScalarAttributeTableView(ViewManager theView) {
+    public DefaultScalarAttributeTableView(DataViewManager theView) {
         this(theView, null);
     }
 
     @SuppressWarnings("rawtypes")
-    public DefaultScalarAttributeTableView(ViewManager theView, HashMap dataPropertiesMap) {
+    public DefaultScalarAttributeTableView(DataViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
     }
 }

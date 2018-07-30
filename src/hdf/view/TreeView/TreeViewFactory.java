@@ -21,10 +21,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.HObject;
-import hdf.view.DataViewFactory;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewFactory;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.ImageView.ImageView;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.PaletteView.PaletteView;
@@ -44,28 +44,28 @@ public class TreeViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
+    public TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
         return null;
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
+    public ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
+    public PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) throws ClassNotFoundException {
+    public MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException {
         return null;
     }
 
     @Override
-    public TreeView getTreeView(Composite parent, ViewManager viewer) throws ClassNotFoundException {
+    public TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException {
         String dataViewName = null;
         Object[] initargs = { parent, viewer };
         TreeView theView = null;

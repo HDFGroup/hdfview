@@ -130,8 +130,8 @@ import hdf.view.Chart;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.ViewProperties.BITMASK_OP;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
@@ -156,7 +156,7 @@ public abstract class DefaultBaseTableView implements TableView {
     protected Font                          curFont;
 
     // The main HDFView
-    protected final ViewManager             viewer;
+    protected final DataViewManager         viewer;
 
     protected NatTable                      dataTable;
 
@@ -240,7 +240,7 @@ public abstract class DefaultBaseTableView implements TableView {
      * @param theView
      *            the main HDFView.
      */
-    public DefaultBaseTableView(ViewManager theView) {
+    public DefaultBaseTableView(DataViewManager theView) {
         this(theView, null);
     }
 
@@ -258,7 +258,7 @@ public abstract class DefaultBaseTableView implements TableView {
      *            ViewProperties.DATA_VIEW_KEY.
      */
     @SuppressWarnings("rawtypes")
-    public DefaultBaseTableView(ViewManager theView, HashMap dataPropertiesMap) {
+    public DefaultBaseTableView(DataViewManager theView, HashMap dataPropertiesMap) {
         log.trace("start");
 
         shell = new Shell(display, SWT.SHELL_TRIM);

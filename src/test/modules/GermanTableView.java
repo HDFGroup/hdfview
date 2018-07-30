@@ -153,8 +153,8 @@ import hdf.view.Chart;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.ViewProperties.BITMASK_OP;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.TreeView;
@@ -177,7 +177,7 @@ public class GermanTableView implements TableView {
     private Font                            curFont;
 
     // The main HDFView
-    private final ViewManager               viewer;
+    private final DataViewManager           viewer;
 
     private NatTable                        table; // The NatTable to display data in
 
@@ -275,7 +275,7 @@ public class GermanTableView implements TableView {
      * @param theView
      *             the main HDFView.
      */
-    public GermanTableView(ViewManager theView) {
+    public GermanTableView(DataViewManager theView) {
         this(theView, null);
     }
 
@@ -291,7 +291,7 @@ public class GermanTableView implements TableView {
      *          ViewProperties.DATA_VIEW_KEY.
      */
     @SuppressWarnings("rawtypes")
-    public GermanTableView(ViewManager theView, HashMap map) {
+    public GermanTableView(DataViewManager theView, HashMap map) {
         log.trace("GermanTableView start");
 
         shell = new Shell(display, SWT.SHELL_TRIM);

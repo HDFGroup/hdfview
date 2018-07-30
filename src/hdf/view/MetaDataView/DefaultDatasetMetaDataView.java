@@ -36,13 +36,13 @@ import hdf.object.Datatype;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
+import hdf.view.DataView.DataViewManager;
 
 public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
 
-    public DefaultDatasetMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
+    public DefaultDatasetMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }
 

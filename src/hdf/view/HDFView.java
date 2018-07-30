@@ -72,6 +72,10 @@ import hdf.HDFVersions;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.view.ViewProperties.DataViewType;
+import hdf.view.DataView.DataView;
+import hdf.view.DataView.DataViewFactory;
+import hdf.view.DataView.DataViewFactoryProducer;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.HelpView.HelpView;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.TableView.TableView;
@@ -83,6 +87,7 @@ import hdf.view.dialog.UserOptionsDialog;
 import hdf.view.dialog.UserOptionsGeneralPage;
 import hdf.view.dialog.UserOptionsHDFPage;
 import hdf.view.dialog.UserOptionsNode;
+import hdf.view.dialog.UserOptionsViewModulesPage;
 
 
 /**
@@ -99,7 +104,7 @@ import hdf.view.dialog.UserOptionsNode;
  * @author Jordan T. Henderson
  * @version 2.4 //2015
  */
-public class HDFView implements ViewManager {
+public class HDFView implements DataViewManager {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 
@@ -797,22 +802,12 @@ public class HDFView implements ViewManager {
                 // Create the nodes
                 UserOptionsNode one = new UserOptionsNode("general", new UserOptionsGeneralPage());
                 UserOptionsNode two = new UserOptionsNode("hdf", new UserOptionsHDFPage());
-
-                /*
-                 * TODO: Disabled until module loading is supported
-                 */
-                /*
-                 * UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
-                 */
+                UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
 
                 // Add the nodes
                 mgr.addToRoot(one);
                 mgr.addToRoot(two);
-
-                /*
-                 * TODO: Disabled until module loading is supported
-                 */
-                /* mgr.addToRoot(three); */
+                mgr.addToRoot(three);
 
                 // Create the preferences dialog
                 userOptionDialog = new UserOptionsDialog(shell, mgr, rootDir);

@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.DataView;
 
 import hdf.object.HObject;
 

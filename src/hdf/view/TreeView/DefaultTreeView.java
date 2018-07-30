@@ -76,14 +76,14 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
-import hdf.view.DataView;
-import hdf.view.DataViewFactory;
-import hdf.view.DataViewFactoryProducer;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataView;
+import hdf.view.DataView.DataViewFactory;
+import hdf.view.DataView.DataViewFactoryProducer;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
 import hdf.view.ViewProperties.DataViewType;
 import hdf.view.MetaDataView.MetaDataView;
@@ -122,7 +122,7 @@ public class DefaultTreeView implements TreeView {
     private Font                          curFont;
 
     /** The owner of this TreeView */
-    private ViewManager                   viewer;
+    private DataViewManager               viewer;
 
     /** Thread to load TableView Data in the background */
     private LoadDataThread                loadDataThread;
@@ -213,7 +213,7 @@ public class DefaultTreeView implements TreeView {
 
     private enum OBJECT_TYPE {GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK};
 
-    public DefaultTreeView(Composite parent, ViewManager theView) {
+    public DefaultTreeView(Composite parent, DataViewManager theView) {
         viewer = theView;
         shell = parent.getShell();
 

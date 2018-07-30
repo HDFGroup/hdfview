@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.DataView;
 
 import hdf.view.ViewProperties.DataViewType;
 import hdf.view.ImageView.ImageViewFactory;
@@ -36,40 +36,31 @@ public class DataViewFactoryProducer {
     public static DataViewFactory getFactory(DataViewType viewType) {
         log.trace("getFactory(): start");
 
-        if (viewType == DataViewType.TABLE) {
-            log.trace("getFactory(): returning TableView factory instance");
-            log.trace("getFactory(): finish");
-
-            return new TableViewFactory();
+        switch (viewType) {
+            case TABLE:
+                log.trace("getFactory(): returning TableView factory instance");
+                log.trace("getFactory(): finish");
+                return new TableViewFactory();
+            case IMAGE:
+                log.trace("getFactory(): returning ImageView factory instance");
+                log.trace("getFactory(): finish");
+                return new ImageViewFactory();
+            case PALETTE:
+                log.trace("getFactory(): returning PaletteView factory instance");
+                log.trace("getFactory(): finish");
+                return new PaletteViewFactory();
+            case METADATA:
+                log.trace("getFactory(): returning MetaDataView factory instance");
+                log.trace("getFactory(): finish");
+                return new MetaDataViewFactory();
+            case TREEVIEW:
+                log.trace("getFactory(): returning TreeView factory instance");
+                log.trace("getFactory(): finish");
+                return new TreeViewFactory();
+            default:
+                log.trace("getFactory(): no suitable factory class found");
+                log.trace("getFactory(): finish");
+                return null;
         }
-        else if (viewType == DataViewType.IMAGE) {
-            log.trace("getFactory(): returning ImageView factory instance");
-            log.trace("getFactory(): finish");
-
-            return new ImageViewFactory();
-        }
-        else if (viewType == DataViewType.PALETTE) {
-            log.trace("getFactory(): returning PaletteView factory instance");
-            log.trace("getFactory(): finish");
-
-            return new PaletteViewFactory();
-        }
-        else if (viewType == DataViewType.METADATA) {
-            log.trace("getFactory(): returning MetaDataView factory instance");
-            log.trace("getFactory(): finish");
-
-            return new MetaDataViewFactory();
-        }
-        else if (viewType == DataViewType.TREEVIEW) {
-            log.trace("getFactory(): returning TreeView factory instance");
-            log.trace("getFactory(): finish");
-
-            return new TreeViewFactory();
-        }
-
-        log.trace("getFactory(): no suitable factory class found");
-        log.trace("getFactory(): finish");
-
-        return null;
     }
 }

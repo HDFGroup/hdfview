@@ -28,7 +28,8 @@ import hdf.view.ViewProperties;
 
 
 /**
- * UserOptionsGeneralPage.java - Configuration page for general application settings.
+ * UserOptionsViewModulesPage.java - Configuration page for user-implementable
+ * modules.
  */
 public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsViewModulesPage.class);
@@ -57,6 +58,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     /**
      * Performs special processing when this page's Defaults button has been pressed.
      */
+    @Override
     public void performDefaults() {
         super.performDefaults();
     }
