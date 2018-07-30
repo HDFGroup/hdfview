@@ -1690,12 +1690,16 @@ public class HDFView implements ViewManager {
             }
             else {
                 currentFile = filename;
+<<<<<<< Upstream, based on branch 'master' of ssh://byrn@bitbucket.hdfgroup.org:7999/~byrn/hdfview_adb.git
+=======
+
+>>>>>>> 468c04f Revert another change
                 try {
                     treeView.openFile(filename, accessMode);
                 }
                 catch (Throwable ex) {
                     try {
-                        treeView.openFile(filename, FileFormat.READ);
+                        treeView.openFile(filename, accessMode);
                     }
                     catch (Throwable ex2) {
                         display.beep();
@@ -1705,11 +1709,19 @@ public class HDFView implements ViewManager {
                     }
                 }
             }
+<<<<<<< Upstream, based on branch 'master' of ssh://byrn@bitbucket.hdfgroup.org:7999/~byrn/hdfview_adb.git
 
             try {
                 url_bar.remove(filename);
             }
             catch (Exception ex) {}
+=======
+            try {
+                url_bar.remove(filename);
+            }
+            catch (Exception ex) {
+            }
+>>>>>>> 468c04f Revert another change
 
             url_bar.add(filename, 0);
             url_bar.select(0);
