@@ -117,6 +117,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     private final static String[]         attrTableColNames = { "Name", "Type", "Array Size", "Value[50](...)" };
 
+    private final static int              attrTabIndex = 0;
+    private final static int              generalTabIndex = 1;
+
     public DefaultBaseMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
         log.trace("start");
 
@@ -149,17 +152,30 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         log.trace("dataObject={} isH4={} isH5={} numAttributes={}", dataObject, isH4, isH5, numAttributes);
 
         contentTabFolder = new TabFolder(parent, SWT.NONE);
+        contentTabFolder.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                switch (contentTabFolder.getSelectionIndex()) {
+                    case attrTabIndex:
+                        parent.setData("MetaDataView.LastTabIndex", attrTabIndex);
+                        break;
+                    case generalTabIndex:
+                        parent.setData("MetaDataView.LastTabIndex", generalTabIndex);
+                        break;
+                }
+            }
+        });
 
         attributeInfoPane = createAttributeInfoPane(contentTabFolder, dataObject);
         if (attributeInfoPane != null) {
-            TabItem attributeInfoItem = new TabItem(contentTabFolder, SWT.None);
+            TabItem attributeInfoItem = new TabItem(contentTabFolder, SWT.None, attrTabIndex);
             attributeInfoItem.setText("Object Attribute Info");
             attributeInfoItem.setControl(attributeInfoPane);
         }
 
         generalObjectInfoPane = createGeneralObjectInfoPane(contentTabFolder, dataObject);
         if (generalObjectInfoPane != null) {
-            TabItem generalInfoItem = new TabItem(contentTabFolder, SWT.None);
+            TabItem generalInfoItem = new TabItem(contentTabFolder, SWT.None, generalTabIndex);
             generalInfoItem.setText("General Object Info");
             generalInfoItem.setControl(generalObjectInfoPane);
         }
@@ -173,6 +189,16 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         if (parent instanceof ScrolledComposite)
             ((ScrolledComposite) parent).setContent(contentTabFolder);
+
+        /*
+         * If the MetaDataView.LastTabIndex key data exists in the parent
+         * composite, retrieve its value to determine which remembered
+         * tab to select.
+         */
+        Object lastTabObject = parent.getData("MetaDataView.LastTabIndex");
+        if (lastTabObject != null) {
+            contentTabFolder.setSelection((int) lastTabObject);
+        }
 
         log.trace("finish");
     }

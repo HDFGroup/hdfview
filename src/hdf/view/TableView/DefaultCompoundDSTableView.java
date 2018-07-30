@@ -1018,6 +1018,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             ncols = groupSize * datasetWidth;
             String[] datasetMemberNames = dataFormat.getMemberNames();
             columnNames = new String[groupSize];
+            log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
 
             // Copy selected dataset member names
             int idx = 0;
@@ -1028,8 +1029,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     columnNames[idx] = new String(datasetMemberNames[i]);
                     columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
 
-                    if ((types[i] != null) && (types[i].isArray())) {
-                        Datatype baseType = types[i].getDatatypeBase();
+                    if ((types[idx] != null) && (types[idx].isArray())) {
+                        Datatype baseType = types[idx].getDatatypeBase();
 
                         if (baseType.isCompound()) {
                             // If member is type array of compound, list member names in column header
@@ -1061,7 +1062,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
                 // If this is a nested field, this column's name is whatever follows the last
                 // nesting character '->'
-                if (nestingPosition >= 0) columnNames[j] = columnNames[j].substring(nestingPosition + 2);
+                if (nestingPosition >= 0)
+                    columnNames[j] = columnNames[j].substring(nestingPosition + 2);
             }
         }
 
@@ -1101,6 +1103,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNamesFull;
             final int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
+            log.trace("CompoundDSNestedColumnHeaderLayer: groupSize={} -- allColumnNames={}", groupSize, allColumnNames);
 
             // Set up first-level column grouping
             for (int i = 0; i < dataObject.getWidth(); i++) {
@@ -1110,30 +1113,26 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
 
             // Set up any further-nested column groups
-            for (int i = 0; i < allColumnNames.length; i++) {
-                int nestingPosition = allColumnNames[i].lastIndexOf("->");
+            for (int k = 0; k < dataObject.getWidth(); k++) {
+                for (int i = 0; i < allColumnNames.length; i++) {
+                    int colindex = i + k * allColumnNames.length;
+                    int nestingPosition = allColumnNames[i].lastIndexOf("->");
 
-                if (nestingPosition >= 0) {
-                    String columnGroupName = columnGroupModel.getColumnGroupByIndex(i).getName();
-                    int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition - 1);
+                    if (nestingPosition >= 0) {
+                        String columnGroupName = columnGroupModel.getColumnGroupByIndex(colindex).getName();
+                        int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition);
 
-                    if (groupTitleStartPosition == 0) {
-                        /* Singly nested member */
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup(
-                                "" + allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) + "{"
-                                        + columnGroupName + "}",
-                                        i);
-                    }
-                    else if (groupTitleStartPosition > 0) {
-                        /* Member nested at second level or beyond, skip past leading '->' */
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup(
-                                "" + allColumnNames[i].substring(groupTitleStartPosition + 2, nestingPosition) + "{"
-                                        + columnGroupName + "}",
-                                        i);
-                    }
-                    else {
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup(
-                                "" + allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", i);
+                        if (groupTitleStartPosition == 0) {
+                            /* Singly nested member */
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) + "{" + columnGroupName + "}", colindex);
+                        }
+                        else if (groupTitleStartPosition > 0) {
+                            /* Member nested at second level or beyond, skip past leading '->' */
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(0, groupTitleStartPosition) + "{" + columnGroupName + "}", colindex);
+                        }
+                        else {
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", colindex);
+                        }
                     }
                 }
             }

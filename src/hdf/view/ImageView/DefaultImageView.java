@@ -82,6 +82,7 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -175,6 +176,11 @@ public class DefaultImageView implements ImageView {
      * The Component containing the image.
      */
     private ImageComponent          imageComponent;
+
+    /**
+     * The Label for the image origin.
+     */
+    private Label                   imageOriginLabel;
 
     /**
      * The image contained in the ImageView.
@@ -375,6 +381,8 @@ public class DefaultImageView implements ImageView {
             imageOrigin = Origin.UPPER_RIGHT;
         else if (ViewProperties.ORIGIN_LR.equalsIgnoreCase(origStr))
             imageOrigin = Origin.LOWER_RIGHT;
+        else
+            imageOrigin = Origin.UPPER_LEFT;
 
         if (ViewProperties.isIndexBase1())
             indexBase = 1;
@@ -435,15 +443,6 @@ public class DefaultImageView implements ImageView {
 
         originalRange[0] = dataRange[0];
         originalRange[1] = dataRange[1];
-
-        if (imageOrigin == Origin.LOWER_LEFT)
-            flip(FLIP_VERTICAL);
-        else if (imageOrigin == Origin.UPPER_RIGHT)
-            flip(FLIP_HORIZONTAL);
-        if (imageOrigin == Origin.LOWER_RIGHT) {
-            rotate(ROTATE_CW_90);
-            rotate(ROTATE_CW_90);
-        }
 
         // set title
         StringBuffer sb = new StringBuffer(hobject.getName());
@@ -514,9 +513,18 @@ public class DefaultImageView implements ImageView {
         // Create main component region
         org.eclipse.swt.widgets.Group group = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         group.setFont(curFont);
-        group.setText(originTag);
         group.setLayout(new GridLayout(2, false));
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        if (imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.UPPER_RIGHT) {
+            imageOriginLabel = new Label(group, SWT.NONE);
+            imageOriginLabel.setText(originTag);
+            imageOriginLabel.setLayoutData(new GridData((imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.LOWER_LEFT) ? SWT.BEGINNING : SWT.END, SWT.FILL,
+                    true, false, (imagePalette == null) ? 2 : 1, 1));
+
+            /* Dummy label to fill space in second column */
+            if (imagePalette != null) new Label(group, SWT.NONE);
+        }
 
         imageScroller = new ScrolledComposite(group, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
         imageScroller.getHorizontalBar().setIncrement(50);
@@ -527,12 +535,31 @@ public class DefaultImageView implements ImageView {
         imageComponent = new ImageComponent(imageScroller, SWT.DOUBLE_BUFFERED, image);
         imageScroller.setContent(imageComponent);
 
+        if (imageOrigin == Origin.LOWER_LEFT)
+            flip(FLIP_VERTICAL);
+        else if (imageOrigin == Origin.UPPER_RIGHT)
+            flip(FLIP_HORIZONTAL);
+        if (imageOrigin == Origin.LOWER_RIGHT) {
+            rotate(ROTATE_CW_90);
+            rotate(ROTATE_CW_90);
+        }
+
         // add palette canvas to show the palette
         if (imagePalette != null) {
             paletteComponent = new PaletteComponent(group, SWT.DOUBLE_BUFFERED, imagePalette, dataRange);
         } else {
             // Make ImageComponent take entire width
             imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        }
+
+        if (imageOrigin == Origin.LOWER_LEFT || imageOrigin == Origin.LOWER_RIGHT) {
+            imageOriginLabel = new Label(group, SWT.NONE);
+            imageOriginLabel.setText(originTag);
+            imageOriginLabel.setLayoutData(new GridData((imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.LOWER_LEFT) ? SWT.BEGINNING : SWT.END, SWT.FILL,
+                    true, false, (imagePalette == null) ? 2 : 1, 1));
+
+            /* Dummy label to fill space in second column */
+            if (imagePalette != null) new Label(group, SWT.NONE);
         }
 
         // Add the text field to display pixel data
@@ -2273,7 +2300,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Throwable err) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Apply", err.getMessage());
+            Tools.showError(shell, "Apply Image Filter", err.getMessage());
             status = false;
         }
 
@@ -2882,7 +2909,7 @@ public class DefaultImageView implements ImageView {
     /**
      * FlipFilter creates image filter to flip image horizontally or vertically.
      */
-    private class FlipFilter extends ImageFilter {
+    public static class FlipFilter extends ImageFilter {
         /** flip direction */
         private int direction;
 
@@ -2899,7 +2926,7 @@ public class DefaultImageView implements ImageView {
          * @param d
          *            the flip direction.
          */
-        private FlipFilter(int d) {
+        public FlipFilter(int d) {
             if (d < FLIP_HORIZONTAL) {
                 d = FLIP_HORIZONTAL;
             }
@@ -3360,7 +3387,7 @@ public class DefaultImageView implements ImageView {
 
     } // private class ContourFilter extends ImageFilter
 
-    private class Rotate90Filter extends ImageFilter {
+    public static class Rotate90Filter extends ImageFilter {
         private ColorModel defaultRGB = ColorModel.getRGBdefault();
 
         private double coord[] = new double[2];

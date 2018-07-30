@@ -138,6 +138,7 @@
   <property name="docs.dir"          value="docs" />
   <property name="bin.dir"           value="bin" />
   <property name="lib.dir"           value="lib" />
+  <property name="packagefiles.dir"  value="package_files" />
   <property name="dist.dir"          value="${build.dir}/dist" />
   <property name="java.bin"          value="/bin/jre/bin" />
   <property name="release.dir"       value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}.0" />
@@ -700,6 +701,47 @@
     </tar>
   </target>
 
+  <target name="createREADME" description="Creates the project README.txt file">
+    <copy file="${packagefiles.dir}/README.txt.in" tofile="${dist.dir}/README.txt" />
+    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
+    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
+    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_VERSION_STRING@" value="${hdfjava.version}" />
+    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
+    <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
+    <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
+    <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
+    <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
+    <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
+    <replace file="${dist.dir}/README.txt" token="@FILE_SEP@" value="${file.separator}" />
+  </target>
+
+  <target name="createWindowsREADME" depends="createREADME">
+    <!-- Windows-specific README.txt replacements -->
+    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi       - ${ant.project.name} Installer" />
+    <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.bat" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="Execute ${ant.project.name}-${app.version}.msi" />
+    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
+  </target>
+
+  <target name="createUnixREADME" depends="createREADME">
+    <!-- Unix-specific README.txt replacements -->
+    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh - ${ant.project.name} Installer" />
+    <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.sh" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}.0-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh${line.separator}    use --help for options" />
+    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/${app.version}.0/hdfview.sh to run ${ant.project.name}" />
+  </target>
+
+  <target name="createMacREADME" depends="createREADME">
+    <!-- Mac-specific README.txt replacements -->
+    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${mac.uname}" />
+  </target>
+
   <target name="deploy" depends="deployWindows, deployUnix, deployMac"
       description="Creates the release directory containing the fully-prepared application binaries, libraries, etc. ready to be packaged up for distribution" />
 
@@ -728,14 +770,15 @@
     </copy>
 
     <!-- Create the run batch file -->
-    <concat destfile="${release.dir}/hdfview.bat">${batch.text}</concat>
+    <copy file="${packagefiles.dir}/hdfview.bat.in" tofile="${release.dir}/hdfview.bat" />
 
-      <pathconvert targetos="windows" property="runscript.classpath" refid="jar-classpath">
-        <map from="${basedir}" to="%INSTALLDIR%"/>
-        <map from="${hdf.lib.dir}" to="%INSTALLDIR%\\lib"/>
-        <map from="${hdf5.lib.dir}" to="$INSTALLDIR\\lib"/>
-      </pathconvert>
-      <replace file="${release.dir}/hdfview.bat" token="@CLASSPATH@" value="${runscript.classpath}" />
+    <!-- Set the correct classpath for the batch file -->
+    <pathconvert targetos="windows" property="runscript.classpath" refid="jar-classpath">
+      <map from="${basedir}" to="%INSTALLDIR%"/>
+      <map from="${hdf.lib.dir}" to="%INSTALLDIR%\\lib"/>
+      <map from="${hdf5.lib.dir}" to="$INSTALLDIR\\lib"/>
+    </pathconvert>
+    <replace file="${release.dir}/hdfview.bat" token="@CLASSPATH@" value="${runscript.classpath}" />
 
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/doc/javadocs">
@@ -802,17 +845,18 @@
     </chmod>
 
     <!-- Create the .sh run script -->
-    <concat destfile="${release.dir}/hdfview.sh">${runscript.text}</concat>
+    <copy file="${packagefiles.dir}/hdfview.sh.in" tofile="${release.dir}/hdfview.sh" />
     <chmod perm="ugo+rx">
       <fileset dir="${release.dir}" includes="hdfview.sh" />
     </chmod>
 
-      <pathconvert property="runscript.classpath" refid="jar-classpath">
-        <map from="${basedir}" to="$INSTALLDIR" />
-        <map from="${hdf.lib.dir}" to="$INSTALLDIR/lib"/>
-        <map from="${hdf5.lib.dir}" to="$INSTALLDIR/lib"/>
-      </pathconvert>
-      <replace file="${release.dir}/hdfview.sh" token="@CLASSPATH@" value="${runscript.classpath}" />
+    <!-- Set the correct classpath for the run script -->
+    <pathconvert property="runscript.classpath" refid="jar-classpath">
+      <map from="${basedir}" to="$INSTALLDIR" />
+      <map from="${hdf.lib.dir}" to="$INSTALLDIR/lib"/>
+      <map from="${hdf5.lib.dir}" to="$INSTALLDIR/lib"/>
+    </pathconvert>
+    <replace file="${release.dir}/hdfview.sh" token="@CLASSPATH@" value="${runscript.classpath}" />
 
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/share/doc/javadocs">
@@ -880,24 +924,7 @@
     </copy>
 
     <!-- Create README.txt and add appropriate version information -->
-    <concat destfile="${dist.dir}/README.txt">${readme.txt}</concat>
-    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
-    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
-    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_VERSION_STRING@" value="${hdfjava.version}" />
-    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
-    <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
-    <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi       - ${ant.project.name} Installer" />
-    <replace file="${dist.dir}/README.txt" token="@LINUX_INSTALL_EXECUTABLE@" value="" />
-    <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
-    <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
-    <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
-    <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.bat" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="Execute ${ant.project.name}-${app.version}.msi" />
-    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
+    <antcall target="createWindowsREADME" />
 
     <!-- Compress everything into one zip file -->
     <condition property="win.extension" value="win64" else="win32">
@@ -914,23 +941,7 @@
     </copy>
 
     <!-- Create README.txt and add appropriate version information -->
-    <concat destfile="${dist.dir}/README.txt">${readme.txt}</concat>
-    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
-    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
-    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_VERSION_STRING@" value="${hdfjava.version}" />
-    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
-    <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
-    <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh - HDFJAVA Install Package" />
-    <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
-    <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
-    <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
-    <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.sh" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}.0-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh${line.separator}    use --help for options" />
-    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/${app.version}.0/hdfview.sh to run ${ant.project.name}" />
+    <antcall target="createUnixREADME" />
 
     <!-- Compress everything into one tar.gz file -->
     <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz"
@@ -954,17 +965,7 @@
     </exec>
 
     <!-- Create README.txt and add appropriate version information -->
-    <concat destfile="${dist.dir}/README.txt">${macreadme.txt}</concat>
-    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
-    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
-    <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_VERSION_STRING@" value="${hdfjava.version}" />
-    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${mac.uname}" />
-    <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
-    <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
-    <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
-    <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
-    <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
+    <antcall target="createMacREADME" />
 
     <!-- Add Applications folder link -->
     <exec executable="ln">
@@ -1142,9 +1143,9 @@
       <arg value="-r" />
     </exec>
 
-    <!-- For Linux/Unix, create install script, then compress HDFJava into tar.gz file and concat it with
+    <!-- For Linux/Unix, create install script, then compress HDFView into tar.gz file and concat it with
          install script to create a self-extracting .sh file -->
-    <concat destfile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh">${installscript.text}</concat>
+    <copy file="${packagefiles.dir}/unix_install_script.sh.in" tofile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" />
     <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
     <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@OS@" value="${uname.os}" />
     <chmod perm="ugo+rx">
