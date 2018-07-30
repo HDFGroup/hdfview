@@ -313,15 +313,10 @@
         </mapper>
     </pathconvert>
 
-    <jar destfile="${testclasses.dir}/lib/ext/test.modules.TestGermanViewMenu.jar"
+    <jar destfile="${testclasses.dir}/lib/ext/test.modules.TestModuleLoading.jar"
         basedir="${classes.dir}"
         includes="test/modules/**"
-        excludes="Test*.java *.h5">
-
-        <manifest>
-          <attribute name="Main-Class" value="test.modules.TestGermanViewMenu" />
-        </manifest>
-    </jar>
+        excludes="Test*.java *.h5" />
   </target>
 
   <target name="jar" depends="compile">
