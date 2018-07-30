@@ -15,11 +15,11 @@
 package hdf.view.DataView;
 
 import hdf.view.ViewProperties.DataViewType;
-import hdf.view.ImageView.ImageViewFactory;
-import hdf.view.MetaDataView.MetaDataViewFactory;
-import hdf.view.PaletteView.PaletteViewFactory;
-import hdf.view.TableView.TableViewFactory;
-import hdf.view.TreeView.TreeViewFactory;
+import hdf.view.ImageView.DefaultImageViewFactory;
+import hdf.view.MetaDataView.DefaultMetaDataViewFactory;
+import hdf.view.PaletteView.DefaultPaletteViewFactory;
+import hdf.view.TableView.DefaultTableViewFactory;
+import hdf.view.TreeView.DefaultTreeViewFactory;
 
 /**
  * Following the Abstract Factory Pattern, represents a class to produce
@@ -40,23 +40,23 @@ public class DataViewFactoryProducer {
             case TABLE:
                 log.trace("getFactory(): returning TableView factory instance");
                 log.trace("getFactory(): finish");
-                return new TableViewFactory();
+                return new DefaultTableViewFactory();
             case IMAGE:
                 log.trace("getFactory(): returning ImageView factory instance");
                 log.trace("getFactory(): finish");
-                return new ImageViewFactory();
+                return new DefaultImageViewFactory();
             case PALETTE:
                 log.trace("getFactory(): returning PaletteView factory instance");
                 log.trace("getFactory(): finish");
-                return new PaletteViewFactory();
+                return new DefaultPaletteViewFactory();
             case METADATA:
                 log.trace("getFactory(): returning MetaDataView factory instance");
                 log.trace("getFactory(): finish");
-                return new MetaDataViewFactory();
+                return new DefaultMetaDataViewFactory();
             case TREEVIEW:
                 log.trace("getFactory(): returning TreeView factory instance");
                 log.trace("getFactory(): finish");
-                return new TreeViewFactory();
+                return new DefaultTreeViewFactory();
             default:
                 log.trace("getFactory(): no suitable factory class found");
                 log.trace("getFactory(): finish");
