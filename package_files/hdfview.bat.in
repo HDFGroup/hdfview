@@ -1,0 +1,36 @@
+@ECHO OFF
+rem Copyright by The HDF Group.
+rem Copyright by the Board of Trustees of the University of Illinois.
+rem All rights reserved.
+rem
+rem This file is part of HDF-JAVA.  The full HDF-JAVA copyright notice, including
+rem terms governing use, modification, and redistribution, is contained in
+rem the files COPYING and Copyright.html.  COPYING can be found at the root
+rem of the source code distribution tree; Copyright.html can be found at the
+rem root level of an installed copy of the electronic HDF-JAVA document set and
+rem is linked from the top-level documents page.  It can also be found at
+rem https://support.hdfgroup.org/products/licenses.html.  If you do not have
+rem access to either file, you may request a copy from help@hdfgroup.org.
+
+rem File Name: hdfview.bat
+rem This batch file is used to execute the hdfview utility
+rem ... hdfview.root property is for the install location
+rem ...... default location is system property user.dir
+rem ... hdfview.workdir property is for the working location to find files
+rem ...... default location is system property user.home
+rem
+
+setlocal enabledelayedexpansion
+pushd %~dp0
+
+rem Adjust the following variable to match your environment
+set INSTALLDIR=%cd%
+set PATH=%PATH%;
+set JAVABIN=%INSTALLDIR%\\jre\\bin
+
+rem start "HDFView" "%JAVABIN%\\javaw.exe" %JAVAOPTS% -Xmx1024M -Djava.library.path="%INSTALLDIR%\\lib" -Dhdfview.root="%INSTALLDIR%" -jar "%INSTALLDIR%\\lib\\HDFView.jar" %*
+
+rem Default invocation when using modules
+start "HDFView" "%JAVABIN%\\javaw.exe" %JAVAOPTS% -Xmx1024M -Djava.library.path="%INSTALLDIR%\\lib;%INSTALLDIR%\\lib\\ext" -Dhdfview.root="%INSTALLDIR%" -cp "@CLASSPATH@;%INSTALLDIR%\\lib\\HDFView.jar" hdf.view.HDFView %*
+
+exit /b 0

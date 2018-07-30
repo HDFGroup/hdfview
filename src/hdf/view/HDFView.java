@@ -1690,6 +1690,21 @@ public class HDFView implements ViewManager {
             }
             else {
                 currentFile = filename;
+
+                try {
+                    treeView.openFile(filename, accessMode);
+                }
+                catch (Throwable ex) {
+                    try {
+                        treeView.openFile(filename, FileFormat.READ);
+                    }
+                    catch (Throwable ex2) {
+                        display.beep();
+                        url_bar.deselectAll();
+                        Tools.showError(mainWindow, "Open", "Failed to open file " + filename + "\n" + ex2);
+                        currentFile = null;
+                    }
+                }
             }
 
             try {
@@ -1699,21 +1714,6 @@ public class HDFView implements ViewManager {
 
             url_bar.add(filename, 0);
             url_bar.select(0);
-
-            try {
-                treeView.openFile(filename, accessMode);
-            }
-            catch (Throwable ex) {
-                try {
-                    treeView.openFile(filename, FileFormat.READ);
-                }
-                catch (Throwable ex2) {
-                    display.beep();
-                    url_bar.deselectAll();
-                    Tools.showError(mainWindow, "Open", "Failed to open file " + filename + "\n" + ex2);
-                    currentFile = null;
-                }
-            }
         }
         else {
             if (!isTesting) {

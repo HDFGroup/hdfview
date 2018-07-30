@@ -239,6 +239,22 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         }
 
         fontname = ViewProperties.getFontType();
+        log.trace("performOk: load General options fontname={}", fontname);
+        try {
+            int selectionIndex = fontTypeChoice.indexOf(fontname);
+            fontTypeChoice.select(selectionIndex);
+        }
+        catch (Exception ex) {
+            String sysFontName = Display.getDefault().getSystemFont().getFontData()[0].getName();
+
+            try {
+                int selectionIndex = fontTypeChoice.indexOf(sysFontName);
+                fontTypeChoice.select(selectionIndex);
+            }
+            catch (Exception ex2) {
+                fontTypeChoice.select(0);
+            }
+        }
 
         checkAutoContrast.setSelection(ViewProperties.isAutoContrast());
 
@@ -419,31 +435,10 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
-        boolean isFontValid = false;
-        if (fontNames != null) {
-            for (int i = 0; i < fontNames.length; i++) {
-                if (fontNames[i].equalsIgnoreCase(fontname)) {
-                    isFontValid = true;
-                }
-            }
-        }
-        if (!isFontValid) {
-            //fontname = (viewer).getFont().getFamily();
-            //ViewProperties.setFontType(fontname);
-        }
-
         fontTypeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
         fontTypeChoice.setFont(curFont);
         fontTypeChoice.setItems(fontNames);
         fontTypeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-        try {
-            int selectionIndex = fontTypeChoice.indexOf(fontname);
-            fontTypeChoice.select(selectionIndex);
-        }
-        catch (Exception ex) {
-            fontTypeChoice.select(0);
-        }
 
         org.eclipse.swt.widgets.Group imageGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         imageGroup.setLayout(new GridLayout(5, false));
