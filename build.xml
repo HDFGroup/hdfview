@@ -301,6 +301,29 @@
       </jar>
   </target>
 
+  <target name="modulejar" depends="compile-test">
+    <mkdir dir="${testclasses.dir}/lib/ext" />
+
+    <pathconvert property="manifest.classpath" pathsep=" ">
+        <path refid="jar-classpath" />
+        <mapper>
+          <chainedmapper>
+            <flattenmapper />
+          </chainedmapper>
+        </mapper>
+    </pathconvert>
+
+    <jar destfile="${testclasses.dir}/lib/ext/test.modules.TestGermanViewMenu.jar"
+        basedir="${classes.dir}"
+        includes="test/modules/**"
+        excludes="Test*.java *.h5">
+
+        <manifest>
+          <attribute name="Main-Class" value="test.modules.TestGermanViewMenu" />
+        </manifest>
+    </jar>
+  </target>
+
   <target name="jar" depends="compile">
     <mkdir dir="${jar.dir}" />
 
@@ -447,29 +470,6 @@
     <mkdir dir="${testclasses.dir}/lib/ext" />
   </target>
   <path id="alltest-classes" location="${testclasses.dir}" />
-
-  <target name="modulejar" depends="compile-test">
-    <mkdir dir="${testclasses.dir}/lib/ext" />
-
-    <pathconvert property="manifest.classpath" pathsep=" ">
-        <path refid="jar-classpath" />
-        <mapper>
-          <chainedmapper>
-            <flattenmapper />
-          </chainedmapper>
-        </mapper>
-    </pathconvert>
-
-    <jar destfile="${testclasses.dir}/lib/ext/test.modules.TestGermanViewMenu.jar"
-        basedir="${classes.dir}"
-        includes="test/modules/**"
-        excludes="Test*.java *.h5">
-
-        <manifest>
-          <attribute name="Main-Class" value="test.modules.TestGermanViewMenu" />
-        </manifest>
-    </jar>
-  </target>
 
   <target name="clean-junit-uitest">
     <delete>
