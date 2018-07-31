@@ -692,7 +692,7 @@
   <target name="createDocumentationTGZ" description="Compresses the application User's Guide project pointed to by userguide.dir into a .tar.gz file to be distributed">
     <mkdir dir="${build.dir}/docs" />
     <tar destfile="${build.dir}/docs/UserGuide.tar.gz" compression="gzip">
-      <tarfileset dir="${userguide.dir}" includes="hdf-java-html/** hdf-object/** hdfview/** JNI/** index.html" />
+      <tarfileset dir="${userguide.dir}" includes="images/** javadocs/** *.html RELEASE.txt" />
     </tar>
   </target>
 
