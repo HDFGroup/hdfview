@@ -1547,7 +1547,8 @@ public class HDFView implements DataViewManager {
             url_bar.select(0);
         }
 
-        ((DefaultTreeView) treeView).updateFont(font);
+        if (treeView instanceof DefaultTreeView)
+            ((DefaultTreeView) treeView).updateFont(font);
 
         mainWindow.layout();
     }
