@@ -1690,6 +1690,7 @@ public class HDFView implements DataViewManager {
             }
             else {
                 currentFile = filename;
+
                 try {
                     treeView.openFile(filename, accessMode);
                 }
@@ -1705,11 +1706,11 @@ public class HDFView implements DataViewManager {
                     }
                 }
             }
+
             try {
                 url_bar.remove(filename);
             }
-            catch (Exception ex) {
-            }
+            catch (Exception ex) {}
 
             url_bar.add(filename, 0);
             url_bar.select(0);
