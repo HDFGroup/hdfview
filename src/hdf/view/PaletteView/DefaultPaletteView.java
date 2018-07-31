@@ -57,8 +57,8 @@ import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.ImageView.ImageView;
 
 /**
@@ -108,7 +108,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         this(parent, null, theImageView);
     }
 
-    public DefaultPaletteView(Shell parent, ViewManager theViewer, ImageView theImageView) {
+    public DefaultPaletteView(Shell parent, DataViewManager theViewer, ImageView theImageView) {
         super(parent, SWT.APPLICATION_MODAL);
 
         try {

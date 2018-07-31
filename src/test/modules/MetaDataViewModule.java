@@ -12,22 +12,34 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view.TableView;
+package test.modules;
 
-import java.util.HashMap;
+import hdf.object.Attribute;
+import hdf.object.HObject;
+import hdf.view.MetaDataView.MetaDataView;
 
-import hdf.view.DataView.DataViewManager;
+public class MetaDataViewModule implements MetaDataView {
 
-public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
-
-    public DefaultScalarAttributeTableView(DataViewManager theView) {
-        this(theView, null);
+    public MetaDataViewModule() {
+        // TODO Auto-generated constructor stub
     }
 
-    @SuppressWarnings("rawtypes")
-    public DefaultScalarAttributeTableView(DataViewManager theView, HashMap dataPropertiesMap) {
-        super(theView, dataPropertiesMap);
+    @Override
+    public HObject getDataObject() {
+        // TODO Auto-generated method stub
+        return null;
     }
+
+    @Override
+    public Attribute addAttribute(HObject obj) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Attribute deleteAttribute(HObject obj) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

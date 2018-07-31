@@ -12,26 +12,30 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package test.modules;
 
-import hdf.object.HObject;
+import java.util.HashMap;
 
-/**
- * The data view interface for displaying data objects
+import hdf.view.DataView.DataViewManager;
+import hdf.view.TableView.TableView;
+import hdf.view.TableView.TableViewFactory;
+
+/*
+ * A simple Factory class which returns a concrete instance of an external
+ * TableView module.
  *
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
+ * This factory class is used to test HDFView's module loading and switching
+ * capabilities.
+ *
+ * @author jhenderson
+ * @version 1.0 7/30/2018
  */
-public abstract interface DataView {
-    /** The unknown view type */
-    public final static int DATAVIEW_UNKNOWN = -1;
+public class ModuleTableViewFactory extends TableViewFactory {
 
-    /** The table view type */
-    public final static int DATAVIEW_TABLE = 1;
+    @SuppressWarnings("rawtypes")
+    @Override
+    public TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
+        return new TableViewModule();
+    }
 
-    /** The image view type */
-    public final static int DATAVIEW_IMAGE = 2;
-
-    /** @return the data object displayed in this data viewer */
-    public abstract HObject getDataObject();
 }

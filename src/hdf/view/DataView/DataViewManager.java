@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view;
+package hdf.view.DataView;
 
 import hdf.object.HObject;
 import hdf.view.TreeView.TreeView;
@@ -24,7 +24,7 @@ import hdf.view.TreeView.TreeView;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface ViewManager {
+public abstract interface DataViewManager {
     /** Data content is displayed, add the dataview to the main windows
      * @param dataView
      *            the dataView whose presence in the main view is to be added.
