@@ -47,7 +47,7 @@ public class DefaultImageViewFactory extends ImageViewFactory {
          * class.
          */
         dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
-        if (dataViewName == null) {
+        if (dataViewName == null || dataViewName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
             dataViewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
         }
 

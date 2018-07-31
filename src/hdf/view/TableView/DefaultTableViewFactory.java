@@ -69,7 +69,7 @@ public class DefaultTableViewFactory extends TableViewFactory {
          * class.
          */
         dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
-        if (dataViewName == null) {
+        if (dataViewName == null || dataViewName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
             if (dataObject instanceof ScalarDS)
                 dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
             else if (dataObject instanceof CompoundDS)
