@@ -17,7 +17,6 @@ package hdf.view.TableView;
 import java.lang.reflect.Constructor;
 import java.util.BitSet;
 import java.util.HashMap;
-import java.util.List;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
@@ -51,46 +50,40 @@ public class DefaultTableViewFactory extends TableViewFactory {
 
         log.trace("getTableView(): start");
 
-        /*
-         * If the name of a specific TableView class to use has been passed in via the
-         * data options map, retrieve its name now, otherwise grab the
-         * "currently selected" TableView class from the ViewProperties-managed list.
-         */
-        dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
-        if (dataViewName == null) {
-            List<?> tableViewList = ViewProperties.getTableViewList();
-            if ((tableViewList == null) || (tableViewList.size() <= 0)) {
-                return null;
-            }
-
-            dataViewName = (String) tableViewList.get(0);
-        }
-
         /* Retrieve the data object to be displayed */
         if (dataPropertiesMap != null)
             dataObject = (HObject) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.OBJECT);
 
-        if (dataObject == null) dataObject = viewer.getTreeView().getCurrentObject();
+        if (dataObject == null)
+            dataObject = viewer.getTreeView().getCurrentObject();
 
-        if (dataObject == null) return null;
+        if (dataObject == null) {
+            log.debug("getTableView(): data object is null");
+            log.trace("getTableView(): finish");
+            return null;
+        }
 
         /*
-         * TODO: hard-coded until module loading is enabled in order to avoid class load failures for default classes
+         * If the name of a specific TableView class to use has been passed in via the
+         * data options map, retrieve its name now, otherwise use the default TableView
+         * class.
          */
-        if (dataObject instanceof ScalarDS)
-            dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
-        else if (dataObject instanceof CompoundDS)
-            dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
-        else if (dataObject instanceof Attribute) {
-            if (((Attribute) dataObject).getDatatype().isCompound())
-                dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
+        dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
+        if (dataViewName == null) {
+            if (dataObject instanceof ScalarDS)
+                dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+            else if (dataObject instanceof CompoundDS)
+                dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
+            else if (dataObject instanceof Attribute) {
+                if (((Attribute) dataObject).getDatatype().isCompound())
+                    dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
+                else
+                    dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
+            }
             else
-                dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
+                dataViewName = null;
         }
-        else
-            dataViewName = null;
 
-        /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
             log.trace("getTableView(): Class.forName({})", dataViewName);
@@ -99,44 +92,8 @@ public class DefaultTableViewFactory extends TableViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getTableView(): Class.forName({}) failure:", dataViewName, ex);
-
-            try {
-                log.trace("getTableView(): ViewProperties.loadExtClass().loadClass({})",
-                        dataViewName);
-
-                /* Attempt to load the class as an external module */
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                log.debug("getTableView(): ViewProperties.loadExtClass().loadClass({}) failure:",
-                        dataViewName, ex);
-
-                /* No loadable class found; use the default TableView */
-                if (dataObject instanceof ScalarDS)
-                    dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
-                else if (dataObject instanceof CompoundDS)
-                    dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
-                else if (dataObject instanceof Attribute) {
-                    if (((Attribute) dataObject).getDatatype().isCompound())
-                        dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
-                    else
-                        dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
-                }
-                else
-                    dataViewName = null;
-
-                try {
-                    log.trace("getTableView(): Class.forName({})", dataViewName);
-
-                    theClass = Class.forName(dataViewName);
-                }
-                catch (Exception ex3) {
-                    log.debug("getTableView(): Class.forName({}) failure:", dataViewName, ex);
-
-                    theClass = null;
-                }
-            }
+            log.debug("getTableView(): unable to load default TableView class by name({})", dataViewName);
+            theClass = null;
         }
 
         if (theClass == null) throw new ClassNotFoundException();

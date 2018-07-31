@@ -14,8 +14,6 @@
 
 package hdf.view.PaletteView;
 
-import java.util.List;
-
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.view.Tools;
@@ -36,21 +34,14 @@ public class DefaultPaletteViewFactory extends PaletteViewFactory {
 
     @Override
     public PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
-        String dataViewName = ViewProperties.getPaletteViewList().get(0);
+        String dataViewName = null;
         Object[] initargs;
         PaletteView theView = null;
 
         log.trace("getPaletteView(): start");
 
-        /* Retrieve the "currently selected" PaletteView class to use */
-        List<?> paletteViewList = ViewProperties.getPaletteViewList();
-        if ((paletteViewList == null) || (paletteViewList.size() <= 0)) {
-            return null;
-        }
+        dataViewName = ViewProperties.DEFAULT_PALETTEVIEW_NAME;
 
-        dataViewName = (String) paletteViewList.get(0);
-
-        /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
             log.trace("getPaletteView(): Class.forName({})", dataViewName);
@@ -59,45 +50,14 @@ public class DefaultPaletteViewFactory extends PaletteViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getPaletteView(): Class.forName({}) failure:", dataViewName, ex);
-
-            try {
-                log.trace("getPaletteView(): ViewProperties.loadExtClass().loadClass({})",
-                        dataViewName);
-
-                /* Attempt to load the class as an external module */
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                log.debug(
-                        "getPaletteView(): ViewProperties.loadExtClass().loadClass({}) failure:",
-                        dataViewName, ex);
-
-                /* No loadable class found; use the default PaletteView */
-                dataViewName = ViewProperties.DEFAULT_PALETTEVIEW_NAME;
-
-                try {
-                    log.trace("getPaletteView(): Class.forName({})", dataViewName);
-
-                    theClass = Class.forName(dataViewName);
-                }
-                catch (Exception ex3) {
-                    log.debug("getPaletteView(): Class.forName({}) failure:", dataViewName, ex);
-
-                    theClass = null;
-                }
-            }
+            log.debug("getPaletteView(): unable to load default PaletteView class by name({})", dataViewName);
+            theClass = null;
         }
 
         if (theClass == null) throw new ClassNotFoundException();
 
         try {
-            if (ViewProperties.DEFAULT_PALETTEVIEW_NAME.equals(dataViewName)) {
-                initargs = new Object[] { parent, viewer, theImageView };
-            }
-            else {
-                initargs = new Object[] { parent, theImageView };
-            }
+            initargs = new Object[] { parent, viewer, theImageView };
 
             theView = (PaletteView) Tools.newInstance(theClass, initargs);
 

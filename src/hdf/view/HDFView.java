@@ -1194,9 +1194,18 @@ public class HDFView implements DataViewManager {
 
         log.trace("createContentArea(): load TreeView");
 
-        DataViewFactory treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
+        DataViewFactory treeViewFactory = null;
+        try {
+            treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
+        }
+        catch (Exception ex) {
+            log.debug("createContentArea(): error occurred while instantiating TreeView factory class", ex);
+            this.showStatus("Error occurred while instantiating TreeView factory class - see log for more info");
+            return;
+        }
+
         if (treeViewFactory == null) {
-            log.debug("createContentArea(): TreeView Factory is null");
+            log.debug("createContentArea(): TreeView factory is null");
             return;
         }
 
@@ -1289,8 +1298,20 @@ public class HDFView implements DataViewManager {
 
         log.trace("showMetaData(): start");
 
-        DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
-        if (metaDataViewFactory == null) return;
+        DataViewFactory metaDataViewFactory = null;
+        try {
+            metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        }
+        catch (Exception ex) {
+            log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
+            this.showStatus("Error occurred while instantiating MetaDataView factory class - see log for more info");
+            return;
+        }
+
+        if (metaDataViewFactory == null) {
+            log.debug("showMetaData(): MetaDataView factory is null");
+            return;
+        }
 
         MetaDataView theView;
         try {
@@ -1307,23 +1328,6 @@ public class HDFView implements DataViewManager {
             this.showStatus("Unable to find suitable MetaDataView class");
             return;
         }
-
-        // String viewName = (String) HDFView.getListOfMetaDataViews().get(0);
-        //
-        // try {
-        // Class<?> theClass = Class.forName(viewName);
-        // if ("hdf.view.DefaultMetaDataView".equals(viewName)) {
-        // Object[] initargs = { generalArea, this, obj };
-        // Tools.newInstance(theClass, initargs);
-        // }
-        // else {
-        // Object[] initargs = { this, obj };
-        // Tools.newInstance(theClass, initargs);
-        // }
-        // }
-        // catch (Exception ex) {
-        // this.showStatus(ex.toString());
-        // }
 
         log.trace("showMetaData(): finish");
     }

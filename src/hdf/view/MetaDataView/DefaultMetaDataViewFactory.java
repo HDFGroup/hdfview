@@ -14,8 +14,6 @@
 
 package hdf.view.MetaDataView;
 
-import java.util.List;
-
 import org.eclipse.swt.widgets.Composite;
 
 import hdf.object.Dataset;
@@ -47,17 +45,6 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
 
         log.trace("getMetaDataView(): start");
 
-        /* Retrieve the "currently selected" MetaDataView class to use */
-        List<?> metaDataViewList = ViewProperties.getMetaDataViewList();
-        if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
-            return null;
-        }
-
-        dataViewName = (String) metaDataViewList.get(0);
-
-        /*
-         * TODO: hard-coded until module loading is enabled in order to avoid class load failures for default classes
-         */
         if (theObj instanceof Group)
             dataViewName = ViewProperties.DEFAULT_GROUP_METADATAVIEW_NAME;
         else if (theObj instanceof Dataset)
@@ -69,7 +56,6 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
         else
             dataViewName = null;
 
-        /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
             log.trace("getMetaDataView(): Class.forName({})", dataViewName);
@@ -78,44 +64,8 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getMetaDataView(): Class.forName({}) failure:", dataViewName, ex);
-
-            try {
-                log.trace("getMetaDataView(): ViewProperties.loadExtClass().loadClass({})",
-                        dataViewName);
-
-                /* Attempt to load the class as an external module */
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                log.debug(
-                        "getMetaDataView(): ViewProperties.loadExtClass().loadClass({}) failure:",
-                        dataViewName, ex);
-
-                /* No loadable class found; use the default MetaDataView */
-                if (theObj instanceof Group)
-                    dataViewName = ViewProperties.DEFAULT_GROUP_METADATAVIEW_NAME;
-                else if (theObj instanceof Dataset)
-                    dataViewName = ViewProperties.DEFAULT_DATASET_METADATAVIEW_NAME;
-                else if (theObj instanceof Datatype)
-                    dataViewName = ViewProperties.DEFAULT_DATATYPE_METADATAVIEW_NAME;
-                else if (theObj instanceof H5Link)
-                    dataViewName = ViewProperties.DEFAULT_LINK_METADATAVIEW_NAME;
-                else
-                    dataViewName = null;
-
-                try {
-                    log.trace("getMetaDataView(): Class.forName({})", dataViewName);
-
-                    theClass = Class.forName(dataViewName);
-                }
-                catch (Exception ex3) {
-                    log.debug("getMetaDataView(): Class.forName({}) failure:", dataViewName,
-                            ex);
-
-                    theClass = null;
-                }
-            }
+            log.debug("getMetaDataView(): unable to load default MetaDataView class by name({})", dataViewName);
+            theClass = null;
         }
 
         if (theClass == null) throw new ClassNotFoundException();

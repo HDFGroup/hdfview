@@ -16,7 +16,6 @@ package hdf.view.ImageView;
 
 import java.util.BitSet;
 import java.util.HashMap;
-import java.util.List;
 
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
@@ -44,20 +43,14 @@ public class DefaultImageViewFactory extends ImageViewFactory {
 
         /*
          * If the name of a specific ImageView class to use has been passed in via the
-         * data options map, retrieve its name now, otherwise grab the
-         * "currently selected" ImageView class from the ViewProperties-managed list.
+         * data options map, retrieve its name now, otherwise use the default ImageView
+         * class.
          */
         dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
         if (dataViewName == null) {
-            List<?> imageViewList = ViewProperties.getImageViewList();
-            if ((imageViewList == null) || (imageViewList.size() <= 0)) {
-                return null;
-            }
-
-            dataViewName = (String) imageViewList.get(0);
+            dataViewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
         }
 
-        /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
             log.trace("getImageView(): Class.forName({})", dataViewName);
@@ -66,33 +59,8 @@ public class DefaultImageViewFactory extends ImageViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getImageView(): Class.forName({}) failure:", dataViewName, ex);
-
-            try {
-                log.trace("getImageView(): ViewProperties.loadExtClass().loadClass({})",
-                        dataViewName);
-
-                /* Attempt to load the class as an external module */
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                log.debug("getImageView(): ViewProperties.loadExtClass().loadClass({}) failure:",
-                        dataViewName, ex);
-
-                /* No loadable class found; use the default ImageView */
-                dataViewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
-
-                try {
-                    log.trace("getImageView(): Class.forName({})", dataViewName);
-
-                    theClass = Class.forName(dataViewName);
-                }
-                catch (Exception ex3) {
-                    log.debug("getImageView(): Class.forName({}) failure:", dataViewName, ex);
-
-                    theClass = null;
-                }
-            }
+            log.debug("getImageView(): unable to load default ImageView class by name({})", dataViewName);
+            theClass = null;
         }
 
         if (theClass == null) throw new ClassNotFoundException();

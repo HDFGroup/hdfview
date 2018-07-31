@@ -102,11 +102,11 @@ import hdf.view.Chart;
 import hdf.view.DefaultFileFilter;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
+import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.ViewProperties.DataViewType;
 import hdf.view.DataView.DataViewFactory;
 import hdf.view.DataView.DataViewFactoryProducer;
 import hdf.view.DataView.DataViewManager;
-import hdf.view.ViewProperties.BITMASK_OP;
-import hdf.view.ViewProperties.DataViewType;
 import hdf.view.PaletteView.PaletteView;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.NewDatasetDialog;
@@ -1612,25 +1612,37 @@ public class DefaultImageView implements ImageView {
             return;
         }
 
-        DataViewFactory paletteViewFactory = DataViewFactoryProducer.getFactory(DataViewType.PALETTE);
-        if (paletteViewFactory != null) {
-            PaletteView theView;
-            try {
-                theView = paletteViewFactory.getPaletteView(shell, viewer, this);
+        DataViewFactory paletteViewFactory = null;
+        try {
+            paletteViewFactory = DataViewFactoryProducer.getFactory(DataViewType.PALETTE);
+        }
+        catch (Exception ex) {
+            log.debug("showColorTable(): error occurred while instantiating PaletteView factory class", ex);
+            viewer.showStatus("Error occurred while instantiating PaletteView factory class - see log for more info");
+            return;
+        }
 
-                if (theView == null) {
-                    log.debug("showColorTable(): error occurred while instantiating PaletteView class");
-                    viewer.showStatus("Error occurred while instantiating PaletteView class - see log for more info");
-                    Tools.showError(shell, "Show Palette", "Error occurred while instantiating PaletteView class - see log for more info");
-                    return;
-                }
-            }
-            catch (ClassNotFoundException ex) {
-                log.debug("showColorTable(): no suitable PaletteView class found");
-                viewer.showStatus("Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
-                Tools.showError(shell, "Show Palette", "Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
+        if (paletteViewFactory == null) {
+            log.debug("showColorTable(): PaletteView factory is null");
+            return;
+        }
+
+        PaletteView theView;
+        try {
+            theView = paletteViewFactory.getPaletteView(shell, viewer, this);
+
+            if (theView == null) {
+                log.debug("showColorTable(): error occurred while instantiating PaletteView class");
+                viewer.showStatus("Error occurred while instantiating PaletteView class - see log for more info");
+                Tools.showError(shell, "Show Palette", "Error occurred while instantiating PaletteView class - see log for more info");
                 return;
             }
+        }
+        catch (ClassNotFoundException ex) {
+            log.debug("showColorTable(): no suitable PaletteView class found");
+            viewer.showStatus("Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
+            Tools.showError(shell, "Show Palette", "Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
+            return;
         }
     }
 

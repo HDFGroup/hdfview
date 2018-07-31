@@ -14,8 +14,6 @@
 
 package hdf.view.TreeView;
 
-import java.util.List;
-
 import org.eclipse.swt.widgets.Composite;
 
 import hdf.view.Tools;
@@ -41,15 +39,8 @@ public class DefaultTreeViewFactory extends TreeViewFactory {
 
         log.trace("getTreeView(): start");
 
-        /* Retrieve the "currently selected" TreeView class to use */
-        List<?> treeViewList = ViewProperties.getTreeViewList();
-        if ((treeViewList == null) || (treeViewList.size() <= 0)) {
-            return null;
-        }
+        dataViewName = ViewProperties.DEFAULT_TREEVIEW_NAME;
 
-        dataViewName = (String) treeViewList.get(0);
-
-        /* Attempt to load the class by name */
         Class<?> theClass = null;
         try {
             log.trace("getTreeView(): Class.forName({})", dataViewName);
@@ -58,31 +49,8 @@ public class DefaultTreeViewFactory extends TreeViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getTreeView(): Class.forName({}) failure:", dataViewName, ex);
-
-            try {
-                log.trace("getTreeView(): ViewProperties.loadExtClass().loadClass({})", dataViewName);
-
-                /* Attempt to load the class as an external module */
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                log.debug("getTreeView(): ViewProperties.loadExtClass().loadClass({}) failure:", dataViewName, ex);
-
-                /* No loadable class found; use the default PaletteView */
-                dataViewName = ViewProperties.DEFAULT_TREEVIEW_NAME;
-
-                try {
-                    log.trace("getTreeView(): Class.forName({})", dataViewName);
-
-                    theClass = Class.forName(dataViewName);
-                }
-                catch (Exception ex3) {
-                    log.debug("getTreeView(): Class.forName({}) failure:", dataViewName, ex);
-
-                    theClass = null;
-                }
-            }
+            log.debug("getTreeView(): unable to load default TreeView class by name({})", dataViewName);
+            theClass = null;
         }
 
         if (theClass == null) throw new ClassNotFoundException();

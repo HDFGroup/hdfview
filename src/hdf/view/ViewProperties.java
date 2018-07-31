@@ -82,6 +82,9 @@ public class ViewProperties extends PreferenceStore {
      * The names of the various default classes for each HDFView module interface
      */
 
+    /** Text for default selection of modules */
+    public static final String DEFAULT_MODULE_TEXT = "Default";
+
     /** Default TreeView class names */
     public static final String DEFAULT_TREEVIEW_NAME = "hdf.view.TreeView.DefaultTreeView";
 
@@ -1121,18 +1124,19 @@ public class ViewProperties extends PreferenceStore {
         String propVal = null;
 
         // add default module.
-        log.trace("load user properties: add default module");
+        log.trace("load user properties: add default modules");
         String[] moduleKeys = { "module.treeview", "module.metadataview", "module.tableview",
                 "module.imageview", "module.paletteview" };
         Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
                 moduleListImageView, moduleListPaletteView };
-        String[] moduleNames = { DEFAULT_TREEVIEW_NAME, "hdf.view.DefaultMetaDataView", "hdf.view.DefaultTableView",
-                DEFAULT_IMAGEVIEW_NAME, DEFAULT_PALETTEVIEW_NAME };
+        String[] moduleNames = { DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT,
+                DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT };
 
         // add default implementation of modules
         log.trace("load user properties: modules");
         for (int i = 0; i < moduleNames.length; i++) {
-            if (!moduleList[i].contains(moduleNames[i])) moduleList[i].addElement(moduleNames[i]);
+            if (!moduleList[i].contains(moduleNames[i]))
+                moduleList[i].addElement(moduleNames[i]);
             log.trace("load: add default moduleList[{}] is {}", i, moduleNames[i]);
         }
         log.trace("load Ext Class modules");
@@ -1145,10 +1149,11 @@ public class ViewProperties extends PreferenceStore {
             propVal = getString(moduleKeys[i]);
             log.trace("load: default theList is {}", Arrays.toString(theList.toArray()));
 
-            if (propVal != null) {
+            if ((propVal != null) && (propVal.length() > 0)) {
                 // set default to the module specified in property file
                 if (theList.size() > 1) {
-                    if (theList.contains(propVal)) theList.remove(propVal);
+                    if (theList.contains(propVal))
+                        theList.remove(propVal);
                     theList.add(0, propVal);
                 }
                 log.trace("load user properties: module[{}]={}", i, propVal);
@@ -1156,24 +1161,13 @@ public class ViewProperties extends PreferenceStore {
             else {
                 // use default module
                 if (theList.size() > 1) {
-                    if (theList.contains(moduleNames[i])) theList.remove(moduleNames[i]);
+                    if (theList.contains(moduleNames[i]))
+                        theList.remove(moduleNames[i]);
                     theList.add(0, moduleNames[i]);
                 }
                 log.trace("load user properties: default module[{}]={}", i, moduleNames[i]);
             }
             log.trace("load: final theList is {}", Arrays.toString(theList.toArray()));
-        }
-
-        // set default modules from user property files
-        log.trace("load user properties: default modules");
-        for (int i = 0; i < moduleNames.length; i++) {
-            String moduleName = getString(moduleKeys[i]);
-            log.trace("load: default modules from user property is {}", moduleName);
-            if ((moduleName != null) && (moduleName.length() > 0)) {
-                if (moduleList[i].contains(moduleName))
-                    moduleList[i].remove(moduleName);
-                moduleList[i].add(0, moduleName);
-            }
         }
 
         // add fileformat modules

@@ -80,12 +80,12 @@ import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
+import hdf.view.ViewProperties.DATA_VIEW_KEY;
+import hdf.view.ViewProperties.DataViewType;
 import hdf.view.DataView.DataView;
 import hdf.view.DataView.DataViewFactory;
 import hdf.view.DataView.DataViewFactoryProducer;
 import hdf.view.DataView.DataViewManager;
-import hdf.view.ViewProperties.DATA_VIEW_KEY;
-import hdf.view.ViewProperties.DataViewType;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.dialog.DataOptionDialog;
 import hdf.view.dialog.InputDialog;
@@ -2738,48 +2738,68 @@ public class DefaultTreeView implements TreeView {
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
 
         if (isImage) {
-            DataViewFactory imageViewFactory = DataViewFactoryProducer.getFactory(DataViewType.IMAGE);
-            if (imageViewFactory != null) {
-                try {
-                    theView = imageViewFactory.getImageView(viewer, map);
+            DataViewFactory imageViewFactory = null;
+            try {
+                imageViewFactory = DataViewFactoryProducer.getFactory(DataViewType.IMAGE);
+            }
+            catch (Exception ex) {
+                log.debug("showDataContent(): error occurred while instantiating ImageView factory class", ex);
+                viewer.showStatus("Error occurred while instantiating ImageView factory class - see log for more info");
+                return null;
+            }
 
-                    if (theView == null) {
-                        log.debug("showDataContent(): error occurred while instantiating ImageView class");
-                        viewer.showStatus("Error occurred while instantiating ImageView class - see log for more info");
-                        Tools.showError(shell, "Show Data", "Error occurred while instantiating ImageView class - see log for more info");
-                    }
-                }
-                catch (ClassNotFoundException ex) {
-                    log.debug("showDataContent(): no suitable ImageView class found");
-                    viewer.showStatus("Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
-                    Tools.showError(shell, "Show Data", "Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
-                    theView = null;
+            if (imageViewFactory == null) {
+                log.debug("showDataContent(): ImageView factory is null");
+                return null;
+            }
+
+            try {
+                theView = imageViewFactory.getImageView(viewer, map);
+
+                if (theView == null) {
+                    log.debug("showDataContent(): error occurred while instantiating ImageView class");
+                    viewer.showStatus("Error occurred while instantiating ImageView class - see log for more info");
+                    Tools.showError(shell, "Show Data", "Error occurred while instantiating ImageView class - see log for more info");
                 }
             }
-            else
-                log.trace("showDataContent(): imageViewFactory is null");
+            catch (ClassNotFoundException ex) {
+                log.debug("showDataContent(): no suitable ImageView class found");
+                viewer.showStatus("Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
+                Tools.showError(shell, "Show Data", "Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
+                theView = null;
+            }
         }
         else {
-            DataViewFactory tableViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TABLE);
-            if (tableViewFactory != null) {
-                try {
-                    theView = tableViewFactory.getTableView(viewer, map);
+            DataViewFactory tableViewFactory = null;
+            try {
+                tableViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TABLE);
+            }
+            catch (Exception ex) {
+                log.debug("showDataContent(): error occurred while instantiating TableView factory class", ex);
+                viewer.showStatus("Error occurred while instantiating TableView factory class - see log for more info");
+                return null;
+            }
 
-                    if (theView == null) {
-                        log.debug("showDataContent(): error occurred while instantiating TableView class");
-                        viewer.showStatus("Error occurred while instantiating TableView class - see log for more info");
-                        Tools.showError(shell, "Show Data", "Error occurred while instantiating TableView class - see log for more info");
-                    }
-                }
-                catch (ClassNotFoundException ex) {
-                    log.debug("showDataContent(): no suitable TableView class found");
-                    viewer.showStatus("Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
-                    Tools.showError(shell, "Show Data", "Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
-                    theView = null;
+            if (tableViewFactory == null) {
+                log.debug("showDataContent(): TableView factory is null");
+                return null;
+            }
+
+            try {
+                theView = tableViewFactory.getTableView(viewer, map);
+
+                if (theView == null) {
+                    log.debug("showDataContent(): error occurred while instantiating TableView class");
+                    viewer.showStatus("Error occurred while instantiating TableView class - see log for more info");
+                    Tools.showError(shell, "Show Data", "Error occurred while instantiating TableView class - see log for more info");
                 }
             }
-            else
-                log.trace("showDataContent(): tableViewFactory is null");
+            catch (ClassNotFoundException ex) {
+                log.debug("showDataContent(): no suitable TableView class found");
+                viewer.showStatus("Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
+                Tools.showError(shell, "Show Data", "Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
+                theView = null;
+            }
         }
 
         if (!shell.isDisposed()) shell.setCursor(null);
@@ -2805,8 +2825,20 @@ public class DefaultTreeView implements TreeView {
 
         log.trace("showMetaData({}): start", dataObject.getName());
 
-        DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
-        if (metaDataViewFactory == null) return null;
+        DataViewFactory metaDataViewFactory = null;
+        try {
+            metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        }
+        catch (Exception ex) {
+            log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
+            viewer.showStatus("Error occurred while instantiating MetaDataView factory class - see log for more info");
+            return null;
+        }
+
+        if (metaDataViewFactory == null) {
+            log.debug("showMetaData(): MetaDataView factory is null");
+            return null;
+        }
 
         /* TODO: initargs needs access to MetaDataView parent composite */
         MetaDataView theView;
@@ -2824,38 +2856,6 @@ public class DefaultTreeView implements TreeView {
             viewer.showStatus("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
             return null;
         }
-
-
-        // List<?> metaDataViewList = HDFView.getListOfMetaDataViews();
-        // if ((metaDataViewList == null) || (metaDataViewList.size() <= 0)) {
-        // return null;
-        // }
-        //
-        // int n = metaDataViewList.size();
-        // String className = (String) metaDataViewList.get(0);
-        //
-        // if (!isDefaultDisplay && (n > 1)) {
-        // //className = (new InputDialog(shell, "HDFView", "Select
-        // MetaDataView")).open();
-        //
-        // //className = (String) JOptionPane.showInputDialog(this, "Select
-        // MetaDataView", "HDFView",
-        // // JOptionPane.INFORMATION_MESSAGE, null, metaDataViewList.toArray(),
-        // className);
-        // }
-
-        // Enables use of JHDF5 in JNLP (Web Start) applications, the system
-        // class loader with reflection first.
-        // Class<?> theClass = null;
-        // try {
-        // theClass = Class.forName(className);
-        // }
-        // catch (Exception ex) {
-        // theClass = ViewProperties.loadExtClass().loadClass(className);
-        // }
-
-        // Object[] initargs = { null, viewer, dataObject };
-        // MetaDataView dataView = (MetaDataView) Tools.newInstance(theClass, initargs);
 
         log.trace("showMetaData({}): finish", dataObject.getName());
 
