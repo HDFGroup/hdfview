@@ -31,6 +31,11 @@ import org.eclipse.swt.graphics.Image;
 
 import hdf.HDFVersions;
 import hdf.object.FileFormat;
+import hdf.view.ImageView.ImageViewFactory;
+import hdf.view.MetaDataView.MetaDataViewFactory;
+import hdf.view.PaletteView.PaletteViewFactory;
+import hdf.view.TableView.TableViewFactory;
+import hdf.view.TreeView.TreeViewFactory;
 
 public class ViewProperties extends PreferenceStore {
     private static final long   serialVersionUID     = -6411465283887959066L;
@@ -76,6 +81,9 @@ public class ViewProperties extends PreferenceStore {
     /**
      * The names of the various default classes for each HDFView module interface
      */
+
+    /** Text for default selection of modules */
+    public static final String DEFAULT_MODULE_TEXT = "Default";
 
     /** Default TreeView class names */
     public static final String DEFAULT_TREEVIEW_NAME = "hdf.view.TreeView.DefaultTreeView";
@@ -424,44 +432,31 @@ public class ViewProperties extends PreferenceStore {
                 }
 
                 if(theClass != null) {
-                    Class<?>[] interfaces = theClass.getInterfaces();
-                    if (interfaces != null) {
-                        for (int j = 0; j < interfaces.length; j++) {
-                            String interfaceName = interfaces[j].getName();
-                            log.trace("loadExtClass: load interfaces[{}] is {}", j, interfaceName);
-
-                            if ("hdf.view.TreeView.TreeView".equals(interfaceName)
-                                    && !moduleListTreeView.contains(theName)) {
-                                moduleListTreeView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.MetaDataView.MetaDataView".equals(interfaceName)
-                                    && !moduleListMetaDataView.contains(theName)) {
-                                moduleListMetaDataView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.TableView.TableView".equals(interfaceName)
-                                    && !moduleListTableView.contains(theName)) {
-                                moduleListTableView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.ImageView.ImageView".equals(interfaceName)
-                                    && !moduleListImageView.contains(theName)) {
-                                moduleListImageView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.PaletteView.PaletteView".equals(interfaceName)
-                                    && !moduleListPaletteView.contains(theName)) {
-                                moduleListPaletteView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.HelpView.HelpView".equals(interfaceName)
-                                    && !moduleListHelpView.contains(theName)) {
-                                moduleListHelpView.add(theName);
-                                break;
-                            }
-                        } // for (int j=0; j<interfaces.length; j++) {
-                    } // if (interfaces != null) {
+                    if (TableViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListTableView.contains(theName))
+                            moduleListTableView.add(theName);
+                        log.trace("loadExtClass: TableViewFactory class {}", theName);
+                    }
+                    else if (MetaDataViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListMetaDataView.contains(theName))
+                            moduleListMetaDataView.add(theName);
+                        log.trace("loadExtClass: MetaDataViewFactory class {}", theName);
+                    }
+                    else if (ImageViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListImageView.contains(theName))
+                            moduleListImageView.add(theName);
+                        log.trace("loadExtClass: ImageViewFactory class {}", theName);
+                    }
+                    else if (TreeViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListTreeView.contains(theName))
+                            moduleListTreeView.add(theName);
+                        log.trace("loadExtClass: TreeViewFactory class {}", theName);
+                    }
+                    else if (PaletteViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListPaletteView.contains(theName))
+                            moduleListPaletteView.add(theName);
+                        log.trace("loadExtClass: PaletteViewFactory class {}", theName);
+                    }
                 }
             }
             catch (Exception ex) {
@@ -1129,18 +1124,19 @@ public class ViewProperties extends PreferenceStore {
         String propVal = null;
 
         // add default module.
-        log.trace("load user properties: add default module");
+        log.trace("load user properties: add default modules");
         String[] moduleKeys = { "module.treeview", "module.metadataview", "module.tableview",
                 "module.imageview", "module.paletteview" };
         Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
                 moduleListImageView, moduleListPaletteView };
-        String[] moduleNames = { DEFAULT_TREEVIEW_NAME, "hdf.view.DefaultMetaDataView", "hdf.view.DefaultTableView",
-                DEFAULT_IMAGEVIEW_NAME, DEFAULT_PALETTEVIEW_NAME };
+        String[] moduleNames = { DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT,
+                DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT };
 
         // add default implementation of modules
         log.trace("load user properties: modules");
         for (int i = 0; i < moduleNames.length; i++) {
-            if (!moduleList[i].contains(moduleNames[i])) moduleList[i].addElement(moduleNames[i]);
+            if (!moduleList[i].contains(moduleNames[i]))
+                moduleList[i].addElement(moduleNames[i]);
             log.trace("load: add default moduleList[{}] is {}", i, moduleNames[i]);
         }
         log.trace("load Ext Class modules");
@@ -1153,10 +1149,11 @@ public class ViewProperties extends PreferenceStore {
             propVal = getString(moduleKeys[i]);
             log.trace("load: default theList is {}", Arrays.toString(theList.toArray()));
 
-            if (propVal != null) {
+            if ((propVal != null) && (propVal.length() > 0)) {
                 // set default to the module specified in property file
                 if (theList.size() > 1) {
-                    if (theList.contains(propVal)) theList.remove(propVal);
+                    if (theList.contains(propVal))
+                        theList.remove(propVal);
                     theList.add(0, propVal);
                 }
                 log.trace("load user properties: module[{}]={}", i, propVal);
@@ -1164,24 +1161,13 @@ public class ViewProperties extends PreferenceStore {
             else {
                 // use default module
                 if (theList.size() > 1) {
-                    if (theList.contains(moduleNames[i])) theList.remove(moduleNames[i]);
+                    if (theList.contains(moduleNames[i]))
+                        theList.remove(moduleNames[i]);
                     theList.add(0, moduleNames[i]);
                 }
                 log.trace("load user properties: default module[{}]={}", i, moduleNames[i]);
             }
             log.trace("load: final theList is {}", Arrays.toString(theList.toArray()));
-        }
-
-        // set default modules from user property files
-        log.trace("load user properties: default modules");
-        for (int i = 0; i < moduleNames.length; i++) {
-            String moduleName = getString(moduleKeys[i]);
-            log.trace("load: default modules from user property is {}", moduleName);
-            if ((moduleName != null) && (moduleName.length() > 0)) {
-                if (moduleList[i].contains(moduleName))
-                    moduleList[i].remove(moduleName);
-                moduleList[i].add(0, moduleName);
-            }
         }
 
         // add fileformat modules

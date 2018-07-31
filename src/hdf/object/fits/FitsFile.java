@@ -19,10 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -115,12 +111,6 @@ public class FitsFile extends FileFormat
         }
 
         if (raf == null) {
-            try {
-                raf.close();
-            }
-            catch (Exception ex) {
-                log.debug("closing RandomAccessFile({}):", filename, ex);
-            }
             return false;
         }
 
@@ -367,14 +357,12 @@ public class FitsFile extends FileFormat
      * @return the treeNode containing the new copy of the dataset.
      */
 
-    private void copyDataset(Dataset srcDataset, FitsGroup pgroup)
-         throws Exception {
+    private void copyDataset(Dataset srcDataset, FitsGroup pgroup) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
-    private void copyGroup(FitsGroup srcGroup, FitsGroup pgroup)
-         throws Exception {
+    private void copyGroup(FitsGroup srcGroup, FitsGroup pgroup) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }

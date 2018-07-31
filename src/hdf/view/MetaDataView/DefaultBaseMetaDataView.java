@@ -62,8 +62,8 @@ import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 import hdf.view.DefaultFileFilter;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.TreeView.DefaultTreeView;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
@@ -89,7 +89,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     protected final Display               display = Display.getDefault();
 
-    protected final ViewManager           viewManager;
+    protected final DataViewManager       viewManager;
 
     private final Composite               parent;
 
@@ -120,7 +120,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     private final static int              attrTabIndex = 0;
     private final static int              generalTabIndex = 1;
 
-    public DefaultBaseMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
+    public DefaultBaseMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         log.trace("start");
 
         this.parent = parentComposite;

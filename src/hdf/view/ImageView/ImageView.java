@@ -17,7 +17,7 @@ package hdf.view.ImageView;
 import java.awt.Image;
 import java.awt.Rectangle;
 
-import hdf.view.DataView;
+import hdf.view.DataView.DataView;
 
 /**
  * The image view interface for displaying image object

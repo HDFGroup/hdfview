@@ -12,22 +12,30 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view.TableView;
+package test.modules;
 
-import java.util.HashMap;
+import org.eclipse.swt.widgets.Shell;
 
 import hdf.view.DataView.DataViewManager;
+import hdf.view.ImageView.ImageView;
+import hdf.view.PaletteView.PaletteView;
+import hdf.view.PaletteView.PaletteViewFactory;
 
-public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
+/*
+ * A simple Factory class which returns a concrete instance of an external
+ * PaletteView module.
+ *
+ * This factory class is used to test HDFView's module loading and switching
+ * capabilities.
+ *
+ * @author jhenderson
+ * @version 1.0 7/30/2018
+ */
+public class ModulePaletteViewFactory extends PaletteViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
-
-    public DefaultScalarAttributeTableView(DataViewManager theView) {
-        this(theView, null);
+    @Override
+    public PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
+        return new PaletteViewModule();
     }
 
-    @SuppressWarnings("rawtypes")
-    public DefaultScalarAttributeTableView(DataViewManager theView, HashMap dataPropertiesMap) {
-        super(theView, dataPropertiesMap);
-    }
 }
