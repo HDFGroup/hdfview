@@ -31,6 +31,11 @@ import org.eclipse.swt.graphics.Image;
 
 import hdf.HDFVersions;
 import hdf.object.FileFormat;
+import hdf.view.ImageView.ImageViewFactory;
+import hdf.view.MetaDataView.MetaDataViewFactory;
+import hdf.view.PaletteView.PaletteViewFactory;
+import hdf.view.TableView.TableViewFactory;
+import hdf.view.TreeView.TreeViewFactory;
 
 public class ViewProperties extends PreferenceStore {
     private static final long   serialVersionUID     = -6411465283887959066L;
@@ -424,44 +429,31 @@ public class ViewProperties extends PreferenceStore {
                 }
 
                 if(theClass != null) {
-                    Class<?>[] interfaces = theClass.getInterfaces();
-                    if (interfaces != null) {
-                        for (int j = 0; j < interfaces.length; j++) {
-                            String interfaceName = interfaces[j].getName();
-                            log.trace("loadExtClass: load interfaces[{}] is {}", j, interfaceName);
-
-                            if ("hdf.view.TreeView.TreeView".equals(interfaceName)
-                                    && !moduleListTreeView.contains(theName)) {
-                                moduleListTreeView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.MetaDataView.MetaDataView".equals(interfaceName)
-                                    && !moduleListMetaDataView.contains(theName)) {
-                                moduleListMetaDataView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.TableView.TableView".equals(interfaceName)
-                                    && !moduleListTableView.contains(theName)) {
-                                moduleListTableView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.ImageView.ImageView".equals(interfaceName)
-                                    && !moduleListImageView.contains(theName)) {
-                                moduleListImageView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.PaletteView.PaletteView".equals(interfaceName)
-                                    && !moduleListPaletteView.contains(theName)) {
-                                moduleListPaletteView.add(theName);
-                                break;
-                            }
-                            else if ("hdf.view.HelpView.HelpView".equals(interfaceName)
-                                    && !moduleListHelpView.contains(theName)) {
-                                moduleListHelpView.add(theName);
-                                break;
-                            }
-                        } // for (int j=0; j<interfaces.length; j++) {
-                    } // if (interfaces != null) {
+                    if (TableViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListTableView.contains(theName))
+                            moduleListTableView.add(theName);
+                        log.trace("loadExtClass: TableViewFactory class {}", theName);
+                    }
+                    else if (MetaDataViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListMetaDataView.contains(theName))
+                            moduleListMetaDataView.add(theName);
+                        log.trace("loadExtClass: MetaDataViewFactory class {}", theName);
+                    }
+                    else if (ImageViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListImageView.contains(theName))
+                            moduleListImageView.add(theName);
+                        log.trace("loadExtClass: ImageViewFactory class {}", theName);
+                    }
+                    else if (TreeViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListTreeView.contains(theName))
+                            moduleListTreeView.add(theName);
+                        log.trace("loadExtClass: TreeViewFactory class {}", theName);
+                    }
+                    else if (PaletteViewFactory.class.isAssignableFrom(theClass)) {
+                        if (!moduleListPaletteView.contains(theName))
+                            moduleListPaletteView.add(theName);
+                        log.trace("loadExtClass: PaletteViewFactory class {}", theName);
+                    }
                 }
             }
             catch (Exception ex) {
