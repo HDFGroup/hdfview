@@ -72,6 +72,10 @@ import hdf.HDFVersions;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.view.ViewProperties.DataViewType;
+import hdf.view.DataView.DataView;
+import hdf.view.DataView.DataViewFactory;
+import hdf.view.DataView.DataViewFactoryProducer;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.HelpView.HelpView;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.TableView.TableView;
@@ -83,6 +87,7 @@ import hdf.view.dialog.UserOptionsDialog;
 import hdf.view.dialog.UserOptionsGeneralPage;
 import hdf.view.dialog.UserOptionsHDFPage;
 import hdf.view.dialog.UserOptionsNode;
+import hdf.view.dialog.UserOptionsViewModulesPage;
 
 
 /**
@@ -99,7 +104,7 @@ import hdf.view.dialog.UserOptionsNode;
  * @author Jordan T. Henderson
  * @version 2.4 //2015
  */
-public class HDFView implements ViewManager {
+public class HDFView implements DataViewManager {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 
@@ -797,22 +802,12 @@ public class HDFView implements ViewManager {
                 // Create the nodes
                 UserOptionsNode one = new UserOptionsNode("general", new UserOptionsGeneralPage());
                 UserOptionsNode two = new UserOptionsNode("hdf", new UserOptionsHDFPage());
-
-                /*
-                 * TODO: Disabled until module loading is supported
-                 */
-                /*
-                 * UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
-                 */
+                UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
 
                 // Add the nodes
                 mgr.addToRoot(one);
                 mgr.addToRoot(two);
-
-                /*
-                 * TODO: Disabled until module loading is supported
-                 */
-                /* mgr.addToRoot(three); */
+                mgr.addToRoot(three);
 
                 // Create the preferences dialog
                 userOptionDialog = new UserOptionsDialog(shell, mgr, rootDir);
@@ -1199,9 +1194,18 @@ public class HDFView implements ViewManager {
 
         log.trace("createContentArea(): load TreeView");
 
-        DataViewFactory treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
+        DataViewFactory treeViewFactory = null;
+        try {
+            treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
+        }
+        catch (Exception ex) {
+            log.debug("createContentArea(): error occurred while instantiating TreeView factory class", ex);
+            this.showStatus("Error occurred while instantiating TreeView factory class - see log for more info");
+            return;
+        }
+
         if (treeViewFactory == null) {
-            log.debug("createContentArea(): TreeView Factory is null");
+            log.debug("createContentArea(): TreeView factory is null");
             return;
         }
 
@@ -1294,8 +1298,20 @@ public class HDFView implements ViewManager {
 
         log.trace("showMetaData(): start");
 
-        DataViewFactory metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
-        if (metaDataViewFactory == null) return;
+        DataViewFactory metaDataViewFactory = null;
+        try {
+            metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        }
+        catch (Exception ex) {
+            log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
+            this.showStatus("Error occurred while instantiating MetaDataView factory class - see log for more info");
+            return;
+        }
+
+        if (metaDataViewFactory == null) {
+            log.debug("showMetaData(): MetaDataView factory is null");
+            return;
+        }
 
         MetaDataView theView;
         try {
@@ -1312,23 +1328,6 @@ public class HDFView implements ViewManager {
             this.showStatus("Unable to find suitable MetaDataView class");
             return;
         }
-
-        // String viewName = (String) HDFView.getListOfMetaDataViews().get(0);
-        //
-        // try {
-        // Class<?> theClass = Class.forName(viewName);
-        // if ("hdf.view.DefaultMetaDataView".equals(viewName)) {
-        // Object[] initargs = { generalArea, this, obj };
-        // Tools.newInstance(theClass, initargs);
-        // }
-        // else {
-        // Object[] initargs = { this, obj };
-        // Tools.newInstance(theClass, initargs);
-        // }
-        // }
-        // catch (Exception ex) {
-        // this.showStatus(ex.toString());
-        // }
 
         log.trace("showMetaData(): finish");
     }
@@ -1548,7 +1547,8 @@ public class HDFView implements ViewManager {
             url_bar.select(0);
         }
 
-        ((DefaultTreeView) treeView).updateFont(font);
+        if (treeView instanceof DefaultTreeView)
+            ((DefaultTreeView) treeView).updateFont(font);
 
         mainWindow.layout();
     }

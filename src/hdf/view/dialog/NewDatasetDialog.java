@@ -49,9 +49,9 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
-import hdf.view.DataView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataView;
 import hdf.view.ImageView.ImageView;
 import hdf.view.TableView.TableView;
 

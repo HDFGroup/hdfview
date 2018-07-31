@@ -22,13 +22,13 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.object.Datatype;
 import hdf.object.HObject;
-import hdf.view.ViewManager;
+import hdf.view.DataView.DataViewManager;
 
 public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatatypeMetaDataView.class);
 
-    public DefaultDatatypeMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
+    public DefaultDatatypeMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }
 

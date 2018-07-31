@@ -14,139 +14,48 @@
 
 package hdf.view.ImageView;
 
-import java.util.BitSet;
 import java.util.HashMap;
-import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import hdf.object.HObject;
-import hdf.view.DataViewFactory;
-import hdf.view.Tools;
-import hdf.view.ViewManager;
-import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewFactory;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.PaletteView.PaletteView;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.TreeView;
 
-/**
- * A Factory class to return instances of classes implementing the ImageView
- * interface, depending on the "currently selected" ImageView class in the list
- * maintained by the ViewProperties class.
+/*
+ * This class extends DataViewFactory so that at runtime it can be determined
+ * if a specific DataViewFactory class is an ImageViewFactory and can thus
+ * be used appropriately where an ImageView is needed.
  *
  * @author jhenderson
- * @version 1.0 4/18/2018
+ * @version 1.0 7/30/3018
  */
-public class ImageViewFactory extends DataViewFactory {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImageViewFactory.class);
+public abstract class ImageViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public TableView getTableView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
-        return null;
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Override
-    public ImageView getImageView(ViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
-        String dataViewName = null;
-        Object[] initargs = { viewer, dataPropertiesMap };
-        ImageView theView = null;
-
-        log.trace("getImageView(): start");
-
-        /*
-         * If the name of a specific ImageView class to use has been passed in via the
-         * data options map, retrieve its name now, otherwise grab the
-         * "currently selected" ImageView class from the ViewProperties-managed list.
-         */
-        dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
-        if (dataViewName == null) {
-            List<?> imageViewList = ViewProperties.getImageViewList();
-            if ((imageViewList == null) || (imageViewList.size() <= 0)) {
-                return null;
-            }
-
-            dataViewName = (String) imageViewList.get(0);
-        }
-
-        /* Attempt to load the class by name */
-        Class<?> theClass = null;
-        try {
-            log.trace("getImageView(): Class.forName({})", dataViewName);
-
-            /* Attempt to load the class by the given name */
-            theClass = Class.forName(dataViewName);
-        }
-        catch (Exception ex) {
-            log.debug("getImageView(): Class.forName({}) failure:", dataViewName, ex);
-
-            try {
-                log.trace("getImageView(): ViewProperties.loadExtClass().loadClass({})",
-                        dataViewName);
-
-                /* Attempt to load the class as an external module */
-                theClass = ViewProperties.loadExtClass().loadClass(dataViewName);
-            }
-            catch (Exception ex2) {
-                log.debug("getImageView(): ViewProperties.loadExtClass().loadClass({}) failure:",
-                        dataViewName, ex);
-
-                /* No loadable class found; use the default ImageView */
-                dataViewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
-
-                try {
-                    log.trace("getImageView(): Class.forName({})", dataViewName);
-
-                    theClass = Class.forName(dataViewName);
-                }
-                catch (Exception ex3) {
-                    log.debug("getImageView(): Class.forName({}) failure:", dataViewName, ex);
-
-                    theClass = null;
-                }
-            }
-        }
-
-        if (theClass == null) throw new ClassNotFoundException();
-
-        /* Add some data display properties if using the default ImageView */
-        if (dataViewName.startsWith(ViewProperties.DEFAULT_IMAGEVIEW_NAME)) {
-            BitSet bitmask = (BitSet) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
-            dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, Boolean.valueOf((bitmask != null)));
-        }
-
-        try {
-            theView = (ImageView) Tools.newInstance(theClass, initargs);
-
-            log.trace("getImageView(): returning ImageView instance {}", theView);
-        }
-        catch (Exception ex) {
-            log.debug("getImageView(): Error instantiating class:", ex);
-            theView = null;
-        }
-
-        log.trace("getImageView(): finish");
-
-        return theView;
+    public final TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException, UnsupportedOperationException {
+        throw new UnsupportedOperationException("ImageViewFactory does not implement getTableView()");
     }
 
     @Override
-    public PaletteView getPaletteView(Shell parent, ViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
-        return null;
+    public final PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException, UnsupportedOperationException {
+        throw new UnsupportedOperationException("ImageViewFactory does not implement getPaletteView()");
     }
 
     @Override
-    public MetaDataView getMetaDataView(Composite parentObj, ViewManager viewer, HObject theObj) throws ClassNotFoundException {
-        return null;
+    public final MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException, UnsupportedOperationException {
+        throw new UnsupportedOperationException("ImageViewFactory does not implement getMetaDataView()");
     }
 
     @Override
-    public TreeView getTreeView(Composite parent, ViewManager viewer) throws ClassNotFoundException {
-        return null;
+    public final TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException, UnsupportedOperationException {
+        throw new UnsupportedOperationException("ImageViewFactory does not implement getTreeView()");
     }
 
 }
