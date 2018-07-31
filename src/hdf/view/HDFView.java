@@ -1695,7 +1695,7 @@ public class HDFView implements DataViewManager {
                 }
                 catch (Throwable ex) {
                     try {
-                        treeView.openFile(filename, accessMode);
+                        treeView.openFile(filename, FileFormat.READ);
                     }
                     catch (Throwable ex2) {
                         display.beep();
