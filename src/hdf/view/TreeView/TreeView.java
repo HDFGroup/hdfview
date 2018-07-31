@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.view.DataView;
+import hdf.view.DataView.DataView;
 import hdf.view.MetaDataView.MetaDataView;
 
 /**

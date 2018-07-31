@@ -29,7 +29,8 @@ import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
 /**
- * UserOptionsGeneralPage.java - Configuration page for general application settings.
+ * UserOptionsHDFPage.java - Configuration page for HDF-specific application
+ * settings.
  */
 public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsHDFPage.class);

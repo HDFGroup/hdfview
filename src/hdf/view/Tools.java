@@ -1071,7 +1071,7 @@ public final class Tools {
         Object instance = null;
 
         if ((initargs == null) || (initargs.length == 0)) {
-            instance = cls.newInstance();
+            instance = cls.getDeclaredConstructor().newInstance();
         }
         else {
             Constructor<?>[] constructors = cls.getConstructors();

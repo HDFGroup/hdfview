@@ -56,8 +56,8 @@ import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewManager;
 
 public class DefaultCompoundDSTableView extends DefaultBaseTableView implements TableView {
 
@@ -69,7 +69,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * @param theView
      *            the main HDFView.
      */
-    public DefaultCompoundDSTableView(ViewManager theView) {
+    public DefaultCompoundDSTableView(DataViewManager theView) {
         this(theView, null);
     }
 
@@ -87,7 +87,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      *            ViewProperties.DATA_VIEW_KEY.
      */
     @SuppressWarnings("rawtypes")
-    public DefaultCompoundDSTableView(ViewManager theView, HashMap dataPropertiesMap) {
+    public DefaultCompoundDSTableView(DataViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
 
         log.trace("DefaultCompoundDSTableView: start");

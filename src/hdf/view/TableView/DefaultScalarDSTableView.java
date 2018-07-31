@@ -66,8 +66,8 @@ import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
 import hdf.view.HDFView;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
 import hdf.view.ViewProperties;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.dialog.InputDialog;
 
 public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView {
@@ -80,7 +80,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * @param theView
      *            the main HDFView.
      */
-    public DefaultScalarDSTableView(ViewManager theView) {
+    public DefaultScalarDSTableView(DataViewManager theView) {
         this(theView, null);
     }
 
@@ -98,7 +98,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      *            ViewProperties.DATA_VIEW_KEY.
      */
     @SuppressWarnings("rawtypes")
-    public DefaultScalarDSTableView(ViewManager theView, HashMap dataPropertiesMap) {
+    public DefaultScalarDSTableView(DataViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
 
         log.trace("DefaultScalarDSTableView: start");

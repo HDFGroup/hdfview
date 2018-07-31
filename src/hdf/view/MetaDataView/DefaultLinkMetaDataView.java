@@ -30,13 +30,13 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Link;
 import hdf.view.Tools;
-import hdf.view.ViewManager;
+import hdf.view.DataView.DataViewManager;
 
 public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
 
-    public DefaultLinkMetaDataView(Composite parentComposite, ViewManager viewer, HObject theObj) {
+    public DefaultLinkMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }
 

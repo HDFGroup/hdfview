@@ -12,22 +12,51 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view.TableView;
+package test.modules;
 
-import java.util.HashMap;
+import hdf.object.HObject;
+import hdf.view.TableView.TableView;
 
-import hdf.view.DataView.DataViewManager;
+public class TableViewModule implements TableView {
 
-public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
-
-    public DefaultScalarAttributeTableView(DataViewManager theView) {
-        this(theView, null);
+    public TableViewModule() {
+        // TODO Auto-generated constructor stub
     }
 
-    @SuppressWarnings("rawtypes")
-    public DefaultScalarAttributeTableView(DataViewManager theView, HashMap dataPropertiesMap) {
-        super(theView, dataPropertiesMap);
+    @Override
+    public HObject getDataObject() {
+        // TODO Auto-generated method stub
+        return null;
     }
+
+    @Override
+    public Object getTable() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object getSelectedData() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public int getSelectedColumnCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getSelectedRowCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public void updateValueInFile() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

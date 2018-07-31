@@ -14,7 +14,7 @@
 
 package hdf.view.TableView;
 
-import hdf.view.DataView;
+import hdf.view.DataView.DataView;
 
 /**
  *

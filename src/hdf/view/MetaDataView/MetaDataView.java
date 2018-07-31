@@ -16,7 +16,7 @@ package hdf.view.MetaDataView;
 
 import hdf.object.Attribute;
 import hdf.object.HObject;
-import hdf.view.DataView;
+import hdf.view.DataView.DataView;
 
 /**
  *

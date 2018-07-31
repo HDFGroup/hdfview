@@ -12,22 +12,30 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view.TableView;
+package test.modules;
 
 import java.util.HashMap;
 
 import hdf.view.DataView.DataViewManager;
+import hdf.view.ImageView.ImageView;
+import hdf.view.ImageView.ImageViewFactory;
 
-public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
-
-    public DefaultScalarAttributeTableView(DataViewManager theView) {
-        this(theView, null);
-    }
+/*
+ * A simple Factory class which returns a concrete instance of an external
+ * ImageView module.
+ *
+ * This factory class is used to test HDFView's module loading and switching
+ * capabilities.
+ *
+ * @author jhenderson
+ * @version 1.0 7/30/2018
+ */
+public class ModuleImageViewFactory extends ImageViewFactory {
 
     @SuppressWarnings("rawtypes")
-    public DefaultScalarAttributeTableView(DataViewManager theView, HashMap dataPropertiesMap) {
-        super(theView, dataPropertiesMap);
+    @Override
+    public ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
+        return new ImageViewModule();
     }
+
 }
