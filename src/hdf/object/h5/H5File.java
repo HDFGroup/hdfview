@@ -2969,7 +2969,7 @@ public class H5File extends FileFormat {
      *
      * @return The name of the target object.
      *
-     * @throws HDF5Exception
+     * @throws Exception
      *             If there is an error at the HDF5 library level.
      */
     public static String getLinkTargetName(HObject obj) throws Exception {
