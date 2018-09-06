@@ -798,7 +798,6 @@ public class H5CompoundDS extends CompoundDS {
                                 log.trace("read(): Member[{}]: H5Dread did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
                                 H5.H5Dread(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, member_data);
                             }
-                            log.trace("read(): member_data=***{}***", member_data);
                         }
                         catch (HDF5DataFiltersException exfltr) {
                             log.debug("read(): {} Member[{}] read failure:", member_name, i, exfltr);
