@@ -714,6 +714,7 @@
     <!-- Windows-specific README.txt replacements -->
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
     <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi       - ${ant.project.name} Installer" />
+    <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="This can be modified by changing JAVABIN in ${ant.project.name}${file.separator}${app.version}.0${file.separator}hdfview.bat" />
     <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.bat" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
@@ -725,6 +726,7 @@
     <!-- Unix-specific README.txt replacements -->
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
     <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh - ${ant.project.name} Installer" />
+    <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="This can be modified by changing JAVABIN in ${ant.project.name}${file.separator}${app.version}.0${file.separator}hdfview.sh" />
     <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.sh" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}.0-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
@@ -735,6 +737,12 @@
   <target name="createMacREADME" depends="createREADME">
     <!-- Mac-specific README.txt replacements -->
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${mac.uname}" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.dmg - ${ant.project.name} Installer" />
+    <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}:" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.dmg" />
+    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="" />
   </target>
 
   <target name="deploy" depends="deployWindows, deployUnix, deployMac"
@@ -1005,6 +1013,14 @@
       <arg value="install" />
       <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
+
+    <!-- Compress everything into one tar.gz file -->
+    <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${mac.uname}.tar.gz"
+      compression="gzip">
+      <tarfileset dir="${dist.dir}" filemode="777">
+        <exclude name="temp.tar.gz" />
+      </tarfileset>
+    </tar>
   </target>
 
   <target name="packageSource" depends="packageSourceWindows, packageSourceUnix"
