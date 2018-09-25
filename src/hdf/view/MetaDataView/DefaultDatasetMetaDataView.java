@@ -315,7 +315,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
 
             if (n > 0) {
                 String rowData[][] = new String[n][3];
-                String names[] = compound.getMemberNames();
+                final String names[] = compound.getMemberNames();
                 Datatype types[] = compound.getMemberTypes();
                 int orders[] = compound.getMemberOrders();
 

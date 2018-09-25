@@ -276,6 +276,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         return selectedData;
     }
 
+
     @Override
     protected void showObjRefData(long ref) {
         // Currently no support for showing Obj. Ref. Data in Compound Datasets
@@ -1016,7 +1017,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             Datatype[] types = dataFormat.getSelectedMemberTypes();
             groupSize = dataFormat.getSelectedMemberCount();
             ncols = groupSize * datasetWidth;
-            String[] datasetMemberNames = dataFormat.getMemberNames();
+            final String[] datasetMemberNames = dataFormat.getMemberNames();
             columnNames = new String[groupSize];
             log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
 
