@@ -1089,7 +1089,7 @@ public class DataOptionDialog extends Dialog {
                             if(n > 1) {
                                 Tools.showError(shell, "Select",
                                         "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
-  
+
                                 source.setSelection(false);
                                 return;
                             }
@@ -1140,10 +1140,15 @@ public class DataOptionDialog extends Dialog {
         membersGroup.setLayout(new GridLayout(1, true));
         membersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
-        String[] names = ((CompoundDS) dataObject).getMemberNames();
+        final String[] names = ((CompoundDS) dataObject).getMemberNames();
+        String[] columnNames = new String[names.length];
+        for (int i = 0; i < names.length; i++) {
+            columnNames[i] = new String(names[i]);
+            columnNames[i] = columnNames[i].replaceAll(CompoundDS.separator, "->");
+        }
         fieldList = new List(membersGroup, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
         fieldList.setFont(curFont);
-        fieldList.setItems(names);
+        fieldList.setItems(columnNames);
         fieldList.selectAll();
 
         GridData data = new GridData(SWT.FILL, SWT.FILL, false, true);

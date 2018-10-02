@@ -239,7 +239,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 int rank = dset.getRank();
                 rankChoice.select(rank - 1);
                 long[] dims = dset.getDims();
-                String[] mNames = dset.getMemberNames();
+                final String[] mNames = dset.getMemberNames();
                 int[] mOrders = dset.getMemberOrders();
                 Datatype[] mTypes = dset.getMemberTypes();
 

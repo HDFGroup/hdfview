@@ -69,7 +69,31 @@ public class H5Datatype extends Datatype {
      */
     private int nativeClass = -1;
 
+    /**
+     * The native properties of the number datatype.
+     */
+    private long nativePrecision = 0;
+    private int nativeOffset = -1;
+    private int nativePadLSB = -1;
+    private int nativePadMSB = -1;
+
+    /**
+     * The native properties of the float datatype.
+     */
+    private long nativeFPebias = 0;
+    private long nativeFPspos = -1;
+    private long nativeFPepos = -1;
+    private long nativeFPesize = -1;
+    private long nativeFPmpos = -1;
+    private long nativeFPmsize = -1;
+    private int nativeFPnorm = -1;
+    private int nativeFPinpad = -1;
+
+    /**
+     * The native properties of the string datatype.
+     */
     private int nativeStrPad = -1;
+    private int nativeStrCSET = -1;
 
     /**
      * The tag for an opaque datatype.
@@ -543,10 +567,34 @@ public class H5Datatype extends Datatype {
             try {
                 isUchar = H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_UCHAR);
                 isChar = (H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_CHAR) || isUchar);
+                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, is_VLEN);
             }
             catch (Exception ex) {
                 log.debug("fromNative(): native char type failure: ", ex);
             }
+            try {
+                nativePrecision = H5.H5Tget_precision_long(tid);
+            }
+            catch (Exception ex) {
+                log.debug("fromNative(): get_precision failure: ", ex);
+            }
+            try {
+                nativeOffset = H5.H5Tget_offset(tid);
+            }
+            catch (Exception ex) {
+                log.debug("fromNative(): get_offset failure: ", ex);
+            }
+            try {
+                int[] pads = new int[2];
+                H5.H5Tget_pad(tid, pads);
+                nativePadLSB = pads[0];
+                nativePadMSB = pads[1];
+            }
+            catch (Exception ex) {
+                log.debug("fromNative(): get_pad failure: ", ex);
+            }
+            log.trace("fromNative(): isUchar={}, nativePrecision={}, nativeOffset={}, nativePadLSB={}, nativePadMSB={}", isUchar, nativePrecision, nativeOffset, nativePadLSB,
+                    nativePadMSB);
 
             datatypeSign = NSGN; // default
             if (nativeClass == HDF5Constants.H5T_ARRAY) {
@@ -618,21 +666,59 @@ public class H5Datatype extends Datatype {
             }
             else if (nativeClass == HDF5Constants.H5T_FLOAT) {
                 datatypeClass = CLASS_FLOAT;
+                try {
+                    nativeFPebias = H5.H5Tget_ebias_long(tid);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_ebias failure: ", ex);
+                }
+                try {
+                    long[] fields = new long[5];
+                    H5.H5Tget_fields(tid, fields);
+                    nativeFPspos = fields[0];
+                    nativeFPepos = fields[1];
+                    nativeFPesize = fields[2];
+                    nativeFPmpos = fields[3];
+                    nativeFPmsize = fields[4];
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_fields failure: ", ex);
+                }
+                try {
+                    nativeFPnorm = H5.H5Tget_norm(tid);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_norm failure: ", ex);
+                }
+                try {
+                    nativeFPinpad = H5.H5Tget_inpad(tid);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_inpad failure: ", ex);
+                }
             }
             else if (isChar) {
                 datatypeClass = CLASS_CHAR;
                 datatypeSign = (isUchar) ? SIGN_NONE : SIGN_2;
+                log.trace("fromNative(): CLASS_CHAR:datatypeSign={}", datatypeSign);
             }
             else if (nativeClass == HDF5Constants.H5T_STRING) {
                 datatypeClass = CLASS_STRING;
                 try {
                     is_VLEN = H5.H5Tdetect_class(tid, HDF5Constants.H5T_VLEN) || is_variable_str;
-                    log.trace("fromNative(): var str type={}", is_VLEN);
+                    log.trace("fromNative(): H5T_STRING:var str type={}", is_VLEN);
                     nativeStrPad = H5.H5Tget_strpad(tid);
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): var str type failure: ", ex);
                 }
+                try {
+                    nativeStrCSET = H5.H5Tget_cset(tid);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): H5T_STRING:get_cset failure: ", ex);
+                }
+                log.trace("fromNative(): H5T_STRING:nativeStrPad={}, nativeStrCSET={}", nativeStrPad, nativeStrCSET);
             }
             else if (nativeClass == HDF5Constants.H5T_REFERENCE) {
                 datatypeClass = CLASS_REFERENCE;
@@ -921,6 +1007,22 @@ public class H5Datatype extends Datatype {
                         H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
                     }
 
+                    if (nativeFPebias > 0) {
+                        H5.H5Tset_ebias(tid, nativeFPebias);
+                    }
+
+                    if (nativeFPnorm >= 0) {
+                        H5.H5Tset_norm(tid, nativeFPnorm);
+                    }
+
+                    if (nativeFPinpad >= 0) {
+                        H5.H5Tset_inpad(tid, nativeFPinpad);
+                    }
+
+                    if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
+                        H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                    }
+
                     break;
                 case CLASS_CHAR:
                     tid = H5.H5Tcopy((datatypeSign == Datatype.SIGN_NONE) ? HDF5Constants.H5T_NATIVE_UCHAR : HDF5Constants.H5T_NATIVE_CHAR);
@@ -929,9 +1031,13 @@ public class H5Datatype extends Datatype {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
                     H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
 
-                    log.trace("createNative(): isVlenStr={}", is_VLEN);
+                    log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad, nativeStrCSET);
 
                     H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
+
+                    if (nativeStrCSET >= 0) {
+                        H5.H5Tset_cset(tid, nativeStrCSET);
+                    }
 
                     break;
                 case CLASS_REFERENCE:
@@ -1258,6 +1364,8 @@ public class H5Datatype extends Datatype {
                     if (tid >= 0) {
                         String strPadType;
                         int strPad = H5.H5Tget_strpad(tid);
+                        String strCSETType;
+                        int strCSET = H5.H5Tget_cset(tid);
 
                         if (strPad == HDF5Constants.H5T_STR_NULLTERM)
                             strPadType = "H5T_STR_NULLTERM";
@@ -1269,7 +1377,17 @@ public class H5Datatype extends Datatype {
                             strPadType = null;
 
                         if (strPadType != null)
-                            description += ", string padding = " + strPadType;
+                            description += ", padding = " + strPadType;
+
+                        if (strCSET == HDF5Constants.H5T_CSET_ASCII)
+                            strCSETType = "H5T_CSET_ASCII";
+                        else if (strCSET == HDF5Constants.H5T_CSET_UTF8)
+                            strCSETType = "H5T_CSET_UTF8";
+                        else
+                            strCSETType = null;
+
+                        if (strCSETType != null)
+                            description += ", cset = " + strCSETType;
                     }
                     else {
                         log.debug("createNative() failure");
