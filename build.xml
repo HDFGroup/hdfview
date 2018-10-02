@@ -765,6 +765,8 @@
       <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
+      <!-- Copy the hdf5 dll from the bin folder -->
+      <fileset dir="${hdf5.lib.dir}/../bin" includes="hdf5.dll" />
     </copy>
 
     <!-- Bundle jre -->
