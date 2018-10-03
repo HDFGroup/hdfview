@@ -159,18 +159,19 @@ public abstract class Group extends HObject implements MetaDataContainer {
         FileFormat theFile = this.getFileFormat();
 
         if ((memberList == null) && (theFile != null)) {
-            int size = Math.min(getNumberOfMembersInFile(), this
-                    .getFileFormat().getMaxMembers());
+            int size = Math.min(getNumberOfMembersInFile(), this.getFileFormat().getMaxMembers());
             memberList = new Vector<HObject>(size + 5); // avoid infinite loop search for groups without members
 
             // find the memberList from the file by checking the group path and
             // name. group may be created out of the structure tree
             // (H4/5File.loadTree()).
-            try {
-                theFile.open();
-            } // load the file structure;
-            catch (Exception ex) {
-                ;
+            if (theFile.getFID() < 0) {
+                try {
+                    theFile.open();
+                } // load the file structure;
+                catch (Exception ex) {
+                    ;
+                }
             }
 
             HObject root = theFile.getRootObject();

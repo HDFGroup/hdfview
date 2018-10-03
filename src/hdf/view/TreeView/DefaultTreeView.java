@@ -203,10 +203,6 @@ public class DefaultTreeView implements TreeView {
 
     private boolean                       isApplyBitmaskOnly  = false;
 
-    private int                           currentIndexType;
-
-    private int                           currentIndexOrder;
-
     private int                           binaryOrder;
 
     private String                        currentSearchPhrase = null;
@@ -848,6 +844,8 @@ public class DefaultTreeView implements TreeView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                selectedFile.setIndexType(selectedFile.getIndexType(ViewProperties.getIndexType()));
+                selectedFile.setIndexOrder(selectedFile.getIndexOrder(ViewProperties.getIndexOrder()));
                 try {
                     reopenFile(selectedFile, -1);
                 }
@@ -2393,19 +2391,46 @@ public class DefaultTreeView implements TreeView {
 
         if (fileFormat == null) throw new java.io.IOException("Unsupported fileformat - " + filename);
 
+        if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
+            fileFormat.setIndexType(fileFormat.getIndexType(ViewProperties.getIndexType()));
+            fileFormat.setIndexOrder(fileFormat.getIndexOrder(ViewProperties.getIndexOrder()));
+        }
+
+        return openFile(fileFormat, accessID);
+    }
+
+    /**
+     * Opens a file and retrieves the file structure of the file. It also can be used to create a new
+     * file by setting the accessID to FileFormat.CREATE.
+     *
+     * <p>
+     * Subclasses must implement this function to take appropriate steps to open a file.
+     * </p>
+     *
+     * @param fileformat
+     *            the file to open.
+     * @param accessID
+     *            identifier for the file access. Valid value of accessID is:
+     *            <ul>
+     *            <li>FileFormat.READ --- allow read-only access to file.</li>
+     *            <li>FileFormat.WRITE --- allow read and write access to file.</li>
+     *            <li>FileFormat.CREATE --- create a new file.</li>
+     *            </ul>
+     *
+     * @return the FileFormat of this file if successful; otherwise returns null.
+     *
+     * @throws Exception
+     *             if a failure occurred
+     */
+    public FileFormat openFile(FileFormat fileFormat, int accessID) throws Exception {
+        log.trace("openFile[format]: {},{}", fileFormat.getAbsolutePath(), accessID);
+        TreeItem fileRoot = null;
+
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
 
         try {
             fileFormat.setMaxMembers(ViewProperties.getMaxMembers());
             fileFormat.setStartMembers(ViewProperties.getStartMembers());
-            if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                if (isNewFile) {
-                    currentIndexType = fileFormat.getIndexType(ViewProperties.getIndexType());
-                    currentIndexOrder = fileFormat.getIndexOrder(ViewProperties.getIndexOrder());
-                }
-                fileFormat.setIndexType(currentIndexType);
-                fileFormat.setIndexOrder(currentIndexOrder);
-            }
 
             fileFormat.open();
         }
@@ -2418,7 +2443,7 @@ public class DefaultTreeView implements TreeView {
         }
 
         if (fileFormat == null) {
-            throw new java.io.IOException("openFile: Failed to open file - " + filename);
+            throw new java.io.IOException("openFile: Failed to open file - " + fileFormat.getAbsolutePath());
         }
         else  {
             fileRoot = populateTree(fileFormat);
@@ -2446,22 +2471,17 @@ public class DefaultTreeView implements TreeView {
 
     @Override
     public FileFormat reopenFile(FileFormat fileFormat, int newFileAccessMode) throws Exception {
-        if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-            this.currentIndexType = fileFormat.getIndexType(null);
-            this.currentIndexOrder = fileFormat.getIndexOrder(null);
-        }
-
         closeFile(fileFormat);
         ((HDFView) viewer).showMetaData(null);
 
         if (newFileAccessMode < 0) {
             if (ViewProperties.isReadOnly())
-                return openFile(fileFormat.getAbsolutePath(), FileFormat.READ);
+                return openFile(fileFormat, FileFormat.READ);
             else
-                return openFile(fileFormat.getAbsolutePath(), FileFormat.WRITE);
+                return openFile(fileFormat, FileFormat.WRITE);
         }
         else
-            return openFile(fileFormat.getAbsolutePath(), newFileAccessMode);
+            return openFile(fileFormat, newFileAccessMode);
     }
 
     /**
@@ -2486,6 +2506,7 @@ public class DefaultTreeView implements TreeView {
             if (theFile.equals(file)) {
                 // Remove TreeItem from the view
                 openFiles[i].dispose();
+                log.trace("dispose({}):", theFile.getFilePath());
 
                 try {
                     theFile.close();
