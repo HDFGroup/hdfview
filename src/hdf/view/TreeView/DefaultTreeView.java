@@ -2304,8 +2304,7 @@ public class DefaultTreeView implements TreeView {
      *            <li>FileFormat.CREATE --- create a new file.</li>
      *            </ul>
      *
-     * @return the FileFormat of this file if successful; otherwise returns
-     *         null.
+     * @return the FileFormat of this file if successful; otherwise returns null.
      *
      * @throws Exception if a failure occurred
      */
@@ -2400,15 +2399,15 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Opens a file and retrieves the file structure of the file. It also can be used to create a new
-     * file by setting the accessID to FileFormat.CREATE.
+     * Opens a file with an existing FileFormat instance and retrieves the file structure of the file.
+     * It also can be used to create a new file by setting the accessID to FileFormat.CREATE.
      *
      * <p>
      * Subclasses must implement this function to take appropriate steps to open a file.
      * </p>
      *
      * @param fileformat
-     *            the file to open.
+     *            the file to open with an existing FileFormat instance.
      * @param accessID
      *            identifier for the file access. Valid value of accessID is:
      *            <ul>
@@ -2417,7 +2416,7 @@ public class DefaultTreeView implements TreeView {
      *            <li>FileFormat.CREATE --- create a new file.</li>
      *            </ul>
      *
-     * @return the FileFormat of this file if successful; otherwise returns null.
+     * @return the updated FileFormat of this file if successful; otherwise returns null.
      *
      * @throws Exception
      *             if a failure occurred
