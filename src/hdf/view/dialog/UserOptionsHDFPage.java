@@ -37,8 +37,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
 
     private Text fileExtField;
     private Button checkConvertEnum, checkShowRegRefValues, helpButton;
-    private Button nativeOrder, decOrder, checkIndexCreateOrder;
-    private Button checkIndexType, checkIndexOrder, checkIndexNative;
+    private Button checkNativeOrder, checkDecOrder, checkIncOrder;
+    private Button checkIndexName, checkIndexCreateOrder;
     private Button earlyLibVersion, early18LibVersion, early110LibVersion, earlyLateLibVersion;
     private Button lateLibVersion, late18LibVersion, late110LibVersion, lateLateLibVersion;
 
@@ -116,18 +116,18 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         }
 
         // set index type
-        if (checkIndexType != null) {
-            if (checkIndexType.getSelection())
+        if (checkIndexName != null) {
+            if (checkIndexName.getSelection())
                 ViewProperties.setIndexType("H5_INDEX_NAME");
             else
                 ViewProperties.setIndexType("H5_INDEX_CRT_ORDER");
         }
 
         // set index order
-        if (checkIndexOrder != null) {
-            if (checkIndexOrder.getSelection())
+        if (checkIncOrder != null) {
+            if (checkIncOrder.getSelection())
                 ViewProperties.setIndexOrder("H5_ITER_INC");
-            else if (checkIndexNative.getSelection())
+            else if (checkNativeOrder.getSelection())
                 ViewProperties.setIndexOrder("H5_ITER_NATIVE");
             else
                 ViewProperties.setIndexOrder("H5_ITER_DEC");
@@ -169,13 +169,13 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkShowRegRefValues.setSelection(ViewProperties.showRegRefValues());
 
         indexType = ViewProperties.getIndexType();
-        checkIndexType.setSelection(indexType.compareTo("H5_INDEX_NAME") == 0);
+        checkIndexName.setSelection(indexType.compareTo("H5_INDEX_NAME") == 0);
         checkIndexCreateOrder.setSelection(indexType.compareTo("H5_INDEX_CRT_ORDER") == 0);
 
         indexOrder = ViewProperties.getIndexOrder();
-        checkIndexOrder.setSelection(indexOrder.compareTo("H5_ITER_INC") == 0);
-        decOrder.setSelection(indexOrder.compareTo("H5_ITER_DEC") == 0);
-        nativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
+        checkIncOrder.setSelection(indexOrder.compareTo("H5_ITER_INC") == 0);
+        checkDecOrder.setSelection(indexOrder.compareTo("H5_ITER_DEC") == 0);
+        checkNativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
 
         log.trace("performOk: load HDF options finished");
     }
@@ -308,10 +308,10 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         indexingTypeGroup.setFont(curFont);
         indexingTypeGroup.setText("Indexing Type");
 
-        checkIndexType = new Button(indexingTypeGroup, SWT.RADIO);
-        checkIndexType.setFont(curFont);
-        checkIndexType.setText("By Name");
-        checkIndexType.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkIndexName = new Button(indexingTypeGroup, SWT.RADIO);
+        checkIndexName.setFont(curFont);
+        checkIndexName.setText("By Name");
+        checkIndexName.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         checkIndexCreateOrder = new Button(indexingTypeGroup, SWT.RADIO);
         checkIndexCreateOrder.setFont(curFont);
@@ -325,20 +325,20 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         indexingOrderGroup.setFont(curFont);
         indexingOrderGroup.setText("Indexing Order");
 
-        checkIndexOrder = new Button(indexingOrderGroup, SWT.RADIO);
-        checkIndexOrder.setFont(curFont);
-        checkIndexOrder.setText("Increments");
-        checkIndexOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkIncOrder = new Button(indexingOrderGroup, SWT.RADIO);
+        checkIncOrder.setFont(curFont);
+        checkIncOrder.setText("Increments");
+        checkIncOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
-        decOrder = new Button(indexingOrderGroup, SWT.RADIO);
-        decOrder.setFont(curFont);
-        decOrder.setText("Decrements");
-        decOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkDecOrder = new Button(indexingOrderGroup, SWT.RADIO);
+        checkDecOrder.setFont(curFont);
+        checkDecOrder.setText("Decrements");
+        checkDecOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
-        nativeOrder = new Button(indexingOrderGroup, SWT.RADIO);
-        nativeOrder.setFont(curFont);
-        nativeOrder.setText("Native");
-        nativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkNativeOrder = new Button(indexingOrderGroup, SWT.RADIO);
+        checkNativeOrder.setFont(curFont);
+        checkNativeOrder.setText("Native");
+        checkNativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         load();
         return composite;
