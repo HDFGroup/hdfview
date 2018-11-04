@@ -842,7 +842,7 @@ public class H5ScalarDS extends ScalarDS {
                     }
                 }
 
-                log.trace("read(): originalBuf={} isText={} isREF={} totalSelectedSpacePoints={} nPoints={}", originalBuf, DSdatatype.isText(), DSdatatype.isRefObj(), totalSelectedSpacePoints, nPoints);
+                log.trace("read(): isText={} isREF={} totalSelectedSpacePoints={} nPoints={}", DSdatatype.isText(), DSdatatype.isRefObj(), totalSelectedSpacePoints, nPoints);
                 if ((originalBuf == null) || DSdatatype.isEnum() || DSdatatype.isText() || DSdatatype.isRefObj() || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
                     try {
                         theData = DSdatatype.allocateArray((int) totalSelectedSpacePoints);
