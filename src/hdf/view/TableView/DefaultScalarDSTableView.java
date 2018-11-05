@@ -166,8 +166,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 throw new RuntimeException("data value is null");
             }
 
-            log.trace("loadData(): dataValue={}", dataValue);
-
             if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
                 isReadOnly = true;
                 String opName = "Bits ";
