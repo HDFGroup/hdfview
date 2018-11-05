@@ -2522,7 +2522,9 @@ public class DefaultImageView implements ImageView {
     /** ImageComponent draws the image. */
     private class ImageComponent extends Canvas implements ImageObserver {
 
-        private Image image;
+        /* The BufferedImage is converted to an SWT Image for dislay */
+        private org.eclipse.swt.graphics.Image convertedImage;
+
         private Dimension originalSize, imageSize;
         private Point scrollDim = null;
         private Point startPosition, currentPosition; // mouse clicked position
@@ -2535,14 +2537,22 @@ public class DefaultImageView implements ImageView {
         public ImageComponent(Composite parent, int style, Image img) {
             super(parent, style);
 
-            image = img;
-            imageSize = new Dimension(image.getWidth(null), image.getHeight(null));
+            convertedImage = convertBufferedImageToSWTImage((BufferedImage) img);
+            imageSize = new Dimension(convertedImage.getBounds().width, convertedImage.getBounds().height);
 
             originalSize = imageSize;
             selectedArea = new Rectangle();
             originalSelectedArea = new Rectangle();
             setSize(imageSize.width, imageSize.height);
             strBuff = new StringBuffer();
+
+            this.addDisposeListener(new DisposeListener() {
+                @Override
+                public void widgetDisposed(DisposeEvent arg0) {
+                    if (convertedImage != null && !convertedImage.isDisposed())
+                        convertedImage.dispose();
+                }
+            });
 
             this.addMouseMoveListener(new MouseMoveListener() {
                 @Override
@@ -2671,11 +2681,9 @@ public class DefaultImageView implements ImageView {
                 public void paintControl(PaintEvent e) {
                     GC gc = e.gc;
 
-                    org.eclipse.swt.graphics.Image converted = convertBufferedImageToSWTImage((BufferedImage) image);
-                    org.eclipse.swt.graphics.Rectangle sourceBounds = converted.getBounds();
+                    org.eclipse.swt.graphics.Rectangle sourceBounds = convertedImage.getBounds();
 
-
-                    gc.drawImage(converted, 0, 0, sourceBounds.width, sourceBounds.height,
+                    gc.drawImage(convertedImage, 0, 0, sourceBounds.width, sourceBounds.height,
                             0, 0, imageSize.width, imageSize.height);
 
                     /*if (gc instanceof Graphics2D && (zoomFactor<0.99)) {
@@ -2687,8 +2695,6 @@ public class DefaultImageView implements ImageView {
                         g2.drawImage(scaledImg, 0, 0, imageSize.width, imageSize.height, this);
 
                     }*/
-
-                    converted.dispose();
 
                     if ((selectedArea.width > 0) && (selectedArea.height > 0)) {
                         gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
@@ -2904,8 +2910,12 @@ public class DefaultImageView implements ImageView {
         }
 
         private void setImage(Image img) {
-            image = img;
-            imageSize = new Dimension(image.getWidth(this), image.getHeight(this));
+            /* Make sure to dispose the old image first so resources aren't leaked */
+            if (convertedImage != null && !convertedImage.isDisposed())
+                convertedImage.dispose();
+
+            convertedImage = convertBufferedImageToSWTImage((BufferedImage) img);
+            imageSize = new Dimension(convertedImage.getBounds().width, convertedImage.getBounds().height);
             originalSize = imageSize;
             selectedArea.width = 0;
             selectedArea.height = 0;
@@ -3572,9 +3582,11 @@ public class DefaultImageView implements ImageView {
 
         private final int MAX_ANIMATION_IMAGE_SIZE = 300;
 
+        /* A list of frames to display for animation */
+        private org.eclipse.swt.graphics.Image[] frames = null;
+
         private Shell shell;
         private Canvas canvas; // Canvas to draw the image
-        private Image[] frames = null; // a list of images for animation
         private int numberOfImages = 0;
         private int currentFrame = 0;
         private int sleepTime = 200;
@@ -3624,12 +3636,11 @@ public class DefaultImageView implements ImageView {
             int size = w * h;
 
             numberOfImages = (int) dims[selectedIndex[2]];
-            frames = new Image[numberOfImages];
-            BufferedImage mir = bufferedImage;
+            frames = new org.eclipse.swt.graphics.Image[numberOfImages];
+
+            BufferedImage frameImage;
             try {
                 for (int i = 0; i < numberOfImages; i++) {
-                    bufferedImage = null; // each animation image has its
-                    // own image resource
                     start[selectedIndex[2]] = i;
 
                     dataset.clearData();
@@ -3645,12 +3656,12 @@ public class DefaultImageView implements ImageView {
                     byteData = Tools.getBytes(data3d, dataRange, w, h, false, dataset.getFilteredImageValues(),
                             true, byteData);
 
-                    frames[i] = createIndexedImage(byteData, imagePalette, w, h);
+                    frameImage = (BufferedImage) createIndexedImage(byteData, imagePalette, w, h);
+                    frames[i] = convertBufferedImageToSWTImage(frameImage);
                 }
             }
             finally {
                 // set back to original state
-                bufferedImage = mir;
                 System.arraycopy(tstart, 0, start, 0, rank);
                 System.arraycopy(tselected, 0, selected, 0, rank);
                 System.arraycopy(tstride, 0, stride, 0, rank);
@@ -3674,14 +3685,23 @@ public class DefaultImageView implements ImageView {
 
                     if (frames == null) return;
 
-                    org.eclipse.swt.graphics.Image image = convertBufferedImageToSWTImage((BufferedImage) frames[currentFrame]);
                     org.eclipse.swt.graphics.Rectangle canvasBounds = canvas.getBounds();
-                    int x = ((canvasBounds.width / 2) - (image.getBounds().width / 2));
-                    int y = ((canvasBounds.height / 2) - (image.getBounds().height / 2));
-                    gc.drawImage(image, x, y);
+                    int x = ((canvasBounds.width / 2) - (frames[currentFrame].getBounds().width / 2));
+                    int y = ((canvasBounds.height / 2) - (frames[currentFrame].getBounds().height / 2));
+                    gc.drawImage(frames[currentFrame], x, y);
 
-                    image.dispose();
                     gc.dispose();
+                }
+            });
+
+            canvas.addDisposeListener(new DisposeListener() {
+                @Override
+                public void widgetDisposed(DisposeEvent arg0) {
+                    /* Make sure to dispose of all generated images */
+                    for (int i = 0; i < frames.length; i++) {
+                        if (frames[i] != null && !frames[i].isDisposed())
+                            frames[i].dispose();
+                    }
                 }
             });
 

@@ -842,7 +842,7 @@ public class H5ScalarDS extends ScalarDS {
                     }
                 }
 
-                log.trace("read(): originalBuf={} isText={} isREF={} totalSelectedSpacePoints={} nPoints={}", originalBuf, DSdatatype.isText(), DSdatatype.isRefObj(), totalSelectedSpacePoints, nPoints);
+                log.trace("read(): isText={} isREF={} totalSelectedSpacePoints={} nPoints={}", DSdatatype.isText(), DSdatatype.isRefObj(), totalSelectedSpacePoints, nPoints);
                 if ((originalBuf == null) || DSdatatype.isEnum() || DSdatatype.isText() || DSdatatype.isRefObj() || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
                     try {
                         theData = DSdatatype.allocateArray((int) totalSelectedSpacePoints);
@@ -2000,14 +2000,15 @@ public class H5ScalarDS extends ScalarDS {
         long atid = -1;
 
         try {
-            // try to find out interlace mode
-            aid = H5.H5Aopen_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            atid = H5.H5Aget_type(aid);
-            int size = (int)H5.H5Tget_size(atid);
-            byte[] attrValue = new byte[size];
-            H5.H5Aread(aid, atid, attrValue);
-            String strValue = new String(attrValue).trim();
-            retValue = strValue.equalsIgnoreCase(value);
+            if (H5.H5Aexists_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT)) {
+                aid = H5.H5Aopen_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                atid = H5.H5Aget_type(aid);
+                int size = (int)H5.H5Tget_size(atid);
+                byte[] attrValue = new byte[size];
+                H5.H5Aread(aid, atid, attrValue);
+                String strValue = new String(attrValue).trim();
+                retValue = strValue.equalsIgnoreCase(value);
+            }
         }
         catch (Exception ex) {
             log.debug("isStringAttributeOf(): try to find out interlace mode:", ex);
