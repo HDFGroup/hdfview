@@ -31,6 +31,6 @@ set JAVABIN=%INSTALLDIR%\\jre\\bin
 rem start "HDFView" "%JAVABIN%\\javaw.exe" %JAVAOPTS% -Xmx1024M -Djava.library.path="%INSTALLDIR%\\lib" -Dhdfview.root="%INSTALLDIR%" -jar "%INSTALLDIR%\\lib\\HDFView.jar" %*
 
 rem Default invocation when using modules
-start "HDFView" "%JAVABIN%\\javaw.exe" %JAVAOPTS% -Xmx1024M -Djava.library.path="%INSTALLDIR%\\lib;%INSTALLDIR%\\lib\\ext" -Dhdfview.root="%INSTALLDIR%" -cp "@CLASSPATH@;%INSTALLDIR%\\lib\\HDFView.jar" hdf.view.HDFView %*
+start "HDFView" "%JAVABIN%\\javaw.exe" %JAVAOPTS% -Xmx1024M -Djava.library.path="%INSTALLDIR%\\lib;%INSTALLDIR%\\lib\\ext" -Dhdfview.root="%INSTALLDIR%" -cp "%INSTALLDIR%\\lib\\*;%INSTALLDIR%\\lib\\extra\@SLF4J@" hdf.view.HDFView %*
 
 exit /b 0

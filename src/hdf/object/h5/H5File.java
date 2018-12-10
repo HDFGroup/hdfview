@@ -563,12 +563,12 @@ public class H5File extends FileFormat {
                                 H5.H5Aread(aid, tid, value);
                             }
 
-                            if (attr.getDatatype().isString()) {
-                                log.trace("getAttribute(): Attribute[{}] byteToString", i);
-                                value = Dataset.byteToString((byte[]) value, (int) H5.H5Tget_size(tid));
+                            if (attr.getDatatype().isText() && value instanceof byte[]) {
+                                log.trace("getAttribute(): isText: converting byte array to string array");
+                                value = attr.byteToString((byte[]) value, (int) attr.getDatatype().getDatatypeSize());
                             }
-                            else if (attr.getDatatype().isRef()) {
-                                log.trace("getAttribute(): Attribute[{}] byteToLong", i);
+                            else if (((H5Datatype)attr.getDatatype()).isRefObj()) {
+                                log.trace("getAttribute(): Attribute[{}] isREF: converting byte array to long array", i);
                                 value = HDFNativeData.byteToLong((byte[]) value);
                             }
                         }
