@@ -40,4 +40,4 @@ export JAVAOPTS=-Xmx1024M
 #"$JAVABIN/java" "$JAVAOPTS" -Djava.library.path="$INSTALLDIR/lib" -Dhdfview.root="$INSTALLDIR" -jar "$INSTALLDIR/lib/HDFView.jar" "$@"
 
 # Default invocation when using modules
-"$JAVABIN/java" "$JAVAOPTS" -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dhdfview.root="$INSTALLDIR" -cp "@CLASSPATH@:$INSTALLDIR/lib/HDFView.jar" hdf.view.HDFView "$@"
+"$JAVABIN/java" "$JAVAOPTS" -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dhdfview.root="$INSTALLDIR" -cp "$INSTALLDIR/lib/*:$INSTALLDIR/lib/extra/@SLF4J@" hdf.view.HDFView "$@"
