@@ -775,7 +775,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         // No need to update if values are the same
-        if (cellValue.equals(dataLayer.getDataValue(col, row).toString())) {
+        Object oldVal = dataLayer.getDataValue(col, row);
+        if ((oldVal != null) && cellValue.equals(oldVal.toString())) {
             log.debug(
                     "updateValueInMemory({}, {}): cell value not updated; new value same as old value",
                     row, col);
