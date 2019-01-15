@@ -315,7 +315,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
 
         // No need to update if values are the same
-        if (cellValue.equals(dataLayer.getDataValue(col, row).toString())) {
+        Object oldVal = dataLayer.getDataValue(col, row);
+        if ((oldVal != null) && cellValue.equals(oldVal.toString())) {
             log.debug(
                     "updateValueInMemory({}, {}): cell value not updated; new value same as old value", row, col);
             log.trace("updateValueInMemory({}, {}): finish", row, col);
