@@ -14,7 +14,7 @@
     <filterchain>
       <tokenfilter>
         <stringtokenizer delims="-\r\n" suppressdelims="true" />
-        <containsregex pattern="[0-9]+\.[0-9]+" />
+        <containsregex pattern="[0-9]+\.[0-9]+\.[0-9]+" />
       </tokenfilter>
     </filterchain>
   </loadfile>
@@ -144,6 +144,7 @@
   <property name="release.dir"       value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}.0" />
   <property name="includeantruntime" value="false" />
   <property name="jre.version"       value="${ant.java.version}" />
+  <property name="version.slf4j"     value="-1.7.25"/>
 
   <path id="obj-classpath">
     <fileset dir="${lib.dir}"
@@ -160,17 +161,17 @@
   </path>
   <path id="slf4j-classpath">
       <fileset dir="${lib.dir}"
-      includes="slf4j-api*.jar"
+      includes="slf4j-api${version.slf4j}.jar"
       excludes="*sources.jar" />
   </path>
   <path id="log-classpath">
     <fileset dir="${lib.dir}/extra"
-      includes="slf4j-simple*.jar"
+      includes="slf4j-simple${version.slf4j}.jar"
       excludes="*sources.jar" />
   </path>
   <path id="nop-classpath">
       <fileset dir="${lib.dir}/extra"
-      includes="slf4j-nop*.jar"
+      includes="slf4j-nop${version.slf4j}.jar"
       excludes="*sources.jar" />
   </path>
   <path id="unit-classpath">
@@ -292,7 +293,7 @@
         basedir="${classes.dir}"
         excludes="hdf/view/** examples/** test/** *.log *.h5 *.data">
         <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
-        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
+        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
 
         <manifest>
           <attribute name="Main-Class" value="${main-class}" />
@@ -336,7 +337,7 @@
       excludes="examples/** test/** *.log *.h5 *.data">
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
-      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
+      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.os}/${machine.arch}" includes="swt.jar" />
 
       <zipfileset src="${lib.dir}/ext/swt/commons-logging.jar" excludes="META-INF/**/*"></zipfileset>
@@ -752,6 +753,7 @@
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
+    <mkdir dir="${release.dir}/lib/extra" />
     <mkdir dir="${release.dir}/doc" />
     <mkdir dir="${release.dir}/samples" />
 
@@ -760,13 +762,15 @@
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
       <!-- Copy the hdf5 dll from the bin folder -->
       <fileset dir="${hdf5.lib.dir}/../bin" includes="hdf5.dll" />
+    </copy>
+    <copy todir="${release.dir}/lib/extra">
+        <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+        <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
     </copy>
 
     <!-- Bundle jre -->
@@ -783,7 +787,8 @@
       <map from="${hdf.lib.dir}" to="%INSTALLDIR%\\lib"/>
       <map from="${hdf5.lib.dir}" to="$INSTALLDIR\\lib"/>
     </pathconvert>
-    <replace file="${release.dir}/hdfview.bat" token="@CLASSPATH@" value="${runscript.classpath}" />
+    <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar"/>
+    <replace file="${release.dir}/hdfview.bat" token="@SLF4J@" value="${runscript.slf4j}" />
 
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/doc/javadocs">
@@ -806,6 +811,7 @@
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
+    <mkdir dir="${release.dir}/lib/extra" />
     <mkdir dir="${release.dir}/share" />
     <mkdir dir="${release.dir}/share/samples" />
     <mkdir dir="${release.dir}/share/doc" />
@@ -815,9 +821,7 @@
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
@@ -840,6 +844,10 @@
         <exclude name="slf4j*.jar" />
       </fileset>
     </copy>
+    <copy todir="${release.dir}/lib/extra">
+        <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+        <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
+    </copy>
 
     <!-- Bundle jre -->
     <copy todir="${release.dir}/jre">
@@ -856,12 +864,8 @@
     </chmod>
 
     <!-- Set the correct classpath for the run script -->
-    <pathconvert property="runscript.classpath" refid="jar-classpath">
-      <map from="${basedir}" to="$INSTALLDIR" />
-      <map from="${hdf.lib.dir}" to="$INSTALLDIR/lib"/>
-      <map from="${hdf5.lib.dir}" to="$INSTALLDIR/lib"/>
-    </pathconvert>
-    <replace file="${release.dir}/hdfview.sh" token="@CLASSPATH@" value="${runscript.classpath}" />
+    <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar"/>
+    <replace file="${release.dir}/hdfview.sh" token="@SLF4J@" value="${runscript.slf4j}" />
 
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/share/doc/javadocs">
@@ -891,9 +895,9 @@
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
