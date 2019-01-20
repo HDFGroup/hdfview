@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import hdf.hdf5lib.HDF5Constants;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
@@ -2097,6 +2098,11 @@ public class H4File extends FileFormat {
     @Override
     public void setNewLibBounds(String lowStr, String highStr) throws Exception {
         return;
+    }
+    
+    @Override
+    public int getIndexType(String strtype) {
+    	return HDF5Constants.H5_INDEX_UNKNOWN;
     }
 
 }
