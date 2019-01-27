@@ -1729,7 +1729,7 @@ public class H5Datatype extends Datatype {
         log.trace("extractCompoundInfo(): start: name={}", name);
 
         if (isArray() || isVLEN()) {
-            log.trace("extractCompoundInfo(): top-level types is ARRAY or VLEN; extracting compound info from base type");
+            log.trace("extractCompoundInfo(): top-level type is ARRAY or VLEN; extracting compound info from base type");
             ((H5Datatype) getDatatypeBase()).extractCompoundInfo(name, names, flatListTypes);
         }
         else {
