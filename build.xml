@@ -14,7 +14,7 @@
     <filterchain>
       <tokenfilter>
         <stringtokenizer delims="-\r\n" suppressdelims="true" />
-        <containsregex pattern="[0-9]+\.[0-9]+" />
+        <containsregex pattern="[0-9]+\.[0-9]+\.[0-9]+" />
       </tokenfilter>
     </filterchain>
   </loadfile>
@@ -141,9 +141,10 @@
   <property name="packagefiles.dir"  value="package_files" />
   <property name="dist.dir"          value="${build.dir}/dist" />
   <property name="java.bin"          value="/bin/jre/bin" />
-  <property name="release.dir"       value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}.0" />
+  <property name="release.dir"       value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}" />
   <property name="includeantruntime" value="false" />
   <property name="jre.version"       value="${ant.java.version}" />
+  <property name="version.slf4j"     value="-1.7.25"/>
 
   <path id="obj-classpath">
     <fileset dir="${lib.dir}"
@@ -160,17 +161,17 @@
   </path>
   <path id="slf4j-classpath">
       <fileset dir="${lib.dir}"
-      includes="slf4j-api*.jar"
+      includes="slf4j-api${version.slf4j}.jar"
       excludes="*sources.jar" />
   </path>
   <path id="log-classpath">
     <fileset dir="${lib.dir}/extra"
-      includes="slf4j-simple*.jar"
+      includes="slf4j-simple${version.slf4j}.jar"
       excludes="*sources.jar" />
   </path>
   <path id="nop-classpath">
       <fileset dir="${lib.dir}/extra"
-      includes="slf4j-nop*.jar"
+      includes="slf4j-nop${version.slf4j}.jar"
       excludes="*sources.jar" />
   </path>
   <path id="unit-classpath">
@@ -230,7 +231,7 @@
     <delete dir="${release.dir}" />
     <delete dir="${build.dir}/HDF_Group" />
     <delete dir="${build.dir}/docs" />
-    <delete file="${build.dir}/${ant.project.name}-${app.version}.0-source.tar.gz" />
+    <delete file="${build.dir}/${ant.project.name}-${app.version}-source.tar.gz" />
     <delete file="${build.dir}/HDFVersions.java" />
     <delete file="${build.dir}/allfiles.wixobj" />
     <delete file="${build.dir}/allfiles.wxs" />
@@ -292,7 +293,7 @@
         basedir="${classes.dir}"
         excludes="hdf/view/** examples/** test/** *.log *.h5 *.data">
         <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
-        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
+        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
 
         <manifest>
           <attribute name="Main-Class" value="${main-class}" />
@@ -336,7 +337,7 @@
       excludes="examples/** test/** *.log *.h5 *.data">
       <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
       <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
-      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api-1.7.25.jar" />
+      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
       <zipgroupfileset dir="${lib.dir}/ext/swt/${machine.os}/${machine.arch}" includes="swt.jar" />
 
       <zipfileset src="${lib.dir}/ext/swt/commons-logging.jar" excludes="META-INF/**/*"></zipfileset>
@@ -699,7 +700,7 @@
   <target name="createREADME" description="Creates the project README.txt file">
     <copy file="${packagefiles.dir}/README.txt.in" tofile="${dist.dir}/README.txt" />
     <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
-    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
+    <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}" />
     <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_VERSION_STRING@" value="${hdfjava.version}" />
     <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
     <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
@@ -714,24 +715,24 @@
     <!-- Windows-specific README.txt replacements -->
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
     <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi       - ${ant.project.name} Installer" />
-    <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="This can be modified by changing JAVABIN in ${ant.project.name}${file.separator}${app.version}.0${file.separator}hdfview.bat" />
+    <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="This can be modified by changing JAVABIN in ${ant.project.name}${file.separator}${app.version}${file.separator}hdfview.bat" />
     <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.bat" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="Execute ${ant.project.name}-${app.version}.msi" />
-    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\${app.version}.0\hdfview.bat to run ${ant.project.name}" />
+    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\${app.version}\hdfview.bat to run ${ant.project.name}" />
   </target>
 
   <target name="createUnixREADME" depends="createREADME">
     <!-- Unix-specific README.txt replacements -->
     <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
-    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh - ${ant.project.name} Installer" />
-    <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="This can be modified by changing JAVABIN in ${ant.project.name}${file.separator}${app.version}.0${file.separator}hdfview.sh" />
+    <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.sh - ${ant.project.name} Installer" />
+    <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="This can be modified by changing JAVABIN in ${ant.project.name}${file.separator}${app.version}${file.separator}hdfview.sh" />
     <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="hdfview.sh" />
     <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}.0-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
-    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.0-${uname.os}.sh${line.separator}    use --help for options" />
-    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/${app.version}.0/hdfview.sh to run ${ant.project.name}" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
+    <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.sh${line.separator}    use --help for options" />
+    <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/${app.version}/hdfview.sh to run ${ant.project.name}" />
   </target>
 
   <target name="createMacREADME" depends="createREADME">
@@ -752,6 +753,7 @@
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
+    <mkdir dir="${release.dir}/lib/extra" />
     <mkdir dir="${release.dir}/doc" />
     <mkdir dir="${release.dir}/samples" />
 
@@ -760,13 +762,15 @@
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
       <!-- Copy the hdf5 dll from the bin folder -->
       <fileset dir="${hdf5.lib.dir}/../bin" includes="hdf5.dll" />
+    </copy>
+    <copy todir="${release.dir}/lib/extra">
+        <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+        <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
     </copy>
 
     <!-- Bundle jre -->
@@ -783,7 +787,8 @@
       <map from="${hdf.lib.dir}" to="%INSTALLDIR%\\lib"/>
       <map from="${hdf5.lib.dir}" to="$INSTALLDIR\\lib"/>
     </pathconvert>
-    <replace file="${release.dir}/hdfview.bat" token="@CLASSPATH@" value="${runscript.classpath}" />
+    <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar"/>
+    <replace file="${release.dir}/hdfview.bat" token="@SLF4J@" value="${runscript.slf4j}" />
 
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/doc/javadocs">
@@ -806,6 +811,7 @@
     <mkdir dir="${release.dir}" />
     <mkdir dir="${release.dir}/jre" />
     <mkdir dir="${release.dir}/lib" />
+    <mkdir dir="${release.dir}/lib/extra" />
     <mkdir dir="${release.dir}/share" />
     <mkdir dir="${release.dir}/share/samples" />
     <mkdir dir="${release.dir}/share/doc" />
@@ -815,9 +821,7 @@
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
       <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
@@ -840,6 +844,10 @@
         <exclude name="slf4j*.jar" />
       </fileset>
     </copy>
+    <copy todir="${release.dir}/lib/extra">
+        <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+        <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
+    </copy>
 
     <!-- Bundle jre -->
     <copy todir="${release.dir}/jre">
@@ -856,12 +864,8 @@
     </chmod>
 
     <!-- Set the correct classpath for the run script -->
-    <pathconvert property="runscript.classpath" refid="jar-classpath">
-      <map from="${basedir}" to="$INSTALLDIR" />
-      <map from="${hdf.lib.dir}" to="$INSTALLDIR/lib"/>
-      <map from="${hdf5.lib.dir}" to="$INSTALLDIR/lib"/>
-    </pathconvert>
-    <replace file="${release.dir}/hdfview.sh" token="@CLASSPATH@" value="${runscript.classpath}" />
+    <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar"/>
+    <replace file="${release.dir}/hdfview.sh" token="@SLF4J@" value="${runscript.slf4j}" />
 
     <!-- Copy the documentation -->
     <copy todir="${release.dir}/share/doc/javadocs">
@@ -891,9 +895,9 @@
       <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
       <fileset dir="${jar.dir}" includes="hdfobject.jar" />
       <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-simple-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-api-*.jar" excludes="*sources.jar" />
-      <fileset dir="${lib.dir}/extra" includes="slf4j-nop-*.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
       <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
       <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
       <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
@@ -1034,7 +1038,7 @@
             description="Packages the application source files into a compressed archive" />
 
   <target name="packageSourceWindows" depends="clean-package" if="isWindows">
-    <zip destfile="${build.dir}/${ant.project.name}-${app.version}.0-source.zip">
+    <zip destfile="${build.dir}/${ant.project.name}-${app.version}-source.zip">
       <zipfileset dir="${basedir}"
         excludes="bin/** build/** .*
                   lib/eos/**
@@ -1052,7 +1056,7 @@
   </target>
 
   <target name="packageSourceUnix" depends="clean-package" if="isUnix">
-    <tar destfile="${build.dir}/${ant.project.name}-${app.version}.0-source.tar.gz" compression="gzip">
+    <tar destfile="${build.dir}/${ant.project.name}-${app.version}-source.tar.gz" compression="gzip">
       <tarfileset dir="${basedir}"
         excludes="bin/** build/** .*
                   lib/eos/**
@@ -1163,28 +1167,28 @@
 
     <!-- For Linux/Unix, create install script, then compress HDFView into tar.gz file and concat it with
          install script to create a self-extracting .sh file -->
-    <copy file="${packagefiles.dir}/unix_install_script.sh.in" tofile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" />
-    <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}.0" />
-    <replace file="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" token="@OS@" value="${uname.os}" />
+    <copy file="${packagefiles.dir}/unix_install_script.sh.in" tofile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" />
+    <replace file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}" />
+    <replace file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" token="@OS@" value="${uname.os}" />
     <chmod perm="ugo+rx">
-      <fileset dir="${dist.dir}" includes="${ant.project.name}-${app.version}.0-${uname.os}.sh" />
+      <fileset dir="${dist.dir}" includes="${ant.project.name}-${app.version}-${uname.os}.sh" />
     </chmod>
 
     <tar destfile="${dist.dir}/temp.tar.gz" compression="gzip">
-      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}.0">
+      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}">
         <exclude name="*.sh" />
       </tarfileset>
       <tarfileset dir="${release.dir}/jre"
-        prefix="${ant.project.name}/${app.version}.0/jre"
+        prefix="${ant.project.name}/${app.version}/jre"
         filemode="777">
         <include name="**" />
       </tarfileset>
-      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}.0" filemode="777">
+      <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}" filemode="777">
         <include name="*.sh" />
       </tarfileset>
     </tar>
 
-    <concat destfile="${dist.dir}/${ant.project.name}-${app.version}.0-${uname.os}.sh" append="yes" binary="yes">
+    <concat destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" append="yes" binary="yes">
       <fileset dir="${dist.dir}" includes="temp.tar.gz" />
     </concat>
   </target>
@@ -1206,7 +1210,7 @@
       shortversion="${app.version}"
       icon="${lib.dir}/macosx/${ant.project.name}.icns"
       signature="????"
-      copyright="Copyright © 2006-2018 by The HDF Group. All rights reserved."
+      copyright="Copyright © 2006-2019 by The HDF Group. All rights reserved."
       applicationCategory="public.app-category.developer-tools"
       mainclassname="${main-class}">
 

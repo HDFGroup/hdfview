@@ -42,7 +42,7 @@ public class AttributeTest {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
-                System.out.println("AttributTest BeforeClass: Number of IDs still open: " + openID);
+                System.out.println("AttributeTest BeforeClass: Number of IDs still open: " + openID);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -61,7 +61,7 @@ public class AttributeTest {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
-                System.out.println("AttributTest AfterClass: Number of IDs still open: " + openID);
+                System.out.println("AttributeTest AfterClass: Number of IDs still open: " + openID);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -376,7 +376,7 @@ public class AttributeTest {
     public void testGetType() {
         log.debug("testGetType");
         assertTrue(strAttr.getDatatype().getDescription()
-                .equals("String, length = 20, string padding = H5T_STR_NULLTERM"));
+                .equals("String, length = 20, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII"));
         assertTrue(arrayIntAttr.getDatatype().getDescription().equals("32-bit integer"));
         long nObjs = 0;
         try {
