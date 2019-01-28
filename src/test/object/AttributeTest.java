@@ -42,7 +42,7 @@ public class AttributeTest {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
-                System.out.println("AttributTest BeforeClass: Number of IDs still open: " + openID);
+                System.out.println("AttributeTest BeforeClass: Number of IDs still open: " + openID);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -61,7 +61,7 @@ public class AttributeTest {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
-                System.out.println("AttributTest AfterClass: Number of IDs still open: " + openID);
+                System.out.println("AttributeTest AfterClass: Number of IDs still open: " + openID);
         }
         catch (Exception ex) {
             ex.printStackTrace();
