@@ -376,7 +376,7 @@ public class AttributeTest {
     public void testGetType() {
         log.debug("testGetType");
         assertTrue(strAttr.getDatatype().getDescription()
-                .equals("String, length = 20, string padding = H5T_STR_NULLTERM"));
+                .equals("String, length = 20, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII"));
         assertTrue(arrayIntAttr.getDatatype().getDescription().equals("32-bit integer"));
         long nObjs = 0;
         try {
