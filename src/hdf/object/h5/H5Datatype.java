@@ -552,7 +552,6 @@ public class H5Datatype extends Datatype {
             try {
                 nativeClass = H5.H5Tget_class(tid);
                 tsize = H5.H5Tget_size(tid);
-                torder = H5.H5Tget_order(tid);
                 is_variable_str = H5.H5Tis_variable_str(tid);
                 is_VLEN = false;
                 log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, is_VLEN);
@@ -562,8 +561,6 @@ public class H5Datatype extends Datatype {
                 datatypeClass = CLASS_NO_CLASS;
             }
 
-            datatypeOrder = (torder == HDF5Constants.H5T_ORDER_BE) ? ORDER_BE : ORDER_LE;
-
             try {
                 isUchar = H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_UCHAR);
                 isChar = (H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_CHAR) || isUchar);
@@ -572,27 +569,44 @@ public class H5Datatype extends Datatype {
             catch (Exception ex) {
                 log.debug("fromNative(): native char type failure: ", ex);
             }
-            try {
-                nativePrecision = H5.H5Tget_precision_long(tid);
+
+            datatypeOrder = HDF5Constants.H5T_ORDER_NONE;
+            if (datatypeIsAtomic(tid) || (nativeClass == HDF5Constants.H5T_COMPOUND)) {
+                try {
+                    torder = H5.H5Tget_order(tid);
+                    datatypeOrder = (torder == HDF5Constants.H5T_ORDER_BE) ? ORDER_BE : ORDER_LE;
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_order failure: ", ex);
+                }
             }
-            catch (Exception ex) {
-                log.debug("fromNative(): get_precision failure: ", ex);
+
+            if (datatypeIsAtomic(tid)) {
+                try {
+                    nativePrecision = H5.H5Tget_precision_long(tid);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_precision failure: ", ex);
+                }
+
+                try {
+                    nativeOffset = H5.H5Tget_offset(tid);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_offset failure: ", ex);
+                }
+
+                try {
+                    int[] pads = new int[2];
+                    H5.H5Tget_pad(tid, pads);
+                    nativePadLSB = pads[0];
+                    nativePadMSB = pads[1];
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): get_pad failure: ", ex);
+                }
             }
-            try {
-                nativeOffset = H5.H5Tget_offset(tid);
-            }
-            catch (Exception ex) {
-                log.debug("fromNative(): get_offset failure: ", ex);
-            }
-            try {
-                int[] pads = new int[2];
-                H5.H5Tget_pad(tid, pads);
-                nativePadLSB = pads[0];
-                nativePadMSB = pads[1];
-            }
-            catch (Exception ex) {
-                log.debug("fromNative(): get_pad failure: ", ex);
-            }
+
             log.trace("fromNative(): isUchar={}, nativePrecision={}, nativeOffset={}, nativePadLSB={}, nativePadMSB={}", isUchar, nativePrecision, nativeOffset, nativePadLSB,
                     nativePadMSB);
 
@@ -1715,7 +1729,7 @@ public class H5Datatype extends Datatype {
         log.trace("extractCompoundInfo(): start: name={}", name);
 
         if (isArray() || isVLEN()) {
-            log.trace("extractCompoundInfo(): top-level types is ARRAY or VLEN; extracting compound info from base type");
+            log.trace("extractCompoundInfo(): top-level type is ARRAY or VLEN; extracting compound info from base type");
             ((H5Datatype) getDatatypeBase()).extractCompoundInfo(name, names, flatListTypes);
         }
         else {
@@ -1814,5 +1828,28 @@ public class H5Datatype extends Datatype {
 
         log.trace("createCompoundFieldType(): finish");
         return nested_tid;
+    }
+
+    private boolean datatypeIsComplex(long tid) {
+    	long tclass = HDF5Constants.H5T_NO_CLASS;
+
+    	try {
+    		tclass = H5.H5Tget_class(tid);
+    	}
+    	catch (Exception ex) {
+    		log.debug("datatypeIsComplex():", ex);
+    	}
+
+    	if ( tclass == HDF5Constants.H5T_COMPOUND
+    	  || tclass == HDF5Constants.H5T_ENUM
+    	  || tclass == HDF5Constants.H5T_VLEN
+    	  || tclass == HDF5Constants.H5T_ARRAY)
+    	    return true;
+    	else
+    	    return false;
+    }
+
+    private boolean datatypeIsAtomic(long tid) {
+        return !datatypeIsComplex(tid);
     }
 }

@@ -2312,7 +2312,6 @@ public class DefaultTreeView implements TreeView {
     public FileFormat openFile(String filename, int accessID) throws Exception {
         log.trace("openFile: {},{}", filename, accessID);
         FileFormat fileFormat = null;
-        TreeItem fileRoot = null;
         boolean isNewFile = (FileFormat.OPEN_NEW == (accessID & FileFormat.OPEN_NEW));
         if (isNewFile) accessID = accessID - FileFormat.OPEN_NEW;
 
@@ -2395,34 +2394,23 @@ public class DefaultTreeView implements TreeView {
             fileFormat.setIndexOrder(fileFormat.getIndexOrder(ViewProperties.getIndexOrder()));
         }
 
-        return openFile(fileFormat, accessID);
+        return initFile(fileFormat);
     }
 
     /**
-     * Opens a file with an existing FileFormat instance and retrieves the file structure of the file.
-     * It also can be used to create a new file by setting the accessID to FileFormat.CREATE.
+     * Initializes a FileFormat object by opening it and populating the file tree structure.
      *
-     * <p>
-     * Subclasses must implement this function to take appropriate steps to open a file.
-     * </p>
-     *
-     * @param fileformat
+     * @param fileFormat
      *            the file to open with an existing FileFormat instance.
-     * @param accessID
-     *            identifier for the file access. Valid value of accessID is:
-     *            <ul>
-     *            <li>FileFormat.READ --- allow read-only access to file.</li>
-     *            <li>FileFormat.WRITE --- allow read and write access to file.</li>
-     *            <li>FileFormat.CREATE --- create a new file.</li>
-     *            </ul>
      *
-     * @return the updated FileFormat of this file if successful; otherwise returns null.
+     * @return the initialized FileFormat of this file if successful; otherwise returns null.
      *
      * @throws Exception
      *             if a failure occurred
      */
-    public FileFormat openFile(FileFormat fileFormat, int accessID) throws Exception {
-        log.trace("openFile[format]: {},{}", fileFormat.getAbsolutePath(), accessID);
+    private FileFormat initFile(FileFormat fileFormat) throws Exception {
+        log.trace("initFile[{}] - start", fileFormat.getAbsolutePath());
+
         TreeItem fileRoot = null;
 
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
@@ -2432,19 +2420,7 @@ public class DefaultTreeView implements TreeView {
             fileFormat.setStartMembers(ViewProperties.getStartMembers());
 
             fileFormat.open();
-        }
-        catch (Exception ex) {
-            log.debug("openFile: FileFormat init and open error:", ex);
-            fileFormat = null;
-        }
-        finally {
-            shell.setCursor(null);
-        }
 
-        if (fileFormat == null) {
-            throw new java.io.IOException("openFile: Failed to open file - " + fileFormat.getAbsolutePath());
-        }
-        else  {
             fileRoot = populateTree(fileFormat);
 
             if (fileRoot != null) {
@@ -2454,33 +2430,39 @@ public class DefaultTreeView implements TreeView {
                     tree.getItem(currentRowCount - 1).setExpanded(true);
                 }
 
-                // If this is the first file opened, initialize the breadth-first
-                // list of TreeItems
-                //if(breadthFirstItems == null)
-                //    breadthFirstItems = getItemsBreadthFirst(fileRoot);
-
                 fileList.add(fileFormat);
             }
 
             tree.setItemCount(fileList.size());
         }
+        catch (Exception ex) {
+            log.debug("initFile: FileFormat init error:", ex);
+            fileFormat = null;
+        }
+        finally {
+            shell.setCursor(null);
+        }
+
+        log.trace("initFile[{}] - finish", fileFormat.getAbsolutePath());
 
         return fileFormat;
     }
 
     @Override
     public FileFormat reopenFile(FileFormat fileFormat, int newFileAccessMode) throws Exception {
+        String fileFormatName = fileFormat.getAbsolutePath();
+
         closeFile(fileFormat);
         ((HDFView) viewer).showMetaData(null);
 
         if (newFileAccessMode < 0) {
             if (ViewProperties.isReadOnly())
-                return openFile(fileFormat, FileFormat.READ);
+                return openFile(fileFormatName, FileFormat.READ);
             else
-                return openFile(fileFormat, FileFormat.WRITE);
+                return openFile(fileFormatName, FileFormat.WRITE);
         }
         else
-            return openFile(fileFormat, newFileAccessMode);
+            return openFile(fileFormatName, newFileAccessMode);
     }
 
     /**

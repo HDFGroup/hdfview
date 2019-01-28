@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import hdf.hdf5lib.H5;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -512,10 +513,17 @@ public class NewLinkDialog extends Dialog {
                 return null;
             }
 
+			/*
+			 * While checking for the existence of the object that the soft link points to,
+			 * the following function currently just calls H5Oopen, which will fail and
+			 * throw an HDF5 error stack for dangling soft links. Due to this, we
+			 * temporarily suppress the HDF5 error stack.
+			 */
             HObject targetObj = null;
-            try {
-                targetObj = fileFormat.get(targetObject.getText());
-            }
+			try {
+				H5.H5error_off();
+				targetObj = fileFormat.get(target_name);
+			}
             catch (Exception ex) {
                 /* It is possible that this is a soft link to a non-existent
                  * object, in which case this exception would be normal.
@@ -524,10 +532,13 @@ public class NewLinkDialog extends Dialog {
                  * if something went terribly wrong.
                  */
             }
+			finally {
+				H5.H5error_on();
+			}
 
             String tObj = null;
-            if(targetObj==null){
-                tObj = targetObject.getText();
+			if (targetObj == null) {
+				tObj = target_name;
 
                 if (!tObj.startsWith(HObject.separator)) {
                     tObj = HObject.separator + tObj;
@@ -541,9 +552,9 @@ public class NewLinkDialog extends Dialog {
             }
 
             try {
-                if(targetObj !=null)
+				if (targetObj != null)
                     obj = fileFormat.createLink(pgroup, name, targetObj, Group.LINK_TYPE_SOFT);
-                else if(tObj!=null)
+				else if (tObj != null)
                     obj = fileFormat.createLink(pgroup, name, tObj, Group.LINK_TYPE_SOFT);
             }
             catch (Exception ex) {
