@@ -2099,4 +2099,24 @@ public class H4File extends FileFormat {
         return;
     }
 
+    @Override
+    public int getIndexType(String strtype) {
+    	return -1;
+    }
+
+    @Override
+    public void setIndexType(int indexType) {
+    	return;
+    }
+
+    @Override
+    public int getIndexOrder(String strorder) {
+        return -1;
+    }
+
+    @Override
+    public void setIndexOrder(int indexOrder) {
+        return;
+    }
+
 }

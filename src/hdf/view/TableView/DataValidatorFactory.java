@@ -178,7 +178,7 @@ public class DataValidatorFactory {
                 this.baseValidator = new ArrayDataValidator(baseType);
             else if (baseType.isInteger() || baseType.isFloat())
                 this.baseValidator = new NumericalDataValidator(baseType);
-            else if (baseType.isVLEN())
+            else if (baseType.isVLEN() && !baseType.isVarStr())
                 this.baseValidator = new VlenDataValidator(baseType);
             else if (baseType.isString())
                 this.baseValidator = new StringDataValidator(baseType);
@@ -225,7 +225,7 @@ public class DataValidatorFactory {
                 this.baseValidator = new ArrayDataValidator(baseType);
             else if (baseType.isInteger() || baseType.isFloat())
                 this.baseValidator = new NumericalDataValidator(baseType);
-            else if (baseType.isVLEN())
+            else if (baseType.isVLEN() && !baseType.isVarStr())
                 this.baseValidator = new VlenDataValidator(baseType);
             else if (baseType.isString())
                 this.baseValidator = new StringDataValidator(baseType);
@@ -238,7 +238,7 @@ public class DataValidatorFactory {
             if (!(newValue instanceof String))
                 throw new ValidationFailedException("Cannot validate data input: data is not a String");
 
-            StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,{}");
+            StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,()");
             while (elementReader.hasMoreTokens()) {
                 String nextToken = elementReader.nextToken();
                 if (!baseValidator.validate(colIndex, rowIndex, nextToken))
