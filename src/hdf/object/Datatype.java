@@ -151,7 +151,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
-    public static final int NSGN = 2; // no sign
+    public static final int NSGN = 2;
 
     protected String datatypeDescription = null;
 
