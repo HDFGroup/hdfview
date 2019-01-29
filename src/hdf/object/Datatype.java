@@ -718,7 +718,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 }
             }
             else {
-                return (datatypeSign == Datatype.SIGN_NONE);
+                if (isInteger() || isFloat() || isChar())
+                    return (datatypeSign == Datatype.SIGN_NONE);
+                return false;
             }
         }
     }

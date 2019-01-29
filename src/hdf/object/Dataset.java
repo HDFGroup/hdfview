@@ -923,6 +923,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         log.trace("convertFromUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'B') {
+            log.debug("convertFromUnsignedC(): Java convert byte to short");
             short[] sdata = null;
             if (data_out == null) {
                 sdata = new short[size];
@@ -939,6 +940,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             data_out = sdata;
         }
         else if (dname == 'S') {
+            log.debug("convertFromUnsignedC(): Java convert short to int");
             int[] idata = null;
             if (data_out == null) {
                 idata = new int[size];
@@ -955,6 +957,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             data_out = idata;
         }
         else if (dname == 'I') {
+            log.debug("convertFromUnsignedC(): Java convert int to long");
             long[] ldata = null;
             if (data_out == null) {
                 ldata = new long[size];
@@ -1040,6 +1043,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         log.trace("convertToUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'S') {
+            log.debug("convertToUnsignedC(): Java convert short to byte");
             byte[] bdata = null;
             if (data_out == null) {
                 bdata = new byte[size];
@@ -1054,6 +1058,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             data_out = bdata;
         }
         else if (dname == 'I') {
+            log.debug("convertToUnsignedC(): Java convert int to short");
             short[] sdata = null;
             if (data_out == null) {
                 sdata = new short[size];
@@ -1068,6 +1073,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             data_out = sdata;
         }
         else if (dname == 'J') {
+            log.debug("convertToUnsignedC(): Java convert long to int");
             int[] idata = null;
             if (data_out == null) {
                 idata = new int[size];
