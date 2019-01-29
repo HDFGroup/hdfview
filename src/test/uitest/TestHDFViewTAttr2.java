@@ -993,7 +993,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             table.click(1, 1);
             assertTrue("openTAttr2GroupVlen() data{"+table.rowCount()+","+table.columnCount()+"} ["+
                     tableShell.bot().text(0).getText()+"] did not match regex '{1}'",
-                    tableShell.bot().text(0).getText().equals("(1)"));
+                    tableShell.bot().text(0).getText().equals("{1}"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -1011,7 +1011,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             table.click(2, 2);
             assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(0).getText()+"] did not match regex '{4, 5}'",
-                    tableShell.bot().text(0).getText().equals("(4, 5)"));
+                    tableShell.bot().text(0).getText().equals("{4, 5}"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -1029,7 +1029,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             table.click(3, 3);
             assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(2).getText()+"] did not match regex '{30, 31, 32}'",
-                    tableShell.bot().text(2).getText().equals("(30, 31, 32)"));
+                    tableShell.bot().text(2).getText().equals("{30, 31, 32}"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1141,8 +1141,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                     table.cell(6,0).matches("compound"));
 
             assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(6,3)+"] did not match regex '{1, 2} , {3, 4}'",
-                    table.cell(6,3).matches("\\{1, 2\\}, \\{3, 4\\}"));
+                    table.cell(6,3)+"] did not match regex '(1, 2),  (3, 4)'",
+                    table.cell(6,3).matches(" \\{1, 2\\} ,  \\{3, 4\\} "));
 
             table.click(7, 0);
             assertTrue("openTAttr2Attribute() data ["+table.cell(7,0)+
@@ -1150,8 +1150,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                     table.cell(7,0).matches("compound2D"));
 
             assertTrue("openTAttr2Attribute() data ["+table.cell(7,3)+
-                    "] did not match regex '{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}'",
-                    table.cell(7,3).matches("\\{1, 2\\}, \\{3, 4\\}, \\{5, 6\\}, \\{7, 8\\}, \\{9, 10\\}, \\{11, 12\\}"));
+                    "] did not match regex '(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)'",
+                    table.cell(7,3).matches(" \\{1, 2\\} ,  \\{3, 4\\} ,  \\{5, 6\\} ,  \\{7, 8\\} ,  \\{9, 10\\} ,  \\{11, 12\\} "));
 
             table.click(8, 0);
             assertTrue("openTAttr2Attribute() data ["+table.cell(8,0)+
@@ -1159,8 +1159,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                     table.cell(8,0).matches("compound3D"));
 
             assertTrue("openTAttr2Attribute() data ["+table.cell(8,3)+
-                    "] did not match regex '{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}, {13, 14}, {15, 16}, {17, 18}, {19, 20}, {21, 22}, {23, 24}, {25, 26}, {27, 28}, {29, 30}, {31, 32}, {33, 34}, {35, 36}, {37, 38}, {39, 40}, {41, 42}, {43, 44}, {45, 46}, {47, 48}'",
-                    table.cell(8,3).matches("\\{1, 2\\}, \\{3, 4\\}, \\{5, 6\\}, \\{7, 8\\}, \\{9, 10\\}, \\{11, 12\\}, \\{13, 14\\}, \\{15, 16\\}, \\{17, 18\\}, \\{19, 20\\}, \\{21, 22\\}, \\{23, 24\\}, \\{25, 26\\}, \\{27, 28\\}, \\{29, 30\\}, \\{31, 32\\}, \\{33, 34\\}, \\{35, 36\\}, \\{37, 38\\}, \\{39, 40\\}, \\{41, 42\\}, \\{43, 44\\}, \\{45, 46\\}, \\{47, 48\\}"));
+                    "] did not match regex '(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14), (15, 16), (17, 18), (19, 20), (21, 22), (23, 24), (25, 26), (27, 28), (29, 30), (31, 32), (33, 34), (35, 36), (37, 38), (39, 40), (41, 42), (43, 44} , {45, 46), (47, 48)'",
+                    table.cell(8,3).matches(" \\{1, 2\\} ,  \\{3, 4\\} ,  \\{5, 6\\} ,  \\{7, 8\\} ,  \\{9, 10\\} ,  \\{11, 12\\} ,  \\{13, 14\\} ,  \\{15, 16\\} ,  \\{17, 18\\} ,  \\{19, 20\\} ,  \\{21, 22\\} ,  \\{23, 24\\} ,  \\{25, 26\\} ,  \\{27, 28\\} ,  \\{29, 30\\} ,  \\{31, 32\\} ,  \\{33, 34\\} ,  \\{35, 36\\} ,  \\{37, 38\\} ,  \\{39, 40\\} ,  \\{41, 42\\} ,  \\{43, 44\\} ,  \\{45, 46\\} ,  \\{47, 48\\} "));
 
             table.click(9, 0);
             assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
@@ -1331,7 +1331,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
                     table.cell(27, 3) + "] did not match regex '(1), (2, 3)'",
-                    table.cell(27, 3).matches("\\(1\\), \\(2, 3\\)"));
+                    table.cell(27, 3).matches("\\{1\\}, \\{2, 3\\}"));
 
             table.click(28, 0);
             assertTrue("openTAttr2Attribute() data ["+table.cell(28,0)+
@@ -1340,7 +1340,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             assertTrue("openTAttr2Attribute() data ["+table.cell(28,3)+
                     "] did not match regex '(0), (1), (2, 3), (4, 5), (6, 7, 8), (9, 10, 11)'",
-                    table.cell(28, 3).matches("\\(0\\), \\(1\\), \\(2, 3\\), \\(4, 5\\), \\(6, 7, 8\\), \\(9, 10, 11\\)"));
+                    table.cell(28, 3).matches("\\{0\\}, \\{1\\}, \\{2, 3\\}, \\{4, 5\\}, \\{6, 7, 8\\}, \\{9, 10, 11\\}"));
 
             table.click(29, 0);
             assertTrue("openTAttr2Attribute() data ["+table.cell(29,0)+
@@ -1350,7 +1350,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             assertTrue("openTAttr2Attribute() data ["+table.cell(29,3)+
                     "] did not match regex '(0), (1), (2), (3), (4), (5), (6, 7), (8, 9), (10, 11), (12, 13), (14, 15), (16, 17), (18, 19, 20), (21, 22, 23), (24, 25, 26), (27, 28, 29), (30, 31, 32), (33, 34, 35), (36, 37, 38, 39), (40, 41, 42, 43), (44, 45, 46, 47), (48, 49, 50, 51), (52, 53, 54, 55), (56, 57, 58, 59)'",
                     table.cell(29, 3).matches(
-                            "\\(0\\), \\(1\\), \\(2\\), \\(3\\), \\(4\\), \\(5\\), \\(6, 7\\), \\(8, 9\\), \\(10, 11\\), \\(12, 13\\), \\(14, 15\\), \\(16, 17\\), \\(18, 19, 20\\), \\(21, 22, 23\\), \\(24, 25, 26\\), \\(27, 28, 29\\), \\(30, 31, 32\\), \\(33, 34, 35\\), \\(36, 37, 38, 39\\), \\(40, 41, 42, 43\\), \\(44, 45, 46, 47\\), \\(48, 49, 50, 51\\), \\(52, 53, 54, 55\\), \\(56, 57, 58, 59\\)"));
+                            "\\{0\\}, \\{1\\}, \\{2\\}, \\{3\\}, \\{4\\}, \\{5\\}, \\{6, 7\\}, \\{8, 9\\}, \\{10, 11\\}, \\{12, 13\\}, \\{14, 15\\}, \\{16, 17\\}, \\{18, 19, 20\\}, \\{21, 22, 23\\}, \\{24, 25, 26\\}, \\{27, 28, 29\\}, \\{30, 31, 32\\}, \\{33, 34, 35\\}, \\{36, 37, 38, 39\\}, \\{40, 41, 42, 43\\}, \\{44, 45, 46, 47\\}, \\{48, 49, 50, 51\\}, \\{52, 53, 54, 55\\}, \\{56, 57, 58, 59\\}"));
         }
         catch (Exception ex) {
             ex.printStackTrace();

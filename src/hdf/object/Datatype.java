@@ -151,7 +151,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
-    public static final int NSGN = 2;
+    public static final int NSGN = 2; //number of valid sign states
 
     protected String datatypeDescription = null;
 
@@ -471,7 +471,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Returns the sign (SIGN_NONE, SIGN_2 or NSGN) of an integer datatype.
+     * Returns the sign (SIGN_NONE, SIGN_2) of an integer datatype.
      *
      * @return the sign of the datatype.
      */
@@ -657,6 +657,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 break;
             case CLASS_REFERENCE:
                 description = "Object reference";
+                break;
+            case CLASS_OPAQUE:
+                description = String.valueOf(datatypeSize * 8) + "-bit opaque";
                 break;
             case CLASS_BITFIELD:
                 description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
