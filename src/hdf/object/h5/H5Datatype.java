@@ -1878,7 +1878,6 @@ public class H5Datatype extends Datatype {
 
         if (tclass == HDF5Constants.H5T_COMPOUND
                 || tclass == HDF5Constants.H5T_ENUM
-                || tclass == HDF5Constants.H5T_BITFIELD
                 || tclass == HDF5Constants.H5T_VLEN
                 || tclass == HDF5Constants.H5T_ARRAY)
             return true;
@@ -1887,6 +1886,6 @@ public class H5Datatype extends Datatype {
     }
 
     private boolean datatypeIsAtomic(long tid) {
-        return !datatypeIsComplex(tid) || isOpaque();
+        return !datatypeIsComplex(tid) || isOpaque() || isBitField();
     }
 }
