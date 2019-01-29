@@ -610,7 +610,7 @@ public class H5Datatype extends Datatype {
             log.trace("fromNative(): isUchar={}, nativePrecision={}, nativeOffset={}, nativePadLSB={}, nativePadMSB={}", isUchar, nativePrecision, nativeOffset, nativePadLSB,
                     nativePadMSB);
 
-            datatypeSign = SIGN_NONE; // default
+            datatypeSign = NSGN; // default
             if (nativeClass == HDF5Constants.H5T_ARRAY) {
                 long tmptid = -1;
                 datatypeClass = CLASS_ARRAY;
@@ -1109,8 +1109,18 @@ public class H5Datatype extends Datatype {
 
                     break;
                 case CLASS_OPAQUE:
-                    log.trace("createNative(): default CLASS_OPAQUE is H5T_NATIVE_OPAQUE");
-                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_OPAQUE);
+                    if (datatypeSize > 0) {
+                        log.trace("createNative(): CLASS_OPAQUE is {}-byte H5T_OPAQUE", datatypeSize);
+                        tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
+                    }
+                    else {
+                        log.trace("createNative(): default CLASS_OPAQUE is 1-byte H5T_OPAQUE");
+                        tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, 1);
+                    }
+
+                    log.trace("createNative(): CLASS_OPAQUE size is " + datatypeSize);
+                    if (datatypeSize > 0)
+                        H5.H5Tset_size(tid, datatypeSize);
 
                     if (datatypeOrder == Datatype.ORDER_BE) {
                         log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");

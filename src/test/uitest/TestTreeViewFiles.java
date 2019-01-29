@@ -949,7 +949,13 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         String groupname1 = "bittypetests";
         String groupname2 = "cmpdtypetests";
         String groupname3 = "opaquetypetests";
-        String datasetname = "bitfield_1";
+        String datasetname1 = "bitfield_1";
+        String datasetname2 = "bitfield_2";
+        String datasetname3 = "bitfield_3";
+        String datasetname4 = "bitfield_4";
+        String datasetname5 = "opaque_1";
+        String datasetname6 = "opaque_2";
+        String datasetname7 = "compound_1";
         SWTBotShell tableShell = null;
         File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
@@ -977,7 +983,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             items[0].getNode(0).getNode(0).click();
             items[0].getNode(0).getNode(0).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname1 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];
@@ -988,29 +994,211 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table.click(1, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val),
-                    val.equals("FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val), val.equals("FF"));
 
             table.click(2, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FE", val),
-                    val.equals("FE"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FE", val), val.equals("FE"));
 
             table.click(3, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FD", val),
-                    val.equals("FD"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FD", val), val.equals("FD"));
 
             table.click(4, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FC", val),
-                    val.equals("FC"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FC", val), val.equals("FC"));
 
             // TODO: disabled until a solution for getting values of non-visible cells is found
             //            val = table.getCellDataValueByPosition(31, 1);
             // assertTrue(constructWrongValueMessage("openHDF5CompoundBits()",
             // "wrong data", "E1", val),
             //                    val.equals("E1"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].getNode(0).getNode(1).click();
+            items[0].getNode(0).getNode(1).contextMenu("Open").click();
+            shellMatcher = WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF:FF", val), val.equals("FF:FF"));
+
+            table.click(2, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "EF:FF", val), val.equals("EF:FF"));
+
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "DF:FF", val), val.equals("DF:FF"));
+
+            table.click(4, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF:FF", val), val.equals("CF:FF"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].getNode(0).getNode(1).click();
+            items[0].getNode(0).getNode(1).contextMenu("Open").click();
+            shellMatcher = WithRegex.withRegex(datasetname3 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF:FF:FF:FF", val), val.equals("FF:FF:FF:FF"));
+
+            table.click(2, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "DF:FF:FF:FF", val), val.equals("DF:FF:FF:FF"));
+
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "BF:FF:FF:FF", val), val.equals("BF:FF:FF:FF"));
+
+            table.click(4, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "9F:FF:FF:FF", val), val.equals("9F:FF:FF:FF"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].getNode(0).getNode(1).click();
+            items[0].getNode(0).getNode(1).contextMenu("Open").click();
+            shellMatcher = WithRegex.withRegex(datasetname4 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF:FF:FF:FF:FF:FF:FF:FF", val), val.equals("FF:FF:FF:FF:FF:FF:FF:FF"));
+
+            table.click(2, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "BF:FF:FF:FF:FF:FF:FF:FF", val), val.equals("BF:FF:FF:FF:FF:FF:FF:FF"));
+
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "7F:FF:FF:FF:FF:FF:FF:FF", val), val.equals("7F:FF:FF:FF:FF:FF:FF:FF"));
+
+            table.click(4, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "3F:FF:FF:FF:FF:FF:FF:FF", val), val.equals("3F:FF:FF:FF:FF:FF:FF:FF"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].getNode(2).getNode(0).click();
+            items[0].getNode(2).getNode(0).contextMenu("Open").click();
+            shellMatcher = WithRegex.withRegex(datasetname5 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val), val.equals("FF"));
+
+            table.click(2, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FE", val), val.equals("FE"));
+
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FD", val), val.equals("FD"));
+
+            table.click(4, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FC", val), val.equals("FC"));
+
+            // TODO: disabled until a solution for getting values of non-visible cells is found
+            // val = table.getCellDataValueByPosition(31, 1);
+            // assertTrue(constructWrongValueMessage("openHDF5CompoundBits()",
+            // "wrong data", "E1", val),
+            // val.equals("E1"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].getNode(2).getNode(1).click();
+            items[0].getNode(2).getNode(1).contextMenu("Open").click();
+            shellMatcher = WithRegex.withRegex(datasetname6 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF:FF", val), val.equals("FF:FF"));
+
+            table.click(2, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "DF:FF", val), val.equals("DF:FF"));
+
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF:FF", val), val.equals("CF:FF"));
+
+            table.click(4, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "BF:FF", val), val.equals("BF:FF"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].getNode(1).getNode(0).click();
+            items[0].getNode(1).getNode(0).contextMenu("Open").click();
+            shellMatcher = WithRegex.withRegex(datasetname7 + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val), val.equals("FF"));
+
+            table.click(2, 2);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "EF:FF", val), val.equals("EF:FF"));
+
+            table.click(3, 3);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "BF:FF:FF:FF", val), val.equals("BF:FF:FF:FF"));
+
+            table.click(4, 4);
+            val = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "3F:FF:FF:FF:FF:FF:FF:FF", val), val.equals("3F:FF:FF:FF:FF:FF:FF:FF"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
