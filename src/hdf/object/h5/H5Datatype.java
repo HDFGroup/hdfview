@@ -1115,12 +1115,9 @@ public class H5Datatype extends Datatype {
                     }
                     else {
                         log.trace("createNative(): default CLASS_OPAQUE is 1-byte H5T_OPAQUE");
+                        datatypeSize = 1;
                         tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, 1);
                     }
-
-                    log.trace("createNative(): CLASS_OPAQUE size is " + datatypeSize);
-                    if (datatypeSize > 0)
-                        H5.H5Tset_size(tid, datatypeSize);
 
                     if (datatypeOrder == Datatype.ORDER_BE) {
                         log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");
@@ -1879,16 +1876,17 @@ public class H5Datatype extends Datatype {
             log.debug("datatypeIsComplex():", ex);
         }
 
-        if ( tclass == HDF5Constants.H5T_COMPOUND
-        || tclass == HDF5Constants.H5T_ENUM
-        || tclass == HDF5Constants.H5T_VLEN
-        || tclass == HDF5Constants.H5T_ARRAY)
+        if (tclass == HDF5Constants.H5T_COMPOUND
+                || tclass == HDF5Constants.H5T_ENUM
+                || tclass == HDF5Constants.H5T_BITFIELD
+                || tclass == HDF5Constants.H5T_VLEN
+                || tclass == HDF5Constants.H5T_ARRAY)
             return true;
         else
             return false;
     }
 
     private boolean datatypeIsAtomic(long tid) {
-        return !datatypeIsComplex(tid);
+        return !datatypeIsComplex(tid) || isOpaque();
     }
 }
