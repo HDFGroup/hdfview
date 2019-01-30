@@ -176,6 +176,73 @@ public class H5ScalarDS extends ScalarDS {
         log.trace("close(): finish");
     }
 
+    public H5Datatype getDSDatatype() throws Exception {
+        H5Datatype DSdatatype = null;
+
+        if (!isInited())
+            init();
+
+        try {
+            DSdatatype = (H5Datatype) this.getDatatype();
+        }
+        catch (Exception ex) {
+            log.debug("getDSDatatype(): get datatype: ", ex);
+        }
+
+        /*
+         * Check for any unsupported datatypes and fail early before attempting to read the dataset
+         */
+        if (DSdatatype.isArray()) {
+            H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
+
+            if (baseType == null) {
+                log.debug("getDSDatatype(): ARRAY datatype has no base type");
+                throw new Exception("Dataset's datatype (ARRAY) has no base datatype");
+            }
+        }
+
+        if (isExternal) {
+            String pdir = this.getFileFormat().getAbsoluteFile().getParent();
+
+            if (pdir == null) {
+                pdir = ".";
+            }
+            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
+            log.trace("getDSDatatype(): External dataset: user.dir={}", pdir);
+        }
+        return DSdatatype;
+    }
+
+    public long getTotalSelectedSpacePoints(long did, long[] spaceIDs) throws HDF5Exception {
+        long totalSelectedSpacePoints = selectHyperslab(did, spaceIDs);
+
+        log.trace("getTotalSelectedSpacePoints(): selected {} points in dataset dataspace", totalSelectedSpacePoints);
+
+        if (totalSelectedSpacePoints == 0) {
+            log.debug("getTotalSelectedSpacePoints(): No data to read. Dataset or selected subset is empty.");
+            log.trace("getTotalSelectedSpacePoints(): finish");
+            throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
+        }
+
+        if (totalSelectedSpacePoints < Integer.MIN_VALUE || totalSelectedSpacePoints > Integer.MAX_VALUE) {
+            log.debug("getTotalSelectedSpacePoints(): totalSelectedSpacePoints outside valid Java int range; unsafe cast");
+            log.trace("getTotalSelectedSpacePoints(): finish");
+            throw new HDF5Exception("Invalid int size");
+        }
+
+        if (log.isDebugEnabled()) {
+            // check is storage space is allocated
+            try {
+                long ssize = H5.H5Dget_storage_size(did);
+                log.trace("getTotalSelectedSpacePoints(): Storage space allocated = {}.", ssize);
+            }
+            catch (Exception ex) {
+                log.debug("getTotalSelectedSpacePoints(): check if storage space is allocated:", ex);
+            }
+        }
+        return totalSelectedSpacePoints;
+    }
+
     /**
      * Retrieves datatype and dataspace information from file and sets the dataset
      * in memory.
@@ -773,40 +840,7 @@ public class H5ScalarDS extends ScalarDS {
         log.trace("read(): start");
 
         Object theData = null;
-        H5Datatype DSdatatype = null;
-
-        if (!isInited())
-            init();
-
-        try {
-            DSdatatype = (H5Datatype) this.getDatatype();
-        }
-        catch (Exception ex) {
-            log.debug("read(): get datatype: ", ex);
-        }
-
-        /*
-         * Check for any unsupported datatypes and fail early before
-         * attempting to read the dataset
-         */
-        if (DSdatatype.isArray()) {
-            H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
-
-            if (baseType == null) {
-                log.debug("read(): ARRAY datatype has no base type");
-                throw new Exception("Dataset's datatype (ARRAY) has no base datatype");
-            }
-        }
-
-        if (isExternal) {
-            String pdir = this.getFileFormat().getAbsoluteFile().getParent();
-
-            if (pdir == null) {
-                pdir = ".";
-            }
-            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
-            log.trace("read(): External dataset: user.dir={}", pdir);
-        }
+        H5Datatype DSdatatype = getDSDatatype();
 
         log.trace("read(): open dataset");
 
@@ -815,32 +849,7 @@ public class H5ScalarDS extends ScalarDS {
             long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
-                long totalSelectedSpacePoints = selectHyperslab(did, spaceIDs);
-
-                log.trace("read(): selected {} points in dataset dataspace", totalSelectedSpacePoints);
-
-                if (totalSelectedSpacePoints == 0) {
-                    log.debug("read(): No data to read. Dataset or selected subset is empty.");
-                    log.trace("read(): finish");
-                    throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
-                }
-
-                if (totalSelectedSpacePoints < Integer.MIN_VALUE || totalSelectedSpacePoints > Integer.MAX_VALUE) {
-                    log.debug("read(): totalSelectedSpacePoints outside valid Java int range; unsafe cast");
-                    log.trace("read(): finish");
-                    throw new HDF5Exception("Invalid int size");
-                }
-
-                if (log.isDebugEnabled()) {
-                    // check is storage space is allocated
-                    try {
-                        long ssize = H5.H5Dget_storage_size(did);
-                        log.trace("read(): Storage space allocated = {}.", ssize);
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): check if storage space is allocated:", ex);
-                    }
-                }
+                long totalSelectedSpacePoints = getTotalSelectedSpacePoints(did, spaceIDs);
 
                 log.trace("read(): isText={} isREF={} totalSelectedSpacePoints={} nPoints={}", DSdatatype.isText(), DSdatatype.isRefObj(), totalSelectedSpacePoints, nPoints);
                 if ((originalBuf == null) || DSdatatype.isEnum() || DSdatatype.isText() || DSdatatype.isRefObj() || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {

@@ -135,37 +135,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     protected void loadData(DataFormat dataObject) throws Exception {
         log.trace("loadData(): start");
 
-        if (!dataObject.isInited()) {
-            try {
-                dataObject.init();
-                log.trace("loadData(): data object inited");
-            }
-            catch (Exception ex) {
-                Tools.showError(shell, "Load", "loadData:" + ex.getMessage());
-                dataValue = null;
-                log.debug("loadData(): ", ex);
-                log.trace("loadData(): finish");
-                return;
-            }
-        }
+        super.loadData(dataObject);
 
-        // Make sure entire dataset is not loaded when looking at 3D
-        // datasets using the default display mode (double clicking the
-        // data object)
-        if (dataObject.getRank() > 2) {
-            dataObject.getSelectedDims()[dataObject.getSelectedIndex()[2]] = 1;
-        }
-
-        dataValue = null;
         try {
-            dataValue = dataObject.getData();
-            if (dataValue == null) {
-                Tools.showError(shell, "Load", "ScalarDS loadData:" + "No data read");
-                log.debug("loadData(): no data read");
-                log.trace("loadData(): finish");
-                throw new RuntimeException("data value is null");
-            }
-
             if (Tools.applyBitmask(dataValue, bitmask, bitmaskOP)) {
                 isReadOnly = true;
                 String opName = "Bits ";
@@ -182,7 +154,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             dataValue = dataObject.getData();
         }
         catch (Throwable ex) {
-            Tools.showError(shell, "Load", "ScalarDS loadData:" + ex.getMessage());
+            Tools.showError(shell, "Load", "DefaultScalarDSTableView.loadData:" + ex.getMessage());
             log.debug("loadData(): ", ex);
             log.trace("loadData(): finish");
             dataValue = null;
@@ -1403,15 +1375,15 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            log.trace("ScalarDSDataProvider:getValueAt({},{}) start", rowIndex, columnIndex);
-            log.trace("ScalarDSDataProvider:getValueAt isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray,
+            log.trace("ScalarDSDataProvider:getDataValue({},{}) start", rowIndex, columnIndex);
+            log.trace("ScalarDSDataProvider:getDataValue isInt={} isArray={} showAsHex={} showAsBin={}", isInt, isArray,
                     showAsHex, showAsBin);
 
             if (dataValue instanceof String) return dataValue;
 
             try {
                 if (isArray) {
-                    log.trace("ScalarDSDataProvider:getValueAt ARRAY dataset size={} isDisplayTypeChar={} isUINT64={}", arraySize, isDisplayTypeChar, isUINT64);
+                    log.trace("ScalarDSDataProvider:getDataValue ARRAY dataset size={} isDisplayTypeChar={} isUINT64={}", arraySize, isDisplayTypeChar, isUINT64);
 
                     int index = (int) (rowIndex * colCount + columnIndex) * (int) arraySize;
 
@@ -1458,7 +1430,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     long index = columnIndex * rowCount + rowIndex;
 
                     if (rank > 1) {
-                        log.trace("ScalarDSDataProvider:getValueAt rank={} isDataTransposed={} isNaturalOrder={}", rank, isDataTransposed, isNaturalOrder);
+                        log.trace("ScalarDSDataProvider:getDataValue rank={} isDataTransposed={} isNaturalOrder={}", rank, isDataTransposed, isNaturalOrder);
                         if (isDataTransposed && isNaturalOrder)
                             index = columnIndex * rowCount + rowIndex;
                         else if (!isDataTransposed && !isNaturalOrder)
@@ -1475,7 +1447,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         int len = (int) dtype.getDatatypeSize();
                         byte[] elements = new byte[len];
 
+                        log.trace("**ScalarDSDataProvider:getDataValue(): isOpaque || isBitField of size {}", len);
                         index *= len;
+                        log.trace("**ScalarDSDataProvider:getDataValue(): isOpaque || isBitField of index {}", index);
 
                         for (int i = 0; i < len; i++) {
                             elements[i] = Array.getByte(dataValue, (int) index + i);
@@ -1493,11 +1467,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     }
                 }
 
-                log.trace("ScalarDSDataProvider:getValueAt {} finish", theValue);
+                log.trace("ScalarDSDataProvider:getDataValue {} finish", theValue);
 
             }
             catch (Exception ex) {
-                log.debug("getDataValue() failure: ", ex);
+                log.debug("ScalarDSDataProvider:getDataValue() failure: ", ex);
                 theValue = "*ERROR*";
             }
 
@@ -1607,7 +1581,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         for (int i = 0; i < ((byte[]) value).length; i++) {
                             if ((i + 1) % typeSize == 0) buffer.append(", ");
                             if (i > 0) {
-                                buffer.append(dtype.isBitField() ? ":" : " ");
+                                buffer.append(":");
                             }
                             buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                         }
@@ -1670,7 +1644,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 else if (isBitfieldOrOpaque) {
                     for (int i = 0; i < ((byte[]) value).length; i++) {
                         if (i > 0) {
-                            buffer.append(dtype.isBitField() ? ":" : " ");
+                            buffer.append(":");
                         }
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }

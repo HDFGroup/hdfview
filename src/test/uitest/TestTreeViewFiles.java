@@ -1047,8 +1047,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
-            items[0].getNode(0).getNode(1).click();
-            items[0].getNode(0).getNode(1).contextMenu("Open").click();
+            items[0].getNode(0).getNode(2).click();
+            items[0].getNode(0).getNode(2).contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname3 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1077,8 +1077,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
-            items[0].getNode(0).getNode(1).click();
-            items[0].getNode(0).getNode(1).contextMenu("Open").click();
+            items[0].getNode(0).getNode(3).click();
+            items[0].getNode(0).getNode(3).contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname4 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1160,15 +1160,15 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table.click(2, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "DF:FF", val), val.equals("DF:FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "EF:FF", val), val.equals("EF:FF"));
 
             table.click(3, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF:FF", val), val.equals("CF:FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "DF:FF", val), val.equals("DF:FF"));
 
             table.click(4, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "BF:FF", val), val.equals("BF:FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF:FF", val), val.equals("CF:FF"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -1184,19 +1184,19 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            table.click(1, 1);
+            table.click(3, 1);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF", val), val.equals("FF"));
 
-            table.click(2, 2);
+            table.click(4, 2);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "EF:FF", val), val.equals("EF:FF"));
 
-            table.click(3, 3);
+            table.click(5, 3);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "BF:FF:FF:FF", val), val.equals("BF:FF:FF:FF"));
 
-            table.click(4, 4);
+            table.click(6, 4);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "3F:FF:FF:FF:FF:FF:FF:FF", val), val.equals("3F:FF:FF:FF:FF:FF:FF:FF"));
 
