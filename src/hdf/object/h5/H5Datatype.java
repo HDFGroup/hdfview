@@ -992,23 +992,21 @@ public class H5Datatype extends Datatype {
                         log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT64");
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT64);
                     }
-                    else {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT);
-                    }
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_BE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_LE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
+                    if (datatypeSize > 0) {
+                        if (datatypeOrder == Datatype.ORDER_BE) {
+                            log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_BE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                        }
+                        else if (datatypeOrder == Datatype.ORDER_LE) {
+                            log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_LE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        }
 
-                    if (datatypeSign == Datatype.SIGN_NONE) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_SGN_NONE");
-                        H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
+                        if (datatypeSign == Datatype.SIGN_NONE) {
+                            log.trace("createNative(): CLASS_INT-ENUM is H5T_SGN_NONE");
+                            H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
+                        }
                     }
                     break;
                 case CLASS_FLOAT:
@@ -1074,37 +1072,19 @@ public class H5Datatype extends Datatype {
                     }
                     break;
                 case CLASS_BITFIELD:
-                    if (datatypeSize == 1) {
-                        log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B8");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
-                    }
-                    else if (datatypeSize == 2) {
-                        log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B16");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B16);
-                    }
-                    else if (datatypeSize == 4) {
-                        log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B32");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B32);
-                    }
-                    else if (datatypeSize == 8) {
-                        log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B64");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B64);
-                    }
-                    else {
-                        log.trace("createNative(): default CLASS_BITFIELD is H5T_NATIVE_B8");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
-                    }
-
                     log.trace("createNative(): CLASS_BITFIELD size is " + datatypeSize);
-                    if (datatypeSize > 0) H5.H5Tset_size(tid, datatypeSize);
+                    if (datatypeSize > 0) {
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_BITFIELD);
+                        H5.H5Tset_size(tid, datatypeSize);
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_BE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_LE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        if (datatypeOrder == Datatype.ORDER_BE) {
+                            log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_BE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                        }
+                        else if (datatypeOrder == Datatype.ORDER_LE) {
+                            log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_LE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        }
                     }
 
                     break;
@@ -1112,24 +1092,19 @@ public class H5Datatype extends Datatype {
                     if (datatypeSize > 0) {
                         log.trace("createNative(): CLASS_OPAQUE is {}-byte H5T_OPAQUE", datatypeSize);
                         tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
-                    }
-                    else {
-                        log.trace("createNative(): default CLASS_OPAQUE is 1-byte H5T_OPAQUE");
-                        datatypeSize = 1;
-                        tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, 1);
-                    }
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_LE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
+                        if (datatypeOrder == Datatype.ORDER_BE) {
+                            log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                        }
+                        else if (datatypeOrder == Datatype.ORDER_LE) {
+                            log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_LE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        }
 
-                    if (opaqueTag != null) {
-                        H5.H5Tset_tag(tid, opaqueTag);
+                        if (opaqueTag != null) {
+                            H5.H5Tset_tag(tid, opaqueTag);
+                        }
                     }
 
                     break;
