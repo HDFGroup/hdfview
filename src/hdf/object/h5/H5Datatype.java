@@ -993,7 +993,7 @@ public class H5Datatype extends Datatype {
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT64);
                     }
 
-                    if (datatypeSize > 0) {
+                    if (datatypeSize > 0 && tid >= 0) {
                         if (datatypeOrder == Datatype.ORDER_BE) {
                             log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_BE");
                             H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
@@ -1012,27 +1012,29 @@ public class H5Datatype extends Datatype {
                 case CLASS_FLOAT:
                     tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
+                    if (tid >= 0) {
+                        if (datatypeOrder == Datatype.ORDER_BE) {
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                        }
+                        else if (datatypeOrder == Datatype.ORDER_LE) {
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        }
 
-                    if (nativeFPebias > 0) {
-                        H5.H5Tset_ebias(tid, nativeFPebias);
-                    }
+                        if (nativeFPebias > 0) {
+                            H5.H5Tset_ebias(tid, nativeFPebias);
+                        }
 
-                    if (nativeFPnorm >= 0) {
-                        H5.H5Tset_norm(tid, nativeFPnorm);
-                    }
+                        if (nativeFPnorm >= 0) {
+                            H5.H5Tset_norm(tid, nativeFPnorm);
+                        }
 
-                    if (nativeFPinpad >= 0) {
-                        H5.H5Tset_inpad(tid, nativeFPinpad);
-                    }
+                        if (nativeFPinpad >= 0) {
+                            H5.H5Tset_inpad(tid, nativeFPinpad);
+                        }
 
-                    if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
-                        H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                        if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
+                            H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                        }
                     }
 
                     break;
@@ -1041,14 +1043,16 @@ public class H5Datatype extends Datatype {
                     break;
                 case CLASS_STRING:
                     tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-                    H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
+                    if (tid >= 0) {
+                        H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
 
-                    log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad, nativeStrCSET);
+                        log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad, nativeStrCSET);
 
-                    H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
+                        H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
 
-                    if (nativeStrCSET >= 0) {
-                        H5.H5Tset_cset(tid, nativeStrCSET);
+                        if (nativeStrCSET >= 0) {
+                            H5.H5Tset_cset(tid, nativeStrCSET);
+                        }
                     }
 
                     break;
@@ -1074,16 +1078,32 @@ public class H5Datatype extends Datatype {
                 case CLASS_BITFIELD:
                     log.trace("createNative(): CLASS_BITFIELD size is " + datatypeSize);
                     if (datatypeSize > 0) {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_BITFIELD);
-                        H5.H5Tset_size(tid, datatypeSize);
-
-                        if (datatypeOrder == Datatype.ORDER_BE) {
-                            log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_BE");
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                        if (datatypeSize == 1) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B8");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
                         }
-                        else if (datatypeOrder == Datatype.ORDER_LE) {
-                            log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_LE");
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        else if (datatypeSize == 2) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B16");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B16);
+                        }
+                        else if (datatypeSize == 4) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B32");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B32);
+                        }
+                        else if (datatypeSize == 8) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B64");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B64);
+                        }
+
+                        if (tid >= 0) {
+                            if (datatypeOrder == Datatype.ORDER_BE) {
+                                log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_BE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                            }
+                            else if (datatypeOrder == Datatype.ORDER_LE) {
+                                log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_LE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                            }
                         }
                     }
 
@@ -1093,17 +1113,19 @@ public class H5Datatype extends Datatype {
                         log.trace("createNative(): CLASS_OPAQUE is {}-byte H5T_OPAQUE", datatypeSize);
                         tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
 
-                        if (datatypeOrder == Datatype.ORDER_BE) {
-                            log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                        }
-                        else if (datatypeOrder == Datatype.ORDER_LE) {
-                            log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_LE");
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                        }
+                        if (tid >= 0) {
+                            if (datatypeOrder == Datatype.ORDER_BE) {
+                                log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                            }
+                            else if (datatypeOrder == Datatype.ORDER_LE) {
+                                log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_LE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                            }
 
-                        if (opaqueTag != null) {
-                            H5.H5Tset_tag(tid, opaqueTag);
+                            if (opaqueTag != null) {
+                                H5.H5Tset_tag(tid, opaqueTag);
+                            }
                         }
                     }
 
