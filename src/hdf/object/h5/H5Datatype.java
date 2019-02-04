@@ -187,7 +187,7 @@ public class H5Datatype extends Datatype {
      * @param torder
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign) {
         this(tclass, tsize, torder, tsign, null);
@@ -215,7 +215,7 @@ public class H5Datatype extends Datatype {
      * @param torder
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
      * @param tbase
      *            the base datatype of the new datatype
      */
@@ -246,7 +246,7 @@ public class H5Datatype extends Datatype {
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
      *            ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
      * @param tbase
      *            the base datatype of the new datatype
      * @param pbase
@@ -610,7 +610,7 @@ public class H5Datatype extends Datatype {
             log.trace("fromNative(): isUchar={}, nativePrecision={}, nativeOffset={}, nativePadLSB={}, nativePadMSB={}", isUchar, nativePrecision, nativeOffset, nativePadLSB,
                     nativePadMSB);
 
-            datatypeSign = NSGN; // default
+            datatypeSign = NATIVE; // default
             if (nativeClass == HDF5Constants.H5T_ARRAY) {
                 long tmptid = -1;
                 datatypeClass = CLASS_ARRAY;
@@ -992,49 +992,49 @@ public class H5Datatype extends Datatype {
                         log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT64");
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT64);
                     }
-                    else {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT);
-                    }
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_BE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_LE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
+                    if (datatypeSize > 0 && tid >= 0) {
+                        if (datatypeOrder == Datatype.ORDER_BE) {
+                            log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_BE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                        }
+                        else if (datatypeOrder == Datatype.ORDER_LE) {
+                            log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_LE");
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        }
 
-                    if (datatypeSign == Datatype.SIGN_NONE) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_SGN_NONE");
-                        H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
+                        if (datatypeSign == Datatype.SIGN_NONE) {
+                            log.trace("createNative(): CLASS_INT-ENUM is H5T_SGN_NONE");
+                            H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
+                        }
                     }
                     break;
                 case CLASS_FLOAT:
                     tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                    }
+                    if (tid >= 0) {
+                        if (datatypeOrder == Datatype.ORDER_BE) {
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                        }
+                        else if (datatypeOrder == Datatype.ORDER_LE) {
+                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        }
 
-                    if (nativeFPebias > 0) {
-                        H5.H5Tset_ebias(tid, nativeFPebias);
-                    }
+                        if (nativeFPebias > 0) {
+                            H5.H5Tset_ebias(tid, nativeFPebias);
+                        }
 
-                    if (nativeFPnorm >= 0) {
-                        H5.H5Tset_norm(tid, nativeFPnorm);
-                    }
+                        if (nativeFPnorm >= 0) {
+                            H5.H5Tset_norm(tid, nativeFPnorm);
+                        }
 
-                    if (nativeFPinpad >= 0) {
-                        H5.H5Tset_inpad(tid, nativeFPinpad);
-                    }
+                        if (nativeFPinpad >= 0) {
+                            H5.H5Tset_inpad(tid, nativeFPinpad);
+                        }
 
-                    if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
-                        H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                        if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
+                            H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                        }
                     }
 
                     break;
@@ -1043,14 +1043,16 @@ public class H5Datatype extends Datatype {
                     break;
                 case CLASS_STRING:
                     tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-                    H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
+                    if (tid >= 0) {
+                        H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
 
-                    log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad, nativeStrCSET);
+                        log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad, nativeStrCSET);
 
-                    H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
+                        H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
 
-                    if (nativeStrCSET >= 0) {
-                        H5.H5Tset_cset(tid, nativeStrCSET);
+                        if (nativeStrCSET >= 0) {
+                            H5.H5Tset_cset(tid, nativeStrCSET);
+                        }
                     }
 
                     break;
@@ -1074,26 +1076,57 @@ public class H5Datatype extends Datatype {
                     }
                     break;
                 case CLASS_BITFIELD:
-                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
-
                     log.trace("createNative(): CLASS_BITFIELD size is " + datatypeSize);
-                    if (datatypeSize > 0) H5.H5Tset_size(tid, datatypeSize);
+                    if (datatypeSize > 0) {
+                        if (datatypeSize == 1) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B8");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
+                        }
+                        else if (datatypeSize == 2) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B16");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B16);
+                        }
+                        else if (datatypeSize == 4) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B32");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B32);
+                        }
+                        else if (datatypeSize == 8) {
+                            log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B64");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B64);
+                        }
 
-                    if (datatypeOrder == Datatype.ORDER_BE) {
-                        log.trace("createNative(): CLASS_BITFIELD-OPAQUE order is H5T_ORDER_BE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                    }
-                    else if (datatypeOrder == Datatype.ORDER_LE) {
-                        log.trace("createNative(): CLASS_BITFIELD-OPAQUE order is H5T_ORDER_LE");
-                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                        if (tid >= 0) {
+                            if (datatypeOrder == Datatype.ORDER_BE) {
+                                log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_BE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                            }
+                            else if (datatypeOrder == Datatype.ORDER_LE) {
+                                log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_LE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                            }
+                        }
                     }
 
                     break;
                 case CLASS_OPAQUE:
-                    tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
+                    if (datatypeSize > 0) {
+                        log.trace("createNative(): CLASS_OPAQUE is {}-byte H5T_OPAQUE", datatypeSize);
+                        tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
 
-                    if (opaqueTag != null) {
-                        H5.H5Tset_tag(tid, opaqueTag);
+                        if (tid >= 0) {
+                            if (datatypeOrder == Datatype.ORDER_BE) {
+                                log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                            }
+                            else if (datatypeOrder == Datatype.ORDER_LE) {
+                                log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_LE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                            }
+
+                            if (opaqueTag != null) {
+                                H5.H5Tset_tag(tid, opaqueTag);
+                            }
+                        }
                     }
 
                     break;
@@ -1831,25 +1864,25 @@ public class H5Datatype extends Datatype {
     }
 
     private boolean datatypeIsComplex(long tid) {
-    	long tclass = HDF5Constants.H5T_NO_CLASS;
+        long tclass = HDF5Constants.H5T_NO_CLASS;
 
-    	try {
-    		tclass = H5.H5Tget_class(tid);
-    	}
-    	catch (Exception ex) {
-    		log.debug("datatypeIsComplex():", ex);
-    	}
+        try {
+            tclass = H5.H5Tget_class(tid);
+        }
+        catch (Exception ex) {
+            log.debug("datatypeIsComplex():", ex);
+        }
 
-    	if ( tclass == HDF5Constants.H5T_COMPOUND
-    	  || tclass == HDF5Constants.H5T_ENUM
-    	  || tclass == HDF5Constants.H5T_VLEN
-    	  || tclass == HDF5Constants.H5T_ARRAY)
-    	    return true;
-    	else
-    	    return false;
+        if (tclass == HDF5Constants.H5T_COMPOUND
+                || tclass == HDF5Constants.H5T_ENUM
+                || tclass == HDF5Constants.H5T_VLEN
+                || tclass == HDF5Constants.H5T_ARRAY)
+            return true;
+        else
+            return false;
     }
 
     private boolean datatypeIsAtomic(long tid) {
-        return !datatypeIsComplex(tid);
+        return !datatypeIsComplex(tid) || isOpaque() || isBitField();
     }
 }

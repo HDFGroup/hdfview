@@ -48,14 +48,16 @@ public class H4Datatype extends Datatype {
      * <li>to create 64-bit double<br>
      * H4Datatype type = new H4Dataype(CLASS_FLOAT, 8, NATIVE, -1);
      * </ol>
+     * 
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
+     *            ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NSGN
      */
     public H4Datatype(int tclass, int tsize, int torder, int tsign) {
         super(tclass, tsize, torder, tsign);

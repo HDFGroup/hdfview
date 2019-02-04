@@ -151,7 +151,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
      */
-    public static final int NSGN = 2; //number of valid sign states
+    public static final int NSGN = 2;
 
     protected String datatypeDescription = null;
 
@@ -250,8 +250,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * The following is a list of a few example of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
-     * SIGN_NONE);
+     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
      * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
      * <li>to create native float<br>
@@ -261,17 +260,14 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * </ol>
      *
      * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
-     *            etc.
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer,
-     *            the size is 4.
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE,
-     *            ORDER_BE, ORDER_VAX and ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
+     *            ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
-     *            and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NSGN and MSGN
      */
     public Datatype(int tclass, int tsize, int torder, int tsign) {
         this(tclass, tsize, torder, tsign, null);
@@ -335,7 +331,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
      *            ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NSGN
      * @param tbase
      *            the base datatype of the new datatype
      * @param pbase
@@ -379,16 +375,14 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * Constructs a Datatype with a given native datatype identifier.
      * <p>
-     * For example, if the datatype identifier is a 32-bit unsigned integer created
-     * from HDF5,
+     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
      * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4,
-     * NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
      *
      * @see #fromNative(long tid)
      * @param tid

@@ -1229,18 +1229,17 @@ public abstract class FileFormat extends File {
     /**
      * Creates a new dataset in a file with/without chunking/compression.
      * <p>
-     * The following example creates a 2D integer dataset of size 100X50 at the
-     * root group in an HDF5 file.
+     * The following example creates a 2D integer dataset of size 100X50 at the root group in an HDF5
+     * file.
      *
      * <pre>
      * String name = &quot;2D integer&quot;;
      * Group pgroup = (Group) getRootObject();
-     * Datatype dtype = new H5Datatype(
-     *                          Datatype.CLASS_INTEGER, // class
-     *                          4, // size in bytes
-     *                          Datatype.ORDER_LE, // byte order
-     *                          Datatype.SIGN_NONE); // signed or unsigned
-     * long[] dims = {100, 50};
+     * Datatype dtype = new H5Datatype(Datatype.CLASS_INTEGER, // class
+     *         4, // size in bytes
+     *         Datatype.ORDER_LE, // byte order
+     *         Datatype.SIGN_NONE); // unsigned
+     * long[] dims = { 100, 50 };
      * long[] maxdims = dims;
      * long[] chunks = null; // no
      * // chunking
@@ -1256,26 +1255,21 @@ public abstract class FileFormat extends File {
      * @param type
      *            datatype of the new dataset.
      * @param dims
-     *            dimension sizes of the new dataset, e.g. long[] dims = {100,
-     *            50}.
+     *            dimension sizes of the new dataset, e.g. long[] dims = {100, 50}.
      * @param maxdims
-     *            maximum dimension sizes of the new dataset, null if maxdims is
-     *            the same as dims.
+     *            maximum dimension sizes of the new dataset, null if maxdims is the same as dims.
      * @param chunks
      *            chunk sizes of the new dataset, null if no chunking.
      * @param gzip
-     *            GZIP compression level (1 to 9), 0 or negative values if no
-     *            compression.
+     *            GZIP compression level (1 to 9), 0 or negative values if no compression.
      * @param fillValue
      *            default value.
      * @param data
-     *            data written to the new dataset, null if no data is written to
-     *            the new dataset.
+     *            data written to the new dataset, null if no data is written to the new dataset.
      *
      * @return The new dataset if successful; otherwise returns null
      * @throws Exception
-     *             The exceptions thrown vary depending on the implementing
-     *             class.
+     *             The exceptions thrown vary depending on the implementing class.
      */
     public abstract Dataset createScalarDS(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
             long[] chunks, int gzip, Object fillValue, Object data) throws Exception;

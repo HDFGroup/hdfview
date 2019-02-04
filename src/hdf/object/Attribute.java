@@ -30,8 +30,8 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.h5.H5Datatype;
 
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data
- * object such as a dataset, group or named datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
+ * dataset, group or named datatype.
  * <p>
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
@@ -41,8 +41,7 @@ import hdf.object.h5.H5Datatype;
  * User's Guide</a>
  * <p>
  *
- * The following code is an example of an attribute with 1D integer array of two
- * elements.
+ * The following code is an example of an attribute with 1D integer array of two elements.
  *
  * <pre>
  * // Example of creating a new attribute
@@ -52,7 +51,7 @@ import hdf.object.h5.H5Datatype;
  * Datatype type = new Datatype(Datatype.CLASS_INTEGER, // class
  *                              1,                      // size in bytes
  *                              Datatype.ORDER_LE,      // byte order
- *                              Datatype.SIGN_NONE);    // signed or unsigned
+ *                              Datatype.SIGN_NONE);    // unsigned
  * // 1-D array of size two
  * long[] dims = {2};
  * // The value of the attribute
@@ -66,10 +65,10 @@ import hdf.object.h5.H5Datatype;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an Attribute will be a 1D array of integers,
- * floats and strings. For a compound datatype, it will be a 1D array of strings
- * with field members separated by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}"
- * is a compound attribute of {int, float} of three data points.
+ * For an atomic datatype, the value of an Attribute will be a 1D array of integers, floats and
+ * strings. For a compound datatype, it will be a 1D array of strings with field members separated
+ * by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+ * float} of three data points.
  *
  * @see hdf.object.Datatype
  *

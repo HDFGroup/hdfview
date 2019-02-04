@@ -111,33 +111,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     protected void loadData(DataFormat dataObject) throws Exception {
         log.trace("loadData(): start");
 
-        if (!dataObject.isInited()) {
-            dataObject.init();
-            log.trace("loadData(): inited");
-        }
-
-        // use lazy convert for large number of strings
-        if (dataObject.getHeight() > 10000 && dataObject instanceof CompoundDS) {
-            ((CompoundDS) dataObject).setConvertByteToString(false);
-        }
-
-        // Make sure entire dataset is not loaded when looking at 3D
-        // datasets using the default display mode (double clicking the
-        // data object)
-        if (dataObject.getRank() > 2) {
-            dataObject.getSelectedDims()[dataObject.getSelectedIndex()[2]] = 1;
-        }
-
-        dataValue = null;
-        try {
-            dataValue = dataObject.getData();
-        }
-        catch (Throwable ex) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Load", "CompoundDS loadData: " + ex.getMessage());
-            log.debug("loadData(): ", ex);
-            dataValue = null;
-        }
+        super.loadData(dataObject);
 
         if ((dataValue == null) || !(dataValue instanceof List)) {
             log.debug("loadData(): data value is null or data not a list");
@@ -744,7 +718,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 else if (dtype.isString() && colValue instanceof byte[]) {
                     // strings
                     int strlen = (int) dtype.getDatatypeSize();
-                    log.trace("**CompoundDSDataProvider:getDataValue(): isString={} of size {}", strlen);
+                    log.trace("**CompoundDSDataProvider:getDataValue(): isString of size {}", strlen);
 
                     String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
                     int idx = str.indexOf('\0');
@@ -758,7 +732,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     int len = (int) dtype.getDatatypeSize();
                     byte[] elements = new byte[len];
 
+                    log.trace("**CompoundDSDataProvider:getDataValue(): isOpaque || isBitField of size {}", len);
                     rowIdx *= len;
+                    log.trace("**CompoundDSDataProvider:getDataValue(): isOpaque || isBitField of rowIdx {}", rowIdx);
 
                     for (int i = 0; i < len; i++) {
                         elements[i] = Array.getByte(colValue, rowIdx + i);
@@ -924,7 +900,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 else if (dtype.isOpaque() || dtype.isBitField()) {
                     for (int i = 0; i < ((byte[]) value).length; i++) {
                         if (i > 0) {
-                            buffer.append(dtype.isBitField() ? ":" : " ");
+                            buffer.append(":");
                         }
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }

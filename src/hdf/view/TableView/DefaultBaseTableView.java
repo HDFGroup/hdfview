@@ -978,7 +978,48 @@ public abstract class DefaultBaseTableView implements TableView {
         return menuBar;
     }
 
-    protected abstract void loadData(DataFormat dataObject) throws Exception;
+    protected void loadData(DataFormat dataObject) throws Exception {
+        log.trace("base loadData(): start");
+
+        if (!dataObject.isInited()) {
+            try {
+                dataObject.init();
+                log.trace("base loadData(): data object inited");
+            }
+            catch (Exception ex) {
+                Tools.showError(shell, "Load", "DefaultBaseTable.loadData:" + ex.getMessage());
+                dataValue = null;
+                log.debug("base loadData(): ", ex);
+                log.trace("base loadData(): finish");
+                return;
+            }
+        }
+
+        // use lazy convert for large number of strings
+        if (dataObject.getHeight() > 10000 && dataObject instanceof CompoundDS) {
+            ((CompoundDS) dataObject).setConvertByteToString(false);
+        }
+
+        // Make sure entire dataset is not loaded when looking at 3D
+        // datasets using the default display mode (double clicking the
+        // data object)
+        if (dataObject.getRank() > 2) {
+            dataObject.getSelectedDims()[dataObject.getSelectedIndex()[2]] = 1;
+        }
+
+        dataValue = null;
+        try {
+            dataValue = dataObject.getData();
+        }
+        catch (Throwable ex) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Load", "DefaultBaseTable.loadData: " + ex.getMessage());
+            log.debug("base loadData(): ", ex);
+            dataValue = null;
+        }
+
+        log.trace("base loadData(): finish");
+    }
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
 
