@@ -1581,7 +1581,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         for (int i = 0; i < ((byte[]) value).length; i++) {
                             if ((i + 1) % typeSize == 0) buffer.append(", ");
                             if (i > 0) {
-                                buffer.append(":");
+                                buffer.append(dtype.isBitField() ? ":" : " ");
                             }
                             buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                         }
@@ -1644,7 +1644,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 else if (isBitfieldOrOpaque) {
                     for (int i = 0; i < ((byte[]) value).length; i++) {
                         if (i > 0) {
-                            buffer.append(":");
+                            buffer.append(dtype.isBitField() ? ":" : " ");
                         }
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }

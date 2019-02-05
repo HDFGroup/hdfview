@@ -267,7 +267,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
      *            ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NSGN and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE and SIGN_2
      */
     public Datatype(int tclass, int tsize, int torder, int tsign) {
         this(tclass, tsize, torder, tsign, null);
@@ -299,7 +299,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the byte order of the datatype. Valid values are ORDER_LE,
      *            ORDER_BE, ORDER_VAX and ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
+     *            the sign of the datatype. Valid values are SIGN_NONE and SIGN_2
      *            and MSGN
      * @param tbase
      *            the base datatype of the new datatype
@@ -331,7 +331,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
      *            ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE and SIGN_2
      * @param tbase
      *            the base datatype of the new datatype
      * @param pbase

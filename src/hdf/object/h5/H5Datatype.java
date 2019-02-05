@@ -618,8 +618,14 @@ public class H5Datatype extends Datatype {
                     int ndims = H5.H5Tget_array_ndims(tid);
                     arrayDims = new long[ndims];
                     H5.H5Tget_array_dims(tid, arrayDims);
+
                     tmptid = H5.H5Tget_super(tid);
                     baseType = new H5Datatype(tmptid);
+                    if (baseType == null) {
+                        log.debug("fromNative(): ARRAY datatype has null base type");
+                        throw new Exception("Datatype (ARRAY) has no base datatype");
+                    }
+
                     datatypeSign = baseType.getDatatypeSign();
                 }
                 catch (Exception ex) {
@@ -975,6 +981,30 @@ public class H5Datatype extends Datatype {
                     }
                     break;
                 case CLASS_INTEGER:
+                    log.trace("createNative(): CLASS_INT of size {}", datatypeSize);
+
+                    if (datatypeSize > 0) {
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT8);
+                        if (tid >= 0) {
+                            H5.H5Tset_size(tid, datatypeSize);
+                            H5.H5Tset_precision(tid, 8 * datatypeSize);
+
+                            if (datatypeOrder == Datatype.ORDER_BE) {
+                                log.trace("createNative(): CLASS_INT order is H5T_ORDER_BE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                            }
+                            else if (datatypeOrder == Datatype.ORDER_LE) {
+                                log.trace("createNative(): CLASS_INT order is H5T_ORDER_LE");
+                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                            }
+
+                            if (datatypeSign == Datatype.SIGN_NONE) {
+                                log.trace("createNative(): CLASS_INT is H5T_SGN_NONE");
+                                H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
+                            }
+                        }
+                    }
+                    break;
                 case CLASS_ENUM:
                     if (datatypeSize == 1) {
                         log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT8");
@@ -1221,7 +1251,7 @@ public class H5Datatype extends Datatype {
             tid = H5.H5Tget_native_type(tmptid);
         }
         catch (HDF5Exception ex) {
-            log.debug("createNative(): H5Tget_native_type{} failure: ", tmptid, ex);
+            log.debug("createNative(): H5Tget_native_type({}) failure: ", tmptid, ex);
         }
         finally {
             close(tmptid);
@@ -1873,10 +1903,10 @@ public class H5Datatype extends Datatype {
             log.debug("datatypeIsComplex():", ex);
         }
 
-        if (tclass == HDF5Constants.H5T_COMPOUND
-                || tclass == HDF5Constants.H5T_ENUM
-                || tclass == HDF5Constants.H5T_VLEN
-                || tclass == HDF5Constants.H5T_ARRAY)
+        if (  tclass == HDF5Constants.H5T_COMPOUND
+           || tclass == HDF5Constants.H5T_ENUM
+           || tclass == HDF5Constants.H5T_VLEN
+           || tclass == HDF5Constants.H5T_ARRAY)
             return true;
         else
             return false;

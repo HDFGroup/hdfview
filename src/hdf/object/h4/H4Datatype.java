@@ -57,7 +57,7 @@ public class H4Datatype extends Datatype {
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
      *            ORDER_NONE
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE and SIGN_2
      */
     public H4Datatype(int tclass, int tsize, int torder, int tsign) {
         super(tclass, tsize, torder, tsign);

@@ -176,73 +176,6 @@ public class H5ScalarDS extends ScalarDS {
         log.trace("close(): finish");
     }
 
-    public H5Datatype getDSDatatype() throws Exception {
-        H5Datatype DSdatatype = null;
-
-        if (!isInited())
-            init();
-
-        try {
-            DSdatatype = (H5Datatype) this.getDatatype();
-        }
-        catch (Exception ex) {
-            log.debug("getDSDatatype(): get datatype: ", ex);
-        }
-
-        /*
-         * Check for any unsupported datatypes and fail early before attempting to read the dataset
-         */
-        if (DSdatatype.isArray()) {
-            H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
-
-            if (baseType == null) {
-                log.debug("getDSDatatype(): ARRAY datatype has no base type");
-                throw new Exception("Dataset's datatype (ARRAY) has no base datatype");
-            }
-        }
-
-        if (isExternal) {
-            String pdir = this.getFileFormat().getAbsoluteFile().getParent();
-
-            if (pdir == null) {
-                pdir = ".";
-            }
-            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
-            log.trace("getDSDatatype(): External dataset: user.dir={}", pdir);
-        }
-        return DSdatatype;
-    }
-
-    public long getTotalSelectedSpacePoints(long did, long[] spaceIDs) throws HDF5Exception {
-        long totalSelectedSpacePoints = selectHyperslab(did, spaceIDs);
-
-        log.trace("getTotalSelectedSpacePoints(): selected {} points in dataset dataspace", totalSelectedSpacePoints);
-
-        if (totalSelectedSpacePoints == 0) {
-            log.debug("getTotalSelectedSpacePoints(): No data to read. Dataset or selected subset is empty.");
-            log.trace("getTotalSelectedSpacePoints(): finish");
-            throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
-        }
-
-        if (totalSelectedSpacePoints < Integer.MIN_VALUE || totalSelectedSpacePoints > Integer.MAX_VALUE) {
-            log.debug("getTotalSelectedSpacePoints(): totalSelectedSpacePoints outside valid Java int range; unsafe cast");
-            log.trace("getTotalSelectedSpacePoints(): finish");
-            throw new HDF5Exception("Invalid int size");
-        }
-
-        if (log.isDebugEnabled()) {
-            // check is storage space is allocated
-            try {
-                long ssize = H5.H5Dget_storage_size(did);
-                log.trace("getTotalSelectedSpacePoints(): Storage space allocated = {}.", ssize);
-            }
-            catch (Exception ex) {
-                log.debug("getTotalSelectedSpacePoints(): check if storage space is allocated:", ex);
-            }
-        }
-        return totalSelectedSpacePoints;
-    }
-
     /**
      * Retrieves datatype and dataspace information from file and sets the dataset
      * in memory.
@@ -594,10 +527,15 @@ public class H5ScalarDS extends ScalarDS {
     @Override
     public Datatype getDatatype() {
         log.trace("getDatatype(): start");
+
+        if (!inited)
+            init();
+
         if (datatype == null) {
-            log.trace("getDatatype(): datatype == null");
             long did = -1;
             long tid = -1;
+
+            log.trace("getDatatype(): datatype == null");
 
             did = open();
             if (did >= 0) {
@@ -642,6 +580,16 @@ public class H5ScalarDS extends ScalarDS {
                     }
                 }
             }
+        }
+
+        if (isExternal) {
+            String pdir = this.getFileFormat().getAbsoluteFile().getParent();
+
+            if (pdir == null) {
+                pdir = ".";
+            }
+            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
+            log.trace("getDatatype(): External dataset: user.dir={}", pdir);
         }
 
         log.trace("getDatatype(): finish");
@@ -840,7 +788,7 @@ public class H5ScalarDS extends ScalarDS {
         log.trace("read(): start");
 
         Object theData = null;
-        H5Datatype DSdatatype = getDSDatatype();
+        H5Datatype DSdatatype = (H5Datatype) getDatatype();
 
         log.trace("read(): open dataset");
 
@@ -996,21 +944,7 @@ public class H5ScalarDS extends ScalarDS {
             long spaceIDs[] = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
-                long totalSelectedSpacePoints = selectHyperslab(did, spaceIDs);
-
-                log.trace("write(): selected {} points in dataset dataspace", totalSelectedSpacePoints);
-
-                if (totalSelectedSpacePoints == 0) {
-                    log.debug("write(): No data to write. Selected subset is empty.");
-                    log.trace("write(): finish");
-                    throw new HDF5Exception("No data to write.\nThe selected subset is empty.");
-                }
-
-                if (totalSelectedSpacePoints < Integer.MIN_VALUE || totalSelectedSpacePoints > Integer.MAX_VALUE) {
-                    log.debug("write(): totalSelectedSpacePoints outside valid Java int range; unsafe cast");
-                    log.trace("write(): finish");
-                    throw new HDF5Exception("Invalid int size");
-                }
+                long totalSelectedSpacePoints = getTotalSelectedSpacePoints(did, spaceIDs);
 
                 /*
                  * Perform any necessary data conversions before writing the data.
@@ -1099,58 +1033,6 @@ public class H5ScalarDS extends ScalarDS {
         }
 
         log.trace("write(): finish");
-    }
-
-    /**
-     * Set up the selection of hyperslab
-     *
-     * @param did
-     *            IN dataset ID
-     * @param spaceIDs
-     *            IN/OUT memory and file space IDs -- spaceIDs[0]=mspace, spaceIDs[1]=fspace
-     *
-     * @return total number of data point selected
-     *
-     * @throws HDF5Exception
-     *             If there is an error at the HDF5 library level.
-     */
-    private long selectHyperslab(long did, long[] spaceIDs) throws HDF5Exception {
-        log.trace("selectHyperslab(): start");
-        long lsize = 1;
-
-        boolean isAllSelected = true;
-        for (int i = 0; i < rank; i++) {
-            lsize *= selectedDims[i];
-            if (selectedDims[i] < dims[i]) {
-                isAllSelected = false;
-            }
-        }
-        log.trace("selectHyperslab(): isAllSelected={}", isAllSelected);
-
-        if (isAllSelected) {
-            spaceIDs[0] = HDF5Constants.H5S_ALL;
-            spaceIDs[1] = HDF5Constants.H5S_ALL;
-        }
-        else {
-            spaceIDs[1] = H5.H5Dget_space(did);
-
-            // When 1D dataspace is used in chunked dataset, reading is very
-            // slow.
-            // It is a known problem on HDF5 library for chunked dataset.
-            // mspace = H5.H5Screate_simple(1, lsize, null);
-            spaceIDs[0] = H5.H5Screate_simple(rank, selectedDims, null);
-            H5.H5Sselect_hyperslab(spaceIDs[1], HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims,
-                    null);
-        }
-
-        if ((rank > 1) && (selectedIndex[0] > selectedIndex[1]))
-            isDefaultImageOrder = false;
-        else
-            isDefaultImageOrder = true;
-
-        log.trace("selectHyperslab(): isDefaultImageOrder={}", isDefaultImageOrder);
-        log.trace("selectHyperslab(): finish");
-        return lsize;
     }
 
     /*
@@ -1631,7 +1513,12 @@ public class H5ScalarDS extends ScalarDS {
         }
 
         isDataLoaded = false;
-        isDefaultImageOrder = true;
+
+        if ((rank > 1) && (selectedIndex[0] > selectedIndex[1]))
+            isDefaultImageOrder = false;
+        else
+            isDefaultImageOrder = true;
+
         log.trace("resetSelection(): finish");
     }
 

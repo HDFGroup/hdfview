@@ -900,7 +900,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 else if (dtype.isOpaque() || dtype.isBitField()) {
                     for (int i = 0; i < ((byte[]) value).length; i++) {
                         if (i > 0) {
-                            buffer.append(":");
+                            buffer.append(dtype.isBitField() ? ":" : " ");
                         }
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }
