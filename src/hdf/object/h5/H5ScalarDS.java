@@ -327,7 +327,7 @@ public class H5ScalarDS extends ScalarDS {
                     if (H5.H5Pfill_value_defined(pid, fillStatus) >= 0) {
                         if (fillStatus[0] == HDF5Constants.H5D_FILL_VALUE_USER_DEFINED) {
                             try {
-                                fillValue = ((H5Datatype) getDatatype()).allocateArray(1);
+                                fillValue = ((H5Datatype) datatype).allocateArray(1);
                             }
                             catch (OutOfMemoryError e) {
                                 log.debug("init(): out of memory: ", e);

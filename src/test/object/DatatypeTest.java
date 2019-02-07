@@ -28,12 +28,12 @@ public class DatatypeTest {
     private int[] classes = { Datatype.CLASS_BITFIELD, Datatype.CLASS_CHAR, Datatype.CLASS_COMPOUND,
             Datatype.CLASS_ENUM, Datatype.CLASS_FLOAT, Datatype.CLASS_INTEGER, Datatype.CLASS_NO_CLASS,
             Datatype.CLASS_OPAQUE, Datatype.CLASS_REFERENCE, Datatype.CLASS_STRING, Datatype.CLASS_VLEN };
-    private int[] signs = { Datatype.SIGN_2, Datatype.SIGN_NONE, Datatype.NSGN };
-    private int[] orders = { Datatype.ORDER_BE, Datatype.ORDER_LE, Datatype.ORDER_NONE, Datatype.ORDER_VAX };
+    private int[] signs = { Datatype.SIGN_2, Datatype.SIGN_NONE, Datatype.NATIVE };
+    private int[] orders = { Datatype.ORDER_BE, Datatype.ORDER_LE, Datatype.ORDER_NONE, Datatype.ORDER_VAX, Datatype.NATIVE };
     private int n_classes = 11;
     private int n_signs = 3;
-    private int n_orders = 4;
-    private int[] sizes = { 1, 2, 4, 8 };
+    private int n_orders = 5;
+    private int[] sizes = { 1, 2, 4, 8, Datatype.NATIVE };
     // @formatter:off
     private String[] descriptions = {
             "8-bit bitfield", "16-bit bitfield", "32-bit bitfield", "64-bit bitfield",
@@ -174,7 +174,7 @@ public class DatatypeTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        baseTypes = new H5Datatype[n_orders * n_signs * (n_classes + 16)]; // INT, ENUM, BITFIELD, OPAQUE have 4 sizes
+        baseTypes = new H5Datatype[n_orders * n_signs * (n_classes + 21)]; // INT, ENUM, BITFIELD, OPAQUE have 4 sizes
         int counter = 0;
         for (int i = 0; i < n_classes; i++) {
             for (int j = 0; j < n_orders; j++) {
@@ -186,7 +186,7 @@ public class DatatypeTest {
                         case Datatype.CLASS_BITFIELD:
                         case Datatype.CLASS_OPAQUE:
                         case Datatype.CLASS_FLOAT:
-                            n_sizes = 4;
+                            n_sizes = 5;
                             break;
                         case Datatype.CLASS_STRING:
                             n_sizes = 2;
@@ -459,8 +459,8 @@ public class DatatypeTest {
                             break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
-                        boolean isSigned = baseTypes[counter++].isUnsigned();
-                        if (isSigned && (signs[k] != Datatype.SIGN_NONE)) {
+                        boolean isUnsigned = baseTypes[counter++].isUnsigned();
+                        if (isUnsigned && (signs[k] != Datatype.SIGN_NONE)) {
                             fail("isUnsigned Failed for size " + l + " [" + i + "," + j + "," + k + "].");
                         }
                     }

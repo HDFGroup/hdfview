@@ -1156,19 +1156,19 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table.click(1, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF:FF", val), val.equals("FF:FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "FF FF", val), val.equals("FF FF"));
 
             table.click(2, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "EF:FF", val), val.equals("EF:FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "EF FF", val), val.equals("EF FF"));
 
             table.click(3, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "DF:FF", val), val.equals("DF:FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "DF FF", val), val.equals("DF FF"));
 
             table.click(4, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF:FF", val), val.equals("CF:FF"));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF FF", val), val.equals("CF FF"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));

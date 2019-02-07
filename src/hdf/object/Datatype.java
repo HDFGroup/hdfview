@@ -263,11 +263,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
-     *            ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE and SIGN_2
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      */
     public Datatype(int tclass, int tsize, int torder, int tsign) {
         this(tclass, tsize, torder, tsign, null);
@@ -295,12 +296,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer,
      *            the size is 4.
+     *            Valid values are NATIVE or a positive value.
      * @param torder
      *            the byte order of the datatype. Valid values are ORDER_LE,
-     *            ORDER_BE, ORDER_VAX and ORDER_NONE
+     *            ORDER_BE, ORDER_VAX, ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE and SIGN_2
-     *            and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
      */
@@ -327,17 +328,26 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
-     *            ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE and SIGN_2
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
      * @param pbase
      *            the parent datatype of the new datatype
      */
     public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
+        /* if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
+            throw new Exception("invalid datatype size - " + tsize);
+        if ((torder != ORDER_LE) && (torder != ORDER_BE) && (torder != ORDER_VAX)
+                && (torder != ORDER_NONE) && (torder != NATIVE))
+            throw new Exception("invalid datatype order - " + torder);
+        if ((tsign != SIGN_NONE) && (tsign != SIGN_2) && (tsign != NATIVE))
+            throw new Exception("invalid datatype sign - " + tsign); */
+
         datatypeClass = tclass;
         datatypeSize = tsize;
         datatypeOrder = torder;
