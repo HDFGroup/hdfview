@@ -620,7 +620,7 @@ public class H5Datatype extends Datatype {
                     H5.H5Tget_array_dims(tid, arrayDims);
 
                     tmptid = H5.H5Tget_super(tid);
-                    baseType = new H5Datatype(tmptid);
+                    baseType = new H5Datatype(tmptid, this);
                     if (baseType == null) {
                         log.debug("fromNative(): ARRAY datatype has null base type");
                         throw new Exception("Datatype (ARRAY) has no base datatype");
@@ -818,7 +818,7 @@ public class H5Datatype extends Datatype {
                 try {
                     log.trace("fromNative(): vlen type");
                     tmptid = H5.H5Tget_super(tid);
-                    baseType = new H5Datatype(tmptid);
+                    baseType = new H5Datatype(tmptid, this);
                     datatypeSign = baseType.getDatatypeSign();
                 }
                 catch (Exception ex) {

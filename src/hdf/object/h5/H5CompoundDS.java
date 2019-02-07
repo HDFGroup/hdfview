@@ -32,7 +32,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.view.Tools;
+import hdf.object.Utils;
 
 /**
  * The H5CompoundDS class defines an HDF5 dataset of compound datatypes.
@@ -371,7 +371,7 @@ public class H5CompoundDS extends CompoundDS {
                 selectedDims = new long[rank];
 
                 // initialize member information
-                ((H5Datatype) getDatatype()).extractCompoundInfo("", flatNameList, flatTypeList);
+                ((H5Datatype) datatype).extractCompoundInfo("", flatNameList, flatTypeList);
                 numberOfMembers = flatNameList.size();
                 log.trace("init(): numberOfMembers={}", numberOfMembers);
 
@@ -429,7 +429,8 @@ public class H5CompoundDS extends CompoundDS {
                 log.debug("init(): ", ex);
             }
             finally {
-                getDatatype().close(tid);
+                if (datatype != null)
+                    datatype.close(tid);
 
                 try {
                     H5.H5Sclose(sid);
@@ -698,6 +699,7 @@ public class H5CompoundDS extends CompoundDS {
 
                     try {
                         member_base = member_type.getDatatypeBase();
+                        log.trace("read(): Member[{}] has base {}", i, member_base);
                     }
                     catch (Exception ex) {
                         log.debug("read(): get member {} base type failure: ", i, ex);
@@ -722,6 +724,7 @@ public class H5CompoundDS extends CompoundDS {
 
                     try {
                         member_data = member_type.allocateArray((int) totalSelectedSpacePoints);
+                        log.trace("read(): member_type.allocateArray {} points ", totalSelectedSpacePoints);
                     }
                     catch (OutOfMemoryError err) {
                         member_data = null;
@@ -795,13 +798,13 @@ public class H5CompoundDS extends CompoundDS {
                             member_data = Dataset.convertFromUnsignedC(member_data, null);
                         }
                         else if ((member_type.isString()) && convertByteToString && !member_type.isVarStr()) {
-                            if (Tools.getJavaObjectRuntimeClass(member_data) == 'B') {
+                            if (Utils.getJavaObjectRuntimeClass(member_data) == 'B') {
                                 log.trace("read(): Member[{}]: converting byte array to string array", i);
                                 member_data = byteToString((byte[]) member_data, member_size / memberOrders[i]);
                             }
                         }
                         else if (member_type.isRef()) {
-                            if (Tools.getJavaObjectRuntimeClass(member_data) == 'B') {
+                            if (Utils.getJavaObjectRuntimeClass(member_data) == 'B') {
                                 log.trace("read(): Member[{}]: converting byte array to long array", i);
                                 member_data = HDFNativeData.byteToLong((byte[]) member_data);
                             }

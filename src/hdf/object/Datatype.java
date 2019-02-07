@@ -474,12 +474,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Returns the datatype of the elements for this datatype.
+     * Returns the base datatype for this datatype.
      * <p>
      * For example, in a dataset of type ARRAY of integer, the datatype of the dataset is ARRAY. The
      * datatype of the base type is integer.
      *
-     * @return the datatype of the contained datatype.
+     * @return the datatype of the contained basetype.
      */
     public Datatype getDatatypeBase() {
         return baseType;
