@@ -1947,41 +1947,97 @@ public class H5Datatype extends Datatype {
      */
     public long createCompoundFieldType(String member_name) throws HDF5Exception {
         log.trace("createCompoundFieldType(): start member_name={}", member_name);
-        long nested_tid = -1;
+
+        long top_tid = -1;
         long tmp_tid1 = -1;
+
         try {
-            log.trace("createCompoundFieldType(): {} Member is type {} of size={} with baseType={}", member_name, getDescription(), getDatatypeSize(), getDatatypeBase());
-            tmp_tid1 = createNative();
+            if (this.isArray()) {
+                log.trace("createCompoundFieldType(): array datatype");
 
-            /*
-             * If this member is nested inside a compound, keep inserting
-             * it into a newly-created compound datatype until we reach
-             * the top-level compound type.
-             */
-            int sep = member_name.lastIndexOf(CompoundDS.separator);
-            while (sep > 0) {
-                String theName = member_name.substring(sep + 1);
+                if (baseType != null) {
+                    log.trace("createCompoundFieldType(): creating compound field type from base datatype");
+                    tmp_tid1 = ((H5Datatype) baseType).createCompoundFieldType(member_name);
+                }
 
-                log.trace("createCompoundFieldType(): member with name {} is nested inside compound", theName);
-
-                nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
-                H5.H5Tinsert(nested_tid, theName, 0, tmp_tid1);
-                close(tmp_tid1);
-                tmp_tid1 = nested_tid;
-                member_name = member_name.substring(0, sep);
-                sep = member_name.lastIndexOf(CompoundDS.separator);
+                log.trace("createCompoundFieldType(): creating container array datatype");
+                top_tid = H5.H5Tarray_create(tmp_tid1, arrayDims.length, arrayDims);
             }
+            else if (this.isVLEN()) {
+                log.trace("createCompoundFieldType(): variable-length datatype");
 
-            nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
+                if (baseType != null) {
+                    log.trace("createCompoundFieldType(): creating compound field type from base datatype");
+                    tmp_tid1 = ((H5Datatype) baseType).createCompoundFieldType(member_name);
+                }
 
-            H5.H5Tinsert(nested_tid, member_name, 0, tmp_tid1);
+                log.trace("createCompoundFieldType(): creating container variable-length datatype");
+                top_tid = H5.H5Tvlen_create(tmp_tid1);
+            }
+            else if (this.isCompound()) {
+                log.trace("createCompoundFieldType(): compound datatype");
+
+                String insertedName = member_name;
+
+                int sep = member_name.indexOf(CompoundDS.separator);
+                if (sep >= 0) {
+                    /*
+                     * If a compound separator character is present in the supplied string, then
+                     * there is an additional level of compound nesting. We will create a compound
+                     * type to hold the nested compound type.
+                     */
+                    insertedName = member_name.substring(0, sep);
+
+                    log.trace("createCompoundFieldType(): member with name {} is nested inside compound", insertedName);
+                }
+
+                /*
+                 * Retrieve the index of the compound member by its name.
+                 */
+                int member_index = this.compoundMemberNames.indexOf(insertedName);
+                if (member_index >= 0) {
+                    H5Datatype member_type = (H5Datatype) this.compoundMemberTypes.get(member_index);
+
+                    log.trace("createCompoundFieldType(): Member {} is type {} of size={} with baseType={}", insertedName,
+                            member_type.getDescription(), member_type.getDatatypeSize(), member_type.getDatatypeBase());
+
+                    if (sep >= 0)
+                        /*
+                         * Additional compound nesting; create the nested compound type.
+                         */
+                        tmp_tid1 = member_type.createCompoundFieldType(member_name.substring(sep + 1));
+                    else
+                        tmp_tid1 = member_type.createNative();
+
+                    log.trace("createCompoundFieldType(): creating container compound datatype");
+                    top_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
+
+                    log.trace("createCompoundFieldType(): inserting member {} into compound datatype", insertedName);
+                    H5.H5Tinsert(top_tid, insertedName, 0, tmp_tid1);
+
+                    /*
+                     * WARNING!!! This step is crucial. Without it, the compound type created might be larger than
+                     * the size of the single datatype field we are inserting. Performing a read with a compound
+                     * datatype of an incorrect size will corrupt JVM memory and cause strange behavior and crashes.
+                     */
+                    H5.H5Tpack(top_tid);
+                }
+                else {
+                    log.debug("createCompoundFieldType(): member name {} not found in compound datatype's member name list");
+                }
+            }
+        }
+        catch (Exception ex) {
+            log.debug("createCompoundFieldType(): creation of compound field type failed: ", ex);
+            top_tid = -1;
         }
         finally {
             close(tmp_tid1);
         }
 
         log.trace("createCompoundFieldType(): finish");
-        return nested_tid;
+
+        return top_tid;
     }
 
     private boolean datatypeIsComplex(long tid) {
