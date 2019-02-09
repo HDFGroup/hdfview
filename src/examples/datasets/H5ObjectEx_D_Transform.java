@@ -35,8 +35,7 @@ public class H5ObjectEx_D_Transform {
         long dxpl_id = -1;
         long[] dims = { DIM_X, DIM_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                Datatype.NATIVE, Datatype.NATIVE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize data.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -66,6 +65,14 @@ public class H5ObjectEx_D_Transform {
             dxpl_id = H5.H5Pcreate (HDF5Constants.H5P_DATASET_XFER);
             if (dxpl_id >= 0)
                 H5.H5Pset_data_transform(dxpl_id, TRANSFORM);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

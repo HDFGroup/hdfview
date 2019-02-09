@@ -73,8 +73,7 @@ public class H5ObjectEx_D_Alloc {
         int[][] dset_data = new int[DIM_X][DIM_Y];
         int space_status = -1;
         long storage_size = 0;
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_BE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize the dataset.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -93,6 +92,14 @@ public class H5ObjectEx_D_Alloc {
         System.out.println("Creating datasets...");
         System.out.println(DATASETNAME1
                 + " has allocation time H5D_ALLOC_TIME_LATE");
+
+        // Create the datatype for the datasets.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Create the dataset using the dataset default creation property list.
         try {

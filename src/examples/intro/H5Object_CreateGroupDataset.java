@@ -30,8 +30,7 @@ public class H5Object_CreateGroupDataset {
         int[][] dset2_data = new int[DIM2_X][DIM2_Y];
         long[] dims1 = { DIM1_X, DIM1_Y };
         long[] dims2 = { DIM2_X, DIM2_Y };
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_BE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize the first dataset.
         for (int indx = 0; indx < DIM1_X; indx++)
@@ -47,6 +46,14 @@ public class H5Object_CreateGroupDataset {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the datatype for the datasets.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

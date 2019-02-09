@@ -172,7 +172,13 @@ public class H4Vdata extends CompoundDS
     public Datatype getDatatype()
     {
         if (datatype == null) {
-            datatype = new H4Datatype(-1);
+            try {
+                datatype = new H4Datatype(-1);
+            }
+            catch (Exception ex) {
+                log.debug("getDatatype(): failed to create datatype: ", ex);
+                datatype = null;
+            }
         }
 
         return datatype;
@@ -294,7 +300,7 @@ public class H4Vdata extends CompoundDS
             if (member_data == null) {
                 String[] nullValues = new String[n];
                 for (int j=0; j<n; j++) {
-                    nullValues[j] = "*error*";
+                    nullValues[j] = "*ERROR*";
                 }
                 list.add(nullValues);
                 continue;
@@ -311,7 +317,13 @@ public class H4Vdata extends CompoundDS
                     // convert characters to string
                     log.trace("read(): convert characters to string");
                     member_data = Dataset.byteToString((byte[])member_data, memberOrders[i]);
-                    memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i], -1, -1);
+                    try {
+                        memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i], Datatype.NATIVE, Datatype.NATIVE);
+                    }
+                    catch (Exception ex) {
+                        log.debug("read(): failed to create datatype for member[{}]: ", i, ex);
+                        memberTypes[i] = null;
+                    }
                     memberOrders[i] = 1; //one String
                 }
                 else if (H4Datatype.isUnsigned(memberTIDs[i])) {
@@ -323,7 +335,7 @@ public class H4Vdata extends CompoundDS
             catch (HDFException ex) {
                 String[] nullValues = new String[n];
                 for (int j=0; j<n; j++) {
-                    nullValues[j] = "*error*";
+                    nullValues[j] = "*ERROR*";
                 }
                 list.add(nullValues);
                 continue;
@@ -665,7 +677,13 @@ public class H4Vdata extends CompoundDS
             try {
                 memberNames[i] = HDFLibrary.VFfieldname(id, i);
                 memberTIDs[i] = HDFLibrary.VFfieldtype(id, i);
-                memberTypes[i] = new H4Datatype(memberTIDs[i]);
+                try {
+                    memberTypes[i] = new H4Datatype(memberTIDs[i]);
+                }
+                catch (Exception ex) {
+                    log.debug("init(): failed to create datatype for member[{}]: ", i, ex);
+                    memberTypes[i] = null;
+                }
                 // mask off the litend bit
                 memberTIDs[i] = memberTIDs[i] & (~HDFConstants.DFNT_LITEND);
                 memberOrders[i] = HDFLibrary.VFfieldorder(id, i);

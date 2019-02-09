@@ -76,21 +76,8 @@ public class TestH5MemoryLeak
     private final static Vector DATA_COMP   = new Vector(3);
 
     // compound names and datatypes
-    private final static String[] COMPOUND_MEMBER_NAMES  = {"int32", "float32", "string", "uint32"};
-    private final static H5Datatype[] COMPOUND_MEMBER_DATATYPES = {
-            new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1),
-            new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1),
-            new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1),
-            new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE),
-            new H5Datatype(Datatype.CLASS_STRING, -1, -1, -1) };
-
-    // attributes
-    private final static Attribute ATTRIBUTE_STR = new Attribute(null,
-            "attrName", new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1), new long[] { 1 },
-            new String[] {"attrValue"});
-    private final static Attribute ATTRIBUTE_INT_ARRAY = new Attribute(null, "arrayInt",
-            new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1), new long[] { 10 },
-            new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+    private final static String[] COMPOUND_MEMBER_NAMES = { "int32", "float32", "string", "uint32", "vlstring" };
+    private final static H5Datatype[] COMPOUND_MEMBER_DATATYPES = { null, null, null, null, null };
 
     /**
      * Test memory leak by create file, open dataset, read/write data in an infinite loop
@@ -368,12 +355,24 @@ public class TestH5MemoryLeak
         H5File file=null;
         Group g0, g1, g00;
 
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1);
-        final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1);
-        final H5Datatype typeStr = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
-        final H5Datatype typeStrVlen = new H5Datatype(Datatype.CLASS_STRING, -1, -1, -1);
-        final H5Datatype typeChar = new H5Datatype(Datatype.CLASS_CHAR, 1, -1, -1);
-        final H5Datatype typeEnum = new H5Datatype(Datatype.CLASS_ENUM, DATATYPE_SIZE, -1, -1);
+        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeStr = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeStrVlen = new H5Datatype(Datatype.CLASS_STRING, -1, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeChar = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeEnum = new H5Datatype(Datatype.CLASS_ENUM, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+
+        COMPOUND_MEMBER_DATATYPES[0] = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        COMPOUND_MEMBER_DATATYPES[1] = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        COMPOUND_MEMBER_DATATYPES[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
+        COMPOUND_MEMBER_DATATYPES[3] = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.SIGN_NONE);
+        COMPOUND_MEMBER_DATATYPES[4] = new H5Datatype(Datatype.CLASS_STRING, -1, Datatype.NATIVE, Datatype.NATIVE);
+
+        final H5Datatype strAttrType = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype intAttrType = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+
+        final Attribute ATTRIBUTE_STR = new Attribute(null, "attrName", strAttrType, new long[] { 1 }, new String[] {"attrValue"});
+        final Attribute ATTRIBUTE_INT_ARRAY = new Attribute(null, "arrayInt", intAttrType, new long[] { 10 }, new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
 
         file = new H5File(NAME_FILE_H5, FileFormat.CREATE);
         file.open();
@@ -408,9 +407,9 @@ public class TestH5MemoryLeak
             ATTRIBUTE_INT_ARRAY.write();
         }
 
-        file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_INT);
-        file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_FLOAT);
-        file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1, NAME_DATATYPE_STR);
+        file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_INT);
+        file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_FLOAT);
+        file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_STR);
 
         long nObjs = 0;
         try { nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL); }

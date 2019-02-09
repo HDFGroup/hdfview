@@ -38,7 +38,7 @@ public class H5ObjectEx_T_StringAttribute {
         long attribute_id = -1;
         long[] dims = { DIM0 };
         byte[][] dset_data = new byte[DIM0][SDIM];
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, -1);
+        H5Datatype typeInt = null;
         StringBuffer[] str_data = { new StringBuffer("Parting"), new StringBuffer("is such"),
                 new StringBuffer("sweet"), new StringBuffer("sorrow.") };
 
@@ -66,6 +66,14 @@ public class H5ObjectEx_T_StringAttribute {
             memtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
             if (memtype_id >= 0)
                 H5.H5Tset_size(memtype_id, SDIM);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the base datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

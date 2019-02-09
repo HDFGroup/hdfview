@@ -314,11 +314,18 @@ public class H5ScalarDS extends ScalarDS {
                 }
 
                 log.trace("init(): tid={} sid={} rank={}", tid, sid, rank);
-                datatype = new H5Datatype(tid);
 
-                log.trace("init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
-                        tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
-                        ((H5Datatype) datatype).isRegRef());
+                try {
+                    datatype = new H5Datatype(tid);
+
+                    log.trace("init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
+                            tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
+                            ((H5Datatype) datatype).isRegRef());
+                }
+                catch (Exception ex) {
+                    log.debug("init(): failed to create datatype for dataset: ", ex);
+                    datatype = null;
+                }
 
                 /* see if fill value is defined */
                 try {
@@ -331,6 +338,10 @@ public class H5ScalarDS extends ScalarDS {
                             }
                             catch (OutOfMemoryError e) {
                                 log.debug("init(): out of memory: ", e);
+                                fillValue = null;
+                            }
+                            catch (Exception ex) {
+                                log.debug("init(): allocate fill value buffer failed: ", ex);
                                 fillValue = null;
                             }
 
@@ -1535,7 +1546,7 @@ public class H5ScalarDS extends ScalarDS {
      * <pre>
      * H5File file = new H5File(&quot;test.h5&quot;, H5File.CREATE);
      * int max_str_len = 120;
-     * Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, -1, -1);
+     * Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, Datatype.NATIVE, Datatype.NATIVE);
      * int size = 10000;
      * long dims[] = { size };
      * long chunks[] = { 1000 };

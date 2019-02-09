@@ -370,8 +370,13 @@ public class FitsDataset extends ScalarDS
     @Override
     public Datatype getDatatype() {
         if (datatype == null) {
-            try {datatype = new FitsDatatype(nativeDataset.getBitPix());}
-            catch (Exception ex) {}
+            try {
+                datatype = new FitsDatatype(nativeDataset.getBitPix());
+            }
+            catch (Exception ex) {
+                log.debug("getDatatype(): failed to create datatype: ", ex);
+                datatype = null;
+            }
         }
 
         return datatype;

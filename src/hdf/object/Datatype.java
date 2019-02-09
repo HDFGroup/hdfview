@@ -247,16 +247,16 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
@@ -270,24 +270,23 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param tsign
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      */
-    public Datatype(int tclass, int tsize, int torder, int tsign) {
+    public Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         this(tclass, tsize, torder, tsign, null);
     }
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
-     * SIGN_NONE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
@@ -305,23 +304,23 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param tbase
      *            the base datatype of the new datatype
      */
-    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) {
+    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
         this(tclass, tsize, torder, tsign, tbase, null);
     }
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
@@ -339,14 +338,14 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
-        /* if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
+    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
+        if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
             throw new Exception("invalid datatype size - " + tsize);
         if ((torder != ORDER_LE) && (torder != ORDER_BE) && (torder != ORDER_VAX)
                 && (torder != ORDER_NONE) && (torder != NATIVE))
             throw new Exception("invalid datatype order - " + torder);
         if ((tsign != SIGN_NONE) && (tsign != SIGN_2) && (tsign != NATIVE))
-            throw new Exception("invalid datatype sign - " + tsign); */
+            throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
         datatypeSize = tsize;
@@ -378,7 +377,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param tid
      *            the native datatype identifier.
      */
-    public Datatype(long tid) {
+    public Datatype(long tid) throws Exception {
         this(tid, null);
     }
 
@@ -400,7 +399,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public Datatype(long tid, Datatype pbase) {
+    public Datatype(long tid, Datatype pbase) throws Exception {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
     }
 
@@ -651,10 +650,16 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
             case CLASS_INTEGER:
-                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                if (datatypeSize == NATIVE)
+                    description = "native " + (isUnsigned() ? "unsigned " : "") + "integer";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
             case CLASS_FLOAT:
-                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
+                if (datatypeSize == NATIVE)
+                    description = "native floating-point";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
                 break;
             case CLASS_STRING:
                 description = "String";
@@ -663,13 +668,22 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 description = "Object reference";
                 break;
             case CLASS_OPAQUE:
-                description = String.valueOf(datatypeSize * 8) + "-bit opaque";
+                if (datatypeSize == NATIVE)
+                    description = "native opaque";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit opaque";
                 break;
             case CLASS_BITFIELD:
-                description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
+                if (datatypeSize == NATIVE)
+                    description = "native bitfield";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
                 break;
             case CLASS_ENUM:
-                description = String.valueOf(datatypeSize * 8) + "-bit enum";
+                if (datatypeSize == NATIVE)
+                    description = "native enum";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit enum";
                 break;
             case CLASS_ARRAY:
                 description = "Array";

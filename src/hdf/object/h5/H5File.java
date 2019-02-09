@@ -441,6 +441,8 @@ public class H5File extends FileFormat {
                         long dims[] = null;
                         int rank = H5.H5Sget_simple_extent_ndims(sid);
 
+                        log.trace("getAttribute(): Attribute[{}] isScalar={}", i, (rank == 0));
+
                         if (rank > 0) {
                             dims = new long[rank];
                             H5.H5Sget_simple_extent_dims(sid, dims, null);
@@ -449,6 +451,7 @@ public class H5File extends FileFormat {
                                 lsize *= dims[j];
                             }
                         }
+
                         String nameA = H5.H5Aget_name(aid);
                         log.trace("getAttribute(): Attribute[{}] is {}", i, nameA);
 
@@ -467,13 +470,22 @@ public class H5File extends FileFormat {
                                 log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
                             }
                         }
-                        H5Datatype attrType = new H5Datatype(tid);
+
+                        H5Datatype attrType = null;
+                        try {
+                            attrType = new H5Datatype(tid);
+
+                            log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attrType.getDescription());
+                            log.trace("getAttribute(): Attribute[{}] has size={} isCompound={} is_variable_str={} isVLEN={}",
+                                    i, lsize, attrType.isCompound(), attrType.isVarStr(), attrType.isVLEN());
+                        }
+                        catch (Exception ex) {
+                            log.debug("getAttribute(): failed to create datatype for Attribute[{}]: ", i, ex);
+                            attrType = null;
+                        }
+
                         Attribute attr = new Attribute(obj, nameA, attrType, dims);
                         attributeList.add(attr);
-                        log.debug("getAttribute(): Attribute[{}] Datatype={}", i, attr.getDatatype().getDescription());
-                        log.trace(
-                                "getAttribute(): Attribute[{}] has size={} isCompound={} isScalar={} is_variable_str={} isVLEN={}",
-                                i, lsize, attr.getDatatype().isCompound(), attr.isScalar(), attr.getDatatype().isVarStr(), attr.getDatatype().isVLEN());
 
                         // retrieve the attribute value
                         if (lsize <= 0) {
@@ -483,94 +495,99 @@ public class H5File extends FileFormat {
                         }
 
                         if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) {
-                            log.debug("getAttribute(): Attribute[{}] lsize outside valid Java int range; unsafe cast",
-                                    i);
+                            log.debug("getAttribute(): Attribute[{}] lsize outside valid Java int range; unsafe cast", i);
                             log.trace("getAttribute(): Attribute[{}] continue", i);
                             continue;
                         }
 
                         Object value = null;
-                        if (attr.getDatatype().isVarStr()) {
-                            String[] strs = new String[(int) lsize];
-                            for (int j = 0; j < lsize; j++) {
-                                strs[j] = "";
-                            }
-                            try {
-                                log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
-                                H5.H5AreadVL(aid, tid, strs);
-                            }
-                            catch (Exception ex) {
-                                log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
-                                ex.printStackTrace();
-                            }
-                            value = strs;
-                        }
-                        else if (attr.getDatatype().isCompound()) {
-                            String[] strs = new String[(int) lsize];
-                            for (int j = 0; j < lsize; j++) {
-                                strs[j] = "";
-                            }
-                            try {
-                                log.trace("getAttribute: attribute[{}] H5AreadComplex", i);
-                                H5.H5AreadComplex(aid, tid, strs);
-                            }
-                            catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                            value = strs;
-                        }
-                        else if (attr.getDatatype().isVLEN()) {
-                            String[] strs = new String[(int) lsize];
-                            for (int j = 0; j < lsize; j++) {
-                                strs[j] = "";
-                            }
-                            try {
-                                log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
-                                H5.H5AreadVL(aid, tid, strs);
-                            }
-                            catch (Exception ex) {
-                                log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
-                                ex.printStackTrace();
-                            }
-                            value = strs;
-                        }
-                        else {
-                            try {
-                                value = ((H5Datatype) attr.getDatatype()).allocateArray((int) lsize);
-                            }
-                            catch (OutOfMemoryError e) {
-                                log.debug("getAttribute(): Attribute[{}] out of memory", i, e);
-                                value = null;
-                            }
-                            if (value == null) {
-                                log.debug("getAttribute(): Attribute[{}] allocateArray returned null", i);
-                                log.trace("getAttribute(): Attribute[{}] continue", i);
-                                continue;
-                            }
-
-                            if (attr.getDatatype().isArray()) {
+                        try {
+                            if (attr.getDatatype().isVarStr()) {
+                                String[] strs = new String[(int) lsize];
+                                for (int j = 0; j < lsize; j++) {
+                                    strs[j] = "";
+                                }
                                 try {
-                                    log.trace("getAttribute(): Attribute[{}] H5Aread ARRAY tid={}", i, tid);
-                                    H5.H5Aread(aid, tid, value);
+                                    log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
+                                    H5.H5AreadVL(aid, tid, strs);
                                 }
                                 catch (Exception ex) {
-                                    log.debug("getAttribute(): Attribute[{}] H5Aread failure: ", i, ex);
+                                    log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
                                     ex.printStackTrace();
                                 }
+                                value = strs;
+                            }
+                            else if (attr.getDatatype().isCompound()) {
+                                String[] strs = new String[(int) lsize];
+                                for (int j = 0; j < lsize; j++) {
+                                    strs[j] = "";
+                                }
+                                try {
+                                    log.trace("getAttribute: attribute[{}] H5AreadComplex", i);
+                                    H5.H5AreadComplex(aid, tid, strs);
+                                }
+                                catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                value = strs;
+                            }
+                            else if (attr.getDatatype().isVLEN()) {
+                                String[] strs = new String[(int) lsize];
+                                for (int j = 0; j < lsize; j++) {
+                                    strs[j] = "";
+                                }
+                                try {
+                                    log.trace("getAttribute(): Attribute[{}] H5AreadVL", i);
+                                    H5.H5AreadVL(aid, tid, strs);
+                                }
+                                catch (Exception ex) {
+                                    log.debug("getAttribute(): Attribute[{}] H5AreadVL failure: ", i, ex);
+                                    ex.printStackTrace();
+                                }
+                                value = strs;
                             }
                             else {
-                                log.trace("getAttribute(): Attribute[{}] H5Aread", i);
-                                H5.H5Aread(aid, tid, value);
-                            }
+                                try {
+                                    value = ((H5Datatype) attr.getDatatype()).allocateArray((int) lsize);
+                                }
+                                catch (OutOfMemoryError e) {
+                                    log.debug("getAttribute(): Attribute[{}] out of memory", i, e);
+                                    value = null;
+                                }
+                                if (value == null) {
+                                    log.debug("getAttribute(): Attribute[{}] allocateArray returned null", i);
+                                    log.trace("getAttribute(): Attribute[{}] continue", i);
+                                    continue;
+                                }
 
-                            if (attr.getDatatype().isText() && value instanceof byte[]) {
-                                log.trace("getAttribute(): isText: converting byte array to string array");
-                                value = attr.byteToString((byte[]) value, (int) attr.getDatatype().getDatatypeSize());
+                                if (attr.getDatatype().isArray()) {
+                                    try {
+                                        log.trace("getAttribute(): Attribute[{}] H5Aread ARRAY tid={}", i, tid);
+                                        H5.H5Aread(aid, tid, value);
+                                    }
+                                    catch (Exception ex) {
+                                        log.debug("getAttribute(): Attribute[{}] H5Aread failure: ", i, ex);
+                                        ex.printStackTrace();
+                                    }
+                                }
+                                else {
+                                    log.trace("getAttribute(): Attribute[{}] H5Aread", i);
+                                    H5.H5Aread(aid, tid, value);
+                                }
+
+                                if (attr.getDatatype().isText() && value instanceof byte[]) {
+                                    log.trace("getAttribute(): isText: converting byte array to string array");
+                                    value = attr.byteToString((byte[]) value, (int) attr.getDatatype().getDatatypeSize());
+                                }
+                                else if (((H5Datatype)attr.getDatatype()).isRefObj()) {
+                                    log.trace("getAttribute(): Attribute[{}] isREF: converting byte array to long array", i);
+                                    value = HDFNativeData.byteToLong((byte[]) value);
+                                }
                             }
-                            else if (((H5Datatype)attr.getDatatype()).isRefObj()) {
-                                log.trace("getAttribute(): Attribute[{}] isREF: converting byte array to long array", i);
-                                value = HDFNativeData.byteToLong((byte[]) value);
-                            }
+                        }
+                        catch (Exception ex) {
+                            log.debug("getAttribute(): Attribute[{}] read failure: ", i, ex);
+                            continue;
                         }
 
                         log.debug("getAttribute(): Attribute[{}] data: {}", i, value);
@@ -680,13 +697,13 @@ public class H5File extends FileFormat {
 
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
-        Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+        Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
         Attribute attr = new Attribute(dataset, attrName, attrType, null);
         attr.write(classValue);
 
         attrName = "IMAGE_VERSION";
         String[] versionValue = { "1.2" };
-        attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, -1, -1);
+        attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
         attr = new Attribute(dataset, attrName, attrType, null);
         attr.write(versionValue);
 
@@ -699,14 +716,14 @@ public class H5File extends FileFormat {
 
         attrName = "IMAGE_SUBCLASS";
         String[] subclassValue = { subclass };
-        attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, -1, -1);
+        attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
         attr = new Attribute(dataset, attrName, attrType, null);
         attr.write(subclassValue);
 
         if ((selectionFlag == ScalarDS.INTERLACE_PIXEL) || (selectionFlag == ScalarDS.INTERLACE_PLANE)) {
             attrName = "INTERLACE_MODE";
             String[] interlaceValue = { interlaceMode };
-            attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, -1, -1);
+            attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
             attr = new Attribute(dataset, attrName, attrType, null);
             attr.write(interlaceValue);
         }

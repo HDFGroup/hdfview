@@ -136,10 +136,10 @@ public class H5DatatypeTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeUInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, -1, Datatype.SIGN_NONE);
-        typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, -1, -1);
+        typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        typeUInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.SIGN_NONE);
+        typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
 
         testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         assertNotNull(testFile);
@@ -396,7 +396,15 @@ public class H5DatatypeTest {
         log.debug("testFromNative");
         long tid = -1;
         H5.H5error_off();
-        H5Datatype type = new H5Datatype(-1);
+
+        H5Datatype type = null;
+        try {
+            type = new H5Datatype(-1);
+        }
+        catch (Exception ex) {
+            ;
+        }
+
         H5.H5error_on();
 
         assertFalse(Datatype.CLASS_INTEGER == type.getDatatypeClass());
@@ -434,7 +442,13 @@ public class H5DatatypeTest {
         int signs[] = { Datatype.SIGN_2, Datatype.SIGN_NONE, Datatype.SIGN_2 };
         int orders[] = { Datatype.ORDER_LE, Datatype.ORDER_LE, Datatype.ORDER_BE };
         for (int i = 0; i < tids.length; i++) {
-            type = new H5Datatype(tids[i]);
+            try {
+                type = new H5Datatype(tids[i]);
+            }
+            catch (Exception ex) {
+                fail("new H5Datatype failed. " + ex);
+            }
+
             assertEquals("sizes#" + i, sizes[i], type.getDatatypeSize());
             assertEquals("signs#" + i, signs[i], type.getDatatypeSign());
             assertEquals("orders#" + i, orders[i], type.getDatatypeOrder());

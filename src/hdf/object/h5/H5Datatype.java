@@ -168,53 +168,55 @@ public class H5Datatype extends Datatype {
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
-     *            Valid values are NATIVE or a positive value.
+     *            Valid values are NATIVE or a positive value. For string datatypes, -1 is also
+     *            a valid value (to create a variable-length string).
      * @param torder
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
      *            ORDER_NONE and NATIVE.
      * @param tsign
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      */
-    public H5Datatype(int tclass, int tsize, int torder, int tsign) {
+    public H5Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         this(tclass, tsize, torder, tsign, null);
     }
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
-     *            Valid values are NATIVE or a positive value.
+     *            Valid values are NATIVE or a positive value. For string datatypes, -1 is also
+     *            a valid value (to create a variable-length string).
      * @param torder
      *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
      *            ORDER_NONE and NATIVE.
@@ -223,41 +225,45 @@ public class H5Datatype extends Datatype {
      * @param tbase
      *            the base datatype of the new datatype
      */
-    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) {
+    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
         this(tclass, tsize, torder, tsign, tbase, null);
     }
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
+     *            etc.
      * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
-     *            Valid values are NATIVE or a positive value.
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the
+     *            size is 4. Valid values are NATIVE or a positive value. For string
+     *            datatypes, -1 is also a valid value (to create a variable-length
+     *            string).
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
-     *            ORDER_NONE and NATIVE.
+     *            the byte order of the datatype. Valid values are ORDER_LE,
+     *            ORDER_BE, ORDER_VAX, ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and
+     *            NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
+    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
         super(tclass, tsize, torder, tsign, tbase, pbase);
         datatypeDescription = getDescription();
     }
@@ -272,14 +278,14 @@ public class H5Datatype extends Datatype {
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
      *
      * @see #fromNative(long nativeID)
      *
      * @param nativeID
      *            the native datatype identifier.
      */
-    public H5Datatype(long nativeID) {
+    public H5Datatype(long nativeID) throws Exception {
         this(nativeID, null);
     }
 
@@ -293,7 +299,7 @@ public class H5Datatype extends Datatype {
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
      *
      * @see #fromNative(long nativeID)
      *
@@ -302,7 +308,7 @@ public class H5Datatype extends Datatype {
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public H5Datatype(long nativeID, Datatype pbase) {
+    public H5Datatype(long nativeID, Datatype pbase) throws Exception {
         super(nativeID, pbase);
         fromNative(nativeID);
         datatypeDescription = getDescription();
@@ -824,6 +830,11 @@ public class H5Datatype extends Datatype {
                     log.trace("fromNative(): vlen type");
                     tmptid = H5.H5Tget_super(tid);
                     baseType = new H5Datatype(tmptid, this);
+                    if (baseType == null) {
+                        log.debug("fromNative(): VLEN datatype has null base type");
+                        throw new Exception("Datatype (VLEN) has no base datatype");
+                    }
+
                     datatypeSign = baseType.getDatatypeSign();
                 }
                 catch (Exception ex) {
@@ -1519,10 +1530,16 @@ public class H5Datatype extends Datatype {
                 description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
             case CLASS_INTEGER:
-                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                if (datatypeSize == NATIVE)
+                    description = "native " + (isUnsigned() ? "unsigned " : "") + "integer";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
             case CLASS_FLOAT:
-                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
+                if (datatypeSize == NATIVE)
+                    description = "native floating-point";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
                 break;
             case CLASS_STRING:
                 description = "String, length = " + (isVarStr() ? "variable" : datatypeSize);
@@ -1569,10 +1586,16 @@ public class H5Datatype extends Datatype {
                 }
                 break;
             case CLASS_BITFIELD:
-                description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
+                if (datatypeSize == NATIVE)
+                    description = "native bitfield";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
                 break;
             case CLASS_OPAQUE:
-                description = String.valueOf(datatypeSize) + "-byte Opaque";
+                if (datatypeSize == NATIVE)
+                    description = "native Opaque";
+                else
+                    description = String.valueOf(datatypeSize) + "-byte Opaque";
 
                 if (opaqueTag != null) {
                     description += ", tag = " + opaqueTag;
@@ -1633,7 +1656,10 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_ENUM:
-                description = String.valueOf(datatypeSize * 8) + "-bit enum";
+                if (datatypeSize == NATIVE)
+                    description = "native enum";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit enum";
 
                 String members = getEnumMembersAsString();
                 if (members != null)

@@ -102,7 +102,7 @@ public class H5ObjectEx_D_Nbit {
         long[] chunk_dims = { CHUNK_X, CHUNK_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
         final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_LE, -1);
+                DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
 
         // Initialize data.
         for (int indx = 0; indx < DIM_X; indx++)

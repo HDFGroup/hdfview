@@ -200,7 +200,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * long[] attrDims = { 1 };
      * String attrName = &quot;CLASS&quot;;
      * String[] classValue = { &quot;IMAGE&quot; };
-     * Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+     * Datatype attrType = null;
+     * try {
+     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     * }
+     * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims);
      * attr.setValue(classValue);
      * </pre>
@@ -235,7 +239,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * long[] attrDims = { 1 };
      * String attrName = &quot;CLASS&quot;;
      * String[] classValue = { &quot;IMAGE&quot; };
-     * Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+     * Datatype attrType = null;
+     * try {
+     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     * }
+     * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
@@ -419,7 +427,15 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                     for (int i = 0; i < numberOfMembers; i++) {
                         isMemberSelected[i] = true;
                         memberTIDs[i] = flatTypeList.get(i).createNative();
-                        memberTypes[i] = new H5Datatype(memberTIDs[i]);
+
+                        try {
+                            memberTypes[i] = new H5Datatype(memberTIDs[i]);
+                        }
+                        catch (Exception ex) {
+                            log.debug("init(): failed to create datatype for member[{}]: ", i, ex);
+                            memberTypes[i] = null;
+                        }
+
                         memberNames[i] = flatNameList.get(i);
                         memberOrders[i] = 1;
                         memberDims[i] = null;

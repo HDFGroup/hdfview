@@ -38,8 +38,7 @@ public class H5ObjectEx_D_External {
         long type_id = -1;
         long[] dims = { DIM_X, DIM_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_LE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize the dataset.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -50,6 +49,14 @@ public class H5ObjectEx_D_External {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

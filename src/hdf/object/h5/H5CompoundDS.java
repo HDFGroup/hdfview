@@ -348,10 +348,6 @@ public class H5CompoundDS extends CompoundDS {
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 tid = H5.H5Dget_type(did);
                 log.trace("init(): tid={} sid={} rank={}", tid, sid, rank);
-                datatype = new H5Datatype(tid);
-
-                log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
-                        datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
 
                 if (rank == 0) {
                     // a scalar data point
@@ -370,8 +366,20 @@ public class H5CompoundDS extends CompoundDS {
                 startDims = new long[rank];
                 selectedDims = new long[rank];
 
+                try {
+                    datatype = new H5Datatype(tid);
+
+                    log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
+                            datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
+
+                    ((H5Datatype) datatype).extractCompoundInfo("", flatNameList, flatTypeList);
+                }
+                catch (Exception ex) {
+                    log.debug("init(): failed to create datatype for dataset: ", ex);
+                    datatype = null;
+                }
+
                 // initialize member information
-                ((H5Datatype) datatype).extractCompoundInfo("", flatNameList, flatTypeList);
                 numberOfMembers = flatNameList.size();
                 log.trace("init(): numberOfMembers={}", numberOfMembers);
 
@@ -1729,9 +1737,9 @@ public class H5CompoundDS extends CompoundDS {
      * String[] mnames = { &quot;int&quot;, &quot;float&quot;, &quot;string&quot; };
      * Dataset dset = null;
      * try {
-     *     mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1);
-     *     mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1);
-     *     mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
+     *     mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
+     *     mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
+     *     mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
      *     dset = file.createCompoundDS(&quot;/CompoundDS&quot;, pgroup, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, data);
      * }
      * catch (Exception ex) {

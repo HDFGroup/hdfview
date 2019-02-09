@@ -354,7 +354,13 @@ public class NC2File extends FileFormat {
 
         String attrName = netcdfAttr.getName();
         long[] attrDims = { netcdfAttr.getLength() };
-        Datatype attrType = new NC2Datatype(netcdfAttr.getDataType());
+        Datatype attrType = null;
+        try {
+            attrType = new NC2Datatype(netcdfAttr.getDataType());
+        }
+        catch (Exception ex) {
+            ;
+        }
         ncsaAttr = new hdf.object.Attribute(null, attrName, attrType, attrDims);
         ncsaAttr.setData(netcdfAttr.getValues());
 
