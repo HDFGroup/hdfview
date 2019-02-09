@@ -40,26 +40,27 @@ public class H4Datatype extends Datatype {
      * The following is a list of a few examples of H4Datatype:
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H4Datatype type = new H4Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * H4Datatype type = new H4Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H4Datatype type = new H4Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * H4Datatype type = new H4Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H4Datatype type = new H4Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * H4Datatype type = new H4Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H4Datatype type = new H4Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * H4Datatype type = new H4Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
-     * 
+     *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
-     *            ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      */
-    public H4Datatype(int tclass, int tsize, int torder, int tsign) {
+    public H4Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         super(tclass, tsize, torder, tsign);
         datatypeDescription = getDescription();
     }
@@ -76,7 +77,7 @@ public class H4Datatype extends Datatype {
      * will construct a datatype equivalent to
      *
      * <pre>
-     * new H4Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     * new H4Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
      * </pre>
      *
      * @see #fromNative(long nativeID)
@@ -84,7 +85,7 @@ public class H4Datatype extends Datatype {
      * @param nativeID
      *            the native datatype identifier.
      */
-    public H4Datatype(long nativeID) {
+    public H4Datatype(long nativeID) throws Exception {
         super(nativeID);
 
         fromNative(nativeID);

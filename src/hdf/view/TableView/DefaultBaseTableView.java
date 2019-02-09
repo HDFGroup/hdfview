@@ -131,8 +131,8 @@ import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
 import hdf.view.ViewProperties.BITMASK_OP;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.MathConversionDialog;
@@ -979,18 +979,18 @@ public abstract class DefaultBaseTableView implements TableView {
     }
 
     protected void loadData(DataFormat dataObject) throws Exception {
-        log.trace("base loadData(): start");
+        log.trace("loadData(): start");
 
         if (!dataObject.isInited()) {
             try {
                 dataObject.init();
-                log.trace("base loadData(): data object inited");
+                log.trace("loadData(): data object inited");
             }
             catch (Exception ex) {
                 Tools.showError(shell, "Load", "DefaultBaseTable.loadData:" + ex.getMessage());
                 dataValue = null;
-                log.debug("base loadData(): ", ex);
-                log.trace("base loadData(): finish");
+                log.debug("loadData(): ", ex);
+                log.trace("loadData(): finish");
                 return;
             }
         }
@@ -1014,11 +1014,11 @@ public abstract class DefaultBaseTableView implements TableView {
         catch (Throwable ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Load", "DefaultBaseTable.loadData: " + ex.getMessage());
-            log.debug("base loadData(): ", ex);
+            log.debug("loadData(): ", ex);
             dataValue = null;
         }
 
-        log.trace("base loadData(): finish");
+        log.trace("loadData(): finish");
     }
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);

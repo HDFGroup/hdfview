@@ -40,8 +40,8 @@ public class H5ObjectEx_T_ArrayAttribute {
         long[] dims = { DIM0 };
         long[] adims = { ADIM0, ADIM1 };
         int[][][] dset_data = new int[DIM0][ADIM0][ADIM1];
-        final H5Datatype typeIntArray = new H5Datatype(Datatype.CLASS_ARRAY, 8, Datatype.ORDER_LE, -1);
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, -1);
+        H5Datatype typeIntArray = null;
+        H5Datatype typeInt = null;
 
         // Initialize data. indx is the element in the dataspace, jndx and kndx the
         // elements within the array datatype.
@@ -54,6 +54,15 @@ public class H5ObjectEx_T_ArrayAttribute {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create base datatypes.
+        try {
+            typeIntArray = new H5Datatype(Datatype.CLASS_ARRAY, 8, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -128,7 +128,15 @@ public class AttributeTest {
         long[] attrDims = { 1 };
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
-        Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+
+        Datatype attrType = null;
+        try {
+            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
+
         Attribute attr = new Attribute(null, attrName, attrType, attrDims);
         attr.setData(classValue);
         assertNotNull(attr);
@@ -159,7 +167,15 @@ public class AttributeTest {
         long[] attrDims = { 1 };
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
-        Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+
+        Datatype attrType = null;
+        try {
+            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
+
         Attribute attr = new Attribute(null, attrName, attrType, attrDims, classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));

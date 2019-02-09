@@ -3110,30 +3110,6 @@ public final class Tools {
     }
 
     /**
-     * Retrieves the Java Runtime Class of the given Object. B = byte array, S =
-     * short array, I = int array, J = long array, F = float array, D = double
-     * array, L = class or interface
-     *
-     * @param o
-     *            the Object to determine the Runtime Class of
-     * @return the Java Runtime Class of the given Object.
-     */
-    public static char getJavaObjectRuntimeClass(Object o) {
-        if (o == null) return ' ';
-
-        String cName = o.getClass().getName();
-
-        if (cName.equals("java.lang.String")) return 'L';
-
-        int cIndex = cName.lastIndexOf("[");
-        if (cIndex >= 0) {
-            return cName.charAt(cIndex + 1);
-        }
-
-        return ' ';
-    }
-
-    /**
      * Show an SWT error dialog with the given error message.
      * @param parent
      *           The parent Shell of the MessageDialog

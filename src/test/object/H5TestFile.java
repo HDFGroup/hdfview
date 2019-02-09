@@ -77,11 +77,7 @@ public class H5TestFile {
 
     // compound names and datatypes
     public final static String[] COMPOUND_MEMBER_NAMES = { "int32", "float32", "string", "uint32" };
-    public final static H5Datatype[] COMPOUND_MEMBER_DATATYPES = {
-            new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1),
-            new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1),
-            new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1),
-            new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE) };
+    public final static H5Datatype[] COMPOUND_MEMBER_DATATYPES = { null, null, null, null };
 
     public static Attribute ATTRIBUTE_STR = null;
     public static Attribute ATTRIBUTE_INT_ARRAY = null;
@@ -119,13 +115,18 @@ public class H5TestFile {
             fileName = NAME_FILE_H5;
         }
 
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1);
-        final H5Datatype typeByte = new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, Datatype.SIGN_NONE);
-        final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1);
-        final H5Datatype typeStr = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
-        final H5Datatype typeChar = new H5Datatype(Datatype.CLASS_CHAR, 1, -1, -1);
-        final H5Datatype typeEnum = new H5Datatype(Datatype.CLASS_ENUM, DATATYPE_SIZE, -1, -1);
-        final H5Datatype typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, -1, -1, -1);
+        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeByte = new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
+        final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeStr = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeChar = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeEnum = new H5Datatype(Datatype.CLASS_ENUM, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        final H5Datatype typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+
+        COMPOUND_MEMBER_DATATYPES[0] = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        COMPOUND_MEMBER_DATATYPES[1] = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        COMPOUND_MEMBER_DATATYPES[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
+        COMPOUND_MEMBER_DATATYPES[3] = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.SIGN_NONE);
 
         for (int i = 0; i < DIM_SIZE; i++) {
             DATA_INT[i] = i;
@@ -194,28 +195,28 @@ public class H5TestFile {
             }
         }
 
-        Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_INT);
+        Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_INT);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
-        dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, -1, Datatype.SIGN_NONE, NAME_DATATYPE_UINT);
+        dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.SIGN_NONE, NAME_DATATYPE_UINT);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
-        dtype = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, -1, -1, NAME_DATATYPE_FLOAT);
+        dtype = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_FLOAT);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
-        dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1, NAME_DATATYPE_STR);
+        dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_STR);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });

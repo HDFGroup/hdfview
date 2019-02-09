@@ -199,9 +199,14 @@ public class H4SDS extends ScalarDS
     @Override
     public Datatype getDatatype()
     {
-        if (datatype == null)
-        {
-            datatype = new H4Datatype(datatypeID);
+        if (datatype == null) {
+            try {
+                datatype = new H4Datatype(datatypeID);
+            }
+            catch (Exception ex) {
+                log.debug("getDatatype(): failed to create datatype: ", ex);
+                datatype = null;
+            }
         }
 
         return datatype;

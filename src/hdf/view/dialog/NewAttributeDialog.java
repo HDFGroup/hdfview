@@ -438,7 +438,7 @@ public class NewAttributeDialog extends Dialog {
 
     @SuppressWarnings("unchecked")
     private boolean createAttribute() {
-        int tclass = -1, tsize = -1, torder = -1, tsign = -1;
+        int tclass = Datatype.CLASS_NO_CLASS, tsize = Datatype.NATIVE, torder = Datatype.NATIVE, tsign = Datatype.NATIVE;
         boolean isVLen = false;
         boolean isVlenStr = false;
         log.trace("createAttribute start");

@@ -202,22 +202,26 @@ public class TestH5Object
             final long[] attrDims = {1};
             final String attrName = "Test attribute";
             final String[] attrValue = {"Test for group attribute"};
-            final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, -1, -1);
+            final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, Datatype.NATIVE, Datatype.NATIVE);
             final Attribute attr = new Attribute(g1, attrName, attrType, attrDims);
             attr.write(attrValue);
         } catch (final Exception ex) { failed(message, ex, file); return null; }
 
         // create datasets
         try {
-            file.createScalarDS(NAME_DATASET_INT, null, new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
-            file.createScalarDS(NAME_DATASET_FLOAT, null, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_FLOAT);
-            file.createScalarDS(NAME_DATASET_CHAR, null, new H5Datatype(Datatype.CLASS_CHAR, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_BYTE);
-            file.createScalarDS(NAME_DATASET_STR, null, new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1), DIMs, null, CHUNKs, 9, DATA_STR);
-            file.createScalarDS(NAME_DATASET_ENUM, null, new H5Datatype(Datatype.CLASS_ENUM, 4, -1, -1), DIMs, null, CHUNKs, 9, DATA_ENUM);
-            file.createScalarDS(NAME_DATASET_SUB, g0, new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
-            file.createScalarDS(NAME_DATASET_SUB_SUB, g00, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_FLOAT);
-            file.createImage(NAME_DATASET_ATTR, null, new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1), DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
-            final Datatype[]  mdtypes = {new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1)};
+            file.createScalarDS(NAME_DATASET_INT, null, new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
+            file.createScalarDS(NAME_DATASET_FLOAT, null, new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_FLOAT);
+            file.createScalarDS(NAME_DATASET_CHAR, null, new H5Datatype(Datatype.CLASS_CHAR, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_BYTE);
+            file.createScalarDS(NAME_DATASET_STR, null, new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_STR);
+            file.createScalarDS(NAME_DATASET_ENUM, null, new H5Datatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_ENUM);
+            file.createScalarDS(NAME_DATASET_SUB, g0, new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
+            file.createScalarDS(NAME_DATASET_SUB_SUB, g00, new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_FLOAT);
+            file.createImage(NAME_DATASET_ATTR, null, new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
+            final Datatype[]  mdtypes = {
+                    new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE),
+                    new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE),
+                    new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE)
+                    };
             final String[] mnames = {"int", "float", "string"};
             file.createCompoundDS(NAME_DATASET_COMPOUND, null, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, DATA_COMP);
         } catch (final Exception ex) { failed(message, ex, file); return null; }
@@ -469,7 +473,7 @@ public class TestH5Object
         for (int i = 0; i < N; i++) {
             message = "Create/read/write a H5ScalarDS -- H5ScalarDS.create ()";
             try {
-                dtype = new H5Datatype(dtype_cls[i], dtype_sizes[i], -1, -1);
+                dtype = new H5Datatype(dtype_cls[i], dtype_sizes[i], Datatype.NATIVE, Datatype.NATIVE);
                 dset = file.createScalarDS(names[i], pgroup, dtype, DIMs, null, CHUNKs, 9, all_data[i]);
             } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -567,7 +571,7 @@ public class TestH5Object
         Dataset dset = null;
         Object data_read = null;
         try {
-            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1);
+            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
             dset = file.createImage("Image", pgroup, dtype, DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -618,9 +622,9 @@ public class TestH5Object
         final String[] mnames = {"int", "float", "string"};
         Dataset dset = null;
         try {
-            mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1);
-            mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1);
-            mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
+            mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+            mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+            mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
             dset = file.createCompoundDS("/CompoundDS", pgroup, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, data);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -688,9 +692,9 @@ public class TestH5Object
             g0 = file.createGroup("/gg0", null);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
         try {
-            mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1);
-            mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1);
-            mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
+            mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+            mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+            mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
             dset = file.createCompoundDS("/g0/CompoundDS/", g0, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, data);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -730,7 +734,7 @@ public class TestH5Object
         Dataset dset = null;
         try {
             grp = file.createGroup("/Group", null);
-            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1);
+            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
             dset = file.createImage("Dataset", pgroup, dtype, DIMs, null, CHUNKs, 9, 1, -1, bdata);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -879,7 +883,7 @@ public class TestH5Object
         Datatype dtype = null;
         Dataset dset = null;
         try {
-            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1);
+            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
             dset = file.createScalarDS("Dataset", pgroup, dtype, DIMs, null, CHUNKs, 9, null);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -941,7 +945,7 @@ public class TestH5Object
         Datatype dtype = null;
         Dataset dset = null;
         try {
-            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1);
+            dtype = new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
             dset = file.createScalarDS("Dataset", pgroup, dtype, DIMs, null, CHUNKs, 9, null);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -1087,7 +1091,7 @@ public class TestH5Object
         byte[] bdata = null;
 
         try {
-            dtype = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
+            dtype = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
             dset = file.createScalarDS("String", pgroup, dtype, dims, null, null, -1, sdata);
         } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
@@ -1138,7 +1142,7 @@ public class TestH5Object
         message = "Decode/encode datatypes -- H5Datatype.toNative()";
 
         try {
-            dtype = file.createDatatype(Datatype.CLASS_INTEGER,-1, -1, -1);
+            dtype = file.createDatatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
             tid = dtype.createNative();
             if (!H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_INT)) {
                 failed(message, new HDF5Exception("Failed to convert native integer"), file);
@@ -1150,7 +1154,7 @@ public class TestH5Object
         }
 
         try {
-            dtype = file.createDatatype(Datatype.CLASS_FLOAT,-1, -1, -1);
+            dtype = file.createDatatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
             tid = dtype.createNative();
             if (!H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_FLOAT)) {
                 failed(message, new HDF5Exception("Failed to convert native float"), file);
@@ -1162,7 +1166,7 @@ public class TestH5Object
         }
 
         try {
-            dtype = file.createDatatype(Datatype.CLASS_CHAR, 1, -1, -1);
+            dtype = file.createDatatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.NATIVE);
             tid = dtype.createNative();
             if (!H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_CHAR)) {
                 failed(message, new HDF5Exception("Failed to convert native char"), file);
@@ -1174,7 +1178,7 @@ public class TestH5Object
         }
 
         try {
-            dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
+            dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
             tid = dtype.createNative();
             tid2 = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
             H5.H5Tset_size(tid2, STR_LEN);

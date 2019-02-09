@@ -146,9 +146,9 @@ public class H5ScalarDSTest {
             ex.printStackTrace();
         }
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, -1, -1);
-            typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, -1, -1);
-            typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, -1, -1);
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+            typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+            typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
 
             testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         }
@@ -1871,7 +1871,13 @@ public class H5ScalarDSTest {
         final String nameNew = "/tmpH5ScalarDS";
         float[] data = null;
 
-        final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1);
+        H5Datatype typeFloat = null;
+        try {
+            typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
 
         try {
             final Group rootGrp = (Group) testFile.get("/");

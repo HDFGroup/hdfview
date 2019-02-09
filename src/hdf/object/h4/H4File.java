@@ -1506,8 +1506,14 @@ public class H4File extends FileFormat {
 
                         if (b && (str[0].length() > 0)) {
                             long attrDims[] = { str.length };
-                            Attribute newAttr = new Attribute(getRootObject(), annName + " #" + i,
-                                    new H4Datatype(HDFConstants.DFNT_CHAR), attrDims);
+                            Datatype attrType = null;
+                            try {
+                                attrType = new H4Datatype(HDFConstants.DFNT_CHAR);
+                            }
+                            catch (Exception ex) {
+                                log.debug("getFileAnnotation(): failed to create datatype for attribute: ", ex);
+                            }
+                            Attribute newAttr = new Attribute(getRootObject(), annName + " #" + i, attrType, attrDims);
                             attrList.add(newAttr);
                             newAttr.setData(str[0]);
                         }
@@ -1615,7 +1621,15 @@ public class H4File extends FileFormat {
                     }
                 }
 
-                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims, buf);
+                Datatype attrType = null;
+                try {
+                    attrType = new H4Datatype(attrInfo[0]);
+                }
+                catch (Exception ex) {
+                    log.debug("getGRglobalAttribute(): failed to create datatype for attribute: ", ex);
+                }
+
+                Attribute attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // for (int i=0; i<numberOfAttributes; i++)
         } // if (b && numberOfAttributes>0)
@@ -1702,7 +1716,15 @@ public class H4File extends FileFormat {
                     }
                 }
 
-                Attribute attr = new Attribute(getRootObject(), attrName[0], new H4Datatype(attrInfo[0]), attrDims, buf);
+                Datatype attrType = null;
+                try {
+                    attrType = new H4Datatype(attrInfo[0]);
+                }
+                catch (Exception ex) {
+                    log.debug("getSDSglobalAttribute(): failed to create datatype for attribute: ", ex);
+                }
+
+                Attribute attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // for (int i=0; i<numberOfAttributes; i++)
         } // if (b && numberOfAttributes>0)

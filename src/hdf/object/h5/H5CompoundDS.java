@@ -32,7 +32,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.view.Tools;
+import hdf.object.Utils;
 
 /**
  * The H5CompoundDS class defines an HDF5 dataset of compound datatypes.
@@ -230,73 +230,6 @@ public class H5CompoundDS extends CompoundDS {
         log.trace("close(): finish");
     }
 
-    public H5Datatype getDSDatatype() throws Exception {
-        H5Datatype DSdatatype = null;
-
-        if (!isInited())
-            init();
-
-        try {
-            DSdatatype = (H5Datatype) this.getDatatype();
-        }
-        catch (Exception ex) {
-            log.debug("getDSDatatype(): get datatype: ", ex);
-        }
-
-        /*
-         * Check for any unsupported datatypes and fail early before attempting to read the dataset
-         */
-        if (DSdatatype.isArray()) {
-            H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
-
-            if (baseType == null) {
-                log.debug("getDSDatatype(): ARRAY datatype has no base type");
-                throw new Exception("Dataset's datatype (ARRAY) has no base datatype");
-            }
-        }
-
-        if (isExternal) {
-            String pdir = this.getFileFormat().getAbsoluteFile().getParent();
-
-            if (pdir == null) {
-                pdir = ".";
-            }
-            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
-            log.trace("getDSDatatype(): External dataset: user.dir={}", pdir);
-        }
-        return DSdatatype;
-    }
-
-    public long getTotalSelectedSpacePoints(long did, long[] spaceIDs) throws HDF5Exception {
-        long totalSelectedSpacePoints = selectHyperslab(did, spaceIDs);
-
-        log.trace("getTotalSelectedSpacePoints(): selected {} points in dataset dataspace", totalSelectedSpacePoints);
-
-        if (totalSelectedSpacePoints == 0) {
-            log.debug("getTotalSelectedSpacePoints(): No data to read. Dataset or selected subset is empty.");
-            log.trace("getTotalSelectedSpacePoints(): finish");
-            throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
-        }
-
-        if (totalSelectedSpacePoints < Integer.MIN_VALUE || totalSelectedSpacePoints > Integer.MAX_VALUE) {
-            log.debug("getTotalSelectedSpacePoints(): totalSelectedSpacePoints outside valid Java int range; unsafe cast");
-            log.trace("getTotalSelectedSpacePoints(): finish");
-            throw new HDF5Exception("Invalid int size");
-        }
-
-        if (log.isDebugEnabled()) {
-            // check is storage space is allocated
-            try {
-                long ssize = H5.H5Dget_storage_size(did);
-                log.trace("getTotalSelectedSpacePoints(): Storage space allocated = {}.", ssize);
-            }
-            catch (Exception ex) {
-                log.debug("getTotalSelectedSpacePoints(): check if storage space is allocated:", ex);
-            }
-        }
-        return totalSelectedSpacePoints;
-    }
-
     /**
      * Retrieves datatype and dataspace information from file and sets the dataset
      * in memory.
@@ -415,10 +348,6 @@ public class H5CompoundDS extends CompoundDS {
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 tid = H5.H5Dget_type(did);
                 log.trace("init(): tid={} sid={} rank={}", tid, sid, rank);
-                datatype = new H5Datatype(tid);
-
-                log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
-                        datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
 
                 if (rank == 0) {
                     // a scalar data point
@@ -437,8 +366,20 @@ public class H5CompoundDS extends CompoundDS {
                 startDims = new long[rank];
                 selectedDims = new long[rank];
 
+                try {
+                    datatype = new H5Datatype(tid);
+
+                    log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
+                            datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
+
+                    ((H5Datatype) datatype).extractCompoundInfo("", flatNameList, flatTypeList);
+                }
+                catch (Exception ex) {
+                    log.debug("init(): failed to create datatype for dataset: ", ex);
+                    datatype = null;
+                }
+
                 // initialize member information
-                ((H5Datatype) getDatatype()).extractCompoundInfo("", flatNameList, flatTypeList);
                 numberOfMembers = flatNameList.size();
                 log.trace("init(): numberOfMembers={}", numberOfMembers);
 
@@ -496,7 +437,8 @@ public class H5CompoundDS extends CompoundDS {
                 log.debug("init(): ", ex);
             }
             finally {
-                getDatatype().close(tid);
+                if (datatype != null)
+                    datatype.close(tid);
 
                 try {
                     H5.H5Sclose(sid);
@@ -557,10 +499,14 @@ public class H5CompoundDS extends CompoundDS {
     public Datatype getDatatype() {
         log.trace("getDatatype(): start");
 
+        if (!inited)
+            init();
+
         if (datatype == null) {
-            log.trace("getDatatype(): datatype == null");
             long did = -1;
             long tid = -1;
+
+            log.trace("getDatatype(): datatype == null");
 
             did = open();
             if (did >= 0) {
@@ -586,6 +532,16 @@ public class H5CompoundDS extends CompoundDS {
                     }
                 }
             }
+        }
+
+        if (isExternal) {
+            String pdir = this.getFileFormat().getAbsoluteFile().getParent();
+
+            if (pdir == null) {
+                pdir = ".";
+            }
+            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
+            log.trace("getDatatype(): External dataset: user.dir={}", pdir);
         }
 
         log.trace("getDatatype(): finish");
@@ -698,7 +654,7 @@ public class H5CompoundDS extends CompoundDS {
         log.trace("read(): start");
 
         List<Object> memberDataList = null;
-        H5Datatype DSdatatype = getDSDatatype();
+        H5Datatype DSdatatype = (H5Datatype) getDatatype();
 
         if (numberOfMembers <= 0) {
             log.debug("read(): Dataset contains no members");
@@ -751,6 +707,7 @@ public class H5CompoundDS extends CompoundDS {
 
                     try {
                         member_base = member_type.getDatatypeBase();
+                        log.trace("read(): Member[{}] has base {}", i, member_base);
                     }
                     catch (Exception ex) {
                         log.debug("read(): get member {} base type failure: ", i, ex);
@@ -775,6 +732,7 @@ public class H5CompoundDS extends CompoundDS {
 
                     try {
                         member_data = member_type.allocateArray((int) totalSelectedSpacePoints);
+                        log.trace("read(): member_type.allocateArray {} points ", totalSelectedSpacePoints);
                     }
                     catch (OutOfMemoryError err) {
                         member_data = null;
@@ -790,7 +748,7 @@ public class H5CompoundDS extends CompoundDS {
                     if (member_data != null) {
                         long comp_tid = -1;
                         try {
-                            comp_tid = member_type.createCompoundFieldType(flatNameList.get(i));
+                            comp_tid = DSdatatype.createCompoundFieldType(flatNameList.get(i));
                         }
                         catch (HDF5Exception ex) {
                             log.debug("read(): unable to create compound field type for Member[{}] of type {}: ", i, member_type.getDescription(), ex);
@@ -848,13 +806,13 @@ public class H5CompoundDS extends CompoundDS {
                             member_data = Dataset.convertFromUnsignedC(member_data, null);
                         }
                         else if ((member_type.isString()) && convertByteToString && !member_type.isVarStr()) {
-                            if (Tools.getJavaObjectRuntimeClass(member_data) == 'B') {
+                            if (Utils.getJavaObjectRuntimeClass(member_data) == 'B') {
                                 log.trace("read(): Member[{}]: converting byte array to string array", i);
                                 member_data = byteToString((byte[]) member_data, member_size / memberOrders[i]);
                             }
                         }
                         else if (member_type.isRef()) {
-                            if (Tools.getJavaObjectRuntimeClass(member_data) == 'B') {
+                            if (Utils.getJavaObjectRuntimeClass(member_data) == 'B') {
                                 log.trace("read(): Member[{}]: converting byte array to long array", i);
                                 member_data = HDFNativeData.byteToLong((byte[]) member_data);
                             }
@@ -1047,9 +1005,7 @@ public class H5CompoundDS extends CompoundDS {
             long spaceIDs[] = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
-                long totalSelectedSpacePoints = selectHyperslab(did, spaceIDs);
-
-                log.trace("write(): selected {} points in dataset dataspace", totalSelectedSpacePoints);
+                long totalSelectedSpacePoints = getTotalSelectedSpacePoints(did, spaceIDs);
 
                 List<Datatype> atomicList = new Vector<>();
                 DSdatatype.extractCompoundInfo(null, null, atomicList);
@@ -1146,7 +1102,7 @@ public class H5CompoundDS extends CompoundDS {
                     if (tmpData != null) {
                         long comp_tid = -1;
                         try {
-                            comp_tid = member_type.createCompoundFieldType(flatNameList.get(i));
+                            comp_tid = DSdatatype.createCompoundFieldType(flatNameList.get(i));
                         }
                         catch (HDF5Exception ex) {
                             log.debug("write(): unable to create compound field type for Member[{}]: ", i, ex);
@@ -1211,53 +1167,6 @@ public class H5CompoundDS extends CompoundDS {
     @Override
     public Object convertToUnsignedC() {
         throw new UnsupportedOperationException("H5CompoundDS:convertToUnsignedC Unsupported operation.");
-    }
-
-    /**
-     * Set up the selection of hyperslab
-     *
-     * @param did
-     *            IN dataset ID
-     * @param spaceIDs
-     *            IN/OUT memory and file space IDs -- spaceIDs[0]=mspace, spaceIDs[1]=fspace
-     *
-     * @return total number of data point selected
-     *
-     * @throws HDF5Exception
-     *             If there is an error at the HDF5 library level.
-     */
-    private long selectHyperslab(long did, long[] spaceIDs) throws HDF5Exception {
-        log.trace("selectHyperslab(): start");
-
-        long lsize = 1;
-
-        boolean isAllSelected = true;
-        for (int i = 0; i < rank; i++) {
-            lsize *= selectedDims[i];
-            if (selectedDims[i] < dims[i]) {
-                isAllSelected = false;
-            }
-        }
-
-        log.trace("selectHyperslab(): isAllSelected={}", isAllSelected);
-
-        if (isAllSelected) {
-            spaceIDs[0] = HDF5Constants.H5S_ALL;
-            spaceIDs[1] = HDF5Constants.H5S_ALL;
-        }
-        else {
-            spaceIDs[1] = H5.H5Dget_space(did);
-
-            // When 1D dataspace is used in chunked dataset, reading is very
-            // slow.
-            // It is a known problem on HDF5 library for chunked dataset.
-            // mspace = H5.H5Screate_simple(1, lsize, null);
-            spaceIDs[0] = H5.H5Screate_simple(rank, selectedDims, null);
-            H5.H5Sselect_hyperslab(spaceIDs[1], HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims,
-                    null);
-        }
-
-        return lsize;
     }
 
     /*
@@ -1828,9 +1737,9 @@ public class H5CompoundDS extends CompoundDS {
      * String[] mnames = { &quot;int&quot;, &quot;float&quot;, &quot;string&quot; };
      * Dataset dset = null;
      * try {
-     *     mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1);
-     *     mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1);
-     *     mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1);
+     *     mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
+     *     mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
+     *     mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
      *     dset = file.createCompoundDS(&quot;/CompoundDS&quot;, pgroup, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, data);
      * }
      * catch (Exception ex) {

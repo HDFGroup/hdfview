@@ -28,13 +28,20 @@ public class H5Object_CreateAttribute {
         long[] dims1 = { DIM_X, DIM_Y };
         long[] dims = { 2 };
         int[] attr_data = { 100, 200 };
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_BE, -1);
+        H5Datatype typeInt = null;
 
         // Create a new file using default properties.
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -340,7 +340,12 @@ public class NC2Dataset extends ScalarDS {
     @Override
     public Datatype getDatatype() {
         if (datatype == null) {
-            datatype = new NC2Datatype(nativeDataset.getDataType());
+            try {
+                datatype = new NC2Datatype(nativeDataset.getDataType());
+            }
+            catch (Exception ex) {
+                datatype = null;
+            }
         }
 
         return datatype;

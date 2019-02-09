@@ -63,6 +63,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.Utils;
 import hdf.object.h5.H5Datatype;
 import hdf.view.HDFView;
 import hdf.view.Tools;
@@ -169,7 +170,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         fillValue = dataObject.getFillValue();
         log.trace("loadData(): fillValue={}", fillValue);
 
-        char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+        char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataValue);
         log.trace("loadData(): cName={} runtimeTypeClass={}", dataValue.getClass().getName(), runtimeTypeClass);
 
         /*
@@ -498,7 +499,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
         });
 
-        char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+        char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataValue);
         boolean isInt = (runtimeTypeClass == 'B' || runtimeTypeClass == 'S' || runtimeTypeClass == 'I'
                 || runtimeTypeClass == 'J');
 
@@ -666,7 +667,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             selectedData = new String[size];
         }
         else {
-            switch (Tools.getJavaObjectRuntimeClass(dataValue)) {
+            switch (Utils.getJavaObjectRuntimeClass(dataValue)) {
                 case 'B':
                     selectedData = new byte[size];
                     break;
@@ -697,7 +698,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             return null;
         }
 
-        log.trace("getSelectedData(): selectedData is type {}", Tools.getJavaObjectRuntimeClass(dataValue));
+        log.trace("getSelectedData(): selectedData is type {}", Utils.getJavaObjectRuntimeClass(dataValue));
 
         int w = dataTable.getPreferredColumnCount() - 1;
         log.trace("getSelectedData(): getColumnCount={}", w);
@@ -765,7 +766,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 i = row * (dataTable.getPreferredColumnCount() - 1) + col;
             }
 
-            char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+            char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataValue);
 
             log.trace("updateValueInMemory({}, {}): {} runtimeTypeClass={}", row, col, cellValue, runtimeTypeClass);
 
@@ -1304,7 +1305,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             rank = theDataset.getRank();
 
-            char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dataValue);
+            char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataValue);
             if (runtimeTypeClass == ' ') {
                 log.debug("ScalarDSDataProvider: invalid data value runtime type class: runtimeTypeClass={}",
                         runtimeTypeClass);
@@ -1526,9 +1527,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.trace("ScalarDSDisplayConverter:isArray={} start", isArray);
             isEnum = dtype.isEnum();
             if (isArray)
-                isUINT64 = (btype.isUnsigned() && (Tools.getJavaObjectRuntimeClass(dataValue) == 'J'));
+                isUINT64 = (btype.isUnsigned() && (Utils.getJavaObjectRuntimeClass(dataValue) == 'J'));
             else
-                isUINT64 = (dtype.isUnsigned() && (Tools.getJavaObjectRuntimeClass(dataValue) == 'J'));
+                isUINT64 = (dtype.isUnsigned() && (Utils.getJavaObjectRuntimeClass(dataValue) == 'J'));
             isBitfieldOrOpaque = (dtype.isOpaque() || dtype.isBitField());
             log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
         }
@@ -1581,7 +1582,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         for (int i = 0; i < ((byte[]) value).length; i++) {
                             if ((i + 1) % typeSize == 0) buffer.append(", ");
                             if (i > 0) {
-                                buffer.append(":");
+                                buffer.append(dtype.isBitField() ? ":" : " ");
                             }
                             buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                         }
@@ -1644,7 +1645,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 else if (isBitfieldOrOpaque) {
                     for (int i = 0; i < ((byte[]) value).length; i++) {
                         if (i > 0) {
-                            buffer.append(":");
+                            buffer.append(dtype.isBitField() ? ":" : " ");
                         }
                         buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
                     }
@@ -1834,7 +1835,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         }
 
                                         /* Convert dbuf to a displayable string */
-                                        char runtimeTypeClass = Tools.getJavaObjectRuntimeClass(dbuf);
+                                        char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dbuf);
                                         log.trace(
                                                 "ScalarDSCellSelectionListener:RegRef CellSelected: cName={} runtimeTypeClass={}",
                                                 dbuf.getClass().getName(), runtimeTypeClass);

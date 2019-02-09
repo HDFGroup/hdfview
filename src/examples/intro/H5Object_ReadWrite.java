@@ -23,8 +23,7 @@ public class H5Object_ReadWrite {
         int[][] dset_data = new int[DIM_X][DIM_Y];
         int[] dset_data_read = new int[DIM_X*DIM_Y];
         long[] dims = { DIM_X, DIM_Y };
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_BE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize the dataset.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -35,6 +34,14 @@ public class H5Object_ReadWrite {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

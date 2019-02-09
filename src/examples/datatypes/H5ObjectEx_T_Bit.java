@@ -36,7 +36,7 @@ public class H5ObjectEx_T_Bit {
         long dataset_id = -1;
         long[] dims = { DIM0, DIM1 };
         int[][] dset_data = new int[DIM0][DIM1];
-        final H5Datatype typeBitField = new H5Datatype(Datatype.CLASS_BITFIELD, 8, Datatype.ORDER_BE, -1);
+        /* H5Datatype typeBitField = new H5Datatype(Datatype.CLASS_BITFIELD, 8, Datatype.ORDER_BE, Datatype.NATIVE); */
 
         // Initialize data.
         for (int indx = 0; indx < DIM0; indx++)

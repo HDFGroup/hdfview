@@ -781,7 +781,8 @@ public class NewDatasetDialog extends Dialog {
         Group pgroup = null;
         boolean isVLen = false;
         boolean isVlenStr = false;
-        int rank = -1, gzip = -1, tclass = -1, tsize = -1, torder = -1, tsign = -1;
+        int rank = -1, gzip = -1;
+        int tclass = Datatype.CLASS_NO_CLASS, tsize = Datatype.NATIVE, torder = Datatype.NATIVE, tsign = Datatype.NATIVE;
         long dims[], maxdims[] = null, chunks[] = null;
 
         name = nameField.getText().trim();

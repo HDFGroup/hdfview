@@ -168,91 +168,102 @@ public class H5Datatype extends Datatype {
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value. For string datatypes, -1 is also
+     *            a valid value (to create a variable-length string).
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      */
-    public H5Datatype(int tclass, int tsize, int torder, int tsign) {
+    public H5Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         this(tclass, tsize, torder, tsign, null);
     }
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value. For string datatypes, -1 is also
+     *            a valid value (to create a variable-length string).
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
      */
-    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) {
+    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
         this(tclass, tsize, torder, tsign, tbase, null);
     }
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
+     *            etc.
      * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the
+     *            size is 4. Valid values are NATIVE or a positive value. For string
+     *            datatypes, -1 is also a valid value (to create a variable-length
+     *            string).
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
-     *            ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE,
+     *            ORDER_BE, ORDER_VAX, ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and
+     *            NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
+    public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
         super(tclass, tsize, torder, tsign, tbase, pbase);
         datatypeDescription = getDescription();
     }
@@ -267,14 +278,14 @@ public class H5Datatype extends Datatype {
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
      *
      * @see #fromNative(long nativeID)
      *
      * @param nativeID
      *            the native datatype identifier.
      */
-    public H5Datatype(long nativeID) {
+    public H5Datatype(long nativeID) throws Exception {
         this(nativeID, null);
     }
 
@@ -288,7 +299,7 @@ public class H5Datatype extends Datatype {
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
      *
      * @see #fromNative(long nativeID)
      *
@@ -297,7 +308,7 @@ public class H5Datatype extends Datatype {
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public H5Datatype(long nativeID, Datatype pbase) {
+    public H5Datatype(long nativeID, Datatype pbase) throws Exception {
         super(nativeID, pbase);
         fromNative(nativeID);
         datatypeDescription = getDescription();
@@ -618,8 +629,14 @@ public class H5Datatype extends Datatype {
                     int ndims = H5.H5Tget_array_ndims(tid);
                     arrayDims = new long[ndims];
                     H5.H5Tget_array_dims(tid, arrayDims);
+
                     tmptid = H5.H5Tget_super(tid);
-                    baseType = new H5Datatype(tmptid);
+                    baseType = new H5Datatype(tmptid, this);
+                    if (baseType == null) {
+                        log.debug("fromNative(): ARRAY datatype has null base type");
+                        throw new Exception("Datatype (ARRAY) has no base datatype");
+                    }
+
                     datatypeSign = baseType.getDatatypeSign();
                 }
                 catch (Exception ex) {
@@ -812,7 +829,12 @@ public class H5Datatype extends Datatype {
                 try {
                     log.trace("fromNative(): vlen type");
                     tmptid = H5.H5Tget_super(tid);
-                    baseType = new H5Datatype(tmptid);
+                    baseType = new H5Datatype(tmptid, this);
+                    if (baseType == null) {
+                        log.debug("fromNative(): VLEN datatype has null base type");
+                        throw new Exception("Datatype (VLEN) has no base datatype");
+                    }
+
                     datatypeSign = baseType.getDatatypeSign();
                 }
                 catch (Exception ex) {
@@ -903,255 +925,368 @@ public class H5Datatype extends Datatype {
             return tid;
         }
 
-        // figure the datatype
-        try {
-            log.trace("createNative(): datatypeClass={} datatypeSize={} baseType={}", datatypeClass, datatypeSize, baseType);
-            switch (datatypeClass) {
-                case CLASS_ARRAY:
-                    if (baseType != null) {
-                        if ((tmptid = baseType.createNative()) >= 0) {
-                            try {
-                                tid = H5.H5Tarray_create(tmptid, arrayDims.length, arrayDims);
-                            }
-                            finally {
-                                close(tmptid);
-                            }
+        log.trace("createNative(): datatypeClass={} datatypeSize={} baseType={}", datatypeClass, datatypeSize,
+                baseType);
+
+        switch (datatypeClass) {
+            case CLASS_ARRAY:
+                try {
+                    if (baseType == null) {
+                        log.debug("createNative(): CLASS_ARRAY base type is NULL");
+                        break;
+                    }
+
+                    if ((tmptid = baseType.createNative()) < 0) {
+                        log.debug("createNative(): failed to create native datatype for ARRAY base datatype");
+                        break;
+                    }
+
+                    tid = H5.H5Tarray_create(tmptid, arrayDims.length, arrayDims);
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native array datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+                finally {
+                    close(tmptid);
+                }
+
+                break;
+            case CLASS_COMPOUND:
+                try {
+                    tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
+
+                    for (int i = 0; i < compoundMemberTypes.size(); i++) {
+                        H5Datatype memberType = null;
+                        String memberName = null;
+                        long memberOffset = -1;
+
+                        try {
+                            memberType = (H5Datatype) compoundMemberTypes.get(i);
                         }
+                        catch (Exception ex) {
+                            log.debug("createNative(): get compound member[{}] type failure: ", i, ex);
+                            memberType = null;
+                        }
+
+                        try {
+                            memberName = compoundMemberNames.get(i);
+                        }
+                        catch (Exception ex) {
+                            log.debug("createNative(): get compound member[{}] name failure: ", i, ex);
+                            memberName = null;
+                        }
+
+                        try {
+                            memberOffset = compoundMemberOffsets.get(i);
+                        }
+                        catch (Exception ex) {
+                            log.debug("createNative(): get compound member[{}] offset failure: ", i, ex);
+                            memberOffset = -1;
+                        }
+
+                        long memberID = -1;
+                        try {
+                            memberID = memberType.createNative();
+                            log.trace("createNative(): {} member[{}] with offset={} ID={}: ", memberName, i,
+                                    memberOffset, memberID);
+
+                            H5.H5Tinsert(tid, memberName, memberOffset, memberID);
+                        }
+                        catch (Exception ex) {
+                            log.debug("createNative(): compound type member[{}] insertion failure: ", i, ex);
+                        }
+                        finally {
+                            close(memberID);
+                        }
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native compound datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+                break;
+            case CLASS_INTEGER:
+                log.trace("createNative(): CLASS_INT of size {}", datatypeSize);
+
+                try {
+                    switch ((int) datatypeSize) {
+                        case 1:
+                            log.trace("createNative(): CLASS_INT is H5T_NATIVE_INT8");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT8);
+                            break;
+                        case 2:
+                            log.trace("createNative(): CLASS_INT is H5T_NATIVE_INT16");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT16);
+                            break;
+                        case 4:
+                            log.trace("createNative(): CLASS_INT is H5T_NATIVE_INT32");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
+                            break;
+                        case 8:
+                            log.trace("createNative(): CLASS_INT is H5T_NATIVE_INT64");
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT64);
+                            break;
+                        default:
+                            if (datatypeSize == NATIVE) {
+                                log.trace("createNative(): CLASS_INT is H5T_NATIVE_INT");
+                                tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT);
+                            }
+                            else {
+                                /* Custom sized integer */
+                                tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT8);
+                                H5.H5Tset_size(tid, datatypeSize);
+                                H5.H5Tset_precision(tid, 8 * datatypeSize);
+                            }
+                            break;
+                    }
+
+                    if (datatypeOrder == Datatype.ORDER_BE) {
+                        log.trace("createNative(): CLASS_INT order is H5T_ORDER_BE");
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                    }
+                    else if (datatypeOrder == Datatype.ORDER_LE) {
+                        log.trace("createNative(): CLASS_INT order is H5T_ORDER_LE");
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                    }
+
+                    if (datatypeSign == Datatype.SIGN_NONE) {
+                        log.trace("createNative(): CLASS_INT sign is H5T_SGN_NONE");
+                        H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native integer datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+
+                break;
+            case CLASS_ENUM:
+                try {
+                    if (baseType != null) {
+                        if ((tmptid = baseType.createNative()) < 0) {
+                            log.debug("createNative(): failed to create native type for ENUM base datatype");
+                            break;
+                        }
+
+                        tid = H5.H5Tenum_create(tmptid);
                     }
                     else {
-                        log.debug("createNative(): CLASS_ARRAY base type is NULL");
-                    }
-                    break;
-                case CLASS_COMPOUND:
-                    try {
-                        tid = H5.H5Tcreate(CLASS_COMPOUND, datatypeSize);
+                        if (datatypeSize == NATIVE)
+                            datatypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
 
-                        for (int i = 0; i < compoundMemberTypes.size(); i++) {
-                            H5Datatype memberType = null;
-                            String memberName = null;
-                            long memberOffset = -1;
-
-                            try {
-                                memberType = (H5Datatype) compoundMemberTypes.get(i);
-                            }
-                            catch (Exception ex) {
-                                log.debug("createNative(): get compound member[{}] type failure: ", i, ex);
-                                memberType = null;
-                            }
-
-                            try {
-                                memberName = compoundMemberNames.get(i);
-                            }
-                            catch (Exception ex) {
-                                log.debug("createNative(): get compound member[{}] name failure: ", i, ex);
-                                memberName = null;
-                            }
-
-                            try {
-                                memberOffset = compoundMemberOffsets.get(i);
-                            }
-                            catch (Exception ex) {
-                                log.debug("createNative(): get compound member[{}] offset failure: ", i, ex);
-                                memberOffset = -1;
-                            }
-
-                            long memberID = -1;
-                            try {
-                                memberID = memberType.createNative();
-                                log.trace("createNative(): {} member[{}] with offset={} ID={}: ", memberName, i, memberOffset, memberID);
-
-                                H5.H5Tinsert(tid, memberName, memberOffset, memberID);
-                            }
-                            catch (Exception ex) {
-                                log.debug("createNative(): compound type member[{}] insertion failure: ", i, ex);
-                            }
-                            finally {
-                                close(memberID);
-                            }
-                        }
-                    }
-                    catch (Exception ex) {
-                        log.debug("createNative(): failure: ", ex);
-                    }
-                    break;
-                case CLASS_INTEGER:
-                case CLASS_ENUM:
-                    if (datatypeSize == 1) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT8");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT8);
-                    }
-                    else if (datatypeSize == 2) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT16");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT16);
-                    }
-                    else if (datatypeSize == 4) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT32");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
-                    }
-                    else if (datatypeSize == 8) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT64");
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT64);
+                        tid = H5.H5Tcreate(HDF5Constants.H5T_ENUM, datatypeSize);
                     }
 
-                    if (datatypeSize > 0 && tid >= 0) {
-                        if (datatypeOrder == Datatype.ORDER_BE) {
-                            log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_BE");
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                        }
-                        else if (datatypeOrder == Datatype.ORDER_LE) {
-                            log.trace("createNative(): CLASS_INT-ENUM order is H5T_ORDER_LE");
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                        }
-
-                        if (datatypeSign == Datatype.SIGN_NONE) {
-                            log.trace("createNative(): CLASS_INT-ENUM is H5T_SGN_NONE");
-                            H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
-                        }
+                    if (datatypeOrder == Datatype.ORDER_BE) {
+                        log.trace("createNative(): CLASS_ENUM order is H5T_ORDER_BE");
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
                     }
-                    break;
-                case CLASS_FLOAT:
+                    else if (datatypeOrder == Datatype.ORDER_LE) {
+                        log.trace("createNative(): CLASS_ENUM order is H5T_ORDER_LE");
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                    }
+
+                    if (datatypeSign == Datatype.SIGN_NONE) {
+                        log.trace("createNative(): CLASS_ENUM sign is H5T_SGN_NONE");
+                        H5.H5Tset_sign(tid, HDF5Constants.H5T_SGN_NONE);
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native enum datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+                finally {
+                    close(tmptid);
+                }
+
+                break;
+            case CLASS_FLOAT:
+                try {
                     tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
 
-                    if (tid >= 0) {
-                        if (datatypeOrder == Datatype.ORDER_BE) {
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                        }
-                        else if (datatypeOrder == Datatype.ORDER_LE) {
-                            H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                        }
-
-                        if (nativeFPebias > 0) {
-                            H5.H5Tset_ebias(tid, nativeFPebias);
-                        }
-
-                        if (nativeFPnorm >= 0) {
-                            H5.H5Tset_norm(tid, nativeFPnorm);
-                        }
-
-                        if (nativeFPinpad >= 0) {
-                            H5.H5Tset_inpad(tid, nativeFPinpad);
-                        }
-
-                        if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
-                            H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos, nativeFPmsize);
-                        }
+                    if (datatypeOrder == Datatype.ORDER_BE) {
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                    }
+                    else if (datatypeOrder == Datatype.ORDER_LE) {
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
                     }
 
-                    break;
-                case CLASS_CHAR:
-                    tid = H5.H5Tcopy((datatypeSign == Datatype.SIGN_NONE) ? HDF5Constants.H5T_NATIVE_UCHAR : HDF5Constants.H5T_NATIVE_CHAR);
-                    break;
-                case CLASS_STRING:
+                    if (nativeFPebias > 0) {
+                        H5.H5Tset_ebias(tid, nativeFPebias);
+                    }
+
+                    if (nativeFPnorm >= 0) {
+                        H5.H5Tset_norm(tid, nativeFPnorm);
+                    }
+
+                    if (nativeFPinpad >= 0) {
+                        H5.H5Tset_inpad(tid, nativeFPinpad);
+                    }
+
+                    if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
+                        H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native floating-point datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+
+                break;
+            case CLASS_CHAR:
+                try {
+                    tid = H5.H5Tcopy((datatypeSign == Datatype.SIGN_NONE) ? HDF5Constants.H5T_NATIVE_UCHAR
+                            : HDF5Constants.H5T_NATIVE_CHAR);
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native character datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+
+                break;
+            case CLASS_STRING:
+                try {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-                    if (tid >= 0) {
-                        H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
 
-                        log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad, nativeStrCSET);
+                    H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
 
-                        H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
+                    log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad,
+                            nativeStrCSET);
 
-                        if (nativeStrCSET >= 0) {
-                            H5.H5Tset_cset(tid, nativeStrCSET);
-                        }
+                    H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
+
+                    if (nativeStrCSET >= 0) {
+                        H5.H5Tset_cset(tid, nativeStrCSET);
                     }
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native string datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
 
-                    break;
-                case CLASS_REFERENCE:
+                break;
+            case CLASS_REFERENCE:
+                try {
                     long obj_ref_type_size = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
-                    tid = H5.H5Tcopy((datatypeSize > obj_ref_type_size) ? HDF5Constants.H5T_STD_REF_DSETREG : HDF5Constants.H5T_STD_REF_OBJ);
-                    break;
-                case CLASS_VLEN:
-                    if (baseType != null) {
-                        if ((tmptid = baseType.createNative()) >= 0) {
-                            try {
-                                tid = H5.H5Tvlen_create(tmptid);
-                            }
-                            finally {
-                                close(tmptid);
-                            }
-                        }
-                    }
-                    else {
+
+                    tid = H5.H5Tcopy((datatypeSize > obj_ref_type_size) ? HDF5Constants.H5T_STD_REF_DSETREG
+                            : HDF5Constants.H5T_STD_REF_OBJ);
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native reference datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+
+                break;
+            case CLASS_VLEN:
+                try {
+                    if (baseType == null) {
                         log.debug("createNative(): CLASS_VLEN base type is NULL");
+                        break;
                     }
-                    break;
-                case CLASS_BITFIELD:
-                    log.trace("createNative(): CLASS_BITFIELD size is " + datatypeSize);
-                    if (datatypeSize > 0) {
-                        if (datatypeSize == 1) {
+
+                    if ((tmptid = baseType.createNative()) < 0) {
+                        log.debug("createNative(): failed to create native datatype for VLEN base datatype");
+                        break;
+                    }
+
+                    tid = H5.H5Tvlen_create(tmptid);
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native variable-length datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+                finally {
+                    close(tmptid);
+                }
+
+                break;
+            case CLASS_BITFIELD:
+                log.trace("createNative(): CLASS_BITFIELD size is " + datatypeSize);
+
+                try {
+                    switch ((int) datatypeSize) {
+                        case 1:
                             log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B8");
                             tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
-                        }
-                        else if (datatypeSize == 2) {
+                            break;
+                        case 2:
                             log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B16");
                             tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B16);
-                        }
-                        else if (datatypeSize == 4) {
+                            break;
+                        case 4:
                             log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B32");
                             tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B32);
-                        }
-                        else if (datatypeSize == 8) {
+                            break;
+                        case 8:
                             log.trace("createNative(): CLASS_BITFIELD is H5T_NATIVE_B64");
                             tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B64);
-                        }
+                            break;
+                        default:
+                            if (datatypeSize == NATIVE)
+                                datatypeSize = 1;
 
-                        if (tid >= 0) {
-                            if (datatypeOrder == Datatype.ORDER_BE) {
-                                log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_BE");
-                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                            }
-                            else if (datatypeOrder == Datatype.ORDER_LE) {
-                                log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_LE");
-                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                            }
-                        }
+                            /* Custom sized bitfield */
+                            tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
+                            H5.H5Tset_size(tid, datatypeSize);
+                            H5.H5Tset_precision(tid, 8 * datatypeSize);
+
+                            break;
                     }
 
-                    break;
-                case CLASS_OPAQUE:
-                    if (datatypeSize > 0) {
-                        log.trace("createNative(): CLASS_OPAQUE is {}-byte H5T_OPAQUE", datatypeSize);
+                    if (datatypeOrder == Datatype.ORDER_BE) {
+                        log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_BE");
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
+                    }
+                    else if (datatypeOrder == Datatype.ORDER_LE) {
+                        log.trace("createNative(): CLASS_BITFIELD order is H5T_ORDER_LE");
+                        H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
+                    }
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native bitfield datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
+
+                break;
+            case CLASS_OPAQUE:
+                log.trace("createNative(): CLASS_OPAQUE is {}-byte H5T_OPAQUE", datatypeSize);
+
+                try {
+                    if (datatypeSize == NATIVE)
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_OPAQUE);
+                    else
                         tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
 
-                        if (tid >= 0) {
-                            if (datatypeOrder == Datatype.ORDER_BE) {
-                                log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_BE");
-                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
-                            }
-                            else if (datatypeOrder == Datatype.ORDER_LE) {
-                                log.trace("createNative(): CLASS_OPAQUE order is H5T_ORDER_LE");
-                                H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_LE);
-                            }
-
-                            if (opaqueTag != null) {
-                                H5.H5Tset_tag(tid, opaqueTag);
-                            }
-                        }
+                    if (opaqueTag != null) {
+                        H5.H5Tset_tag(tid, opaqueTag);
                     }
+                }
+                catch (Exception ex) {
+                    log.debug("createNative(): native opaque datatype creation failed: ", ex);
+                    if (tid >= 0) close(tid);
+                    tid = -1;
+                }
 
-                    break;
-                default:
-                    log.debug("createNative(): Unknown class");
-                    break;
-            } // switch (tclass)
-        }
-        catch (Exception ex) {
-            log.debug("createNative(): Error figuring the datatype: ", ex);
-            tid = -1;
-        }
+                break;
+            default:
+                log.debug("createNative(): Unknown class");
+                break;
+        } // switch (tclass)
 
         // set up enum members
         if (datatypeClass == CLASS_ENUM) {
-            long ptid = tid;
-            try {
-                tid = H5.H5Tenum_create(ptid);
-                datatypeSize = H5.H5Tget_size(tid);
-            }
-            catch (Exception ex) {
-                log.debug("createNative(): create members failure: ", ex);
-                tid = -1;
-            }
-
             try {
                 String memstr, memname;
                 byte[] memval = null;
@@ -1211,9 +1346,6 @@ public class H5Datatype extends Datatype {
             catch (Exception ex) {
                 log.debug("createNative(): set up enum members failure: ", ex);
             }
-            finally {
-                close(ptid);
-            }
         } // if (datatypeClass == CLASS_ENUM) {
 
         try {
@@ -1221,7 +1353,7 @@ public class H5Datatype extends Datatype {
             tid = H5.H5Tget_native_type(tmptid);
         }
         catch (HDF5Exception ex) {
-            log.debug("createNative(): H5Tget_native_type{} failure: ", tmptid, ex);
+            log.debug("createNative(): H5Tget_native_type({}) failure: ", tmptid, ex);
         }
         finally {
             close(tmptid);
@@ -1398,10 +1530,16 @@ public class H5Datatype extends Datatype {
                 description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
             case CLASS_INTEGER:
-                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                if (datatypeSize == NATIVE)
+                    description = "native " + (isUnsigned() ? "unsigned " : "") + "integer";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
                 break;
             case CLASS_FLOAT:
-                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
+                if (datatypeSize == NATIVE)
+                    description = "native floating-point";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
                 break;
             case CLASS_STRING:
                 description = "String, length = " + (isVarStr() ? "variable" : datatypeSize);
@@ -1448,10 +1586,16 @@ public class H5Datatype extends Datatype {
                 }
                 break;
             case CLASS_BITFIELD:
-                description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
+                if (datatypeSize == NATIVE)
+                    description = "native bitfield";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
                 break;
             case CLASS_OPAQUE:
-                description = String.valueOf(datatypeSize) + "-byte Opaque";
+                if (datatypeSize == NATIVE)
+                    description = "native Opaque";
+                else
+                    description = String.valueOf(datatypeSize) + "-byte Opaque";
 
                 if (opaqueTag != null) {
                     description += ", tag = " + opaqueTag;
@@ -1512,7 +1656,10 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_ENUM:
-                description = String.valueOf(datatypeSize * 8) + "-bit enum";
+                if (datatypeSize == NATIVE)
+                    description = "native enum";
+                else
+                    description = String.valueOf(datatypeSize * 8) + "-bit enum";
 
                 String members = getEnumMembersAsString();
                 if (members != null)
@@ -1826,41 +1973,97 @@ public class H5Datatype extends Datatype {
      */
     public long createCompoundFieldType(String member_name) throws HDF5Exception {
         log.trace("createCompoundFieldType(): start member_name={}", member_name);
-        long nested_tid = -1;
+
+        long top_tid = -1;
         long tmp_tid1 = -1;
+
         try {
-            log.trace("createCompoundFieldType(): {} Member is type {} of size={} with baseType={}", member_name, getDescription(), getDatatypeSize(), getDatatypeBase());
-            tmp_tid1 = createNative();
+            if (this.isArray()) {
+                log.trace("createCompoundFieldType(): array datatype");
 
-            /*
-             * If this member is nested inside a compound, keep inserting
-             * it into a newly-created compound datatype until we reach
-             * the top-level compound type.
-             */
-            int sep = member_name.lastIndexOf(CompoundDS.separator);
-            while (sep > 0) {
-                String theName = member_name.substring(sep + 1);
+                if (baseType != null) {
+                    log.trace("createCompoundFieldType(): creating compound field type from base datatype");
+                    tmp_tid1 = ((H5Datatype) baseType).createCompoundFieldType(member_name);
+                }
 
-                log.trace("createCompoundFieldType(): member with name {} is nested inside compound", theName);
-
-                nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
-                H5.H5Tinsert(nested_tid, theName, 0, tmp_tid1);
-                close(tmp_tid1);
-                tmp_tid1 = nested_tid;
-                member_name = member_name.substring(0, sep);
-                sep = member_name.lastIndexOf(CompoundDS.separator);
+                log.trace("createCompoundFieldType(): creating container array datatype");
+                top_tid = H5.H5Tarray_create(tmp_tid1, arrayDims.length, arrayDims);
             }
+            else if (this.isVLEN()) {
+                log.trace("createCompoundFieldType(): variable-length datatype");
 
-            nested_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
+                if (baseType != null) {
+                    log.trace("createCompoundFieldType(): creating compound field type from base datatype");
+                    tmp_tid1 = ((H5Datatype) baseType).createCompoundFieldType(member_name);
+                }
 
-            H5.H5Tinsert(nested_tid, member_name, 0, tmp_tid1);
+                log.trace("createCompoundFieldType(): creating container variable-length datatype");
+                top_tid = H5.H5Tvlen_create(tmp_tid1);
+            }
+            else if (this.isCompound()) {
+                log.trace("createCompoundFieldType(): compound datatype");
+
+                String insertedName = member_name;
+
+                int sep = member_name.indexOf(CompoundDS.separator);
+                if (sep >= 0) {
+                    /*
+                     * If a compound separator character is present in the supplied string, then
+                     * there is an additional level of compound nesting. We will create a compound
+                     * type to hold the nested compound type.
+                     */
+                    insertedName = member_name.substring(0, sep);
+
+                    log.trace("createCompoundFieldType(): member with name {} is nested inside compound", insertedName);
+                }
+
+                /*
+                 * Retrieve the index of the compound member by its name.
+                 */
+                int member_index = this.compoundMemberNames.indexOf(insertedName);
+                if (member_index >= 0) {
+                    H5Datatype member_type = (H5Datatype) this.compoundMemberTypes.get(member_index);
+
+                    log.trace("createCompoundFieldType(): Member {} is type {} of size={} with baseType={}", insertedName,
+                            member_type.getDescription(), member_type.getDatatypeSize(), member_type.getDatatypeBase());
+
+                    if (sep >= 0)
+                        /*
+                         * Additional compound nesting; create the nested compound type.
+                         */
+                        tmp_tid1 = member_type.createCompoundFieldType(member_name.substring(sep + 1));
+                    else
+                        tmp_tid1 = member_type.createNative();
+
+                    log.trace("createCompoundFieldType(): creating container compound datatype");
+                    top_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, datatypeSize);
+
+                    log.trace("createCompoundFieldType(): inserting member {} into compound datatype", insertedName);
+                    H5.H5Tinsert(top_tid, insertedName, 0, tmp_tid1);
+
+                    /*
+                     * WARNING!!! This step is crucial. Without it, the compound type created might be larger than
+                     * the size of the single datatype field we are inserting. Performing a read with a compound
+                     * datatype of an incorrect size will corrupt JVM memory and cause strange behavior and crashes.
+                     */
+                    H5.H5Tpack(top_tid);
+                }
+                else {
+                    log.debug("createCompoundFieldType(): member name {} not found in compound datatype's member name list");
+                }
+            }
+        }
+        catch (Exception ex) {
+            log.debug("createCompoundFieldType(): creation of compound field type failed: ", ex);
+            top_tid = -1;
         }
         finally {
             close(tmp_tid1);
         }
 
         log.trace("createCompoundFieldType(): finish");
-        return nested_tid;
+
+        return top_tid;
     }
 
     private boolean datatypeIsComplex(long tid) {
@@ -1873,10 +2076,10 @@ public class H5Datatype extends Datatype {
             log.debug("datatypeIsComplex():", ex);
         }
 
-        if (tclass == HDF5Constants.H5T_COMPOUND
-                || tclass == HDF5Constants.H5T_ENUM
-                || tclass == HDF5Constants.H5T_VLEN
-                || tclass == HDF5Constants.H5T_ARRAY)
+        if (  tclass == HDF5Constants.H5T_COMPOUND
+           || tclass == HDF5Constants.H5T_ENUM
+           || tclass == HDF5Constants.H5T_VLEN
+           || tclass == HDF5Constants.H5T_ARRAY)
             return true;
         else
             return false;

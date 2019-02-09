@@ -389,7 +389,7 @@ public class NewDatatypeDialog extends Dialog {
         Group pgroup = null;
         boolean isVLen = false;
         boolean isVlenStr = false;
-        int tclass = -1, tsize = -1, torder = -1, tsign = -1;
+        int tclass = Datatype.CLASS_NO_CLASS, tsize = Datatype.NATIVE, torder = Datatype.NATIVE, tsign = Datatype.NATIVE;
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();

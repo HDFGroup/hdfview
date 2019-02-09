@@ -316,7 +316,13 @@ public class H4GRImage extends ScalarDS
     public Datatype getDatatype()
     {
         if (datatype == null) {
-            datatype = new H4Datatype(datatypeID);
+            try {
+                datatype = new H4Datatype(datatypeID);
+            }
+            catch (Exception ex) {
+                log.debug("getDatatype(): failed to create datatype: ", ex);
+                datatype = null;
+            }
         }
 
         return datatype;
