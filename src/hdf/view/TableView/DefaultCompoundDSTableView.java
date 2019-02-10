@@ -24,10 +24,8 @@ import java.util.StringTokenizer;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.EditableRule;
-import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
-import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
@@ -49,12 +47,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
 
-import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.CompoundDS;
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
-import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
@@ -438,8 +434,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         log.trace("updateValueInFile(): start");
 
         if (isReadOnly || !isValueChanged || showAsBin || showAsHex) {
-            log.debug(
-                    "updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
+            log.debug("updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
             log.trace("updateValueInFile(): finish");
             return;
         }
@@ -464,24 +459,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         if (dataObject == null) return null;
 
         return new CompoundDSDataProvider(dataObject);
-    }
-
-    /**
-     * Returns an appropriate DisplayConverter to convert data values into
-     * human-readable forms in the table. Also converts the human-readable form back
-     * into real data when writing the data object back to the file.
-     *
-     * @param dataObject
-     *            The data object whose values are to be converted.
-     *
-     * @return A new DisplayConverter if the data object is valid, or null
-     *         otherwise.
-     */
-    @Override
-    protected DisplayConverter getDataDisplayConverter(final DataFormat dataObject) {
-        if (dataObject == null) return null;
-
-        return new CompoundDSDataDisplayConverter(dataObject);
     }
 
     /**
@@ -778,153 +755,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         @Override
         public int getRowCount() {
             return nRows;
-        }
-    }
-
-    private class CompoundDSDataDisplayConverter extends DisplayConverter {
-        private final StringBuffer buffer;
-
-        private final Datatype[]   types;
-
-        private final int[]        orders;
-        private final int          nFields;
-        private int                fieldIndex;
-        private final int          nSubColumns;
-
-        public CompoundDSDataDisplayConverter(final DataFormat dataObject) {
-            log.trace("CompoundDSDataDisplayConverter: start");
-
-            CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
-
-            buffer = new StringBuffer();
-
-            types = dataFormat.getSelectedMemberTypes();
-
-            orders = dataFormat.getSelectedMemberOrders();
-            nFields = ((List<?>) dataValue).size();
-            nSubColumns = (nFields > 0) ? (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount()) / nFields : 0;
-
-            log.trace("CompoundDSDataDisplayConverter: finish");
-        }
-
-        @Override
-        public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
-            fieldIndex = cell.getColumnIndex();
-            if (nSubColumns > 1) fieldIndex %= nFields;
-            return canonicalToDisplayValue(value);
-        }
-
-        @Override
-        public Object canonicalToDisplayValue(Object value) {
-            if (value == null || value instanceof String) return value;
-
-            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
-
-            try {
-                Datatype dtype = types[fieldIndex];
-
-                buffer.setLength(0);
-
-                if (dtype.isArray()) {
-                    Datatype btype = dtype.getDatatypeBase();
-                    log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue():Array - isArray={} isEnum={} isStr={}", btype.isArray(), btype.isEnum(), btype.isString());
-
-                    if (btype.isCompound()) {
-                        int numberOfMembers = btype.getCompoundMemberNames().size();
-
-                        for (int i = 0; i < orders[fieldIndex]; i++) {
-                            if (i > 0) buffer.append(", ");
-
-                            buffer.append("[");
-
-                            for (int j = 0; j < numberOfMembers; j++) {
-                                if (j > 0) buffer.append(", ");
-                                buffer.append(Array.get(value, (i * numberOfMembers) + j));
-                            }
-
-                            buffer.append("]");
-                        }
-                    }
-                    else if (btype.isEnum()) {
-                        int len = Array.getLength(value);
-
-                        if (isEnumConverted) {
-                            String[] retValues = null;
-
-                            try {
-                                retValues = ((H5Datatype) btype).convertEnumValueToName(value);
-                            }
-                            catch (HDF5Exception ex) {
-                                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                                retValues = null;
-                            }
-
-                            if (retValues != null) {
-                                for (int i = 0; i < retValues.length; i++) {
-                                    if (i > 0) buffer.append(", ");
-                                    buffer.append(retValues[i]);
-                                }
-                            }
-                        }
-                        else {
-                            for (int i = 0; i < len; i++) {
-                                if (i > 0) buffer.append(", ");
-                                buffer.append(Array.get(value, i));
-                            }
-                        }
-                    }
-                    else {
-                        for (int i = 0; i < orders[fieldIndex]; i++) {
-                            if (i > 0) buffer.append(", ");
-                            buffer.append(((Object[]) value)[i]);
-                        }
-                    }
-                }
-                else if (dtype.isEnum()) {
-                    if (isEnumConverted) {
-                        String[] retValues = null;
-
-                        try {
-                            retValues = ((H5Datatype) dtype).convertEnumValueToName(value);
-                        }
-                        catch (HDF5Exception ex) {
-                            log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                            retValues = null;
-                        }
-
-                        if (retValues != null) buffer.append(retValues[0]);
-                    }
-                    else
-                        buffer.append(value);
-                }
-                else if (dtype.isOpaque() || dtype.isBitField()) {
-                    for (int i = 0; i < ((byte[]) value).length; i++) {
-                        if (i > 0) {
-                            buffer.append(dtype.isBitField() ? ":" : " ");
-                        }
-                        buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
-                    }
-                }
-                else if (numberFormat != null) {
-                    // show in scientific or custom notation
-                    buffer.append(numberFormat.format(value));
-                }
-                else {
-                    buffer.append(value);
-                }
-                log.trace("CompoundDSDataDisplayConverter:canonicalToDisplayValue {} finish", buffer);
-            }
-            catch (Exception ex) {
-                log.debug("canonicalToDisplayValue() failure: ", ex);
-                buffer.append("*ERROR*");
-            }
-
-            return buffer;
-        }
-
-        @Override
-        public Object displayToCanonicalValue(Object value) {
-            return value;
         }
     }
 

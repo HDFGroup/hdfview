@@ -65,6 +65,8 @@ public class DataValidatorFactory {
          * By default, never validate if a proper DataValidator was not found.
          */
         if (validator == null) {
+            log.debug("getDataValidator(Datatype): using a default data validator");
+
             validator = new DataValidator() {
                 @Override
                 public boolean validate(int arg0, int arg1, Object arg2) {
@@ -98,6 +100,8 @@ public class DataValidatorFactory {
          * By default, never validate if a proper DataValidator was not found.
          */
         if (validator == null) {
+            log.debug("getDataValidator(CompoundDS): using a default data validator");
+
             validator = new DataValidator() {
                 @Override
                 public boolean validate(int arg0, int arg1, Object arg2) {

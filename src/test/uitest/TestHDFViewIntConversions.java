@@ -623,20 +623,20 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             table.click(1, 1);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU32()", "wrong data",
-                    "00000000 00000000 00000000 00000000 11111111 11111111 11111111 11111111", val),
-                    val.equals("00000000 00000000 00000000 00000000 11111111 11111111 11111111 11111111"));
+                    "11111111 11111111 11111111 11111111", val),
+                    val.equals("11111111 11111111 11111111 11111111"));
 
             table.click(8, 1);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU32()", "wrong data",
-                    "00000000 00000000 00000000 00000000 11111111 11111111 11111111 10000000", val),
-                    val.equals("00000000 00000000 00000000 00000000 11111111 11111111 11111111 10000000"));
+                    "11111111 11111111 11111111 10000000", val),
+                    val.equals("11111111 11111111 11111111 10000000"));
 
             table.click(8, 8);
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU32()", "wrong data",
-                    "00000000 00000000 00000000 00000000 11111111 11111111 11000000 00000000", val),
-                    val.equals("00000000 00000000 00000000 00000000 11111111 11111111 11000000 00000000"));
+                    "11111111 11111111 11000000 00000000", val),
+                    val.equals("11111111 11111111 11000000 00000000"));
 
             // Reset view to normal integer display
             tableShell.bot().menu("Show Binary").click();

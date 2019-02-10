@@ -51,8 +51,6 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
-import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
-import org.eclipse.nebula.widgets.nattable.data.convert.IDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.action.KeyEditAction;
@@ -133,6 +131,7 @@ import hdf.view.Tools;
 import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.BITMASK_OP;
 import hdf.view.DataView.DataViewManager;
+import hdf.view.TableView.DataDisplayConverterFactory.HDFDisplayConverter;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.MathConversionDialog;
@@ -212,7 +211,7 @@ public abstract class DefaultBaseTableView implements TableView {
     protected IDataProvider                 rowHeaderDataProvider;
     protected IDataProvider                 columnHeaderDataProvider;
 
-    protected IDisplayConverter             dataDisplayConverter;
+    protected HDFDisplayConverter           dataDisplayConverter;
 
     /**
      * Global variables for GUI components
@@ -333,15 +332,16 @@ public abstract class DefaultBaseTableView implements TableView {
 
         if (hObject == null) hObject = viewer.getTreeView().getCurrentObject();
 
-        dataObject = (DataFormat) hObject;
-
         /* Only edit objects which actually contain editable data */
-        if ((dataObject == null) || !(dataObject instanceof DataFormat)) {
+        if ((hObject == null) || !(hObject instanceof DataFormat)) {
             log.debug("data object is null or not an instanceof DataFormat");
             log.trace("finish");
+            dataObject = null;
             shell.dispose();
             return;
         }
+
+        dataObject = (DataFormat) hObject;
 
         isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
 
@@ -402,8 +402,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         isEnumConverted = ViewProperties.isConvertEnum();
 
-        log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar,
-                isEnumConverted);
+        log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar, isEnumConverted);
 
         if (dataObject.getDatatype().isRef()) {
             if (dataObject.getDatatype().getDatatypeSize() > 8) {
@@ -520,6 +519,11 @@ public abstract class DefaultBaseTableView implements TableView {
             shell.dispose();
             return;
         }
+
+        /*
+         * Set the default data display conversion settings.
+         */
+        updateDataConversionSettings();
 
         dataTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -1029,9 +1033,16 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected abstract void showRegRefData(String reg);
 
-    protected abstract DisplayConverter getDataDisplayConverter(DataFormat dataObject);
-
     protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
+
+    protected void updateDataConversionSettings() {
+        if (dataDisplayConverter != null) {
+            dataDisplayConverter.setShowAsHex(showAsHex);
+            dataDisplayConverter.setShowAsBin(showAsBin);
+            dataDisplayConverter.setNumberFormat(numberFormat);
+            dataDisplayConverter.setConvertEnum(isEnumConverted);
+        }
+    }
 
     @Override
     public HObject getDataObject() {
@@ -2113,10 +2124,15 @@ public abstract class DefaultBaseTableView implements TableView {
                             DisplayMode.SELECT, GridRegion.BODY);
 
                     // Add data display conversion capability
-                    dataDisplayConverter = getDataDisplayConverter(dataObject);
-                    if (dataDisplayConverter != null) {
+                    try {
+                        dataDisplayConverter = DataDisplayConverterFactory.getDataDisplayConverter(dataObject);
+
                         configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER,
                                 dataDisplayConverter, DisplayMode.NORMAL, GridRegion.BODY);
+                    }
+                    catch (Exception ex) {
+                        log.debug("EditingGridLayer: failed to retrieve a DataDisplayConverter: ", ex);
+                        dataDisplayConverter = null;
                     }
                 }
             });

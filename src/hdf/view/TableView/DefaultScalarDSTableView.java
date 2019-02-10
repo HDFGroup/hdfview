@@ -31,7 +31,6 @@ import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
-import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
@@ -56,7 +55,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
-import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -64,7 +62,6 @@ import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.Utils;
-import hdf.object.h5.H5Datatype;
 import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
@@ -424,6 +421,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     numberFormat = normalFormat;
                 }
 
+                updateDataConversionSettings();
+
                 dataTable.doCommand(new VisualRefreshCommand());
 
                 PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
@@ -455,6 +454,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 else {
                     numberFormat = normalFormat;
                 }
+
+                updateDataConversionSettings();
 
                 dataTable.doCommand(new VisualRefreshCommand());
 
@@ -519,6 +520,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         numberFormat = normalFormat;
                     }
 
+                    updateDataConversionSettings();
+
                     dataTable.doCommand(new VisualRefreshCommand());
 
                     PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
@@ -547,6 +550,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         showAsHex = false;
                         numberFormat = normalFormat;
                     }
+
+                    updateDataConversionSettings();
 
                     dataTable.doCommand(new VisualRefreshCommand());
 
@@ -834,8 +839,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         log.trace("updateValueInFile(): start");
 
         if (isReadOnly || !isValueChanged || showAsBin || showAsHex) {
-            log.debug(
-                    "updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
+            log.debug("updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
             log.trace("updateValueInFile(): finish");
             return;
         }
@@ -860,24 +864,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (dataObject == null) return null;
 
         return new ScalarDSDataProvider(dataObject);
-    }
-
-    /**
-     * Returns an appropriate DisplayConverter to convert data values into
-     * human-readable forms in the table. Also converts the human-readable form back
-     * into real data when writing the data object back to the file.
-     *
-     * @param dataObject
-     *            The data object whose values are to be converted.
-     *
-     * @return A new DisplayConverter if the data object is valid, or null
-     *         otherwise.
-     */
-    @Override
-    protected DisplayConverter getDataDisplayConverter(final DataFormat dataObject) {
-        if (dataObject == null) return null;
-
-        return new ScalarDSDataDisplayConverter(dataObject);
     }
 
     /**
@@ -1498,197 +1484,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         @Override
         public int getRowCount() {
             return (int) rowCount;
-        }
-    }
-
-    private class ScalarDSDataDisplayConverter extends DisplayConverter {
-        private final StringBuffer buffer;
-
-        private final Datatype     dtype;
-        private final Datatype     btype;
-
-        private final long         typeSize;
-
-        private final boolean      isArray;
-        private final boolean      isEnum;
-        private final boolean      isUINT64;
-        private final boolean      isBitfieldOrOpaque;
-
-        public ScalarDSDataDisplayConverter(final DataFormat theDataObject) {
-            log.trace("ScalarDSDataDisplayConverter: start");
-            buffer = new StringBuffer();
-
-            dtype = theDataObject.getDatatype();
-            btype = dtype.getDatatypeBase();
-
-            typeSize = (btype == null) ? dtype.getDatatypeSize() : btype.getDatatypeSize();
-
-            isArray = dtype.isArray();
-            log.trace("ScalarDSDisplayConverter:isArray={} start", isArray);
-            isEnum = dtype.isEnum();
-            if (isArray)
-                isUINT64 = (btype.isUnsigned() && (Utils.getJavaObjectRuntimeClass(dataValue) == 'J'));
-            else
-                isUINT64 = (dtype.isUnsigned() && (Utils.getJavaObjectRuntimeClass(dataValue) == 'J'));
-            isBitfieldOrOpaque = (dtype.isOpaque() || dtype.isBitField());
-            log.trace("ScalarDSDataDisplayConverter {} finish", typeSize);
-        }
-
-        @Override
-        public Object canonicalToDisplayValue(Object value) {
-            if (value == null || value instanceof String) return value;
-
-            log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue {} start", value);
-
-            try {
-                buffer.setLength(0); // clear the old string
-
-                if (isArray) {
-                    int len = Array.getLength(value);
-                    log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue():ARRAY isArray={} isEnum={} isBitfieldOrOpaque={} isUINT64={}", isArray, isEnum,
-                            isBitfieldOrOpaque, isUINT64);
-
-                    if (showAsHex) {
-                        if (isUINT64) {
-                            for (int i = 0; i < len; i++) {
-                                if (i > 0) buffer.append(", ");
-                                buffer.append(Tools.toHexString((BigInteger) ((Object[]) value)[i], 8));
-                            }
-                        }
-                        else {
-                            for (int i = 0; i < len; i++) {
-                                if (i > 0) buffer.append(", ");
-                                Long l = Long.valueOf(((Object[]) value)[i].toString());
-                                buffer.append(Tools.toHexString(l, (int) (typeSize)));
-                            }
-                        }
-                    }
-                    else if (showAsBin) {
-                        if (isUINT64) {
-                            for (int i = 0; i < len; i++) {
-                                if (i > 0) buffer.append(", ");
-                                buffer.append(Tools.toBinaryString((BigInteger) ((Object[]) value)[i], 8));
-                            }
-                        }
-                        else {
-                            for (int i = 0; i < len; i++) {
-                                if (i > 0) buffer.append(", ");
-                                Long l = Long.valueOf(((Object[]) value)[i].toString());
-                                buffer.append(Tools.toBinaryString(l, (int) (typeSize)));
-                            }
-                        }
-                    }
-                    else if (isBitfieldOrOpaque) {
-                        for (int i = 0; i < ((byte[]) value).length; i++) {
-                            if ((i + 1) % typeSize == 0) buffer.append(", ");
-                            if (i > 0) {
-                                buffer.append(dtype.isBitField() ? ":" : " ");
-                            }
-                            buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
-                        }
-                    }
-                    else if (isEnum) {
-                        if (isEnumConverted) {
-                            String[] retValues = null;
-
-                            try {
-                                retValues = ((H5Datatype) btype).convertEnumValueToName(value);
-                            }
-                            catch (HDF5Exception ex) {
-                                log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue():ARRAY Could not convert enum values to names: ex");
-                                retValues = null;
-                            }
-
-                            if (retValues != null) {
-                                for (int i = 0; i < retValues.length; i++) {
-                                    if (i > 0) buffer.append(", ");
-                                    buffer.append(retValues[i]);
-                                }
-                            }
-                        }
-                        else {
-                            for (int i = 0; i < len; i++) {
-                                if (i > 0) buffer.append(", ");
-                                buffer.append(Array.get(value, i));
-                            }
-                        }
-                    }
-                    else {
-                        // Default case if no special display type is chosen
-                        for (int i = 0; i < len; i++) {
-                            if (i > 0) buffer.append(", ");
-                            if (isUINT64)
-                                buffer.append(((Object[]) value)[i]);
-                            else
-                                buffer.append(((Object[]) value)[i]);
-                        }
-                    }
-                }
-                else if (isEnum) {
-                    if (isEnumConverted) {
-                        String[] retValues = null;
-
-                        try {
-                            retValues = ((H5Datatype) dtype).convertEnumValueToName(value);
-                        }
-                        catch (HDF5Exception ex) {
-                            log.trace(
-                                    "ScalarDSDataDisplayConverter:canonicalToDisplayValue(): Could not convert enum values to names: ex");
-                            retValues = null;
-                        }
-
-                        if (retValues != null) buffer.append(retValues[0]);
-                    }
-                    else
-                        buffer.append(value);
-                }
-                else if (isBitfieldOrOpaque) {
-                    for (int i = 0; i < ((byte[]) value).length; i++) {
-                        if (i > 0) {
-                            buffer.append(dtype.isBitField() ? ":" : " ");
-                        }
-                        buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
-                    }
-                }
-                else {
-                    // Numerical values
-
-                    if (showAsHex) {
-                        if (isUINT64) {
-                            buffer.append(Tools.toHexString((BigInteger) value, 8));
-                        }
-                        else {
-                            buffer.append(Tools.toHexString(Long.valueOf(value.toString()), (int) typeSize));
-                        }
-                    }
-                    else if (showAsBin) {
-                        if (isUINT64) {
-                            buffer.append(Tools.toBinaryString((BigInteger) value, 8));
-                        }
-                        else {
-                            buffer.append(Tools.toBinaryString(Long.valueOf(value.toString()), (int) typeSize));
-                        }
-                    }
-                    else if (numberFormat != null) {
-                        buffer.append(numberFormat.format(value));
-                    }
-                    else {
-                        buffer.append(value.toString());
-                    }
-                }
-                log.trace("ScalarDSDataDisplayConverter:canonicalToDisplayValue {} finish", buffer);
-            }
-            catch (Exception ex) {
-                log.debug("ScalarDSDataDisplayConverter:canonicalToDisplayValue() failure: ", ex);
-                buffer.append("*ERROR*");
-            }
-
-            return buffer;
-        }
-
-        @Override
-        public Object displayToCanonicalValue(Object value) {
-            return value;
         }
     }
 

@@ -669,7 +669,8 @@ public class H5CompoundDS extends CompoundDS {
             long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
-                long totalSelectedSpacePoints = getTotalSelectedSpacePoints(did, spaceIDs);
+                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
+                        selectedStride, selectedDims, spaceIDs);
 
                 /*
                  * Read each member of the compound datatype into a separate byte
@@ -1005,7 +1006,8 @@ public class H5CompoundDS extends CompoundDS {
             long spaceIDs[] = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
-                long totalSelectedSpacePoints = getTotalSelectedSpacePoints(did, spaceIDs);
+                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
+                        selectedStride, selectedDims, spaceIDs);
 
                 List<Datatype> atomicList = new Vector<>();
                 DSdatatype.extractCompoundInfo(null, null, atomicList);

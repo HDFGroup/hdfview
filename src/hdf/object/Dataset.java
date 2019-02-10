@@ -17,10 +17,6 @@ package hdf.object;
 import java.lang.reflect.Array;
 import java.util.Vector;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.exceptions.HDF5Exception;
-
 /**
  * The abstract class provides general APIs to create and manipulate dataset
  * objects, and retrieve dataset properties, datatype and dimension sizes.
@@ -1301,85 +1297,5 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     public int getVirtualMaps() {
         return -1;
-    }
-
-    /**
-     * Set up a hyperslab selection within a dataset.
-     *
-     * @param did
-     *            IN dataset ID
-     * @param spaceIDs
-     *            IN/OUT memory and file space IDs -- spaceIDs[0]=mspace, spaceIDs[1]=fspace
-     *
-     * @return total number of data points selected
-     *
-     * @throws HDF5Exception
-     *             If there is an error at the HDF5 library level.
-     */
-    protected final long selectHyperslab(long did, long[] spaceIDs) throws HDF5Exception {
-        log.trace("selectHyperslab(): start");
-
-        long lsize = 1;
-
-        boolean isAllSelected = true;
-        for (int i = 0; i < rank; i++) {
-            lsize *= selectedDims[i];
-            if (selectedDims[i] < dims[i]) {
-                isAllSelected = false;
-            }
-        }
-
-        log.trace("selectHyperslab(): isAllSelected={}", isAllSelected);
-
-        if (isAllSelected) {
-            spaceIDs[0] = HDF5Constants.H5S_ALL;
-            spaceIDs[1] = HDF5Constants.H5S_ALL;
-        }
-        else {
-            spaceIDs[1] = H5.H5Dget_space(did);
-
-            // When a 1D dataspace is used for a chunked dataset, reading is very slow.
-            //
-            // It is a known problem within the HDF5 library.
-            // mspace = H5.H5Screate_simple(1, lsize, null);
-            spaceIDs[0] = H5.H5Screate_simple(rank, selectedDims, null);
-            H5.H5Sselect_hyperslab(spaceIDs[1], HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims,
-                    null);
-        }
-
-        log.trace("selectHyperslab(): finish");
-
-        return lsize;
-    }
-
-    protected final long getTotalSelectedSpacePoints(long did, long[] spaceIDs) throws HDF5Exception {
-        long totalSelectedSpacePoints = selectHyperslab(did, spaceIDs);
-
-        log.trace("getTotalSelectedSpacePoints(): selected {} points in dataset's dataspace", totalSelectedSpacePoints);
-
-        if (totalSelectedSpacePoints == 0) {
-            log.debug("getTotalSelectedSpacePoints(): No data to read. Dataset or selected subset is empty.");
-            log.trace("getTotalSelectedSpacePoints(): finish");
-            throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
-        }
-
-        if (totalSelectedSpacePoints < Integer.MIN_VALUE || totalSelectedSpacePoints > Integer.MAX_VALUE) {
-            log.debug("getTotalSelectedSpacePoints(): totalSelectedSpacePoints outside valid Java int range; unsafe cast");
-            log.trace("getTotalSelectedSpacePoints(): finish");
-            throw new HDF5Exception("Invalid int size");
-        }
-
-        if (log.isDebugEnabled()) {
-            // check is storage space is allocated
-            try {
-                long ssize = H5.H5Dget_storage_size(did);
-                log.trace("getTotalSelectedSpacePoints(): Storage space allocated = {} bytes", ssize);
-            }
-            catch (Exception ex) {
-                log.debug("getTotalSelectedSpacePoints(): check if storage space is allocated:", ex);
-            }
-        }
-
-        return totalSelectedSpacePoints;
     }
 }

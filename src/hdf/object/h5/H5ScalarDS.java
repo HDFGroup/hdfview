@@ -808,7 +808,8 @@ public class H5ScalarDS extends ScalarDS {
             long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
-                long totalSelectedSpacePoints = getTotalSelectedSpacePoints(did, spaceIDs);
+                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
+                        selectedStride, selectedDims, spaceIDs);
 
                 log.trace("read(): isText={} isREF={} totalSelectedSpacePoints={} nPoints={}", DSdatatype.isText(), DSdatatype.isRefObj(), totalSelectedSpacePoints, nPoints);
                 if ((originalBuf == null) || DSdatatype.isEnum() || DSdatatype.isText() || DSdatatype.isRefObj() || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
@@ -955,7 +956,8 @@ public class H5ScalarDS extends ScalarDS {
             long spaceIDs[] = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
-                long totalSelectedSpacePoints = getTotalSelectedSpacePoints(did, spaceIDs);
+                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
+                        selectedStride, selectedDims, spaceIDs);
 
                 /*
                  * Perform any necessary data conversions before writing the data.
