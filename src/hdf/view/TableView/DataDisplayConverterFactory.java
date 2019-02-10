@@ -28,6 +28,16 @@ import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
 
+/**
+ * A Factory class to return a concrete class implementing the IDisplayConverter
+ * interface in order to convert data values into human-readable forms in a NatTable.
+ * The returned class is also responsible for converting the human-readable form back
+ * into real data when writing the data object back to the file.
+ *
+ * @author Jordan T. Henderson
+ * @version 1.0 2/9/2019
+ *
+ */
 public class DataDisplayConverterFactory {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataDisplayConverterFactory.class);
@@ -171,6 +181,14 @@ public class DataDisplayConverterFactory {
 
                 try {
                     memberTypeConverters[i] = getDataDisplayConverter(memberType);
+
+                    /*
+                     * Make base datatype converters inherit the data conversion settings.
+                     */
+                    memberTypeConverters[i].setShowAsHex(this.showAsHex);
+                    memberTypeConverters[i].setShowAsBin(this.showAsBin);
+                    memberTypeConverters[i].setNumberFormat(this.numberFormat);
+                    memberTypeConverters[i].setConvertEnum(this.isEnumConverted);
                 }
                 catch (Exception ex) {
                     log.debug("CompoundDataDisplayConverter: failed to retrieve DataDisplayConverter for member {}: ", i, ex);
@@ -216,6 +234,42 @@ public class DataDisplayConverterFactory {
             return value;
         }
 
+        @Override
+        public void setNumberFormat(NumberFormat format) {
+            super.setNumberFormat(format);
+
+            for (int i = 0; i < memberTypeConverters.length; i++) {
+                memberTypeConverters[i].setNumberFormat(format);
+            }
+        }
+
+        @Override
+        public void setShowAsHex(boolean asHex) {
+            super.setShowAsHex(asHex);
+
+            for (int i = 0; i < memberTypeConverters.length; i++) {
+                memberTypeConverters[i].setShowAsHex(asHex);
+            }
+        }
+
+        @Override
+        public void setShowAsBin(boolean asBin) {
+            super.setShowAsBin(asBin);
+
+            for (int i = 0; i < memberTypeConverters.length; i++) {
+                memberTypeConverters[i].setShowAsBin(asBin);
+            }
+        }
+
+        @Override
+        public void setConvertEnum(boolean convert) {
+            super.setConvertEnum(convert);
+
+            for (int i = 0; i < memberTypeConverters.length; i++) {
+                memberTypeConverters[i].setConvertEnum(convert);
+            }
+        }
+
     }
 
     private static class ArrayDataDisplayConverter extends HDFDisplayConverter {
@@ -241,6 +295,14 @@ public class DataDisplayConverterFactory {
 
             try {
                 baseTypeConverter = getDataDisplayConverter(baseType);
+
+                /*
+                 * Make base datatype converter inherit the data conversion settings.
+                 */
+                baseTypeConverter.setShowAsHex(this.showAsHex);
+                baseTypeConverter.setShowAsBin(this.showAsBin);
+                baseTypeConverter.setNumberFormat(this.numberFormat);
+                baseTypeConverter.setConvertEnum(this.isEnumConverted);
             }
             catch (Exception ex) {
                 log.debug("ArrayDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: ", ex);
@@ -289,9 +351,39 @@ public class DataDisplayConverterFactory {
             return value;
         }
 
+        @Override
+        public void setNumberFormat(NumberFormat format) {
+            super.setNumberFormat(format);
+
+            baseTypeConverter.setNumberFormat(format);
+        }
+
+        @Override
+        public void setShowAsHex(boolean asHex) {
+            super.setShowAsHex(asHex);
+
+            baseTypeConverter.setShowAsHex(asHex);
+        }
+
+        @Override
+        public void setShowAsBin(boolean asBin) {
+            super.setShowAsBin(asBin);
+
+            baseTypeConverter.setShowAsBin(asBin);
+        }
+
+        @Override
+        public void setConvertEnum(boolean convert) {
+            super.setConvertEnum(convert);
+
+            baseTypeConverter.setConvertEnum(convert);
+        }
+
     }
 
     private static class VlenDataDisplayConverter extends HDFDisplayConverter {
+
+        private final HDFDisplayConverter baseTypeConverter;
 
         VlenDataDisplayConverter(final Datatype dtype) throws Exception {
             log.trace("VlenDataDisplayConverter: start");
@@ -308,6 +400,22 @@ public class DataDisplayConverterFactory {
                 throw new Exception("VlenDataDisplayConverter: base datatype is null");
             }
 
+            try {
+                baseTypeConverter = getDataDisplayConverter(baseType);
+
+                /*
+                 * Make base datatype converter inherit the data conversion settings.
+                 */
+                baseTypeConverter.setShowAsHex(this.showAsHex);
+                baseTypeConverter.setShowAsBin(this.showAsBin);
+                baseTypeConverter.setNumberFormat(this.numberFormat);
+                baseTypeConverter.setConvertEnum(this.isEnumConverted);
+            }
+            catch (Exception ex) {
+                log.debug("VlenDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: ", ex);
+                throw new Exception("VlenDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: " + ex.getMessage());
+            }
+
             log.trace("VlenDataDisplayConverter: finish");
         }
 
@@ -319,6 +427,34 @@ public class DataDisplayConverterFactory {
         @Override
         public Object displayToCanonicalValue(Object value) {
             return value;
+        }
+
+        @Override
+        public void setNumberFormat(NumberFormat format) {
+            super.setNumberFormat(format);
+
+            baseTypeConverter.setNumberFormat(format);
+        }
+
+        @Override
+        public void setShowAsHex(boolean asHex) {
+            super.setShowAsHex(asHex);
+
+            baseTypeConverter.setShowAsHex(asHex);
+        }
+
+        @Override
+        public void setShowAsBin(boolean asBin) {
+            super.setShowAsBin(asBin);
+
+            baseTypeConverter.setShowAsBin(asBin);
+        }
+
+        @Override
+        public void setConvertEnum(boolean convert) {
+            super.setConvertEnum(convert);
+
+            baseTypeConverter.setConvertEnum(convert);
         }
 
     }
