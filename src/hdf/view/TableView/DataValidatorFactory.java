@@ -53,7 +53,7 @@ public class DataValidatorFactory {
                 validator = new NumericalDataValidator(dtype);
             else if (dtype.isVLEN() && !dtype.isVarStr())
                 validator = new VlenDataValidator(dtype);
-            else if (dtype.isString())
+            else if (dtype.isString() || dtype.isVarStr())
                 validator = new StringDataValidator(dtype);
         }
         catch (Exception ex) {
@@ -65,6 +65,8 @@ public class DataValidatorFactory {
          * By default, never validate if a proper DataValidator was not found.
          */
         if (validator == null) {
+            log.debug("getDataValidator(Datatype): using a default data validator");
+
             validator = new DataValidator() {
                 @Override
                 public boolean validate(int arg0, int arg1, Object arg2) {
@@ -98,6 +100,8 @@ public class DataValidatorFactory {
          * By default, never validate if a proper DataValidator was not found.
          */
         if (validator == null) {
+            log.debug("getDataValidator(CompoundDS): using a default data validator");
+
             validator = new DataValidator() {
                 @Override
                 public boolean validate(int arg0, int arg1, Object arg2) {
@@ -174,15 +178,15 @@ public class DataValidatorFactory {
 
             log.trace("ArrayDataValidator: base Datatype is {}", baseType.getDescription());
 
-            if (baseType.isArray())
-                this.baseValidator = new ArrayDataValidator(baseType);
-            else if (baseType.isInteger() || baseType.isFloat())
-                this.baseValidator = new NumericalDataValidator(baseType);
-            else if (baseType.isVLEN() && !baseType.isVarStr())
-                this.baseValidator = new VlenDataValidator(baseType);
-            else if (baseType.isString())
-                this.baseValidator = new StringDataValidator(baseType);
+            if (baseType.isCompound())
+                /*
+                 * TODO
+                 */
+                this.baseValidator = null;
             else
+                this.baseValidator = getDataValidator(baseType);
+
+            if (baseValidator == null)
                 throw new Exception("Unable to find a suitable base validator class for this ArrayDataValidator");
         }
 
@@ -221,15 +225,15 @@ public class DataValidatorFactory {
 
             log.trace("VlenDataValidator: base Datatype is {}", baseType.getDescription());
 
-            if (baseType.isArray())
-                this.baseValidator = new ArrayDataValidator(baseType);
-            else if (baseType.isInteger() || baseType.isFloat())
-                this.baseValidator = new NumericalDataValidator(baseType);
-            else if (baseType.isVLEN() && !baseType.isVarStr())
-                this.baseValidator = new VlenDataValidator(baseType);
-            else if (baseType.isString())
-                this.baseValidator = new StringDataValidator(baseType);
+            if (baseType.isCompound())
+                /*
+                 * TODO
+                 */
+                this.baseValidator = null;
             else
+                this.baseValidator = getDataValidator(baseType);
+
+            if (baseValidator == null)
                 throw new Exception("Unable to find a suitable base validator class for this VlenDataValidator");
         }
 
