@@ -80,7 +80,7 @@ public class DataDisplayConverterFactory {
                 converter = new ArrayDataDisplayConverter(dtype);
             else if (dtype.isVLEN() && !dtype.isVarStr())
                 converter = new VlenDataDisplayConverter(dtype);
-            else if (dtype.isString())
+            else if (dtype.isString() || dtype.isVarStr())
                 converter = new StringDataDisplayConverter(dtype);
             else if (dtype.isChar())
                 converter = new CharDataDisplayConverter(dtype);
@@ -213,6 +213,12 @@ public class DataDisplayConverterFactory {
         public Object canonicalToDisplayValue(Object value) {
             log.trace("CompoundDataDisplayConverter: canonicalToDisplayValue({}): start", value);
 
+            if (value == null) {
+                log.debug("CompoundDataDisplayConverter: value is null");
+                log.trace("CompoundDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             buffer.setLength(0); // clear the old string
 
             try {
@@ -318,6 +324,12 @@ public class DataDisplayConverterFactory {
         public Object canonicalToDisplayValue(Object value) {
             log.trace("ArrayDataDisplayConverter: canonicalToDisplayValue({}): start", value);
 
+            if (value == null) {
+                log.debug("ArrayDataDisplayConverter: value is null");
+                log.trace("ArrayDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             buffer.setLength(0); // clear the old string
 
             try {
@@ -421,6 +433,12 @@ public class DataDisplayConverterFactory {
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
+            if (value == null) {
+                log.debug("VlenDataDisplayConverter: value is null");
+                log.trace("VlenDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             return value;
         }
 
@@ -474,6 +492,12 @@ public class DataDisplayConverterFactory {
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
+            if (value == null) {
+                log.debug("StringDataDisplayConverter: value is null");
+                log.trace("StringDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             return value;
         }
 
@@ -499,6 +523,12 @@ public class DataDisplayConverterFactory {
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
+            if (value == null) {
+                log.debug("CharDataDisplayConverter: value is null");
+                log.trace("CharDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             return value;
         }
 
@@ -536,6 +566,12 @@ public class DataDisplayConverterFactory {
         @Override
         public Object canonicalToDisplayValue(Object value) {
             log.trace("NumericalDataDisplayConverter: canonicalToDisplayValue({}): start", value);
+
+            if (value == null) {
+                log.debug("NumericalDataDisplayConverter: value is null");
+                log.trace("NumericalDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
 
             buffer.setLength(0); // clear the old string
 
@@ -605,6 +641,12 @@ public class DataDisplayConverterFactory {
         public Object canonicalToDisplayValue(Object value) {
             log.trace("EnumDataDisplayConverter: canonicalToDisplayValue({}): start", value);
 
+            if (value == null) {
+                log.debug("EnumDataDisplayConverter: value is null");
+                log.trace("EnumDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             buffer.setLength(0); // clear the old string
 
             try {
@@ -667,6 +709,12 @@ public class DataDisplayConverterFactory {
         public Object canonicalToDisplayValue(Object value) {
             log.trace("BitfieldDataDisplayConverter: canonicalToDisplayValue({}): start", value);
 
+            if (value == null) {
+                log.debug("BitfieldDataDisplayConverter: value is null");
+                log.trace("BitfieldDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             buffer.setLength(0); // clear the old string
 
             try {
@@ -710,6 +758,12 @@ public class DataDisplayConverterFactory {
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
+            if (value == null) {
+                log.debug("RefDataDisplayConverter: value is null");
+                log.trace("RefDataDisplayConverter: canonicalToDisplayValue({}): finish", value);
+                return "Null";
+            }
+
             return value;
         }
 

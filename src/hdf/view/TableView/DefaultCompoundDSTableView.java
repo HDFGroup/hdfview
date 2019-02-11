@@ -136,8 +136,16 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
         final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
 
-        final IDataProvider bodyDataProvider = getDataProvider(dataObject);
-        dataLayer = new DataLayer(bodyDataProvider);
+        try {
+            final IDataProvider bodyDataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
+
+            dataLayer = new DataLayer(bodyDataProvider);
+        }
+        catch (Exception ex) {
+            log.debug("createTable(): failed to retrieve DataProvider for table: ", ex);
+            return null;
+        }
+
         final ColumnGroupExpandCollapseLayer expandCollapseLayer = new ColumnGroupExpandCollapseLayer(dataLayer,
                 secondLevelGroupModel, columnGroupModel);
         selectionLayer = new SelectionLayer(expandCollapseLayer);
@@ -278,8 +286,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         log.trace("updateValueInMemory({}, {}): start", row, col);
 
         if ((cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
-            log.debug(
-                    "updateValueInMemory({}, {}): cell value not updated; new value is null", row, col);
+            log.debug("updateValueInMemory({}, {}): cell value not updated; new value is null", row, col);
             log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
@@ -287,8 +294,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // No need to update if values are the same
         Object oldVal = dataLayer.getDataValue(col, row);
         if ((oldVal != null) && cellValue.equals(oldVal.toString())) {
-            log.debug(
-                    "updateValueInMemory({}, {}): cell value not updated; new value same as old value", row, col);
+            log.debug("updateValueInMemory({}, {}): cell value not updated; new value same as old value", row, col);
             log.trace("updateValueInMemory({}, {}): finish", row, col);
             return;
         }
@@ -455,12 +461,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         log.trace("updateValueInFile(): finish");
     }
 
-    protected IDataProvider getDataProvider(DataFormat dataObject) {
-        if (dataObject == null) return null;
-
-        return new CompoundDSDataProvider(dataObject);
-    }
-
     /**
      * Returns an IEditableRule that determines whether cells can be edited.
      *
@@ -487,78 +487,16 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     /**
      * Provides the NatTable with data from a Compound Dataset for each cell.
      */
+    /*
     private class CompoundDSDataProvider implements IDataProvider {
-        private Object             theValue;
-
-        // Used to store any data fields of type ARRAY
-        private Object[]           arrayElements;
-
-        // StringBuffer used for variable-length types
-        private final StringBuffer stringBuffer;
-
-        private final Datatype     types[];
-
-        private final int          orders[];
-        private final int          nFields;
-        private final int          nRows;
-        private final int          nCols;
-        private final int          nSubColumns;
-
-        public CompoundDSDataProvider(DataFormat theDataset) {
-            log.trace("CompoundDSDataProvider: start");
-
-            CompoundDataFormat dataFormat = (CompoundDataFormat) theDataset;
-
-            stringBuffer = new StringBuffer();
-
-            types = dataFormat.getSelectedMemberTypes();
-
-            orders = dataFormat.getSelectedMemberOrders();
-            nFields = ((List<?>) dataValue).size();
-            nRows = (int) dataFormat.getHeight();
-            nCols = (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount());
-            nSubColumns = (nFields > 0) ? getColumnCount() / nFields : 0;
-
-            log.trace("CompoundDSDataProvider: finish");
-        }
 
         @Override
         public Object getDataValue(int col, int row) {
-            try {
-                int fieldIdx = col;
-                int rowIdx = row;
-                log.trace("CompoundDSDataProvider:getDataValue({},{}): start", row, col);
-
-                if (nSubColumns > 1) { // multi-dimension compound dataset
-                    int colIdx = col / nFields;
-                    fieldIdx %= nFields;
-                    rowIdx = row * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
-                    log.trace("CompoundDSDataProvider:getDataValue(): row={} orders[{}]={} nSubColumns={} colIdx={}", row, fieldIdx, orders[fieldIdx], nSubColumns, colIdx);
-                }
-                else {
-                    rowIdx = row * orders[fieldIdx];
-                    log.trace("CompoundDSDataProvider:getDataValue(): row={} orders[{}]={}", row, fieldIdx, orders[fieldIdx]);
-                }
                 log.trace("CompoundDSDataProvider:getDataValue(): rowIdx={}", rowIdx);
 
-                Object colValue = ((List<?>) dataValue).get(fieldIdx);
-                if (colValue == null) {
-                    return "Null";
-                }
 
-                Datatype dtype = types[fieldIdx];
-                if (dtype == null) {
-                    return "Null";
-                }
 
-                boolean isUINT64 = false;
 
-                String cName = colValue.getClass().getName();
-                int cIndex = cName.lastIndexOf("[");
-                if (cIndex >= 0) {
-                    if (dtype.isUnsigned())
-                        isUINT64 = (cName.charAt(cIndex + 1) == 'J');
-                }
 
                 if (dtype.isArray()) {
                     Datatype btype = dtype.getDatatypeBase();
@@ -728,35 +666,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         theValue = Array.get(colValue, rowIdx);
                     }
                 }
-            }
-            catch (Exception ex) {
-                log.debug("getDataValue() failure: ", ex);
-                theValue = "*ERROR*";
-            }
-
-            return theValue;
         }
 
-        @Override
-        public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-            try {
-                updateValueInMemory((String) newValue, rowIndex, columnIndex);
-            }
-            catch (Exception ex) {
-                log.debug("CompoundDSDataProvider:setDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
-            }
-        }
-
-        @Override
-        public int getColumnCount() {
-            return nCols;
-        }
-
-        @Override
-        public int getRowCount() {
-            return nRows;
-        }
-    }
+    }*/
 
     /**
      * Update cell value label and cell value field when a cell is selected
