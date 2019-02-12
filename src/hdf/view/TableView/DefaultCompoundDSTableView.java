@@ -680,17 +680,13 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
 
-                if (val == null) return;
-
                 log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
 
-                int rowIndex = rowStart + indexBase
-                        + dataTable.getRowIndexByPosition(event.getRowPosition()) * rowStride;
-                Object fieldName = columnHeaderDataProvider
-                        .getDataValue(dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
+                int rowIndex = rowStart + indexBase + dataTable.getRowIndexByPosition(event.getRowPosition()) * rowStride;
+                Object fieldName = columnHeaderDataProvider.getDataValue(dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
 
                 String colIndex = "";
 
@@ -701,11 +697,13 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
 
-                ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(),
-                        ((CellSelectionEvent) e).getRowPosition());
-                cellValueField.setText(
-                        dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val)
-                        .toString());
+                if (val == null) {
+                    cellValueField.setText("Null");
+                    return;
+                }
+
+                ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
+                cellValueField.setText(dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val).toString());
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
                 log.trace("NATTable CellSelected finish");

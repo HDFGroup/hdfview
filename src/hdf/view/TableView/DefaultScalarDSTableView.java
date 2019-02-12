@@ -1258,8 +1258,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
                 String strVal = null;
 
-                if (val == null) return;
-
                 String[] columnNames = ((ScalarDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNames;
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
@@ -1267,6 +1265,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 cellLabel.setText(String.valueOf(
                         rowStart + indexBase + dataTable.getRowIndexByPosition(event.getRowPosition()) * rowStride)
                         + ", " + columnNames[dataTable.getColumnIndexByPosition(event.getColumnPosition())] + "  =  ");
+
+                if (val == null) {
+                    cellValueField.setText("Null");
+                    ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+                    return;
+                }
 
                 if (isRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
