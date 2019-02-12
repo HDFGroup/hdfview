@@ -358,17 +358,6 @@ public class DataProviderFactory {
             if (baseType.isVarStr()) {
                 arraySize = dtype.getArrayDims()[0];
             }
-            else if (baseType.isArray()) {
-                // Array of Array
-                long[] dims = baseType.getArrayDims();
-
-                long size = 1;
-                for (int i = 0; i < dims.length; i++) {
-                    size *= dims[i];
-                }
-
-                arraySize = size * (dtype.getDatatypeSize() / baseType.getDatatypeSize());
-            }
             else if (baseType.isBitField() || baseType.isOpaque()) {
                 arraySize = dtype.getDatatypeSize();
             }
@@ -389,10 +378,7 @@ public class DataProviderFactory {
                 long index = (rowIndex * colCount + columnIndex) * arraySize;
 
                 for (int i = 0; i < arraySize; i++) {
-                    /*
-                     * TODO:
-                     */
-                    arrayElements[i] = baseTypeDataProvider.getDataValue((int) index++);
+                    arrayElements[i] = baseTypeDataProvider.getDataValue((int) index + i);
                 }
 
                 theValue = arrayElements;
@@ -403,6 +389,31 @@ public class DataProviderFactory {
             }
 
             log.trace("ArrayDataProvider: getDataValue({}, {})({}) finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(int index) {
+            log.trace("ArrayDataProvider: getDataValue({}) start", index);
+
+            Object[] tempArray = new Object[(int) arraySize];
+
+            try {
+                long localIndex = index * arraySize;
+
+                for (int i = 0; i < arraySize; i++) {
+                    tempArray[i] = baseTypeDataProvider.getDataValue((int) localIndex + i);
+                }
+
+                theValue = tempArray;
+            }
+            catch (Exception ex) {
+                log.debug("ArrayDataProvider: getDataValue({}) failure: ", index, ex);
+                theValue = "*ERROR*";
+            }
+
+            log.trace("ArrayDataProvider: getDataValue({})({}) finish", index, theValue);
 
             return theValue;
         }
@@ -588,11 +599,17 @@ public class DataProviderFactory {
         public Object getDataValue(int index) {
             log.trace("NumericalDataProvider: getDataValue({}) start", index);
 
-            if (isUINT64) {
-                theValue = Tools.convertUINT64toBigInt(Array.getLong(dataBuf, index));
+            try {
+                if (isUINT64) {
+                    theValue = Tools.convertUINT64toBigInt(Array.getLong(dataBuf, index));
+                }
+                else {
+                    theValue = Array.get(dataBuf, index);
+                }
             }
-            else {
-                theValue = Array.get(dataBuf, index);
+            catch (Exception ex) {
+                log.debug("NumericalDataProvider: getDataValue({}) failure: ", index, ex);
+                theValue = "*ERROR*";
             }
 
             log.trace("NumericalDataProvider: getDataValue({})({}) finish", index, theValue);
@@ -699,6 +716,25 @@ public class DataProviderFactory {
             }
 
             log.trace("BitfieldDataProvider: getDataValue({}, {})({}) finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(int index) {
+            log.trace("BitfieldDataProvider: getDataValue({}) start", index);
+
+            byte[] elements = new byte[(int) typeSize];
+
+            /* index *= typeSize; */
+
+            for (int i = 0; i < typeSize; i++) {
+                elements[i] = Array.getByte(dataBuf, index + i);
+            }
+
+            theValue = elements;
+
+            log.trace("BitfieldDataProvider: getDataValue({})({}) finish", index, theValue);
 
             return theValue;
         }

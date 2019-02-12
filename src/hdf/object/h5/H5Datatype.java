@@ -1677,10 +1677,6 @@ public class H5Datatype extends Datatype {
             case CLASS_ARRAY:
                 description = "Array";
 
-                if (baseType != null) {
-                    description += " of " + baseType.getDescription();
-                }
-
                 if (arrayDims != null) {
                     description += " [";
                     for (int i = 0; i < arrayDims.length; i++) {
@@ -1689,6 +1685,10 @@ public class H5Datatype extends Datatype {
                             description += " x ";
                     }
                     description += "]";
+                }
+
+                if (baseType != null) {
+                    description += " of " + baseType.getDescription();
                 }
 
                 break;

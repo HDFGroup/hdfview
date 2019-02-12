@@ -687,12 +687,27 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 break;
             case CLASS_ARRAY:
                 description = "Array";
+
+                if (arrayDims != null) {
+                    description += " [";
+                    for (int i = 0; i < arrayDims.length; i++) {
+                        description += arrayDims[i];
+                        if (i < arrayDims.length - 1)
+                            description += " x ";
+                    }
+                    description += "]";
+                }
+
+                if (baseType != null)
+                    description += " of " + baseType.getDescription();
                 break;
             case CLASS_COMPOUND:
                 description = "Compound";
                 break;
             case CLASS_VLEN:
                 description = "Variable-length";
+                if (baseType != null)
+                    description += " of " + baseType.getDescription();
                 break;
             default:
                 description = "Unknown";

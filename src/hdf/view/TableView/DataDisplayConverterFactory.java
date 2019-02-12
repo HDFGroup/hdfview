@@ -339,6 +339,7 @@ public class DataDisplayConverterFactory {
 
                 log.trace("ArrayDataDisplayConverter: array length={}", arrLen);
 
+                buffer.append("[");
                 for (int i = 0; i < arrLen; i++) {
                     if (i > 0) buffer.append(", ");
 
@@ -347,6 +348,7 @@ public class DataDisplayConverterFactory {
 
                     buffer.append(convertedValue);
                 }
+                buffer.append("]");
             }
             catch (Exception ex) {
                 log.debug("ArrayDataDisplayConverter: canonicalToDisplayValue() failure: ", ex);
