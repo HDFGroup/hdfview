@@ -485,192 +485,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }
 
     /**
-     * Provides the NatTable with data from a Compound Dataset for each cell.
-     */
-    /*
-    private class CompoundDSDataProvider implements IDataProvider {
-
-        @Override
-        public Object getDataValue(int col, int row) {
-                log.trace("CompoundDSDataProvider:getDataValue(): rowIdx={}", rowIdx);
-
-
-
-
-
-                if (dtype.isArray()) {
-                    Datatype btype = dtype.getDatatypeBase();
-                    if (cIndex >= 0) {
-                        if (btype.isUnsigned()) isUINT64 = (cName.charAt(cIndex + 1) == 'J');
-                    }
-
-                    log.trace("CompoundDSDataProvider:getDataValue(): Array - isArray={} isString={} isUINT64={}", btype.isArray(), btype.isString(), isUINT64);
-
-                    if (btype.isCompound()) {
-                        int numberOfMembers = btype.getCompoundMemberNames().size();
-                        arrayElements = new Object[orders[fieldIdx] * numberOfMembers];
-
-                        log.trace("CompoundDSDataProvider:getDataValue(): Array - Datatype.CLASS_COMPOUND with {} members", numberOfMembers);
-                        for (int i = 0; i < orders[fieldIdx]; i++) {
-                            try {
-                                Object field_data = null;
-
-                                try {
-                                    field_data = Array.get(colValue, rowIdx + i);
-                                }
-                                catch (Exception ex) {
-                                    log.debug("CompoundDSDataProvider:getDataValue(): Array - could not retrieve field_data: ", ex);
-                                }
-
-                                log.trace("CompoundDSDataProvider:getDataValue(): Array - fieldIdx = {}", i);
-                                for (int j = 0; j < numberOfMembers; j++) {
-                                    Object theValue = null;
-
-                                    try {
-                                        theValue = Array.get(field_data, j);
-                                        log.trace("CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", (i * numberOfMembers) + j, theValue.toString());
-                                    }
-                                    catch (Exception ex) {
-                                        theValue = "*unsupported*";
-                                    }
-
-                                    arrayElements[(i * numberOfMembers) + j] = theValue;
-                                }
-                            }
-                            catch (Exception ex) {
-                                log.trace("CompoundDSDataProvider:getDataValue(): Array - ", ex);
-                            }
-                        }
-
-                        theValue = arrayElements;
-                    }
-                    else if (btype.isVLEN()) {
-                        stringBuffer.setLength(0); // clear the old string
-
-                        log.trace("CompoundDSDataProvider:getDataValue(): Array - Datatype is VLEN");
-                        if (btype.isString()) {
-                            for (int i = 0; i < orders[fieldIdx]; i++) {
-                                if (i > 0) stringBuffer.append(", ");
-                                stringBuffer.append(((String[]) colValue)[rowIdx + i]);
-                                log.trace("CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", i, ((String[]) colValue)[rowIdx + i]);
-                            }
-                        }
-                        else {
-                            // Only support variable length strings
-                            log.debug("**CompoundDSDataProvider:getDataValue(): Array - Unsupported Variable-length of {}", btype.getDescription());
-                            stringBuffer.append("*unsupported*");
-                        }
-
-                        theValue = stringBuffer.toString();
-                    }
-                    else if (btype.isString()) {
-                        // ARRAY of strings
-                        int strlen = (int) btype.getDatatypeSize();
-                        int arraylen = (int) types[fieldIdx].getDatatypeSize() / strlen;
-                        arrayElements = new Object[arraylen];
-
-                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - size {}: isString={} of size {}", arraylen, btype.isString(), strlen);
-                        for (int i = 0; i < arraylen; i++) {
-                            String str = new String(((byte[]) colValue), (rowIdx * strlen) + (i * strlen), strlen);
-                            int idx = str.indexOf('\0');
-                            if (idx > 0) {
-                                str = str.substring(0, idx);
-                            }
-                            log.trace("**CompoundDSDataProvider:getDataValue(): Array - theValue[{}]={}", i, str);
-
-                            arrayElements[i] = str.trim();
-                        }
-
-                        theValue = arrayElements;
-                    }
-                    else if (btype.isEnum()) {
-                        arrayElements = new Object[orders[fieldIdx]];
-
-                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - ENUM");
-                        for (int i = 0; i < orders[fieldIdx]; i++) {
-                            arrayElements[i] = Array.get(colValue, rowIdx + i);
-                        }
-
-                        theValue = arrayElements;
-                    }
-                    else if (btype.isOpaque() || btype.isBitField()) {
-                        arrayElements = new Object[orders[fieldIdx]];
-
-                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - OPAQUE or BITFILED");
-                        int len = (int) btype.getDatatypeSize();
-                        byte[] elements = new byte[len];
-
-                        for (int i = 0; i < orders[fieldIdx]; i++) {
-                            rowIdx *= len;
-
-                            for (int j = 0; i < len; i++) {
-                                elements[j] = Array.getByte(colValue, rowIdx + j);
-                            }
-
-                            arrayElements[i] = elements;
-                        }
-
-                        theValue = arrayElements;
-                    }
-                    else {
-                        arrayElements = new Object[orders[fieldIdx]];
-
-                        log.trace("**CompoundDSDataProvider:getDataValue(): Array - OTHER");
-                        if (isUINT64) {
-                            for (int i = 0; i < orders[fieldIdx]; i++) {
-                                arrayElements[i] = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx + i));
-                            }
-                        }
-                        else {
-                            for (int i = 0; i < orders[fieldIdx]; i++) {
-                                arrayElements[i] = Array.get(colValue, rowIdx + i);
-                            }
-                        }
-
-                        theValue = arrayElements;
-                    }
-                }
-                else if (dtype.isString() && colValue instanceof byte[]) {
-                    // strings
-                    int strlen = (int) dtype.getDatatypeSize();
-                    log.trace("**CompoundDSDataProvider:getDataValue(): isString of size {}", strlen);
-
-                    String str = new String(((byte[]) colValue), rowIdx * strlen, strlen);
-                    int idx = str.indexOf('\0');
-                    if (idx > 0) {
-                        str = str.substring(0, idx);
-                    }
-
-                    theValue = str.trim();
-                }
-                else if (dtype.isOpaque() || dtype.isBitField()) {
-                    int len = (int) dtype.getDatatypeSize();
-                    byte[] elements = new byte[len];
-
-                    log.trace("**CompoundDSDataProvider:getDataValue(): isOpaque || isBitField of size {}", len);
-                    rowIdx *= len;
-                    log.trace("**CompoundDSDataProvider:getDataValue(): isOpaque || isBitField of rowIdx {}", rowIdx);
-
-                    for (int i = 0; i < len; i++) {
-                        elements[i] = Array.getByte(colValue, rowIdx + i);
-                    }
-
-                    theValue = elements;
-                }
-                else {
-                    // Flat numerical types
-                    if (isUINT64) {
-                        theValue = Tools.convertUINT64toBigInt(Array.getLong(colValue, rowIdx));
-                    }
-                    else {
-                        theValue = Array.get(colValue, rowIdx);
-                    }
-                }
-        }
-
-    }*/
-
-    /**
      * Update cell value label and cell value field when a cell is selected
      */
     private class CompoundDSCellSelectionListener implements ILayerListener {
@@ -680,17 +494,13 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
 
-                if (val == null) return;
-
                 log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
 
-                int rowIndex = rowStart + indexBase
-                        + dataTable.getRowIndexByPosition(event.getRowPosition()) * rowStride;
-                Object fieldName = columnHeaderDataProvider
-                        .getDataValue(dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
+                int rowIndex = rowStart + indexBase + dataTable.getRowIndexByPosition(event.getRowPosition()) * rowStride;
+                Object fieldName = columnHeaderDataProvider.getDataValue(dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
 
                 String colIndex = "";
 
@@ -701,11 +511,13 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
 
-                ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(),
-                        ((CellSelectionEvent) e).getRowPosition());
-                cellValueField.setText(
-                        dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val)
-                        .toString());
+                if (val == null) {
+                    cellValueField.setText("Null");
+                    return;
+                }
+
+                ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
+                cellValueField.setText(dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val).toString());
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
                 log.trace("NATTable CellSelected finish");

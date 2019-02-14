@@ -16,6 +16,9 @@ package hdf.view.TableView;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
@@ -166,21 +169,31 @@ public class DataDisplayConverterFactory {
                 throw new Exception("CompoundDataDisplayConverter: datatype is not a compound type");
             }
 
-            Datatype[] memberTypes = compoundFormatReference.getSelectedMemberTypes();
-            if (memberTypes == null) {
-                log.debug("CompoundDataDisplayConverter: compound member datatype list is null");
-                throw new Exception("CompoundDataDisplayConverter: compound member datatype list is null");
+            List<Datatype> allSelectedMemberTypes = Arrays.asList(compoundFormatReference.getSelectedMemberTypes());
+            if (allSelectedMemberTypes == null) {
+                log.debug("CompoundDataDisplayConverter: selected compound member datatype list is null");
+                throw new Exception("CompoundDataDisplayConverter: selected compound member datatype list is null");
             }
 
-            memberTypeConverters = new HDFDisplayConverter[memberTypes.length];
+            /*
+             * Make sure to make a copy of the compound datatype's member list, as we might
+             * make modifications to the list when members aren't selected.
+             */
+            List<Datatype> memberTypes = new ArrayList<Datatype>(dtype.getCompoundMemberTypes());
 
-            for (int i = 0; i < memberTypes.length; i++) {
-                Datatype memberType = memberTypes[i];
+            /*
+             * Among the CompoundDataFormat's selected compound members, make sure to only
+             * include the members that exist within the passed in Compound datatype.
+             */
+            memberTypes.retainAll(allSelectedMemberTypes);
 
+            memberTypeConverters = new HDFDisplayConverter[memberTypes.size()];
+
+            for (int i = 0; i < memberTypeConverters.length; i++) {
                 log.trace("CompoundDataDisplayConverter: retrieving DataDisplayConverter for member {}", i);
 
                 try {
-                    memberTypeConverters[i] = getDataDisplayConverter(memberType);
+                    memberTypeConverters[i] = getDataDisplayConverter(memberTypes.get(i));
 
                     /*
                      * Make base datatype converters inherit the data conversion settings.
@@ -196,7 +209,7 @@ public class DataDisplayConverterFactory {
                 }
             }
 
-            nFields = memberTypes.length;
+            nFields = memberTypeConverters.length;
 
             buffer = new StringBuffer();
 
@@ -339,6 +352,7 @@ public class DataDisplayConverterFactory {
 
                 log.trace("ArrayDataDisplayConverter: array length={}", arrLen);
 
+                buffer.append("[");
                 for (int i = 0; i < arrLen; i++) {
                     if (i > 0) buffer.append(", ");
 
@@ -347,6 +361,7 @@ public class DataDisplayConverterFactory {
 
                     buffer.append(convertedValue);
                 }
+                buffer.append("]");
             }
             catch (Exception ex) {
                 log.debug("ArrayDataDisplayConverter: canonicalToDisplayValue() failure: ", ex);

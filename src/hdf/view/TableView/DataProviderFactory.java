@@ -160,7 +160,7 @@ public class DataProviderFactory {
             log.trace("HDFDataProvider: getDataValue({}, {}) start", rowIndex, columnIndex);
 
             try {
-                long index = columnIndex * rowCount + rowIndex;
+                long index = rowIndex * colCount + columnIndex;
 
                 if (rank > 1) {
                     log.trace("HDFDataProvider: getDataValue({}, {}) rank={} isDataTransposed={} isNaturalOrder={}",
@@ -195,12 +195,16 @@ public class DataProviderFactory {
          * retrieve a data value by routing the operation through its base HDFDataProvider,
          * the parent HDFDataProvider will generally know the direct index to have the base
          * provider to use. This method is to facilitate this kind of behavior.
+         *
+         * Note that this method takes an Object parameter, which is the object that the
+         * method should pull its data from. This is to be able to nicely support compound
+         * DataProviders.
          */
-        public Object getDataValue(int index) {
+        public Object getDataValue(Object obj, int index) {
             log.trace("HDFDataProvider: getDataValue({}) start", index);
 
             try {
-                theValue = Array.get(dataBuf, index);
+                theValue = Array.get(obj, index);
             }
             catch (Exception ex) {
                 log.debug("HDFDataProvider: getDataValue({}) failure: ", index, ex);
@@ -284,38 +288,27 @@ public class DataProviderFactory {
                 int rowIdx = rowIndex;
 
                 if (nSubColumns > 1) { // multi-dimension compound dataset
+                    /*
+                     * TODO: indexing probably wrong here.
+                     */
                     int colIdx = columnIndex / nFields;
                     fieldIdx %= nFields;
-                    rowIdx = rowIndex * orders[fieldIdx] * nSubColumns + colIdx * orders[fieldIdx];
+                    rowIdx = rowIndex * nSubColumns + colIdx * orders[fieldIdx];
                 }
                 else {
-                    rowIdx = rowIndex * orders[fieldIdx];
+                    rowIdx = rowIndex;
                 }
-
-                /*
-                 * TODO
-                 */
-                /* log.trace("CompoundDataProvider: getDataValue({}, {}) row={} orders[{}]={} nSubColumns={} colIdx={}",
-                        rowIndex, columnIndex, orders[fieldIdx], nSubColumns, colIdx); */
 
                 Object colValue = ((List<?>) dataBuf).get(fieldIdx);
                 if (colValue == null) {
                     return "Null";
                 }
 
-                Datatype dtype = types[fieldIdx];
-                if (dtype == null) {
-                    return "Null";
-                }
-
-                boolean isUINT64 = false;
-
-                String cName = colValue.getClass().getName();
-                int cIndex = cName.lastIndexOf("[");
-                if (cIndex >= 0) {
-                    if (dtype.isUnsigned())
-                        isUINT64 = (cName.charAt(cIndex + 1) == 'J');
-                }
+                /*
+                 * Delegate data retrieval to one of the base DataProviders according to
+                 * the index of the relevant compound field.
+                 */
+                theValue = baseTypeProviders[fieldIdx].getDataValue(colValue, rowIdx);
             }
             catch (Exception ex) {
                 log.debug("CompoundDataProvider: getDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
@@ -358,17 +351,6 @@ public class DataProviderFactory {
             if (baseType.isVarStr()) {
                 arraySize = dtype.getArrayDims()[0];
             }
-            else if (baseType.isArray()) {
-                // Array of Array
-                long[] dims = baseType.getArrayDims();
-
-                long size = 1;
-                for (int i = 0; i < dims.length; i++) {
-                    size *= dims[i];
-                }
-
-                arraySize = size * (dtype.getDatatypeSize() / baseType.getDatatypeSize());
-            }
             else if (baseType.isBitField() || baseType.isOpaque()) {
                 arraySize = dtype.getDatatypeSize();
             }
@@ -388,11 +370,24 @@ public class DataProviderFactory {
             try {
                 long index = (rowIndex * colCount + columnIndex) * arraySize;
 
+                if (rank > 1) {
+                    log.trace("ArrayDataProvider: getDataValue({}, {}) rank={} isDataTransposed={} isNaturalOrder={}",
+                            rowIndex, columnIndex, rank, isDataTransposed, isNaturalOrder);
+
+                    if (isDataTransposed && isNaturalOrder)
+                        index = (columnIndex * rowCount + rowIndex) * arraySize;
+                    else if (!isDataTransposed && !isNaturalOrder)
+                        // Reshape Data
+                        index = (rowIndex * colCount + columnIndex) * arraySize;
+                    else if (isDataTransposed && !isNaturalOrder)
+                        // Transpose Data
+                        index = (columnIndex * rowCount + rowIndex) * arraySize;
+                    else
+                        index = (rowIndex * colCount + columnIndex) * arraySize;
+                }
+
                 for (int i = 0; i < arraySize; i++) {
-                    /*
-                     * TODO:
-                     */
-                    arrayElements[i] = baseTypeDataProvider.getDataValue((int) index++);
+                    arrayElements[i] = baseTypeDataProvider.getDataValue(dataBuf, (int) index + i);
                 }
 
                 theValue = arrayElements;
@@ -403,6 +398,31 @@ public class DataProviderFactory {
             }
 
             log.trace("ArrayDataProvider: getDataValue({}, {})({}) finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("ArrayDataProvider: getDataValue({}) start", index);
+
+            Object[] tempArray = new Object[(int) arraySize];
+
+            try {
+                long localIndex = index * arraySize;
+
+                for (int i = 0; i < arraySize; i++) {
+                    tempArray[i] = baseTypeDataProvider.getDataValue(obj, (int) localIndex + i);
+                }
+
+                theValue = tempArray;
+            }
+            catch (Exception ex) {
+                log.debug("ArrayDataProvider: getDataValue({}) failure: ", index, ex);
+                theValue = "*ERROR*";
+            }
+
+            log.trace("ArrayDataProvider: getDataValue({})({}) finish", index, theValue);
 
             return theValue;
         }
@@ -438,10 +458,11 @@ public class DataProviderFactory {
 
             buffer.setLength(0);
 
-            /*
-             * TODO:
-             */
+            super.getDataValue(columnIndex, rowIndex);
+
             try {
+                buffer.append(theValue);
+
                 theValue = buffer.toString();
             }
             catch (Exception ex) {
@@ -450,6 +471,29 @@ public class DataProviderFactory {
             }
 
             log.trace("VlenDataProvider: getDataValue({}, {})({}) finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("VlenDataProvider: getDataValue({}) start", index);
+
+            buffer.setLength(0);
+
+            super.getDataValue(obj, index);
+
+            try {
+                buffer.append(theValue);
+
+                theValue = buffer.toString();
+            }
+            catch (Exception ex) {
+                log.debug("VlenDataProvider: getDataValue({}) failure: ", index, ex);
+                theValue = "*ERROR*";
+            }
+
+            log.trace("VlenDataProvider: getDataValue({})({}) finish", index, theValue);
 
             return theValue;
         }
@@ -467,10 +511,15 @@ public class DataProviderFactory {
 
     private static class StringDataProvider extends HDFDataProvider {
 
+        private final long typeSize;
+
         StringDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
 
             log.trace("StringDataProvider: start");
+
+            typeSize = dtype.getDatatypeSize();
+
             log.trace("StringDataProvider: finish");
         }
 
@@ -481,6 +530,31 @@ public class DataProviderFactory {
             super.getDataValue(columnIndex, rowIndex);
 
             log.trace("StringDataProvider: getDataValue({}, {})({}) finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("StringDataProvider: getDataValue({}) start", index);
+
+            if (obj instanceof byte[]) {
+                int strlen = (int) typeSize;
+
+                log.trace("StringDataProvider: getDataValue({}): converting byte[] to String", index);
+
+                String str = new String((byte[]) obj, index * strlen, strlen);
+                int idx = str.indexOf('\0');
+                if (idx > 0) {
+                    str = str.substring(0, idx);
+                }
+
+                theValue = str.trim();
+            }
+            else
+                super.getDataValue(obj, index);
+
+            log.trace("StringDataProvider: getDataValue({})({}) finish", index, theValue);
 
             return theValue;
         }
@@ -517,6 +591,17 @@ public class DataProviderFactory {
         }
 
         @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("CharDataProvider: getDataValue({}) start", index);
+
+            super.getDataValue(obj, index);
+
+            log.trace("CharDataProvider: getDataValue({})({}) finish", index, theValue);
+
+            return theValue;
+        }
+
+        @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
             log.trace("CharDataProvider: setDataValue({}, {})({}) start", rowIndex, columnIndex, newValue);
 
@@ -548,31 +633,11 @@ public class DataProviderFactory {
         public Object getDataValue(int columnIndex, int rowIndex) {
             log.trace("NumericalDataProvider: getDataValue({}, {}) start", rowIndex, columnIndex);
 
+            super.getDataValue(columnIndex, rowIndex);
+
             try {
-                long index = columnIndex * rowCount + rowIndex;
-
-                if (rank > 1) {
-                    log.trace("NumericalDataProvider: getDataValue({}, {}) rank={} isDataTransposed={} isNaturalOrder={}",
-                            rowIndex, columnIndex, rank, isDataTransposed, isNaturalOrder);
-
-                    if (isDataTransposed && isNaturalOrder)
-                        index = columnIndex * rowCount + rowIndex;
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = rowIndex * colCount + columnIndex;
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = columnIndex * rowCount + rowIndex;
-                    else
-                        index = rowIndex * colCount + columnIndex;
-                }
-
-                if (isUINT64) {
-                    theValue = Tools.convertUINT64toBigInt(Array.getLong(dataBuf, (int) index));
-                }
-                else {
-                    theValue = Array.get(dataBuf, (int) index);
-                }
+                if (isUINT64)
+                    theValue = Tools.convertUINT64toBigInt(Long.valueOf((long) theValue));
             }
             catch (Exception ex) {
                 log.debug("NumericalDataProvider: getDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
@@ -585,14 +650,18 @@ public class DataProviderFactory {
         }
 
         @Override
-        public Object getDataValue(int index) {
+        public Object getDataValue(Object obj, int index) {
             log.trace("NumericalDataProvider: getDataValue({}) start", index);
 
-            if (isUINT64) {
-                theValue = Tools.convertUINT64toBigInt(Array.getLong(dataBuf, index));
+            super.getDataValue(obj, index);
+
+            try {
+                if (isUINT64)
+                    theValue = Tools.convertUINT64toBigInt(Long.valueOf((long) theValue));
             }
-            else {
-                theValue = Array.get(dataBuf, index);
+            catch (Exception ex) {
+                log.debug("NumericalDataProvider: getDataValue({}) failure: ", index, ex);
+                theValue = "*ERROR*";
             }
 
             log.trace("NumericalDataProvider: getDataValue({})({}) finish", index, theValue);
@@ -632,6 +701,17 @@ public class DataProviderFactory {
         }
 
         @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("EnumDataProvider: getDataValue({}) start", index);
+
+            super.getDataValue(obj, index);
+
+            log.trace("EnumDataProvider: getDataValue({})({}) finish", index, theValue);
+
+            return theValue;
+        }
+
+        @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
             log.trace("EnumDataProvider: setDataValue({}, {})({}) start", rowIndex, columnIndex, newValue);
 
@@ -661,7 +741,7 @@ public class DataProviderFactory {
             log.trace("BitfieldDataProvider: getDataValue({}, {}) start", rowIndex, columnIndex);
 
             try {
-                long index = columnIndex * rowCount + rowIndex;
+                long index = rowIndex * colCount + columnIndex;
 
                 if (rank > 1) {
                     log.trace("BitfieldDataProvider: getDataValue({}, {}) rank={} isDataTransposed={} isNaturalOrder={}",
@@ -704,6 +784,25 @@ public class DataProviderFactory {
         }
 
         @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("BitfieldDataProvider: getDataValue({}) start", index);
+
+            byte[] elements = new byte[(int) typeSize];
+
+            index *= typeSize;
+
+            for (int i = 0; i < typeSize; i++) {
+                elements[i] = Array.getByte(obj, index + i);
+            }
+
+            theValue = elements;
+
+            log.trace("BitfieldDataProvider: getDataValue({})({}) finish", index, theValue);
+
+            return theValue;
+        }
+
+        @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
             log.trace("BitfieldDataProvider: setDataValue({}, {})({}) start", rowIndex, columnIndex, newValue);
 
@@ -730,6 +829,17 @@ public class DataProviderFactory {
             super.getDataValue(columnIndex, rowIndex);
 
             log.trace("RefDataProvider: getDataValue({}, {})({}) finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("RefDataProvider: getDataValue({}) start", index);
+
+            super.getDataValue(obj, index);
+
+            log.trace("RefDataProvider: getDataValue({})({}) finish", index, theValue);
 
             return theValue;
         }
