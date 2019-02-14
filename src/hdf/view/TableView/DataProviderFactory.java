@@ -789,7 +789,7 @@ public class DataProviderFactory {
 
             byte[] elements = new byte[(int) typeSize];
 
-            /* index *= typeSize; */
+            index *= typeSize;
 
             for (int i = 0; i < typeSize; i++) {
                 elements[i] = Array.getByte(obj, index + i);
