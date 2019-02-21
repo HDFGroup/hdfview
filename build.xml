@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="HDFView" basedir="." default="main" xmlns:fx="javafx:com.sun.javafx.tools.ant">
+<project name="HDFView" basedir="." default="main" xmlns:fx="javafx:com.sun.javafx.tools.ant" xmlns:sonar="antlib:org.sonar.ant">
   <property environment="env" />
 
   <!-- Configuration files: -->
@@ -8,6 +8,18 @@
   <property file="package.properties" />
 
   <record name="antoutput.log" action="start" append="true" loglevel="verbose" />
+
+  <!-- Define the SonarQube global properties (the most usual way is to pass these properties via the command line) -->
+  <property name="sonar.host.url" value="http://localhost:9000" />
+
+  <!-- Define the SonarQube project properties -->
+  <property name="sonar.projectKey" value="org.sonarqube:sonarqube-scanner-ant" />
+  <property name="sonar.projectName" value="HDFView-development" />
+  <property name="sonar.projectVersion" value="1.0" />
+    <property name="sonar.sources" value="src/hdf" />
+    <property name="sonar.tests" value="src/test" />
+  <property name="sonar.java.binaries" value="build" />
+  <property name="sonar.sourceEncoding" value="UTF-8" />
 
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -110,13 +122,11 @@
     </and>
   </condition>
 
-  <!-- Determine whether to build 32- or 64-bit binary.
+  <!-- Build 64-bit binary.
        Note: os.arch gives the architecture of the JVM, NOT the OS;
-       It is assumed that a 32-bit JVM is used for building on a 32-bit
-       Windows system and a 64-bit JVM is used for building on a 64-bit
-       Windows system. -->
-  <condition property="machine.arch" value="x64" else="x86">
-    <matches pattern="64" string="${os.arch}" />
+       It is assumed that a ppc JVM is used for building on a powerpc system. -->
+  <condition property="machine.arch" value="ppc64le" else="x86_64">
+    <matches pattern="ppc64le" string="${os.arch}" />
   </condition>
 
   <!-- Sets variables which can later be used. -->
@@ -354,6 +364,17 @@
   </target>
   <path id="application" location="${jar.dir}/${ant.project.name}.jar" />
 
+    <!-- Define SonarQube Scanner for Ant Target -->
+    <target name="sonar" depends="jar">
+        <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+            <!-- Update the following line, or put the "sonarqube-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
+            <classpath path="~/.ant/lib/sonarqube-ant-task-*.jar" />
+        </taskdef>
+
+        <!-- Execute SonarQube Scanner for Ant Analysis -->
+        <sonar:sonar />
+    </target>
+
   <!-- SWT on Mac requires the -XstartOnFirstThreadFlag. -->
   <condition property="XstartOnFirstThreadFlag" value="-XstartOnFirstThread" else="-Dgwt.dummy.arg1=">
      <os family="mac"/>
@@ -504,7 +525,8 @@
         chunked.txt,
         CompoundInts.txt,
         DS64BITS.txt,
-        DU64BITS.bin" />
+        DU64BITS.bin,
+        tarray4.h5" />
     </delete>
   </target>
 
