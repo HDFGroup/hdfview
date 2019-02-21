@@ -126,7 +126,7 @@
        Note: os.arch gives the architecture of the JVM, NOT the OS;
        It is assumed that a ppc JVM is used for building on a powerpc system. -->
   <condition property="machine.arch" value="ppc64le" else="x86_64">
-    <matches pattern="ppc" string="${os.arch}" />
+    <matches pattern="ppc64le" string="${os.arch}" />
   </condition>
 
   <!-- Sets variables which can later be used. -->
