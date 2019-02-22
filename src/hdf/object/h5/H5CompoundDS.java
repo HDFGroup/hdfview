@@ -16,6 +16,9 @@ package hdf.object.h5;
 
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -126,6 +129,14 @@ public class H5CompoundDS extends CompoundDS {
     /** flag to indicate if the dataset is a virtual dataset */
     private boolean isVirtual = false;
     private List<String> virtualNameList;
+
+    /*
+     * Enum to indicate the type of I/O to perform inside of the common I/O
+     * function.
+     */
+    protected static enum IO_TYPE {
+        READ, WRITE
+    };
 
     /**
      * Constructs an instance of a HDF5 compound dataset with given file, dataset name and path.
@@ -372,7 +383,7 @@ public class H5CompoundDS extends CompoundDS {
                     log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
                             datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
 
-                    ((H5Datatype) datatype).extractCompoundInfo("", flatNameList, flatTypeList);
+                    H5Datatype.extractCompoundInfo((H5Datatype) datatype, "", flatNameList, flatTypeList);
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
@@ -653,289 +664,22 @@ public class H5CompoundDS extends CompoundDS {
     public Object read() throws Exception {
         log.trace("read(): start");
 
-        List<Object> memberDataList = null;
-        H5Datatype DSdatatype = (H5Datatype) getDatatype();
+        Object readData = null;
 
-        if (numberOfMembers <= 0) {
-            log.debug("read(): Dataset contains no members");
-            log.trace("read(): finish");
-            return null; // this compound dataset does not have any member
+        if (!isInited())
+            init();
+
+        try {
+            readData = compoundDatasetCommonIO(IO_TYPE.READ, null);
         }
-
-        log.trace("read(): open dataset");
-
-        long did = open();
-        if (did >= 0) {
-            long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
-
-            try {
-                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
-                        selectedStride, selectedDims, spaceIDs);
-
-                /*
-                 * Read each member of the compound datatype into a separate byte
-                 * array, then extract the data into its type, such as int, long,
-                 * float, etc.
-                 */
-                /*
-                 * TODO: Can potentially just re-use the global lists
-                 */
-                List<Datatype> atomicList = new Vector<>();
-                DSdatatype.extractCompoundInfo(null, null, atomicList);
-                memberDataList = new Vector<>(atomicList.size());
-
-                log.trace("read(): foreach nMembers={}", atomicList.size());
-
-                for (int i = 0; i < atomicList.size(); i++) {
-                    H5Datatype member_type = null;
-                    Datatype member_base = null;
-                    String member_name = null;
-                    Object member_data = null;
-                    int member_size = 0;
-
-                    if (!isMemberSelected[i]) {
-                        log.debug("read(): Member[{}] is not selected", i);
-                        continue; // the field is not selected
-                    }
-
-                    try {
-                        member_type = (H5Datatype) atomicList.get(i);
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): get member {} failure: ", i, ex);
-                        continue;
-                    }
-
-                    try {
-                        member_base = member_type.getDatatypeBase();
-                        log.trace("read(): Member[{}] has base {}", i, member_base);
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): get member {} base type failure: ", i, ex);
-                        continue;
-                    }
-
-                    try {
-                        member_name = new String(memberNames[i]);
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): get member {} name failure: ", i, ex);
-                        member_name = "null";
-                    }
-
-                    try {
-                        member_size = (int) member_type.getDatatypeSize();
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): get member {} size failure: ", i, ex);
-                        continue;
-                    }
-
-                    try {
-                        member_data = member_type.allocateArray((int) totalSelectedSpacePoints);
-                        log.trace("read(): member_type.allocateArray {} points ", totalSelectedSpacePoints);
-                    }
-                    catch (OutOfMemoryError err) {
-                        member_data = null;
-                        throw new HDF5Exception("Out Of Memory.");
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): Member[{}]: ", i, ex);
-                        member_data = null;
-                    }
-
-                    log.trace("read(): {} Member[{}] is type {} of size={}", member_name, i, member_type.getDescription(), member_size);
-
-                    if (member_data != null) {
-                        long comp_tid = -1;
-                        try {
-                            comp_tid = DSdatatype.createCompoundFieldType(flatNameList.get(i));
-                        }
-                        catch (HDF5Exception ex) {
-                            log.debug("read(): unable to create compound field type for Member[{}] of type {}: ", i, member_type.getDescription(), ex);
-
-                            String[] nullValues = new String[(int) totalSelectedSpacePoints];
-                            for (int j = 0; j < totalSelectedSpacePoints; j++) {
-                                nullValues[j] = "NULL";
-                            }
-                            memberDataList.add(nullValues);
-                            log.debug("read(): {} Member[{}] createCompoundFieldType failure:", member_name, i, ex);
-                            continue;
-                        }
-
-                        /*
-                         * Actually read the data for this member now that everything has been setup
-                         */
-                        try {
-                            if (member_type.isVLEN() || (member_type.isArray() && member_base.isVLEN())) {
-                                log.trace("read(): Member[{}]: H5DreadVL did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
-                                H5.H5DreadVL(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) member_data);
-                            }
-                            else if ((member_base != null) && member_base.isCompound()) {
-                                log.trace("read(): Member[{}]: H5Dread did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
-                                H5.H5Dread(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (byte[]) member_data, true);
-                            }
-                            else {
-                                log.trace("read(): Member[{}]: H5Dread did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
-                                H5.H5Dread(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, member_data);
-                            }
-                        }
-                        catch (HDF5DataFiltersException exfltr) {
-                            log.debug("read(): {} Member[{}] read failure:", member_name, i, exfltr);
-                            log.trace("read(): finish");
-                            throw new Exception("Filter not available exception: " + exfltr.getMessage(), exfltr);
-                        }
-                        catch (Exception ex) {
-                            String[] errValues = new String[(int) totalSelectedSpacePoints];
-                            for (int j = 0; j < totalSelectedSpacePoints; j++) {
-                                errValues[j] = "*ERROR*";
-                            }
-                            memberDataList.add(errValues);
-                            log.debug("read(): {} Member[{}] read failure:", member_name, i, ex);
-                            continue;
-                        }
-                        finally {
-                            DSdatatype.close(comp_tid);
-                        }
-
-
-                        /*
-                         * Perform any necessary data conversions
-                         */
-                        if (member_type.isUnsigned()) {
-                            log.trace("read(): Member[{}]: converting from unsigned C-type integers", i);
-                            member_data = Dataset.convertFromUnsignedC(member_data, null);
-                        }
-                        else if ((member_type.isString()) && convertByteToString && !member_type.isVarStr()) {
-                            if (Utils.getJavaObjectRuntimeClass(member_data) == 'B') {
-                                log.trace("read(): Member[{}]: converting byte array to string array", i);
-                                member_data = byteToString((byte[]) member_data, member_size / memberOrders[i]);
-                            }
-                        }
-                        else if (member_type.isRef()) {
-                            if (Utils.getJavaObjectRuntimeClass(member_data) == 'B') {
-                                log.trace("read(): Member[{}]: converting byte array to long array", i);
-                                member_data = HDFNativeData.byteToLong((byte[]) member_data);
-                            }
-                        }
-                        else if (member_type.isArray() && member_base.isCompound()) {
-                            // Since compounds are read into memory as a byte array, discover each member
-                            // type and size and convert the byte array to the correct type before adding
-                            // it to the list
-                            long atom_tid = -1;
-                            try {
-                                atom_tid = member_type.createNative();
-
-                                int numDims = H5.H5Tget_array_ndims(atom_tid);
-                                long[] dims = new long[numDims];
-                                H5.H5Tget_array_dims(atom_tid, dims);
-                                int numberOfCompounds = (int) dims[0] * (int) totalSelectedSpacePoints;
-                                int compoundSize = (member_size * (int) totalSelectedSpacePoints) / numberOfCompounds;
-
-                                Object current_data = new Object[numberOfCompounds];
-
-                                long base_tid = -1;
-                                long memberOffsets[] = null;
-                                long memberLengths[] = null;
-                                long memberTypes[] = null;
-                                int numberOfMembers;
-
-                                try {
-                                    base_tid = H5.H5Tget_super(atom_tid);
-                                    numberOfMembers = H5.H5Tget_nmembers(base_tid);
-                                    memberOffsets = new long[numberOfMembers];
-                                    memberLengths = new long[numberOfMembers];
-                                    memberTypes = new long[numberOfMembers];
-
-                                    for (int j = 0; j < numberOfMembers; j++) {
-                                        memberOffsets[j] = H5.H5Tget_member_offset(base_tid, j);
-                                        memberTypes[j] = H5.H5Tget_member_type(base_tid, j);
-                                    }
-
-                                    for (int j = 0; j < numberOfMembers; j++) {
-                                        if (j < numberOfMembers - 1) {
-                                            memberLengths[j] = (memberOffsets[j + 1] - memberOffsets[j]);
-                                        }
-                                        else {
-                                            memberLengths[j] = (compoundSize - memberOffsets[j]);
-                                        }
-                                    }
-
-                                    for (int j = 0; j < numberOfCompounds; j++) {
-                                        Object field_data = new Object[numberOfMembers];
-
-                                        for (int k = 0; k < numberOfMembers; k++) {
-                                            Object converted = convertCompoundByteMember((byte[]) member_data, memberTypes[k], memberOffsets[k] + (compoundSize * j),
-                                                    memberLengths[k]);
-
-                                            ((Object[]) field_data)[k] = Array.get(converted, 0);
-                                        }
-
-                                        ((Object[]) current_data)[j] = field_data;
-                                    }
-                                }
-                                catch (Exception ex) {
-                                    log.debug("read(): Convert Array of Compounds failure: ", ex);
-                                    continue;
-                                }
-                                finally {
-                                    for (int j = 0; j < memberTypes.length; j++) {
-                                        member_type.close(memberTypes[j]);
-                                    }
-
-                                    member_type.close(base_tid);
-                                }
-
-                                memberDataList.add(current_data);
-                            }
-                            catch (Exception ex) {
-                                log.debug("read(): Member[{}]: list.add failure(): ", i, ex);
-                            }
-                            finally {
-                                member_type.close(atom_tid);
-                            }
-                        } // if (member_type.isArray() && member_base.isCompound())
-                    } // if (member_data != null) {
-                    else {
-                        String[] errValues = new String[(int) totalSelectedSpacePoints];
-                        String errStr = "ERROR";
-
-                        for (int j = 0; j < totalSelectedSpacePoints; j++)
-                            errValues[j] = errStr;
-
-                        memberDataList.add(errValues);
-
-                        log.debug("read(): {} Member[{}] of type {} member_data is null", member_name, i, member_type.getDescription());
-                    }
-
-                    memberDataList.add(member_data);
-                } // end of for (int i=0; i<num_members; i++)
-            }
-            finally {
-                if (HDF5Constants.H5S_ALL != spaceIDs[0]) {
-                    try {
-                        H5.H5Sclose(spaceIDs[0]);
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): H5Sclose(spaceIDs[0] {}) failure: ", spaceIDs[0], ex);
-                    }
-                }
-
-                if (HDF5Constants.H5S_ALL != spaceIDs[1]) {
-                    try {
-                        H5.H5Sclose(spaceIDs[1]);
-                    }
-                    catch (Exception ex) {
-                        log.debug("read(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex);
-                    }
-                }
-
-                close(did);
-            }
+        catch (Exception ex) {
+            log.debug("read(): failed to read compound dataset: ", ex);
+            throw new Exception("failed to read compound dataset: " + ex.getMessage(), ex);
         }
 
         log.trace("read(): finish");
-        return memberDataList;
+
+        return readData;
     }
 
     /**
@@ -947,193 +691,90 @@ public class H5CompoundDS extends CompoundDS {
      * @param buf
      *            The vector that contains the data values of compound fields.
      *
-     * @throws HDF5Exception
+     * @throws Exception
      *             If there is an error at the HDF5 library level.
      */
     @Override
-    public void write(Object buf) throws HDF5Exception {
+    public void write(Object buf) throws Exception {
         log.trace("write(): start");
 
-        Object tmpData = null;
-        H5Datatype DSdatatype = null;
-
-        if ((buf == null) || (numberOfMembers <= 0) || !(buf instanceof List)) {
-            log.debug("write(): buf is null or invalid or contains no members");
-            log.trace("write(): finish");
-            return;
-        }
+        if (this.getFileFormat().isReadOnly())
+            throw new Exception("cannot write to compound dataset in file opened as read-only");
 
         if (!isInited())
             init();
 
         try {
-            DSdatatype = (H5Datatype) this.getDatatype();
+            compoundDatasetCommonIO(IO_TYPE.WRITE, buf);
         }
         catch (Exception ex) {
-            log.debug("write(): get datatype: ", ex);
+            log.debug("write(): failed to write compound dataset: ", ex);
+            throw new Exception("failed to write compound dataset: " + ex.getMessage(), ex);
+        }
+
+        log.trace("write(): finish");
+    }
+
+    private Object compoundDatasetCommonIO(IO_TYPE io_type, Object writeBuf) throws Exception {
+        log.trace("compoundDatasetCommonIO(): start");
+
+        H5Datatype DSDatatype = (H5Datatype) getDatatype();
+        Object data = null;
+
+        if (numberOfMembers <= 0) {
+            log.debug("compoundDatasetCommonIO(): Dataset contains no members");
+            log.trace("compoundDatasetCommonIO(): finish");
+            throw new Exception("dataset contains no members");
         }
 
         /*
-         * Check for any unsupported datatypes and fail early before
-         * attempting to write to the dataset
+         * I/O type-specific pre-initialization.
          */
-        if (DSdatatype.isArray() || DSdatatype.isVLEN()) {
-            H5Datatype baseType = (H5Datatype) DSdatatype.getDatatypeBase();
-
-            if (baseType != null) {
-                if (baseType.isCompound()) {
-                    log.debug("write(): cannot write dataset of type ARRAY of COMPOUND");
-                    log.trace("write(): finish");
-                    throw new HDF5Exception("Unsupported dataset of type ARRAY of COMPOUND");
-                }
-
-                if (baseType.isCompound()) {
-                    log.debug("write(): cannot write dataset of type VLEN of COMPOUND");
-                    log.trace("write(): finish");
-                    throw new HDF5Exception("Unsupported dataset of type VLEN of COMPOUND");
-                }
+        if (io_type == IO_TYPE.WRITE) {
+            if ((writeBuf == null) || !(writeBuf instanceof List)) {
+                log.debug("compoundDatasetCommonIO(): writeBuf is null or invalid");
+                log.trace("compoundDatasetCommonIO(): finish");
+                throw new Exception("write buffer is null or invalid");
             }
-            else {
-                log.debug("write(): ARRAY or VLEN datatype has no base type");
-                throw new HDF5Exception("Dataset's datatype (ARRAY or VLEN) has no base datatype");
+
+            /*
+             * Check for any unsupported datatypes and fail early before
+             * attempting to write to the dataset.
+             */
+            if (DSDatatype.isArray() && DSDatatype.getDatatypeBase().isCompound()) {
+                log.debug("compoundDatasetCommonIO(): cannot write dataset of type ARRAY of COMPOUND");
+                log.trace("compoundDatasetCommonIO(): finish");
+                throw new HDF5Exception("Unsupported dataset of type ARRAY of COMPOUND");
+            }
+
+            if (DSDatatype.isVLEN() && DSDatatype.getDatatypeBase().isCompound()) {
+                log.debug("compoundDatasetCommonIO(): cannot write dataset of type VLEN of COMPOUND");
+                log.trace("compoundDatasetCommonIO(): finish");
+                throw new HDF5Exception("Unsupported dataset of type VLEN of COMPOUND");
             }
         }
 
-        log.trace("write(): open dataset");
+        log.trace("compoundDatasetCommonIO(): open dataset");
 
         long did = open();
         if (did >= 0) {
-            long spaceIDs[] = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
+            long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
+                /*
+                 * NOTE: this call sets up a hyperslab selection in the file according to the
+                 * current selection in the dataset object.
+                 */
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
                         selectedStride, selectedDims, spaceIDs);
 
-                List<Datatype> atomicList = new Vector<>();
-                DSdatatype.extractCompoundInfo(null, null, atomicList);
-
-                log.trace("write(): foreach nMembers={}", atomicList.size());
-
-                int currentMemberIndex = 0;
-                for (int i = 0; i < atomicList.size(); i++) {
-                    H5Datatype member_type = null;
-                    String member_name = null;
-                    Object member_data = null;
-
-                    if (!isMemberSelected[i]) {
-                        log.debug("write(): Member[{}] is not selected", i);
-                        continue; // the field is not selected
-                    }
-
-                    try {
-                        member_type = (H5Datatype) atomicList.get(i);
-                    }
-                    catch (Exception ex) {
-                        log.debug("write(): get member {} failure: ", i, ex);
-                        continue;
-                    }
-
-                    try {
-                        member_name = new String(memberNames[i]);
-                    }
-                    catch (Exception ex) {
-                        log.debug("write(): get member {} name failure: ", i, ex);
-                        member_name = "null";
-                    }
-
-                    try {
-                        member_data = ((List<?>) buf).get(currentMemberIndex++);
-                    }
-                    catch (Exception ex) {
-                        log.debug("write(): get member {} data failure: ", i, ex);
-                        continue;
-                    }
-
-                    if (member_data == null) {
-                        log.debug("write(): Member[{}] data is null", i);
-                        continue;
-                    }
-
-                    log.trace("write(): {} Member[{}] is type {} of size={}", member_name, i, member_type.getDescription(), member_type.getDatatypeSize());
-
-                    /*
-                     * Check for any unsupported datatypes before attempting to write
-                     * this compound member
-                     */
-                    if (member_type.isVLEN() && !member_type.isVarStr()) {
-                        log.debug("write(): Member[{}]: write of VL non-strings is not currently supported");
-                        continue;
-                    }
-
-                    /*
-                     * Perform any necessary data conversions before writing the data.
-                     */
-                    try {
-                        tmpData = member_data;
-
-                        if (member_type.isUnsigned()) {
-                            // Check if we need to convert integer data
-                            long tsize = member_type.getDatatypeSize();
-                            String cname = member_data.getClass().getName();
-                            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-                            boolean doIntConversion = (((tsize == 1) && (dname == 'S'))
-                                    || ((tsize == 2) && (dname == 'I')) || ((tsize == 4) && (dname == 'J')));
-
-                            if (doIntConversion) {
-                                log.trace("write(): Member[{}]: converting integer data to unsigned C-type integers", i);
-                                tmpData = convertToUnsignedC(member_data, null);
-                            }
-                        }
-                        else if (member_type.isString() && (Array.get(member_data, 0) instanceof String)) {
-                            log.trace("write(): Member[{}]: converting string array to byte array", i);
-                            tmpData = stringToByte((String[]) member_data, (int) member_type.getDatatypeSize());
-                        }
-                        else if (member_type.isEnum() && (Array.get(member_data, 0) instanceof String)) {
-                            log.trace("write(): Member[{}]: converting enum names to values", i);
-                            tmpData = member_type.convertEnumNameToValue((String[]) member_data);
-                        }
-                    }
-                    catch (Exception ex) {
-                        log.debug("write(): data conversion failure: ", ex);
-                        tmpData = null;
-                    }
-
-                    /*
-                     * Actually write the data now that everything has been setup
-                     */
-                    if (tmpData != null) {
-                        long comp_tid = -1;
-                        try {
-                            comp_tid = DSdatatype.createCompoundFieldType(flatNameList.get(i));
-                        }
-                        catch (HDF5Exception ex) {
-                            log.debug("write(): unable to create compound field type for Member[{}]: ", i, ex);
-                            continue;
-                        }
-
-                        try {
-                            if (member_type.isVarStr()) {
-                                log.trace("write(): Member[{}]: H5Dwrite_string did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
-                                H5.H5Dwrite_string(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (String[]) tmpData);
-                            }
-                            else {
-                                // BUG!!! does not write nested compound data and no
-                                // exception was caught need to check if it is a java
-                                // error or C library error
-                                log.trace("write(): Member[{}]: H5Dwrite did={} comp_tid={} spaceIDs[0]={} spaceIDs[1]={}", i, did, comp_tid, spaceIDs[0], spaceIDs[1]);
-                                H5.H5Dwrite(did, comp_tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, tmpData);
-                            }
-                        }
-                        catch (Exception ex) {
-                            log.debug("write(): write failure: ", ex);
-                            log.trace("write(): finish");
-                            throw new HDF5Exception(ex.getMessage());
-                        }
-                        finally {
-                            DSdatatype.close(comp_tid);
-                        }
-                    }
-                } // end of for (int i=0; i<num_members; i++)
+                data = compoundTypeIO(io_type, did, spaceIDs, (int) totalSelectedSpacePoints, DSDatatype, writeBuf, new int[]{0});
+            }
+            catch (Exception ex) {
+                /*
+                 * TODO: will prevent exceptions from going up.
+                 */
+                log.debug("compoundDatasetCommonIO(): failure: ", ex);
             }
             finally {
                 if (HDF5Constants.H5S_ALL != spaceIDs[0]) {
@@ -1141,7 +782,7 @@ public class H5CompoundDS extends CompoundDS {
                         H5.H5Sclose(spaceIDs[0]);
                     }
                     catch (Exception ex) {
-                        log.debug("write(): H5Sclose(spaceIDs[0] {}) failure: ", spaceIDs[0], ex);
+                        log.debug("compoundDatasetCommonIO(): H5Sclose(spaceIDs[0] {}) failure: ", spaceIDs[0], ex);
                     }
                 }
 
@@ -1150,15 +791,538 @@ public class H5CompoundDS extends CompoundDS {
                         H5.H5Sclose(spaceIDs[1]);
                     }
                     catch (Exception ex) {
-                        log.debug("write(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex);
+                        log.debug("compoundDatasetCommonIO(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex);
                     }
                 }
 
                 close(did);
             }
         }
+        else
+            log.debug("compoundDatasetCommonIO(): failed to open dataset");
 
-        log.trace("write(): finish");
+        log.trace("compoundDatasetCommonIO(): finish");
+
+        return data;
+    }
+
+    /*
+     * Private recursive routine to read/write an entire compound datatype field by
+     * field. This routine is called recursively for ARRAY of COMPOUND and VLEN of
+     * COMPOUND datatypes.
+     *
+     * NOTE: the globalMemberIndex hack is ugly, but we need to keep track of a
+     * running counter so that we can index properly into the flattened name list
+     * generated from H5Datatype.extractCompoundInfo() at dataset init time.
+     */
+    private Object compoundTypeIO(IO_TYPE io_type, long did, long[] spaceIDs, int nPoints, final H5Datatype cmpdType,
+            Object writeBuf, int[] globalMemberIndex) {
+        log.trace("compoundTypeIO(): start");
+
+        Object theData = null;
+
+        if (cmpdType.isArray()) {
+            log.trace("compoundTypeIO(): ARRAY type");
+
+            long[] arrayDims = cmpdType.getArrayDims();
+            int arrSize = 1;
+            for (int i = 0; i < arrayDims.length; i++) {
+                arrSize *= arrayDims[i];
+            }
+
+            Object[] cmpdArray = new Object[arrSize];
+            for (int i = 0; i < arrSize; i++) {
+                cmpdArray[i] = compoundTypeIO(io_type, did, spaceIDs, nPoints, (H5Datatype) cmpdType.getDatatypeBase(),
+                        writeBuf, globalMemberIndex);
+
+                /*
+                 * Reset the index counter.
+                 */
+                globalMemberIndex[0] = 0;
+            }
+
+            theData = cmpdArray;
+        }
+        else if (cmpdType.isVLEN()) {
+            /*
+             * TODO:
+             */
+        }
+        else if (cmpdType.isCompound()) {
+            List<Object> memberDataList = null;
+            List<Datatype> typeList = cmpdType.getCompoundMemberTypes();
+
+            log.trace("compoundTypeIO(): {} {} members:", (io_type == IO_TYPE.READ) ? "read" : "write",
+                    typeList.size());
+
+            if (io_type == IO_TYPE.READ) {
+                memberDataList = (List<Object>) H5Datatype.allocateArray(cmpdType, nPoints);
+            }
+
+            try {
+                for (int i = 0, writeListIndex = 0; i < typeList.size(); i++) {
+                    H5Datatype memberType = null;
+                    String memberName = null;
+                    Object memberData = null;
+
+                    try {
+                        memberType = (H5Datatype) typeList.get(i);
+                    }
+                    catch (Exception ex) {
+                        log.debug("compoundTypeIO(): get member {} failure: ", i, ex);
+                        globalMemberIndex[0]++;
+                        continue;
+                    }
+
+                    /*
+                     * Since the type list used here is not a flattened structure, we need to skip
+                     * the member selection check for compound types, as otherwise having a single
+                     * member not selected would skip the reading/writing for the entire compound
+                     * type. The member selection check will be deferred to the recursive compound
+                     * read/write below.
+                     */
+                    if (!memberType.isCompound()) {
+                        if (!isMemberSelected[globalMemberIndex[0] % this.getMemberCount()]) {
+                            log.debug("compoundTypeIO(): member[{}] is not selected", i);
+                            globalMemberIndex[0]++;
+                            continue; // the field is not selected
+                        }
+                    }
+
+                    if (!memberType.isCompound()) {
+                        try {
+                            memberName = new String(flatNameList.get(globalMemberIndex[0]));
+                        }
+                        catch (Exception ex) {
+                            log.debug("compoundTypeIO(): get member {} name failure: ", i, ex);
+                            memberName = "null";
+                        }
+                    }
+
+                    log.trace("compoundTypeIO(): member[{}]({}) is type {}", i, memberName, memberType.getDescription());
+
+                    if (io_type == IO_TYPE.READ) {
+                        try {
+                            if (memberType.isCompound())
+                                memberData = compoundTypeIO(io_type, did, spaceIDs, nPoints, memberType, writeBuf, globalMemberIndex);
+                            else {
+                                memberData = readSingleCompoundMember(did, spaceIDs, nPoints, memberType, memberName);
+                                globalMemberIndex[0]++;
+                            }
+                        }
+                        catch (Exception ex) {
+                            log.debug("compoundTypeIO(): failed to read member {}: ", i, ex);
+                            globalMemberIndex[0]++;
+                            memberData = null;
+                        }
+
+                        if (memberData == null) {
+                            String[] errVal = new String[nPoints];
+                            String errStr = "*ERROR*";
+
+                            for (int j = 0; j < nPoints; j++)
+                                errVal[j] = errStr;
+
+                            memberData = errVal;
+                        }
+
+                        memberDataList.add(memberData);
+                    }
+                    else {
+                        try {
+                            /*
+                             * TODO: currently doesn't correctly handle non-selected compound members.
+                             */
+                            memberData = ((List<?>) writeBuf).get(writeListIndex++);
+                        }
+                        catch (Exception ex) {
+                            log.debug("compoundTypeIO(): get member[{}] data failure: ", i, ex);
+                            globalMemberIndex[0]++;
+                            continue;
+                        }
+
+                        if (memberData == null) {
+                            log.debug("compoundTypeIO(): member[{}] data is null", i);
+                            globalMemberIndex[0]++;
+                            continue;
+                        }
+
+                        try {
+                            if (memberType.isCompound()) {
+                                List<?> nestedList = (List<?>) ((List<?>) writeBuf).get(writeListIndex++);
+                                compoundTypeIO(io_type, did, spaceIDs, nPoints, memberType, nestedList, globalMemberIndex);
+                            }
+                            else {
+                                writeSingleCompoundMember(did, spaceIDs, nPoints, memberType, memberName, memberData);
+                                globalMemberIndex[0]++;
+                            }
+                        }
+                        catch (Exception ex) {
+                            log.debug("compoundTypeIO(): failed to write member[{}]: ", i, ex);
+                            globalMemberIndex[0]++;
+                        }
+                    }
+                } // for (i = 0, writeListIndex = 0; i < atomicTypeList.size(); i++)
+            }
+            catch (Exception ex) {
+                log.debug("compoundTypeIO(): failure: ", ex);
+                memberDataList = null;
+            }
+
+            theData = memberDataList;
+        }
+
+        log.trace("compoundTypeIO(): finish");
+
+        return theData;
+    }
+
+    /*
+     * Private routine to read a single field of a compound datatype by creating a
+     * compound datatype and inserting the single field into that datatype.
+     */
+    private Object readSingleCompoundMember(long dsetID, long[] spaceIDs, int nSelPoints, final H5Datatype memberType,
+            String memberName) throws Exception {
+        log.trace("readSingleCompoundMember(): start");
+
+        H5Datatype DSDatatype = (H5Datatype) this.getDatatype();
+        Object memberData = null;
+
+        try {
+            memberData = H5Datatype.allocateArray(memberType, nSelPoints);
+            log.trace("readSingleCompoundMember(): allocateArray {} points ", nSelPoints);
+        }
+        catch (OutOfMemoryError err) {
+            memberData = null;
+            throw new Exception("Out of memory");
+        }
+        catch (Exception ex) {
+            log.debug("readSingleCompoundMember(): ", ex);
+            memberData = null;
+        }
+
+        if (memberData != null) {
+            /*
+             * Create a compound datatype containing just a single field (the one which we
+             * want to read).
+             */
+            long compTid = -1;
+            try {
+                compTid = DSDatatype.createCompoundFieldType(memberName);
+            }
+            catch (HDF5Exception ex) {
+                log.debug("readSingleCompoundMember(): unable to create compound field type for member of type {}: ",
+                        memberType.getDescription(), ex);
+                memberData = null;
+            }
+
+            /*
+             * Actually read the data for this member now that everything has been setup.
+             */
+            try {
+                if (memberType.isVLEN() || (memberType.isArray() && memberType.getDatatypeBase().isVLEN())) {
+                    log.trace("readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                            dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                            (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+
+                    H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) memberData);
+                }
+                else {
+                    log.trace("readSingleCompoundMember(): H5Dread did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                            dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                            (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+
+                    H5.H5Dread(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, memberData);
+                }
+            }
+            catch (HDF5DataFiltersException exfltr) {
+                log.debug("readSingleCompoundMember(): read failure: ", exfltr);
+                log.trace("readSingleCompoundMember(): finish");
+                throw new Exception("Filter not available exception: " + exfltr.getMessage(), exfltr);
+            }
+            catch (Exception ex) {
+                log.debug("readSingleCompoundMember(): read failure: ", ex);
+                log.trace("readSingleCompoundMember(): finish");
+                throw new Exception("failed to read compound member: " + ex.getMessage(), ex);
+            }
+            finally {
+                DSDatatype.close(compTid);
+            }
+
+            /*
+             * Perform any necessary data conversions.
+             */
+            if (memberType.isUnsigned()) {
+                log.trace("readSingleCompoundMember(): converting from unsigned C-type integers");
+                memberData = Dataset.convertFromUnsignedC(memberData, null);
+            }
+            else if (Utils.getJavaObjectRuntimeClass(memberData) == 'B') {
+                log.trace("readSingleCompoundMember(): converting byte array member into Object");
+
+                /*
+                 * For all other types that get read into memory as a byte[] (such as nested
+                 * compounds and arrays of compounds), we must manually convert the byte[] into
+                 * something usable.
+                 */
+                memberData = convertByteMember(memberType, (byte[]) memberData);
+            }
+        }
+
+        log.trace("readSingleCompoundMember(): finish");
+
+        return memberData;
+    }
+
+    /*
+     * Private routine to write a single field of a compound datatype by creating a
+     * compound datatype and inserting the single field into that datatype.
+     */
+    private void writeSingleCompoundMember(long dsetID, long[] spaceIDs, int nSelPoints, final H5Datatype memberType,
+            String memberName, Object theData) throws Exception {
+        log.trace("writeSingleCompoundMember(): start");
+
+        H5Datatype DSDatatype = (H5Datatype) this.getDatatype();
+
+        /*
+         * Check for any unsupported datatypes before attempting to write this compound
+         * member.
+         */
+        if (memberType.isVLEN() && !memberType.isVarStr()) {
+            log.debug("writeSingleCompoundMember(): writing of VL non-strings is not currently supported");
+            log.trace("writeSingleCompoundMember(): finish");
+            throw new Exception("writing of VL non-strings is not currently supported");
+        }
+
+        /*
+         * Perform any necessary data conversions before writing the data.
+         */
+        Object tmpData = theData;
+        try {
+            if (memberType.isUnsigned()) {
+                // Check if we need to convert unsigned integer data from Java-style
+                // to C-style integers
+                long tsize = memberType.getDatatypeSize();
+                String cname = theData.getClass().getName();
+                char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+                boolean doIntConversion = (((tsize == 1) && (dname == 'S'))
+                        || ((tsize == 2) && (dname == 'I')) || ((tsize == 4) && (dname == 'J')));
+
+                if (doIntConversion) {
+                    log.trace("writeSingleCompoundMember(): converting integer data to unsigned C-type integers");
+                    tmpData = convertToUnsignedC(theData, null);
+                }
+            }
+            else if (memberType.isString() && (Array.get(theData, 0) instanceof String)) {
+                log.trace("writeSingleCompoundMember(): converting string array to byte array");
+                tmpData = stringToByte((String[]) theData, (int) memberType.getDatatypeSize());
+            }
+            else if (memberType.isEnum() && (Array.get(theData, 0) instanceof String)) {
+                log.trace("writeSingleCompoundMember(): converting enum names to values");
+                tmpData = memberType.convertEnumNameToValue((String[]) theData);
+            }
+        }
+        catch (Exception ex) {
+            log.debug("writeSingleCompoundMember(): data conversion failure: ", ex);
+            tmpData = null;
+        }
+
+        if (tmpData == null) {
+            log.debug("writeSingleCompoundMember(): data is null");
+            log.trace("writeSingleCompoundMember(): finish");
+            return;
+        }
+
+        /*
+         * Create a compound datatype containing just a single field (the one which we
+         * want to write).
+         */
+        long compTid = -1;
+        try {
+            compTid = DSDatatype.createCompoundFieldType(memberName);
+        }
+        catch (HDF5Exception ex) {
+            log.debug("writeSingleCompoundMember(): unable to create compound field type for member of type {}: ",
+                    memberType.getDescription(), ex);
+        }
+
+        /*
+         * Actually write the data now that everything has been setup.
+         */
+        try {
+            if (memberType.isVarStr()) {
+                log.trace("writeSingleCompoundMember(): H5Dwrite_string did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                        dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+
+                H5.H5Dwrite_string(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (String[]) tmpData);
+            }
+            else {
+                log.trace("writeSingleCompoundMember(): H5Dwrite did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                        dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+
+                // BUG!!! does not write nested compound data and no
+                // exception was caught. Need to check if it is a java
+                // error or C library error.
+                H5.H5Dwrite(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, tmpData);
+            }
+        }
+        catch (Exception ex) {
+            log.debug("writeSingleCompoundMember(): write failure: ", ex);
+            log.trace("writeSingleCompoundMember(): finish");
+            throw new Exception("failed to write compound member: " + ex.getMessage(), ex);
+        }
+        finally {
+            DSDatatype.close(compTid);
+        }
+
+        log.trace("writeSingleCompoundMember(): finish");
+    }
+
+    /*
+     * Private routine to convert datatypes that are read in as byte arrays to
+     * regular types.
+     */
+    private Object convertByteMember(final H5Datatype dtype, byte[] byteData) {
+        log.trace("convertByteMember(): start");
+
+        Object theObj = null;
+
+        if (dtype.getDatatypeSize() == 1) {
+            /*
+             * Normal byte[] type, such as an integer datatype of size 1.
+             */
+            theObj = byteData;
+        }
+        else if (dtype.isString() && !dtype.isVarStr() && convertByteToString) {
+            log.trace("convertByteMember(): converting byte array to string array");
+
+            theObj = byteToString(byteData, (int) dtype.getDatatypeSize());
+        }
+        else if (dtype.isInteger()) {
+            log.trace("convertByteMember(): converting byte array to integer array");
+
+            theObj = HDFNativeData.byteToInt(byteData);
+        }
+        else if (dtype.isFloat()) {
+            log.trace("convertByteMember(): converting byte array to float array");
+
+            theObj = HDFNativeData.byteToFloat(byteData);
+        }
+        else if (dtype.isRef()) {
+            log.trace("convertByteMember(): reference type - converting byte array to long array");
+
+            theObj = HDFNativeData.byteToLong(byteData);
+        }
+        else if (dtype.isArray()) {
+            H5Datatype baseType = (H5Datatype) dtype.getDatatypeBase();
+
+            /*
+             * Retrieve the real base datatype in the case of ARRAY of ARRAY datatypes.
+             */
+            while (baseType.isArray()) baseType = (H5Datatype) baseType.getDatatypeBase();
+
+            /*
+             * Optimize for the common cases of Arrays.
+             */
+            switch (baseType.getDatatypeClass()) {
+                case Datatype.CLASS_INTEGER:
+                case Datatype.CLASS_FLOAT:
+                case Datatype.CLASS_CHAR:
+                case Datatype.CLASS_STRING:
+                case Datatype.CLASS_BITFIELD:
+                case Datatype.CLASS_OPAQUE:
+                case Datatype.CLASS_COMPOUND:
+                case Datatype.CLASS_REFERENCE:
+                case Datatype.CLASS_ENUM:
+                case Datatype.CLASS_VLEN:
+                case Datatype.CLASS_TIME:
+                    theObj = convertByteMember(baseType, byteData);
+                    break;
+
+                case Datatype.CLASS_ARRAY:
+                {
+                    H5Datatype arrayType = (H5Datatype) dtype.getDatatypeBase();
+
+                    long[] arrayDims = dtype.getArrayDims();
+                    int nPoints = 1;
+                    for (int i = 0; i < arrayDims.length; i++) {
+                        nPoints *= arrayDims[i];
+                    }
+
+                    theObj = new Object[nPoints];
+
+                    for (int i = 0; i < nPoints; i++) {
+                        byte[] indexedBytes = Arrays.copyOfRange(byteData, (int) (i * arrayType.getDatatypeSize()),
+                                (int) ((i + 1) * arrayType.getDatatypeSize()));
+                        ((Object[]) theObj)[i] = convertByteMember(arrayType, indexedBytes);
+                    }
+
+                    break;
+                }
+
+                case Datatype.CLASS_NO_CLASS:
+                default:
+                    log.debug("convertByteMember(): invalid datatype class");
+                    theObj = new String("*ERROR*");
+            }
+        }
+        else if (dtype.isCompound()) {
+            /*
+             * TODO: still valid after reading change?
+             */
+            theObj = convertCompoundByteMembers(dtype, byteData);
+        }
+        else {
+            theObj = byteData;
+        }
+
+        log.trace("convertByteMember(): finish");
+
+        return theObj;
+    }
+
+    /**
+     * Given an array of bytes representing a compound Datatype, converts each of
+     * its members into Objects and returns the results.
+     *
+     * @param dtype
+     *            The compound datatype to convert
+     * @param data
+     *            The byte array representing the data of the compound Datatype
+     * @return The converted types of the bytes
+     */
+    private Object convertCompoundByteMembers(final H5Datatype dtype, byte[] data) {
+        List<Object> theData = null;
+
+        List<Datatype> allSelectedTypes = Arrays.asList(this.getSelectedMemberTypes());
+        List<Datatype> localTypes = new ArrayList<Datatype>(dtype.getCompoundMemberTypes());
+        Iterator<Datatype> localIt = localTypes.iterator();
+        while (localIt.hasNext()) {
+            Datatype curType = localIt.next();
+
+            if (curType.isCompound())
+                continue;
+
+            if (!allSelectedTypes.contains(curType))
+                localIt.remove();
+        }
+
+        theData = new ArrayList<Object>(localTypes.size());
+        for (int i = 0, index = 0; i < localTypes.size(); i++) {
+            Datatype curType = localTypes.get(i);
+
+            if (curType.isCompound())
+                theData.add(convertCompoundByteMembers((H5Datatype) curType,
+                        Arrays.copyOfRange(data, index, index + (int) curType.getDatatypeSize())));
+            else
+                theData.add(convertByteMember((H5Datatype) curType,
+                        Arrays.copyOfRange(data, index, index + (int) curType.getDatatypeSize())));
+
+            index += curType.getDatatypeSize();
+        }
+
+        return theData;
     }
 
     @Override
@@ -2057,39 +2221,4 @@ public class H5CompoundDS extends CompoundDS {
             return -1;
     }
 
-    /**
-     * Given an array of bytes representing a compound Datatype and a start index and length, converts
-     * len number of bytes into the correct Object type and returns it.
-     *
-     * @param data
-     *            The byte array representing the data of the compound Datatype
-     * @param data_type
-     *            The type of data to convert the bytes to
-     * @param start
-     *            The start index of the bytes to get
-     * @param len
-     *            The number of bytes to convert
-     * @return The converted type of the bytes
-     */
-    private Object convertCompoundByteMember(byte[] data, long data_type, long start, long len) {
-        Object currentData = null;
-
-        try {
-            long typeClass = H5.H5Tget_class(data_type);
-
-            if (typeClass == HDF5Constants.H5T_INTEGER) {
-                long size = H5.H5Tget_size(data_type);
-
-                currentData = HDFNativeData.byteToInt((int) start, (int) (len / size), data);
-            }
-            else if (typeClass == HDF5Constants.H5T_FLOAT) {
-                currentData = HDFNativeData.byteToDouble((int) start, 1, data);
-            }
-        }
-        catch (Exception ex) {
-            log.debug("convertCompoundByteMember(): conversion failure: ", ex);
-        }
-
-        return currentData;
-    }
 }

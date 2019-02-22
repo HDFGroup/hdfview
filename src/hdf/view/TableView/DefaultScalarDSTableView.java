@@ -587,12 +587,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         // Create body layer
         try {
-            final IDataProvider bodyDataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
+            dataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
 
-            log.trace("createTable(): rows={} : cols={}", bodyDataProvider.getRowCount(),
-                    bodyDataProvider.getColumnCount());
+            log.trace("createTable(): rows={} : cols={}", dataProvider.getRowCount(), dataProvider.getColumnCount());
 
-            dataLayer = new DataLayer(bodyDataProvider);
+            dataLayer = new DataLayer(dataProvider);
         }
         catch (Exception ex) {
             log.debug("createTable(): failed to retrieve DataProvider for table: ", ex);
@@ -732,136 +731,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         return selectedData;
-    }
-
-    /**
-     * Update cell value in memory. It does not change the dataset's value in the
-     * file.
-     *
-     * @param cellValue
-     *            the string value of input.
-     * @param row
-     *            the row of the editing cell.
-     * @param col
-     *            the column of the editing cell.
-     *
-     * @throws Exception
-     *             if a failure occurred
-     */
-    @Override
-    protected void updateValueInMemory(String cellValue, int row, int col) throws Exception {
-        log.trace("updateValueInMemory({}, {}): start", row, col);
-
-        if ((cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
-            log.debug("updateValueInMemory({}, {}): cell value not updated; new value is null", row, col);
-            log.trace("updateValueInMemory({}, {}): finish", row, col);
-            return;
-        }
-
-        // No need to update if values are the same
-        Object oldVal = dataLayer.getDataValue(col, row);
-        if ((oldVal != null) && cellValue.equals(oldVal.toString())) {
-            log.debug("updateValueInMemory({}, {}): cell value not updated; new value same as old value", row, col);
-            log.trace("updateValueInMemory({}, {}): finish", row, col);
-            return;
-        }
-
-        try {
-            int i = 0;
-            if (isDataTransposed) {
-                i = col * (dataTable.getPreferredRowCount() - 1) + row;
-            }
-            else {
-                i = row * (dataTable.getPreferredColumnCount() - 1) + col;
-            }
-
-            char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataValue);
-
-            log.trace("updateValueInMemory({}, {}): {} runtimeTypeClass={}", row, col, cellValue, runtimeTypeClass);
-
-            boolean isUnsigned = dataObject.getDatatype().isUnsigned();
-            String cname = dataObject.getOriginalClass().getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-            log.trace("updateValueInMemory({}, {}): isUnsigned={} cname={} dname={}", row,
-                    col, isUnsigned, cname, dname);
-
-            switch (runtimeTypeClass) {
-                case 'B':
-                    byte bvalue = 0;
-                    bvalue = Byte.parseByte(cellValue);
-                    Array.setByte(dataValue, i, bvalue);
-                    break;
-                case 'S':
-                    short svalue = 0;
-                    svalue = Short.parseShort(cellValue);
-                    Array.setShort(dataValue, i, svalue);
-                    break;
-                case 'I':
-                    int ivalue = 0;
-                    ivalue = Integer.parseInt(cellValue);
-                    Array.setInt(dataValue, i, ivalue);
-                    break;
-                case 'J':
-                    long lvalue = 0;
-                    if (dname == 'J') {
-                        BigInteger big = new BigInteger(cellValue);
-                        lvalue = big.longValue();
-                    }
-                    else
-                        lvalue = Long.parseLong(cellValue);
-                    Array.setLong(dataValue, i, lvalue);
-                    break;
-                case 'F':
-                    float fvalue = 0;
-                    fvalue = Float.parseFloat(cellValue);
-                    Array.setFloat(dataValue, i, fvalue);
-                    break;
-                case 'D':
-                    double dvalue = 0;
-                    dvalue = Double.parseDouble(cellValue);
-                    Array.setDouble(dataValue, i, dvalue);
-                    break;
-                default:
-                    Array.set(dataValue, i, cellValue);
-                    break;
-            }
-
-            isValueChanged = true;
-        }
-        catch (Exception ex) {
-            log.debug("updateValueInMemory({}, {}) failure:", row, col, ex);
-        }
-
-        log.trace("updateValueInMemory({}, {}): finish", row, col);
-    }
-
-    /**
-     * Update dataset's value in file. The changes will go to the file.
-     */
-    @Override
-    public void updateValueInFile() {
-        log.trace("updateValueInFile(): start");
-
-        if (isReadOnly || !isValueChanged || showAsBin || showAsHex) {
-            log.debug("updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
-            log.trace("updateValueInFile(): finish");
-            return;
-        }
-
-        try {
-            log.trace("updateValueInFile(): write");
-            dataObject.write();
-        }
-        catch (Exception ex) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Update", ex.getMessage());
-            log.debug("updateValueInFile(): ", ex);
-            log.trace("updateValueInFile(): finish");
-            return;
-        }
-
-        isValueChanged = false;
-        log.trace("updateValueInFile(): finish");
     }
 
     /**

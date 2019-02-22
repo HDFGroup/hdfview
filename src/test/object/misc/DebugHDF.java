@@ -1431,7 +1431,7 @@ public class DebugHDF {
                 long msid = H5.H5Screate_simple(ds.getRank(), selectionCount, null);
                 long fsid = H5.H5Dget_space(did);
                 long[] lsize = { selectionCount[0] * (selectionCount.length > 1 ? selectionCount[1] : 1) };
-                Object theData = datatype.allocateArray((int) lsize[0]);
+                Object theData = H5Datatype.allocateArray(datatype, (int) lsize[0]);
                 H5.H5Sselect_hyperslab(fsid, HDF5Constants.H5S_SELECT_SET, selectionStart, selectionStride,
                         selectionCount, null);
                 H5.H5Dread(did, nativeDatatype, msid, fsid, HDF5Constants.H5P_DEFAULT, theData);

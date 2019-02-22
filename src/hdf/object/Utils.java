@@ -31,7 +31,7 @@ public final class Utils {
         String cName = o.getClass().getName();
 
         if (cName.equals("java.lang.String") || cName.equals("java.util.Vector")
-                || cName.equals("java.util.Arrays$ArrayList"))
+                || cName.equals("java.util.Arrays$ArrayList") || cName.equals("java.util.ArrayList"))
             return 'L';
 
         int cIndex = cName.lastIndexOf("[");

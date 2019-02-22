@@ -548,7 +548,7 @@ public class H5File extends FileFormat {
                             }
                             else {
                                 try {
-                                    value = ((H5Datatype) attr.getDatatype()).allocateArray((int) lsize);
+                                    value = H5Datatype.allocateArray(((H5Datatype) attr.getDatatype()), (int) lsize);
                                 }
                                 catch (OutOfMemoryError e) {
                                     log.debug("getAttribute(): Attribute[{}] out of memory", i, e);
@@ -590,7 +590,7 @@ public class H5File extends FileFormat {
                             continue;
                         }
 
-                        log.debug("getAttribute(): Attribute[{}] data: {}", i, value);
+                        log.trace("getAttribute(): Attribute[{}] data: {}", i, value);
                         attr.setData(value);
                     }
                     catch (HDF5Exception ex) {

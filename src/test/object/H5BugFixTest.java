@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Vector;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -162,7 +162,7 @@ public class H5BugFixTest {
     @Test
     public void testBug847() throws Exception {
         log.debug("testBug847");
-        Vector data = null;
+        List<?> data = null;
 
         final H5CompoundDS dset = (H5CompoundDS) testFile.get(H5TestFile.NAME_DATASET_COMPOUND);
         assertNotNull(dset);
@@ -172,7 +172,7 @@ public class H5BugFixTest {
             dset.init();
 
             try {
-                data = (Vector) dset.getData();
+                data = (List<?>) dset.getData();
             }
             catch (final Exception ex) {
                 fail("getData() failed. " + ex);
@@ -218,7 +218,7 @@ public class H5BugFixTest {
                 start[0] = i;
 
                 try {
-                    data = (Vector) dset.getData();
+                    data = (List) dset.getData();
                 }
                 catch (final Exception ex) {
                     fail("getData() failed. " + ex);
@@ -245,7 +245,7 @@ public class H5BugFixTest {
                 dset.selectMember(i);
 
                 try {
-                    data = (Vector) dset.getData();
+                    data = (List) dset.getData();
                 }
                 catch (final Exception ex) {
                     fail("getData() failed. " + ex);

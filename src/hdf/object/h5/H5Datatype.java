@@ -15,6 +15,7 @@
 package hdf.object.h5;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1370,12 +1371,12 @@ public class H5Datatype extends Datatype {
      *
      * <pre>
      * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
-     * int[] data = (int[]) allocateArray(100);
+     * int[] data = (int[]) H5Datatype.allocateArray(datatype, 100);
      * </pre>
      *
      * returns a 32-bit integer array of size 100.
      *
-     * @param spaceSize
+     * @param nPoints
      *            the total number of data points of the array.
      *
      * @return the array object if successful; otherwise, return null.
@@ -1383,101 +1384,119 @@ public class H5Datatype extends Datatype {
      * @throws OutOfMemoryError
      *             If there is a failure.
      */
-    public Object allocateArray(int spaceSize) throws OutOfMemoryError {
-        log.trace("allocateArray(): start: spaceSize={}", spaceSize);
-        Object data = null;
+    public static final Object allocateArray(final H5Datatype dtype, int nPoints) throws OutOfMemoryError {
+        log.trace("allocateArray(): start: nPoints={}", nPoints);
 
-        if (spaceSize < 0) {
-            log.debug("allocateArray(): spaceSize < 0");
+        Object data = null;
+        H5Datatype baseType = (H5Datatype) dtype.getDatatypeBase();
+        int typeClass = dtype.getDatatypeClass();
+        long typeSize = dtype.getDatatypeSize();
+
+        if (nPoints < 0) {
+            log.debug("allocateArray(): nPoints < 0");
             log.trace("allocateArray(): finish");
             return null;
         }
 
         // Scalar members have dimensionality zero, i.e. size =0
         // what can we do about it, set the size to 1
-        if (spaceSize == 0) {
-            spaceSize = 1;
+        if (nPoints == 0) {
+            nPoints = 1;
         }
 
-        log.trace("allocateArray(): tclass={} : tsize={}", nativeClass, datatypeSize);
+        log.trace("allocateArray(): tclass={} : tsize={}", typeClass, typeSize);
 
-        if (is_variable_str || is_VLEN || is_reg_ref) {
-            log.trace("allocateArray(): is_variable_str={} || isVL={} || is_reg_ref={}", is_variable_str, is_VLEN, is_reg_ref);
-            data = new String[spaceSize];
-            for (int i = 0; i < spaceSize; i++) {
+        if (dtype.isVarStr() || dtype.isVLEN() || dtype.isRegRef()) {
+            log.trace("allocateArray(): is_variable_str={} || isVL={} || is_reg_ref={}", dtype.isVarStr(), dtype.isVLEN(), dtype.isRegRef());
+
+            data = new String[nPoints];
+            for (int i = 0; i < nPoints; i++) {
                 ((String[]) data)[i] = "";
             }
         }
-        else if (nativeClass == HDF5Constants.H5T_INTEGER) {
-            log.trace("allocateArray(): class.H5T_INTEGER={}", nativeClass);
-            if (datatypeSize == 1) {
-                data = new byte[spaceSize];
-            }
-            else if (datatypeSize == 2) {
-                data = new short[spaceSize];
-            }
-            else if (datatypeSize == 4) {
-                data = new int[spaceSize];
-            }
-            else if (datatypeSize == 8) {
-                data = new long[spaceSize];
+        else if (typeClass == HDF5Constants.H5T_INTEGER) {
+            log.trace("allocateArray(): class H5T_INTEGER");
+
+            switch ((int) typeSize) {
+                case 1:
+                    data = new byte[nPoints];
+                    break;
+                case 2:
+                    data = new short[nPoints];
+                    break;
+                case 4:
+                    data = new int[nPoints];
+                    break;
+                case 8:
+                    data = new long[nPoints];
+                    break;
             }
         }
-        else if (nativeClass == HDF5Constants.H5T_ENUM) {
-            log.trace("allocateArray(): class.H5T_ENUM={}", nativeClass);
+        else if (typeClass == HDF5Constants.H5T_ENUM) {
+            log.trace("allocateArray(): class H5T_ENUM");
+
             if (baseType != null)
-                data = ((H5Datatype) baseType).allocateArray(spaceSize);
+                data = H5Datatype.allocateArray(baseType, nPoints);
             else
-                data = new byte[(int) (spaceSize * datatypeSize)];
+                data = new byte[(int) (nPoints * typeSize)];
         }
-        else if (nativeClass == HDF5Constants.H5T_COMPOUND) {
-            log.trace("allocateArray(): class.H5T_COMPOUND={}", nativeClass);
-            if (baseType != null)
-                data = ((H5Datatype) baseType).allocateArray((spaceSize));
-            else
-                data = new byte[(int) (spaceSize * datatypeSize)];
+        else if (typeClass == HDF5Constants.H5T_COMPOUND) {
+            log.trace("allocateArray(): class H5T_COMPOUND");
+
+            data = new ArrayList<Object>(dtype.getCompoundMemberTypes().size());
         }
-        else if (nativeClass == HDF5Constants.H5T_FLOAT) {
-            log.trace("allocateArray(): class.H5T_FLOAT={}", nativeClass);
-            if (datatypeSize == 4) {
-                data = new float[spaceSize];
+        else if (typeClass == HDF5Constants.H5T_FLOAT) {
+            log.trace("allocateArray(): class H5T_FLOAT");
+
+            switch ((int) typeSize) {
+                case 4:
+                    data = new float[nPoints];
+                    break;
+                case 8:
+                    data = new double[nPoints];
+                    break;
             }
-            else if (datatypeSize == 8) {
-                data = new double[spaceSize];
-            }
         }
-        else if ((nativeClass == HDF5Constants.H5T_STRING) || (nativeClass == HDF5Constants.H5T_REFERENCE)) {
-            log.trace("allocateArray(): class.H5T_STRING || H5T_REFERENCE={}", nativeClass);
-            data = new byte[(int) (spaceSize * datatypeSize)];
+        else if ((typeClass == HDF5Constants.H5T_STRING) || (typeClass == HDF5Constants.H5T_REFERENCE)) {
+            log.trace("allocateArray(): class H5T_STRING || H5T_REFERENCE");
+
+            data = new byte[(int) (nPoints * typeSize)];
         }
-        else if (nativeClass == HDF5Constants.H5T_ARRAY) {
-            // use the base datatype to define the array
+        else if (typeClass == HDF5Constants.H5T_ARRAY) {
+            log.trace("allocateArray(): class H5T_ARRAY");
+
             try {
-                log.trace("allocateArray(): ArrayRank={}", arrayDims.length);
-                int asize = spaceSize;
+                log.trace("allocateArray(): ArrayRank={}", dtype.getArrayDims().length);
+
+                // Use the base datatype to define the array
+                long[] arrayDims = dtype.getArrayDims();
+                int asize = nPoints;
                 for (int j = 0; j < arrayDims.length; j++) {
-                    log.trace("allocateArray(): ArrayRank={} : dims[{}]={}", arrayDims.length, j, arrayDims[j]);
+                    log.trace("allocateArray(): Array dims[{}]={}", j, arrayDims[j]);
+
                     asize *= arrayDims[j];
                 }
-                log.trace("allocateArray(): class.H5T_ARRAY={} : members={} : asize={} : datatypeSize={}", nativeClass, arrayDims.length, asize, datatypeSize);
 
                 if (baseType != null) {
-                    // data = new byte[(int) (size * asize * datatypeSize)];
-                    data = ((H5Datatype) baseType).allocateArray(asize);
+                    data = H5Datatype.allocateArray(baseType, asize);
                 }
             }
             catch (Exception ex) {
                 log.debug("allocateArray(): H5T_ARRAY class failure: ", ex);
             }
         }
-        else if ((nativeClass == HDF5Constants.H5T_OPAQUE) || (nativeClass == HDF5Constants.H5T_BITFIELD)) {
-            log.trace("allocateArray(): class.H5T_OPAQUE || H5T_BITFIELD={}", nativeClass);
-            data = new byte[(int) (spaceSize * datatypeSize)];
+        else if ((typeClass == HDF5Constants.H5T_OPAQUE) || (typeClass == HDF5Constants.H5T_BITFIELD)) {
+            log.trace("allocateArray(): class H5T_OPAQUE || H5T_BITFIELD");
+
+            data = new byte[(int) (nPoints * typeSize)];
         }
         else {
-            log.debug("allocateArray(): class.????={}", nativeClass);
+            log.debug("allocateArray(): class ???? ({})", typeClass);
+
             data = null;
         }
+
+        log.trace("allocateArray(): finish");
 
         return data;
     }
@@ -1898,6 +1917,8 @@ public class H5Datatype extends Datatype {
      * nest.e
      * </pre>
      *
+     *@param dtype
+     *            the datatype to extract compound info from
      * @param name
      *            the name of the compound datatype
      * @param names
@@ -1905,58 +1926,100 @@ public class H5Datatype extends Datatype {
      * @param flatListTypes
      *            the list to store the nested member names of the compound datatype
      */
-    public void extractCompoundInfo(String name, List<String> names, List<Datatype> flatListTypes) {
+    public static void extractCompoundInfo(final H5Datatype dtype, String name, List<String> names, List<Datatype> flatListTypes) {
         log.trace("extractCompoundInfo(): start: name={}", name);
 
-        if (isArray() || isVLEN()) {
-            log.trace("extractCompoundInfo(): top-level type is ARRAY or VLEN; extracting compound info from base type");
-            ((H5Datatype) getDatatypeBase()).extractCompoundInfo(name, names, flatListTypes);
+        if (dtype.isArray()) {
+            log.trace("extractCompoundInfo(): array type - extracting compound info from base datatype");
+
+            long[] arrayDims = dtype.getArrayDims();
+
+            for (int i = 0; i < arrayDims.length; i++) {
+                for (int k = 0; k < (int) arrayDims[i]; k++) {
+                    H5Datatype.extractCompoundInfo((H5Datatype) dtype.getDatatypeBase(), name, names, flatListTypes);
+                }
+            }
+        }
+        else if (dtype.isVLEN()) {
+            log.trace("extractCompoundInfo(): variable-length type - extracting compound info from base datatype");
+
+            /*
+             * TODO: additional logic for variable-length of compound?
+             */
+            H5Datatype.extractCompoundInfo((H5Datatype) dtype.getDatatypeBase(), name, names, flatListTypes);
         }
         else {
+            List<String> compoundMemberNames = dtype.getCompoundMemberNames();
+            List<Datatype> compoundMemberTypes = dtype.getCompoundMemberTypes();
+            Datatype mtype = null;
+            String mname = null;
+
             if (compoundMemberNames == null) {
                 log.debug("extractCompoundInfo(): compoundMemberNames is null");
                 log.trace("extractCompoundInfo(): finish");
                 return;
             }
 
-            Datatype mtype = null;
-            String mname = null;
-
-            log.trace("extractCompoundInfo(): nMembers={}", compoundMemberNames.size());
-
             if (compoundMemberNames.size() <= 0) {
-                log.debug("extractCompoundInfo(): datatype has no members");
+                log.debug("extractCompoundInfo(): compound datatype has no members");
                 log.trace("extractCompoundInfo(): finish");
                 return;
             }
 
+            log.trace("extractCompoundInfo(): nMembers={}", compoundMemberNames.size());
+
             for (int i = 0; i < compoundMemberNames.size(); i++) {
-                log.trace("extractCompoundInfo(): nMembers[{}]", i);
+                log.trace("extractCompoundInfo(): member[{}]:", i);
 
                 mtype = compoundMemberTypes.get(i);
-                log.trace("extractCompoundInfo():[{}] mtype={} with size={}", i, mtype.getDescription(), mtype.getDatatypeSize());
+
+                log.trace("extractCompoundInfo(): type={} with size={}", mtype.getDescription(), mtype.getDatatypeSize());
 
                 if (names != null) {
                     mname = name + compoundMemberNames.get(i);
-                    log.trace("extractCompoundInfo():[{}] mname={}, name={}", i, mname, name);
+                    log.trace("extractCompoundInfo(): mname={}, name={}", mname, name);
                 }
 
                 if (mtype.isCompound()) {
-                    ((H5Datatype) mtype).extractCompoundInfo(mname + CompoundDS.separator, names, flatListTypes);
-                    log.debug("extractCompoundInfo(): continue after recursive H5T_COMPOUND[{}]:", i);
+                    H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.separator, names, flatListTypes);
+                    log.trace("extractCompoundInfo(): continue after recursive compound");
                     continue;
+                }
+                else if (mtype.isArray()) {
+                    boolean compoundFound = false;
+
+                    /*
+                     * Recursively detect any nested array of compound members
+                     */
+                    Datatype base = mtype.getDatatypeBase();
+                    while (base != null) {
+                        if (base.isCompound())
+                            compoundFound = true;
+
+                        base = base.getDatatypeBase();
+                    }
+
+                    if (compoundFound) {
+                        H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.separator, names, flatListTypes);
+                        log.trace("extractCompoundInfo(): continue after recursive array of compound");
+                    }
+                }
+                else if (mtype.isVLEN()) {
+                    /*
+                     * TODO:
+                     */
                 }
 
                 if (names != null) {
                     names.add(mname);
                 }
-                flatListTypes.add(mtype);
 
-            } // for (int i=0; i<nMembers; i++)
+                flatListTypes.add(mtype);
+            }
         }
 
         log.trace("extractCompoundInfo(): finish");
-    } // extractCompoundInfo
+    }
 
     /**
      * Creates a datatype of a compound with one field.

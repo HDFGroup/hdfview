@@ -15,11 +15,9 @@
 package hdf.view.TableView;
 
 import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
@@ -109,8 +107,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         super.loadData(dataObject);
 
-        if ((dataValue == null) || !(dataValue instanceof List)) {
-            log.debug("loadData(): data value is null or data not a list");
+        if (dataValue == null) {
+            log.debug("loadData(): data value is null");
             log.trace("loadData(): finish");
             throw new RuntimeException("data value is null or not a list");
         }
@@ -137,9 +135,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
 
         try {
-            final IDataProvider bodyDataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
+            dataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
 
-            dataLayer = new DataLayer(bodyDataProvider);
+            dataLayer = new DataLayer(dataProvider);
         }
         catch (Exception ex) {
             log.debug("createTable(): failed to retrieve DataProvider for table: ", ex);
@@ -265,200 +263,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     protected void showRegRefData(String reg) {
         // Currently no support for show Reg. Ref. Data in Compound Datasets
         return;
-    }
-
-    /**
-     * Update cell value in memory. It does not change the dataset's value in the
-     * file.
-     *
-     * @param cellValue
-     *            the string value of input.
-     * @param row
-     *            the row of the editing cell.
-     * @param col
-     *            the column of the editing cell.
-     *
-     * @throws Exception
-     *             if a failure occurred
-     */
-    @Override
-    protected void updateValueInMemory(String cellValue, int row, int col) throws Exception {
-        log.trace("updateValueInMemory({}, {}): start", row, col);
-
-        if ((cellValue == null) || ((cellValue = cellValue.trim()) == null)) {
-            log.debug("updateValueInMemory({}, {}): cell value not updated; new value is null", row, col);
-            log.trace("updateValueInMemory({}, {}): finish", row, col);
-            return;
-        }
-
-        // No need to update if values are the same
-        Object oldVal = dataLayer.getDataValue(col, row);
-        if ((oldVal != null) && cellValue.equals(oldVal.toString())) {
-            log.debug("updateValueInMemory({}, {}): cell value not updated; new value same as old value", row, col);
-            log.trace("updateValueInMemory({}, {}): finish", row, col);
-            return;
-        }
-
-        try {
-            List<?> cdata = (List<?>) dataObject.getData();
-            int orders[] = ((CompoundDataFormat) dataObject).getSelectedMemberOrders();
-            Datatype types[] = ((CompoundDataFormat) dataObject).getSelectedMemberTypes();
-            int nFields = cdata.size();
-            int nSubColumns = (dataTable.getPreferredColumnCount() - 1) / nFields;
-            int column = col;
-            int offset = 0;
-            int morder = 1;
-
-            if (nSubColumns > 1) { // multi-dimension compound dataset
-                int colIdx = col / nFields;
-                column = col - colIdx * nFields;
-                // //BUG 573: offset = row * orders[column] + colIdx * nRows *
-                // orders[column];
-                offset = row * orders[column] * nSubColumns + colIdx * orders[column];
-            }
-            else {
-                offset = row * orders[column];
-            }
-            morder = orders[column];
-
-            Object mdata = cdata.get(column);
-
-            // strings
-            if (Array.get(mdata, 0) instanceof String) {
-                Array.set(mdata, offset, cellValue);
-                isValueChanged = true;
-
-                log.trace("updateValueInMemory({}, {}): finish", row, col);
-                return;
-            }
-            else if (types[column].isString()) {
-                // it is string but not converted, still byte array
-                int strlen = (int) types[column].getDatatypeSize();
-                offset *= strlen;
-                byte[] bytes = cellValue.getBytes();
-                byte[] bData = (byte[]) mdata;
-                int n = Math.min(strlen, bytes.length);
-                System.arraycopy(bytes, 0, bData, offset, n);
-                offset += n;
-                n = strlen - bytes.length;
-                // space padding
-                for (int i = 0; i < n; i++) {
-                    bData[offset + i] = ' ';
-                }
-                isValueChanged = true;
-
-                log.trace("updateValueInMemory({}, {}): finish", row, col);
-                return;
-            }
-
-            // Numeric data
-            char mNT = ' ';
-            String cName = mdata.getClass().getName();
-            int cIndex = cName.lastIndexOf("[");
-            if (cIndex >= 0) {
-                mNT = cName.charAt(cIndex + 1);
-            }
-
-            StringTokenizer st = new StringTokenizer(cellValue, ",");
-            if (st.countTokens() < morder) {
-                shell.getDisplay().beep();
-                Tools.showError(shell, "Select", "Number of data points < " + morder + ".");
-                log.debug("updateValueInMemory({}, {}): number of data points < {}", row, col, morder);
-                log.trace("updateValueInMemory({}, {}): finish", row, col);
-                return;
-            }
-
-            String token = "";
-            isValueChanged = true;
-            switch (mNT) {
-                case 'B':
-                    byte bvalue = 0;
-                    for (int i = 0; i < morder; i++) {
-                        token = st.nextToken().trim();
-                        bvalue = Byte.parseByte(token);
-                        Array.setByte(mdata, offset + i, bvalue);
-                    }
-                    break;
-                case 'S':
-                    short svalue = 0;
-                    for (int i = 0; i < morder; i++) {
-                        token = st.nextToken().trim();
-                        svalue = Short.parseShort(token);
-                        Array.setShort(mdata, offset + i, svalue);
-                    }
-                    break;
-                case 'I':
-                    int ivalue = 0;
-                    for (int i = 0; i < morder; i++) {
-                        token = st.nextToken().trim();
-                        ivalue = Integer.parseInt(token);
-                        Array.setInt(mdata, offset + i, ivalue);
-                    }
-                    break;
-                case 'J':
-                    long lvalue = 0;
-                    for (int i = 0; i < morder; i++) {
-                        token = st.nextToken().trim();
-                        BigInteger big = new BigInteger(token);
-                        lvalue = big.longValue();
-                        // lvalue = Long.parseLong(token);
-                        Array.setLong(mdata, offset + i, lvalue);
-                    }
-                    break;
-                case 'F':
-                    float fvalue = 0;
-                    for (int i = 0; i < morder; i++) {
-                        token = st.nextToken().trim();
-                        fvalue = Float.parseFloat(token);
-                        Array.setFloat(mdata, offset + i, fvalue);
-                    }
-                    break;
-                case 'D':
-                    double dvalue = 0;
-                    for (int i = 0; i < morder; i++) {
-                        token = st.nextToken().trim();
-                        dvalue = Double.parseDouble(token);
-                        Array.setDouble(mdata, offset + i, dvalue);
-                    }
-                    break;
-                default:
-                    isValueChanged = false;
-            }
-        }
-        catch (Exception ex) {
-            log.debug("updateValueInMemory({}, {}):", row, col, ex);
-        }
-
-        log.trace("updateValueInMemory({}, {}): finish", row, col);
-    }
-
-    /**
-     * Update dataset's value in file. The changes will go to the file.
-     */
-    @Override
-    public void updateValueInFile() {
-        log.trace("updateValueInFile(): start");
-
-        if (isReadOnly || !isValueChanged || showAsBin || showAsHex) {
-            log.debug("updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
-            log.trace("updateValueInFile(): finish");
-            return;
-        }
-
-        try {
-            log.trace("updateValueInFile(): write");
-            dataObject.write();
-        }
-        catch (Exception ex) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Update", ex.getMessage());
-            log.debug("updateValueInFile(): ", ex);
-            log.trace("updateValueInFile(): finish");
-            return;
-        }
-
-        isValueChanged = false;
-        log.trace("updateValueInFile(): finish");
     }
 
     /**

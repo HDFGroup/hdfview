@@ -413,7 +413,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
                 if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
                     // initialize member information
-                    ((H5Datatype) getDatatype()).extractCompoundInfo("", flatNameList, flatTypeList);
+                    H5Datatype.extractCompoundInfo((H5Datatype) getDatatype(), "", flatNameList, flatTypeList);
                     numberOfMembers = flatNameList.size();
                     log.trace("init(): numberOfMembers={}", numberOfMembers);
 
