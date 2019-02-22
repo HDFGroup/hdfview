@@ -132,6 +132,7 @@ import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.BITMASK_OP;
 import hdf.view.DataView.DataViewManager;
 import hdf.view.TableView.DataDisplayConverterFactory.HDFDisplayConverter;
+import hdf.view.TableView.DataProviderFactory.HDFDataProvider;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.MathConversionDialog;
@@ -195,8 +196,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected boolean                       isReadOnly = false;
 
-    protected boolean                       isValueChanged = false;
-
     protected boolean                       isEnumConverted = false;
 
     protected boolean                       isDisplayTypeChar, isDataTransposed;
@@ -211,6 +210,7 @@ public abstract class DefaultBaseTableView implements TableView {
     protected IDataProvider                 rowHeaderDataProvider;
     protected IDataProvider                 columnHeaderDataProvider;
 
+    protected HDFDataProvider               dataProvider;
     protected HDFDisplayConverter           dataDisplayConverter;
 
     /**
@@ -273,18 +273,21 @@ public abstract class DefaultBaseTableView implements TableView {
         shell.addDisposeListener(new DisposeListener() {
             @Override
             public void widgetDisposed(DisposeEvent e) {
-                if (isValueChanged && !isReadOnly) {
-                    if (Tools.showConfirm(shell, "Changes Detected", "\"" + ((HObject) dataObject).getName()
-                            + "\" has changed.\nDo you want to save the changes?"))
-                        updateValueInFile();
-                    else
-                        dataObject.clearData();
+                if (dataProvider != null) {
+                    if (dataProvider.getIsValueChanged() && !isReadOnly) {
+                        if (Tools.showConfirm(shell, "Changes Detected", "\"" + ((HObject) dataObject).getName()
+                                + "\" has changed.\nDo you want to save the changes?"))
+                            updateValueInFile();
+                        else
+                            dataObject.clearData();
+                    }
                 }
 
                 dataValue = null;
                 dataTable = null;
 
-                if (curFont != null) curFont.dispose();
+                if (curFont != null)
+                    curFont.dispose();
 
                 viewer.removeDataView(DefaultBaseTableView.this);
             }
@@ -1027,8 +1030,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
 
-    protected abstract void updateValueInMemory(String cellValue, int row, int coll) throws Exception;
-
     protected abstract void showObjRefData(long ref);
 
     protected abstract void showRegRefData(String reg);
@@ -1042,6 +1043,36 @@ public abstract class DefaultBaseTableView implements TableView {
             dataDisplayConverter.setNumberFormat(numberFormat);
             dataDisplayConverter.setConvertEnum(isEnumConverted);
         }
+    }
+
+    /**
+     * Update dataset's value in file. The changes will go to the file.
+     */
+    @Override
+    public void updateValueInFile() {
+        log.trace("updateValueInFile(): start");
+
+        if (isReadOnly || !dataProvider.getIsValueChanged() || showAsBin || showAsHex) {
+            log.debug("updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
+            log.trace("updateValueInFile(): finish");
+            return;
+        }
+
+        try {
+            log.trace("updateValueInFile(): write");
+            dataObject.write();
+        }
+        catch (Exception ex) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Update", ex.getMessage());
+            log.debug("updateValueInFile(): ", ex);
+            log.trace("updateValueInFile(): finish");
+            return;
+        }
+
+        dataProvider.setIsValueChanged(false);
+
+        log.trace("updateValueInFile(): finish");
     }
 
     @Override
@@ -1138,7 +1169,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         // Make sure to save any changes to this frame of data before changing frames
-        if (isValueChanged) {
+        if (dataProvider.getIsValueChanged()) {
             updateValueInFile();
         }
 
@@ -1275,7 +1306,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     StringTokenizer lt = new StringTokenizer(line, "\t");
                     while (lt.hasMoreTokens() && (c < cols)) {
                         try {
-                            updateValueInMemory(lt.nextToken(), r, c);
+                            dataProvider.setDataValue(c, r, lt.nextToken());
                         }
                         catch (Exception ex) {
                             continue;
@@ -1292,7 +1323,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     for (int i = 0; i < n; i = i + fixedDataLength) {
                         try {
                             theVal = line.substring(i, i + fixedDataLength);
-                            updateValueInMemory(theVal, r, c);
+                            dataProvider.setDataValue(c, r, theVal);
                         }
                         catch (Exception ex) {
                             continue;
@@ -1668,7 +1699,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 for (int i = 0; i < n; i = i + fixedDataLength) {
                     try {
                         theVal = line.substring(i, i + fixedDataLength);
-                        updateValueInMemory(theVal, r, c);
+                        dataProvider.setDataValue(c, r, theVal);
                     }
                     catch (Exception ex) {
                         continue;
@@ -1684,7 +1715,7 @@ public abstract class DefaultBaseTableView implements TableView {
                         StringTokenizer tokenizer2 = new StringTokenizer(token);
                         if (tokenizer2.hasMoreTokens()) {
                             while (tokenizer2.hasMoreTokens() && (c < cols)) {
-                                updateValueInMemory(tokenizer2.nextToken(), r, c);
+                                dataProvider.setDataValue(c, r, tokenizer2.nextToken());
                                 c++;
                             }
                         }
@@ -1772,7 +1803,8 @@ public abstract class DefaultBaseTableView implements TableView {
         else if (binaryOrder == 2) bo = ByteOrder.BIG_ENDIAN;
 
         try {
-            if (Tools.getBinaryDataFromFile(dataValue, chosenFile.getAbsolutePath(), bo)) isValueChanged = true;
+            if (Tools.getBinaryDataFromFile(dataValue, chosenFile.getAbsolutePath(), bo))
+                dataProvider.setIsValueChanged(true);
 
             dataTable.doCommand(new StructuralRefreshCommand());
         }
@@ -1863,7 +1895,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
             theData = null;
             System.gc();
-            isValueChanged = true;
+
+            dataProvider.setIsValueChanged(true);
 
             log.trace("mathConversion(): finish");
         }

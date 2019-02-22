@@ -15,7 +15,7 @@
 package hdf.object;
 
 import java.lang.reflect.Array;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * The abstract class provides general APIs to create and manipulate dataset
@@ -238,8 +238,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     @SuppressWarnings("rawtypes")
     public void clear() {
         if (data != null) {
-            if (data instanceof Vector) {
-                ((Vector) data).setSize(0);
+            if (data instanceof List) {
+                ((List) data).clear();
             }
             data = null;
             originalBuf = null;

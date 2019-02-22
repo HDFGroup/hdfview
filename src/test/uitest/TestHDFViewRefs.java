@@ -113,7 +113,7 @@ public class TestHDFViewRefs extends AbstractWindowTest {
     }
 
     @Test
-    public void openTDataRegionReferencee() {
+    public void openTDataRegionReference() {
         String filename = "tdatareg";
         String file_ext = ".h5";
         String dataset_name = "Dataset1";
@@ -125,10 +125,10 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("openTDataRegionReferencee()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==3);
-            assertTrue("openTDataRegionReferencee() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("openTDataRegionReferencee() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTDataRegionReferencee() filetree is missing dataset '" + dataset_name2 + "'", items[0].getNode(1).getText().compareTo(dataset_name2)==0);
+            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==3);
+            assertTrue("openTDataRegionReference() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTDataRegionReference() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
+            assertTrue("openTDataRegionReference() filetree is missing dataset '" + dataset_name2 + "'", items[0].getNode(1).getText().compareTo(dataset_name2)==0);
 
             items[0].getNode(0).click();
 
@@ -138,15 +138,15 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("openTDataRegionReferencee()", "wrong name", dataset_name, val),
+            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong name", dataset_name, val),
                     val.equals(dataset_name));       // Test dataset name
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
-            assertTrue(constructWrongValueMessage("openTDataRegionReferencee()", "wrong rank", "1", val),
+            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong rank", "1", val),
                     val.equals("1"));           // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
-            assertTrue(constructWrongValueMessage("openTDataRegionReferencee()", "wrong data type", "Dataset region reference", val),
+            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong data type", "Dataset region reference", val),
                     val.equals("Dataset region reference"));   // Test data type
 
             items[0].getNode(0).contextMenu().menu("Open").click();
@@ -160,22 +160,22 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             val = table.getCellDataValueByPosition(1, 1);
-            assertTrue("openTDataRegionReferencee() data ["+val+
+            assertTrue("openTDataRegionReference() data ["+val+
                     "] did not match regex '/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7)  }'",
                     val.matches("/Dataset2 REGION_TYPE BLOCK \\{ \\(2,2\\)\\-\\(7,7\\)  \\}"));
 
             val = table.getCellDataValueByPosition(2, 1);
-            assertTrue("openTDataRegionReferencee() data ["+val+
+            assertTrue("openTDataRegionReference() data ["+val+
                     "] did not match regex '/Dataset2 REGION_TYPE POINT { (6,9)  (2,2)  (8,4)  (1,6)  (2,8)  (3,2)  (0,4)  (9,0)  (7,1)  (3,3)  }'",
                     val.matches("/Dataset2 REGION_TYPE POINT \\{ \\(6,9\\)  \\(2,2\\)  \\(8,4\\)  \\(1,6\\)  \\(2,8\\)  \\(3,2\\)  \\(0,4\\)  \\(9,0\\)  \\(7,1\\)  \\(3,3\\)  \\}"));
 
             val = table.getCellDataValueByPosition(3, 1);
-            assertTrue("openTDataRegionReferencee() data ["+val+
+            assertTrue("openTDataRegionReference() data ["+val+
                     "] did not match regex 'NULL'",
                     val.matches("NULL"));
 
             val = table.getCellDataValueByPosition(4, 1);
-            assertTrue("openTDataRegionReferencee() data ["+val+
+            assertTrue("openTDataRegionReference() data ["+val+
                     "] did not match regex 'NULL'",
                     val.matches("NULL"));
 

@@ -55,8 +55,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             table.click(1, 1);
-            assertTrue("openHDF5ScalarGroup() data did not match regex '^-1, .*'",
-                    tableShell.bot().text(0).getText().matches("^-1, .*"));
+            assertTrue("openHDF5ScalarGroup() data did not match regex '^[-1, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[-1, .*\\]"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -74,7 +74,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table.click(1, 1);
             assertTrue("openHDF5ScalarGroup() data did not match regex '^18446744073709551615, .*'",
-                    tableShell.bot().text(0).getText().matches("^18446744073709551615, .*"));
+                    tableShell.bot().text(0).getText().matches("^\\[18446744073709551615, .*\\]"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -438,16 +438,16 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             table.click(3, 5);
-            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
-                    tableShell.bot().text(0).getText().matches("^-1, .*"));
+            assertTrue("openHDF5CompoundDS() data did not match regex '^[-1, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[-1, .*\\]"));
 
             table.click(4, 6);
-            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
-                    tableShell.bot().text(0).getText().matches("^-1, .*"));
+            assertTrue("openHDF5CompoundDS() data did not match regex '^[-1, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[-1, .*\\]"));
 
             table.click(5, 7);
-            assertTrue("openHDF5CompoundDS() data did not match regex '^-1, .*'",
-                    tableShell.bot().text(0).getText().matches("^-1, .*"));
+            assertTrue("openHDF5CompoundDS() data did not match regex '^[-1, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[-1, .*\\]"));
 
             // TODO Disabled until offscreen columns/rows can be accessed
             /*
@@ -457,20 +457,20 @@ public class TestTreeViewFiles extends AbstractWindowTest {
              */
 
             table.click(3, 1);
-            assertTrue("openHDF5CompoundDS() data did not match regex '^255, .*'",
-                    tableShell.bot().text(0).getText().matches("^255, .*"));
+            assertTrue("openHDF5CompoundDS() data did not match regex '^[255, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[255, .*\\]"));
 
             table.click(4, 2);
-            assertTrue("openHDF5CompoundDS() data did not match regex '^65535, .*'",
-                    tableShell.bot().text(0).getText().matches("^65535, .*"));
+            assertTrue("openHDF5CompoundDS() data did not match regex '^[65535, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[65535, .*\\]"));
 
             table.click(5, 3);
-            assertTrue("openHDF5CompoundDS() data did not match regex '^4294967295, .*'",
-                    tableShell.bot().text(0).getText().matches("^4294967295, .*"));
+            assertTrue("openHDF5CompoundDS() data did not match regex '^[4294967295, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[4294967295, .*\\]"));
 
             table.click(6, 4);
-            assertTrue("openHDF5CompoundDS() data did not match regex '^18446744073709551615, .*'",
-                    tableShell.bot().text(0).getText().matches("^18446744073709551615, .*"));
+            assertTrue("openHDF5CompoundDS() data did not match regex '^[18446744073709551615, .*]'",
+                    tableShell.bot().text(0).getText().matches("^\\[18446744073709551615, .*\\]"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1257,12 +1257,12 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table.click(3, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue("openHDF5ArrayString() data did not match regex '^0, 1, 4, .*'", val.matches("^0, 1, 4, .*"));
+            assertTrue("openHDF5ArrayString() data did not match regex '^[0, 1, 4, .*]'", val.matches("^\\[0, 1, 4, .*\\]"));
 
             table.click(3, 2);
             val = tableShell.bot().text(0).getText();
-            assertTrue("openHDF5ArrayString() data did not match regex '^abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*'",
-                    val.matches("^abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*"));
+            assertTrue("openHDF5ArrayString() data did not match regex '^[abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*]'",
+                    val.matches("^\\[abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*\\]"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
