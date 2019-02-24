@@ -592,7 +592,9 @@
        depends="jar, compile-test, clean-junit-uitest, ensure-test-name">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <!-- Run in debug logging level because trace generates way too much output.
+           We will run manually using trace logging output when there are UI test failures. -->
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
@@ -619,7 +621,9 @@
           description="Runs the UI tests">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <!-- Run in debug logging level because trace generates way too much output.
+           We will run manually using trace logging output when there are UI test failures. -->
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
@@ -647,7 +651,9 @@
           description="Runs the tests for the UI modules">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <!-- Run in debug logging level because trace generates way too much output.
+           We will run manually using trace logging output when there are UI test failures. -->
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />

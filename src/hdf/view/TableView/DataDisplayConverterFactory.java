@@ -58,6 +58,7 @@ public class DataDisplayConverterFactory {
 
         if (dataObject == null) {
             log.debug("getDataDisplayConverter(DataFormat): data object is null");
+            log.trace("getDataDisplayConverter(DataFormat): finish");
             return null;
         }
 
@@ -143,6 +144,11 @@ public class DataDisplayConverterFactory {
         @Override
         public Object canonicalToDisplayValue(Object value) {
             log.trace("canonicalToDisplayValue({}): start", value);
+
+            if (value instanceof String) {
+                log.trace("canonicalToDisplayValue({}): finish", value);
+                return value;
+            }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
@@ -248,6 +254,10 @@ public class DataDisplayConverterFactory {
                     baseConverterIndexMap.toString(), relCmpdStartIndexMap.toString());
 
             nTotFields = baseConverterIndexMap.size();
+            if (nTotFields == 0) {
+                log.debug("index mapping is invalid - size 0");
+                throw new Exception("CompoundDataDisplayConverter: invalid mapping of size 0 built");
+            }
 
             buffer = new StringBuffer();
 
@@ -264,6 +274,11 @@ public class DataDisplayConverterFactory {
         public Object canonicalToDisplayValue(Object value) {
             log.trace("canonicalToDisplayValue({}): start", value);
 
+            if (value instanceof String) {
+                log.trace("canonicalToDisplayValue({}): finish", value);
+                return value;
+            }
+
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
                 log.trace("canonicalToDisplayValue({}): finish", value);
@@ -273,6 +288,9 @@ public class DataDisplayConverterFactory {
             buffer.setLength(0); // clear the old string
 
             try {
+                if (cellColIdx >= nTotFields)
+                    cellColIdx %= nTotFields;
+
                 HDFDisplayConverter converter = memberTypeConverters[baseConverterIndexMap.get(cellColIdx)];
                 converter.cellColIdx = cellColIdx - relCmpdStartIndexMap.get(cellColIdx);
 
@@ -379,16 +397,18 @@ public class DataDisplayConverterFactory {
 
         @Override
         public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
-            /*
-             * TODO:
-             */
-            /* cellColIdx = cell.getColumnIndex() % nTotFields; */
+            cellColIdx = cell.getColumnIndex();
             return canonicalToDisplayValue(value);
         }
 
         @Override
         public Object canonicalToDisplayValue(Object value) {
             log.trace("canonicalToDisplayValue({}): start", value);
+
+            if (value instanceof String) {
+                log.trace("canonicalToDisplayValue({}): finish", value);
+                return value;
+            }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
@@ -397,6 +417,12 @@ public class DataDisplayConverterFactory {
             }
 
             buffer.setLength(0); // clear the old string
+
+            /*
+             * Pass the cell's column index down in case there is a
+             * CompoundDataDisplayConverter at the bottom of the chain.
+             */
+            baseTypeConverter.cellColIdx = cellColIdx;
 
             try {
                 Object obj;
@@ -599,6 +625,11 @@ public class DataDisplayConverterFactory {
         public Object canonicalToDisplayValue(Object value) {
             log.trace("canonicalToDisplayValue({}): start", value);
 
+            if (value instanceof String) {
+                log.trace("canonicalToDisplayValue({}): finish", value);
+                return value;
+            }
+
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
                 log.trace("canonicalToDisplayValue({}): finish", value);
@@ -672,6 +703,11 @@ public class DataDisplayConverterFactory {
         public Object canonicalToDisplayValue(Object value) {
             log.trace("canonicalToDisplayValue({}): start", value);
 
+            if (value instanceof String) {
+                log.trace("canonicalToDisplayValue({}): finish", value);
+                return value;
+            }
+
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
                 log.trace("canonicalToDisplayValue({}): finish", value);
@@ -740,6 +776,11 @@ public class DataDisplayConverterFactory {
         @Override
         public Object canonicalToDisplayValue(Object value) {
             log.trace("canonicalToDisplayValue({}): start", value);
+
+            if (value instanceof String) {
+                log.trace("canonicalToDisplayValue({}): finish", value);
+                return value;
+            }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
