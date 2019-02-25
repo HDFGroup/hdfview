@@ -1460,7 +1460,7 @@ public class DataProviderFactory {
      * TableView from the array of strings.
      */
     private static class CompoundAttributeDataProvider extends HDFDataProvider {
-        // private Object theValue;
+        private Object theAttrValue;
 
         private final StringBuilder stringBuffer;
 
@@ -1542,18 +1542,18 @@ public class DataProviderFactory {
 
                     stringBuffer.append("]");
 
-                    theValue = stringBuffer.toString();
+                    theAttrValue = stringBuffer.toString();
                 }
                 else {
-                    theValue = dataValues[fieldIdx];
+                    theAttrValue = dataValues[fieldIdx];
                 }
             }
             catch (Exception ex) {
                 log.debug("CompoundAttributeDataProvider:getDataValue({}, {}) failure: ", rowIndex, columnIndex, ex);
-                theValue = DataFactoryUtils.errStr;
+                theAttrValue = DataFactoryUtils.errStr;
             }
 
-            return theValue;
+            return theAttrValue;
         }
 
         @Override
