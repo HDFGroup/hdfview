@@ -33,7 +33,7 @@ import hdf.view.ViewProperties;
  * settings.
  */
 public class UserOptionsHDFPage extends UserOptionsDefaultPage {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsHDFPage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsHDFPage.class);
 
     private Text fileExtField;
     private Button checkConvertEnum, checkShowRegRefValues, helpButton;

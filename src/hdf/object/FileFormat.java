@@ -52,7 +52,7 @@ import java.util.Vector;
 public abstract class FileFormat extends File {
     private static final long                    serialVersionUID   = -4700692313888420796L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormat.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormat.class);
 
     /***************************************************************************
      * File access flags used in calls to createInstance( String, flag );
@@ -212,7 +212,7 @@ public abstract class FileFormat extends File {
                     log.debug("FILE_TYPE_HDF4 file format added");
                 }
             }
-            catch (Throwable err) {
+            catch (Exception err) {
                 log.debug("FILE_TYPE_HDF4 instance failure: ", err);
             }
         }
@@ -228,7 +228,7 @@ public abstract class FileFormat extends File {
                     log.debug("FILE_TYPE_HDF5 file format added");
                 }
             }
-            catch (Throwable err) {
+            catch (Exception err) {
                 log.debug("FILE_TYPE_HDF5 instance failure: ", err);
             }
         }
@@ -244,7 +244,7 @@ public abstract class FileFormat extends File {
                     log.debug("NetCDF file format added");
                 }
             }
-            catch (Throwable err) {
+            catch (Exception err) {
                 log.debug("NetCDF instance failure: ", err);
             }
         }
@@ -260,7 +260,7 @@ public abstract class FileFormat extends File {
                     log.debug("Fits file format added");
                 }
             }
-            catch (Throwable err) {
+            catch (Exception err) {
                 log.debug("FITS instance failure: ", err);
             }
         }
@@ -1792,7 +1792,7 @@ public abstract class FileFormat extends File {
      *
      * @return the object that has the given OID; otherwise returns null
      */
-    public final static HObject findObject(FileFormat file, long[] oid) {
+    public static final HObject findObject(FileFormat file, long[] oid) {
         log.trace("findObject(): start");
 
         if ((file == null) || (oid == null)) {
@@ -1829,7 +1829,7 @@ public abstract class FileFormat extends File {
      *
      * @return the object that has the given path; otherwise returns null
      */
-    public final static HObject findObject(FileFormat file, String path) {
+    public static final HObject findObject(FileFormat file, String path) {
         log.trace("findObject({}): start", path);
 
         if ((file == null) || (path == null)) {

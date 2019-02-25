@@ -46,7 +46,7 @@ public abstract class AbstractWindowTest {
 
     protected static Shell shell;
 
-    private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
+    private static final CyclicBarrier swtBarrier = new CyclicBarrier(2);
 
     private static int TEST_DELAY = 0;
 

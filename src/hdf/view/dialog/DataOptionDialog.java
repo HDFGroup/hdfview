@@ -564,7 +564,7 @@ public class DataOptionDialog extends Dialog {
             if (n2[i] <= 0) {
                 n2[i] = 1; // stride cannot be zero
             }
-        } // for (int i=0; i<n; i++)
+        } //  (int i=0; i<n; i++)
 
         if (dataObject instanceof CompoundDS) {
             CompoundDS d = (CompoundDS) dataObject;
@@ -592,7 +592,7 @@ public class DataOptionDialog extends Dialog {
                         min = Double.valueOf(st.nextToken());
                         max = Double.valueOf(st.nextToken());
                     }
-                    catch (Throwable ex) {
+                    catch (Exception ex) {
                     }
                     if (max > min)
                         ds.setImageDataRange(min, max);
@@ -604,7 +604,7 @@ public class DataOptionDialog extends Dialog {
                         x = Double.valueOf(st.nextToken());
                         ds.addFilteredImageValue(x);
                     }
-                    catch (Throwable ex) {
+                    catch (Exception ex) {
                     }
                 }
             }
@@ -1144,7 +1144,7 @@ public class DataOptionDialog extends Dialog {
         String[] columnNames = new String[names.length];
         for (int i = 0; i < names.length; i++) {
             columnNames[i] = new String(names[i]);
-            columnNames[i] = columnNames[i].replaceAll(CompoundDS.separator, "->");
+            columnNames[i] = columnNames[i].replaceAll(CompoundDS.SEPARATOR, "->");
         }
         fieldList = new List(membersGroup, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
         fieldList.setFont(curFont);
@@ -1876,7 +1876,7 @@ public class DataOptionDialog extends Dialog {
             try {
                 previewImage = Tools.toBufferedImage(Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(imageProducer, filter)));
             }
-            catch (Throwable err) {
+            catch (Exception err) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Apply Image Filter", err.getMessage());
                 status = false;

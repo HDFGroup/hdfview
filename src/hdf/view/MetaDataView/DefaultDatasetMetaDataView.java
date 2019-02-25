@@ -40,7 +40,7 @@ import hdf.view.DataView.DataViewManager;
 
 public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
 
     public DefaultDatasetMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
@@ -93,8 +93,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         if (dims != null) {
             String[] dimNames = d.getDimNames();
             boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
-            StringBuffer sb = new StringBuffer();
-            StringBuffer sb2 = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
+            StringBuilder sb2 = new StringBuilder();
 
             sb.append(dims[0]);
             if (hasDimNames) {
@@ -322,8 +322,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                 for (int i = 0; i < n; i++) {
                     rowData[i][0] = new String(names[i]);
 
-                    if (rowData[i][0].contains(CompoundDS.separator)) {
-                        rowData[i][0] = rowData[i][0].replaceAll(CompoundDS.separator, "->");
+                    if (rowData[i][0].contains(CompoundDS.SEPARATOR)) {
+                        rowData[i][0] = rowData[i][0].replaceAll(CompoundDS.SEPARATOR, "->");
                     }
 
                     int mDims[] = compound.getMemberDims(i);
@@ -361,7 +361,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                 // int cellRowHeight = Math.max(16,
                 // table.getFontMetrics(table.getFont()).getHeight());
                 // table.setRowHeight(cellRowHeight);
-            } // if (n > 0)
+            } //  (n > 0)
 
             // Prevent conflict from equal vertical grabbing
             datasetLayoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));

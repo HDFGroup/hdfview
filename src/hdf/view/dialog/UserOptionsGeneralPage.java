@@ -40,7 +40,7 @@ import hdf.view.ViewProperties;
  * UserOptionsGeneralPage.java - Configuration page for general application settings.
  */
 public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsGeneralPage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsGeneralPage.class);
 
     private Text UGField, workField, maxMemberField, startMemberField;
 

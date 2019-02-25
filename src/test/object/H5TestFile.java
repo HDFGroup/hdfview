@@ -18,35 +18,35 @@ import hdf.object.h5.H5File;
  *
  */
 public class H5TestFile {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5TestFile.class);
-    public final static String NAME_FILE_H5 = "TestHDF5.h5";
-    public final static String NAME_GROUP = "/g0";
-    public final static String NAME_GROUP_ATTR = "/g0_attr";
-    public final static String NAME_GROUP_SUB = NAME_GROUP + "/g00";
-    public final static String NAME_DATASET_INT = "/dataset_int";
-    public final static String NAME_DATASET_FLOAT = "/dataset_float";
-    public final static String NAME_DATASET_CHAR = "/dataset_byte";
-    public final static String NAME_DATASET_STR = "/dataset_str";
-    public final static String NAME_DATASET_ENUM = "/dataset_enum";
-    public final static String NAME_DATASET_IMAGE = "/dataset_image";
-    public final static String NAME_DATASET_IMAGE_PALETTE = "/wave_palete";
-    public final static String NAME_DATASET_OBJ_REF = "/dataset_obj_ref";
-    public final static String NAME_DATASET_COMPOUND = "/dataset_comp";
-    public final static String NAME_DATASET_INT_SUB = NAME_GROUP + "/dataset_int";
-    public final static String NAME_DATASET_FLOAT_SUB_SUB = NAME_GROUP_SUB + "/dataset_float";
-    public final static String NAME_DATASET_COMPOUND_SUB = NAME_GROUP + "/dataset_comp";
-    public final static String NAME_DATATYPE_INT = NAME_GROUP + "/datatype_int";
-    public final static String NAME_DATATYPE_UINT = NAME_GROUP + "/datatype_uint";
-    public final static String NAME_DATATYPE_FLOAT = NAME_GROUP + "/datatype_float";
-    public final static String NAME_DATATYPE_STR = NAME_GROUP + "/datatype_str";
-    public final static String NAME_HARD_LINK_TO_IMAGE = "a_link_to_the_image";
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5TestFile.class);
+    public static final String NAME_FILE_H5 = "TestHDF5.h5";
+    public static final String NAME_GROUP = "/g0";
+    public static final String NAME_GROUP_ATTR = "/g0_attr";
+    public static final String NAME_GROUP_SUB = NAME_GROUP + "/g00";
+    public static final String NAME_DATASET_INT = "/dataset_int";
+    public static final String NAME_DATASET_FLOAT = "/dataset_float";
+    public static final String NAME_DATASET_CHAR = "/dataset_byte";
+    public static final String NAME_DATASET_STR = "/dataset_str";
+    public static final String NAME_DATASET_ENUM = "/dataset_enum";
+    public static final String NAME_DATASET_IMAGE = "/dataset_image";
+    public static final String NAME_DATASET_IMAGE_PALETTE = "/wave_palete";
+    public static final String NAME_DATASET_OBJ_REF = "/dataset_obj_ref";
+    public static final String NAME_DATASET_COMPOUND = "/dataset_comp";
+    public static final String NAME_DATASET_INT_SUB = NAME_GROUP + "/dataset_int";
+    public static final String NAME_DATASET_FLOAT_SUB_SUB = NAME_GROUP_SUB + "/dataset_float";
+    public static final String NAME_DATASET_COMPOUND_SUB = NAME_GROUP + "/dataset_comp";
+    public static final String NAME_DATATYPE_INT = NAME_GROUP + "/datatype_int";
+    public static final String NAME_DATATYPE_UINT = NAME_GROUP + "/datatype_uint";
+    public static final String NAME_DATATYPE_FLOAT = NAME_GROUP + "/datatype_float";
+    public static final String NAME_DATATYPE_STR = NAME_GROUP + "/datatype_str";
+    public static final String NAME_HARD_LINK_TO_IMAGE = "a_link_to_the_image";
 
-    public final static String OBJ_NAMES[] = { NAME_GROUP, NAME_GROUP_ATTR, NAME_GROUP_SUB, NAME_DATASET_INT,
+    public static final String OBJ_NAMES[] = { NAME_GROUP, NAME_GROUP_ATTR, NAME_GROUP_SUB, NAME_DATASET_INT,
             NAME_DATASET_FLOAT, NAME_DATASET_CHAR, NAME_DATASET_STR, NAME_DATASET_ENUM, NAME_DATASET_IMAGE,
             NAME_DATASET_COMPOUND, NAME_DATASET_INT_SUB, NAME_DATASET_FLOAT_SUB_SUB, NAME_DATASET_COMPOUND_SUB,
             NAME_DATATYPE_INT, NAME_DATATYPE_UINT, NAME_DATATYPE_FLOAT, NAME_DATATYPE_STR, NAME_DATASET_OBJ_REF };
 
-    public final static int OBJ_TYPES[] = { HDF5Constants.H5O_TYPE_GROUP, HDF5Constants.H5O_TYPE_GROUP,
+    public static final int OBJ_TYPES[] = { HDF5Constants.H5O_TYPE_GROUP, HDF5Constants.H5O_TYPE_GROUP,
             HDF5Constants.H5O_TYPE_GROUP, HDF5Constants.H5O_TYPE_DATASET, HDF5Constants.H5O_TYPE_DATASET,
             HDF5Constants.H5O_TYPE_DATASET, HDF5Constants.H5O_TYPE_DATASET, HDF5Constants.H5O_TYPE_DATASET,
             HDF5Constants.H5O_TYPE_DATASET, HDF5Constants.H5O_TYPE_DATASET, HDF5Constants.H5O_TYPE_DATASET,
@@ -55,29 +55,29 @@ public class H5TestFile {
             HDF5Constants.H5O_TYPE_NAMED_DATATYPE, HDF5Constants.H5O_TYPE_DATASET };
 
     // data space information
-    public final static int DATATYPE_SIZE = 4;
-    public final static int RANK = 2;
-    public final static long DIM1 = 50;
-    public final static long DIM2 = 10;
+    public static final int DATATYPE_SIZE = 4;
+    public static final int RANK = 2;
+    public static final long DIM1 = 50;
+    public static final long DIM2 = 10;
     public static final long DIM3 = 20;
-    public final static long[] DIMs = { DIM1, DIM2 };
-    public final static long[] CHUNKs = { DIM1 / 2, DIM2 / 2 };
-    public final static int STR_LEN = 20;
-    public final static int DIM_SIZE = (int) (DIM1 * DIM2);;
+    public static final long[] DIMs = { DIM1, DIM2 };
+    public static final long[] CHUNKs = { DIM1 / 2, DIM2 / 2 };
+    public static final int STR_LEN = 20;
+    public static final int DIM_SIZE = (int) (DIM1 * DIM2);;
 
     /* testing data */
-    public final static int[] DATA_INT = new int[DIM_SIZE];
-    public final static long[] DATA_LONG = new long[DIM_SIZE];
-    public final static float[] DATA_FLOAT = new float[DIM_SIZE];
-    public final static byte[] DATA_BYTE = new byte[DIM_SIZE];
-    public final static String[] DATA_STR = new String[DIM_SIZE];
-    public final static int[] DATA_ENUM = new int[DIM_SIZE];
-    public final static Vector DATA_COMP = new Vector(3);
-    public final static byte[] DATA_PALETTE = createWavePalette();
+    public static final int[] DATA_INT = new int[DIM_SIZE];
+    public static final long[] DATA_LONG = new long[DIM_SIZE];
+    public static final float[] DATA_FLOAT = new float[DIM_SIZE];
+    public static final byte[] DATA_BYTE = new byte[DIM_SIZE];
+    public static final String[] DATA_STR = new String[DIM_SIZE];
+    public static final int[] DATA_ENUM = new int[DIM_SIZE];
+    public static final Vector DATA_COMP = new Vector(3);
+    public static final byte[] DATA_PALETTE = createWavePalette();
 
     // compound names and datatypes
-    public final static String[] COMPOUND_MEMBER_NAMES = { "int32", "float32", "string", "uint32" };
-    public final static H5Datatype[] COMPOUND_MEMBER_DATATYPES = { null, null, null, null };
+    public static final String[] COMPOUND_MEMBER_NAMES = { "int32", "float32", "string", "uint32" };
+    public static final H5Datatype[] COMPOUND_MEMBER_DATATYPES = { null, null, null, null };
 
     public static Attribute ATTRIBUTE_STR = null;
     public static Attribute ATTRIBUTE_INT_ARRAY = null;
@@ -234,7 +234,7 @@ public class H5TestFile {
         // write object refs to the ref dataset
         file.open();
         final long[] refs = new long[DIM_SIZE];
-        // for (int i = 0; i < OBJ_NAMES.length; i++) { --//This gives CORE DUMP when OBJ_NAMES = NAME_DATASET_OBJ_REF,
+        //  (int i = 0; i < OBJ_NAMES.length; i++) { --//This gives CORE DUMP when OBJ_NAMES = NAME_DATASET_OBJ_REF,
         // as it enters an infinite loop.
         for (int i = 0; i < OBJ_NAMES.length - 1; i++) {
             oid = file.get(OBJ_NAMES[i]).getOID();

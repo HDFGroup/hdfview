@@ -47,7 +47,7 @@ import hdf.object.ScalarDS;
 public class H5ScalarDS extends ScalarDS {
     private static final long serialVersionUID = 2887517608230611642L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ScalarDS.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ScalarDS.class);
 
     /**
      * The list of attributes of this data object. Members of the list are instance of Attribute.
@@ -124,9 +124,9 @@ public class H5ScalarDS extends ScalarDS {
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID
             try {
-                byte[] ref_buf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
+                byte[] refbuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
                 this.oid = new long[1];
-                this.oid[0] = HDFNativeData.byteToLong(ref_buf, 0);
+                this.oid[0] = HDFNativeData.byteToLong(refbuf, 0);
             }
             catch (Exception ex) {
                 log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
@@ -254,8 +254,8 @@ public class H5ScalarDS extends ScalarDS {
                 try {
                     int nfiles = H5.H5Pget_external_count(pid);
                     isExternal = (nfiles > 0);
-                    int layout_type = H5.H5Pget_layout(pid);
-                    if (isVirtual = (layout_type == HDF5Constants.H5D_VIRTUAL)) {
+                    int layoutType = H5.H5Pget_layout(pid);
+                    if (isVirtual = (layoutType == HDF5Constants.H5D_VIRTUAL)) {
                         try {
                             long vmaps = H5.H5Pget_virtual_count(pid);
                             if (vmaps > 0) {
@@ -266,14 +266,14 @@ public class H5ScalarDS extends ScalarDS {
                                         virtualNameList.add(fname);
                                         log.trace("init(): virtualNameList[{}]={}", next, fname);
                                     }
-                                    catch (Throwable err) {
+                                    catch (Exception err) {
                                         log.trace("init(): vds[{}] continue", next);
                                         continue;
                                     }
                                 }
                             }
                         }
-                        catch (Throwable err) {
+                        catch (Exception err) {
                             log.debug("init(): vds count error: ", err);
                         }
                     }
@@ -497,7 +497,7 @@ public class H5ScalarDS extends ScalarDS {
                             isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
                             log.trace("hasAttribute(): isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
                         }
-                        catch (Throwable err) {
+                        catch (Exception err) {
                             log.debug("hasAttribute(): check image: ", err);
                         }
                     }
@@ -507,8 +507,8 @@ public class H5ScalarDS extends ScalarDS {
                     if (avalue != null) {
                         double x0 = 0, x1 = 0;
                         try {
-                            x0 = Double.valueOf(java.lang.reflect.Array.get(avalue, 0).toString()).doubleValue();
-                            x1 = Double.valueOf(java.lang.reflect.Array.get(avalue, 1).toString()).doubleValue();
+                            x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
+                            x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
                         }
                         catch (Exception ex2) {
                             x0 = x1 = 0;
@@ -607,7 +607,7 @@ public class H5ScalarDS extends ScalarDS {
             if (pdir == null) {
                 pdir = ".";
             }
-            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
+            System.setProperty("user.dir", pdir);
             log.trace("getDatatype(): External dataset: user.dir={}", pdir);
         }
 
@@ -1200,7 +1200,7 @@ public class H5ScalarDS extends ScalarDS {
                                 storage_layout += "Last Available";
                             storage_layout += "\nGAP : " + String.valueOf(virt_gap);
                         }
-                        catch (Throwable err) {
+                        catch (Exception err) {
                             log.debug("getMetadata(): vds error: ", err);
                             storage_layout += "ERROR";
                         }
@@ -1214,7 +1214,7 @@ public class H5ScalarDS extends ScalarDS {
                                     String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
                                     storage_layout += "\n" + fname + " : " + dsetname;
                                 }
-                                catch (Throwable err) {
+                                catch (Exception err) {
                                     log.debug("getMetadata(): vds space[{}] error: ", next, err);
                                     log.trace("getMetadata(): vds[{}] continue", next);
                                     storage_layout += "ERROR";
@@ -1223,7 +1223,7 @@ public class H5ScalarDS extends ScalarDS {
                             }
                         }
                     }
-                    catch (Throwable err) {
+                    catch (Exception err) {
                         log.debug("getMetadata(): vds count error: ", err);
                         storage_layout += "ERROR";
                     }
@@ -1261,7 +1261,7 @@ public class H5ScalarDS extends ScalarDS {
                             log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cd_values[j]);
                         }
                     }
-                    catch (Throwable err) {
+                    catch (Exception err) {
                         log.debug("getMetadata(): filter[{}] error: ", i, err);
                         log.trace("getMetadata(): filter[{}] continue", i);
                         filters += "ERROR";
@@ -1318,7 +1318,7 @@ public class H5ScalarDS extends ScalarDS {
                         }
                         log.debug("getMetadata(): filter[{}] is user defined compression", i);
                     }
-                } // for (int i=0; i<nfilt; i++)
+                } // (int i=0; i<nfilt; i++)
 
                 if (compression.length() == 0) {
                     compression = "NONE";
@@ -1638,13 +1638,13 @@ public class H5ScalarDS extends ScalarDS {
             return null;
         }
 
-        String path = HObject.separator;
+        String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
-            path = pgroup.getPath() + pgroup.getName() + HObject.separator;
+            path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
             if (name.endsWith("/")) {
                 name = name.substring(0, name.length() - 1);
             }
-            int idx = name.lastIndexOf("/");
+            int idx = name.lastIndexOf('/');
             if (idx >= 0) {
                 name = name.substring(idx + 1);
             }
@@ -1761,7 +1761,7 @@ public class H5ScalarDS extends ScalarDS {
             pgroup.addToMemberList(dataset);
             if (data != null) {
                 dataset.init();
-                long selected[] = dataset.getSelectedDims();
+                long[] selected = dataset.getSelectedDims();
                 for (int i = 0; i < rank; i++) {
                     selected[i] = dims[i];
                 }
@@ -1789,8 +1789,8 @@ public class H5ScalarDS extends ScalarDS {
             avalue = getAttrValue(oid, "valid_range");
             if (avalue != null) {
                 try {
-                    x0 = Double.valueOf(java.lang.reflect.Array.get(avalue, 0).toString()).doubleValue();
-                    x1 = Double.valueOf(java.lang.reflect.Array.get(avalue, 1).toString()).doubleValue();
+                    x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
+                    x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
                     imageDataRange = new double[2];
                     imageDataRange[0] = x0;
                     imageDataRange[1] = x1;
@@ -1804,7 +1804,7 @@ public class H5ScalarDS extends ScalarDS {
             avalue = getAttrValue(oid, "valid_min");
             if (avalue != null) {
                 try {
-                    x0 = Double.valueOf(java.lang.reflect.Array.get(avalue, 0).toString()).doubleValue();
+                    x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
                 }
                 catch (Exception ex) {
                     log.debug("checkCFconvention(): valid_min: ", ex);
@@ -1812,7 +1812,7 @@ public class H5ScalarDS extends ScalarDS {
                 avalue = getAttrValue(oid, "valid_max");
                 if (avalue != null) {
                     try {
-                        x1 = Double.valueOf(java.lang.reflect.Array.get(avalue, 0).toString()).doubleValue();
+                        x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
                         imageDataRange = new double[2];
                         imageDataRange[0] = x0;
                         imageDataRange[1] = x1;
@@ -1822,7 +1822,7 @@ public class H5ScalarDS extends ScalarDS {
                     }
                 }
             }
-        } // if (imageDataRange==null || imageDataRange[1]<=imageDataRange[0])
+        } // (imageDataRange==null || imageDataRange[1]<=imageDataRange[0])
         log.trace("checkCFconvention(): finish");
     }
 
@@ -1920,7 +1920,7 @@ public class H5ScalarDS extends ScalarDS {
                     log.debug("getAttrValue(): H5Aclose(aid {}) failure: ", aid, ex);
                 }
             }
-        } // if (aid > 0)
+        } // (aid > 0)
 
         log.trace("getAttrValue(): finish");
         return avalue;
@@ -1987,10 +1987,10 @@ public class H5ScalarDS extends ScalarDS {
         String dname = null, path = null;
 
         if (pgroup.isRoot()) {
-            path = HObject.separator;
+            path = HObject.SEPARATOR;
         }
         else {
-            path = pgroup.getPath() + pgroup.getName() + HObject.separator;
+            path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
         }
         dname = path + dstName;
 
@@ -2134,7 +2134,7 @@ public class H5ScalarDS extends ScalarDS {
         try {
             System.arraycopy(refs, idx * 8, ref_buf, 0, 8);
         }
-        catch (Throwable err) {
+        catch (Exception err) {
             log.debug("getPaletteName(): arraycopy failure: ", err);
             log.trace("getPaletteName(): finish");
             return null;
@@ -2186,7 +2186,7 @@ public class H5ScalarDS extends ScalarDS {
         try {
             System.arraycopy(refs, idx * 8, ref_buf, 0, 8);
         }
-        catch (Throwable err) {
+        catch (Exception err) {
             log.debug("readPalette(): arraycopy failure: ", err);
             log.trace("readPalette(): failure");
             return null;
@@ -2309,7 +2309,7 @@ public class H5ScalarDS extends ScalarDS {
                 default:
                     log.debug("parseFillValue(): datatypeClass unknown");
                     break;
-            } // switch (datatypeClass)
+            } // (datatypeClass)
         }
         catch (Exception ex) {
             log.debug("parseFillValue(): failure: ", ex);
@@ -2343,8 +2343,9 @@ public class H5ScalarDS extends ScalarDS {
         long aid = -1;
         long sid = -1;
         long atype = -1;
-        int size = 0, rank = 0;
-        byte[] ref_buf = null;
+        int size = 0;
+        int rank = 0;
+        byte[] refbuf = null;
 
         try {
             if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
@@ -2363,15 +2364,15 @@ public class H5ScalarDS extends ScalarDS {
 
                 if ((size * 8) < Integer.MIN_VALUE || (size * 8) > Integer.MAX_VALUE) throw new HDF5Exception("Invalid int size");
 
-                ref_buf = new byte[size * 8];
+                refbuf = new byte[size * 8];
                 atype = H5.H5Aget_type(aid);
 
-                H5.H5Aread(aid, atype, ref_buf);
+                H5.H5Aread(aid, atype, refbuf);
             }
         }
         catch (HDF5Exception ex) {
             log.debug("getPaletteRefs(): Palette attribute search failed: Expected", ex);
-            ref_buf = null;
+            refbuf = null;
         }
         finally {
             try {
@@ -2395,7 +2396,7 @@ public class H5ScalarDS extends ScalarDS {
         }
 
         log.trace("getPaletteRefs(): finish");
-        return ref_buf;
+        return refbuf;
     }
 
     /**

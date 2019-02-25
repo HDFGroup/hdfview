@@ -38,7 +38,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultTableViewFactory extends TableViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTableViewFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTableViewFactory.class);
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -139,7 +139,7 @@ public class DefaultTableViewFactory extends TableViewFactory {
                     System.arraycopy(((DataFormat) dataObject).getStride(), 0, ((DataFormat) d_copy).getStride(), 0, rank);
                     System.arraycopy(((DataFormat) dataObject).getSelectedIndex(), 0, ((DataFormat) d_copy).getSelectedIndex(), 0, 3);
                 }
-                catch (Throwable ex) {
+                catch (Exception ex) {
                     ex.printStackTrace();
                 }
 

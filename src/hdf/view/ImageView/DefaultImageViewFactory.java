@@ -30,7 +30,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultImageViewFactory extends ImageViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageViewFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageViewFactory.class);
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override

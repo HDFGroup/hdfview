@@ -508,7 +508,7 @@ public class Chart extends Dialog {
                         }
 
                         g.setForeground(c); // set the color back to its default
-                    } // if (chartStyle == LINEPLOT)
+                    } //  (chartStyle == LINEPLOT)
                     else if (chartStyle == HISTOGRAM) {
                         // draw histogram for selected image area
                         xp = xgap;

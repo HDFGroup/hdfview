@@ -39,8 +39,8 @@ public class H5ObjectEx_T_StringAttribute {
         long[] dims = { DIM0 };
         byte[][] dset_data = new byte[DIM0][SDIM];
         H5Datatype typeInt = null;
-        StringBuffer[] str_data = { new StringBuffer("Parting"), new StringBuffer("is such"),
-                new StringBuffer("sweet"), new StringBuffer("sorrow.") };
+        StringBuilder[] str_data = { new StringBuilder("Parting"), new StringBuilder("is such"),
+                new StringBuilder("sweet"), new StringBuilder("sorrow.") };
 
         // Create a new file using default properties.
         try {
@@ -188,7 +188,7 @@ public class H5ObjectEx_T_StringAttribute {
         long sdim = 0;
         long[] dims = { DIM0 };
         byte[][] dset_data;
-        StringBuffer[] str_data;
+        StringBuilder[] str_data;
 
         // Open an existing file.
         try {
@@ -249,7 +249,7 @@ public class H5ObjectEx_T_StringAttribute {
 
         // Allocate space for data.
         dset_data = new byte[(int) dims[0]][(int)sdim];
-        str_data = new StringBuffer[(int) dims[0]];
+        str_data = new StringBuilder[(int) dims[0]];
 
         // Create the memory datatype.
         try {
@@ -270,7 +270,7 @@ public class H5ObjectEx_T_StringAttribute {
                 for (int jndx = 0; jndx < sdim; jndx++) {
                     tempbuf[jndx] = dset_data[indx][jndx];
                 }
-                str_data[indx] = new StringBuffer(new String(tempbuf).trim());
+                str_data[indx] = new StringBuilder(new String(tempbuf).trim());
             }
         }
         catch (Exception e) {

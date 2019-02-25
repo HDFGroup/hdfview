@@ -91,7 +91,7 @@ public class H4Vdata extends CompoundDS
 {
     private static final long serialVersionUID = -5978700886955419959L;
 
-    private final static org.slf4j.Logger       log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
+    private static final org.slf4j.Logger       log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
@@ -342,7 +342,7 @@ public class H4Vdata extends CompoundDS
             }
 
             list.add(member_data);
-        } // for (int i=0; i<numberOfMembers; i++)
+        } //  (int i=0; i<numberOfMembers; i++)
 
         close(id);
 
@@ -410,7 +410,7 @@ public class H4Vdata extends CompoundDS
             catch (HDFException ex) {
                 log.debug("write():", ex);
             }
-        } // for (int i=0; i<numberOfMembers; i++)
+        } //  (int i=0; i<numberOfMembers; i++)
 
         close(vid);
          */
@@ -515,8 +515,8 @@ public class H4Vdata extends CompoundDS
                         attr.setData(buf);
                         nleft--;
                     }
-                } // for (int i=0; i<n; i++)
-            } // for (int j=-1; j<numberOfMembers; j++)
+                } //  (int i=0; i<n; i++)
+            } //  (int j=-1; j<numberOfMembers; j++)
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);
@@ -710,7 +710,7 @@ public class H4Vdata extends CompoundDS
                 log.trace("init(): continue");
                 continue;
             }
-        } // for (int i=0; i<numberOfMembers; i++)
+        } //  (int i=0; i<numberOfMembers; i++)
 
         inited = true;
 

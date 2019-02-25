@@ -16,6 +16,7 @@ package hdf.object.h4;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,7 +43,7 @@ import hdf.object.HObject;
 public class H4File extends FileFormat {
     private static final long serialVersionUID = 8985533001471224030L;
 
-    private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4File.class);
+    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4File.class);
 
     /**
      * the file access flag.
@@ -276,7 +277,7 @@ public class H4File extends FileFormat {
         log.trace("open(): start");
 
         if (fid >= 0) {
-            log.trace("open(): File " + fid + " already open");
+            log.trace("open(): File {} already open", fid);
             log.trace("open(): finish");
             return fid; // file is opened already
         }
@@ -441,10 +442,8 @@ public class H4File extends FileFormat {
     public Dataset createImage(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks, int gzip, int ncomp,
             int interlace, Object data) throws Exception {
-        H4GRImage dataset = H4GRImage.create(name, pgroup, type, dims, maxdims,
+        return H4GRImage.create(name, pgroup, type, dims, maxdims,
                 chunks, gzip, ncomp, interlace, data);
-
-        return dataset;
     }
 
     /**
@@ -614,8 +613,10 @@ public class H4File extends FileFormat {
         log.trace("copyGroup(): start: srcGroup={} parentGroup={}", srcGroup, pgroup);
 
         H4Group group = null;
-        long srcgid, dstgid;
-        String gname = null, path = null;
+        long srcgid = -1;
+        long dstgid = -1;
+        String gname = null;
+        String path = null;
 
         dstgid = HDFLibrary.Vattach(fid, -1, "w");
         if (dstgid < 0) {
@@ -632,11 +633,11 @@ public class H4File extends FileFormat {
         int tag = HDFLibrary.VQuerytag(dstgid);
 
         if (pgroup.isRoot()) {
-            path = HObject.separator;
+            path = HObject.SEPARATOR;
         }
         else {
             // add the dataset to the parent group
-            path = pgroup.getPath() + pgroup.getName() + HObject.separator;
+            path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
             long pid = pgroup.open();
             HDFLibrary.Vinsert(pid, dstgid);
             pgroup.close(pid);
@@ -666,7 +667,6 @@ public class H4File extends FileFormat {
             }
             catch (Exception ex) {
                 log.trace("copyGroup(): failure: ", ex);
-                continue;
             }
         }
 
@@ -677,7 +677,7 @@ public class H4File extends FileFormat {
 
         // copy members of the source group to the new group
         List<HObject> members = srcGroup.getMemberList();
-        if ((members != null) && (members.size() > 0)) {
+        if ((members != null) && !members.isEmpty()) {
             Iterator<HObject> iterator = members.iterator();
             while (iterator.hasNext()) {
                 HObject mObj = iterator.next();
@@ -721,7 +721,8 @@ public class H4File extends FileFormat {
             return;
         }
 
-        int n = 0, ref = -1;
+        int n = 0;
+        int ref = -1;
         int[] argv = null;
 
         // get top level VGroup
@@ -772,7 +773,7 @@ public class H4File extends FileFormat {
             ref = refs[i];
             log.trace("loadIntoMemory(): Iterate[{}] members of the group ref={}",i,ref);
             H4Group g = getVGroup(HDFConstants.DFTAG_VG, ref,
-                    HObject.separator, (H4Group) rootObject, false);
+                    HObject.SEPARATOR, (H4Group) rootObject, false);
 
             if (g != null) {
                 ((H4Group) rootObject).addToMemberList(g);
@@ -780,7 +781,7 @@ public class H4File extends FileFormat {
                 // recursively get the sub-tree
                 depth_first(g);
             }
-        } // for (int i=0; i<n; i++)
+        }
 
         // get the top level GR images
         argv = new int[2];
@@ -799,12 +800,12 @@ public class H4File extends FileFormat {
             for (int i = 0; i < n; i++) {
                 // no duplicate object at top level
                 H4GRImage gr = getGRImage(HDFConstants.DFTAG_RIG, i,
-                        HObject.separator, false);
+                        HObject.SEPARATOR, false);
                 if (gr != null) {
                     ((H4Group) rootObject).addToMemberList(gr);
                 }
-            } // for (int i=0; i<n; i++)
-        } // if ( grid!=HDFConstants.FAIL && HDFLibrary.GRfileinfo(grid,argv) )
+            } //  (int i=0; i<n; i++)
+        } //  ( grid!=HDFConstants.FAIL && HDFLibrary.GRfileinfo(grid,argv) )
 
         // get top level SDS
         try {
@@ -820,12 +821,12 @@ public class H4File extends FileFormat {
             for (int i = 0; i < n; i++) {
                 // no duplicate object at top level
                 H4SDS sds = getSDS(HDFConstants.DFTAG_NDG, i,
-                        HObject.separator, false);
+                        HObject.SEPARATOR, false);
                 if (sds != null) {
                     ((H4Group) rootObject).addToMemberList(sds);
                 }
-            } // for (int i=0; i<n; i++)
-        } // if (sdid != HDFConstants.FAIL && HDFLibrary.SDfileinfo(sdid, argv))
+            }
+        } // (HDFLibrary.SDfileinfo(sdid, argv))
 
         // get top level VData
         try {
@@ -845,12 +846,12 @@ public class H4File extends FileFormat {
 
             // no duplicate object at top level
             H4Vdata vdata = getVdata(HDFConstants.DFTAG_VS, ref,
-                    HObject.separator, false);
+                    HObject.SEPARATOR, false);
 
             if (vdata != null) {
                 ((H4Group) rootObject).addToMemberList(vdata);
             }
-        } // for (int i=0; i<n; i++)
+        }
 
         if (rootObject != null) {
             // retrieve file annotation, GR and SDS global attributes
@@ -903,13 +904,16 @@ public class H4File extends FileFormat {
             return;
         }
 
-        int nelems = 0, ref = -1, tag = -1, index = -1;
+        int nelems = 0;
+        int ref = -1;
+        int tag = -1;
+        int index = -1;
         int[] tags = null;
         int[] refs = null;
 
         H4Group parentGroup = (H4Group) parentObj;
 
-        String fullPath = parentGroup.getPath() + parentGroup.getName() + HObject.separator;
+        String fullPath = parentGroup.getPath() + parentGroup.getName() + HObject.SEPARATOR;
         long gid = parentGroup.open();
         if (gid == HDFConstants.FAIL) {
             log.debug("depth_first(): Invalid Parent group ID");
@@ -1002,9 +1006,9 @@ public class H4File extends FileFormat {
                     break;
                 default:
                     break;
-            } // switch (tag)
+            } // switch
 
-        } // for (int i=0; i<nelms; i++)
+        } // (int i=0; i<nelms; i++)
 
         log.trace("depth_first(): finish");
     } // private depth_first()
@@ -1015,7 +1019,7 @@ public class H4File extends FileFormat {
      * object.
      */
     private static List<HObject> getMembersBreadthFirst(HObject obj) {
-        List<HObject> allMembers = new Vector<>();
+        List<HObject> allMembers = new ArrayList<>();
         Queue<HObject> queue = new LinkedList<>();
         HObject currentObject = obj;
 
@@ -1027,8 +1031,6 @@ public class H4File extends FileFormat {
 
             if(currentObject instanceof Group) {
                 queue.addAll(((Group) currentObject).getMemberList());
-            } else {
-                continue;
             }
         }
 
@@ -1060,7 +1062,6 @@ public class H4File extends FileFormat {
         String[] objName = { "" };
         int[] imgInfo = new int[4];
         int[] dim_sizes = { 0, 0 };
-        // int tag = HDFConstants.DFTAG_RIG;
 
         try {
             id = HDFLibrary.GRselect(grid, index);
@@ -1127,7 +1128,6 @@ public class H4File extends FileFormat {
         String[] objName = { "" };
         int[] tmpInfo = new int[HDFConstants.MAX_VAR_DIMS];
         int[] sdInfo = { 0, 0, 0 };
-        // int tag = HDFConstants.DFTAG_NDG;
 
         boolean isCoordvar = false;
         try {
@@ -1218,7 +1218,6 @@ public class H4File extends FileFormat {
         H4Vdata vdata = null;
         String[] objName = { "" };
         String[] vClass = { "" };
-        // int tag = HDFConstants.DFTAG_VS;
         long oid[] = { tag, ref };
 
         if (copyAllowed) {
@@ -1295,7 +1294,6 @@ public class H4File extends FileFormat {
         H4Group vgroup = null;
         String[] objName = { "" };
         String[] vClass = { "" };
-        // int tag = HDFConstants.DFTAG_VG;
         long oid[] = { tag, ref };
 
         if (ref <= 0) {
@@ -1525,8 +1523,8 @@ public class H4File extends FileFormat {
                     catch (HDFException ex) {
                         log.debug("getFileAnnotation(): ANendaccess failure: ", ex);
                     }
-                } // for (int i=0; i < fileInfo[annTYpe]; i++)
-            } // for (int annType=0; annType<2; annType++)
+                } // (int i=0; i < fileInfo[annTYpe]; i++)
+            } // (int annType=0; annType<2; annType++)
         }
         finally {
             if (anid >= 0) {
@@ -1631,8 +1629,8 @@ public class H4File extends FileFormat {
 
                 Attribute attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
-            } // for (int i=0; i<numberOfAttributes; i++)
-        } // if (b && numberOfAttributes>0)
+            } // (int i=0; i<numberOfAttributes; i++)
+        } // (b && numberOfAttributes>0)
 
         log.trace("getGRglobalAttribute(): finish");
         return attrList;
@@ -1726,8 +1724,8 @@ public class H4File extends FileFormat {
 
                 Attribute attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
-            } // for (int i=0; i<numberOfAttributes; i++)
-        } // if (b && numberOfAttributes>0)
+            } // (int i=0; i<numberOfAttributes; i++)
+        } // (b && numberOfAttributes>0)
 
         log.trace("getSDSglobalAttribute(): finish");
         return attrList;
@@ -1922,11 +1920,11 @@ public class H4File extends FileFormat {
         for (int i = 0; i < n; i++) {
             ref = refs[i];
             H4Group g = getVGroup(HDFConstants.DFTAG_VG, ref,
-                    HObject.separator, rootGroup, false);
+                    HObject.SEPARATOR, rootGroup, false);
             if (g != null) {
                 rootGroup.addToMemberList(g);
             }
-        } // for (int i=0; i<n; i++)
+        }
 
         // get the top level GR images
         argv = new int[2];
@@ -1944,12 +1942,12 @@ public class H4File extends FileFormat {
             for (int i = 0; i < n; i++) {
                 // no duplicate object at top level
                 H4GRImage gr = getGRImage(HDFConstants.DFTAG_RIG, i,
-                        HObject.separator, false);
+                        HObject.SEPARATOR, false);
                 if (gr != null) {
                     rootGroup.addToMemberList(gr);
                 }
-            } // for (int i=0; i<n; i++)
-        } // if ( grid!=HDFConstants.FAIL && HDFLibrary.GRfileinfo(grid,argv) )
+            }
+        } // ( HDFLibrary.GRfileinfo(grid, argv) )
 
         // get top level SDS
         try {
@@ -1966,12 +1964,12 @@ public class H4File extends FileFormat {
             for (int i = 0; i < n; i++) {
                 // no duplicate object at top level
                 H4SDS sds = getSDS(HDFConstants.DFTAG_NDG, i,
-                        HObject.separator, false);
+                        HObject.SEPARATOR, false);
                 if (sds != null) {
                     rootGroup.addToMemberList(sds);
                 }
-            } // for (int i=0; i<n; i++)
-        } // if (sdid != HDFConstants.FAIL && HDFLibrary.SDfileinfo(sdid, argv))
+            }
+        } // (HDFLibrary.SDfileinfo(sdid, argv))
 
         // get top level VData
         try {
@@ -1992,12 +1990,12 @@ public class H4File extends FileFormat {
 
             // no duplicate object at top level
             H4Vdata vdata = getVdata(HDFConstants.DFTAG_VS, ref,
-                    HObject.separator, false);
+                    HObject.SEPARATOR, false);
 
             if (vdata != null) {
                 rootGroup.addToMemberList(vdata);
             }
-        } // for (int i=0; i<n; i++)
+        }
 
         if (rootGroup != null) {
             // retrieve file annotation, GR and SDS globle attributes
@@ -2059,7 +2057,7 @@ public class H4File extends FileFormat {
         }
 
         if (idx >= 0) {
-            H4GRImage img = getGRImage(HDFConstants.DFTAG_RIG, idx, HObject.separator, false);
+            H4GRImage img = getGRImage(HDFConstants.DFTAG_RIG, idx, HObject.SEPARATOR, false);
             log.trace("getAttachedObject(): finish");
             return img;
         }
@@ -2074,10 +2072,10 @@ public class H4File extends FileFormat {
         }
 
         if (idx >= 0) {
-            H4SDS sds = getSDS(HDFConstants.DFTAG_NDG, idx, HObject.separator, false);
+            H4SDS sds = getSDS(HDFConstants.DFTAG_NDG, idx, HObject.SEPARATOR, false);
             log.trace("getAttachedObject(): finish");
             return sds;
-        } // if (sdid != HDFConstants.FAIL && HDFLibrary.SDfileinfo(sdid, argv))
+        }
 
         int ref = 0;
         try {
@@ -2106,10 +2104,10 @@ public class H4File extends FileFormat {
         }
 
         if (ref > 0) {
-            H4Vdata vdata = getVdata(HDFConstants.DFTAG_VS, ref, HObject.separator, false);
+            H4Vdata vdata = getVdata(HDFConstants.DFTAG_VS, ref, HObject.SEPARATOR, false);
             log.trace("getAttachedObject(): finish");
             return vdata;
-        } // for (int i=0; i<n; i++)
+        }
 
         log.debug("getAttachedObject(): Object not found");
         log.trace("getAttachedObject(): finish");
@@ -2118,17 +2116,17 @@ public class H4File extends FileFormat {
 
     @Override
     public void setNewLibBounds(String lowStr, String highStr) throws Exception {
-        return;
+        // HDF4 does not have this feature
     }
 
     @Override
     public int getIndexType(String strtype) {
-    	return -1;
+        return -1;
     }
 
     @Override
     public void setIndexType(int indexType) {
-    	return;
+        // HDF4 does not have this feature
     }
 
     @Override
@@ -2138,7 +2136,7 @@ public class H4File extends FileFormat {
 
     @Override
     public void setIndexOrder(int indexOrder) {
-        return;
+        // HDF4 does not have this feature
     }
 
 }

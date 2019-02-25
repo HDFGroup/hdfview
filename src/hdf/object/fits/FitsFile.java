@@ -43,7 +43,7 @@ public class FitsFile extends FileFormat
 {
     private static final long serialVersionUID = -1965689032980605791L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsFile.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsFile.class);
 
     /**
      * The root object of the file hierarchy.
@@ -277,8 +277,7 @@ public class FitsFile extends FileFormat
     // implementign FileFormat
     @Override
     public Group createGroup(String name, Group pgroup) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation for Fits.");
+        throw new UnsupportedOperationException("Unsupported createGroup operation for Fits.");
     }
 
     // implementign FileFormat
@@ -288,8 +287,7 @@ public class FitsFile extends FileFormat
         int tsize,
         int torder,
         int tsign) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation for Fits.");
+        throw new UnsupportedOperationException("Unsupported createDatatype operation for Fits.");
     }
 
     // implementign FileFormat
@@ -301,7 +299,7 @@ public class FitsFile extends FileFormat
         int tsign,
         String name) throws Exception
     {
-        throw new UnsupportedOperationException("Unsupported operation for Fits.");
+        throw new UnsupportedOperationException("Unsupported createDatatype with name operation for Fits.");
     }
 
     // implementign FileFormat
@@ -316,8 +314,7 @@ public class FitsFile extends FileFormat
         int gzip,
         Object fillValue,
         Object data) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported createScalarDS operation.");
     }
 
     // implementign FileFormat
@@ -333,22 +330,19 @@ public class FitsFile extends FileFormat
         int ncomp,
         int intelace,
         Object data) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported createImage operation.");
     }
 
     // implementing FileFormat
     @Override
     public void delete(HObject obj) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported delete operation.");
     }
 
     // implementing FileFormat
     @Override
     public HObject copy(HObject srcObj, Group dstGroup, String dstName) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported copy operation.");
     }
 
     /** copy a dataset into another group.
@@ -358,29 +352,25 @@ public class FitsFile extends FileFormat
      */
 
     private void copyDataset(Dataset srcDataset, FitsGroup pgroup) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported copyDataset operation.");
     }
 
     private void copyGroup(FitsGroup srcGroup, FitsGroup pgroup) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported copyGroup operation.");
     }
 
     /**
      * Copy attributes of the source object to the destination object.
      */
     public void copyAttributes(HObject src, HObject dst) {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported copyAttributes operation.");
     }
 
     /**
      * Copy attributes of the source object to the destination object.
      */
-    public void copyAttributes(long src_id, long dst_id) {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+    public void copyAttributes(long srcID, long dstID) {
+        throw new UnsupportedOperationException("Unsupported copyAttributes with id operation.");
     }
 
     /**
@@ -396,7 +386,6 @@ public class FitsFile extends FileFormat
     @Override
     public void writeAttribute(HObject obj, hdf.object.Attribute attr,
         boolean attrExisted) throws Exception {
-        // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 

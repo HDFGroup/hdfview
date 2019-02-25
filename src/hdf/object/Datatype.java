@@ -47,7 +47,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     private static final long serialVersionUID = -581324710549963177L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
 
     /**
      * The default definition for datatype size, order, and sign.

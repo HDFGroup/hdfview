@@ -48,7 +48,7 @@ public class H5Group extends Group {
 
     private static final long serialVersionUID = -951164512330444150L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
@@ -332,7 +332,7 @@ public class H5Group extends Group {
 
         try {
             if (isRoot()) {
-                gid = H5.H5Gopen(getFID(), separator, HDF5Constants.H5P_DEFAULT);
+                gid = H5.H5Gopen(getFID(), SEPARATOR, HDF5Constants.H5P_DEFAULT);
             }
             else {
                 gid = H5.H5Gopen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
@@ -424,13 +424,13 @@ public class H5Group extends Group {
             return null;
         }
 
-        String path = HObject.separator;
+        String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
-            path = pgroup.getPath() + pgroup.getName() + HObject.separator;
+            path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
             if (name.endsWith("/")) {
                 name = name.substring(0, name.length() - 1);
             }
-            int idx = name.lastIndexOf("/");
+            int idx = name.lastIndexOf('/');
             if (idx >= 0) {
                 name = name.substring(idx + 1);
             }
@@ -500,7 +500,7 @@ public class H5Group extends Group {
         HObject obj = null;
         for (int i = 0; i < n; i++) {
             obj = (HObject) members.get(i);
-            obj.setPath(getPath() + getName() + HObject.separator);
+            obj.setPath(getPath() + getName() + HObject.SEPARATOR);
         }
     }
 }

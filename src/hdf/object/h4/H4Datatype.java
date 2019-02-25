@@ -32,7 +32,7 @@ import hdf.object.Datatype;
 public class H4Datatype extends Datatype {
     private static final long serialVersionUID = -1342029403385521874L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Datatype.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Datatype.class);
 
     /**
      * Constructs a H4Datatype with specified class, size, byte order and sign.
@@ -411,7 +411,7 @@ public class H4Datatype extends Datatype {
      */
     @Override
     public void close(long id) {
-        ;
+        // No implementation
     }
 
     // Implementing DataFormat

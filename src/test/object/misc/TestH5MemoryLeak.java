@@ -20,64 +20,64 @@ import hdf.object.h5.H5File;
 public class TestH5MemoryLeak
 {
     /** Name of test file */
-    private final static String NAME_FILE_H5="TestH5MemoryLeak.h5";
+    private static final String NAME_FILE_H5="TestH5MemoryLeak.h5";
 
-    private final static boolean DEBUG = true;
-    private final static int NLOOPS = 10000;
-    private final static int NPRINT = 100;
-    private final static int NSTART = 2000;
+    private static final boolean DEBUG = true;
+    private static final int NLOOPS = 10000;
+    private static final int NPRINT = 100;
+    private static final int NSTART = 2000;
 
     /** Name of test groups */
-    private final static String NAME_GROUP = "/g0";
-    private final static String NAME_GROUP_ATTR = "/g0_attr";
-    private final static String NAME_GROUP_SUB = NAME_GROUP+"/g00";
+    private static final String NAME_GROUP = "/g0";
+    private static final String NAME_GROUP_ATTR = "/g0_attr";
+    private static final String NAME_GROUP_SUB = NAME_GROUP+"/g00";
 
     /** Name of test datasets */
-    private final static String DNAMES[] = {
+    private static final String DNAMES[] = {
             "/dataset_byte", "/dataset_int",
             "/dataset_float", "/dataset_str",
             "/dataset_enum", "/dataset_image",
             "/dataset_comp", NAME_GROUP + "/dataset_int",
             NAME_GROUP_SUB+ "/dataset_float", NAME_GROUP + "/dataset_comp", "/dataset_str_vlen"};
-    private final static String NAME_DATASET_CHAR           = DNAMES[0];
-    private final static String NAME_DATASET_INT            = DNAMES[1];
-    private final static String NAME_DATASET_FLOAT          = DNAMES[2];
-    private final static String NAME_DATASET_STR            = DNAMES[3];
-    private final static String NAME_DATASET_ENUM = DNAMES[4];
-    private final static String NAME_DATASET_IMAGE          = DNAMES[5];
-    private final static String NAME_DATASET_COMPOUND       = DNAMES[6];
-    private final static String NAME_DATASET_SUB            = DNAMES[7];
-    private final static String NAME_DATASET_SUB_SUB        = DNAMES[8];
-    private final static String NAME_DATASET_COMPOUND_SUB   = DNAMES[9];
-    private final static String NAME_DATASET_STR_VLEN       = DNAMES[10];
+    private static final String NAME_DATASET_CHAR           = DNAMES[0];
+    private static final String NAME_DATASET_INT            = DNAMES[1];
+    private static final String NAME_DATASET_FLOAT          = DNAMES[2];
+    private static final String NAME_DATASET_STR            = DNAMES[3];
+    private static final String NAME_DATASET_ENUM = DNAMES[4];
+    private static final String NAME_DATASET_IMAGE          = DNAMES[5];
+    private static final String NAME_DATASET_COMPOUND       = DNAMES[6];
+    private static final String NAME_DATASET_SUB            = DNAMES[7];
+    private static final String NAME_DATASET_SUB_SUB        = DNAMES[8];
+    private static final String NAME_DATASET_COMPOUND_SUB   = DNAMES[9];
+    private static final String NAME_DATASET_STR_VLEN       = DNAMES[10];
 
     /** Name of test dataype */
-    private final static String NAME_DATATYPE_INT   = NAME_GROUP + "/datatype_int";
-    private final static String NAME_DATATYPE_FLOAT = NAME_GROUP + "/datatype_float";
-    private final static String NAME_DATATYPE_STR   = NAME_GROUP + "/datatype_str";
+    private static final String NAME_DATATYPE_INT   = NAME_GROUP + "/datatype_int";
+    private static final String NAME_DATATYPE_FLOAT = NAME_GROUP + "/datatype_float";
+    private static final String NAME_DATATYPE_STR   = NAME_GROUP + "/datatype_str";
 
     // data space information
-    private final static int DATATYPE_SIZE  = 4;
-    private final static int RANK           = 2;
-    private final static long DIM1          = 10;
-    private final static long DIM2          = 5;
-    private final static long[] DIMs        = {DIM1, DIM2};
-    private final static long[] CHUNKs      = {DIM1/2, DIM2/2};
-    private final static int STR_LEN        = 20;
-    private final static int DIM_SIZE       = (int)(DIM1*DIM2);;
+    private static final int DATATYPE_SIZE  = 4;
+    private static final int RANK           = 2;
+    private static final long DIM1          = 10;
+    private static final long DIM2          = 5;
+    private static final long[] DIMs        = {DIM1, DIM2};
+    private static final long[] CHUNKs      = {DIM1/2, DIM2/2};
+    private static final int STR_LEN        = 20;
+    private static final int DIM_SIZE       = (int)(DIM1*DIM2);;
 
     /* testing data */
-    private final static int[] DATA_INT     = new int[DIM_SIZE];
-    private final static long[] DATA_LONG   = new long[DIM_SIZE];
-    private final static float[] DATA_FLOAT = new float[DIM_SIZE];
-    private final static byte[] DATA_BYTE   = new byte[DIM_SIZE];
-    private final static String[] DATA_STR  = new String[DIM_SIZE];
-    private final static int[] DATA_ENUM    = new int[DIM_SIZE];
-    private final static Vector DATA_COMP   = new Vector(3);
+    private static final int[] DATA_INT     = new int[DIM_SIZE];
+    private static final long[] DATA_LONG   = new long[DIM_SIZE];
+    private static final float[] DATA_FLOAT = new float[DIM_SIZE];
+    private static final byte[] DATA_BYTE   = new byte[DIM_SIZE];
+    private static final String[] DATA_STR  = new String[DIM_SIZE];
+    private static final int[] DATA_ENUM    = new int[DIM_SIZE];
+    private static final Vector DATA_COMP   = new Vector(3);
 
     // compound names and datatypes
-    private final static String[] COMPOUND_MEMBER_NAMES = { "int32", "float32", "string", "uint32", "vlstring" };
-    private final static H5Datatype[] COMPOUND_MEMBER_DATATYPES = { null, null, null, null, null };
+    private static final String[] COMPOUND_MEMBER_NAMES = { "int32", "float32", "string", "uint32", "vlstring" };
+    private static final H5Datatype[] COMPOUND_MEMBER_DATATYPES = { null, null, null, null, null };
 
     /**
      * Test memory leak by create file, open dataset, read/write data in an infinite loop
@@ -104,7 +104,7 @@ public class TestH5MemoryLeak
                 retValue = test_user_file(args[0]);
             else
                 retValue = test_default_file();
-        } catch (Throwable err) { retValue=1; }
+        } catch (Exception err) { retValue=1; }
 
         if (retValue <= 0)
             System.out.println("PASSED:\tcheck memory leak.\n");
@@ -301,7 +301,7 @@ public class TestH5MemoryLeak
                     catch (Exception ex) {
                         System.err.println("file.close() failed. "+ ex);
                     }
-                } // for (int openOption=0; openOption<2; openOption++)
+                } //  (int openOption=0; openOption<2; openOption++)
             } finally {
                 // delete the testing file
                 if (tmpFile != null) {

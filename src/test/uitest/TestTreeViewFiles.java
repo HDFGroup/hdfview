@@ -1289,4 +1289,67 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             }
         }
     }
+
+    @Test
+    public void openHDF5ArrayCompound() {
+        String filename = "tarray4";
+        String file_ext = ".h5";
+        String datasetname = "Dataset1";
+        SWTBotShell tableShell = null;
+        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+
+        try {
+            String val;
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+
+            assertTrue(constructWrongValueMessage("openHDF5ArrayCompound()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 2);
+            assertTrue("openHDF5ArrayCompound() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("openHDF5ArrayCompound() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname) == 0);
+
+            items[0].getNode(0).click();
+            items[0].getNode(0).contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+
+            table.click(3, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '0'", val.matches("0"));
+
+            table.click(3, 2);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '3.0'", val.matches("3.0"));
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdf_file, false);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 }

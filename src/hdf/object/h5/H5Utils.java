@@ -20,7 +20,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 
 public final class H5Utils {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Utils.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Utils.class);
 
     /**
      * Set up a hyperslab selection within a dataset.

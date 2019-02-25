@@ -15,6 +15,9 @@
 package hdf.object;
 
 public final class Utils {
+    private Utils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * Retrieves the Java Runtime Class of the given Object. B = byte array, S = short array, I = int
@@ -34,7 +37,7 @@ public final class Utils {
                 || cName.equals("java.util.Arrays$ArrayList") || cName.equals("java.util.ArrayList"))
             return 'L';
 
-        int cIndex = cName.lastIndexOf("[");
+        int cIndex = cName.lastIndexOf('[');
         if (cIndex >= 0) {
             return cName.charAt(cIndex + 1);
         }

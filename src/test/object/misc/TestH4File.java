@@ -202,7 +202,7 @@ public class TestH4File
                     {
                         // print out the first 1000 data points
                         n = Math.min(Array.getLength(data), 1000);
-                        StringBuffer sb = new StringBuffer();
+                        StringBuilder sb = new StringBuilder();
                         for (int j=0; j<n; j++)
                         {
                             sb.append(Array.get(data, j));
@@ -297,7 +297,7 @@ public class TestH4File
                             mdata = list.get(i);
                             if (mdata.getClass().isArray())
                             {
-                                StringBuffer sb = new StringBuffer();
+                                StringBuilder sb = new StringBuilder();
                                 // print out the first 1000 data points
                                 int mn = Math.min(Array.getLength(mdata), 1000);
                                 for (int j=0; j<mn; j++)
@@ -307,8 +307,8 @@ public class TestH4File
                                 }
                                 System.out.println(sb.toString());
                             }
-                        } // for (int i=0; i<n; i++)
-                    } // if (list != null)
+                        } //  (int i=0; i<n; i++)
+                    } //  (list != null)
                } //if (obj instanceof H4Vdata
             } //while (nodes.hasMoreElements())
         } //if (root != null)
@@ -380,7 +380,7 @@ public class TestH4File
                     {
                         // print out the first 1000 data points
                         n = Math.min(Array.getLength(data), 1000);
-                        StringBuffer sb = new StringBuffer();
+                        StringBuilder sb = new StringBuilder();
                         for (int j=0; j<n; j++)
                         {
                             sb.append(Array.get(data, j));

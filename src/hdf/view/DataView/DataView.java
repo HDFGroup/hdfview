@@ -24,13 +24,13 @@ import hdf.object.HObject;
  */
 public abstract interface DataView {
     /** The unknown view type */
-    public final static int DATAVIEW_UNKNOWN = -1;
+    public static final int DATAVIEW_UNKNOWN = -1;
 
     /** The table view type */
-    public final static int DATAVIEW_TABLE = 1;
+    public static final int DATAVIEW_TABLE = 1;
 
     /** The image view type */
-    public final static int DATAVIEW_IMAGE = 2;
+    public static final int DATAVIEW_IMAGE = 2;
 
     /** @return the data object displayed in this data viewer */
     public abstract HObject getDataObject();

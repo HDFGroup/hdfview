@@ -29,7 +29,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultTreeViewFactory extends TreeViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeViewFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeViewFactory.class);
 
     @Override
     public TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException {

@@ -35,7 +35,7 @@ import hdf.view.TreeView.DefaultTreeViewFactory;
  */
 public class DataViewFactoryProducer {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataViewFactoryProducer.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataViewFactoryProducer.class);
 
     public static DataViewFactory getFactory(DataViewType viewType) throws Exception {
         String factoryClassName = null;

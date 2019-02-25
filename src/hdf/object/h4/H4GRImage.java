@@ -103,7 +103,7 @@ public class H4GRImage extends ScalarDS
 {
     private static final long serialVersionUID = 1029672744963360976L;
 
-    private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4GRImage.class);
+    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4GRImage.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
@@ -196,27 +196,26 @@ public class H4GRImage extends ScalarDS
         log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
 
         Dataset dataset = null;
-        long srcdid=-1, dstdid=-1;
-        String path=null;
-        int[] count=null;
+        long srcdid = -1;
+        long dstdid = -1;
+        String path = null;
+        int[] count = null;
 
         if (pgroup == null) {
-            log.debug("copy(): Parent group is null");
-            log.trace("copy(): finish");
+            log.debug("copy(): Parent group is null - exit");
             return null;
         }
 
         if (pgroup.isRoot()) {
-            path = HObject.separator;
+            path = HObject.SEPARATOR;
         }
         else {
-            path = pgroup.getPath()+pgroup.getName()+HObject.separator;
+            path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
         }
 
         srcdid = open();
         if (srcdid < 0) {
-            log.debug("copy(): Invalid source dataset ID");
-            log.trace("copy(): finish");
+            log.debug("copy(): Invalid source dataset ID - exit");
             return null;
         }
 
@@ -239,7 +238,7 @@ public class H4GRImage extends ScalarDS
             log.debug("copy(): GRgetiminfo failure: ", ex);
         }
 
-        int ncomp = grInfo[0];
+        ncomp = grInfo[0];
         long tid = grInfo[1];
         int interlace = grInfo[2];
         int numberOfAttributes = grInfo[3];
@@ -247,8 +246,7 @@ public class H4GRImage extends ScalarDS
                 ((H4File)pgroup.getFileFormat()).getGRAccessID(),
                 dname, ncomp, tid, interlace, count);
         if (dstdid < 0) {
-            log.debug("copy(): Invalid dest dataset ID");
-            log.trace("copy(): finish");
+            log.debug("copy(): Invalid dest dataset ID - exit");
             return null;
         }
 
@@ -261,7 +259,7 @@ public class H4GRImage extends ScalarDS
 
         // read data from the source dataset
         int[] start = {0, 0};
-        if (buff == null) {
+        if ((buff == null) && (count != null)) {
             buff = new byte[count[0]*count[1] * HDFLibrary.DFKNTsize(tid)];
             HDFLibrary.GRreadimage(srcdid, start, null, count, buff);
         }
@@ -340,8 +338,7 @@ public class H4GRImage extends ScalarDS
 
         long id = open();
         if (id < 0) {
-            log.debug("readBytes(): Invalid ID");
-            log.trace("readBytes(): finish");
+            log.debug("readBytes(): Invalid ID - exit");
             return null;
         }
 
@@ -442,15 +439,13 @@ public class H4GRImage extends ScalarDS
         log.trace("write(): start");
 
         if (buf == null) {
-            log.debug("write(): buf is null");
-            log.trace("write(): finish");
+            log.debug("write(): buf is null - exit");
             return;
         }
 
         long id = open();
         if (id < 0) {
-            log.debug("write(): Invalid ID");
-            log.trace("write(): finish");
+            log.debug("write(): Invalid ID - exit");
             return;
         }
 
@@ -498,8 +493,7 @@ public class H4GRImage extends ScalarDS
         log.trace("getMetadata(): start");
 
         if (attributeList != null) {
-            log.trace("getMetadata(): attributeList != null");
-            log.trace("getMetadata(): finish");
+            log.trace("getMetadata(): attributeList != null - exit");
             return attributeList;
         }
 
@@ -565,7 +559,7 @@ public class H4GRImage extends ScalarDS
 
                     attr.setData(buf);
                 }
-            } // for (int i=0; i<n; i++)
+            } //  (int i=0; i<n; i++)
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);
@@ -587,8 +581,7 @@ public class H4GRImage extends ScalarDS
 
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
-            log.debug("writeMetadata(): Object not an Attribute");
-            log.trace("writeMetadata(): finish");
+            log.debug("writeMetadata(): Object not an Attribute - exit");
             return;
         }
 
@@ -712,7 +705,7 @@ public class H4GRImage extends ScalarDS
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
                     }
-                    storage_layout = "CHUNKED: " + String.valueOf(chunkSize[0]);
+                    storage_layout = "CHUNKED: " + chunkSize[0];
                     for (int i = 1; i < rank; i++) {
                         storage_layout += " X " + chunkSize[i];
                     }
@@ -760,15 +753,13 @@ public class H4GRImage extends ScalarDS
         log.trace("getPalette(): start");
 
         if (palette != null) {
-            log.trace("getPalette(): palette != null");
-            log.trace("getPalette(): finish");
+            log.trace("getPalette(): palette != null - exit");
             return palette;
         }
 
         long id = open();
         if (id < 0) {
-            log.debug("getPalette(): Invalid ID");
-            log.trace("getPalette(): finish");
+            log.debug("getPalette(): Invalid ID - exit");
             return null;
         }
 
@@ -782,9 +773,8 @@ public class H4GRImage extends ScalarDS
             HDFLibrary.GRgetlutinfo(lutid, lutInfo);
         }
         catch (HDFException ex) {
-            log.debug("getPalette(): failure: ", ex);
+            log.debug("getPalette(): exit with failure: ", ex);
             close(id);
-            log.trace("getPalette(): finish");
             return null;
         }
 
@@ -793,8 +783,7 @@ public class H4GRImage extends ScalarDS
         // RGB with 256 colors
         if ((lutInfo[0] != 3) || (lutInfo[2] < 0) | (lutInfo[3] != 256)) {
             close(id);
-            log.debug("getPalette(): no palette data");
-            log.trace("getPalette(): finish");
+            log.debug("getPalette(): no palette data - exit");
             return null;
         }
 
@@ -813,8 +802,7 @@ public class H4GRImage extends ScalarDS
 
         if (!b) {
             close(id);
-            log.debug("getPalette(): no palette data");
-            log.trace("getPalette(): finish");
+            log.debug("getPalette(): no palette data - exit");
             return null;
         }
 
@@ -888,21 +876,19 @@ public class H4GRImage extends ScalarDS
             (pgroup == null) ||
             (dims == null) ||
             ((gzip>0) && (chunks==null))) {
-            log.debug("create(): one or more parameters are null");
-            log.trace("create(): finish");
+            log.debug("create(): one or more parameters are null - exit");
             return null;
         }
 
         H4File file = (H4File)pgroup.getFileFormat();
         if (file == null) {
-            log.debug("create(): Parent group FileFormat is null");
-            log.trace("create(): finish");
+            log.debug("create(): Parent group FileFormat is null - exit");
             return null;
         }
 
-        String path = HObject.separator;
+        String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
-            path = pgroup.getPath()+pgroup.getName()+HObject.separator;
+            path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
         }
         if (interlace == ScalarDS.INTERLACE_PLANE) {
             interlace = HDFConstants.MFGR_INTERLACE_COMPONENT;
@@ -912,9 +898,9 @@ public class H4GRImage extends ScalarDS
         }
 
         int rank = 2;
-        int idims[] = new int[rank];
-        int imaxdims[] = new int[rank];
-        int start[] = new int [rank];
+        int[] idims = new int[rank];
+        int[] imaxdims = new int[rank];
+        int[] start = new int[rank];
         for (int i=0; i<rank; i++) {
             idims[i] = (int)dims[i];
             if (maxdims != null) {
@@ -926,7 +912,7 @@ public class H4GRImage extends ScalarDS
             start[i] = 0;
         }
 
-        int ichunks[] = null;
+        int[] ichunks = null;
         if (chunks != null) {
             ichunks = new int[rank];
             for (int i=0; i<rank; i++) {
@@ -944,15 +930,13 @@ public class H4GRImage extends ScalarDS
                 grid = HDFLibrary.GRcreate(gid, name, ncomp, tid, interlace, idims);
             }
             catch (Exception ex) {
-                log.debug("create(): failure: ", ex);
-                log.trace("create(): finish");
+                log.debug("create(): exit with failure: ", ex);
                 throw (ex);
             }
         }
 
         if (grid < 0) {
-            log.debug("create(): Invalid GR ID");
-            log.trace("create(): finish");
+            log.debug("create(): Invalid GR ID - exit");
             throw (new HDFException("Unable to create the new dataset."));
         }
 
@@ -983,8 +967,7 @@ public class H4GRImage extends ScalarDS
                 if (grid > 0) {
                     HDFLibrary.GRendaccess(grid);
                 }
-                log.debug("create(): Invalid VG ID");
-                log.trace("create(): finish");
+                log.debug("create(): Invalid VG ID - exit");
                 throw (new HDFException("Unable to open the parent group."));
             }
 
@@ -1055,14 +1038,13 @@ public class H4GRImage extends ScalarDS
                 }
 
                 if (attrBuff == null) {
-                    log.debug("copyAttribute(): attrBuff[{}] is null", i);
-                    log.trace("copyAttribute(): continue");
+                    log.debug("copyAttribute(): attrBuff[{}] is null continue", i);
                     continue;
                 }
 
                 // attach attribute to the destination dataset
                 HDFLibrary.GRsetattr(dstdid, attrName[0], attrInfo[0], attrInfo[1], attrBuff);
-            } // for (int i=0; i<numberOfAttributes; i++)
+            } //  (int i=0; i<numberOfAttributes; i++)
         }
         catch (Exception ex) {
             log.debug("copyAttribute(): failure: ", ex);

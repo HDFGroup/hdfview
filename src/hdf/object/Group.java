@@ -128,7 +128,7 @@ public abstract class Group extends HObject implements MetaDataContainer {
         if (memberList == null) {
             int size = Math.min(getNumberOfMembersInFile(), this
                     .getFileFormat().getMaxMembers());
-            memberList = new Vector<HObject>(size + 5);
+            memberList = new Vector<>(size + 5);
         }
 
         if ((object != null) && !memberList.contains(object)) {
@@ -160,7 +160,7 @@ public abstract class Group extends HObject implements MetaDataContainer {
 
         if ((memberList == null) && (theFile != null)) {
             int size = Math.min(getNumberOfMembersInFile(), this.getFileFormat().getMaxMembers());
-            memberList = new Vector<HObject>(size + 5); // avoid infinite loop search for groups without members
+            memberList = new Vector<>(size + 5); // avoid infinite loop search for groups without members
 
             // find the memberList from the file by checking the group path and
             // name. group may be created out of the structure tree
@@ -205,8 +205,8 @@ public abstract class Group extends HObject implements MetaDataContainer {
      * @return the members of this Group in breadth-first order.
      */
     public List<HObject> breadthFirstMemberList() {
-        Vector<HObject> members = new Vector<HObject>();
-        Queue<HObject> queue = new LinkedList<HObject>();
+        Vector<HObject> members = new Vector<>();
+        Queue<HObject> queue = new LinkedList<>();
         HObject currentObj = this;
 
         queue.addAll(((Group) currentObj).getMemberList());
@@ -227,8 +227,8 @@ public abstract class Group extends HObject implements MetaDataContainer {
      * @return the members of this Group in depth-first order.
      */
     public List<HObject> depthFirstMemberList() {
-        Vector<HObject> members = new Vector<HObject>();
-        Stack<HObject> stack = new Stack<HObject>();
+        Vector<HObject> members = new Vector<>();
+        Stack<HObject> stack = new Stack<>();
         HObject currentObj = this;
 
         // Push elements onto the stack in reverse order
@@ -275,7 +275,7 @@ public abstract class Group extends HObject implements MetaDataContainer {
             HObject theObj = null;
             for (int i = 0; i < n; i++) {
                 theObj = memberList.get(i);
-                theObj.setPath(this.getPath() + newName + HObject.separator);
+                theObj.setPath(this.getPath() + newName + HObject.SEPARATOR);
             }
         }
     }

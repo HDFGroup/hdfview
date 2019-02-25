@@ -35,37 +35,37 @@ import hdf.object.h5.H5ScalarDS;
  */
 public class TestH5Object
 {
-    private final static String FILE_NAME = "TestH5Object.h5";
-    private final static String FILE_NAME2 = "../../TestH5Obejct2.h5";
+    private static final String FILE_NAME = "TestH5Object.h5";
+    private static final String FILE_NAME2 = "../../TestH5Obejct2.h5";
 
-    private final static String NAME_GROUP = "/g0";
-    private final static String NAME_GROUP_ATTR = "/g0_attr";
-    private final static String NAME_GROUP_SUB = "/g0/g00";
-    private final static String NAME_DATASET_INT = "/dataset_int";
-    private final static String NAME_DATASET_FLOAT = "/dataset_float";
-    private final static String NAME_DATASET_CHAR = "/dataset_byte";
-    private final static String NAME_DATASET_STR = "/dataset_str";
-    private final static String NAME_DATASET_ENUM = "/dataset_enum";
-    private final static String NAME_DATASET_ATTR = "/dataset_with_attr";
-    private final static String NAME_DATASET_COMPOUND = "/comp_dataset";
-    private final static String NAME_DATASET_SUB = "/g0/dataset_int";
-    private final static String NAME_DATASET_SUB_SUB = "/g0/g00/dataset_float";
-    private final static H5File H5FILE = new H5File();
-    private final static long DIM1 = 50;
-    private final static long DIM2 = 10;
-    private final static long[] DIMs = {DIM1, DIM2};
-    private final static long[] CHUNKs = {DIM1/2, DIM2/2};
-    //    private final static int RANK = 2;
-    private final static int STR_LEN = 20;
-    private final static int DIM_SIZE = (int)(DIM1*DIM2);;
+    private static final String NAME_GROUP = "/g0";
+    private static final String NAME_GROUP_ATTR = "/g0_attr";
+    private static final String NAME_GROUP_SUB = "/g0/g00";
+    private static final String NAME_DATASET_INT = "/dataset_int";
+    private static final String NAME_DATASET_FLOAT = "/dataset_float";
+    private static final String NAME_DATASET_CHAR = "/dataset_byte";
+    private static final String NAME_DATASET_STR = "/dataset_str";
+    private static final String NAME_DATASET_ENUM = "/dataset_enum";
+    private static final String NAME_DATASET_ATTR = "/dataset_with_attr";
+    private static final String NAME_DATASET_COMPOUND = "/comp_dataset";
+    private static final String NAME_DATASET_SUB = "/g0/dataset_int";
+    private static final String NAME_DATASET_SUB_SUB = "/g0/g00/dataset_float";
+    private static final H5File H5FILE = new H5File();
+    private static final long DIM1 = 50;
+    private static final long DIM2 = 10;
+    private static final long[] DIMs = {DIM1, DIM2};
+    private static final long[] CHUNKs = {DIM1/2, DIM2/2};
+    //    private static final int RANK = 2;
+    private static final int STR_LEN = 20;
+    private static final int DIM_SIZE = (int)(DIM1*DIM2);;
 
     /* testing data */
-    private final static int[] DATA_INT = new int[DIM_SIZE];
-    private final static float[] DATA_FLOAT = new float[DIM_SIZE];
-    private final static byte[] DATA_BYTE = new byte[DIM_SIZE];
-    private final static String[] DATA_STR = new String[DIM_SIZE];
-    private final static int[] DATA_ENUM = new int[DIM_SIZE];
-    private final static Vector<Object> DATA_COMP = new Vector<>(3);
+    private static final int[] DATA_INT = new int[DIM_SIZE];
+    private static final float[] DATA_FLOAT = new float[DIM_SIZE];
+    private static final byte[] DATA_BYTE = new byte[DIM_SIZE];
+    private static final String[] DATA_STR = new String[DIM_SIZE];
+    private static final int[] DATA_ENUM = new int[DIM_SIZE];
+    private static final Vector<Object> DATA_COMP = new Vector<>(3);
 
     private static PrintStream out = null;
 

@@ -59,7 +59,7 @@ public class NC2Dataset extends ScalarDS {
      *            the unique identifier for this dataset.
      */
     public NC2Dataset(FileFormat fileFormat, Variable ncDataset, long[] oid) {
-        super(fileFormat, ncDataset.getName(), HObject.separator, oid);
+        super(fileFormat, ncDataset.getName(), HObject.SEPARATOR, oid);
         unsignedConverted = false;
         nativeDataset = ncDataset;
     }
