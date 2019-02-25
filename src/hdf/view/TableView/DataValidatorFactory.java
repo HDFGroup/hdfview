@@ -147,14 +147,6 @@ public class DataValidatorFactory {
         }
 
         @Override
-        public boolean validate(ILayerCell cell, IConfigRegistry configRegistry, Object newValue) {
-            throwValidationFailedException(cell.getRowIndex(), cell.getColumnIndex(), newValue,
-                    "A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
-
-            return false;
-        }
-
-        @Override
         public boolean validate(int colIndex, int rowIndex, Object newValue) {
             throwValidationFailedException(rowIndex, colIndex, newValue,
                     "A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
