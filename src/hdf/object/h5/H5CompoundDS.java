@@ -836,7 +836,7 @@ public class H5CompoundDS extends CompoundDS {
                         writeBuf, globalMemberIndex);
 
                 /*
-                 * Reset the index counter.
+                 * Reset the globalMemberIndex
                  */
                 globalMemberIndex[0] = 0;
             }
@@ -905,6 +905,25 @@ public class H5CompoundDS extends CompoundDS {
                         try {
                             if (memberType.isCompound())
                                 memberData = compoundTypeIO(io_type, did, spaceIDs, nPoints, memberType, writeBuf, globalMemberIndex);
+                            else if (memberType.isArray()) {
+                                /*
+                                 * Recursively detect array of compound datatypes.
+                                 */
+                                Datatype baseType = memberType.getDatatypeBase();
+                                boolean isArrayOfCompound = baseType.isCompound();
+                                while (baseType.isArray()) {
+                                    baseType = baseType.getDatatypeBase();
+                                    isArrayOfCompound = baseType.isCompound();
+                                }
+
+                                if (isArrayOfCompound) {
+                                    memberData = compoundTypeIO(io_type, did, spaceIDs, nPoints, memberType, writeBuf, globalMemberIndex);
+                                }
+                                else {
+                                    memberData = readSingleCompoundMember(did, spaceIDs, nPoints, memberType, memberName);
+                                    globalMemberIndex[0]++;
+                                }
+                            }
                             else {
                                 memberData = readSingleCompoundMember(did, spaceIDs, nPoints, memberType, memberName);
                                 globalMemberIndex[0]++;

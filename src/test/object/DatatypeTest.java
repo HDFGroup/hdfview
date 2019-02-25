@@ -60,21 +60,21 @@ public class DatatypeTest {
             "Compound", "Compound", "Compound", "Compound",
             "Compound", "Compound", "Compound", "Compound",
             "Compound", "Compound", "Compound",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
-            "8-bit enum (0=1, 1=2)", "16-bit enum (0=1, 1=2)", "32-bit enum (0=1, 1=2)", "64-bit enum (0=1, 1=2)", "native enum (0=1, 1=2)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
+            "8-bit enum (1=0, 2=1)", "16-bit enum (1=0, 2=1)", "32-bit enum (1=0, 2=1)", "64-bit enum (1=0, 2=1)", "native enum (1=0, 2=1)",
             "8-bit floating-point", "16-bit floating-point", "32-bit floating-point", "64-bit floating-point", "native floating-point",
             "8-bit floating-point", "16-bit floating-point", "32-bit floating-point", "64-bit floating-point", "native floating-point",
             "8-bit floating-point", "16-bit floating-point", "32-bit floating-point", "64-bit floating-point", "native floating-point",
@@ -410,8 +410,8 @@ public class DatatypeTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        ed.setEnumMembers("high=40, low=20");
-        assertEquals("high=40, low=20", ed.getEnumMembersAsString());
+        ed.setEnumMembers("40=high, 20=low");
+        assertEquals("40=high, 20=low", ed.getEnumMembersAsString());
     }
 
     /**

@@ -2217,7 +2217,8 @@ public abstract class DefaultBaseTableView implements TableView {
                                 for (int i = 0; i < len; i++) {
                                     if (isRegRef)
                                         showRegRefData((String) Array.get(theData, selectedRows[i]));
-                                    else if (isObjRef) showObjRefData(Array.getLong(theData, selectedRows[i]));
+                                    else if (isObjRef)
+                                        showObjRefData(Array.getLong(theData, selectedRows[i]));
                                 }
                             }
                         });
@@ -2243,10 +2244,7 @@ public abstract class DefaultBaseTableView implements TableView {
                         // Add data validator and validation error handler
                         DataValidator validator = null;
                         try {
-                            if (dataObject instanceof CompoundDS)
-                                validator = DataValidatorFactory.getDataValidator((CompoundDS) dataObject);
-                            else
-                                validator = DataValidatorFactory.getDataValidator(dataObject.getDatatype());
+                            validator = DataValidatorFactory.getDataValidator(dataObject);
                         }
                         catch (Exception ex) {
                             log.debug("EditingGridLayer: no DataValidator retrieved, data editing will be disabled");

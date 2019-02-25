@@ -135,10 +135,45 @@ public class DataFactoryUtils {
 
     /*
      * Recursive routine to build a mapping between relative indices in a compound
-     * type and the relative index of the first member of that compound. For
-     * example, consider the following compound datatype:
+     * type and the relative index of the first member of the nested compound that
+     * index belongs to. For example, consider the following compound datatype:
      *
-     * TODO:
+     *  ___________________________________________________________
+     * |                         Compound                          |
+     * |___________________________________________________________|
+     * |   Compound   |   Compound   |   Compound   |   Compound   |
+     * |______________|______________|______________|______________|
+     * | int |  float | int |  float | int |  float | int |  float |
+     * |_____|________|_____|________|_____|________|_____|________|
+     *
+     * The top-level mapping between relative compound offsets and the relative
+     * index of the first member of the nested compound would look like:
+     *
+     * (0=0, 1=0, 2=2, 3=2, 4=4, 5=4, 6=6, 7=6)
+     *
+     * Each of the nested Compound types would have the same mapping of:
+     *
+     * (0=0, 1=1)
+     *
+     * As the above mapping for the nested Compound types shows, when the member
+     * in question is not part of a further nested compound, its index is simply its
+     * offset, as in the following compound type:
+     *
+     *  ____________________________
+     * |          Compound          |
+     * |____________________________|
+     * |     |       |   Compound   |
+     * | int | float |______________|
+     * |     |       | int | float  |
+     * |_____|_______|_____|________|
+     *
+     * The top-level mapping would be:
+     *
+     * (0=0, 1=1, 2=2, 3=2)
+     *
+     * and the mapping for the nested compound would be:
+     *
+     * (0=0, 1=1)
      */
     private static void buildRelColIdxToStartIdxMap(HashMap<Integer, Integer> outMap, List<Datatype> allSelectedTypes,
             List<Datatype> localSelectedTypes, int[] curMapIndex, int[] curStartIdx, int depth) throws Exception {

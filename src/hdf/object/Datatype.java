@@ -14,6 +14,7 @@
 
 package hdf.object;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -357,6 +358,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         is_variable_str = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
         is_VLEN = (datatypeClass == Datatype.CLASS_VLEN) || is_variable_str;
 
+        compoundMemberNames = new ArrayList<String>();
+        compoundMemberTypes = new ArrayList<Datatype>();
+        compoundMemberOffsets = new ArrayList<Long>();
+
         log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
                 datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
     }
@@ -495,20 +500,20 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Sets the (name, value) pairs of enum members for enum datatype.
+     * Sets the (key, value) pairs of enum members for enum datatype.
      * <p>
      * For Example,
      * <dl>
-     * <dt>setEnumMembers("lowTemp=-40, highTemp=90")</dt>
-     * <dd>sets the value of enum member lowTemp to -40 and highTemp to 90.</dd>
+     * <dt>setEnumMembers("-40=lowTemp, 90=highTemp")</dt>
+     * <dd>sets the key of enum member lowTemp to -40 and highTemp to 90.</dd>
      * <dt>setEnumMembers("lowTemp, highTemp")</dt>
-     * <dd>sets enum members to defaults, i.e. lowTemp=0 and highTemp=1</dd>
-     * <dt>setEnumMembers("lowTemp=10, highTemp")</dt>
+     * <dd>sets enum members to defaults, i.e. 0=lowTemp and 1=highTemp</dd>
+     * <dt>setEnumMembers("10=lowTemp, highTemp")</dt>
      * <dd>sets enum member lowTemp to 10 and highTemp to 11.</dd>
      * </dl>
      *
      * @param enumStr
-     *            the (name, value) pairs of enum members
+     *            the (key, value) pairs of enum members
      */
     public final void setEnumMembers(String enumStr) {
         log.trace("setEnumMembers: is_enum enum_members={}", enumStr);
@@ -516,8 +521,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         String[] entries = enumStr.split(",");
         for (String entry : entries) {
             String[] keyValue = entry.split("=");
-            enumMembers.put(keyValue[1].trim(), keyValue[0].trim());
-            log.trace("setEnumMembers: is_enum value={} name={}", keyValue[1].trim(), keyValue[0].trim());
+            enumMembers.put(keyValue[0].trim(), keyValue[1].trim());
+            log.trace("setEnumMembers: is_enum value={} name={}", keyValue[0].trim(), keyValue[1].trim());
         }
     }
 
@@ -542,10 +547,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * For Example,
      * <dl>
      * <dt>getEnumMembersAsString()</dt>
-     * <dd>returns "lowTemp=10, highTemp=40"</dd>
+     * <dd>returns "10=lowTemp, 40=highTemp"</dd>
      * </dl>
      *
-     * @return enumStr the (name, value) pairs of enum members
+     * @return enumStr the (key, value) pairs of enum members
      */
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
@@ -562,7 +567,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             Entry thisEntry = entries.next();
             String memstr = (String) thisEntry.getKey();
             String memname = (String) thisEntry.getValue();
-            enumStr += memname + "=" + memstr;
+            enumStr += memstr + "=" + memname;
             i--;
             if (i > 0)
                 enumStr += ", ";

@@ -672,7 +672,15 @@ public class H4Vdata extends CompoundDS
         memberOrders = new int[numberOfMembers];
         isMemberSelected = new boolean[numberOfMembers];
 
-        for (int i=0; i<numberOfMembers; i++) {
+        try {
+            datatype = new H4Datatype(Datatype.CLASS_COMPOUND, -1, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            log.debug("init(): failed to create compound datatype for VData");
+            datatype = null;
+        }
+
+        for (int i = 0; i < numberOfMembers; i++) {
             isMemberSelected[i] = true;
             try {
                 memberNames[i] = HDFLibrary.VFfieldname(id, i);
@@ -688,6 +696,14 @@ public class H4Vdata extends CompoundDS
                 memberTIDs[i] = memberTIDs[i] & (~HDFConstants.DFNT_LITEND);
                 memberOrders[i] = HDFLibrary.VFfieldorder(id, i);
                 log.trace("init():{}> isMemberSelected[i]={} memberNames[i]={} memberTIDs[i]={} memberOrders[i]={}", i, isMemberSelected[i], memberNames[i], memberTIDs[i], memberOrders[i]);
+
+                /*
+                 * NOTE: An ugly workaround to get HDF4 "compound" datatypes to work correctly.
+                 */
+                if (datatype != null) {
+                    datatype.getCompoundMemberNames().add(memberNames[i]);
+                    datatype.getCompoundMemberTypes().add(memberTypes[i]);
+                }
             }
             catch (HDFException ex) {
                 log.debug("init(): member[{}]: ", i, ex);

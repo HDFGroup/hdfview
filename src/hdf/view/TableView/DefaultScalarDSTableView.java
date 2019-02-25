@@ -752,8 +752,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         return new EditableRule() {
             @Override
             public boolean isEditable(int columnIndex, int rowIndex) {
-                if (isReadOnly || isDisplayTypeChar || showAsBin || showAsHex
-                        || dataObject.getDatatype().isArray()) {
+                if (isReadOnly || isDisplayTypeChar || showAsBin || showAsHex) {
                     return false;
                 }
                 else {

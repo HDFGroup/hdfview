@@ -1930,7 +1930,10 @@ public class H5Datatype extends Datatype {
         log.trace("extractCompoundInfo(): start: name={}", name);
 
         if (dtype.isArray()) {
-            log.trace("extractCompoundInfo(): array type - extracting compound info from base datatype");
+            /*
+             * TODO:
+             */
+            /* log.trace("extractCompoundInfo(): array type - extracting compound info from base datatype");
 
             long[] arrayDims = dtype.getArrayDims();
 
@@ -1938,7 +1941,9 @@ public class H5Datatype extends Datatype {
                 for (int k = 0; k < (int) arrayDims[i]; k++) {
                     H5Datatype.extractCompoundInfo((H5Datatype) dtype.getDatatypeBase(), name, names, flatListTypes);
                 }
-            }
+            } */
+
+            H5Datatype.extractCompoundInfo((H5Datatype) dtype.getDatatypeBase(), name, names, flatListTypes);
         }
         else if (dtype.isVLEN()) {
             log.trace("extractCompoundInfo(): variable-length type - extracting compound info from base datatype");
@@ -1985,12 +1990,12 @@ public class H5Datatype extends Datatype {
                     log.trace("extractCompoundInfo(): continue after recursive compound");
                     continue;
                 }
-                else if (mtype.isArray()) {
+                else {
+                    /*
+                     * Recursively detect any nested array/vlen of compound members
+                     */
                     boolean compoundFound = false;
 
-                    /*
-                     * Recursively detect any nested array of compound members
-                     */
                     Datatype base = mtype.getDatatypeBase();
                     while (base != null) {
                         if (base.isCompound())
@@ -2000,14 +2005,11 @@ public class H5Datatype extends Datatype {
                     }
 
                     if (compoundFound) {
-                        H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.separator, names, flatListTypes);
-                        log.trace("extractCompoundInfo(): continue after recursive array of compound");
+                        /* H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.separator, names, flatListTypes);
+                        log.trace("extractCompoundInfo(): continue after recursive array/vlen of compound");
+
+                        continue; */
                     }
-                }
-                else if (mtype.isVLEN()) {
-                    /*
-                     * TODO:
-                     */
                 }
 
                 if (names != null) {

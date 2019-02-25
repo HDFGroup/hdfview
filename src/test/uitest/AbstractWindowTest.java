@@ -52,6 +52,7 @@ public abstract class AbstractWindowTest {
 
     private static int open_files = 0;
 
+    protected static Rectangle monitorBounds;
 
     private static void clearRemovePropertyFile() {
         // the local property file name
@@ -274,7 +275,9 @@ public abstract class AbstractWindowTest {
                                 }
                             }
 
-                            shell.setBounds(activeMonitor.getBounds());
+                            monitorBounds = activeMonitor.getBounds();
+
+                            shell.setBounds(monitorBounds);
 
                             // wait for the test setup
                             swtBarrier.await();
