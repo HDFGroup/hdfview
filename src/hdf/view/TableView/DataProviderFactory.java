@@ -38,7 +38,7 @@ import hdf.view.Tools;
  */
 public class DataProviderFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataProviderFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataProviderFactory.class);
 
     /*
      * To keep things clean from an API perspective, keep a static reference to the last
@@ -266,7 +266,7 @@ public class DataProviderFactory {
 
             if ((newValue == null) || ((newValue = ((String) newValue).trim()) == null)) {
                 log.debug("setDataValue({}, {}, {}): cell value not updated; new value is null", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): finish", rowIndex, columnIndex, newValue);
+                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
                 return;
             }
 
@@ -274,7 +274,7 @@ public class DataProviderFactory {
             Object oldVal = this.getDataValue(columnIndex, rowIndex);
             if ((oldVal != null) && newValue.equals(oldVal.toString())) {
                 log.debug("setDataValue({}, {}, {}): cell value not updated; new value same as old value", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): finish", rowIndex, columnIndex, newValue);
+                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
                 return;
             }
 
@@ -663,7 +663,7 @@ public class DataProviderFactory {
 
             if ((newValue == null) || ((newValue = ((String) newValue).trim()) == null)) {
                 log.debug("setDataValue({}, {}, {}): cell value not updated; new value is null", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): finish", rowIndex, columnIndex, newValue);
+                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
                 return;
             }
 
@@ -671,7 +671,7 @@ public class DataProviderFactory {
             Object oldVal = this.getDataValue(columnIndex, rowIndex);
             if ((oldVal != null) && newValue.equals(oldVal.toString())) {
                 log.debug("setDataValue({}, {}, {}): cell value not updated; new value same as old value", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): finish", rowIndex, columnIndex, newValue);
+                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
                 return;
             }
 
@@ -1046,7 +1046,7 @@ public class DataProviderFactory {
 
     private static class VlenDataProvider extends HDFDataProvider {
 
-        private final StringBuffer buffer;
+        private final StringBuilder buffer;
 
         VlenDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
@@ -1055,7 +1055,7 @@ public class DataProviderFactory {
 
             log.trace("constructor: start");
 
-            buffer = new StringBuffer();
+            buffer = new StringBuilder();
 
             log.trace("constructor: finish");
         }
@@ -1460,9 +1460,9 @@ public class DataProviderFactory {
      * TableView from the array of strings.
      */
     private static class CompoundAttributeDataProvider extends HDFDataProvider {
-        private Object             theValue;
+        // private Object theValue;
 
-        private final StringBuffer stringBuffer;
+        private final StringBuilder stringBuffer;
 
         private final int          orders[];
         private final int          nFields;
@@ -1477,7 +1477,7 @@ public class DataProviderFactory {
 
             CompoundDataFormat dataFormat = (CompoundDataFormat) dataFormatReference;
 
-            stringBuffer = new StringBuffer();
+            stringBuffer = new StringBuilder();
 
             orders = dataFormat.getSelectedMemberOrders();
             nFields = dataFormat.getSelectedMemberCount();

@@ -55,7 +55,7 @@ import hdf.view.DataView.DataViewManager;
 
 public class DefaultCompoundDSTableView extends DefaultBaseTableView implements TableView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundDSTableView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundDSTableView.class);
 
     /**
      * Constructs a CompoundDS TableView with no additional data properties.
@@ -215,7 +215,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         int size = Array.getLength(colData);
         String cName = colData.getClass().getName();
-        int cIndex = cName.lastIndexOf("[");
+        int cIndex = cName.lastIndexOf('[');
         char nt = ' ';
         if (cIndex >= 0) {
             nt = cName.charAt(cIndex + 1);
@@ -256,13 +256,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     @Override
     protected void showObjRefData(long ref) {
         // Currently no support for showing Obj. Ref. Data in Compound Datasets
-        return;
     }
 
     @Override
     protected void showRegRefData(String reg) {
         // Currently no support for show Reg. Ref. Data in Compound Datasets
-        return;
     }
 
     /**
@@ -334,7 +332,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * members for Compound Datasets.
      */
     private class CompoundDSColumnHeaderDataProvider implements IDataProvider {
-        // Column names with CompoundDS separator character '->' left intact.
+        // Column names with CompoundDS SEPARATOR character '->' left intact.
         // Used in CompoundDSNestedColumnHeader to provide correct nesting structure
         private final String[] columnNamesFull;
 
@@ -363,7 +361,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     // Copy the dataset member name reference, so changes to the column name
                     // don't affect the dataset's internal member names
                     columnNames[idx] = new String(datasetMemberNames[i]);
-                    columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.separator, "->");
+                    columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.SEPARATOR, "->");
 
                     if ((types[idx] != null) && (types[idx].isArray())) {
                         Datatype baseType = types[idx].getDatatypeBase();
@@ -420,7 +418,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-            return;
         }
     }
 

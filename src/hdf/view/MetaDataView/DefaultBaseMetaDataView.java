@@ -52,6 +52,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Datatype;
@@ -85,7 +87,7 @@ import hdf.view.dialog.NewAttributeDialog;
  */
 public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultBaseMetaDataView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultBaseMetaDataView.class);
 
     protected final Display               display = Display.getDefault();
 
@@ -115,10 +117,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     protected boolean                     isH5, isH4;
 
-    private final static String[]         attrTableColNames = { "Name", "Type", "Array Size", "Value[50](...)" };
+    private static final String[]         attrTableColNames = { "Name", "Type", "Array Size", "Value[50](...)" };
 
-    private final static int              attrTabIndex = 0;
-    private final static int              generalTabIndex = 1;
+    private static final int              attrTabIndex = 0;
+    private static final int              generalTabIndex = 1;
 
     public DefaultBaseMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         log.trace("start");
@@ -160,6 +162,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         parent.setData("MetaDataView.LastTabIndex", attrTabIndex);
                         break;
                     case generalTabIndex:
+                    default:
                         parent.setData("MetaDataView.LastTabIndex", generalTabIndex);
                         break;
                 }
@@ -334,7 +337,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         attr.getDatatype().getDescription());
 
                 addAttributeTableItem(attrTable, attr);
-            } // for (int i=0; i<n; i++)
+            }
         }
 
         for (int i = 0; i < attrTableColNames.length; i++) {
@@ -407,6 +410,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             else if (dataObject instanceof Datatype) {
                 objTypeStr = "HDF5 Named Datatype";
+            }
+            long fcpl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_CREATE);
+            try {
+                H5.H5Pget_link_creation_order(fcpl_id);
+
+            }
+            catch (Exception err) {
+                // Empty catch
             }
         }
         else if (isH4) {
@@ -493,7 +504,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             HObject root = theFile.getRootObject();
             HObject theObj = null;
             Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
-            int groupCount = 0, datasetCount = 0;
+            int groupCount = 0;
+            int datasetCount = 0;
 
             while (it.hasNext()) {
                 theObj = it.next();
@@ -860,9 +872,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             return;
         }
 
-        int array_length = Array.getLength(data);
+        int arrayLength = Array.getLength(data);
         StringTokenizer st = new StringTokenizer(newValue, ",");
-        if (st.countTokens() < array_length) {
+        if (st.countTokens() < arrayLength) {
             log.debug("updateAttributeValue(): More data values needed: {}", newValue);
             log.trace("updateAttributeValue(): finish");
             Tools.showError(display.getShells()[0], "Update", "More data values needed: " + newValue);
@@ -871,19 +883,19 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         char NT = ' ';
         String cName = data.getClass().getName();
-        int cIndex = cName.lastIndexOf("[");
+        int cIndex = cName.lastIndexOf('[');
         if (cIndex >= 0) {
             NT = cName.charAt(cIndex + 1);
         }
         boolean isUnsigned = attr.getDatatype().isUnsigned();
 
-        log.trace("updateAttributeValue(): array_length={} cName={} NT={} isUnsigned={}", array_length, cName,
+        log.trace("updateAttributeValue(): array_length={} cName={} NT={} isUnsigned={}", arrayLength, cName,
                 NT, isUnsigned);
 
         double d = 0;
         String theToken = null;
         long max = 0, min = 0;
-        for (int i = 0; i < array_length; i++) {
+        for (int i = 0; i < arrayLength; i++) {
             max = min = 0;
             theToken = st.nextToken().trim();
             try {
@@ -1229,7 +1241,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
             String userBlockInfo = null;
             if ((radix == 2) || (radix == 8) || (radix == 16) || (radix == 10)) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 for (headerSize = 0; headerSize < userBlock.length; headerSize++) {
                     int intValue = userBlock[headerSize];
                     if (intValue < 0) {

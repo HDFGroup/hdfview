@@ -51,14 +51,14 @@ package hdf.object;
 public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     private static final long serialVersionUID = -4880399929644095662L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
 
     /**
      * A single character to separate the names of nested compound fields. An
      * extended ASCII character, 0x95, is used to avoid common characters in
      * compound names.
      */
-    public static final String separator = "\u0095";
+    public static final String SEPARATOR = "\u0095";
 
     /**
      * The number of members of the compound dataset.

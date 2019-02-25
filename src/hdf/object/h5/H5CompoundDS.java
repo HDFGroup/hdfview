@@ -84,7 +84,7 @@ import hdf.object.Utils;
 public class H5CompoundDS extends CompoundDS {
     private static final long serialVersionUID = -5968625125574032736L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundDS.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundDS.class);
 
     /**
      * The list of attributes of this data object. Members of the list are instance of Attribute.
@@ -98,7 +98,7 @@ public class H5CompoundDS extends CompoundDS {
     /**
      * A list of names of all fields including nested fields.
      * <p>
-     * The nested names are separated by CompoundDS.separator. For example, if compound dataset "A" has
+     * The nested names are separated by CompoundDS.SEPARATOR. For example, if compound dataset "A" has
      * the following nested structure,
      *
      * <pre>
@@ -325,14 +325,14 @@ public class H5CompoundDS extends CompoundDS {
                                         virtualNameList.add(fname);
                                         log.trace("init(): virtualNameList[{}]={}", next, fname);
                                     }
-                                    catch (Throwable err) {
+                                    catch (Exception err) {
                                         log.trace("init(): vds[{}] continue", next);
                                         continue;
                                     }
                                 }
                             }
                         }
-                        catch (Throwable err) {
+                        catch (Exception err) {
                             log.debug("init(): vds count error: ", err);
                         }
                     }
@@ -436,7 +436,7 @@ public class H5CompoundDS extends CompoundDS {
                         log.debug("init()[{}]: memberNames[{}] get failure: ", i, i, ex);
                         memberNames[i] = "null";
                     }
-                } // for (int i=0; i<numberOfMembers; i++)
+                } //  (int i=0; i<numberOfMembers; i++)
 
                 inited = true;
             }
@@ -981,7 +981,7 @@ public class H5CompoundDS extends CompoundDS {
                             globalMemberIndex[0]++;
                         }
                     }
-                } // for (i = 0, writeListIndex = 0; i < atomicTypeList.size(); i++)
+                } //  (i = 0, writeListIndex = 0; i < atomicTypeList.size(); i++)
             }
             catch (Exception ex) {
                 log.debug("compoundTypeIO(): failure: ", ex);
@@ -1122,7 +1122,7 @@ public class H5CompoundDS extends CompoundDS {
                 // to C-style integers
                 long tsize = memberType.getDatatypeSize();
                 String cname = theData.getClass().getName();
-                char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+                char dname = cname.charAt(cname.lastIndexOf('[') + 1);
                 boolean doIntConversion = (((tsize == 1) && (dname == 'S'))
                         || ((tsize == 2) && (dname == 'I')) || ((tsize == 4) && (dname == 'J')));
 
@@ -1315,7 +1315,7 @@ public class H5CompoundDS extends CompoundDS {
         List<Object> theData = null;
 
         List<Datatype> allSelectedTypes = Arrays.asList(this.getSelectedMemberTypes());
-        List<Datatype> localTypes = new ArrayList<Datatype>(dtype.getCompoundMemberTypes());
+        List<Datatype> localTypes = new ArrayList<>(dtype.getCompoundMemberTypes());
         Iterator<Datatype> localIt = localTypes.iterator();
         while (localIt.hasNext()) {
             Datatype curType = localIt.next();
@@ -1327,7 +1327,7 @@ public class H5CompoundDS extends CompoundDS {
                 localIt.remove();
         }
 
-        theData = new ArrayList<Object>(localTypes.size());
+        theData = new ArrayList<>(localTypes.size());
         for (int i = 0, index = 0; i < localTypes.size(); i++) {
             Datatype curType = localTypes.get(i);
 
@@ -1482,7 +1482,7 @@ public class H5CompoundDS extends CompoundDS {
                                 storage_layout += "Last Available";
                             storage_layout += "\nGAP : " + String.valueOf(virt_gap);
                         }
-                        catch (Throwable err) {
+                        catch (Exception err) {
                             log.debug("getMetadata(): vds error: ", err);
                             storage_layout += "ERROR";
                         }
@@ -1496,7 +1496,7 @@ public class H5CompoundDS extends CompoundDS {
                                     String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
                                     storage_layout += "\n" + fname + " : " + dsetname;
                                 }
-                                catch (Throwable err) {
+                                catch (Exception err) {
                                     log.debug("getMetadata(): vds space[{}] error: ", next, err);
                                     log.trace("getMetadata(): vds[{}] continue", next);
                                     storage_layout += "ERROR";
@@ -1505,7 +1505,7 @@ public class H5CompoundDS extends CompoundDS {
                             }
                         }
                     }
-                    catch (Throwable err) {
+                    catch (Exception err) {
                         log.debug("getMetadata(): vds count error: ", err);
                         storage_layout += "ERROR";
                     }
@@ -1543,7 +1543,7 @@ public class H5CompoundDS extends CompoundDS {
                             log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cd_values[j]);
                         }
                     }
-                    catch (Throwable err) {
+                    catch (Exception err) {
                         log.debug("getMetadata(): filter[{}] error: ", i, err);
                         log.trace("getMetadata(): filter[{}] continue", i);
                         filters += "ERROR";
@@ -1600,7 +1600,7 @@ public class H5CompoundDS extends CompoundDS {
                         }
                         log.debug("getMetadata(): filter[{}] is user defined compression", i);
                     }
-                } // for (int i=0; i<nfilt; i++)
+                } //  (int i=0; i<nfilt; i++)
 
                 if (compression.length() == 0) {
                     compression = "NONE";
@@ -1989,13 +1989,13 @@ public class H5CompoundDS extends CompoundDS {
             return null;
         }
 
-        String path = HObject.separator;
+        String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
-            path = pgroup.getPath() + pgroup.getName() + HObject.separator;
+            path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
             if (name.endsWith("/")) {
                 name = name.substring(0, name.length() - 1);
             }
-            int idx = name.lastIndexOf("/");
+            int idx = name.lastIndexOf('/');
             if (idx >= 0) {
                 name = name.substring(idx + 1);
             }
@@ -2051,7 +2051,7 @@ public class H5CompoundDS extends CompoundDS {
                 }
                 throw ex;
             }
-        } // for (int i = 0; i < nMembers; i++) {
+        } //  (int i = 0; i < nMembers; i++) {
 
         // setup chunking and compression
         boolean isExtentable = false;

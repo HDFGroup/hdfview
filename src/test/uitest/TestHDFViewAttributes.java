@@ -36,10 +36,10 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
      * Constants to keep track of the order of the columns in the attribute table,
      * in case these change in the future.
      */
-    private final static int ATTRIBUTE_TABLE_NAME_COLUMN_INDEX = 0;
-    private final static int ATTRIBUTE_TABLE_TYPE_COLUMN_INDEX = 1;
-    private final static int ATTRIBUTE_TABLE_ARRAY_SIZE_COLUMN_INDEX = 2;
-    private final static int ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX = 3;
+    private static final int ATTRIBUTE_TABLE_NAME_COLUMN_INDEX = 0;
+    private static final int ATTRIBUTE_TABLE_TYPE_COLUMN_INDEX = 1;
+    private static final int ATTRIBUTE_TABLE_ARRAY_SIZE_COLUMN_INDEX = 2;
+    private static final int ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX = 3;
 
     private void createNewGroup() {
         SWTBotShell groupShell = null;

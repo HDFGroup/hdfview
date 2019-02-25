@@ -115,7 +115,7 @@ import hdf.view.dialog.NewLinkDialog;
  */
 public class DefaultTreeView implements TreeView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
 
     private Shell                         shell;
 
@@ -152,10 +152,10 @@ public class DefaultTreeView implements TreeView {
     //private ArrayList<TreeItem>           breadthFirstItems = null;
 
     /** A list of currently open files */
-    private final List<FileFormat>        fileList = new Vector<>();
+    private final List<FileFormat> fileList = new ArrayList<>();
 
     /** A list of editing GUI components */
-    private List<MenuItem>                editGUIs = new Vector<>();
+    private List<MenuItem> editGUIs = new ArrayList<>();
 
     /**
      * The popup menu used to display user choice of actions on data object.
@@ -287,7 +287,8 @@ public class DefaultTreeView implements TreeView {
         tree.addListener(SWT.Traverse, new Listener() {
             @Override
             public void handleEvent(Event event) {
-                if(!(event.detail == SWT.TRAVERSE_RETURN)) return;
+                if (event.detail != SWT.TRAVERSE_RETURN)
+                    return;
 
                 TreeItem item = selectedItem;
                 if(item == null) return;
@@ -315,10 +316,9 @@ public class DefaultTreeView implements TreeView {
                         loadDataThread = new LoadDataThread();
                         loadDataThread.start();
                     }
-                    catch (Throwable err) {
+                    catch (Exception err) {
                         shell.getDisplay().beep();
                         Tools.showError(shell, "Select", err.getMessage());
-                        return;
                     }
                 }
             }
@@ -561,10 +561,9 @@ public class DefaultTreeView implements TreeView {
                     loadDataThread = new LoadDataThread();
                     loadDataThread.start();
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Open", err.getMessage());
-                    return;
                 }
             }
         });
@@ -580,11 +579,10 @@ public class DefaultTreeView implements TreeView {
                     loadDataThread = new LoadDataThread();
                     loadDataThread.start();
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     shell.getDisplay().beep();
                     err.printStackTrace();
                     Tools.showError(shell, "Open", err.getMessage());
-                    return;
                 }
             }
         });
@@ -1211,7 +1209,6 @@ public class DefaultTreeView implements TreeView {
         catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", ex.getMessage());
-            return;
         }
     }
 
@@ -1371,7 +1368,7 @@ public class DefaultTreeView implements TreeView {
         Group pgroup = (Group) pitem.getData();
         String fullPath = pgroup.getPath() + pgroup.getName();
         if (pgroup.isRoot()) {
-            fullPath = HObject.separator;
+            fullPath = HObject.SEPARATOR;
         }
 
         String msg = "";
@@ -1455,7 +1452,7 @@ public class DefaultTreeView implements TreeView {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Paste", ex.getMessage());
             }
-        } // for (int i = 0; i < objList.length; i++)
+        } // (int i = 0; i < objList.length; i++)
 
         log.trace("pasteObject(...): finish");
     }
@@ -1573,7 +1570,7 @@ public class DefaultTreeView implements TreeView {
             }
 
             currentItem.dispose();
-        } // for (int i=0; i < currentSelections.length; i++) {
+        } // (int i=0; i < currentSelections.length; i++)
     }
 
     /**
@@ -1809,7 +1806,7 @@ public class DefaultTreeView implements TreeView {
             }
         }
         else {
-            return !(((HDFView) viewer).getDataView(obj) == null);
+            return (((HDFView) viewer).getDataView(obj) != null);
         }
 
         return isOpen;
@@ -1865,7 +1862,7 @@ public class DefaultTreeView implements TreeView {
 
         log.trace("breadthFirstUserObjects(): start");
 
-        Vector<Object> list = new Vector<>();
+        ArrayList<Object> list = new ArrayList<>();
         list.add(item.getData()); // Add this item to the list first
 
         Iterator<TreeItem> it = getItemsBreadthFirst(item).iterator();
@@ -2129,7 +2126,7 @@ public class DefaultTreeView implements TreeView {
 
         TreeItem rootItem = findTreeItem(root);
         int n = rootItem.getItemCount();
-        Vector<TreeItem> objList = new Vector<>(n);
+        ArrayList<TreeItem> objList = new ArrayList<>(n);
 
         try {
             for (int i = 0; i < n; i++) objList.add(rootItem.getItem(i));
@@ -2153,7 +2150,7 @@ public class DefaultTreeView implements TreeView {
         HObject pitem = newFile.getRootObject();
 
         pasteObject(objList.toArray(new TreeItem[0]), findTreeItem(pitem), newFile);
-        objList.setSize(0);
+        objList.clear();
 
         Group srcGroup = (Group) root;
         Group dstGroup = (Group) newFile.getRootObject();
@@ -2348,7 +2345,7 @@ public class DefaultTreeView implements TreeView {
                     ((HDFView) viewer).showStatus("Unable to open file '" + filename
                             + "': HDF4 library linking error - see log for more info");
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
                 continue;
@@ -2367,7 +2364,7 @@ public class DefaultTreeView implements TreeView {
                     ((HDFView) viewer).showStatus("Unable to open file '" + filename
                             + "': HDF5 library linking error - see log for more info");
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
                 continue;
@@ -2381,7 +2378,7 @@ public class DefaultTreeView implements TreeView {
                         break;
                     }
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
             }
@@ -2506,8 +2503,6 @@ public class DefaultTreeView implements TreeView {
                 break;
             }
         }
-
-        //if(fileList.size() <= 0) breadthFirstItems = null;
     }
 
     /**
@@ -2559,16 +2554,16 @@ public class DefaultTreeView implements TreeView {
         TreeItem[] fileRoots = tree.getItems();
         TreeItem rootItem = null;
         HObject rootObject = null;
-        for(int i = 0; i < fileRoots.length; i++) {
+        for (int i = 0; i < fileRoots.length; i++) {
             rootItem = fileRoots[i];
             rootObject = (HObject) rootItem.getData();
 
             if (rootObject == null) continue;
 
-            if(rootObject.getFileFormat().equals(obj.getFileFormat())) {
+            if (rootObject.getFileFormat().equals(obj.getFileFormat())) {
                 // If the object being looked for is a file root, return
                 // this found TreeItem
-                if(obj instanceof Group && ((Group) obj).isRoot()) {
+                if (obj instanceof Group && ((Group) obj).isRoot()) {
                     return rootItem;
                 }
 
@@ -2586,7 +2581,7 @@ public class DefaultTreeView implements TreeView {
         if (breadthFirstItems != null) {
             Iterator<TreeItem> it = getItemsBreadthFirst(rootItem).iterator();
 
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 theItem = it.next();
                 theObj = (HObject) theItem.getData();
 
@@ -2594,7 +2589,7 @@ public class DefaultTreeView implements TreeView {
                     continue;
                 }
 
-                if(theObj.equals(obj)) {
+                if (theObj.equals(obj)) {
                     return theItem;
                 }
             }
@@ -3132,7 +3127,7 @@ public class DefaultTreeView implements TreeView {
                     try {
                         selectedObject.getFileFormat().setLibBounds(earliestCombo.getItem(earliestCombo.getSelectionIndex()), latestCombo.getItem(latestCombo.getSelectionIndex()));
                     }
-                    catch (Throwable err) {
+                    catch (Exception err) {
                         shell.getDisplay().beep();
                         Tools.showError(shell, "Version bounds", "Error when setting lib version bounds");
                         return;

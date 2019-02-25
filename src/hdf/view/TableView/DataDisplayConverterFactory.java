@@ -43,7 +43,7 @@ import hdf.view.Tools;
  */
 public class DataDisplayConverterFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataDisplayConverterFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataDisplayConverterFactory.class);
 
     /*
      * To keep things clean from an API perspective, keep a static reference to the last
@@ -196,7 +196,7 @@ public class DataDisplayConverterFactory {
 
         private final HDFDisplayConverter[]     memberTypeConverters;
 
-        private final StringBuffer              buffer;
+        private final StringBuilder              buffer;
 
         private final int                       nTotFields;
 
@@ -261,7 +261,7 @@ public class DataDisplayConverterFactory {
                 throw new Exception("CompoundDataDisplayConverter: invalid mapping of size 0 built");
             }
 
-            buffer = new StringBuffer();
+            buffer = new StringBuilder();
 
             log.trace("constructor: finish");
         }
@@ -379,7 +379,7 @@ public class DataDisplayConverterFactory {
 
         private final HDFDisplayConverter baseTypeConverter;
 
-        private final StringBuffer        buffer;
+        private final StringBuilder        buffer;
 
         ArrayDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
@@ -416,7 +416,7 @@ public class DataDisplayConverterFactory {
                 throw new Exception("ArrayDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: " + ex.getMessage());
             }
 
-            buffer = new StringBuffer();
+            buffer = new StringBuilder();
 
             log.trace("constructor: finish");
         }
@@ -623,7 +623,7 @@ public class DataDisplayConverterFactory {
 
     private static class NumericalDataDisplayConverter extends HDFDisplayConverter {
 
-        private final StringBuffer buffer;
+        private final StringBuilder buffer;
 
         private final long         typeSize;
 
@@ -641,7 +641,7 @@ public class DataDisplayConverterFactory {
                 throw new Exception("NumericalDataDisplayConverter: datatype is not an integer or floating-point type");
             }
 
-            buffer = new StringBuffer();
+            buffer = new StringBuilder();
 
             typeSize = dtype.getDatatypeSize();
             isUINT64 = dtype.isUnsigned() && (typeSize == 8);
@@ -704,7 +704,7 @@ public class DataDisplayConverterFactory {
 
     private static class EnumDataDisplayConverter extends HDFDisplayConverter {
 
-        private final StringBuffer buffer;
+        private final StringBuilder buffer;
 
         private final H5Datatype   enumType;
 
@@ -720,7 +720,7 @@ public class DataDisplayConverterFactory {
                 throw new Exception("EnumDataDisplayConverter: datatype is not an enum type");
             }
 
-            buffer = new StringBuffer();
+            buffer = new StringBuilder();
 
             enumType = (H5Datatype) dtype;
 
@@ -778,7 +778,7 @@ public class DataDisplayConverterFactory {
 
     private static class BitfieldDataDisplayConverter extends HDFDisplayConverter {
 
-        private final StringBuffer buffer;
+        private final StringBuilder buffer;
 
         private final boolean      isOpaque;
 
@@ -794,7 +794,7 @@ public class DataDisplayConverterFactory {
                 throw new Exception("BitfieldDataDisplayConverter: datatype is not a bitfield or opaque type");
             }
 
-            buffer = new StringBuffer();
+            buffer = new StringBuilder();
 
             isOpaque = dtype.isOpaque();
 

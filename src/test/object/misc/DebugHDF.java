@@ -155,7 +155,7 @@ public class DebugHDF {
         // String fname = "g:\\temp\\dset.h5";
         // new File(fname).delete(); // clean up existing file
         //
-        // for (int i=0; i<10; i++)
+        //  (int i=0; i<10; i++)
         // testCreateDS(fname, "dset"+i);
         //
         //        } catch (Exception ex) {ex.printStackTrace();}
@@ -690,7 +690,7 @@ public class DebugHDF {
         long fid = -1, did = -1, sid = -1;
         float[] buf = new float[SIZE];
 
-        // for (int i = 0; i < buf.length; i++)
+        //  (int i = 0; i < buf.length; i++)
         // buf[i] = i;
         //
         // try {
@@ -1162,7 +1162,7 @@ public class DebugHDF {
         for (int i=0; i<nhex; i++)
             hex[i] = (short)(0x0f & (v << (i*16) ));
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i=nhex-1; i>=0; i--) {
             switch (hex[i]) {
                 case 0:  sb.append("0000"); break;
@@ -1970,7 +1970,7 @@ public class DebugHDF {
      *    <li> long[] uint32 = {4294967295L, 2147483648L, 2147483647, 0};
      * </ul>
      */
-    public final static void testConvertFromUnsignedC() {
+    public static final void testConvertFromUnsignedC() {
         byte[] int8 = {-1, -128, 127, 0};
         short[] int16 = {-1, -32768, 32767, 0};
         int[] int32 = {-1, -2147483648, 2147483647, 0};

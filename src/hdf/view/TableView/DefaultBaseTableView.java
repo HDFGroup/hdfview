@@ -32,6 +32,7 @@ import java.lang.reflect.Array;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -149,7 +150,7 @@ import hdf.view.dialog.NewDatasetDialog;
  */
 public abstract class DefaultBaseTableView implements TableView {
 
-    private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(DefaultBaseTableView.class);
+    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(DefaultBaseTableView.class);
 
     private final Display                   display = Display.getDefault();
     protected final Shell                   shell;
@@ -509,7 +510,7 @@ public abstract class DefaultBaseTableView implements TableView {
         try {
             dataTable = createTable(content, dataObject);
             if (dataTable == null) {
-                log.debug("table creation for object '" + ((HObject) dataObject).getName() + "' failed");
+                log.debug("table creation for object {} failed", ((HObject) dataObject).getName());
                 log.trace("finish");
                 viewer.showStatus("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
                 shell.dispose();
@@ -533,7 +534,7 @@ public abstract class DefaultBaseTableView implements TableView {
         /*
          * Set the Shell's title using the object path and name
          */
-        StringBuffer sb = new StringBuffer(hObject.getName());
+        StringBuilder sb = new StringBuilder(hObject.getName());
 
         if (((HObject) dataObject).getFileFormat() != null) {
             sb.append("  at  ");
@@ -782,7 +783,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
                 if (root == null) return;
 
-                Vector<HObject> list = new Vector<>(((HObject) dataObject).getFileFormat().getNumberOfMembers() + 5);
+                ArrayList<HObject> list = new ArrayList<>(((HObject) dataObject).getFileFormat().getNumberOfMembers() + 5);
                 Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
 
                 while (it.hasNext())
@@ -803,7 +804,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     }
                 }
 
-                list.setSize(0);
+                list.clear();
             }
         });
 
@@ -1018,7 +1019,7 @@ public abstract class DefaultBaseTableView implements TableView {
         try {
             dataValue = dataObject.getData();
         }
-        catch (Throwable ex) {
+        catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Load", "DefaultBaseTable.loadData: " + ex.getMessage());
             log.debug("loadData(): ", ex);
@@ -1210,7 +1211,6 @@ public abstract class DefaultBaseTableView implements TableView {
             Tools.showError(shell, "Error loading data", "Dataset getData: " + ex.getMessage());
             log.debug("gotoFrame(): ", ex);
             dataValue = null;
-            return;
         }
         finally {
             shell.setCursor(null);
@@ -1223,7 +1223,7 @@ public abstract class DefaultBaseTableView implements TableView {
      * Copy data from the spreadsheet to the system clipboard.
      */
     private void copyData() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         Rectangle selection = selectionLayer.getLastSelectedRegion();
         if (selection == null) {
@@ -1333,7 +1333,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
             }
         }
-        catch (Throwable ex) {
+        catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Paste", ex.getMessage());
         }
@@ -1451,19 +1451,19 @@ public abstract class DefaultBaseTableView implements TableView {
     //
     // String filename = fChooser.open();
     //
-    // if (filename == null) return;
+    //  (filename == null) return;
     //
     // File chosenFile = new File(filename);
     //
     // // check if the file is in use
     // String fname = chosenFile.getAbsolutePath();
     // List<FileFormat> fileList = viewer.getTreeView().getCurrentFiles();
-    // if (fileList != null) {
+    //  (fileList != null) {
     // FileFormat theFile = null;
     // Iterator<FileFormat> iterator = fileList.iterator();
     // while (iterator.hasNext()) {
     // theFile = iterator.next();
-    // if (theFile.getFilePath().equals(fname)) {
+    //  (theFile.getFilePath().equals(fname)) {
     // Tools.showError(shell, "Save", "Unable to save data to file \"" + fname
     // + "\". \nThe file is being used.");
     // return;
@@ -1475,7 +1475,7 @@ public abstract class DefaultBaseTableView implements TableView {
     // FileWriter(chosenFile)));
     //
     // int rows = text.length;
-    // for (int i = 0; i < rows; i++) {
+    //  (int i = 0; i < rows; i++) {
     // out.print(text[i].trim());
     // out.println();
     // out.println();
@@ -1501,11 +1501,11 @@ public abstract class DefaultBaseTableView implements TableView {
     // private void print() {
     // // StreamPrintServiceFactory[] spsf = StreamPrintServiceFactory
     // // .lookupStreamPrintServiceFactories(null, null);
-    // // for (int i = 0; i < spsf.length; i++) {
+    // //  (int i = 0; i < spsf.length; i++) {
     // // System.out.println(spsf[i]);
     // // }
     // // DocFlavor[] docFlavors = spsf[0].getSupportedDocFlavors();
-    // // for (int i = 0; i < docFlavors.length; i++) {
+    // //  (int i = 0; i < docFlavors.length; i++) {
     // // System.out.println(docFlavors[i]);
     // // }
     //
@@ -1602,7 +1602,8 @@ public abstract class DefaultBaseTableView implements TableView {
                 bo = ByteOrder.nativeOrder();
             else if (binaryOrder == 2)
                 bo = ByteOrder.LITTLE_ENDIAN;
-            else if (binaryOrder == 3) bo = ByteOrder.BIG_ENDIAN;
+            else if (binaryOrder == 3)
+                bo = ByteOrder.BIG_ENDIAN;
 
             Tools.saveAsBinary(out, data, bo);
 
@@ -1721,7 +1722,7 @@ public abstract class DefaultBaseTableView implements TableView {
                         }
                         else
                             c++;
-                    } // while (tokenizer1.hasMoreTokens() && index < size)
+                    }
                 }
                 catch (Exception ex) {
                     Tools.showError(shell, "Import", ex.getMessage());
@@ -1753,7 +1754,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
 
             r++;
-        } // while ((line != null) && (r < rows))
+        } // ((line != null) && (r < rows))
 
         try {
             in.close();
@@ -1800,7 +1801,8 @@ public abstract class DefaultBaseTableView implements TableView {
             bo = ByteOrder.nativeOrder();
         else if (binaryOrder == 2)
             bo = ByteOrder.LITTLE_ENDIAN;
-        else if (binaryOrder == 2) bo = ByteOrder.BIG_ENDIAN;
+        else if (binaryOrder == 3)
+            bo = ByteOrder.BIG_ENDIAN;
 
         try {
             if (Tools.getBinaryDataFromFile(dataValue, chosenFile.getAbsolutePath(), bo))
@@ -1810,11 +1812,9 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (Exception ex) {
             log.debug("importBinaryData():", ex);
-            return;
         }
         catch (OutOfMemoryError e) {
             log.debug("importBinaryData(): Out of memory");
-            return;
         }
     }
 
@@ -1973,8 +1973,8 @@ public abstract class DefaultBaseTableView implements TableView {
                     catch (NumberFormatException ex) {
                         log.debug("rows[{}]:", i, ex);
                     }
-                } // for (int j = 0; j < ncols; j++)
-            } // for (int i = 0; i < rows.length; i++)
+                }
+            }
 
             if (xIndex >= 0) {
                 xData = new double[cols.length];
@@ -1989,7 +1989,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     }
                 }
             }
-        } // if (isRowPlot)
+        }
         else {
             title += " - by column";
             nLines = cols.length;
@@ -2015,8 +2015,8 @@ public abstract class DefaultBaseTableView implements TableView {
                     catch (NumberFormatException ex) {
                         log.debug("cols[{}]:", j, ex);
                     }
-                } // for (int j=0; j<ncols; j++)
-            } // for (int i=0; i<rows.length; i++)
+                }
+            }
 
             if (xIndex >= 0) {
                 xData = new double[rows.length];
@@ -2031,7 +2031,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     }
                 }
             }
-        } // else
+        }
 
         int n = removeInvalidPlotData(data, xData, yRange);
         if (n < data[0].length) {
@@ -2070,7 +2070,7 @@ public abstract class DefaultBaseTableView implements TableView {
         cv.setLineLabels(lineLabels);
 
         String cname = dataValue.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         if ((dname == 'B') || (dname == 'S') || (dname == 'I') || (dname == 'J')) {
             cv.setTypeToInteger();
         }
@@ -2350,7 +2350,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-            return;
         }
     }
 
@@ -2498,7 +2497,7 @@ public abstract class DefaultBaseTableView implements TableView {
             // log.trace("show reference data: Show data as {}: ", viewType);
             //
             // Object theData = getSelectedData();
-            // if (theData == null) {
+            //  (theData == null) {
             // shell.getDisplay().beep();
             // Tools.showError(shell, "Select", "No data selected.");
             // return;
@@ -2516,7 +2515,7 @@ public abstract class DefaultBaseTableView implements TableView {
             //
             // Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
             // int[] selectedCols = selectionLayer.getFullySelectedColumnPositions();
-            // if (selectedRows == null || selectedRows.length <= 0) {
+            //  (selectedRows == null || selectedRows.length <= 0) {
             // log.trace("show reference data: Show data as {}: selectedRows is empty",
             // viewType);
             // return;
@@ -2525,8 +2524,8 @@ public abstract class DefaultBaseTableView implements TableView {
             // int len = Array.getLength(selectedRows) * Array.getLength(selectedCols);
             // log.trace("show reference data: Show data as {}: len={}", viewType, len);
             //
-            // for (int i = 0; i < len; i++) {
-            // if (isRegRef) {
+            //  (int i = 0; i < len; i++) {
+            //  (isRegRef) {
             // log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i,
             // viewType, isRegRef);
             // showRegRefData((String) Array.get(theData, i));
@@ -2565,7 +2564,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
         private int nrow, ncol;
 
-        private int idx_xaxis = -1, plotType = -1;
+        private int idx_xaxis = -1;
+        private int plotType = -1;
 
         public LinePlotOption(Shell parent, int style, int nrow, int ncol) {
             super(parent, style);

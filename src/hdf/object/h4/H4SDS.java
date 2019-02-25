@@ -102,7 +102,7 @@ public class H4SDS extends ScalarDS
 {
     private static final long serialVersionUID = 2557157923292438696L;
 
-    private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4SDS.class);
+    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4SDS.class);
 
     /** tag for netCDF datasets.
      *  HDF4 library supports netCDF version 2.3.2. It only supports SDS APIs.
@@ -220,10 +220,14 @@ public class H4SDS extends ScalarDS
         log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
 
         Dataset dataset = null;
-        long srcdid=-1, dstdid=-1, tid=-1;
-        int size=1, theRank=2;
-        String path=null;
-        int[] count=null, start=null;
+        long srcdid = -1;
+        long dstdid = -1;
+        long tid = -1;
+        int size = 1;
+        int theRank = 2;
+        String path = null;
+        int[] count = null;
+        int[] start = null;
 
         if (pgroup == null) {
             log.debug("copy(): Parent group is null");
@@ -236,10 +240,10 @@ public class H4SDS extends ScalarDS
         }
 
         if (pgroup.isRoot()) {
-            path = HObject.separator;
+            path = HObject.SEPARATOR;
         }
         else {
-            path = pgroup.getPath()+pgroup.getName()+HObject.separator;
+            path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
         }
         log.trace("copy(): path={}", path);
 
@@ -492,7 +496,6 @@ public class H4SDS extends ScalarDS
             HDFLibrary.HXsetdir(getFileFormat().getParent());
 
             HDFLibrary.SDwritedata(id, start, stride, select, tmpData);
-            //} catch (Exception ex) {ex.printStackTrace();
         }
         catch (Exception ex) {
             log.debug("write(): failure: ", ex);
@@ -584,16 +587,13 @@ public class H4SDS extends ScalarDS
                     attr.setData(buf);
                 }
 
-            } // for (int i=0; i<n; i++)
+            } // (int i=0; i<n; i++)
 
             // retrieve attribute of dimension
             // BUG !! HDFLibrary.SDgetdimstrs(dimID, argv, 80) does not return anything
-            /*
-            for (int i=0; i< rank; i++) {
-                int dimID = HDFLibrary.SDgetdimid(id, i);
-                String[] argv = {" ", " ", " "};
-                HDFLibrary.SDgetdimstrs(dimID, argv, 80);
-            }
+            /**
+             * for (int i=0; i< rank; i++) { int dimID = HDFLibrary.SDgetdimid(id, i); String[] argv = {" ", "
+             * ", " "}; HDFLibrary.SDgetdimstrs(dimID, argv, 80); }
              */
         }
         catch (Exception ex) {
@@ -794,7 +794,7 @@ public class H4SDS extends ScalarDS
                 try {
                     HDFLibrary.SDgetchunkinfo(id, chunkInfo, cflag);
                 }
-                catch (Throwable ex) {
+                catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
@@ -916,19 +916,17 @@ public class H4SDS extends ScalarDS
             return null;
         }
 
-        String path = HObject.separator;
+        String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
-            path = pgroup.getPath()+pgroup.getName()+HObject.separator;
+            path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
         }
         // prepare the dataspace
-        // int tsize = 1;
         int rank = dims.length;
-        int idims[] = new int[rank];
-        int start[] = new int [rank];
+        int[] idims = new int[rank];
+        int[] start = new int[rank];
         for (int i=0; i<rank; i++) {
             idims[i] = (int)dims[i];
             start[i] = 0;
-            // tsize *= idims[i];
         }
 
         // only the first element of the SDcreate parameter dim_sizes (i.e.,
@@ -947,7 +945,7 @@ public class H4SDS extends ScalarDS
             }
         }
 
-        // unlimted cannot be used with chunking or compression for HDF 4.2.6 or earlier.
+        // unlimited cannot be used with chunking or compression for HDF 4.2.6 or earlier.
         if (idims[0] == 0 && (ichunks != null || gzip>0)) {
             log.debug("create(): Unlimited cannot be used with chunking or compression");
             log.trace("create(): finish");
@@ -1021,7 +1019,7 @@ public class H4SDS extends ScalarDS
             try  {
                 HDFLibrary.SDsetchunk (sdsid, chunkInfo, flag);
             }
-            catch (Throwable err) {
+            catch (Exception err) {
                 log.debug("create(): SDsetchunk failure: ", err);
                 err.printStackTrace();
                 log.trace("create(): finish");
@@ -1038,8 +1036,7 @@ public class H4SDS extends ScalarDS
         if (!pgroup.isRoot()) {
             // add the dataset to the parent group
             vgid = pgroup.open();
-            if (vgid < 0)
-            {
+            if (vgid < 0) {
                 if (sdsid > 0) {
                     HDFLibrary.SDendaccess(sdsid);
                 }
@@ -1135,7 +1132,7 @@ public class H4SDS extends ScalarDS
 
                 // attach attribute to the destination dataset
                 HDFLibrary.SDsetattr(dstdid, attrName[0], attrInfo[0], attrInfo[1], attrBuff);
-            } // for (int i=0; i<numberOfAttributes; i++)
+            } // (int i=0; i<numberOfAttributes; i++)
         }
         catch (Exception ex) {
             log.debug("copyAttribute(): failure: ", ex);

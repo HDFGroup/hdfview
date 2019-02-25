@@ -14,6 +14,7 @@
 
 package hdf.view.dialog;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -167,7 +168,7 @@ public class NewGroupDialog extends Dialog {
             }
         });
 
-        groupList = new Vector<Group>();
+        groupList = new ArrayList<>();
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
@@ -176,20 +177,20 @@ public class NewGroupDialog extends Dialog {
                 Group g = (Group) obj;
                 groupList.add(g);
                 if (g.isRoot()) {
-                    parentChoice.add(HObject.separator);
+                    parentChoice.add(HObject.SEPARATOR);
                 }
                 else {
-                    parentChoice.add(g.getPath() + g.getName() + HObject.separator);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.SEPARATOR);
                 }
             }
         }
 
         if (parentGroup.isRoot()) {
-            parentChoice.select(parentChoice.indexOf(HObject.separator));
+            parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() +
-                    parentGroup.getName() + HObject.separator));
+                    parentGroup.getName() + HObject.SEPARATOR));
         }
 
         // Only add "More" button if file is H5 type
@@ -292,7 +293,7 @@ public class NewGroupDialog extends Dialog {
             return null;
         }
 
-        if (name.indexOf(HObject.separator) >= 0) {
+        if (name.indexOf(HObject.SEPARATOR) >= 0) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", "Group name cannot contain path.");
             return null;

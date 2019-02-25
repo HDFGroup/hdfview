@@ -39,7 +39,7 @@ import java.util.List;
 public abstract class Dataset extends HObject implements MetaDataContainer, DataFormat {
     private static final long serialVersionUID    = -3360885430038261178L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
 
     /**
      * The memory buffer that holds the raw data of the dataset.
@@ -134,7 +134,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /** The compression information. */
     protected String          compression;
-    public final static String          compression_gzip_txt = "GZIP: level = ";
+    public static final String          compression_gzip_txt = "GZIP: level = ";
 
     /** The filters information. */
     protected String          filters;
@@ -590,7 +590,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     public final Object getData() throws Exception, OutOfMemoryError {
         if (!isDataLoaded) {
             log.trace("getData: read");
-            data = read(); // load the data;
+            data = read(); // load the data
             originalBuf = data;
             isDataLoaded = true;
             nPoints = 1;
@@ -918,7 +918,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         }
 
         String cname = data_class.getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         int size = Array.getLength(data_in);
         log.trace("convertFromUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
@@ -1038,7 +1038,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         }
 
         String cname = data_class.getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         int size = Array.getLength(data_in);
         log.trace("convertToUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
@@ -1134,18 +1134,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
         int n = bytes.length / length;
         log.trace("byteToString(): n={} from length of {}", n, length);
-        // String bigstr = new String(bytes);
         String[] strArray = new String[n];
         String str = null;
         int idx = 0;
         for (int i = 0; i < n; i++) {
             str = new String(bytes, i * length, length);
-            // bigstr.substring uses less memory space
-            // NOTE: bigstr does not work on linux if bytes.length is very large
-            // see bug 1091
-            // offset = i*length;
-            // str = bigstr.substring(offset, offset+length);
-
             idx = str.indexOf('\0');
             if (idx >= 0) {
                 str = str.substring(0, idx);
@@ -1157,9 +1150,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
                 end--;
 
             strArray[i] = (end <= 0) ? "" : str.substring(0, end);
-
-            // trim both start and end
-            // strArray[i] = str.trim();
         }
 
         log.trace("byteToString(): finish");
@@ -1195,7 +1185,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         int size = strings.length;
         byte[] bytes = new byte[size * length];
         log.trace("stringToByte(): size={} length={}", size, length);
-        StringBuffer strBuff = new StringBuffer(length);
+        StringBuilder strBuff = new StringBuilder(length);
         for (int i = 0; i < size; i++) {
             // initialize the string with spaces
             strBuff.replace(0, length, " ");

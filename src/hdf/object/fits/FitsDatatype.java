@@ -1,4 +1,6 @@
 /*****************************************************************************
+                default:
+                    break;
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -110,6 +112,8 @@ public class FitsDatatype extends Datatype
             case BasicHDU.BITPIX_DOUBLE:
                 data = new double[size];
                 break;
+            default:
+                break;
         }
 
         return data;
@@ -154,6 +158,8 @@ public class FitsDatatype extends Datatype
             case BasicHDU.BITPIX_DOUBLE:
                 datatypeClass = CLASS_FLOAT;
                 datatypeSize = 8;
+                break;
+            default:
                 break;
         }
     }
@@ -253,7 +259,9 @@ public class FitsDatatype extends Datatype
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(long id) {;}
+    public void close(long id) {
+        // Nothing to implement
+    }
 
     // Implementing DataFormat
     @SuppressWarnings("rawtypes")

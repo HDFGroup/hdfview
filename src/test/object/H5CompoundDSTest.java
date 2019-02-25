@@ -87,7 +87,7 @@ import hdf.object.h5.H5Group;
  * @author Peter Cao, The HDF Group
  */
 public class H5CompoundDSTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundDSTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundDSTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
     private static final int TEST_VALUE_INT = Integer.MAX_VALUE;
@@ -580,7 +580,7 @@ public class H5CompoundDSTest {
             catch (final Exception ex) {
             }
 
-        } // for (int loop=0; loop<NLOOPS; loop++)
+        } //  (int loop=0; loop<NLOOPS; loop++)
     } // public final void testInit() {
 
     /**
@@ -625,7 +625,7 @@ public class H5CompoundDSTest {
                 assertTrue(H5TestFile.DATA_STR[i].equals(strs[i]));
                 assertEquals(H5TestFile.DATA_LONG[i], longs[i]);
             }
-        } // for (int loop=0; loop<NLOOPS; loop++) {
+        } //  (int loop=0; loop<NLOOPS; loop++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -688,8 +688,8 @@ public class H5CompoundDSTest {
                 assertEquals(H5TestFile.DATA_INT[idx], ints[0]);
                 assertEquals(H5TestFile.DATA_FLOAT[idx], floats[0], Float.MIN_VALUE);
                 assertTrue(H5TestFile.DATA_STR[idx].equals(strs[0]));
-            } // for (int i=0; i<nrows; i++) {
-        } // for (int loop=0; loop<NLOOPS; loop++) {
+            } //  (int i=0; i<nrows; i++) {
+        } //  (int loop=0; loop<NLOOPS; loop++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -758,8 +758,8 @@ public class H5CompoundDSTest {
                         }
                         break;
                 }
-            } // for (int i=0; i<nmembers; i++) {
-        } // for (int loop=0; loop<NLOOPS; loop++) {
+            } //  (int i=0; i<nmembers; i++) {
+        } //  (int loop=0; loop<NLOOPS; loop++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -902,7 +902,7 @@ public class H5CompoundDSTest {
             catch (final Exception ex) {
                 fail("write() failed. " + ex);
             }
-        } // for (int loop=0; loop<NLOOPS; loop++) {
+        } //  (int loop=0; loop<NLOOPS; loop++) {
 
         // write the original data into file
         testDataset.init();
@@ -1004,7 +1004,7 @@ public class H5CompoundDSTest {
                 assertEquals(TEST_VALUE_INT, ints[0]);
                 assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
                 assertTrue(TEST_VALUE_STR.equals(strs[0]));
-            } // for (int i=0; i<nrows; i++) {
+            } //  (int i=0; i<nrows; i++) {
 
             // write the original data into file
             testDataset.init();
@@ -1015,7 +1015,7 @@ public class H5CompoundDSTest {
             catch (final Exception ex) {
                 fail("write() failed. " + ex);
             }
-        } // for (int loop=0; loop<NLOOPS; loop++) {
+        } //  (int loop=0; loop<NLOOPS; loop++) {
 
         // write the original data into file
         testDataset.init();
@@ -1146,8 +1146,8 @@ public class H5CompoundDSTest {
                 catch (final Exception ex) {
                     fail("write() failed. " + ex);
                 }
-            } // for (int i=0; i<nmembers; i++) {
-        } // for (int loop=0; loop<NLOOPS; loop++) {
+            } //  (int i=0; i<nmembers; i++) {
+        } //  (int loop=0; loop<NLOOPS; loop++) {
 
         // write the original data into file
         testDataset.init();
@@ -1518,7 +1518,7 @@ public class H5CompoundDSTest {
                     fail("Out of memory");
                 }
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -1593,7 +1593,7 @@ public class H5CompoundDSTest {
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
 
         // attache a new attribute
         attr = new Attribute(testDataset, "float attribute", typeFloat, new long[] { 1 },
@@ -1672,7 +1672,7 @@ public class H5CompoundDSTest {
                     fail("Out of memory");
                 }
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
 
         // remove the new attribute
         try {
@@ -1721,7 +1721,7 @@ public class H5CompoundDSTest {
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
