@@ -1,6 +1,4 @@
 /*****************************************************************************
-                default:
-                    break;
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
