@@ -15,6 +15,7 @@
 package hdf.view.dialog;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +62,7 @@ import hdf.view.ViewProperties;
  */
 public class NewLinkDialog extends Dialog {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewLinkDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewLinkDialog.class);
 
     private Shell         shell;
 
@@ -349,10 +350,10 @@ public class NewLinkDialog extends Dialog {
         targetObject.setEditable(false);
         targetObject.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 
-        groupList = new Vector<Group>(objList.size());
+        groupList = new ArrayList<>(objList.size());
         Object obj = null;
         Iterator<?> iterator = objList.iterator();
-        String full_name = null;
+        String fullName = null;
         int idx_root = -1, idx = -1;
         while (iterator.hasNext()) {
             obj = iterator.next();
@@ -362,30 +363,30 @@ public class NewLinkDialog extends Dialog {
                 Group g = (Group) obj;
                 groupList.add(g);
                 if (g.isRoot()) {
-                    full_name = HObject.separator;
+                    fullName = HObject.SEPARATOR;
                     idx_root = idx;
                 }
                 else {
-                    full_name = g.getPath() + g.getName() + HObject.separator;
+                    fullName = g.getPath() + g.getName() + HObject.SEPARATOR;
                 }
-                parentChoice.add(full_name);
+                parentChoice.add(fullName);
             }
             else {
-                full_name = ((HObject) obj).getPath() + ((HObject) obj).getName();
+                fullName = ((HObject) obj).getPath() + ((HObject) obj).getName();
             }
 
-            targetObject.add(full_name);
+            targetObject.add(fullName);
         }
 
         targetObject.remove(idx_root);
         objList.remove(idx_root);
 
         if (parentGroup.isRoot()) {
-            parentChoice.select(parentChoice.indexOf(HObject.separator));
+            parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
             parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName()
-                    + HObject.separator));
+                    + HObject.SEPARATOR));
         }
 
         // Dummy label to take up space as dialog is resized
@@ -466,7 +467,7 @@ public class NewLinkDialog extends Dialog {
             return null;
         }
 
-        if (name.indexOf(HObject.separator) >= 0) {
+        if (name.indexOf(HObject.SEPARATOR) >= 0) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", "Link name cannot contain path.");
             return null;
@@ -540,8 +541,8 @@ public class NewLinkDialog extends Dialog {
             if (targetObj == null) {
                 tObj = target_name;
 
-                if (!tObj.startsWith(HObject.separator)) {
-                    tObj = HObject.separator + tObj;
+                if (!tObj.startsWith(HObject.SEPARATOR)) {
+                    tObj = HObject.SEPARATOR + tObj;
                 }
             }
 
@@ -680,7 +681,7 @@ public class NewLinkDialog extends Dialog {
                 retrieveObjects(theFile);
                 break;
             }
-        } // while(iterator.hasNext())
+        }
 
         return isOpen;
     }
@@ -688,8 +689,8 @@ public class NewLinkDialog extends Dialog {
     private List<HObject> getAllUserObjectsBreadthFirst(FileFormat file) {
         if (file == null) return null;
 
-        Vector<HObject> breadthFirstObjects = new Vector<HObject>();
-        Queue<HObject> currentChildren = new LinkedList<HObject>();
+        ArrayList<HObject> breadthFirstObjects = new ArrayList<>();
+        Queue<HObject> currentChildren = new LinkedList<>();
         HObject currentObject = file.getRootObject();
 
         if (currentObject == null) {
@@ -721,7 +722,7 @@ public class NewLinkDialog extends Dialog {
         HObject obj = null;
         List<HObject> userObjectList = getAllUserObjectsBreadthFirst(file);
         Iterator<HObject> iterator;
-        String full_name = null;
+        String fullName = null;
 
         if (userObjectList == null) {
             log.debug("retrieveObjects(): user object list is null");
@@ -735,17 +736,17 @@ public class NewLinkDialog extends Dialog {
             if (obj instanceof Group) {
                 Group g = (Group) obj;
                 if (g.isRoot()) {
-                    full_name = HObject.separator;
+                    fullName = HObject.SEPARATOR;
                 }
                 else {
-                    full_name = g.getPath() + g.getName() + HObject.separator;
+                    fullName = g.getPath() + g.getName() + HObject.SEPARATOR;
                 }
             }
             else {
-                full_name = obj.getPath() + obj.getName();
+                fullName = obj.getPath() + obj.getName();
             }
 
-            targetObject.add(full_name);
+            targetObject.add(fullName);
         }
 
         // Remove the root group "/" from the target objects

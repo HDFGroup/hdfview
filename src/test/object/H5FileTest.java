@@ -86,7 +86,7 @@ import hdf.object.h5.H5ScalarDS;
  * @author Peter Cao, The HDF Group
  */
 public class H5FileTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5FileTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
     private static final int TEST_VALUE_INT = Integer.MAX_VALUE;
@@ -238,7 +238,7 @@ public class H5FileTest {
             catch (final Exception ex) {
                 fail("file.close() failed. " + ex);
             }
-        } // for (int i=0; i<NLOOPS; i++)
+        } //  (int i=0; i<NLOOPS; i++)
 
         try {
             testFile.open();

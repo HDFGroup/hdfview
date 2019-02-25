@@ -70,7 +70,7 @@ import hdf.view.dialog.InputDialog;
 
 public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarDSTableView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarDSTableView.class);
 
     /**
      * Constructs a ScalarDS TableView with no additional data properties.
@@ -151,7 +151,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             dataValue = dataObject.getData();
         }
-        catch (Throwable ex) {
+        catch (Exception ex) {
             Tools.showError(shell, "Load", "DefaultScalarDSTableView.loadData:" + ex.getMessage());
             log.debug("loadData(): ", ex);
             log.trace("loadData(): finish");
@@ -961,7 +961,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         // load each selection into a separate dataset and display it in
         // a separate spreadsheet
-        StringBuffer titleSB = new StringBuffer();
+        StringBuilder titleSB = new StringBuilder();
         log.trace("showRegRefData(): titleSB created");
 
         while (st.hasMoreTokens()) {
@@ -1186,8 +1186,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                 "ScalarDSCellSelectionListener:RegRef CellSelected: reference dset did not init()",
                                                 ex);
                                     }
-                                    StringBuffer selectionSB = new StringBuffer();
-                                    StringBuffer strvalSB = new StringBuffer();
+                                    StringBuilder selectionSB = new StringBuilder();
+                                    StringBuilder strvalSB = new StringBuilder();
 
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {

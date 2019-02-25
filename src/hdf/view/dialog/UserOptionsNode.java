@@ -22,7 +22,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * UserOptionsDialog displays components for choosing user options.
  */
 public class UserOptionsNode extends PreferenceNode {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsNode.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsNode.class);
     /**
      * The name of the class that implements the <code>PreferencePage</code>
      * bound to this <code>ExtendedPreferenceNode</code>

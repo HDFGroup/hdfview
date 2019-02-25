@@ -32,7 +32,7 @@ import hdf.view.ViewProperties;
  * modules.
  */
 public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsViewModulesPage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsViewModulesPage.class);
 
     private Combo                 choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
 

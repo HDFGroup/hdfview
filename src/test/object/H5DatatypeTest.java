@@ -78,7 +78,7 @@ import hdf.object.h5.H5File;
  * @author Peter Cao, The HDF Group
  */
 public class H5DatatypeTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5DatatypeTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5DatatypeTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
     private static final int TEST_VALUE_INT = Integer.MAX_VALUE;
@@ -535,7 +535,7 @@ public class H5DatatypeTest {
                     fail("Out of memory");
                 }
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -611,7 +611,7 @@ public class H5DatatypeTest {
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
 
         // attache a new attribute
         attr = new Attribute(testDatatype, "float attribute", typeFloat, new long[] { 1 },
@@ -690,7 +690,7 @@ public class H5DatatypeTest {
                     fail("Out of memory");
                 }
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
 
         // remove the new attribute
         try {
@@ -739,7 +739,7 @@ public class H5DatatypeTest {
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);

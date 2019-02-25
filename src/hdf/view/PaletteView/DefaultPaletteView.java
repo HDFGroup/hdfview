@@ -18,6 +18,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -80,22 +81,25 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
     private ImageView imageView;
     private PaletteValueTable paletteValueTable;
 
-    private Button checkRed, checkGreen, checkBlue;
+    private Button checkRed;
+    private Button checkGreen;
+    private Button checkBlue;
 
     private Combo choicePalette;
 
-    private Image originalImage, currentImage;
+    private Image originalImage;
+    private Image currentImage;
 
-    private final int[] lineColors = { SWT.COLOR_RED, SWT.COLOR_GREEN, SWT.COLOR_BLUE };
-    private final String lineLabels[] = { "Red", "Green", "Blue" };
+    private static final int[] lineColors = { SWT.COLOR_RED, SWT.COLOR_GREEN, SWT.COLOR_BLUE };
+    private static final String[] lineLabels = { "Red", "Green", "Blue" };
 
-    private static String PALETTE_GRAY = "Gray";
-    private static String PALETTE_DEFAULT = "Default";
-    private static String PALETTE_REVERSE_GRAY = "Reverse Gray";
-    private static String PALETTE_GRAY_WAVE = "GrayWave";
-    private static String PALETTE_RAINBOW = "Rainbow";
-    private static String PALETTE_NATURE = "Nature";
-    private static String PALETTE_WAVE = "Wave";
+    private static final String PALETTE_GRAY = "Gray";
+    private static final String PALETTE_DEFAULT = "Default";
+    private static final String PALETTE_REVERSE_GRAY = "Reverse Gray";
+    private static final String PALETTE_GRAY_WAVE = "GrayWave";
+    private static final String PALETTE_RAINBOW = "Rainbow";
+    private static final String PALETTE_NATURE = "Nature";
+    private static final String PALETTE_WAVE = "Wave";
 
     byte[][] palette;
     private int numberOfPalettes;
@@ -140,8 +144,6 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                 paletteData[i][j] = d;
             }
         }
-
-        imageView = theImageView;
 
         originalImage = currentImage = imageView.getImage();
         palette = new byte[3][256];
@@ -291,7 +293,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         choicePalette.add(PALETTE_RAINBOW);
         choicePalette.add(PALETTE_NATURE);
         choicePalette.add(PALETTE_WAVE);
-        Vector<?> plist = ViewProperties.getPaletteList();
+        ArrayList<?> plist = ViewProperties.getPaletteList();
         int n = plist.size();
         for (int i = 0; i < n; i++)
             choicePalette.add((String) plist.get(i));
@@ -405,7 +407,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         try {
             memoryImageSource = (MemoryImageSource) originalImage.getSource();
         }
-        catch (Throwable err) {
+        catch (Exception err) {
             memoryImageSource = null;
         }
 
@@ -490,7 +492,13 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                     int dw = plotWidth / 10;
                     int dx = 25;
                     double dy = 25;
-                    int xp = 2 * gap, yp = 0, x = 0, x0, y0, x1, y1;
+                    int xp = 2 * gap;
+                    int yp = 0;
+                    int x = 0;
+                    int x0;
+                    int y0;
+                    int x1;
+                    int y1;
                     double y = 0;
 
                     // draw X and Y grid labels
@@ -572,7 +580,6 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                         int idx = 0;
                         double b = (double) (y1 - dragY0) / (double) (x1 - dragX0);
                         double a = dragY0 - b * dragX0;
-                        double value = dragY0 * ry;
                         int i0 = Math.min(dragX0, x1);
                         int i1 = Math.max(dragX0, x1);
                         for (int i = i0; i < i1; i++) {
@@ -580,7 +587,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                             if (idx > 255) {
                                 continue;
                             }
-                            value = 255 - (a + b * i) * ry;
+                            double value = 255 - (a + b * i) * ry;
                             if (value < 0) {
                                 value = 0;
                             }
@@ -603,13 +610,13 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                     // dragX0 = e.x - xgap;
                     // dragY0 = e.y + gap;
                     //
-                    // if (dragX0 < 0)
+                    //  (dragX0 < 0)
                     // dragX0 = 0;
-                    // if (dragX0 > xgap + plotWidth)
+                    //  (dragX0 > xgap + plotWidth)
                     // dragX0 = xgap + plotWidth;
-                    // if (dragY0 < 0)
+                    //  (dragY0 < 0)
                     // dragY0 = 0;
-                    // if (dragY0 > plotHeight + gap)
+                    //  (dragY0 > plotHeight + gap)
                     // dragY0 = plotHeight + gap;
                 }
 
@@ -630,8 +637,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
 
         private Table valueTable;
 
-        private final String rgbName = "Color";
-        private final String idxName = "Index";
+        private static final String RGBNAME = "Color";
+        private static final String IDXNAME = "Index";
 
         public PaletteValueTable(Shell parent, int style) {
             super(parent, style);
@@ -655,7 +662,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
             data.heightHint = 200;
             content.setLayoutData(data);
 
-            String[] columnNames = { idxName, "Red", "Green", "Blue", rgbName };
+            String[] columnNames = { IDXNAME, "Red", "Green", "Blue", RGBNAME };
 
             valueTable = new Table(content, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.NO_SCROLL);
             valueTable.setHeaderVisible(true);
@@ -736,7 +743,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
 
             tableShell.open();
 
-            Display display = parent.getDisplay();
+            display = parent.getDisplay();
             while (!tableShell.isDisposed()) {
                 if (!display.readAndDispatch())
                     display.sleep();
@@ -801,8 +808,6 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                             Listener textListener = new Listener() {
                                 @Override
                                 public void handleEvent(final Event e) {
-                                    Integer.parseInt(text.getText());
-
                                     switch (e.type) {
                                         case SWT.FocusOut:
                                             item.setText(column, text.getText());
@@ -814,11 +819,16 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                                                 case SWT.TRAVERSE_RETURN:
                                                     item.setText(column, text.getText());
                                                     updatePaletteValue(item.getText(column), row, column - 1);
+                                                    break;
                                                 case SWT.TRAVERSE_ESCAPE:
                                                     text.dispose();
                                                     e.doit = false;
+                                                    break;
+                                                default:
+                                                    break;
                                             }
-
+                                            break;
+                                        default:
                                             break;
                                     }
                                 }

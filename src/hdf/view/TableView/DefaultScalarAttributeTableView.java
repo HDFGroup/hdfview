@@ -20,7 +20,7 @@ import hdf.view.DataView.DataViewManager;
 
 public class DefaultScalarAttributeTableView extends DefaultScalarDSTableView implements TableView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarAttributeTableView.class);
 
     public DefaultScalarAttributeTableView(DataViewManager theView) {
         this(theView, null);

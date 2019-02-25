@@ -22,7 +22,7 @@ import hdf.object.h5.H5Datatype;
  *
  */
 public class DatatypeTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatatypeTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatatypeTest.class);
 
     private Datatype[] baseTypes = null;
     private int[] classes = { Datatype.CLASS_BITFIELD, Datatype.CLASS_CHAR, Datatype.CLASS_COMPOUND,

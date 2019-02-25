@@ -64,7 +64,7 @@ import hdf.view.TableView.TableView;
  */
 public class NewDatasetDialog extends Dialog {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 
     private Shell             shell;
 
@@ -215,19 +215,19 @@ public class NewDatasetDialog extends Dialog {
                 Group g = (Group) obj;
                 groupList.add(g);
                 if (g.isRoot()) {
-                    parentChoice.add(HObject.separator);
+                    parentChoice.add(HObject.SEPARATOR);
                 }
                 else {
-                    parentChoice.add(g.getPath() + g.getName() + HObject.separator);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.SEPARATOR);
                 }
             }
         }
 
         if (parentGroup.isRoot()) {
-            parentChoice.select(parentChoice.indexOf(HObject.separator));
+            parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
+            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.SEPARATOR));
         }
 
         // Create New Dataset from scratch
@@ -419,7 +419,7 @@ public class NewDatasetDialog extends Dialog {
                     currentSizeField.setText(currentSizeStr);
 
                     String currentStr = currentSizeField.getText();
-                    int idx = currentStr.lastIndexOf("x");
+                    int idx = currentStr.lastIndexOf('x');
                     String chunkStr = "1";
 
                     if (rank <= 1) {
@@ -543,7 +543,7 @@ public class NewDatasetDialog extends Dialog {
                     if (isCompressed && isH5) {
                         if (!checkChunked.getSelection()) {
                             String currentStr = currentSizeField.getText();
-                            int idx = currentStr.lastIndexOf("x");
+                            int idx = currentStr.lastIndexOf('x');
                             String chunkStr = "1";
 
                             int rank = rankChoice.getSelectionIndex() + 1;
@@ -755,7 +755,7 @@ public class NewDatasetDialog extends Dialog {
             }
 
             maxdims[i] = max;
-        } // for (int i = 0; i < rank; i++)
+        } //  (int i = 0; i < rank; i++)
 
         if (isH5) {
             if (isChunkNeeded && !checkChunked.getSelection()) {
@@ -792,7 +792,7 @@ public class NewDatasetDialog extends Dialog {
             return null;
         }
 
-        if (name.indexOf(HObject.separator) >= 0) {
+        if (name.indexOf(HObject.SEPARATOR) >= 0) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", "Dataset name cannot contain path.");
             return null;
@@ -1009,7 +1009,7 @@ public class NewDatasetDialog extends Dialog {
                 }
 
                 chunks[i] = l;
-            } // for (int i=0; i<rank; i++)
+            } //  (int i=0; i<rank; i++)
 
             long tchunksize = 1, tdimsize = 1;
             for (int i = 0; i < rank; i++) {
@@ -1034,7 +1034,7 @@ public class NewDatasetDialog extends Dialog {
                     return null;
                 }
             }
-        } // if (checkChunked.isSelected())
+        } //  (checkChunked.isSelected())
 
         if (checkCompression.getSelection()) {
             gzip = compressionLevel.getSelectionIndex();
@@ -1084,7 +1084,7 @@ public class NewDatasetDialog extends Dialog {
             return null;
         }
 
-        if (name.indexOf(HObject.separator) >= 0) {
+        if (name.indexOf(HObject.SEPARATOR) >= 0) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", "Dataset name cannot contain path.");
             return null;
@@ -1138,7 +1138,7 @@ public class NewDatasetDialog extends Dialog {
             return null;
         }
 
-        if (name.indexOf(HObject.separator) >= 0) {
+        if (name.indexOf(HObject.SEPARATOR) >= 0) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", "Dataset name cannot contain path.");
             return null;
@@ -1235,7 +1235,7 @@ public class NewDatasetDialog extends Dialog {
                     try {
                         InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewDatasetHelp.html");
                         Scanner scan = new Scanner(in);
-                        StringBuffer buffer = new StringBuffer();
+                        StringBuilder buffer = new StringBuilder();
                         while(scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
@@ -1246,7 +1246,7 @@ public class NewDatasetDialog extends Dialog {
                         in.close();
                     }
                     catch (Exception e) {
-                        StringBuffer buff = new StringBuffer();
+                        StringBuilder buff = new StringBuilder();
                         buff.append("<html>");
                         buff.append("<body>");
                         buff.append("ERROR: cannot load help information.");
@@ -1289,7 +1289,7 @@ public class NewDatasetDialog extends Dialog {
                         cl.close();
                     }
                     catch (Exception e) {
-                        StringBuffer buff = new StringBuffer();
+                        StringBuilder buff = new StringBuilder();
                         buff.append("<html>");
                         buff.append("<body>");
                         buff.append("ERROR: cannot load help information.");

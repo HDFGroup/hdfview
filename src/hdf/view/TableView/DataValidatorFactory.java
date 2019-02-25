@@ -39,7 +39,7 @@ import hdf.object.Datatype;
  */
 public class DataValidatorFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
 
     /*
      * To keep things clean from an API perspective, keep a static reference to the

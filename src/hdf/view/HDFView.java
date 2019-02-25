@@ -106,7 +106,7 @@ import hdf.view.dialog.UserOptionsViewModulesPage;
  */
 public class HDFView implements DataViewManager {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
 
     private static Display             display;
     private static Shell               mainWindow;
@@ -420,7 +420,7 @@ public class HDFView implements DataViewManager {
                             try {
                                 treeView.closeFile((FileFormat) files[i]);
                             }
-                            catch (Throwable ex) {
+                            catch (Exception ex) {
                                 continue;
                             }
                         }
@@ -1694,11 +1694,11 @@ public class HDFView implements DataViewManager {
                 try {
                     treeView.openFile(filename, accessMode);
                 }
-                catch (Throwable ex) {
+                catch (Exception ex) {
                     try {
                         treeView.openFile(filename, FileFormat.READ);
                     }
-                    catch (Throwable ex2) {
+                    catch (Exception ex2) {
                         display.beep();
                         url_bar.deselectAll();
                         Tools.showError(mainWindow, "Open", "Failed to open file " + filename + "\n" + ex2);
@@ -1761,11 +1761,11 @@ public class HDFView implements DataViewManager {
                     try {
                         treeView.openFile(chosenFiles[i].getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                     }
-                    catch (Throwable ex) {
+                    catch (Exception ex) {
                         try {
                             treeView.openFile(chosenFiles[i].getAbsolutePath(), FileFormat.READ);
                         }
-                        catch (Throwable ex2) {
+                        catch (Exception ex2) {
                             display.beep();
                             url_bar.deselectAll();
                             Tools.showError(mainWindow, "Open", "Failed to open file " + selectedFilenames[i] + "\n" + ex2);
@@ -1806,11 +1806,11 @@ public class HDFView implements DataViewManager {
                 try {
                     treeView.openFile(chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                 }
-                catch (Throwable ex) {
+                catch (Exception ex) {
                     try {
                         treeView.openFile(chosenFile.getAbsolutePath(), FileFormat.READ);
                     }
-                    catch (Throwable ex2) {
+                    catch (Exception ex2) {
                         display.beep();
                         url_bar.deselectAll();
                         Tools.showError(mainWindow, "Open", "Failed to open file " + chosenFile + "\n" + ex2);
@@ -2025,7 +2025,7 @@ public class HDFView implements DataViewManager {
                 FileFormat.addFileFormat(key, (FileFormat) theObject);
             }
         }
-        catch (Throwable ex) {
+        catch (Exception ex) {
             Tools.showError(mainWindow, "Register File Format", "Failed to register " + str + "\n\n" + ex);
             return;
         }

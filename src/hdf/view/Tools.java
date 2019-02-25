@@ -69,9 +69,9 @@ import hdf.view.ViewProperties.BITMASK_OP;
  * @version 2.4 9/6/2007
  */
 public final class Tools {
-    private final static Display display = Display.getDefault();
+    private static final Display display = Display.getDefault();
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tools.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     public static final long       MAX_INT8        = 127;
     public static final long       MAX_UINT8       = 255;
@@ -102,20 +102,10 @@ public final class Tools {
     public static final String     FILE_TYPE_GIF   = "GIF";
 
     /** Key for BMP image file type. */
-    public static final String     FILE_TYPE_BMP   = "BMP";
+    public static final String FILE_TYPE_BMP = "BMP";
 
     /** Key for all image file type. */
-    public static final String     FILE_TYPE_IMAGE = "IMG";
-
-    /** Print out debug information
-     * @param caller
-     *            the caller object.
-     * @param msg
-     *            the message to be displayed.
-     */
-    public static final void debug(Object caller, Object msg) {
-        if (caller != null) System.out.println("*** " + caller.getClass().getName() + ": " + msg);
-    }
+    public static final String FILE_TYPE_IMAGE = "IMG";
 
     /**
      * Converts unsigned 64-bit integer data to a BigInteger since Java does not
@@ -159,10 +149,11 @@ public final class Tools {
         if (imgFileName == null) {
             throw new NullPointerException("The source image file is null.");
         }
-        else if (!(imgFile = new File(imgFileName)).exists()) {
+        imgFile = new File(imgFileName);
+        if (!imgFile.exists()) {
             throw new NullPointerException("The source image file does not exist.");
         }
-        else if (hFileName == null) {
+        if (hFileName == null) {
             throw new NullPointerException("The target HDF file is null.");
         }
 
@@ -179,7 +170,7 @@ public final class Tools {
             image = ImageIO.read(in);
             in.close();
         }
-        catch (Throwable err) {
+        catch (Exception err) {
             image = null;
         }
 
@@ -194,7 +185,7 @@ public final class Tools {
         }
         catch (OutOfMemoryError err) {
             err.printStackTrace();
-            throw new RuntimeException("Out of memory error.");
+            throw err;
         }
 
         int idx = 0;
@@ -212,7 +203,8 @@ public final class Tools {
         Datatype type = null;
         Group pgroup = null;
         String imgName = imgFile.getName();
-        FileFormat newfile = null, thefile = null;
+        FileFormat newfile = null;
+        FileFormat thefile = null;
         if (toType.equals(FileFormat.FILE_TYPE_HDF5)) {
             thefile = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
             long[] h5dims = { h, w, 3 }; // RGB pixel interlace
@@ -235,11 +227,6 @@ public final class Tools {
             newfile.createImage(imgName, pgroup, type, dims, null, null, -1, 3, ScalarDS.INTERLACE_PIXEL, data);
             newfile.close();
         }
-
-        // clean up memory
-        data = null;
-        image = null;
-        Runtime.getRuntime().gc();
     }
 
     /**
@@ -252,9 +239,10 @@ public final class Tools {
      * @param type
      *            the image type.
      *
-     * @throws Exception if a failure occurred
+     * @throws IOException
+     *             if a failure occurred
      */
-    public static void saveImageAs(BufferedImage image, File file, String type) throws Exception {
+    public static void saveImageAs(BufferedImage image, File file, String type) throws IOException {
         if (image == null) {
             throw new NullPointerException("The source image is null.");
         }
@@ -316,7 +304,7 @@ public final class Tools {
         byte[][] p = new byte[3][256];
 
         for (int i = 0; i < 256; i++) {
-            p[0][i] = p[1][i] = p[2][i] = (byte) (255 / 2 + (255 / 2) * Math.sin((i - 32) / 20.3));
+            p[0][i] = p[1][i] = p[2][i] = (byte) ((double) 255 / 2 + ((double) 255 / 2) * Math.sin((i - 32) / 20.3));
         }
 
         return p;
@@ -333,7 +321,9 @@ public final class Tools {
      * @return the rainbow palette in the form of byte[3][256]
      */
     public static final byte[][] createRainbowPalette() {
-        byte r, g, b;
+        byte r;
+        byte g;
+        byte b;
         byte[][] p = new byte[3][256];
 
         for (int i = 1; i < 255; i++) {
@@ -453,8 +443,19 @@ public final class Tools {
         final int COLOR256 = 256;
         BufferedReader in = null;
         String line = null;
-        int nentries = 0, i, j, idx;
-        float v, r, g, b, ratio, max_v, min_v, max_color, min_color;
+        int nentries = 0;
+        int i = 0;
+        int j = 0;
+        int idx = 0;
+        float v = 0;
+        float r = 0;
+        float g = 0;
+        float b = 0;
+        float ratio = 0;
+        float max_v = 0;
+        float min_v = 0;
+        float max_color = 0;
+        float min_color = 0;
         float[][] tbl = new float[COLOR256][4]; /* value, red, green, blue */
 
         if (filename == null) return null;
@@ -468,9 +469,6 @@ public final class Tools {
         }
 
         if (in == null) return null;
-
-        idx = 0;
-        v = r = g = b = ratio = max_v = min_v = max_color = min_color = 0;
         do {
             try {
                 line = in.readLine();
@@ -578,8 +576,8 @@ public final class Tools {
                     p[2][k] = (int) (p[2][i - 1] + d3 * (k - i + 1));
                 }
                 i = j + 1;
-            } // if ((p[0][i] + p[1][i] + p[2][i]) == 0)
-        } // for (i = 1; i < COLOR256; i++) {
+            } // ((p[0][i] + p[1][i] + p[2][i]) == 0)
+        } // (i = 1; i < COLOR256; i++)
 
         byte[][] pal = new byte[3][COLOR256];
         for (i = 1; i < COLOR256; i++) {
@@ -609,7 +607,7 @@ public final class Tools {
             return bimage.getColorModel().hasAlpha();
         }
 
-        // Use a pixel grabber to retrieve the image's color model;
+        // Use a pixel grabber to retrieve the image's color model
         // grabbing a single pixel is usually sufficient
         PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
         try {
@@ -716,8 +714,12 @@ public final class Tools {
     public static Image createTrueColorImage(byte[] imageData, boolean planeInterlace, long w, long h) {
         Image theImage = null;
         long imgSize = w * h;
-        int packedImageData[] = new int[(int)imgSize];
-        int pixel = 0, idx = 0, r = 0, g = 0, b = 0;
+        int[] packedImageData = new int[(int) imgSize];
+        int pixel = 0;
+        int idx = 0;
+        int r = 0;
+        int g = 0;
+        int b = 0;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 pixel = r = g = b = 0;
@@ -740,13 +742,11 @@ public final class Tools {
                 // as 11111111rrrrrrrrggggggggbbbbbbbb
                 pixel = 0xff000000 | r | g | b;
                 packedImageData[idx++] = pixel;
-            } // for (int j=0; j<w; j++)
-        } // for (int i=0; i<h; i++)
+            } // (int j=0; j<w; j++)
+        } // (int i=0; i<h; i++)
 
         DirectColorModel dcm = (DirectColorModel) ColorModel.getRGBdefault();
         theImage = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource((int)w, (int)h, dcm, packedImageData, 0, (int)w));
-
-        packedImageData = null;
 
         return theImage;
     }
@@ -776,7 +776,7 @@ public final class Tools {
         // The buffered image created by this way works for package
         // com.sun.image.codec.jpeg.*
         // It does not work well with JavaTM Advanced Imaging
-        // com.sun.media.jai.codec.*;
+        // com.sun.media.jai.codec.*
         // if the screen setting is less than 32-bit color
         int w = image.getWidth(null);
         int h = image.getHeight(null);
@@ -847,7 +847,7 @@ public final class Tools {
     public static byte[] getBytes(Object rawData, double[] minmax, long w, long h, boolean isTransposed,
             List<Number> invalidValues, boolean convertByteData, byte[] byteData, List<Integer> list)
     {
-        double fillValue[] = null;
+        double[] fillValue = null;
 
         // no input data
         if (rawData == null || w<=0 || h<=0) {
@@ -861,7 +861,7 @@ public final class Tools {
 
         double min = Double.MAX_VALUE, max = -Double.MAX_VALUE, ratio = 1.0d;
         String cname = rawData.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         int size = Array.getLength(rawData);
 
         if (minmax == null) {
@@ -884,7 +884,7 @@ public final class Tools {
         min = minmax[0];
         max = minmax[1];
 
-        if (invalidValues!=null && invalidValues.size()>0) {
+        if (invalidValues != null && !invalidValues.isEmpty()) {
             int n = invalidValues.size();
             fillValue = new double[n];
             for (int i=0; i<n; i++) {
@@ -892,7 +892,8 @@ public final class Tools {
             }
         }
         ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
-        long idxSrc = 0, idxDst = 0;
+        long idxSrc = 0;
+        long idxDst = 0;
         switch (dname) {
             case 'S':
                 short[] s = (short[]) rawData;
@@ -952,7 +953,7 @@ public final class Tools {
             default:
                 byteData = null;
                 break;
-        } // switch (dname)
+        } // (dname)
 
         return byteData;
     }
@@ -987,7 +988,9 @@ public final class Tools {
 
     private static byte[] convertByteData(byte[] rawData, double[] minmax, long w, long h, boolean isTransposed,
             Object fillValue, boolean convertByteData, byte[] byteData, List<Integer> list) {
-        double min = Double.MAX_VALUE, max = -Double.MAX_VALUE, ratio = 1.0d;
+        double min = Double.MAX_VALUE;
+        double max = -Double.MAX_VALUE;
+        double ratio = 1.0d;
 
         if (rawData == null) return null;
 
@@ -1030,7 +1033,8 @@ public final class Tools {
         min = minmax[0];
         max = minmax[1];
         ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
-        long idxSrc = 0, idxDst = 0;
+        long idxSrc = 0;
+        long idxDst = 0;
         for (long i = 0; i < h; i++) {
             for (long j = 0; j < w; j++) {
                 idxSrc = idxDst =j * h + i;
@@ -1105,7 +1109,7 @@ public final class Tools {
                         break;
                     }
                 }
-            } // for (int i=0; i<m; i++) {
+            } // (int i=0; i<m; i++)
         }
         log.trace("newInstance(Class = {}): finish", cls);
 
@@ -1160,7 +1164,7 @@ public final class Tools {
         }
 
         String cname = data.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         switch (dname) {
             case 'B':
                 maxDataValue = MAX_INT8;
@@ -1186,7 +1190,7 @@ public final class Tools {
             default:
                 retval = -1;
                 break;
-        } // switch (dname)
+        } // (dname)
 
         if (minmax[0] == minmax[1]) {
             params[0] = 1.0;
@@ -1255,9 +1259,10 @@ public final class Tools {
 
         double gain = params[0];
         double bias = params[1];
-        double value_out, value_in;
+        double value_out;
+        double value_in;
         String cname = data_in.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
 
         switch (dname) {
             case 'B':
@@ -1270,7 +1275,7 @@ public final class Tools {
 
                 for (int i = 0; i < size; i++) {
                     value_in = Math.max(b_in[i], min);
-                    value_in = Math.min(b_in[i], max);
+                    value_in = Math.min(value_in, max);
                     value_out = (value_in + bias) * gain;
                     value_out = Math.max(value_out, 0.0);
                     value_out = Math.min(value_out, b_max);
@@ -1291,7 +1296,7 @@ public final class Tools {
 
                 for (int i = 0; i < size; i++) {
                     value_in = Math.max(s_in[i], min);
-                    value_in = Math.min(s_in[i], max);
+                    value_in = Math.min(value_in, max);
                     value_out = (value_in + bias) * gain;
                     value_out = Math.max(value_out, 0.0);
                     value_out = Math.min(value_out, s_max);
@@ -1311,7 +1316,7 @@ public final class Tools {
 
                 for (int i = 0; i < size; i++) {
                     value_in = Math.max(i_in[i], min);
-                    value_in = Math.min(i_in[i], max);
+                    value_in = Math.min(value_in, max);
                     value_out = (value_in + bias) * gain;
                     value_out = Math.max(value_out, 0.0);
                     value_out = Math.min(value_out, i_max);
@@ -1331,7 +1336,7 @@ public final class Tools {
 
                 for (int i = 0; i < size; i++) {
                     value_in = Math.max(l_in[i], min);
-                    value_in = Math.min(l_in[i], max);
+                    value_in = Math.min(value_in, max);
                     value_out = (value_in + bias) * gain;
                     value_out = Math.max(value_out, 0.0);
                     value_out = Math.min(value_out, l_max);
@@ -1340,7 +1345,7 @@ public final class Tools {
                 break;
             default:
                 break;
-        } // switch (dname)
+        } // (dname)
 
         return data_out;
     }
@@ -1379,7 +1384,7 @@ public final class Tools {
 
         int size = dst.length;
         String cname = src.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         switch (dname) {
             case 'B':
                 byte[] b_src = (byte[]) src;
@@ -1436,7 +1441,7 @@ public final class Tools {
             default:
                 retval = -1;
                 break;
-        } // switch (dname)
+        } // (dname)
 
         return retval;
     }
@@ -1500,7 +1505,7 @@ public final class Tools {
         boolean hasFillValue = (fillValue != null && fillValue.getClass().isArray());
 
         String cname = data.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         log.trace("findMinMax() cname={} : dname={}", cname, dname);
 
         minmax[0] = Float.MAX_VALUE;
@@ -1604,7 +1609,7 @@ public final class Tools {
             default:
                 retval = -1;
                 break;
-        } // switch (dname)
+        } // (dname)
 
         return retval;
     }
@@ -1661,8 +1666,13 @@ public final class Tools {
      * @return non-negative if successful; otherwise, returns negative
      */
     public static int computeStatistics(Object data, double[] avgstd, Object fillValue) {
-        int retval = 1, npoints = 0;
-        double sum = 0, avg = 0.0, var = 0.0, diff = 0.0, fill = 0.0;
+        int retval = 1;
+        int npoints = 0;
+        double sum = 0;
+        double avg = 0.0;
+        double var = 0.0;
+        double diff = 0.0;
+        double fill = 0.0;
 
         if ((data == null) || (avgstd == null) || (Array.getLength(data) <= 0) || (Array.getLength(avgstd) < 2)) {
             return -1;
@@ -1672,7 +1682,7 @@ public final class Tools {
         boolean hasFillValue = (fillValue != null && fillValue.getClass().isArray());
 
         String cname = data.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         log.trace("computeStatistics() cname={} : dname={}", cname, dname);
 
         npoints = 0;
@@ -1685,11 +1695,14 @@ public final class Tools {
                     sum += b[i];
                     npoints++;
                 }
-                avg = sum / npoints;
-                for (int i = 0; i < n; i++) {
-                    if (hasFillValue && b[i] == fill) continue;
-                    diff = b[i] - avg;
-                    var += diff * diff;
+                if (npoints > 0) {
+                    avg = sum / npoints;
+                    for (int i = 0; i < n; i++) {
+                        if (hasFillValue && b[i] == fill)
+                            continue;
+                        diff = b[i] - avg;
+                        var += diff * diff;
+                    }
                 }
                 break;
             case 'S':
@@ -1700,11 +1713,14 @@ public final class Tools {
                     sum += s[i];
                     npoints++;
                 }
-                avg = sum / npoints;
-                for (int i = 0; i < n; i++) {
-                    if (hasFillValue && s[i] == fill) continue;
-                    diff = s[i] - avg;
-                    var += diff * diff;
+                if (npoints > 0) {
+                    avg = sum / npoints;
+                    for (int i = 0; i < n; i++) {
+                        if (hasFillValue && s[i] == fill)
+                            continue;
+                        diff = s[i] - avg;
+                        var += diff * diff;
+                    }
                 }
                 break;
             case 'I':
@@ -1715,11 +1731,14 @@ public final class Tools {
                     sum += ia[i];
                     npoints++;
                 }
-                avg = sum / npoints;
-                for (int i = 0; i < n; i++) {
-                    if (hasFillValue && ia[i] == fill) continue;
-                    diff = ia[i] - avg;
-                    var += diff * diff;
+                if (npoints > 0) {
+                    avg = sum / npoints;
+                    for (int i = 0; i < n; i++) {
+                        if (hasFillValue && ia[i] == fill)
+                            continue;
+                        diff = ia[i] - avg;
+                        var += diff * diff;
+                    }
                 }
                 break;
             case 'J':
@@ -1730,12 +1749,14 @@ public final class Tools {
                     sum += l[i];
                     npoints++;
                 }
-
-                avg = sum / npoints;
-                for (int i = 0; i < n; i++) {
-                    if (hasFillValue && l[i] == fill) continue;
-                    diff = l[i] - avg;
-                    var += diff * diff;
+                if (npoints > 0) {
+                    avg = sum / npoints;
+                    for (int i = 0; i < n; i++) {
+                        if (hasFillValue && l[i] == fill)
+                            continue;
+                        diff = l[i] - avg;
+                        var += diff * diff;
+                    }
                 }
                 break;
             case 'F':
@@ -1746,12 +1767,14 @@ public final class Tools {
                     sum += f[i];
                     npoints++;
                 }
-
-                avg = sum / npoints;
-                for (int i = 0; i < n; i++) {
-                    if (hasFillValue && f[i] == fill) continue;
-                    diff = f[i] - avg;
-                    var += diff * diff;
+                if (npoints > 0) {
+                    avg = sum / npoints;
+                    for (int i = 0; i < n; i++) {
+                        if (hasFillValue && f[i] == fill)
+                            continue;
+                        diff = f[i] - avg;
+                        var += diff * diff;
+                    }
                 }
                 break;
             case 'D':
@@ -1762,17 +1785,20 @@ public final class Tools {
                     sum += d[i];
                     npoints++;
                 }
-                avg = sum / npoints;
-                for (int i = 0; i < n; i++) {
-                    if (hasFillValue && d[i] == fill) continue;
-                    diff = d[i] - avg;
-                    var += diff * diff;
+                if (npoints > 0) {
+                    avg = sum / npoints;
+                    for (int i = 0; i < n; i++) {
+                        if (hasFillValue && d[i] == fill)
+                            continue;
+                        diff = d[i] - avg;
+                        var += diff * diff;
+                    }
                 }
                 break;
             default:
                 retval = -1;
                 break;
-        } // switch (dname)
+        } // (dname)
 
         if (npoints <= 1) {
             if (npoints < 1) avgstd[0] = fill;
@@ -1788,14 +1814,13 @@ public final class Tools {
 
     public static void saveAsBinary(DataOutputStream out, Object data, ByteOrder order) throws Exception {
         String cname = data.getClass().getName();
-        char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         ByteBuffer bb = null;
 
         int size = Array.getLength(data);
 
         if (dname == 'B') {
-            byte[] bdata = new byte[size];
-            bdata = (byte[]) data;
+            byte[] bdata = (byte[]) data;
 
             bb = ByteBuffer.allocate(BYTE_BUFFER_SIZE);
             bb.order(order);
@@ -1821,8 +1846,7 @@ public final class Tools {
             out.close();
         }
         else if (dname == 'S') {
-            short[] sdata = new short[size];
-            sdata = (short[]) data;
+            short[] sdata = (short[]) data;
             bb = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
             bb.order(order);
 
@@ -1849,8 +1873,7 @@ public final class Tools {
             out.close();
         }
         else if (dname == 'I') {
-            int[] idata = new int[size];
-            idata = (int[]) data;
+            int[] idata = (int[]) data;
             bb = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
             bb.order(order);
 
@@ -1877,8 +1900,7 @@ public final class Tools {
             out.close();
         }
         else if (dname == 'J') {
-            long[] ldata = new long[size];
-            ldata = (long[]) data;
+            long[] ldata = (long[]) data;
 
             bb = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
             bb.order(order);
@@ -1906,8 +1928,7 @@ public final class Tools {
             out.close();
         }
         else if (dname == 'F') {
-            float[] fdata = new float[size];
-            fdata = (float[]) data;
+            float[] fdata = (float[]) data;
 
             bb = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
             bb.order(order);
@@ -1935,8 +1956,7 @@ public final class Tools {
             out.close();
         }
         else if (dname == 'D') {
-            double[] ddata = new double[size];
-            ddata = (double[]) data;
+            double[] ddata = (double[]) data;
 
             bb = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
             bb.order(order);
@@ -1993,7 +2013,7 @@ public final class Tools {
 
             int datasetSize = Array.getLength(dataOut);
             String cname = dataOut.getClass().getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
 
             if (dname == 'B') {
                 long datasetByteSize = datasetSize;
@@ -2218,7 +2238,7 @@ public final class Tools {
         for (int i = 0; i < nhex; i++)
             hex[i] = (short) (0x0F & (v >> (i * 4)));
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         boolean isEven = true;
         for (int i = nhex - 1; i >= 0; i--) {
             if (isEven && i < nhex - 1) sb.append(" ");
@@ -2273,6 +2293,8 @@ public final class Tools {
                 case 15:
                     sb.append("1111");
                     break;
+                default:
+                    break;
             }
         }
 
@@ -2280,7 +2302,7 @@ public final class Tools {
     }
 
     public static final String toBinaryString(BigInteger v, int nbytes) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String val = String.format("%" + (8 * nbytes) + "s", v.toString(2)).replace(" ", "0").toUpperCase();
 
         // Insert spacing
@@ -2292,7 +2314,7 @@ public final class Tools {
         return sb.toString();
     }
 
-    final static char[] HEXCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    static final char[] HEXCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     /**
      * Returns a string representation of the long argument as an unsigned integer in base 16. This
@@ -2316,7 +2338,7 @@ public final class Tools {
             hex[i] = (short) (0x0F & (v >> (i * 4)));
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = nhex - 1; i >= 0; i--) {
             sb.append(HEXCHARS[hex[i]]);
         }
@@ -2350,7 +2372,7 @@ public final class Tools {
      * @param op
      *            the bitmask op to be applied
      *
-     * @return true if bitmask is applied successfuly; otherwise, false.
+     * @return true if bitmask is applied successfully; otherwise, false.
      */
     public static final boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op) {
         if (     theData == null
@@ -2360,7 +2382,7 @@ public final class Tools {
 
         char nt = '0';
         String cName = theData.getClass().getName();
-        int cIndex = cName.lastIndexOf("[");
+        int cIndex = cName.lastIndexOf('[');
         if (cIndex >= 0) {
             nt = cName.charAt(cIndex + 1);
         }
@@ -2415,7 +2437,7 @@ public final class Tools {
                 ((int[]) theData)[i] = (int) packedValue;
             else if (nt == 'J')
                 ((long[]) theData)[i] = packedValue;
-        } /* for (int i = 0; i < len; i++) */
+        } // (int i = 0; i < len; i++)
 
         return true;
     } /* public static final boolean applyBitmask() */
@@ -2438,8 +2460,8 @@ public final class Tools {
             try {
                 raf.close();
             }
-            catch (Throwable err) {
-                ;
+            catch (Exception err) {
+                // Empty on purpose
             }
             raf = null;
         }
@@ -2460,8 +2482,8 @@ public final class Tools {
             try {
                 raf.close();
             }
-            catch (Throwable err) {
-                ;
+            catch (Exception err) {
+                // Empty on purpose
             }
             return null;
         }
@@ -2503,8 +2525,8 @@ public final class Tools {
             try {
                 raf.close();
             }
-            catch (Throwable err) {
-                ;
+            catch (Exception err) {
+                // Empty on purpose
             }
             return null;
         }
@@ -2523,6 +2545,7 @@ public final class Tools {
             raf.close();
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
 
         return userBlock;
@@ -2549,7 +2572,7 @@ public final class Tools {
             return false;
         }
 
-        // find the end of user block for the input file;
+        // find the end of user block for the input file
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(fin, "r");
@@ -2570,18 +2593,12 @@ public final class Tools {
         catch (Exception ex) {
             fileSize = 0;
         }
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-            fileSize = 0;
-        }
         if (fileSize <= 0) {
             try {
                 raf.close();
             }
-            catch (Throwable err) {
-                ;
+            catch (Exception err) {
+                // Empty on purpose
             }
             return false;
         }
@@ -2620,8 +2637,8 @@ public final class Tools {
         try {
             raf.close();
         }
-        catch (Throwable err) {
-            ;
+        catch (Exception err) {
+            // Empty on purpose
         }
 
         if (!ish5) {
@@ -2642,6 +2659,7 @@ public final class Tools {
                 bi.close();
             }
             catch (Exception ex2) {
+                // Empty on purpose
             }
             return false;
         }
@@ -2654,11 +2672,13 @@ public final class Tools {
                 bo.close();
             }
             catch (Exception ex2) {
+                // Empty on purpose
             }
             try {
                 bi.close();
             }
             catch (Exception ex2) {
+                // Empty on purpose
             }
             return false;
         }
@@ -2675,6 +2695,7 @@ public final class Tools {
             bo.write(buf, 0, buf.length);
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
 
         // The super block space is allocated by offset 0, 512, 1024, 2048, etc
@@ -2689,6 +2710,7 @@ public final class Tools {
                 bo.write(padBuf, 0, padSize);
             }
             catch (Exception ex) {
+                // Empty on purpose
             }
         }
 
@@ -2719,11 +2741,13 @@ public final class Tools {
             bi.close();
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
         try {
             bo.close();
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
         return true;
     }
@@ -2761,14 +2785,7 @@ public final class Tools {
         }
 
         if (header != null) {
-            if (
-                    // HDF4
-                    ((header[0] == 14) && (header[1] == 3) && (header[2] == 19) && (header[3] == 1))
-                    /*
-                     * // netCDF || (header[0]==67 && header[1]==68 && header[2]==70 &&
-                     * header[3]==1)
-                     */
-                    ) {
+            if ((header[0] == 14) && (header[1] == 3) && (header[2] == 19) && (header[3] == 1)) {
                 ish4 = true;
             }
             else {
@@ -2780,6 +2797,7 @@ public final class Tools {
             raf.close();
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
 
         return ish4;
@@ -2815,6 +2833,7 @@ public final class Tools {
             fileSize = raf.length();
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
 
         // The super block is located by searching for the HDF5 file signature
@@ -2852,6 +2871,7 @@ public final class Tools {
             raf.close();
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
 
         return ish5;
@@ -2904,6 +2924,7 @@ public final class Tools {
             raf.close();
         }
         catch (Exception ex) {
+            // Empty on purpose
         }
 
         return isnc;
@@ -2950,7 +2971,7 @@ public final class Tools {
             else
                 runtime.exec(new String[] { browser, url });
         }
-    } /* public static final void launchBrowser(String url) */
+    }
 
     /** Create a new HDF file with default file creation properties
      *
@@ -2996,12 +3017,10 @@ public final class Tools {
             if (type == FileFormat.FILE_TYPE_HDF4) {
                 fname += ".hdf";
                 f = new File(fname);
-                //setSelectedFile(f);
             }
             else if (type == FileFormat.FILE_TYPE_HDF5) {
                 fname += ".h5";
                 f = new File(fname);
-                //setSelectedFile(f);
             }
         }
 
@@ -3082,15 +3101,12 @@ public final class Tools {
      * Check if a given number if NaN or INF.
      *
      * @param val
-     *            the nubmer to be checked
+     *            the number to be checked
      *
      * @return true if the number is Nan or INF; otherwise, false.
      */
     public static final boolean isNaNINF(double val) {
-        if (Double.isNaN(val) || val == Float.NEGATIVE_INFINITY || val == Float.POSITIVE_INFINITY
-                || val == Double.NEGATIVE_INFINITY || val == Double.POSITIVE_INFINITY) return true;
-
-        return false;
+        return (Double.isNaN(val) || val == Float.NEGATIVE_INFINITY || val == Float.POSITIVE_INFINITY || val == Double.NEGATIVE_INFINITY || val == Double.POSITIVE_INFINITY);
     }
 
     /**
@@ -3104,9 +3120,7 @@ public final class Tools {
      *         otherwise.
      */
     public static boolean checkValidJavaArrayIndex(final long value) {
-        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) return false;
-
-        return true;
+        return (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE);
     }
 
     /**

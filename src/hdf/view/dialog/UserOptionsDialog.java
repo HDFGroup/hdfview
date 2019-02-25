@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class UserOptionsDialog extends PreferenceDialog {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
 
     private Shell                         shell;
 

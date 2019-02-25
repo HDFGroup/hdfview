@@ -40,7 +40,7 @@ import hdf.view.TreeView.TreeViewFactory;
 public class ViewProperties extends PreferenceStore {
     private static final long   serialVersionUID     = -6411465283887959066L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
 
     /** the version of the HDFViewer */
     public static final String  VERSION              = HDFVersions.HDFVIEW_VERSION;
@@ -381,8 +381,8 @@ public class ViewProperties extends PreferenceStore {
                 catch (Exception ex) {
                     log.debug("loadExtClass: load jar[{}] failed", i, ex);
                 }
-            } // if (jars[i].endsWith(".jar")) {
-        } // for (int i=0; i<jars.length; i++) {
+            } //  (jars[i].endsWith(".jar")) {
+        } //  (int i=0; i<jars.length; i++) {
 
         int n = jarList.size();
         if (n <= 0) {
@@ -461,7 +461,7 @@ public class ViewProperties extends PreferenceStore {
             catch (Exception ex) {
                 log.debug("loadExtClass: load classList[{}] of {} failed", i, theName, ex);
             }
-        } // for (int i=0; i<n; i++)
+        } //  (int i=0; i<n; i++)
         log.trace("loadExtClass: finished");
 
         return extClassLoader;
@@ -1199,7 +1199,7 @@ public class ViewProperties extends PreferenceStore {
                         FileFormat.addFileFormat(fExt, (FileFormat) theObject);
                     }
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("load: load file format failed", err);
                 }
             }
@@ -1303,26 +1303,26 @@ public class ViewProperties extends PreferenceStore {
         // log.trace("load user properties: srb account");
         // propVal = null;
         // String srbaccount[] = new String[7];
-        // for (int i = 0; i < MAX_RECENT_FILES; i++) {
-        // if (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
+        //  (int i = 0; i < MAX_RECENT_FILES; i++) {
+        //  (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
         // continue;
         //
-        // if (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
+        //  (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
         // continue;
         //
-        // if (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
+        //  (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
         // continue;
         //
-        // if (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
+        //  (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
         // continue;
         //
-        // if (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
+        //  (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
         // continue;
         //
-        // if (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
+        //  (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
         // continue;
         //
-        // if (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
+        //  (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
         // continue;
         //
         // srbAccountList.add(srbaccount);
@@ -1419,9 +1419,9 @@ public class ViewProperties extends PreferenceStore {
         // String srbaccount[] = null;
         // size = srbAccountList.size();
         // minSize = Math.min(size, MAX_RECENT_FILES);
-        // for (int i = 0; i < minSize; i++) {
+        //  (int i = 0; i < minSize; i++) {
         // srbaccount = srbAccountList.get(i);
-        // if ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] !=
+        //  ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] !=
         // null)
         // && (srbaccount[3] != null) && (srbaccount[4] != null) && (srbaccount[5] !=
         // null)

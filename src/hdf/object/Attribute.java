@@ -79,7 +79,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
     private static final long serialVersionUID = 2072473407027648309L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
 
     /** The HObject to which this Attribute is attached */
     protected HObject         parentObject;
@@ -100,7 +100,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     /**
      * A list of names of all compound fields including nested fields.
      * <p>
-     * The nested names are separated by CompoundDS.separator. For example, if
+     * The nested names are separated by CompoundDS.SEPARATOR. For example, if
      * compound attribute "A" has the following nested structure,
      *
      * <pre>
@@ -466,7 +466,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                                 log.debug("init(): memberTIDs[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
                             }
                         }
-                    } // for (int i=0; i<numberOfMembers; i++)
+                    } // (int i=0; i<numberOfMembers; i++)
                 }
 
                 inited = true;
@@ -1094,7 +1094,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         }
 
         // attribute value is an array
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int n = Array.getLength(data);
         if (maxItems > 0)
             if (n > maxItems)
@@ -1105,7 +1105,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         if (getDatatype().isEnum()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
 
             Map<String, String> map = this.getDatatype().getEnumMembers();
@@ -1202,7 +1202,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         }
         else if (getDatatype().isUnsigned()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {

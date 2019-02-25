@@ -60,7 +60,7 @@ import hdf.view.ViewProperties;
  */
 public class NewAttributeDialog extends Dialog {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 
     private Shell             shell;
 
@@ -904,7 +904,7 @@ public class NewAttributeDialog extends Dialog {
                     try {
                         InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html");
                         Scanner scan = new Scanner(in);
-                        StringBuffer buffer = new StringBuffer();
+                        StringBuilder buffer = new StringBuilder();
                         while(scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
@@ -915,7 +915,7 @@ public class NewAttributeDialog extends Dialog {
                         in.close();
                     }
                     catch (Exception e) {
-                        StringBuffer buff = new StringBuffer();
+                        StringBuilder buff = new StringBuilder();
                         buff.append("<html>");
                         buff.append("<body>");
                         buff.append("ERROR: cannot load help information.");
@@ -959,7 +959,7 @@ public class NewAttributeDialog extends Dialog {
                         cl.close();
                     }
                     catch (Exception e) {
-                        StringBuffer buff = new StringBuffer();
+                        StringBuilder buff = new StringBuilder();
                         buff.append("<html>");
                         buff.append("<body>");
                         buff.append("ERROR: cannot load help information.");

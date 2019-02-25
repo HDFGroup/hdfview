@@ -47,7 +47,7 @@ import hdf.object.FileFormat;
 public class H5Datatype extends Datatype {
     private static final long serialVersionUID = -750546422258749792L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Datatype.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Datatype.class);
 
     /**
      * The list of attributes of this data object.
@@ -415,7 +415,7 @@ public class H5Datatype extends Datatype {
         int inSize = 0;
         String[] outNames = null;
         String cName = inValues.getClass().getName();
-        boolean isArray = cName.lastIndexOf("[") >= 0;
+        boolean isArray = cName.lastIndexOf('[') >= 0;
         if (isArray) {
             inSize = Array.getLength(inValues);
         }
@@ -1347,7 +1347,7 @@ public class H5Datatype extends Datatype {
             catch (Exception ex) {
                 log.debug("createNative(): set up enum members failure: ", ex);
             }
-        } // if (datatypeClass == CLASS_ENUM) {
+        } //  (datatypeClass == CLASS_ENUM) {
 
         try {
             tmptid = tid;
@@ -1430,6 +1430,8 @@ public class H5Datatype extends Datatype {
                 case 8:
                     data = new long[nPoints];
                     break;
+                default:
+                    break;
             }
         }
         else if (typeClass == HDF5Constants.H5T_ENUM) {
@@ -1443,7 +1445,7 @@ public class H5Datatype extends Datatype {
         else if (typeClass == HDF5Constants.H5T_COMPOUND) {
             log.trace("allocateArray(): class H5T_COMPOUND");
 
-            data = new ArrayList<Object>(dtype.getCompoundMemberTypes().size());
+            data = new ArrayList<>(dtype.getCompoundMemberTypes().size());
         }
         else if (typeClass == HDF5Constants.H5T_FLOAT) {
             log.trace("allocateArray(): class H5T_FLOAT");
@@ -1454,6 +1456,8 @@ public class H5Datatype extends Datatype {
                     break;
                 case 8:
                     data = new double[nPoints];
+                    break;
+                default:
                     break;
             }
         }
@@ -1798,7 +1802,7 @@ public class H5Datatype extends Datatype {
             catch (Exception ex) {
                 log.debug("getMetadata(): H5File.getAttribute failure: ", ex);
             }
-        } // if (attributeList == null)
+        } //  (attributeList == null)
 
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
@@ -1986,7 +1990,7 @@ public class H5Datatype extends Datatype {
                 }
 
                 if (mtype.isCompound()) {
-                    H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.separator, names, flatListTypes);
+                    H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.SEPARATOR, names, flatListTypes);
                     log.trace("extractCompoundInfo(): continue after recursive compound");
                     continue;
                 }
@@ -2070,7 +2074,7 @@ public class H5Datatype extends Datatype {
 
                 String insertedName = member_name;
 
-                int sep = member_name.indexOf(CompoundDS.separator);
+                int sep = member_name.indexOf(CompoundDS.SEPARATOR);
                 if (sep >= 0) {
                     /*
                      * If a compound separator character is present in the supplied string, then
