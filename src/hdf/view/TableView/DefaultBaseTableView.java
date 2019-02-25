@@ -2217,7 +2217,8 @@ public abstract class DefaultBaseTableView implements TableView {
                                 for (int i = 0; i < len; i++) {
                                     if (isRegRef)
                                         showRegRefData((String) Array.get(theData, selectedRows[i]));
-                                    else if (isObjRef) showObjRefData(Array.getLong(theData, selectedRows[i]));
+                                    else if (isObjRef)
+                                        showObjRefData(Array.getLong(theData, selectedRows[i]));
                                 }
                             }
                         });

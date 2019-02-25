@@ -843,14 +843,9 @@ public class DataProviderFactory {
                         index = (rowIndex * colCount + columnIndex) * arraySize;
                 }
 
-                /*
-                 * TODO: should maybe be modified to multiply the index by the arraySize before
-                 * handing down?
-                 */
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
                     for (int i = 0; i < arraySize; i++) {
-                        List<?> cmpdDataList = (List<?>) ((Object[]) dataBuf)[i];
-                        arrayElements[i] = baseTypeDataProvider.getDataValue(cmpdDataList, columnIndex, (int) index + i);
+                        arrayElements[i] = ((Object[]) dataBuf)[i];
                     }
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {

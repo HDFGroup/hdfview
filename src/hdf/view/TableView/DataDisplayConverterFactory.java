@@ -131,11 +131,13 @@ public class DataDisplayConverterFactory {
          * ArrayDataDisplayConverter, we have to set this field and pass it through in
          * case there is a CompoundDataDisplayConverter at the bottom of the chain.
          */
+        protected int              cellRowIdx;
         protected int              cellColIdx;
 
         HDFDisplayConverter(final Datatype dtype) {
             log.trace("constructor: start");
 
+            cellRowIdx = -1;
             cellColIdx = -1;
 
             log.trace("constructor: finish");
@@ -266,6 +268,7 @@ public class DataDisplayConverterFactory {
 
         @Override
         public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
+            cellRowIdx = cell.getRowIndex();
             cellColIdx = cell.getColumnIndex() % nTotFields;
             return canonicalToDisplayValue(value);
         }
@@ -291,10 +294,33 @@ public class DataDisplayConverterFactory {
                 if (cellColIdx >= nTotFields)
                     cellColIdx %= nTotFields;
 
-                HDFDisplayConverter converter = memberTypeConverters[baseConverterIndexMap.get(cellColIdx)];
-                converter.cellColIdx = cellColIdx - relCmpdStartIndexMap.get(cellColIdx);
+                if (value instanceof List) {
+                    /*
+                     * For Arrays of Compounds, we convert an entire list of data.
+                     */
+                    List<?> cmpdList = (List<?>) value;
 
-                buffer.append(converter.canonicalToDisplayValue(value));
+                    buffer.append("{");
+                    for (int i = 0; i < memberTypeConverters.length; i++) {
+                        if (i > 0) buffer.append(", ");
+
+                        Object curObject = cmpdList.get(i);
+                        if (curObject instanceof List)
+                            buffer.append(memberTypeConverters[i].canonicalToDisplayValue(curObject));
+                        else {
+                            Object dataArrayValue = Array.get(curObject, cellRowIdx);
+                            buffer.append(memberTypeConverters[i].canonicalToDisplayValue(dataArrayValue));
+                        }
+                    }
+                    buffer.append("}");
+                }
+                else {
+                    HDFDisplayConverter converter = memberTypeConverters[baseConverterIndexMap.get(cellColIdx)];
+                    converter.cellRowIdx = cellRowIdx;
+                    converter.cellColIdx = cellColIdx - relCmpdStartIndexMap.get(cellColIdx);
+
+                    buffer.append(converter.canonicalToDisplayValue(value));
+                }
             }
             catch (Exception ex) {
                 log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
@@ -397,6 +423,7 @@ public class DataDisplayConverterFactory {
 
         @Override
         public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
+            cellRowIdx = cell.getRowIndex();
             cellColIdx = cell.getColumnIndex();
             return canonicalToDisplayValue(value);
         }
@@ -419,9 +446,10 @@ public class DataDisplayConverterFactory {
             buffer.setLength(0); // clear the old string
 
             /*
-             * Pass the cell's column index down in case there is a
+             * Pass the cell's row and column index down in case there is a
              * CompoundDataDisplayConverter at the bottom of the chain.
              */
+            baseTypeConverter.cellRowIdx = cellRowIdx;
             baseTypeConverter.cellColIdx = cellColIdx;
 
             try {
