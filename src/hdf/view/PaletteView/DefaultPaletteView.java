@@ -293,7 +293,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         choicePalette.add(PALETTE_RAINBOW);
         choicePalette.add(PALETTE_NATURE);
         choicePalette.add(PALETTE_WAVE);
-        ArrayList<?> plist = ViewProperties.getPaletteList();
+        Vector<?> plist = ViewProperties.getPaletteList();
         int n = plist.size();
         for (int i = 0; i < n; i++)
             choicePalette.add((String) plist.get(i));
