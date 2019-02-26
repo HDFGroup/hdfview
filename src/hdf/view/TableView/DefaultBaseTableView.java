@@ -1590,27 +1590,26 @@ public abstract class DefaultBaseTableView implements TableView {
             if (!Tools.showConfirm(shell, "Save", "File exists. Do you want to replace it?")) return;
         }
 
-        FileOutputStream outputFile = new FileOutputStream(chosenFile);
-        DataOutputStream out = new DataOutputStream(outputFile);
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(chosenFile))) {
+            if (dataObject instanceof ScalarDS) {
+                ((ScalarDS) dataObject).convertToUnsignedC();
+                Object data = dataObject.getData();
+                ByteOrder bo = ByteOrder.nativeOrder();
 
-        if (dataObject instanceof ScalarDS) {
-            ((ScalarDS) dataObject).convertToUnsignedC();
-            Object data = dataObject.getData();
-            ByteOrder bo = ByteOrder.nativeOrder();
+                if (binaryOrder == 1)
+                    bo = ByteOrder.nativeOrder();
+                else if (binaryOrder == 2)
+                    bo = ByteOrder.LITTLE_ENDIAN;
+                else if (binaryOrder == 3)
+                    bo = ByteOrder.BIG_ENDIAN;
 
-            if (binaryOrder == 1)
-                bo = ByteOrder.nativeOrder();
-            else if (binaryOrder == 2)
-                bo = ByteOrder.LITTLE_ENDIAN;
-            else if (binaryOrder == 3)
-                bo = ByteOrder.BIG_ENDIAN;
+                Tools.saveAsBinary(out, data, bo);
 
-            Tools.saveAsBinary(out, data, bo);
-
-            viewer.showStatus("Data saved to: " + fname);
+                viewer.showStatus("Data saved to: " + fname);
+            }
+            else
+                viewer.showStatus("Data not saved - not a ScalarDS");
         }
-        else
-            viewer.showStatus("Data not saved - not a ScalarDS");
     }
 
     /**
@@ -1646,29 +1645,31 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dataObject instanceof CompoundDS) c0 = 0;
 
         BufferedReader in = null;
+        String line = null;
+        StringTokenizer tokenizer1 = null;
         try {
             in = new BufferedReader(new FileReader(fname));
+
+            try {
+                line = in.readLine();
+            }
+            catch (IOException ex) {
+                log.debug("read text file {}:", fname, ex);
+                return;
+            }
         }
         catch (FileNotFoundException ex) {
             log.debug("import data values from text file {}:", fname, ex);
             return;
         }
-
-        String line = null;
-        StringTokenizer tokenizer1 = null;
-
-        try {
-            line = in.readLine();
-        }
-        catch (IOException ex) {
+        finally {
             try {
                 in.close();
             }
             catch (IOException ex2) {
-                log.debug("close text file {}:", fname, ex2);
+                // empty on purpose
             }
-            log.debug("read text file {}:", fname, ex);
-            return;
+
         }
 
         String delName = ViewProperties.getDataDelimiter();

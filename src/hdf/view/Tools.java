@@ -452,10 +452,10 @@ public final class Tools {
         float g = 0;
         float b = 0;
         float ratio = 0;
-        float max_v = 0;
-        float min_v = 0;
-        float max_color = 0;
-        float min_color = 0;
+        float maxV = 0;
+        float minV = 0;
+        float maxColor = 0;
+        float minColor = 0;
         float[][] tbl = new float[COLOR256][4]; /* value, red, green, blue */
 
         if (filename == null) return null;
@@ -504,19 +504,19 @@ public final class Tools {
             tbl[idx][3] = b;
 
             if (idx == 0) {
-                max_v = min_v = v;
-                max_color = min_color = r;
+                maxV = minV = v;
+                maxColor = minColor = r;
             }
 
-            max_v = Math.max(max_v, v);
-            max_color = Math.max(max_color, r);
-            max_color = Math.max(max_color, g);
-            max_color = Math.max(max_color, b);
+            maxV = Math.max(maxV, v);
+            maxColor = Math.max(maxColor, r);
+            maxColor = Math.max(maxColor, g);
+            maxColor = Math.max(maxColor, b);
 
-            min_v = Math.min(min_v, v);
-            min_color = Math.min(min_color, r);
-            min_color = Math.min(min_color, g);
-            min_color = Math.min(min_color, b);
+            minV = Math.min(minV, v);
+            minColor = Math.min(minColor, r);
+            minColor = Math.min(minColor, g);
+            minColor = Math.min(minColor, b);
 
             idx++;
             if (idx >= COLOR256) break; /* only support to 256 colors */
@@ -535,22 +535,22 @@ public final class Tools {
 
         // convert color table to byte
         nentries = idx;
-        if (max_color <= 1) {
-            ratio = (min_color == max_color) ? 1.0f : ((COLOR256 - 1.0f) / (max_color - min_color));
+        if (maxColor <= 1) {
+            ratio = (minColor == maxColor) ? 1.0f : ((COLOR256 - 1.0f) / (maxColor - minColor));
 
             for (i = 0; i < nentries; i++) {
                 for (j = 1; j < 4; j++)
-                    tbl[i][j] = (tbl[i][j] - min_color) * ratio;
+                    tbl[i][j] = (tbl[i][j] - minColor) * ratio;
             }
         }
 
         // convert table to 256 entries
         idx = 0;
-        ratio = (min_v == max_v) ? 1.0f : ((COLOR256 - 1.0f) / (max_v - min_v));
+        ratio = (minV == maxV) ? 1.0f : ((COLOR256 - 1.0f) / (maxV - minV));
 
         int[][] p = new int[3][COLOR256];
         for (i = 0; i < nentries; i++) {
-            idx = (int) ((tbl[i][0] - min_v) * ratio);
+            idx = (int) ((tbl[i][0] - minV) * ratio);
             for (j = 0; j < 3; j++)
                 p[j][idx] = (int) tbl[i][j + 1];
         }
@@ -859,7 +859,6 @@ public final class Tools {
             return null;
         }
 
-        double min = Double.MAX_VALUE, max = -Double.MAX_VALUE, ratio = 1.0d;
         String cname = rawData.getClass().getName();
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         int size = Array.getLength(rawData);
@@ -881,8 +880,8 @@ public final class Tools {
             Tools.findMinMax(rawData, minmax, fillValue);
         }
 
-        min = minmax[0];
-        max = minmax[1];
+        double min = minmax[0];
+        double max = minmax[1];
 
         if (invalidValues != null && !invalidValues.isEmpty()) {
             int n = invalidValues.size();
@@ -891,7 +890,7 @@ public final class Tools {
                 fillValue[i] = invalidValues.get(i).doubleValue();
             }
         }
-        ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
+        double ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
         long idxSrc = 0;
         long idxDst = 0;
         switch (dname) {
@@ -988,10 +987,6 @@ public final class Tools {
 
     private static byte[] convertByteData(byte[] rawData, double[] minmax, long w, long h, boolean isTransposed,
             Object fillValue, boolean convertByteData, byte[] byteData, List<Integer> list) {
-        double min = Double.MAX_VALUE;
-        double max = -Double.MAX_VALUE;
-        double ratio = 1.0d;
-
         if (rawData == null) return null;
 
         if (convertByteData) {
@@ -1030,9 +1025,9 @@ public final class Tools {
         }
 
         // special data range used, must convert the data
-        min = minmax[0];
-        max = minmax[1];
-        ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
+        double min = minmax[0];
+        double max = minmax[1];
+        double ratio = (min == max) ? 1.00d : (double) (255.00 / (max - min));
         long idxSrc = 0;
         long idxDst = 0;
         for (long i = 0; i < h; i++) {
@@ -1224,9 +1219,9 @@ public final class Tools {
     /**
      * Apply autocontrast parameters to the original data in place (destructive)
      *
-     * @param data_in
+     * @param dataIN
      *            the original data array of signed/unsigned integers
-     * @param data_out
+     * @param dataOUT
      *            the converted data array of signed/unsigned integers
      * @param params
      *            the auto gain parameter. params[0]=gain, params[1]=bias
@@ -1238,12 +1233,13 @@ public final class Tools {
      * @return the data array with the auto contrast conversion; otherwise,
      *         returns null
      */
-    public static Object autoContrastApply(Object data_in, Object data_out, double[] params, double[] minmax,
+    public static Object autoContrastApply(Object dataIN, Object dataOUT, double[] params, double[] minmax,
             boolean isUnsigned) {
         int size = 0;
-        double min = -MAX_INT64, max = MAX_INT64;
+        double min = -MAX_INT64;
+        double max = MAX_INT64;
 
-        if ((data_in == null) || (params == null) || (params.length < 2)) {
+        if ((dataIN == null) || (params == null) || (params.length < 2)) {
             return null;
         }
 
@@ -1252,102 +1248,102 @@ public final class Tools {
             max = minmax[1];
         }
         // input and output array must be the same size
-        size = Array.getLength(data_in);
-        if ((data_out != null) && (size != Array.getLength(data_out))) {
+        size = Array.getLength(dataIN);
+        if ((dataOUT != null) && (size != Array.getLength(dataOUT))) {
             return null;
         }
 
         double gain = params[0];
         double bias = params[1];
-        double value_out;
-        double value_in;
-        String cname = data_in.getClass().getName();
+        double valueOut;
+        double valueIn;
+        String cname = dataIN.getClass().getName();
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
 
         switch (dname) {
             case 'B':
-                byte[] b_in = (byte[]) data_in;
-                if (data_out == null) {
-                    data_out = new byte[size];
+                byte[] bIn = (byte[]) dataIN;
+                if (dataOUT == null) {
+                    dataOUT = new byte[size];
                 }
-                byte[] b_out = (byte[]) data_out;
-                byte b_max = (byte) MAX_INT8;
+                byte[] bOut = (byte[]) dataOUT;
+                byte bMax = (byte) MAX_INT8;
 
                 for (int i = 0; i < size; i++) {
-                    value_in = Math.max(b_in[i], min);
-                    value_in = Math.min(value_in, max);
-                    value_out = (value_in + bias) * gain;
-                    value_out = Math.max(value_out, 0.0);
-                    value_out = Math.min(value_out, b_max);
-                    b_out[i] = (byte) value_out;
+                    valueIn = Math.max(bIn[i], min);
+                    valueIn = Math.min(valueIn, max);
+                    valueOut = (valueIn + bias) * gain;
+                    valueOut = Math.max(valueOut, 0.0);
+                    valueOut = Math.min(valueOut, bMax);
+                    bOut[i] = (byte) valueOut;
                 }
                 break;
             case 'S':
-                short[] s_in = (short[]) data_in;
-                if (data_out == null) {
-                    data_out = new short[size];
+                short[] sIn = (short[]) dataIN;
+                if (dataOUT == null) {
+                    dataOUT = new short[size];
                 }
-                short[] s_out = (short[]) data_out;
-                short s_max = (short) MAX_INT16;
+                short[] sOut = (short[]) dataOUT;
+                short sMax = (short) MAX_INT16;
 
                 if (isUnsigned) {
-                    s_max = (short) MAX_UINT8; // data was upgraded from unsigned byte
+                    sMax = (short) MAX_UINT8; // data was upgraded from unsigned byte
                 }
 
                 for (int i = 0; i < size; i++) {
-                    value_in = Math.max(s_in[i], min);
-                    value_in = Math.min(value_in, max);
-                    value_out = (value_in + bias) * gain;
-                    value_out = Math.max(value_out, 0.0);
-                    value_out = Math.min(value_out, s_max);
-                    s_out[i] = (byte) value_out;
+                    valueIn = Math.max(sIn[i], min);
+                    valueIn = Math.min(valueIn, max);
+                    valueOut = (valueIn + bias) * gain;
+                    valueOut = Math.max(valueOut, 0.0);
+                    valueOut = Math.min(valueOut, sMax);
+                    sOut[i] = (byte) valueOut;
                 }
                 break;
             case 'I':
-                int[] i_in = (int[]) data_in;
-                if (data_out == null) {
-                    data_out = new int[size];
+                int[] iIn = (int[]) dataIN;
+                if (dataOUT == null) {
+                    dataOUT = new int[size];
                 }
-                int[] i_out = (int[]) data_out;
-                int i_max = (int) MAX_INT32;
+                int[] iOut = (int[]) dataOUT;
+                int iMax = (int) MAX_INT32;
                 if (isUnsigned) {
-                    i_max = (int) MAX_UINT16; // data was upgraded from unsigned short
+                    iMax = (int) MAX_UINT16; // data was upgraded from unsigned short
                 }
 
                 for (int i = 0; i < size; i++) {
-                    value_in = Math.max(i_in[i], min);
-                    value_in = Math.min(value_in, max);
-                    value_out = (value_in + bias) * gain;
-                    value_out = Math.max(value_out, 0.0);
-                    value_out = Math.min(value_out, i_max);
-                    i_out[i] = (byte) value_out;
+                    valueIn = Math.max(iIn[i], min);
+                    valueIn = Math.min(valueIn, max);
+                    valueOut = (valueIn + bias) * gain;
+                    valueOut = Math.max(valueOut, 0.0);
+                    valueOut = Math.min(valueOut, iMax);
+                    iOut[i] = (byte) valueOut;
                 }
                 break;
             case 'J':
-                long[] l_in = (long[]) data_in;
-                if (data_out == null) {
-                    data_out = new long[size];
+                long[] lIn = (long[]) dataIN;
+                if (dataOUT == null) {
+                    dataOUT = new long[size];
                 }
-                long[] l_out = (long[]) data_out;
-                long l_max = MAX_INT64;
+                long[] lOut = (long[]) dataOUT;
+                long lMax = MAX_INT64;
                 if (isUnsigned) {
-                    l_max = MAX_UINT32; // data was upgraded from unsigned int
+                    lMax = MAX_UINT32; // data was upgraded from unsigned int
                 }
 
                 for (int i = 0; i < size; i++) {
-                    value_in = Math.max(l_in[i], min);
-                    value_in = Math.min(value_in, max);
-                    value_out = (value_in + bias) * gain;
-                    value_out = Math.max(value_out, 0.0);
-                    value_out = Math.min(value_out, l_max);
-                    l_out[i] = (byte) value_out;
+                    valueIn = Math.max(lIn[i], min);
+                    valueIn = Math.min(valueIn, max);
+                    valueOut = (valueIn + bias) * gain;
+                    valueOut = Math.max(valueOut, 0.0);
+                    valueOut = Math.min(valueOut, lMax);
+                    lOut[i] = (byte) valueOut;
                 }
                 break;
             default:
                 break;
         } // (dname)
 
-        return data_out;
+        return dataOUT;
     }
 
     /**
@@ -1387,54 +1383,54 @@ public final class Tools {
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         switch (dname) {
             case 'B':
-                byte[] b_src = (byte[]) src;
+                byte[] bSrc = (byte[]) src;
                 if (isUnsigned) {
                     for (int i = 0; i < size; i++) {
-                        dst[i] = b_src[i];
+                        dst[i] = bSrc[i];
                     }
                 }
                 else {
                     for (int i = 0; i < size; i++) {
-                        dst[i] = (byte) ((b_src[i] & 0x7F) << 1);
+                        dst[i] = (byte) ((bSrc[i] & 0x7F) << 1);
                     }
                 }
                 break;
             case 'S':
-                short[] s_src = (short[]) src;
+                short[] sSrc = (short[]) src;
                 if (isUnsigned) { // data was upgraded from unsigned byte
                     for (int i = 0; i < size; i++) {
-                        dst[i] = (byte) s_src[i];
+                        dst[i] = (byte) sSrc[i];
                     }
                 }
                 else {
                     for (int i = 0; i < size; i++) {
-                        dst[i] = (byte) ((s_src[i] >> 7) & 0xFF);
+                        dst[i] = (byte) ((sSrc[i] >> 7) & 0xFF);
                     }
                 }
                 break;
             case 'I':
-                int[] i_src = (int[]) src;
+                int[] iSrc = (int[]) src;
                 if (isUnsigned) { // data was upgraded from unsigned short
                     for (int i = 0; i < size; i++) {
-                        dst[i] = (byte) ((i_src[i] >> 8) & 0xFF);
+                        dst[i] = (byte) ((iSrc[i] >> 8) & 0xFF);
                     }
                 }
                 else {
                     for (int i = 0; i < size; i++) {
-                        dst[i] = (byte) ((i_src[i] >> 23) & 0xFF);
+                        dst[i] = (byte) ((iSrc[i] >> 23) & 0xFF);
                     }
                 }
                 break;
             case 'J':
-                long[] l_src = (long[]) src;
+                long[] lSrc = (long[]) src;
                 if (isUnsigned) { // data was upgraded from unsigned int
                     for (int i = 0; i < size; i++) {
-                        dst[i] = (byte) ((l_src[i] >> 24) & 0xFF);
+                        dst[i] = (byte) ((lSrc[i] >> 24) & 0xFF);
                     }
                 }
                 else {
                     for (int i = 0; i < size; i++) {
-                        dst[i] = (byte) ((l_src[i] >> 55) & 0xFF);
+                        dst[i] = (byte) ((lSrc[i] >> 55) & 0xFF);
                     }
                 }
                 break;
@@ -2001,13 +1997,11 @@ public final class Tools {
         if (dataOut == null) return false;
 
         String fname = fileName;
-        FileInputStream inputFile = null;
         BufferedInputStream in = null;
         ByteBuffer byteBuffer = null;
         boolean valChanged = false;
 
-        try {
-            inputFile = new FileInputStream(fname);
+        try (FileInputStream inputFile = new FileInputStream(fname)) {
             long fileSize = inputFile.getChannel().size();
             in = new BufferedInputStream(inputFile);
 
@@ -2046,7 +2040,7 @@ public final class Tools {
                 valChanged = true;
             }
             else if (dname == 'S') {
-                long datasetShortSize = datasetSize * 2;
+                long datasetShortSize = (long) datasetSize * 2;
                 byteBuffer = ByteBuffer.allocate(SHORT_BUFFER_SIZE * 2);
                 byteBuffer.order(order);
 
@@ -2076,7 +2070,7 @@ public final class Tools {
                 valChanged = true;
             }
             else if (dname == 'I') {
-                long datasetIntSize = datasetSize * 4;
+                long datasetIntSize = (long) datasetSize * 4;
                 byteBuffer = ByteBuffer.allocate(INT_BUFFER_SIZE * 4);
                 byteBuffer.order(order);
 
@@ -2107,7 +2101,7 @@ public final class Tools {
                 valChanged = true;
             }
             else if (dname == 'J') {
-                long datasetLongSize = datasetSize * 8;
+                long datasetLongSize = (long) datasetSize * 8;
                 byteBuffer = ByteBuffer.allocate(LONG_BUFFER_SIZE * 8);
                 byteBuffer.order(order);
 
@@ -2138,7 +2132,7 @@ public final class Tools {
                 valChanged = true;
             }
             else if (dname == 'F') {
-                long datasetFloatSize = datasetSize * 4;
+                long datasetFloatSize = (long) datasetSize * 4;
                 byteBuffer = ByteBuffer.allocate(FLOAT_BUFFER_SIZE * 4);
                 byteBuffer.order(order);
 
@@ -2168,7 +2162,7 @@ public final class Tools {
                 valChanged = true;
             }
             else if (dname == 'D') {
-                long datasetDoubleSize = datasetSize * 8;
+                long datasetDoubleSize = (long) datasetSize * 8;
                 byteBuffer = ByteBuffer.allocate(DOUBLE_BUFFER_SIZE * 8);
                 byteBuffer.order(order);
 
@@ -2205,10 +2199,9 @@ public final class Tools {
         finally {
             try {
                 in.close();
-                inputFile.close();
             }
             catch (IOException ex) {
-                log.debug("close binary file {}:", fname, ex);
+                // Empty on purpose
             }
         }
 
@@ -2390,7 +2383,9 @@ public final class Tools {
         // only deal with 8/16/32/64 bit datasets
         if (!(nt == 'B' || nt == 'S' || nt == 'I' || nt == 'J')) return false;
 
-        long bmask = 0, theValue = 0, packedValue = 0, bitValue = 0;
+        long bmask = 0;
+        long theValue = 0;
+        long packedValue = 0;
 
         int nbits = theMask.length();
         int len = Array.getLength(theData);
@@ -2416,11 +2411,10 @@ public final class Tools {
                 // extract bits
                 packedValue = 0;
                 int bitPosition = 0;
-                bitValue = 0;
 
                 for (int j = 0; j < nbits; j++) {
                     if (theMask.get(j)) {
-                        bitValue = (theValue & 1);
+                        long bitValue = (theValue & 1);
                         packedValue += (bitValue << bitPosition);
                         bitPosition++;
                     }
@@ -2451,101 +2445,48 @@ public final class Tools {
      */
     public static byte[] getHDF5UserBlock(String filename) {
         byte[] userBlock = null;
-        RandomAccessFile raf = null;
 
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            try {
-                raf.close();
-            }
-            catch (Exception err) {
-                // Empty on purpose
-            }
-            raf = null;
-        }
+        try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
+            byte[] header = new byte[8];
+            long fileSize = raf.length();
 
-        if (raf == null) {
-            return null;
-        }
-
-        byte[] header = new byte[8];
-        long fileSize = 0;
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-            fileSize = 0;
-        }
-        if (fileSize <= 0) {
-            try {
-                raf.close();
-            }
-            catch (Exception err) {
-                // Empty on purpose
-            }
-            return null;
-        }
-
-        // The super block is located by searching for the HDF5 file signature
-        // at byte offset 0, byte offset 512 and at successive locations in the
-        // file, each a multiple of two of the previous location, i.e. 0, 512,
-        // 1024, 2048, etc
-        long offset = 0;
-        boolean ish5 = false;
-        while (offset < fileSize) {
-            try {
+            // The super block is located by searching for the HDF5 file signature
+            // at byte offset 0, byte offset 512 and at successive locations in the
+            // file, each a multiple of two of the previous location, i.e. 0, 512,
+            // 1024, 2048, etc
+            long offset = 0;
+            boolean ish5 = false;
+            while (offset < fileSize) {
                 raf.seek(offset);
                 raf.read(header);
-            }
-            catch (Exception ex) {
-                header = null;
-            }
 
-            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
-                    && (header[3] == 70) && (header[4] == 13)
-                    && (header[5] == 10) && (header[6] == 26)
-                    && (header[7] == 10)) {
-                ish5 = true;
-                break; // find the end of user block
-            }
-            else {
-                ish5 = false;
-                if (offset == 0) {
-                    offset = 512;
+                if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68) && (header[3] == 70) && (header[4] == 13) && (header[5] == 10) && (header[6] == 26)
+                        && (header[7] == 10)) {
+                    ish5 = true;
+                    break; // find the end of user block
                 }
                 else {
-                    offset *= 2;
+                    ish5 = false;
+                    if (offset == 0) {
+                        offset = 512;
+                    }
+                    else {
+                        offset *= 2;
+                    }
                 }
             }
-        }
 
-        if (!ish5 || (offset == 0)) {
-            try {
-                raf.close();
+            if (!ish5 || (offset == 0)) {
+                return null;
             }
-            catch (Exception err) {
-                // Empty on purpose
-            }
-            return null;
-        }
 
-        int blockSize = (int) offset;
-        userBlock = new byte[blockSize];
-        try {
+            int blockSize = (int) offset;
+            userBlock = new byte[blockSize];
             raf.seek(0);
             raf.read(userBlock, 0, blockSize);
         }
         catch (Exception ex) {
             userBlock = null;
-        }
-
-        try {
-            raf.close();
-        }
-        catch (Exception ex) {
-            // Empty on purpose
         }
 
         return userBlock;
@@ -2572,73 +2513,38 @@ public final class Tools {
             return false;
         }
 
-        // find the end of user block for the input file
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(fin, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
-
-        if (raf == null) {
-            return false;
-        }
-
-        byte[] header = new byte[8];
-        long fileSize = 0;
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-            fileSize = 0;
-        }
-        if (fileSize <= 0) {
-            try {
-                raf.close();
-            }
-            catch (Exception err) {
-                // Empty on purpose
-            }
-            return false;
-        }
-
-        // The super block is located by searching for the HDF5 file signature
-        // at byte offset 0, byte offset 512 and at successive locations in the
-        // file, each a multiple of two of the previous location, i.e. 0, 512,
-        // 1024, 2048, etc
         long offset = 0;
-        while (offset < fileSize) {
-            try {
+        // find the end of user block for the input file
+        try (RandomAccessFile raf = new RandomAccessFile(fin, "r")) {
+            byte[] header = new byte[8];
+            long fileSize = raf.length();
+
+            // The super block is located by searching for the HDF5 file signature
+            // at byte offset 0, byte offset 512 and at successive locations in the
+            // file, each a multiple of two of the previous location, i.e. 0, 512,
+            // 1024, 2048, etc
+            while (offset < fileSize) {
                 raf.seek(offset);
                 raf.read(header);
-            }
-            catch (Exception ex) {
-                header = null;
-            }
 
-            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
-                    && (header[3] == 70) && (header[4] == 13)
-                    && (header[5] == 10) && (header[6] == 26)
-                    && (header[7] == 10)) {
-                ish5 = true;
-                break;
-            }
-            else {
-                ish5 = false;
-                if (offset == 0) {
-                    offset = 512;
+                if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68) && (header[3] == 70) && (header[4] == 13) && (header[5] == 10) && (header[6] == 26)
+                        && (header[7] == 10)) {
+                    ish5 = true;
+                    break;
                 }
                 else {
-                    offset *= 2;
+                    ish5 = false;
+                    if (offset == 0) {
+                        offset = 512;
+                    }
+                    else {
+                        offset *= 2;
+                    }
                 }
             }
         }
-        try {
-            raf.close();
-        }
-        catch (Exception err) {
-            // Empty on purpose
+        catch (Exception ex) {
+            return false;
         }
 
         if (!ish5) {
@@ -2648,106 +2554,72 @@ public final class Tools {
         int length = 0;
         int bsize = 1024;
         byte[] buffer;
-        BufferedInputStream bi = null;
-        BufferedOutputStream bo = null;
 
-        try {
-            bi = new BufferedInputStream(new FileInputStream(fin));
-        }
-        catch (Exception ex) {
-            try {
-                bi.close();
-            }
-            catch (Exception ex2) {
-                // Empty on purpose
-            }
-            return false;
-        }
+        try (BufferedInputStream bi = new BufferedInputStream(new FileInputStream(fin))) {
+            try (BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(fout))) {
+                // skip the header of original file
+                try {
+                    bi.skip(offset);
+                }
+                catch (Exception ex) {
+                    // Empty on purpose
+                }
 
-        try {
-            bo = new BufferedOutputStream(new FileOutputStream(fout));
-        }
-        catch (Exception ex) {
-            try {
-                bo.close();
-            }
-            catch (Exception ex2) {
-                // Empty on purpose
-            }
-            try {
-                bi.close();
-            }
-            catch (Exception ex2) {
-                // Empty on purpose
-            }
-            return false;
-        }
+                // write the header into the new file
+                try {
+                    bo.write(buf, 0, buf.length);
+                }
+                catch (Exception ex) {
+                    // Empty on purpose
+                }
 
-        // skip the header of original file
-        try {
-            bi.skip(offset);
-        }
-        catch (Exception ex) {
-        }
+                // The super block space is allocated by offset 0, 512, 1024, 2048, etc
+                offset = 512;
+                while (offset < buf.length) {
+                    offset *= 2;
+                }
+                int padSize = (int) (offset - buf.length);
+                if (padSize > 0) {
+                    byte[] padBuf = new byte[padSize];
+                    try {
+                        bo.write(padBuf, 0, padSize);
+                    }
+                    catch (Exception ex) {
+                        // Empty on purpose
+                    }
+                }
 
-        // write the header into the new file
-        try {
-            bo.write(buf, 0, buf.length);
-        }
-        catch (Exception ex) {
-            // Empty on purpose
-        }
+                // copy the hdf5 file content from input file to the output file
+                buffer = new byte[bsize];
+                try {
+                    length = bi.read(buffer, 0, bsize);
+                }
+                catch (Exception ex) {
+                    length = 0;
+                }
+                while (length > 0) {
+                    try {
+                        bo.write(buffer, 0, length);
+                        length = bi.read(buffer, 0, bsize);
+                    }
+                    catch (Exception ex) {
+                        length = 0;
+                    }
+                }
 
-        // The super block space is allocated by offset 0, 512, 1024, 2048, etc
-        offset = 512;
-        while (offset < buf.length) {
-            offset *= 2;
-        }
-        int padSize = (int) (offset - buf.length);
-        if (padSize > 0) {
-            byte[] padBuf = new byte[padSize];
-            try {
-                bo.write(padBuf, 0, padSize);
+                try {
+                    bo.flush();
+                }
+                catch (Exception ex) {
+                    // Empty on purpose
+                }
             }
             catch (Exception ex) {
-                // Empty on purpose
+                return false;
             }
         }
-
-        // copy the hdf5 file content from input file to the output file
-        buffer = new byte[bsize];
-        try {
-            length = bi.read(buffer, 0, bsize);
-        }
         catch (Exception ex) {
-            length = 0;
-        }
-        while (length > 0) {
-            try {
-                bo.write(buffer, 0, length);
-                length = bi.read(buffer, 0, bsize);
-            }
-            catch (Exception ex) {
-                length = 0;
-            }
-        }
-
-        try {
-            bo.flush();
-        }
-        catch (Exception ex) {
-        }
-        try {
-            bi.close();
-        }
-        catch (Exception ex) {
-            // Empty on purpose
-        }
-        try {
-            bo.close();
-        }
-        catch (Exception ex) {
-            // Empty on purpose
+            return false;
         }
         return true;
     }
@@ -2763,28 +2635,11 @@ public final class Tools {
      */
     public static boolean isHDF4(String filename) {
         boolean ish4 = false;
-        RandomAccessFile raf = null;
 
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
-
-        if (raf == null) {
-            return false;
-        }
-
-        byte[] header = new byte[4];
-        try {
+        try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
+            byte[] header = new byte[4];
             raf.read(header);
-        }
-        catch (Exception ex) {
-            header = null;
-        }
 
-        if (header != null) {
             if ((header[0] == 14) && (header[1] == 3) && (header[2] == 19) && (header[3] == 1)) {
                 ish4 = true;
             }
@@ -2792,12 +2647,8 @@ public final class Tools {
                 ish4 = false;
             }
         }
-
-        try {
-            raf.close();
-        }
         catch (Exception ex) {
-            // Empty on purpose
+            return false;
         }
 
         return ish4;
@@ -2814,64 +2665,37 @@ public final class Tools {
      */
     public static boolean isHDF5(String filename) {
         boolean ish5 = false;
-        RandomAccessFile raf = null;
 
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
+        try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
+            byte[] header = new byte[8];
+            long fileSize = raf.length();
 
-        if (raf == null) {
-            return false;
-        }
-
-        byte[] header = new byte[8];
-        long fileSize = 0;
-        try {
-            fileSize = raf.length();
-        }
-        catch (Exception ex) {
-            // Empty on purpose
-        }
-
-        // The super block is located by searching for the HDF5 file signature
-        // at byte offset 0, byte offset 512 and at successive locations in the
-        // file, each a multiple of two of the previous location, i.e. 0, 512,
-        // 1024, 2048, etc
-        long offset = 0;
-        while (!ish5 && (offset < fileSize)) {
-            try {
+            // The super block is located by searching for the HDF5 file signature
+            // at byte offset 0, byte offset 512 and at successive locations in the
+            // file, each a multiple of two of the previous location, i.e. 0, 512,
+            // 1024, 2048, etc
+            long offset = 0;
+            while (!ish5 && (offset < fileSize)) {
                 raf.seek(offset);
                 raf.read(header);
-            }
-            catch (Exception ex) {
-                header = null;
-            }
 
-            if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68)
-                    && (header[3] == 70) && (header[4] == 13)
-                    && (header[5] == 10) && (header[6] == 26)
-                    && (header[7] == 10)) {
-                ish5 = true;
-            }
-            else {
-                ish5 = false;
-                if (offset == 0) {
-                    offset = 512;
+                if ((header[0] == -119) && (header[1] == 72) && (header[2] == 68) && (header[3] == 70) && (header[4] == 13) && (header[5] == 10) && (header[6] == 26)
+                        && (header[7] == 10)) {
+                    ish5 = true;
                 }
                 else {
-                    offset *= 2;
+                    ish5 = false;
+                    if (offset == 0) {
+                        offset = 512;
+                    }
+                    else {
+                        offset *= 2;
+                    }
                 }
             }
         }
-
-        try {
-            raf.close();
-        }
         catch (Exception ex) {
-            // Empty on purpose
+            return false;
         }
 
         return ish5;
@@ -2887,31 +2711,13 @@ public final class Tools {
      */
     public static boolean isNetcdf(String filename) {
         boolean isnc = false;
-        RandomAccessFile raf = null;
 
-        try {
-            raf = new RandomAccessFile(filename, "r");
-        }
-        catch (Exception ex) {
-            raf = null;
-        }
-
-        if (raf == null) {
-            return false;
-        }
+        try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
 
         byte[] header = new byte[4];
-        try {
             raf.read(header);
-        }
-        catch (Exception ex) {
-            header = null;
-        }
-
-        if (header != null) {
-            if (
-                    // netCDF
-                    (header[0] == 67) && (header[1] == 68) && (header[2] == 70)
+            // netCDF
+            if ((header[0] == 67) && (header[1] == 68) && (header[2] == 70)
                     && (header[3] == 1)) {
                 isnc = true;
             }
@@ -2919,12 +2725,8 @@ public final class Tools {
                 isnc = false;
             }
         }
-
-        try {
-            raf.close();
-        }
         catch (Exception ex) {
-            // Empty on purpose
+            return false;
         }
 
         return isnc;
@@ -3014,11 +2816,11 @@ public final class Tools {
         }
 
         if (noExtension) {
-            if (type == FileFormat.FILE_TYPE_HDF4) {
+            if (type.equals(FileFormat.FILE_TYPE_HDF4)) {
                 fname += ".hdf";
                 f = new File(fname);
             }
-            else if (type == FileFormat.FILE_TYPE_HDF5) {
+            else if (type.equals(FileFormat.FILE_TYPE_HDF5)) {
                 fname += ".h5";
                 f = new File(fname);
             }
@@ -3067,8 +2869,7 @@ public final class Tools {
                 FileFormat.getFileFormat(type).setNewLibBounds(ViewProperties.getEarlyLib(), ViewProperties.getLateLib());
             }
             log.trace("createNewFile: {} FileFormat create", filename);
-            FileFormat theFile = FileFormat.getFileFormat(type).createFile(fname, aFlag);
-            return theFile;
+            return FileFormat.getFileFormat(type).createFile(fname, aFlag);
         }
         catch (Exception ex) {
             throw new Exception(ex.getMessage());

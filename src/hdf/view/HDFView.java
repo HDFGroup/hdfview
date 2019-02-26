@@ -18,6 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -400,7 +401,7 @@ public class HDFView implements DataViewManager {
         shell.addDisposeListener(new DisposeListener() {
             @Override
             public void widgetDisposed(DisposeEvent e) {
-                ViewProperties.setRecentFiles(new Vector<>(Arrays.asList(url_bar.getItems())));
+                ViewProperties.setRecentFiles(new ArrayList<>(Arrays.asList(url_bar.getItems())));
 
                 try {
                     props.save();
@@ -1870,52 +1871,25 @@ public class HDFView implements DataViewManager {
             return null;
         }
 
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-
-        try {
-            in = new BufferedInputStream(url.openStream());
-            out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+        try (BufferedInputStream in = new BufferedInputStream(url.openStream())) {
+            try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile))) {
+                mainWindow.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+                byte[] buff = new byte[512]; // set default buffer size to 512
+                int n = 0;
+                while ((n = in.read(buff)) > 0) {
+                    out.write(buff, 0, n);
+                }
+            }
+            catch (Exception ex) {
+                log.debug("Remote file: ", ex);
+                throw ex;
+            }
         }
         catch (Exception ex) {
-            in = null;
             display.beep();
             Tools.showError(mainWindow, "Open", ex.getMessage());
 
-            try {
-                out.close();
-            }
-            catch (Exception ex2) {
-                log.debug("Remote file: ", ex2);
-            }
-
             return null;
-        }
-
-        mainWindow.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
-        byte[] buff = new byte[512]; // set default buffer size to 512
-        try {
-            int n = 0;
-            while ((n = in.read(buff)) > 0) {
-                out.write(buff, 0, n);
-            }
-        }
-        catch (Exception ex) {
-            log.debug("Remote file: ", ex);
-        }
-
-        try {
-            in.close();
-        }
-        catch (Exception ex) {
-            log.debug("Remote file: ", ex);
-        }
-
-        try {
-            out.close();
-        }
-        catch (Exception ex) {
-            log.debug("Remote file: ", ex);
         }
 
         mainWindow.setCursor(null);

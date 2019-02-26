@@ -1868,8 +1868,7 @@ public class DefaultImageView implements ImageView {
 
         viewer.showStatus("Current image saved to: " + chosenFile.getAbsolutePath());
 
-        try {
-            RandomAccessFile rf = new RandomAccessFile(chosenFile, "r");
+        try (RandomAccessFile rf = new RandomAccessFile(chosenFile, "r")) {
             long size = rf.length();
             rf.close();
             viewer.showStatus("File size (bytes): " + size);
