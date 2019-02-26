@@ -19,6 +19,10 @@
     </filterchain>
   </loadfile>
 
+    <condition property="h4path" value="${hdf.lib.dir}">
+      <available file="${hdf.lib.dir}/libhdf4.settings" />
+    </condition>
+
   <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings" failonerror="false">
     <filterchain>
       <tokenfilter>
@@ -243,37 +247,101 @@
     <delete dir="${dist.dir}" />
   </target>
 
-  <target name="compile">
+  <target name="compile" depends="compileobj, compilehdf4, compilespc, compilehdf5">
     <mkdir dir="${classes.dir}" />
     <mkdir dir="${classes.dir}/hdf" />
 
-    <!-- Store compile-time Version information -->
-    <copy todir="${build.dir}">
-      <fileset dir="${src.dir}/hdf" includes="HDFVersions.java" />
-    </copy>
-    <replace file="${build.dir}/HDFVersions.java" token="@HDF4_VERSION@" value='"${hdf4.version}"' />
-    <replace file="${build.dir}/HDFVersions.java" token="@HDF5_VERSION@" value='"${hdf5.version}"' />
-    <replace file="${build.dir}/HDFVersions.java" token="@HDFVIEW_VERSION@" value='"${app.version}"' />
-    <replace file="${build.dir}/HDFVersions.java" token="@HDFJAVA_VERSION@" value='"${hdfjava.version}"' />
-
-    <!-- Generate Versions file -->
-    <javac srcdir="${build.dir}" destdir="${classes.dir}"
-      includes="HDFVersions.java"
-      includeantruntime="false"
-      debug="${build.debug}"
-    />
-
     <javac srcdir="${src.dir}" destdir="${classes.dir}"
       classpathref="project-classpath"
-      excludes="examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+      excludes="hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
       includeantruntime="false"
       debug="${build.debug}"
     />
 
     <copy todir="${classes.dir}">
-      <fileset dir="${src.dir}" excludes=" **/*.in **/*.java examples/** test/**" />
+      <fileset dir="${src.dir}" excludes="hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
     </copy>
   </target>
+
+    <target name="compileobj">
+      <mkdir dir="${classes.dir}" />
+      <mkdir dir="${classes.dir}/hdf" />
+
+        <!-- Store compile-time Version information -->
+        <copy todir="${build.dir}">
+          <fileset dir="${src.dir}/hdf" includes="HDFVersions.java" />
+        </copy>
+        <replace file="${build.dir}/HDFVersions.java" token="@HDF4_VERSION@" value='"${hdf4.version}"' />
+        <replace file="${build.dir}/HDFVersions.java" token="@HDF5_VERSION@" value='"${hdf5.version}"' />
+        <replace file="${build.dir}/HDFVersions.java" token="@HDFVIEW_VERSION@" value='"${app.version}"' />
+        <replace file="${build.dir}/HDFVersions.java" token="@HDFJAVA_VERSION@" value='"${hdfjava.version}"' />
+
+        <!-- Generate Versions file -->
+        <javac srcdir="${build.dir}" destdir="${classes.dir}"
+          includes="HDFVersions.java"
+          includeantruntime="false"
+          debug="${build.debug}"
+        />
+
+      <javac srcdir="${src.dir}" destdir="${classes.dir}"
+        classpathref="project-classpath"
+        excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+        includeantruntime="false"
+        debug="${build.debug}"
+      />
+
+      <copy todir="${classes.dir}">
+        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
+      </copy>
+    </target>
+
+    <target name="compilehdf4" depends="compileobj" if="h4path">
+      <mkdir dir="${classes.dir}" />
+      <mkdir dir="${classes.dir}/hdf" />
+
+      <javac srcdir="${src.dir}" destdir="${classes.dir}"
+        classpathref="project-classpath"
+        excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+        includeantruntime="false"
+        debug="${build.debug}"
+      />
+
+      <copy todir="${classes.dir}">
+        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
+      </copy>
+    </target>
+
+    <target name="compilespc" depends="compileobj">
+      <mkdir dir="${classes.dir}" />
+      <mkdir dir="${classes.dir}/hdf" />
+
+      <javac srcdir="${src.dir}" destdir="${classes.dir}"
+        classpathref="project-classpath"
+        excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+        includeantruntime="false"
+        debug="${build.debug}"
+      />
+
+      <copy todir="${classes.dir}">
+        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/**  **/*.in **/*.java examples/** test/**" />
+      </copy>
+    </target>
+
+    <target name="compilehdf5" depends="compileobj">
+      <mkdir dir="${classes.dir}" />
+      <mkdir dir="${classes.dir}/hdf" />
+
+      <javac srcdir="${src.dir}" destdir="${classes.dir}"
+        classpathref="project-classpath"
+        excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+        includeantruntime="false"
+        debug="${build.debug}"
+      />
+
+      <copy todir="${classes.dir}">
+        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** **/*.in **/*.java examples/** test/**" />
+      </copy>
+    </target>
 
   <target name="objectjar" depends="compile">
     <mkdir dir="${jar.dir}" />
@@ -384,7 +452,7 @@
       <fileset dir="${hdf5.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
@@ -502,7 +570,8 @@
         chunked.txt,
         CompoundInts.txt,
         DS64BITS.txt,
-        DU64BITS.bin" />
+        DU64BITS.bin,
+        tarray4.h5" />
     </delete>
   </target>
 
@@ -530,7 +599,7 @@
           description="Runs the Object Library tests">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
@@ -568,7 +637,9 @@
        depends="jar, compile-test, clean-junit-uitest, ensure-test-name">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <!-- Run in debug logging level because trace generates way too much output.
+           We will run manually using trace logging output when there are UI test failures. -->
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
@@ -595,7 +666,9 @@
           description="Runs the UI tests">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <!-- Run in debug logging level because trace generates way too much output.
+           We will run manually using trace logging output when there are UI test failures. -->
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
@@ -623,7 +696,9 @@
           description="Runs the tests for the UI modules">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <!-- Run in debug logging level because trace generates way too much output.
+           We will run manually using trace logging output when there are UI test failures. -->
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
