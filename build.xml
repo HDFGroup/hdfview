@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="HDFView" basedir="." default="main" xmlns:fx="javafx:com.sun.javafx.tools.ant" xmlns:sonar="antlib:org.sonar.ant">
+<project name="HDFView" basedir="." default="main"
+    xmlns:fx="javafx:com.sun.javafx.tools.ant"
+    xmlns:sonar="antlib:org.sonar.ant"
+    xmlns:jacoco="antlib:org.jacoco.ant">
   <property environment="env" />
 
   <!-- Configuration files: -->
@@ -8,18 +11,6 @@
   <property file="package.properties" />
 
   <record name="antoutput.log" action="start" append="true" loglevel="verbose" />
-
-  <!-- Define the SonarQube global properties (the most usual way is to pass these properties via the command line) -->
-  <property name="sonar.host.url" value="http://localhost:9000" />
-
-  <!-- Define the SonarQube project properties -->
-  <property name="sonar.projectKey" value="org.sonarqube:sonarqube-scanner-ant" />
-  <property name="sonar.projectName" value="HDFView-development" />
-  <property name="sonar.projectVersion" value="1.0" />
-    <property name="sonar.sources" value="src/hdf" />
-    <property name="sonar.tests" value="src/test" />
-  <property name="sonar.java.binaries" value="build" />
-  <property name="sonar.sourceEncoding" value="UTF-8" />
 
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -159,6 +150,32 @@
   <property name="includeantruntime" value="false" />
   <property name="jre.version"       value="${ant.java.version}" />
   <property name="version.slf4j"     value="-1.7.25"/>
+
+  <!-- Define the SonarQube global properties (the most usual way is to pass these properties via the command line) -->
+  <property name="sonar.host.url" value="http://localhost:9000" />
+
+  <!-- Define the SonarQube project properties -->
+  <property name="sonar.projectKey" value="org.sonarqube:sonarqube-scanner-ant" />
+  <property name="sonar.projectName" value="HDFView-development" />
+  <property name="sonar.projectVersion" value="1.0" />
+  <property name="sonar.sources" value="${src.dir}/hdf" />
+  <property name="sonar.tests" value="${test.dir}" />
+  <property name="sonar.java.binaries" value="${build.dir}" />
+  <property name="sonar.sourceEncoding" value="UTF-8" />
+  <property name="sonar.language" value="java" />
+  <property name="sonar.core.codeCoveragePlugin" value="jacoco" />
+  <property name="sonar.jacoco.reportPath" value="${report.dir}/jacoco.exec" />
+  <property name="sonar.dynamicAnalysis" value="reuseReports" />
+
+    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+            <classpath path="/opt/jacoco-0.8.3/lib/jacocoant.jar"/>
+    </taskdef>
+
+    <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec"
+                                  xmlns:jacoco="antlib:org.jacoco.ant"/>
+    <!--
+    <property name="agentvmparam" value=""/>
+    -->
 
   <path id="obj-classpath">
     <fileset dir="${lib.dir}"
@@ -432,17 +449,6 @@
   </target>
   <path id="application" location="${jar.dir}/${ant.project.name}.jar" />
 
-    <!-- Define SonarQube Scanner for Ant Target -->
-    <target name="sonar" depends="jar">
-        <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
-            <!-- Update the following line, or put the "sonarqube-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
-            <classpath path="~/.ant/lib/sonarqube-ant-task-*.jar" />
-        </taskdef>
-
-        <!-- Execute SonarQube Scanner for Ant Analysis -->
-        <sonar:sonar />
-    </target>
-
   <!-- SWT on Mac requires the -XstartOnFirstThreadFlag. -->
   <condition property="XstartOnFirstThreadFlag" value="-XstartOnFirstThread" else="-Dgwt.dummy.arg1=">
      <os family="mac"/>
@@ -603,6 +609,7 @@
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
+        <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -624,6 +631,7 @@
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
+        <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -642,6 +650,17 @@
       </batchtest>
     </junit>
   </target>
+
+    <!-- Define SonarQube Scanner for Ant Target -->
+    <target name="sonar" depends="junit, junit-uitest">
+        <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+            <!-- Update the following line, or put the "sonarqube-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
+            <classpath path="~/.ant/lib/sonarqube-ant-task-*.jar" />
+        </taskdef>
+
+        <!-- Execute SonarQube Scanner for Ant Analysis -->
+        <sonar:sonar />
+    </target>
 
   <target name="ensure-test-name" unless="test">
     <!-- Capture the path as a delimited property using the refid attribute -->
@@ -664,6 +683,7 @@
            We will run manually using trace logging output when there are UI test failures. -->
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
+        <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -693,6 +713,7 @@
            We will run manually using trace logging output when there are UI test failures. -->
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
+        <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />

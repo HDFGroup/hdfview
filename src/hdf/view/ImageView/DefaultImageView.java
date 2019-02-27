@@ -722,10 +722,10 @@ public class DefaultImageView implements ImageView {
                     return;
                 }
 
-                Vector<String> palList = ViewProperties.getPaletteList();
+                ArrayList<String> palList = (ArrayList<String>) ViewProperties.getPaletteList();
                 String palPath = chosenFile.getAbsolutePath();
-                if(!palList.contains(palList))
-                    palList.addElement(palPath);
+                if (!palList.contains(palPath))
+                    palList.add(palPath);
             }
         });
 
