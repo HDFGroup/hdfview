@@ -781,7 +781,7 @@ public class H4GRImage extends ScalarDS
         // check if there is palette data. HDFLibrary.GRgetlutinfo() sometimes
         // return true even if there is no palette data, and check if it is a
         // RGB with 256 colors
-        if ((lutInfo[0] != 3) || (lutInfo[2] < 0) | (lutInfo[3] != 256)) {
+        if ((lutInfo[0] != 3) || (lutInfo[2] < 0) || (lutInfo[3] != 256)) {
             close(id);
             log.debug("getPalette(): no palette data - exit");
             return null;
