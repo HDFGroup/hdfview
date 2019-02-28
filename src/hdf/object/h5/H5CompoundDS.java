@@ -715,7 +715,7 @@ public class H5CompoundDS extends CompoundDS {
         log.trace("write(): finish");
     }
 
-    private Object compoundDatasetCommonIO(IO_TYPE io_type, Object writeBuf) throws Exception {
+    private Object compoundDatasetCommonIO(IO_TYPE ioType, Object writeBuf) throws Exception {
         log.trace("compoundDatasetCommonIO(): start");
 
         H5Datatype DSDatatype = (H5Datatype) getDatatype();
@@ -730,7 +730,7 @@ public class H5CompoundDS extends CompoundDS {
         /*
          * I/O type-specific pre-initialization.
          */
-        if (io_type == IO_TYPE.WRITE) {
+        if (ioType == IO_TYPE.WRITE) {
             if ((writeBuf == null) || !(writeBuf instanceof List)) {
                 log.debug("compoundDatasetCommonIO(): writeBuf is null or invalid");
                 log.trace("compoundDatasetCommonIO(): finish");
@@ -768,7 +768,7 @@ public class H5CompoundDS extends CompoundDS {
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
                         selectedStride, selectedDims, spaceIDs);
 
-                data = compoundTypeIO(io_type, did, spaceIDs, (int) totalSelectedSpacePoints, DSDatatype, writeBuf, new int[]{0});
+                data = compoundTypeIO(ioType, did, spaceIDs, (int) totalSelectedSpacePoints, DSDatatype, writeBuf, new int[]{0});
             }
             catch (Exception ex) {
                 /*
@@ -815,7 +815,7 @@ public class H5CompoundDS extends CompoundDS {
      * running counter so that we can index properly into the flattened name list
      * generated from H5Datatype.extractCompoundInfo() at dataset init time.
      */
-    private Object compoundTypeIO(IO_TYPE io_type, long did, long[] spaceIDs, int nPoints, final H5Datatype cmpdType,
+    private Object compoundTypeIO(IO_TYPE ioType, long did, long[] spaceIDs, int nSelPoints, final H5Datatype cmpdType,
             Object writeBuf, int[] globalMemberIndex) {
         log.trace("compoundTypeIO(): start");
 
@@ -825,38 +825,45 @@ public class H5CompoundDS extends CompoundDS {
             log.trace("compoundTypeIO(): ARRAY type");
 
             long[] arrayDims = cmpdType.getArrayDims();
-            int arrSize = 1;
+            int arrSize = nSelPoints;
             for (int i = 0; i < arrayDims.length; i++) {
                 arrSize *= arrayDims[i];
             }
 
-            Object[] cmpdArray = new Object[arrSize];
-            for (int i = 0; i < arrSize; i++) {
-                cmpdArray[i] = compoundTypeIO(io_type, did, spaceIDs, nPoints, (H5Datatype) cmpdType.getDatatypeBase(),
-                        writeBuf, globalMemberIndex);
+            theData = compoundTypeIO(ioType, did, spaceIDs, arrSize, (H5Datatype) cmpdType.getDatatypeBase(), writeBuf, globalMemberIndex);
+        }
+        else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
+            /*
+             * TODO: true variable-length support.
+             */
+            String[] errVal = new String[nSelPoints];
+            String errStr = "*UNSUPPORTED*";
 
-                /*
-                 * Reset the globalMemberIndex
-                 */
-                globalMemberIndex[0] = 0;
+            for (int j = 0; j < nSelPoints; j++)
+                errVal[j] = errStr;
+
+            /*
+             * Setup a fake data list.
+             */
+            Datatype baseType = cmpdType.getDatatypeBase();
+            while (baseType != null && !baseType.isCompound()) {
+                baseType = baseType.getDatatypeBase();
             }
 
-            theData = cmpdArray;
-        }
-        else if (cmpdType.isVLEN()) {
-            /*
-             * TODO:
-             */
+            List<Object> fakeVlenData = (List<Object>) H5Datatype.allocateArray((H5Datatype) baseType, nSelPoints);
+            fakeVlenData.add(errVal);
+
+            theData = fakeVlenData;
         }
         else if (cmpdType.isCompound()) {
             List<Object> memberDataList = null;
             List<Datatype> typeList = cmpdType.getCompoundMemberTypes();
 
-            log.trace("compoundTypeIO(): {} {} members:", (io_type == IO_TYPE.READ) ? "read" : "write",
+            log.trace("compoundTypeIO(): {} {} members:", (ioType == IO_TYPE.READ) ? "read" : "write",
                     typeList.size());
 
-            if (io_type == IO_TYPE.READ) {
-                memberDataList = (List<Object>) H5Datatype.allocateArray(cmpdType, nPoints);
+            if (ioType == IO_TYPE.READ) {
+                memberDataList = (List<Object>) H5Datatype.allocateArray(cmpdType, nSelPoints);
             }
 
             try {
@@ -901,31 +908,39 @@ public class H5CompoundDS extends CompoundDS {
 
                     log.trace("compoundTypeIO(): member[{}]({}) is type {}", i, memberName, memberType.getDescription());
 
-                    if (io_type == IO_TYPE.READ) {
+                    if (ioType == IO_TYPE.READ) {
                         try {
                             if (memberType.isCompound())
-                                memberData = compoundTypeIO(io_type, did, spaceIDs, nPoints, memberType, writeBuf, globalMemberIndex);
-                            else if (memberType.isArray()) {
+                                memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, writeBuf, globalMemberIndex);
+                            else if (memberType.isArray() /* || (memberType.isVLEN() && !memberType.isVarStr()) */) {
                                 /*
-                                 * Recursively detect array of compound datatypes.
+                                 * Recursively detect any nested array/vlen of compound types.
                                  */
-                                Datatype baseType = memberType.getDatatypeBase();
-                                boolean isArrayOfCompound = baseType.isCompound();
-                                while (baseType.isArray()) {
-                                    baseType = baseType.getDatatypeBase();
-                                    isArrayOfCompound = baseType.isCompound();
+                                boolean compoundFound = false;
+
+                                Datatype base = memberType.getDatatypeBase();
+                                while (base != null) {
+                                    if (base.isCompound())
+                                        compoundFound = true;
+
+                                    base = base.getDatatypeBase();
                                 }
 
-                                if (isArrayOfCompound) {
-                                    memberData = compoundTypeIO(io_type, did, spaceIDs, nPoints, memberType, writeBuf, globalMemberIndex);
+                                if (compoundFound) {
+                                    /*
+                                     * Skip the top-level array/vlen type.
+                                     */
+                                    globalMemberIndex[0]++;
+
+                                    memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, writeBuf, globalMemberIndex);
                                 }
                                 else {
-                                    memberData = readSingleCompoundMember(did, spaceIDs, nPoints, memberType, memberName);
+                                    memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName);
                                     globalMemberIndex[0]++;
                                 }
                             }
                             else {
-                                memberData = readSingleCompoundMember(did, spaceIDs, nPoints, memberType, memberName);
+                                memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName);
                                 globalMemberIndex[0]++;
                             }
                         }
@@ -936,10 +951,10 @@ public class H5CompoundDS extends CompoundDS {
                         }
 
                         if (memberData == null) {
-                            String[] errVal = new String[nPoints];
+                            String[] errVal = new String[nSelPoints];
                             String errStr = "*ERROR*";
 
-                            for (int j = 0; j < nPoints; j++)
+                            for (int j = 0; j < nSelPoints; j++)
                                 errVal[j] = errStr;
 
                             memberData = errVal;
@@ -969,10 +984,10 @@ public class H5CompoundDS extends CompoundDS {
                         try {
                             if (memberType.isCompound()) {
                                 List<?> nestedList = (List<?>) ((List<?>) writeBuf).get(writeListIndex++);
-                                compoundTypeIO(io_type, did, spaceIDs, nPoints, memberType, nestedList, globalMemberIndex);
+                                compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, nestedList, globalMemberIndex);
                             }
                             else {
-                                writeSingleCompoundMember(did, spaceIDs, nPoints, memberType, memberName, memberData);
+                                writeSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName, memberData);
                                 globalMemberIndex[0]++;
                             }
                         }
@@ -1264,14 +1279,14 @@ public class H5CompoundDS extends CompoundDS {
                     H5Datatype arrayType = (H5Datatype) dtype.getDatatypeBase();
 
                     long[] arrayDims = dtype.getArrayDims();
-                    int nPoints = 1;
+                    int arrSize = 1;
                     for (int i = 0; i < arrayDims.length; i++) {
-                        nPoints *= arrayDims[i];
+                        arrSize *= arrayDims[i];
                     }
 
-                    theObj = new Object[nPoints];
+                    theObj = new Object[arrSize];
 
-                    for (int i = 0; i < nPoints; i++) {
+                    for (int i = 0; i < arrSize; i++) {
                         byte[] indexedBytes = Arrays.copyOfRange(byteData, (int) (i * arrayType.getDatatypeSize()),
                                 (int) ((i + 1) * arrayType.getDatatypeSize()));
                         ((Object[]) theObj)[i] = convertByteMember(arrayType, indexedBytes);
@@ -2221,10 +2236,7 @@ public class H5CompoundDS extends CompoundDS {
      */
     @Override
     public String getVirtualFilename(int index) {
-        if (isVirtual)
-            return virtualNameList.get(index);
-        else
-            return null;
+        return (isVirtual) ? virtualNameList.get(index) : null;
     }
 
     /*
@@ -2234,10 +2246,7 @@ public class H5CompoundDS extends CompoundDS {
      */
     @Override
     public int getVirtualMaps() {
-        if (isVirtual)
-            return virtualNameList.size();
-        else
-            return -1;
+        return (isVirtual) ? virtualNameList.size() : -1;
     }
 
 }

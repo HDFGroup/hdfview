@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -149,13 +148,13 @@ public class DefaultTreeView implements TreeView {
     /** Maintains a list of TreeItems in the tree in breadth-first order
      * to prevent many calls of getAllItemsBreadthFirst.
      */
-    //private ArrayList<TreeItem>           breadthFirstItems = null;
+    //private ArrayList<TreeItem>         breadthFirstItems = null;
 
     /** A list of currently open files */
-    private final List<FileFormat> fileList = new ArrayList<>();
+    private final List<FileFormat>        fileList = new ArrayList<>();
 
     /** A list of editing GUI components */
-    private List<MenuItem> editGUIs = new ArrayList<>();
+    private List<MenuItem>                editGUIs = new ArrayList<>();
 
     /**
      * The popup menu used to display user choice of actions on data object.

@@ -451,7 +451,7 @@
   <target name="run" depends="jar" description="Runs the application">
     <mkdir dir="${jar.dir}/lib/ext" />
     <java fork="true" classname="${main-class}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
@@ -475,7 +475,7 @@
       <fileset dir="${hdf5.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
@@ -593,8 +593,7 @@
         chunked.txt,
         CompoundInts.txt,
         DS64BITS.txt,
-        DU64BITS.bin,
-        tarray4.h5" />
+        DU64BITS.bin" />
     </delete>
   </target>
 

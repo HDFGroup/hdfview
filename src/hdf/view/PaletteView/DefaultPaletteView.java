@@ -18,7 +18,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -743,7 +742,6 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
 
             tableShell.open();
 
-            display = parent.getDisplay();
             while (!tableShell.isDisposed()) {
                 if (!display.readAndDispatch())
                     display.sleep();

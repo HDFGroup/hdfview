@@ -549,12 +549,24 @@ public class DataProviderFactory {
             log.trace("index maps built: baseProviderIndexMap = {}, relColIdxMap = {}",
                     baseProviderIndexMap.toString(), relCmpdStartIndexMap.toString());
 
+            if (baseProviderIndexMap.size() == 0) {
+                log.debug("base DataProvider index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataProvider: invalid DataProvider mapping of size 0 built");
+            }
+
+            if (relCmpdStartIndexMap.size() == 0) {
+                log.debug("compound field start index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataProvider: invalid compound field start index mapping of size 0 built");
+            }
+
             /*
              * nCols should represent the number of columns covered by this CompoundDataProvider
              * only. For top-level CompoundDataProviders, this should be the entire width of the
              * dataset. For nested CompoundDataProviders, nCols will be a subset of these columns.
              */
-            nCols = (int) compoundFormat.getWidth() * selectedMemberTypes.length;
+            nCols = (int) compoundFormat.getWidth() * baseProviderIndexMap.size();
             nRows = (int) compoundFormat.getHeight();
 
             nSubColumns = (int) compoundFormat.getWidth();
@@ -845,7 +857,11 @@ public class DataProviderFactory {
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
                     for (int i = 0; i < arraySize; i++) {
-                        arrayElements[i] = ((Object[]) dataBuf)[i];
+                        /*
+                         * TODO: still valid?
+                         */
+                        /* arrayElements[i] = ((Object[]) dataBuf)[i]; */
+                        arrayElements[i] = baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index + i);
                     }
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
@@ -884,23 +900,26 @@ public class DataProviderFactory {
                 long index = rowIndex * arraySize;
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        List<?> cmpdDataList = (List<?>) ((Object[]) obj)[i];
-                        tempArray[i] = baseTypeDataProvider.getDataValue(cmpdDataList, columnIndex, (int) index + i);
-                    }
+                    /*
+                     * Since we flatten array of compound types, we only need to return a single
+                     * value.
+                     */
+                    theValue = new Object[] { baseTypeDataProvider.getDataValue(obj, columnIndex, (int) index) };
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
                     for (int i = 0; i < arraySize; i++) {
                         tempArray[i] = baseTypeDataProvider.getDataValue(obj, columnIndex, (int) index + i);
                     }
+
+                    theValue = tempArray;
                 }
                 else {
                     for (int i = 0; i < arraySize; i++) {
                         tempArray[i] = baseTypeDataProvider.getDataValue(obj, (int) index + i);
                     }
-                }
 
-                theValue = tempArray;
+                    theValue = tempArray;
+                }
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}, {}, {}): failure: ", obj, rowIndex, columnIndex, ex);
@@ -1046,7 +1065,9 @@ public class DataProviderFactory {
 
     private static class VlenDataProvider extends HDFDataProvider {
 
-        private final StringBuilder buffer;
+        private final HDFDataProvider baseTypeDataProvider;
+
+        private final StringBuilder   buffer;
 
         VlenDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
@@ -1054,6 +1075,10 @@ public class DataProviderFactory {
             log = org.slf4j.LoggerFactory.getLogger(VlenDataProvider.class);
 
             log.trace("constructor: start");
+
+            Datatype baseType = dtype.getDatatypeBase();
+
+            baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
 
             buffer = new StringBuilder();
 
@@ -1066,10 +1091,43 @@ public class DataProviderFactory {
 
             buffer.setLength(0);
 
-            super.getDataValue(columnIndex, rowIndex);
-
             try {
-                buffer.append(theValue);
+                long index = (rowIndex * colCount + columnIndex);
+
+                if (rank > 1) {
+                    log.trace("getDataValue({}, {}): rank={} isDataTransposed={} isNaturalOrder={}",
+                            rowIndex, columnIndex, rank, isDataTransposed, isNaturalOrder);
+
+                    if (isDataTransposed && isNaturalOrder)
+                        index = (columnIndex * rowCount + rowIndex);
+                    else if (!isDataTransposed && !isNaturalOrder)
+                        // Reshape Data
+                        index = (rowIndex * colCount + columnIndex);
+                    else if (isDataTransposed && !isNaturalOrder)
+                        // Transpose Data
+                        index = (columnIndex * rowCount + rowIndex);
+                    else
+                        index = (rowIndex * colCount + columnIndex);
+                }
+
+                if (baseTypeDataProvider instanceof CompoundDataProvider) {
+                    /*
+                     * TODO:
+                     */
+                    /*
+                     * buffer.append(baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index));
+                     */
+                    if (dataBuf instanceof String[])
+                        buffer.append(Array.get(dataBuf, (int) index));
+                    else
+                        buffer.append("*UNSUPPORTED*");
+                }
+                else if (baseTypeDataProvider instanceof ArrayDataProvider) {
+                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index));
+                }
+                else {
+                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, (int) index));
+                }
 
                 theValue = buffer.toString();
             }
@@ -1084,27 +1142,47 @@ public class DataProviderFactory {
         }
 
         @Override
-        public Object getDataValue(Object obj, int index) {
-            log.trace("getDataValue({}, {}): start", obj, index);
+        public Object getDataValue(Object obj, int columnIndex, int rowIndex) {
+            log.trace("getDataValue({}, {}, {}): start", obj, rowIndex, columnIndex);
 
             buffer.setLength(0);
 
-            super.getDataValue(obj, index);
-
             try {
-                buffer.append(theValue);
+                if (baseTypeDataProvider instanceof CompoundDataProvider) {
+                    /*
+                     * TODO:
+                     */
+                    /*
+                     * buffer.append(baseTypeDataProvider.getDataValue(obj, columnIndex, rowIndex));
+                     */
+                    if (obj instanceof String[])
+                        buffer.append(Array.get(obj, rowIndex));
+                    else
+                        buffer.append("*UNSUPPORTED*");
+                }
+                else if (baseTypeDataProvider instanceof ArrayDataProvider) {
+                    buffer.append(baseTypeDataProvider.getDataValue(obj, columnIndex, rowIndex));
+                }
+                else {
+                    buffer.append(baseTypeDataProvider.getDataValue(obj, rowIndex));
+                }
 
                 theValue = buffer.toString();
             }
             catch (Exception ex) {
-                log.debug("getDataValue({}, {}): failure: ", obj, index, ex);
+                log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
                 theValue = DataFactoryUtils.errStr;
             }
 
-            log.trace("getDataValue({}, {})({}): finish", obj, index, theValue);
+            log.trace("getDataValue({}, {}, {})({}): finish", obj, rowIndex, columnIndex, theValue);
 
             return theValue;
         }
+
+        /* @Override
+        public Object getDataValue(Object obj, int index) {
+            throw new UnsupportedOperationException("getDataValue(Object, int) should not be called for VlenDataProviders");
+        } */
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
@@ -1460,15 +1538,15 @@ public class DataProviderFactory {
      * TableView from the array of strings.
      */
     private static class CompoundAttributeDataProvider extends HDFDataProvider {
-        private Object theAttrValue;
+        private Object              theAttrValue;
 
         private final StringBuilder stringBuffer;
 
-        private final int          orders[];
-        private final int          nFields;
-        private final int          nRows;
-        private final int          nCols;
-        private final int          nSubColumns;
+        private final int           orders[];
+        private final int           nFields;
+        private final int           nRows;
+        private final int           nCols;
+        private final int           nSubColumns;
 
         CompoundAttributeDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
