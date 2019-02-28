@@ -722,10 +722,10 @@ public class DefaultImageView implements ImageView {
                     return;
                 }
 
-                Vector<String> palList = ViewProperties.getPaletteList();
+                ArrayList<String> palList = (ArrayList<String>) ViewProperties.getPaletteList();
                 String palPath = chosenFile.getAbsolutePath();
-                if(!palList.contains(palList))
-                    palList.addElement(palPath);
+                if (!palList.contains(palPath))
+                    palList.add(palPath);
             }
         });
 
@@ -1868,8 +1868,7 @@ public class DefaultImageView implements ImageView {
 
         viewer.showStatus("Current image saved to: " + chosenFile.getAbsolutePath());
 
-        try {
-            RandomAccessFile rf = new RandomAccessFile(chosenFile, "r");
+        try (RandomAccessFile rf = new RandomAccessFile(chosenFile, "r")) {
             long size = rf.length();
             rf.close();
             viewer.showStatus("File size (bytes): " + size);

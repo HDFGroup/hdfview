@@ -410,31 +410,33 @@ public class NewDatasetDialog extends Dialog {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
                     int rank = rankChoice.getSelectionIndex() + 1;
-                    String currentSizeStr = "1";
+                    StringBuilder currentSizeStr = new StringBuilder("1");
 
                     for (int i = 1; i < rank; i++) {
-                        currentSizeStr += " x 1";
+                        currentSizeStr.append(" x 1");
                     }
 
-                    currentSizeField.setText(currentSizeStr);
+                    currentSizeField.setText(currentSizeStr.toString());
 
                     String currentStr = currentSizeField.getText();
                     int idx = currentStr.lastIndexOf('x');
-                    String chunkStr = "1";
+                    StringBuilder chunkStr = null;
 
                     if (rank <= 1) {
-                        chunkStr = currentStr;
+                        chunkStr = new StringBuilder(currentStr);
                     }
                     else {
+                        chunkStr = new StringBuilder("1");
                         for (int i = 1; i < rank - 1; i++) {
-                            chunkStr += " x 1";
+                            chunkStr.append(" x 1");
                         }
                         if (idx > 0) {
-                            chunkStr += " x " + currentStr.substring(idx + 1);
+                            chunkStr.append(" x ");
+                            chunkStr.append(currentStr.substring(idx + 1));
                         }
                     }
 
-                    chunkSizeField.setText(chunkStr);
+                    chunkSizeField.setText(chunkStr.toString());
                 }
             });
 
@@ -509,15 +511,16 @@ public class NewDatasetDialog extends Dialog {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
                     chunkSizeField.setEnabled(true);
-                    String chunkStr = "";
+                    StringBuilder chunkStr = new StringBuilder("");
                     StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
                     int rank = rankChoice.getSelectionIndex() + 1;
                     while (st.hasMoreTokens()) {
                         long l = Math.max(1, Long.valueOf(st.nextToken().trim()) / (2 * rank));
-                        chunkStr += String.valueOf(l) + "x";
+                        chunkStr.append(String.valueOf(l));
+                        chunkStr.append("x");
                     }
-                    chunkStr = chunkStr.substring(0, chunkStr.lastIndexOf('x'));
-                    chunkSizeField.setText(chunkStr);
+                    String chunkString = chunkStr.substring(0, chunkStr.lastIndexOf("x"));
+                    chunkSizeField.setText(chunkString);
                 }
             });
 
@@ -544,22 +547,24 @@ public class NewDatasetDialog extends Dialog {
                         if (!checkChunked.getSelection()) {
                             String currentStr = currentSizeField.getText();
                             int idx = currentStr.lastIndexOf('x');
-                            String chunkStr = "1";
+                            StringBuilder chunkStr = null;
 
                             int rank = rankChoice.getSelectionIndex() + 1;
                             if (rank <= 1) {
-                                chunkStr = currentStr;
+                                chunkStr = new StringBuilder(currentStr);
                             }
                             else {
+                                chunkStr = new StringBuilder("1");
                                 for (int i = 1; i < rank - 1; i++) {
-                                    chunkStr += " x 1";
+                                    chunkStr.append(" x 1");
                                 }
                                 if (idx > 0) {
-                                    chunkStr += " x " + currentStr.substring(idx + 1);
+                                    chunkStr.append(" x ");
+                                    chunkStr.append(currentStr.substring(idx + 1));
                                 }
                             }
 
-                            chunkSizeField.setText(chunkStr);
+                            chunkSizeField.setText(chunkStr.toString());
                         }
                         compressionLevel.setEnabled(true);
                         checkContiguous.setEnabled(false);
@@ -781,9 +786,15 @@ public class NewDatasetDialog extends Dialog {
         Group pgroup = null;
         boolean isVLen = false;
         boolean isVlenStr = false;
-        int rank = -1, gzip = -1;
-        int tclass = Datatype.CLASS_NO_CLASS, tsize = Datatype.NATIVE, torder = Datatype.NATIVE, tsign = Datatype.NATIVE;
-        long dims[], maxdims[] = null, chunks[] = null;
+        int rank = -1;
+        int gzip = -1;
+        int tclass = Datatype.CLASS_NO_CLASS;
+        int tsize = Datatype.NATIVE;
+        int torder = Datatype.NATIVE;
+        int tsign = Datatype.NATIVE;
+        long[] dims;
+        long[] maxdims = null;
+        long[] chunks = null;
 
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
@@ -1011,7 +1022,8 @@ public class NewDatasetDialog extends Dialog {
                 chunks[i] = l;
             } //  (int i=0; i<rank; i++)
 
-            long tchunksize = 1, tdimsize = 1;
+            long tchunksize = 1;
+            long tdimsize = 1;
             for (int i = 0; i < rank; i++) {
                 tchunksize *= chunks[i];
                 tdimsize *= dims[i];
@@ -1232,8 +1244,7 @@ public class NewDatasetDialog extends Dialog {
 
                 if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
                     // Attempt to load HTML help file from jar
-                    try {
-                        InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewDatasetHelp.html");
+                    try (InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewDatasetHelp.html")) {
                         Scanner scan = new Scanner(in);
                         StringBuilder buffer = new StringBuilder();
                         while(scan.hasNextLine()) {
@@ -1243,7 +1254,6 @@ public class NewDatasetDialog extends Dialog {
                         browser.setText(buffer.toString());
 
                         scan.close();
-                        in.close();
                     }
                     catch (Exception e) {
                         StringBuilder buff = new StringBuilder();
@@ -1254,7 +1264,8 @@ public class NewDatasetDialog extends Dialog {
                         buff.append("</html>");
                         browser.setText(buff.toString(), true);
                     }
-                } else {
+                }
+                else {
                     try {
                         URL url = null, url2 = null, url3 = null;
                         String rootPath = ViewProperties.getViewRoot();
@@ -1281,12 +1292,14 @@ public class NewDatasetDialog extends Dialog {
                         }
 
                         URL uu[] = { url, url2, url3 };
-                        URLClassLoader cl = new URLClassLoader(uu);
-                        URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
+                        try (URLClassLoader cl = new URLClassLoader(uu)) {
+                            URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
 
-                        browser.setUrl(u.toString());
-
-                        cl.close();
+                            browser.setUrl(u.toString());
+                        }
+                        catch (Exception ex) {
+                            log.debug("URLClassLoader failed:", ex);
+                        }
                     }
                     catch (Exception e) {
                         StringBuilder buff = new StringBuilder();

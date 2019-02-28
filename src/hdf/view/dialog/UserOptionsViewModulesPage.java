@@ -14,6 +14,7 @@
 
 package hdf.view.dialog;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -37,19 +38,19 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     private Combo                 choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
 
     /** A list of Tree view implementations. */
-    private static Vector<String> treeViews;
+    private static ArrayList<String> treeViews;
 
     /** A list of Image view implementations. */
-    private static Vector<String> imageViews;
+    private static ArrayList<String> imageViews;
 
     /** A list of Table view implementations. */
-    private static Vector<String> tableViews;
+    private static ArrayList<String> tableViews;
 
     /** A list of metadata view implementations. */
-    private static Vector<String> metaDataViews;
+    private static ArrayList<String> metaDataViews;
 
     /** A list of palette view implementations. */
-    private static Vector<String> paletteViews;
+    private static ArrayList<String> paletteViews;
 
     public UserOptionsViewModulesPage() {
         super("View Modules Settings");
@@ -74,7 +75,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     public boolean performOk() {
         getPreferenceStore();
 
-        Vector[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
+        ArrayList[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
         Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView };
         for (int i = 0; i < moduleList.length; i++) {
             Combo curModuleCombo = choiceList[i];
@@ -95,12 +96,12 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     protected void load() {
         getPreferenceStore();
 
-        treeViews = ViewProperties.getTreeViewList();
-        metaDataViews = ViewProperties.getMetaDataViewList();
-        tableViews = ViewProperties.getTableViewList();
-        imageViews = ViewProperties.getImageViewList();
-        paletteViews = ViewProperties.getPaletteViewList();
-        // srbVector = ViewProperties.getSrbAccount();
+        treeViews = (ArrayList<String>) ViewProperties.getTreeViewList();
+        metaDataViews = (ArrayList<String>) ViewProperties.getMetaDataViewList();
+        tableViews = (ArrayList<String>) ViewProperties.getTableViewList();
+        imageViews = (ArrayList<String>) ViewProperties.getImageViewList();
+        paletteViews = (ArrayList<String>) ViewProperties.getPaletteViewList();
+        // srbVector = (ArrayList<String>)ViewProperties.getSrbAccount();
 
         choiceTreeView.setItems(treeViews.toArray(new String[0]));
         choiceTreeView.select(0);
@@ -113,7 +114,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
         choicePaletteView.setItems(paletteViews.toArray(new String[0]));
         choicePaletteView.select(0);
 
-        Vector[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
+        ArrayList[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
         Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView };
         for (int i = 0; i < moduleList.length; i++) {
             Object theModule = choiceList[i].getItem(choiceList[i].getSelectionIndex());
