@@ -133,17 +133,17 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     protected long[]          chunkSize;
 
     /** The compression information. */
-    protected String          compression;
-    public static final String          compression_gzip_txt = "GZIP: level = ";
+    protected StringBuilder   compression;
+    public static final String compressionGzipTxt = "GZIP: level = ";
 
     /** The filters information. */
-    protected String          filters;
+    protected StringBuilder   filters;
 
     /** The storage layout information. */
-    protected String          storage_layout;
+    protected StringBuilder   storageLayout;
 
     /** The storage information. */
-    protected String          storage;
+    protected StringBuilder   storage;
 
     /** The datatype object of the dataset. */
     protected Datatype        datatype;
@@ -221,9 +221,9 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         startDims = null;
         selectedStride = null;
         chunkSize = null;
-        compression = "NONE";
-        filters = "NONE";
-        storage = "NONE";
+        compression = new StringBuilder("NONE");
+        filters = new StringBuilder("NONE");
+        storage = new StringBuilder("NONE");
         dimNames = null;
 
         selectedIndex = new int[3];
@@ -773,7 +773,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     public final String getCompression() {
         if (!inited) init();
 
-        return compression;
+        return compression.toString();
     }
 
     /**
@@ -784,7 +784,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     public final String getFilters() {
         if (!inited) init();
 
-        return filters;
+        return filters.toString();
     }
 
     /**
@@ -795,7 +795,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     public final String getStorageLayout() {
         if (!inited) init();
 
-        return storage_layout;
+        return storageLayout.toString();
     }
 
     /**
@@ -806,7 +806,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     public final String getStorage() {
         if (!inited) init();
 
-        return storage;
+        return storage.toString();
     }
 
     /**
@@ -836,8 +836,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the converted object
      */
     @Deprecated
-    public static Object convertFromUnsignedC(Object data_in) {
-        return Dataset.convertFromUnsignedC(data_in, null);
+    public static Object convertFromUnsignedC(Object dataIN) {
+        return Dataset.convertFromUnsignedC(dataIN, null);
     }
 
     /**
@@ -885,100 +885,100 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @see #convertToUnsignedC(Object, Object)
      *
-     * @param data_in
+     * @param dataIN
      *            the input 1D array of the unsigned C-type integers.
-     * @param data_out
+     * @param dataOUT
      *            the output converted (or upgraded) 1D array of Java integers.
      *
      * @return the upgraded 1D array of Java integers.
      */
     @SuppressWarnings("rawtypes")
-    public static Object convertFromUnsignedC(Object data_in, Object data_out) {
+    public static Object convertFromUnsignedC(Object dataIN, Object dataOUT) {
         log.trace("convertFromUnsignedC(): start");
 
-        if (data_in == null) {
+        if (dataIN == null) {
             log.debug("convertFromUnsignedC(): data_in is null");
             log.trace("convertFromUnsignedC(): finish");
             return null;
         }
 
-        Class data_class = data_in.getClass();
-        if (!data_class.isArray()) {
+        Class dataClass = dataIN.getClass();
+        if (!dataClass.isArray()) {
             log.debug("convertFromUnsignedC(): data_in not an array");
             log.trace("convertFromUnsignedC(): finish");
             return null;
         }
 
-        if (data_out != null) {
-            Class data_class_out = data_out.getClass();
-            if (!data_class_out.isArray() || (Array.getLength(data_in) != Array.getLength(data_out))) {
+        if (dataOUT != null) {
+            Class dataClassOut = dataOUT.getClass();
+            if (!dataClassOut.isArray() || (Array.getLength(dataIN) != Array.getLength(dataOUT))) {
                 log.debug("convertFromUnsignedC(): data_out not an array or does not match data_in size");
-                data_out = null;
+                dataOUT = null;
             }
         }
 
-        String cname = data_class.getName();
+        String cname = dataClass.getName();
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-        int size = Array.getLength(data_in);
+        int size = Array.getLength(dataIN);
         log.trace("convertFromUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'B') {
             log.debug("convertFromUnsignedC(): Java convert byte to short");
             short[] sdata = null;
-            if (data_out == null) {
+            if (dataOUT == null) {
                 sdata = new short[size];
             }
             else {
-                sdata = (short[]) data_out;
+                sdata = (short[]) dataOUT;
             }
 
-            byte[] bdata = (byte[]) data_in;
+            byte[] bdata = (byte[]) dataIN;
             for (int i = 0; i < size; i++) {
                 sdata[i] = (short) ((bdata[i] + 256) & 0xFF);
             }
 
-            data_out = sdata;
+            dataOUT = sdata;
         }
         else if (dname == 'S') {
             log.debug("convertFromUnsignedC(): Java convert short to int");
             int[] idata = null;
-            if (data_out == null) {
+            if (dataOUT == null) {
                 idata = new int[size];
             }
             else {
-                idata = (int[]) data_out;
+                idata = (int[]) dataOUT;
             }
 
-            short[] sdata = (short[]) data_in;
+            short[] sdata = (short[]) dataIN;
             for (int i = 0; i < size; i++) {
                 idata[i] = (sdata[i] + 65536) & 0xFFFF;
             }
 
-            data_out = idata;
+            dataOUT = idata;
         }
         else if (dname == 'I') {
             log.debug("convertFromUnsignedC(): Java convert int to long");
             long[] ldata = null;
-            if (data_out == null) {
+            if (dataOUT == null) {
                 ldata = new long[size];
             }
             else {
-                ldata = (long[]) data_out;
+                ldata = (long[]) dataOUT;
             }
 
-            int[] idata = (int[]) data_in;
+            int[] idata = (int[]) dataIN;
             for (int i = 0; i < size; i++) {
                 ldata[i] = (idata[i] + 4294967296L) & 0xFFFFFFFFL;
             }
 
-            data_out = ldata;
+            dataOUT = ldata;
         }
         else {
-            data_out = data_in;
+            dataOUT = dataIN;
             log.debug("convertFromUnsignedC(): Java does not support unsigned long");
         }
 
-        return data_out;
+        return dataOUT;
     }
 
     /**
@@ -991,8 +991,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the upgraded 1D array of Java integers.
      */
     @Deprecated
-    public static Object convertToUnsignedC(Object data_in) {
-        return Dataset.convertToUnsignedC(data_in, null);
+    public static Object convertToUnsignedC(Object dataIN) {
+        return Dataset.convertToUnsignedC(dataIN, null);
     }
 
     /**
@@ -1005,94 +1005,94 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *
      * @see #convertFromUnsignedC(Object, Object)
      *
-     * @param data_in
+     * @param dataIN
      *            the input array of the Java integer.
-     * @param data_out
+     * @param dataOUT
      *            the output array of the unsigned C-type integer.
      *
      * @return the converted data of unsigned C-type integer array.
      */
     @SuppressWarnings("rawtypes")
-    public static Object convertToUnsignedC(Object data_in, Object data_out) {
+    public static Object convertToUnsignedC(Object dataIN, Object dataOUT) {
         log.trace("convertToUnsignedC(): start");
 
-        if (data_in == null) {
+        if (dataIN == null) {
             log.debug("convertToUnsignedC(): data_in is null");
             log.trace("convertToUnsignedC(): finish");
             return null;
         }
 
-        Class data_class = data_in.getClass();
-        if (!data_class.isArray()) {
+        Class dataClass = dataIN.getClass();
+        if (!dataClass.isArray()) {
             log.debug("convertToUnsignedC(): data_in not an array");
             log.trace("convertToUnsignedC(): finish");
             return null;
         }
 
-        if (data_out != null) {
-            Class data_class_out = data_out.getClass();
-            if (!data_class_out.isArray() || (Array.getLength(data_in) != Array.getLength(data_out))) {
+        if (dataOUT != null) {
+            Class dataClassOut = dataOUT.getClass();
+            if (!dataClassOut.isArray() || (Array.getLength(dataIN) != Array.getLength(dataOUT))) {
                 log.debug("convertToUnsignedC(): data_out not an array or does not match data_in size");
-                data_out = null;
+                dataOUT = null;
             }
         }
 
-        String cname = data_class.getName();
+        String cname = dataClass.getName();
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-        int size = Array.getLength(data_in);
+        int size = Array.getLength(dataIN);
         log.trace("convertToUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'S') {
             log.debug("convertToUnsignedC(): Java convert short to byte");
             byte[] bdata = null;
-            if (data_out == null) {
+            if (dataOUT == null) {
                 bdata = new byte[size];
             }
             else {
-                bdata = (byte[]) data_out;
+                bdata = (byte[]) dataOUT;
             }
-            short[] sdata = (short[]) data_in;
+            short[] sdata = (short[]) dataIN;
             for (int i = 0; i < size; i++) {
                 bdata[i] = (byte) sdata[i];
             }
-            data_out = bdata;
+            dataOUT = bdata;
         }
         else if (dname == 'I') {
             log.debug("convertToUnsignedC(): Java convert int to short");
             short[] sdata = null;
-            if (data_out == null) {
+            if (dataOUT == null) {
                 sdata = new short[size];
             }
             else {
-                sdata = (short[]) data_out;
+                sdata = (short[]) dataOUT;
             }
-            int[] idata = (int[]) data_in;
+            int[] idata = (int[]) dataIN;
             for (int i = 0; i < size; i++) {
                 sdata[i] = (short) idata[i];
             }
-            data_out = sdata;
+            dataOUT = sdata;
         }
         else if (dname == 'J') {
             log.debug("convertToUnsignedC(): Java convert long to int");
             int[] idata = null;
-            if (data_out == null) {
+            if (dataOUT == null) {
                 idata = new int[size];
             }
             else {
-                idata = (int[]) data_out;
+                idata = (int[]) dataOUT;
             }
-            long[] ldata = (long[]) data_in;
+            long[] ldata = (long[]) dataIN;
             for (int i = 0; i < size; i++) {
                 idata[i] = (int) ldata[i];
             }
-            data_out = idata;
+            dataOUT = idata;
         }
         else {
-            data_out = data_in;
+            dataOUT = dataIN;
             log.debug("convertToUnsignedC(): Java does not support unsigned long");
         }
 
-        return data_out;
+        return dataOUT;
     }
 
     /**

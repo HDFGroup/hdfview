@@ -669,22 +669,22 @@ public class H4GRImage extends ScalarDS
                 HDFCompInfo compInfo = new HDFCompInfo();
                 HDFLibrary.GRgetcompinfo(id, compInfo);
                 if (compInfo.ctype == HDFConstants.COMP_CODE_DEFLATE) {
-                    compression = "GZIP";
+                    compression = new StringBuilder("GZIP");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SZIP) {
-                    compression = "SZIP";
+                    compression = new StringBuilder("SZIP");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_JPEG) {
-                    compression = "JPEG";
+                    compression = new StringBuilder("JPEG");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SKPHUFF) {
-                    compression = "SKPHUFF";
+                    compression = new StringBuilder("SKPHUFF");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_RLE) {
-                    compression = "RLE";
+                    compression = new StringBuilder("RLE");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_NBIT) {
-                    compression = "NBIT";
+                    compression = new StringBuilder("NBIT");
                 }
             }
             catch (Exception ex) {
@@ -698,16 +698,16 @@ public class H4GRImage extends ScalarDS
                 HDFLibrary.GRgetchunkinfo(id, chunkInfo, cflag);
                 if (cflag[0] == HDFConstants.HDF_NONE) {
                     chunkSize = null;
-                    storage_layout = "NONE";
+                    storageLayout = new StringBuilder("NONE");
                 }
                 else {
                     chunkSize = new long[rank];
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
                     }
-                    storage_layout = "CHUNKED: " + chunkSize[0];
+                    storageLayout = new StringBuilder("CHUNKED: " + chunkSize[0]);
                     for (int i = 1; i < rank; i++) {
-                        storage_layout += " X " + chunkSize[i];
+                        storageLayout.append(" X " + chunkSize[i]);
                     }
                 }
             }

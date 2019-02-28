@@ -268,8 +268,8 @@ public class NewCompoundDatasetDialog extends Dialog {
                 String compression = dset.getCompression();
                 if (compression != null) {
                     int clevel = -1;
-                    int comp_pos = Dataset.compression_gzip_txt.length();
-                    int idx = compression.indexOf(Dataset.compression_gzip_txt);
+                    int comp_pos = Dataset.compressionGzipTxt.length();
+                    int idx = compression.indexOf(Dataset.compressionGzipTxt);
                     if (idx >= 0) {
                         try {
                             clevel = Integer.parseInt(compression.substring(idx + comp_pos, idx + comp_pos +1));

@@ -94,10 +94,10 @@ public class Chart extends Dialog {
     private double                      xmin;
 
     /** line labels */
-    private String                      lineLabels[];
+    private String[]                    lineLabels;
 
     /** line colors */
-    private int                         lineColors[];
+    private int[]                       lineColors;
 
     /** number of lines */
     private int                         numberOfLines;
@@ -300,7 +300,7 @@ public class Chart extends Dialog {
     *
     * @param c the list of colors
     */
-    public void setLineColors(int c[]) {
+    public void setLineColors(int[] c) {
         lineColors = c;
     }
 
@@ -308,7 +308,7 @@ public class Chart extends Dialog {
     *
     * @param l the list of line labels
     */
-    public void setLineLabels(String l[]) {
+    public void setLineLabels(String[] l) {
         lineLabels = l;
     }
 
@@ -341,24 +341,24 @@ public class Chart extends Dialog {
     private class ChartCanvas extends Canvas {
         // Value controlling gap between the sides of the canvas
         // and the drawn elements
-        private final int gap = 10;
+        private static final int GAP = 10;
 
         // Values controlling the dimensions of the legend for
         // line plots, as well as the gap in between each
         // element displayed in the legend
-        private int LEGEND_WIDTH;
-        private int LEGEND_HEIGHT;
+        private int legendWidth;
+        private int legendHeight;
 
-        private final int LEGEND_LINE_WIDTH = 10;
-        private final int LEGEND_LINE_GAP = 30;
+        private static final int LEGEND_LINE_WIDTH = 10;
+        private static final int LEGEND_LINE_GAP = 30;
 
         public ChartCanvas(Composite parent, int style) {
             super(parent, style);
 
             // Only draw the legend if the Chart type is a line plot
             if ((chartStyle == LINEPLOT) && (lineLabels != null)) {
-                LEGEND_WIDTH = 60;
-                LEGEND_HEIGHT = (2 * LEGEND_LINE_GAP) + (numberOfLines * LEGEND_LINE_GAP);
+                legendWidth = 60;
+                legendHeight = (2 * LEGEND_LINE_GAP) + (numberOfLines * LEGEND_LINE_GAP);
             }
 
             this.addPaintListener(new PaintListener() {
@@ -383,14 +383,15 @@ public class Chart extends Dialog {
                     if (lineLabels != null) {
                         for (int i = 0; i < lineLabels.length; i++) {
                             int width = g.stringExtent(lineLabels[i]).x;
-                            if (width > (2 * LEGEND_WIDTH / 3) - 10) LEGEND_WIDTH += width;
+                            if (width > (2 * legendWidth / 3) - 10)
+                                legendWidth += width;
                         }
                     }
 
-                    int xgap = maxYLabelWidth + gap;
-                    int ygap = canvasBounds.height - maxXLabelHeight - gap - 1;
-                    int plotHeight = ygap - gap;
-                    int plotWidth = canvasBounds.width - LEGEND_WIDTH - (2 * gap) - xgap;
+                    int xgap = maxYLabelWidth + GAP;
+                    int ygap = canvasBounds.height - maxXLabelHeight - GAP - 1;
+                    int plotHeight = ygap - GAP;
+                    int plotWidth = canvasBounds.width - legendWidth - (2 * GAP) - xgap;
                     int xnpoints = Math.min(10, numberOfPoints - 1);
                     int ynpoints = 10;
 
@@ -398,10 +399,11 @@ public class Chart extends Dialog {
                     g.drawLine(xgap, ygap, xgap + plotWidth, ygap);
 
                     // draw the Y axis
-                    g.drawLine(xgap, ygap, xgap, gap);
+                    g.drawLine(xgap, ygap, xgap, GAP);
 
                     // draw x labels
-                    double xp = 0, x = xmin;
+                    double xp = 0;
+                    double x = xmin;
                     double dw = (double) plotWidth / (double) xnpoints;
                     double dx = (xmax - xmin) / xnpoints;
                     boolean gtOne = (dx >= 1);
@@ -425,7 +427,8 @@ public class Chart extends Dialog {
                     }
 
                     // draw y labels
-                    double yp = 0, y = ymin;
+                    double yp = 0;
+                    double y = ymin;
                     double dh = (double) plotHeight / (double) ynpoints;
                     double dy = (ymax - ymin) / (ynpoints);
                     if (dy > 1) {
@@ -450,13 +453,16 @@ public class Chart extends Dialog {
                         }
                     }
 
-                    double x0, y0, x1, y1;
+                    double x0;
+                    double y0;
+                    double x1;
+                    double y1;
                     if (chartStyle == LINEPLOT) {
                         dw = (double) plotWidth / (double) (numberOfPoints - 1);
 
                         // use y = a + b* x to calculate pixel positions
                         double b = plotHeight / (ymin - ymax);
-                        double a = -b * ymax + gap;
+                        double a = -b * ymax + GAP;
                         boolean hasXdata = ((xData != null) && (xData.length >= numberOfPoints));
                         double xRatio = (1 / (xmax - xmin)) * plotWidth;
                         double xD = (xmin / (xmax - xmin)) * plotWidth;
@@ -494,8 +500,8 @@ public class Chart extends Dialog {
 
                             // draw line legend
                             if ((lineLabels != null) && (lineLabels.length >= numberOfLines)) {
-                                x0 = (canvasBounds.width - gap - LEGEND_WIDTH) + (LEGEND_WIDTH / 3);
-                                y0 = gap + LEGEND_LINE_GAP * (i + 1);
+                                x0 = (canvasBounds.width - GAP - legendWidth) + ((double) legendWidth / 3);
+                                y0 = GAP + (double) LEGEND_LINE_GAP * (i + 1);
                                 g.drawLine((int) x0, (int) y0, (int) x0 + LEGEND_LINE_WIDTH, (int) y0);
                                 g.drawString(lineLabels[i], (int) x0 + 10, (int) y0 + 3);
                             }
@@ -504,7 +510,7 @@ public class Chart extends Dialog {
                         // draw a box on the legend
                         if ((lineLabels != null) && (lineLabels.length >= numberOfLines)) {
                             g.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
-                            g.drawRectangle(canvasBounds.width - LEGEND_WIDTH - gap, gap, LEGEND_WIDTH, LEGEND_HEIGHT);
+                            g.drawRectangle(canvasBounds.width - legendWidth - GAP, GAP, legendWidth, legendHeight);
                         }
 
                         g.setForeground(c); // set the color back to its default
@@ -522,11 +528,11 @@ public class Chart extends Dialog {
                         for (int j = 0; j < numberOfPoints; j++) {
                             xp = xgap + j * dw;
                             barHeight = (int) (data[0][j] * (plotHeight / (ymax - ymin)));
-                            g.fillRectangle((int) xp, (int) (ygap - barHeight), barWidth, barHeight);
+                            g.fillRectangle((int) xp, ygap - barHeight, barWidth, barHeight);
                         }
 
                         g.setBackground(c); // set the color back to its default
-                    } // else if (chartStyle == HISTOGRAM)
+                    } // (chartStyle == HISTOGRAM)
                 }
             });
         }

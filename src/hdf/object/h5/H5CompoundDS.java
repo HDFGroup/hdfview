@@ -93,7 +93,7 @@ public class H5CompoundDS extends CompoundDS {
 
     private int nAttributes = -1;
 
-    private H5O_info_t obj_info;
+    private H5O_info_t objInfo;
 
     /**
      * A list of names of all fields including nested fields.
@@ -175,14 +175,14 @@ public class H5CompoundDS extends CompoundDS {
     @Deprecated
     public H5CompoundDS(FileFormat theFile, String theName, String thePath, long[] oid) {
         super(theFile, theName, thePath, oid);
-        obj_info = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
+        objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
 
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID
             try {
-                byte[] ref_buf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
+                byte[] refBuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
                 this.oid = new long[1];
-                this.oid[0] = HDFNativeData.byteToLong(ref_buf, 0);
+                this.oid[0] = HDFNativeData.byteToLong(refBuf, 0);
             }
             catch (Exception ex) {
                 log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
@@ -313,8 +313,8 @@ public class H5CompoundDS extends CompoundDS {
                 try {
                     int nfiles = H5.H5Pget_external_count(pid);
                     isExternal = (nfiles > 0);
-                    int layout_type = H5.H5Pget_layout(pid);
-                    if (isVirtual = (layout_type == HDF5Constants.H5D_VIRTUAL)) {
+                    int layoutType = H5.H5Pget_layout(pid);
+                    if (isVirtual = (layoutType == HDF5Constants.H5D_VIRTUAL)) {
                         try {
                             long vmaps = H5.H5Pget_virtual_count(pid);
                             if (vmaps > 0) {
@@ -327,7 +327,6 @@ public class H5CompoundDS extends CompoundDS {
                                     }
                                     catch (Exception err) {
                                         log.trace("init(): vds[{}] continue", next);
-                                        continue;
                                     }
                                 }
                             }
@@ -477,17 +476,17 @@ public class H5CompoundDS extends CompoundDS {
      */
     @Override
     public boolean hasAttribute() {
-        obj_info.num_attrs = nAttributes;
+        objInfo.num_attrs = nAttributes;
 
-        if (obj_info.num_attrs < 0) {
+        if (objInfo.num_attrs < 0) {
             long did = open();
             if (did >= 0) {
                 try {
-                    obj_info = H5.H5Oget_info(did);
-                    nAttributes = (int) obj_info.num_attrs;
+                    objInfo = H5.H5Oget_info(did);
+                    nAttributes = (int) objInfo.num_attrs;
                 }
                 catch (Exception ex) {
-                    obj_info.num_attrs = 0;
+                    objInfo.num_attrs = 0;
                     log.debug("hasAttribute(): get object info failure: ", ex);
                 }
                 close(did);
@@ -497,8 +496,8 @@ public class H5CompoundDS extends CompoundDS {
             }
         }
 
-        log.trace("hasAttribute(): nAttributes={}", obj_info.num_attrs);
-        return (obj_info.num_attrs > 0);
+        log.trace("hasAttribute(): nAttributes={}", objInfo.num_attrs);
+        return (objInfo.num_attrs > 0);
     }
 
     /*
@@ -551,7 +550,7 @@ public class H5CompoundDS extends CompoundDS {
             if (pdir == null) {
                 pdir = ".";
             }
-            System.setProperty("user.dir", pdir);// H5.H5Dchdir_ext(pdir);
+            System.setProperty("user.dir", pdir);
             log.trace("getDatatype(): External dataset: user.dir={}", pdir);
         }
 
@@ -718,12 +717,12 @@ public class H5CompoundDS extends CompoundDS {
     private Object compoundDatasetCommonIO(IO_TYPE ioType, Object writeBuf) throws Exception {
         log.trace("compoundDatasetCommonIO(): start");
 
-        H5Datatype DSDatatype = (H5Datatype) getDatatype();
+        H5Datatype dsDatatype = (H5Datatype) getDatatype();
         Object data = null;
 
         if (numberOfMembers <= 0) {
             log.debug("compoundDatasetCommonIO(): Dataset contains no members");
-            log.trace("compoundDatasetCommonIO(): finish");
+            log.trace("compoundDatasetCommonIO(): exit");
             throw new Exception("dataset contains no members");
         }
 
@@ -733,7 +732,7 @@ public class H5CompoundDS extends CompoundDS {
         if (ioType == IO_TYPE.WRITE) {
             if ((writeBuf == null) || !(writeBuf instanceof List)) {
                 log.debug("compoundDatasetCommonIO(): writeBuf is null or invalid");
-                log.trace("compoundDatasetCommonIO(): finish");
+                log.trace("compoundDatasetCommonIO(): exit");
                 throw new Exception("write buffer is null or invalid");
             }
 
@@ -741,13 +740,13 @@ public class H5CompoundDS extends CompoundDS {
              * Check for any unsupported datatypes and fail early before
              * attempting to write to the dataset.
              */
-            if (DSDatatype.isArray() && DSDatatype.getDatatypeBase().isCompound()) {
+            if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isCompound()) {
                 log.debug("compoundDatasetCommonIO(): cannot write dataset of type ARRAY of COMPOUND");
                 log.trace("compoundDatasetCommonIO(): finish");
                 throw new HDF5Exception("Unsupported dataset of type ARRAY of COMPOUND");
             }
 
-            if (DSDatatype.isVLEN() && DSDatatype.getDatatypeBase().isCompound()) {
+            if (dsDatatype.isVLEN() && dsDatatype.getDatatypeBase().isCompound()) {
                 log.debug("compoundDatasetCommonIO(): cannot write dataset of type VLEN of COMPOUND");
                 log.trace("compoundDatasetCommonIO(): finish");
                 throw new HDF5Exception("Unsupported dataset of type VLEN of COMPOUND");
@@ -768,7 +767,7 @@ public class H5CompoundDS extends CompoundDS {
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
                         selectedStride, selectedDims, spaceIDs);
 
-                data = compoundTypeIO(ioType, did, spaceIDs, (int) totalSelectedSpacePoints, DSDatatype, writeBuf, new int[]{0});
+                data = compoundTypeIO(ioType, did, spaceIDs, (int) totalSelectedSpacePoints, dsDatatype, writeBuf, new int[]{0});
             }
             catch (Exception ex) {
                 /*
@@ -898,7 +897,7 @@ public class H5CompoundDS extends CompoundDS {
 
                     if (!memberType.isCompound()) {
                         try {
-                            memberName = new String(flatNameList.get(globalMemberIndex[0]));
+                            memberName = flatNameList.get(globalMemberIndex[0]);
                         }
                         catch (Exception ex) {
                             log.debug("compoundTypeIO(): get member {} name failure: ", i, ex);
@@ -1019,7 +1018,7 @@ public class H5CompoundDS extends CompoundDS {
             String memberName) throws Exception {
         log.trace("readSingleCompoundMember(): start");
 
-        H5Datatype DSDatatype = (H5Datatype) this.getDatatype();
+        H5Datatype dsDatatype = (H5Datatype) this.getDatatype();
         Object memberData = null;
 
         try {
@@ -1042,7 +1041,7 @@ public class H5CompoundDS extends CompoundDS {
              */
             long compTid = -1;
             try {
-                compTid = DSDatatype.createCompoundFieldType(memberName);
+                compTid = dsDatatype.createCompoundFieldType(memberName);
             }
             catch (HDF5Exception ex) {
                 log.debug("readSingleCompoundMember(): unable to create compound field type for member of type {}: ",
@@ -1071,16 +1070,16 @@ public class H5CompoundDS extends CompoundDS {
             }
             catch (HDF5DataFiltersException exfltr) {
                 log.debug("readSingleCompoundMember(): read failure: ", exfltr);
-                log.trace("readSingleCompoundMember(): finish");
+                log.trace("readSingleCompoundMember(): exit");
                 throw new Exception("Filter not available exception: " + exfltr.getMessage(), exfltr);
             }
             catch (Exception ex) {
                 log.debug("readSingleCompoundMember(): read failure: ", ex);
-                log.trace("readSingleCompoundMember(): finish");
+                log.trace("readSingleCompoundMember(): exit");
                 throw new Exception("failed to read compound member: " + ex.getMessage(), ex);
             }
             finally {
-                DSDatatype.close(compTid);
+                dsDatatype.close(compTid);
             }
 
             /*
@@ -1115,7 +1114,7 @@ public class H5CompoundDS extends CompoundDS {
             String memberName, Object theData) throws Exception {
         log.trace("writeSingleCompoundMember(): start");
 
-        H5Datatype DSDatatype = (H5Datatype) this.getDatatype();
+        H5Datatype dsDatatype = (H5Datatype) this.getDatatype();
 
         /*
          * Check for any unsupported datatypes before attempting to write this compound
@@ -1123,7 +1122,7 @@ public class H5CompoundDS extends CompoundDS {
          */
         if (memberType.isVLEN() && !memberType.isVarStr()) {
             log.debug("writeSingleCompoundMember(): writing of VL non-strings is not currently supported");
-            log.trace("writeSingleCompoundMember(): finish");
+            log.trace("writeSingleCompoundMember(): exit");
             throw new Exception("writing of VL non-strings is not currently supported");
         }
 
@@ -1172,7 +1171,7 @@ public class H5CompoundDS extends CompoundDS {
          */
         long compTid = -1;
         try {
-            compTid = DSDatatype.createCompoundFieldType(memberName);
+            compTid = dsDatatype.createCompoundFieldType(memberName);
         }
         catch (HDF5Exception ex) {
             log.debug("writeSingleCompoundMember(): unable to create compound field type for member of type {}: ",
@@ -1207,7 +1206,7 @@ public class H5CompoundDS extends CompoundDS {
             throw new Exception("failed to write compound member: " + ex.getMessage(), ex);
         }
         finally {
-            DSDatatype.close(compTid);
+            dsDatatype.close(compTid);
         }
 
         log.trace("writeSingleCompoundMember(): finish");
@@ -1427,32 +1426,32 @@ public class H5CompoundDS extends CompoundDS {
         if (did >= 0) {
             log.trace("getMetadata(): dataset opened");
             try {
-                compression = "";
+                compression = new StringBuilder("");
 
                 // get the compression and chunk information
                 pcid = H5.H5Dget_create_plist(did);
                 paid = H5.H5Dget_access_plist(did);
-                long storage_size = H5.H5Dget_storage_size(did);
+                long storageSize = H5.H5Dget_storage_size(did);
                 int nfilt = H5.H5Pget_nfilters(pcid);
-                int layout_type = H5.H5Pget_layout(pcid);
-                if (layout_type == HDF5Constants.H5D_CHUNKED) {
+                int layoutType = H5.H5Pget_layout(pcid);
+                if (layoutType == HDF5Constants.H5D_CHUNKED) {
                     chunkSize = new long[rank];
                     H5.H5Pget_chunk(pcid, rank, chunkSize);
                     int n = chunkSize.length;
-                    storage_layout = "CHUNKED: " + String.valueOf(chunkSize[0]);
+                    storageLayout = new StringBuilder("CHUNKED: " + chunkSize[0]);
                     for (int i = 1; i < n; i++) {
-                        storage_layout += " X " + chunkSize[i];
+                        storageLayout.append(" X " + chunkSize[i]);
                     }
 
                     if (nfilt > 0) {
                         long nelmts = 1;
-                        long uncomp_size;
-                        long datum_size = getDatatype().getDatatypeSize();
-                        if (datum_size < 0) {
+                        long uncompSize;
+                        long datumSize = getDatatype().getDatatypeSize();
+                        if (datumSize < 0) {
                             long tmptid = -1;
                             try {
                                 tmptid = H5.H5Dget_type(did);
-                                datum_size = H5.H5Tget_size(tmptid);
+                                datumSize = H5.H5Tget_size(tmptid);
                             }
                             finally {
                                 try {H5.H5Tclose(tmptid);}
@@ -1463,45 +1462,45 @@ public class H5CompoundDS extends CompoundDS {
                         for (int i = 0; i < rank; i++) {
                             nelmts *= dims[i];
                         }
-                        uncomp_size = nelmts * datum_size;
+                        uncompSize = nelmts * datumSize;
 
                         /* compression ratio = uncompressed size / compressed size */
 
-                        if (storage_size != 0) {
-                            double ratio = (double) uncomp_size / (double) storage_size;
+                        if (storageSize != 0) {
+                            double ratio = (double) uncompSize / (double) storageSize;
                             DecimalFormat df = new DecimalFormat();
                             df.setMinimumFractionDigits(3);
                             df.setMaximumFractionDigits(3);
-                            compression += df.format(ratio) + ":1";
+                            compression.append(df.format(ratio) + ":1");
                         }
                     }
                 }
-                else if (layout_type == HDF5Constants.H5D_COMPACT) {
-                    storage_layout = "COMPACT";
+                else if (layoutType == HDF5Constants.H5D_COMPACT) {
+                    storageLayout = new StringBuilder("COMPACT");
                 }
-                else if (layout_type == HDF5Constants.H5D_CONTIGUOUS) {
-                    storage_layout = "CONTIGUOUS";
+                else if (layoutType == HDF5Constants.H5D_CONTIGUOUS) {
+                    storageLayout = new StringBuilder("CONTIGUOUS");
                     if (H5.H5Pget_external_count(pcid) > 0)
-                        storage_layout += " - EXTERNAL ";
+                        storageLayout.append(" - EXTERNAL ");
                 }
-                else if (layout_type == HDF5Constants.H5D_VIRTUAL) {
-                    storage_layout = "VIRTUAL - ";
+                else if (layoutType == HDF5Constants.H5D_VIRTUAL) {
+                    storageLayout = new StringBuilder("VIRTUAL - ");
                     try {
                         long vmaps = H5.H5Pget_virtual_count(pcid);
                         try {
-                            int virt_view = H5.H5Pget_virtual_view(paid);
-                            long virt_gap = H5.H5Pget_virtual_printf_gap(paid);
-                            if (virt_view == HDF5Constants.H5D_VDS_FIRST_MISSING)
-                                storage_layout += "First Missing";
+                            int virtView = H5.H5Pget_virtual_view(paid);
+                            long virtGap = H5.H5Pget_virtual_printf_gap(paid);
+                            if (virtView == HDF5Constants.H5D_VDS_FIRST_MISSING)
+                                storageLayout.append("First Missing");
                             else
-                                storage_layout += "Last Available";
-                            storage_layout += "\nGAP : " + String.valueOf(virt_gap);
+                                storageLayout.append("Last Available");
+                            storageLayout.append("\nGAP : " + virtGap);
                         }
                         catch (Exception err) {
                             log.debug("getMetadata(): vds error: ", err);
-                            storage_layout += "ERROR";
+                            storageLayout.append("ERROR");
                         }
-                        storage_layout += "\nMAPS : " + String.valueOf(vmaps);
+                        storageLayout.append("\nMAPS : " + vmaps);
                         if (vmaps > 0) {
                             for (long next = 0; next < vmaps; next++) {
                                 try {
@@ -1509,85 +1508,84 @@ public class H5CompoundDS extends CompoundDS {
                                     H5.H5Pget_virtual_srcspace(pcid, next);
                                     String fname = H5.H5Pget_virtual_filename(pcid, next);
                                     String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
-                                    storage_layout += "\n" + fname + " : " + dsetname;
+                                    storageLayout.append("\n" + fname + " : " + dsetname);
                                 }
                                 catch (Exception err) {
                                     log.debug("getMetadata(): vds space[{}] error: ", next, err);
                                     log.trace("getMetadata(): vds[{}] continue", next);
-                                    storage_layout += "ERROR";
-                                    continue;
+                                    storageLayout.append("ERROR");
                                 }
                             }
                         }
                     }
                     catch (Exception err) {
                         log.debug("getMetadata(): vds count error: ", err);
-                        storage_layout += "ERROR";
+                        storageLayout.append("ERROR");
                     }
                 }
                 else {
                     chunkSize = null;
-                    storage_layout = "NONE";
+                    storageLayout = new StringBuilder("NONE");
                 }
 
                 int[] flags = { 0, 0 };
-                long[] cd_nelmts = { 20 };
-                int[] cd_values = new int[(int) cd_nelmts[0]];
-                String[] cd_name = { "", "" };
+                long[] cdNelmts = { 20 };
+                int[] cdValues = new int[(int) cdNelmts[0]];
+                String[] cdName = { "", "" };
                 log.trace("getMetadata(): {} filters in pipeline", nfilt);
                 int filter = -1;
-                int[] filter_config = { 1 };
-                filters = "";
+                int[] filterConfig = { 1 };
+                filters = new StringBuilder("");
 
                 for (int i = 0, k = 0; i < nfilt; i++) {
                     log.trace("getMetadata(): filter[{}]", i);
                     if (i > 0) {
-                        filters += ", ";
+                        filters.append(", ");
                     }
                     if (k > 0) {
-                        compression += ", ";
+                        compression.append(", ");
                     }
 
                     try {
-                        cd_nelmts[0] = 20;
-                        cd_values = new int[(int) cd_nelmts[0]];
-                        cd_values = new int[(int) cd_nelmts[0]];
-                        filter = H5.H5Pget_filter(pcid, i, flags, cd_nelmts, cd_values, 120, cd_name, filter_config);
-                        log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cd_name[0], cd_nelmts[0]);
-                        for (int j = 0; j < cd_nelmts[0]; j++) {
-                            log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cd_values[j]);
+                        cdNelmts[0] = 20;
+                        cdValues = new int[(int) cdNelmts[0]];
+                        cdValues = new int[(int) cdNelmts[0]];
+                        filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName, filterConfig);
+                        log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0], cdNelmts[0]);
+                        for (int j = 0; j < cdNelmts[0]; j++) {
+                            log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cdValues[j]);
                         }
                     }
                     catch (Exception err) {
                         log.debug("getMetadata(): filter[{}] error: ", i, err);
                         log.trace("getMetadata(): filter[{}] continue", i);
-                        filters += "ERROR";
+                        filters.append("ERROR");
                         continue;
                     }
 
                     if (filter == HDF5Constants.H5Z_FILTER_NONE) {
-                        filters += "NONE";
+                        filters.append("NONE");
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_DEFLATE) {
-                        filters += "GZIP";
-                        compression += compression_gzip_txt + cd_values[0];
+                        filters.append("GZIP");
+                        compression.append(compressionGzipTxt + cdValues[0]);
                         k++;
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_FLETCHER32) {
-                        filters += "Error detection filter";
+                        filters.append("Error detection filter");
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_SHUFFLE) {
-                        filters += "SHUFFLE: Nbytes = " + cd_values[0];
+                        filters.append("SHUFFLE: Nbytes = " + cdValues[0]);
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_NBIT) {
-                        filters += "NBIT";
+                        filters.append("NBIT");
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_SCALEOFFSET) {
-                        filters += "SCALEOFFSET: MIN BITS = " + cd_values[0];
+                        filters.append("SCALEOFFSET: MIN BITS = " + cdValues[0]);
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_SZIP) {
-                        filters += "SZIP";
-                        compression += "SZIP: Pixels per block = " + cd_values[1];
+                        filters.append("SZIP");
+                        compression.append("SZIP: Pixels per block = " + cdValues[1]);
                         k++;
                         int flag = -1;
                         try {
@@ -1598,55 +1596,55 @@ public class H5CompoundDS extends CompoundDS {
                             flag = -1;
                         }
                         if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) {
-                            compression += ": H5Z_FILTER_CONFIG_DECODE_ENABLED";
+                            compression.append(": H5Z_FILTER_CONFIG_DECODE_ENABLED");
                         }
                         else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
                                 || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
                                         + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED))) {
-                            compression += ": H5Z_FILTER_CONFIG_ENCODE_ENABLED";
+                            compression.append(": H5Z_FILTER_CONFIG_ENCODE_ENABLED");
                         }
                     }
                     else {
-                        filters += "USERDEFINED " + cd_name[0] + "(" + filter + "): ";
-                        for (int j = 0; j < cd_nelmts[0]; j++) {
+                        filters.append("USERDEFINED " + cdName[0] + "(" + filter + "): ");
+                        for (int j = 0; j < cdNelmts[0]; j++) {
                             if (j > 0)
-                                filters += ", ";
-                            filters += cd_values[j];
+                                filters.append(", ");
+                            filters.append(cdValues[j]);
                         }
                         log.debug("getMetadata(): filter[{}] is user defined compression", i);
                     }
                 } //  (int i=0; i<nfilt; i++)
 
                 if (compression.length() == 0) {
-                    compression = "NONE";
+                    compression = new StringBuilder("NONE");
                 }
                 log.trace("getMetadata(): filter compression={}", compression);
 
                 if (filters.length() == 0) {
-                    filters = "NONE";
+                    filters = new StringBuilder("NONE");
                 }
                 log.trace("getMetadata(): filter information={}", filters);
 
-                storage = "SIZE: " + storage_size;
+                storage = new StringBuilder("SIZE: " + storageSize);
                 try {
                     int[] at = { 0 };
                     H5.H5Pget_alloc_time(pcid, at);
-                    storage += ", allocation time: ";
+                    storage.append(", allocation time: ");
                     if (at[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY) {
-                        storage += "Early";
+                        storage.append("Early");
                     }
                     else if (at[0] == HDF5Constants.H5D_ALLOC_TIME_INCR) {
-                        storage += "Incremental";
+                        storage.append("Incremental");
                     }
                     else if (at[0] == HDF5Constants.H5D_ALLOC_TIME_LATE) {
-                        storage += "Late";
+                        storage.append("Late");
                     }
                 }
                 catch (Exception ex) {
                     log.debug("getMetadata(): Storage allocation time:", ex);
                 }
                 if (storage.length() == 0) {
-                    storage = "NONE";
+                    storage = new StringBuilder("NONE");
                 }
                 log.trace("getMetadata(): storage={}", storage);
             }

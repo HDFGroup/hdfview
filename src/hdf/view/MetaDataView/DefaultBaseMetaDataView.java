@@ -119,8 +119,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     private static final String[]         attrTableColNames = { "Name", "Type", "Array Size", "Value[50](...)" };
 
-    private static final int              attrTabIndex = 0;
-    private static final int              generalTabIndex = 1;
+    private static final int              ATTR_TAB_INDEX = 0;
+    private static final int              GENERAL_TAB_INDEX = 1;
 
     public DefaultBaseMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         log.trace("start");
@@ -158,12 +158,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 switch (contentTabFolder.getSelectionIndex()) {
-                    case attrTabIndex:
-                        parent.setData("MetaDataView.LastTabIndex", attrTabIndex);
+                    case ATTR_TAB_INDEX:
+                        parent.setData("MetaDataView.LastTabIndex", ATTR_TAB_INDEX);
                         break;
-                    case generalTabIndex:
+                    case GENERAL_TAB_INDEX:
                     default:
-                        parent.setData("MetaDataView.LastTabIndex", generalTabIndex);
+                        parent.setData("MetaDataView.LastTabIndex", GENERAL_TAB_INDEX);
                         break;
                 }
             }
@@ -171,14 +171,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         attributeInfoPane = createAttributeInfoPane(contentTabFolder, dataObject);
         if (attributeInfoPane != null) {
-            TabItem attributeInfoItem = new TabItem(contentTabFolder, SWT.None, attrTabIndex);
+            TabItem attributeInfoItem = new TabItem(contentTabFolder, SWT.None, ATTR_TAB_INDEX);
             attributeInfoItem.setText("Object Attribute Info");
             attributeInfoItem.setControl(attributeInfoPane);
         }
 
         generalObjectInfoPane = createGeneralObjectInfoPane(contentTabFolder, dataObject);
         if (generalObjectInfoPane != null) {
-            TabItem generalInfoItem = new TabItem(contentTabFolder, SWT.None, generalTabIndex);
+            TabItem generalInfoItem = new TabItem(contentTabFolder, SWT.None, GENERAL_TAB_INDEX);
             generalInfoItem.setText("General Object Info");
             generalInfoItem.setControl(generalObjectInfoPane);
         }
@@ -411,9 +411,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             else if (dataObject instanceof Datatype) {
                 objTypeStr = "HDF5 Named Datatype";
             }
-            long fcpl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_CREATE);
+            long fcplID = H5.H5Pcreate(HDF5Constants.H5P_FILE_CREATE);
             try {
-                H5.H5Pget_link_creation_order(fcpl_id);
+                H5.H5Pget_link_creation_order(fcplID);
 
             }
             catch (Exception err) {
@@ -459,10 +459,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
         String oidStr = null;
-        long[] OID = dataObject.getOID();
-        if (OID != null) {
-            oidStr = String.valueOf(OID[0]);
-            if (isH4) oidStr += ", " + OID[1];
+        long[] oID = dataObject.getOID();
+        if (oID != null) {
+            oidStr = String.valueOf(oID[0]);
+            if (isH4) oidStr += ", " + oID[1];
 
             if (isH5) {
                 label = new Label(generalInfoGroup, SWT.LEFT);
@@ -740,7 +740,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         int idx = attrTable.getSelectionIndex();
         if (idx < 0) {
             log.debug("deleteAttribute(): no attribute is selected");
-            log.trace("deleteAttribute(): finish");
+            log.trace("deleteAttribute(): exit");
             Tools.showError(display.getShells()[0], "Delete", "No attribute is selected.");
             return null;
         }
@@ -751,13 +751,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             answer = SWT.YES;
         if (answer == SWT.NO) {
             log.trace("deleteAttribute(): attribute deletion cancelled");
-            log.trace("deleteAttribute(): finish");
+            log.trace("deleteAttribute(): exit");
             return null;
         }
 
         if (attrList == null) {
             log.debug("deleteAttribute(): Attribute list was null; can't delete an attribute from it");
-            log.trace("deleteAttribute(): finish");
+            log.trace("deleteAttribute(): exit");
             return null;
         }
 
@@ -847,7 +847,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         if ((attr == null) || (newValue == null) || (newValue = newValue.trim()) == null || (newValue.length() < 1)) {
             log.debug("updateAttributeValue(): Attribute is null or Attribute's new value is null");
-            log.trace("updateAttributeValue(): finish");
+            log.trace("updateAttributeValue(): exit");
             return;
         }
 
@@ -881,20 +881,21 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             return;
         }
 
-        char NT = ' ';
+        char cNT = ' ';
         String cName = data.getClass().getName();
         int cIndex = cName.lastIndexOf('[');
         if (cIndex >= 0) {
-            NT = cName.charAt(cIndex + 1);
+            cNT = cName.charAt(cIndex + 1);
         }
         boolean isUnsigned = attr.getDatatype().isUnsigned();
 
         log.trace("updateAttributeValue(): array_length={} cName={} NT={} isUnsigned={}", arrayLength, cName,
-                NT, isUnsigned);
+                cNT, isUnsigned);
 
         double d = 0;
         String theToken = null;
-        long max = 0, min = 0;
+        long max = 0;
+        long min = 0;
         for (int i = 0; i < arrayLength; i++) {
             max = min = 0;
             theToken = st.nextToken().trim();
@@ -917,7 +918,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 return;
             }
 
-            switch (NT) {
+            switch (cNT) {
                 case 'B': {
                     if (isUnsigned) {
                         min = 0;
@@ -980,9 +981,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     if (isUnsigned) {
                         if (theToken != null) {
                             String theValue = theToken;
-                            BigInteger Jmax = new BigInteger("18446744073709551615");
+                            BigInteger maxJ = new BigInteger("18446744073709551615");
                             BigInteger big = new BigInteger(theValue);
-                            if ((big.compareTo(Jmax) > 0) || (big.compareTo(BigInteger.ZERO) < 0)) {
+                            if ((big.compareTo(maxJ) > 0) || (big.compareTo(BigInteger.ZERO) < 0)) {
                                 Tools.showError(display.getShells()[0], "Update",
                                         "Data is out of range[" + min + ", " + max + "]: " + theToken);
                             }
@@ -1059,7 +1060,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         String attrName = attr.getName();
         String attrType = attr.getDatatype().getDescription();
-        String attrSize;
+        StringBuilder attrSize;
         String attrValue = attr.toString(", ", 50);
         String[] rowData = new String[attrTableColNames.length];
 
@@ -1072,28 +1073,25 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         item.setData(attr);
 
         if (attr.getProperty("field") != null) {
-            String fieldInfo = " {Field: " + attr.getProperty("field") + "}";
-            rowData[0] = (attrName + fieldInfo == null) ? "null" : attrName + fieldInfo;
+            rowData[0] = attrName + " {Field: " + attr.getProperty("field") + "}";
         }
         else {
             rowData[0] = attrName;
         }
 
         if (attr.isScalar()) {
-            attrSize = "Scalar";
+            attrSize = new StringBuilder("Scalar");
         }
         else {
-            long dims[] = attr.getDims();
-            attrSize = String.valueOf(dims[0]);
+            long[] dims = attr.getDims();
+            attrSize = new StringBuilder(String.valueOf(dims[0]));
             for (int j = 1; j < dims.length; j++) {
-                attrSize += " x " + dims[j];
+                attrSize.append(" x " + dims[j]);
             }
-
-            if (attrSize == null) attrSize = "null";
         }
 
         rowData[1] = attrType;
-        rowData[2] = attrSize;
+        rowData[2] = attrSize.toString();
         rowData[3] = attrValue;
 
         item.setText(rowData);
@@ -1120,8 +1118,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
 
         public void open() {
-            Shell parent = getParent();
-            shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE);
+            Shell openParent = getParent();
+            shell = new Shell(openParent, SWT.DIALOG_TRIM | SWT.RESIZE);
             shell.setFont(curFont);
             shell.setText("User Block - " + obj);
             shell.setLayout(new GridLayout(5, false));
@@ -1218,7 +1216,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
             shell.pack();
 
-            Rectangle parentBounds = parent.getBounds();
+            Rectangle parentBounds = openParent.getBounds();
 
             Point shellSize = new Point((int) (0.5 * parentBounds.width), (int) (0.5 * parentBounds.height));
             shell.setSize(shellSize);
@@ -1228,9 +1226,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
             shell.open();
 
-            Display display = parent.getDisplay();
+            Display openDisplay = openParent.getDisplay();
             while (!shell.isDisposed()) {
-                if (!display.readAndDispatch()) display.sleep();
+                if (!openDisplay.readAndDispatch()) openDisplay.sleep();
             }
         }
 
@@ -1295,7 +1293,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     userBlockStr = " "; // want to wipe out old userblock content
                 }
             }
-            byte buf[] = null;
+            byte[] buf = null;
             buf = userBlockStr.getBytes();
 
             blkSize1 = buf.length;
@@ -1378,7 +1376,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
                 if (!outFile.exists()) {
                     try {
-                        outFile.createNewFile();
+                        if (!outFile.createNewFile())
+                            log.debug("Error creating file {}", fout);
                     }
                     catch (Exception ex) {
                         Tools.showError(shell, "Save", "Failed to write user block into file.");
@@ -1404,7 +1403,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         File oldFile = new File(fin);
                         boolean status = oldFile.delete();
                         if (status) {
-                            outFile.renameTo(oldFile);
+                            if (!outFile.renameTo(oldFile))
+                                log.debug("Error renaming file {}", fout);
                         }
                         else {
                             Tools.showError(shell, "Save", "Cannot replace the current file.\nPlease save to a different file.");

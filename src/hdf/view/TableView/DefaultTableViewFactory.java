@@ -105,7 +105,7 @@ public class DefaultTableViewFactory extends TableViewFactory {
              * Create a copy of the data object in order to apply the bitmask
              * non-destructively
              */
-            HObject d_copy = null;
+            HObject dCopy = null;
             Constructor<? extends HObject> constructor = null;
             Object[] paramObj = null;
 
@@ -120,30 +120,32 @@ public class DefaultTableViewFactory extends TableViewFactory {
                 constructor = null;
             }
 
-            try {
-                d_copy = constructor.newInstance(paramObj);
-            }
-            catch (Exception ex) {
-                d_copy = null;
+            if (constructor != null) {
+                try {
+                    dCopy = constructor.newInstance(paramObj);
+                }
+                catch (Exception ex) {
+                    dCopy = null;
+                }
             }
 
-            if (d_copy != null) {
+            if (dCopy != null) {
                 try {
-                    ((DataFormat) d_copy).init();
+                    ((DataFormat) dCopy).init();
                     log.trace("getTableView(): d_copy inited");
 
                     int rank = ((DataFormat) dataObject).getRank();
-                    System.arraycopy(((DataFormat) dataObject).getDims(), 0, ((DataFormat) d_copy).getDims(), 0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getStartDims(), 0, ((DataFormat) d_copy).getStartDims(),0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getSelectedDims(), 0, ((DataFormat) d_copy).getSelectedDims(), 0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getStride(), 0, ((DataFormat) d_copy).getStride(), 0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getSelectedIndex(), 0, ((DataFormat) d_copy).getSelectedIndex(), 0, 3);
+                    System.arraycopy(((DataFormat) dataObject).getDims(), 0, ((DataFormat) dCopy).getDims(), 0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getStartDims(), 0, ((DataFormat) dCopy).getStartDims(),0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getSelectedDims(), 0, ((DataFormat) dCopy).getSelectedDims(), 0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getStride(), 0, ((DataFormat) dCopy).getStride(), 0, rank);
+                    System.arraycopy(((DataFormat) dataObject).getSelectedIndex(), 0, ((DataFormat) dCopy).getSelectedIndex(), 0, 3);
                 }
                 catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
-                dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.OBJECT, d_copy);
+                dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dCopy);
             }
         }
 

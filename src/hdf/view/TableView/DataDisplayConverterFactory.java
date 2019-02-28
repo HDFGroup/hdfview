@@ -148,13 +148,13 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): finish", value);
+                log.trace("canonicalToDisplayValue({}): exit", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): finish", value);
+                log.trace("canonicalToDisplayValue({}): exit", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -253,7 +253,7 @@ public class DataDisplayConverterFactory {
             relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
 
             log.trace("index maps built: baseConverterIndexMap = {}, relColIdxMap = {}",
-                    baseConverterIndexMap.toString(), relCmpdStartIndexMap.toString());
+                    baseConverterIndexMap, relCmpdStartIndexMap);
 
             if (baseConverterIndexMap.size() == 0) {
                 log.debug("base DataDisplayConverter index mapping is invalid - size 0");
@@ -744,13 +744,13 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): finish", value);
+                log.trace("canonicalToDisplayValue({}): exit", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): finish", value);
+                log.trace("canonicalToDisplayValue({}): exit", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -818,13 +818,13 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): finish", value);
+                log.trace("canonicalToDisplayValue({}): exit", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): finish", value);
+                log.trace("canonicalToDisplayValue({}): exit", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -836,7 +836,7 @@ public class DataDisplayConverterFactory {
                         buffer.append(isOpaque ? " " : ":");
                     }
 
-                    buffer.append(Tools.toHexString(Long.valueOf(((byte[]) value)[i]), 1));
+                    buffer.append(Tools.toHexString((((byte[]) value)[i]), 1));
                 }
             }
             catch (Exception ex) {
