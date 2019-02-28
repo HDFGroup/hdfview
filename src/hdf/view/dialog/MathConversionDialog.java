@@ -50,9 +50,9 @@ public class MathConversionDialog extends Dialog {
 
     private Font        curFont;
 
-    private Text aField;
+    private Text        aField;
 
-    private Text bField;
+    private Text        bField;
 
     private Text        infoArea;
 
@@ -148,6 +148,7 @@ public class MathConversionDialog extends Dialog {
         functionListData.minimumWidth = 350;
         functionList.setLayoutData(functionListData);
         functionList.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 int index = functionList.getSelectionIndex();
                 infoArea.setText(functionDescription[index]);
@@ -211,6 +212,7 @@ public class MathConversionDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 isConverted = convertData();
 
@@ -223,6 +225,7 @@ public class MathConversionDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 isConverted = false;
 
@@ -233,6 +236,7 @@ public class MathConversionDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }

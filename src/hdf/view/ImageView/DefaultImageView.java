@@ -249,8 +249,8 @@ public class DefaultImageView implements ImageView {
 
     private Text                    frameField;
 
-    private long curFrame = 0;
-    private long maxFrame = 1;
+    private long                    curFrame = 0;
+    private long                    maxFrame = 1;
 
     private BufferedImage           bufferedImage;
 
@@ -263,8 +263,8 @@ public class DefaultImageView implements ImageView {
      * equates to brightness
      */
     private boolean                 doAutoGainContrast = false;
-    private double[] gainBias;
-    private double[] gainBias_current;
+    private double[]                gainBias;
+    private double[]                gainBias_current;
 
     /**
      * int array to hold unsigned short or signed int data from applying the

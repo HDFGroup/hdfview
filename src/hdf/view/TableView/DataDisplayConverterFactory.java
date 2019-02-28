@@ -196,7 +196,7 @@ public class DataDisplayConverterFactory {
 
         private final HDFDisplayConverter[]     memberTypeConverters;
 
-        private final StringBuilder              buffer;
+        private final StringBuilder             buffer;
 
         private final int                       nTotFields;
 
@@ -255,11 +255,19 @@ public class DataDisplayConverterFactory {
             log.trace("index maps built: baseConverterIndexMap = {}, relColIdxMap = {}",
                     baseConverterIndexMap.toString(), relCmpdStartIndexMap.toString());
 
-            nTotFields = baseConverterIndexMap.size();
-            if (nTotFields == 0) {
-                log.debug("index mapping is invalid - size 0");
-                throw new Exception("CompoundDataDisplayConverter: invalid mapping of size 0 built");
+            if (baseConverterIndexMap.size() == 0) {
+                log.debug("base DataDisplayConverter index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataDisplayConverter: invalid DataDisplayConverter mapping of size 0 built");
             }
+
+            if (relCmpdStartIndexMap.size() == 0) {
+                log.debug("compound field start index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataDisplayConverter: invalid compound field start index mapping of size 0 built");
+            }
+
+            nTotFields = baseConverterIndexMap.size();
 
             buffer = new StringBuilder();
 
@@ -379,7 +387,7 @@ public class DataDisplayConverterFactory {
 
         private final HDFDisplayConverter baseTypeConverter;
 
-        private final StringBuilder        buffer;
+        private final StringBuilder       buffer;
 
         ArrayDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
@@ -459,7 +467,9 @@ public class DataDisplayConverterFactory {
 
                 log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
 
-                buffer.append("[");
+                if (!(baseTypeConverter instanceof CompoundDataDisplayConverter))
+                    buffer.append("[");
+
                 for (int i = 0; i < arrLen; i++) {
                     if (i > 0) buffer.append(", ");
 
@@ -469,7 +479,9 @@ public class DataDisplayConverterFactory {
 
                     buffer.append(convertedValue);
                 }
-                buffer.append("]");
+
+                if (!(baseTypeConverter instanceof CompoundDataDisplayConverter))
+                    buffer.append("]");
             }
             catch (Exception ex) {
                 log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
@@ -522,9 +534,9 @@ public class DataDisplayConverterFactory {
 
             log.trace("constructor: start");
 
-            if (!dtype.isVLEN()) {
-                log.debug("datatype is not a variable-length type");
-                throw new Exception("VlenDataDisplayConverter: datatype is not a variable-length type");
+            if (!dtype.isVLEN() || dtype.isVarStr()) {
+                log.debug("datatype is not a variable-length type or is a variable-length string type (use StringDataDisplayConverter)");
+                throw new Exception("VlenDataDisplayConverter: datatype is not a variable-length type or is a variable-length string type (use StringDataDisplayConverter)");
             }
 
             Datatype baseType = dtype.getDatatypeBase();
@@ -625,9 +637,9 @@ public class DataDisplayConverterFactory {
 
         private final StringBuilder buffer;
 
-        private final long         typeSize;
+        private final long          typeSize;
 
-        private final boolean      isUINT64;
+        private final boolean       isUINT64;
 
         NumericalDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
@@ -706,7 +718,7 @@ public class DataDisplayConverterFactory {
 
         private final StringBuilder buffer;
 
-        private final H5Datatype   enumType;
+        private final H5Datatype    enumType;
 
         EnumDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
@@ -780,7 +792,7 @@ public class DataDisplayConverterFactory {
 
         private final StringBuilder buffer;
 
-        private final boolean      isOpaque;
+        private final boolean       isOpaque;
 
         BitfieldDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);

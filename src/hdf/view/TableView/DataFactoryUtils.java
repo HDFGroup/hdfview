@@ -114,13 +114,50 @@ public class DataFactoryUtils {
      */
     private static void buildColIdxToProviderMap(HashMap<Integer, Integer> outMap, List<Datatype> allSelectedTypes,
             List<Datatype> localSelectedTypes, int[] curMapIndex, int[] curProviderIndex, int depth) throws Exception {
-        /*
-         * TODO: nested array of compound types might not be indexed correctly.
-         */
         for (int i = 0; i < localSelectedTypes.size(); i++) {
             Datatype curType = localSelectedTypes.get(i);
+            Datatype nestedCompoundType = null;
+            int arrSize = 1;
 
-            if (curType.isCompound()) {
+            if (curType.isArray()) {
+                long[] arrayDims = curType.getArrayDims();
+                for (int j = 0; j < arrayDims.length; j++) {
+                    arrSize *= arrayDims[j];
+                }
+
+                /*
+                 * Recursively detect any nested array/vlen of compound types.
+                 */
+                Datatype base = curType.getDatatypeBase();
+                while (base != null) {
+                    if (base.isCompound()) {
+                        nestedCompoundType = base;
+                        break;
+                    }
+                    else if (base.isArray()) {
+                        arrayDims = base.getArrayDims();
+                        for (int j = 0; j < arrayDims.length; j++) {
+                            arrSize *= arrayDims[j];
+                        }
+                    }
+
+                    base = base.getDatatypeBase();
+                }
+            }
+
+            if (nestedCompoundType != null) {
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(allSelectedTypes, nestedCompoundType);
+
+                /*
+                 * For Array/Vlen of Compound types, we repeat the compound members n times,
+                 * where n is the number of array elements of variable-length elements.
+                 * Therefore, we repeat our mapping for these types n times.
+                 */
+                for (int j = 0; j < arrSize; j++) {
+                    buildColIdxToProviderMap(outMap, allSelectedTypes, cmpdSelectedTypes, curMapIndex, curProviderIndex, depth + 1);
+                }
+            }
+            else if (curType.isCompound()) {
                 List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(allSelectedTypes, curType);
 
                 buildColIdxToProviderMap(outMap, allSelectedTypes, cmpdSelectedTypes, curMapIndex, curProviderIndex, depth + 1);
@@ -179,8 +216,51 @@ public class DataFactoryUtils {
             List<Datatype> localSelectedTypes, int[] curMapIndex, int[] curStartIdx, int depth) throws Exception {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
             Datatype curType = localSelectedTypes.get(i);
+            Datatype nestedCompoundType = null;
+            int arrSize = 1;
 
-            if (curType.isCompound()) {
+            if (curType.isArray()) {
+                long[] arrayDims = curType.getArrayDims();
+                for (int j = 0; j < arrayDims.length; j++) {
+                    arrSize *= arrayDims[j];
+                }
+
+                /*
+                 * Recursively detect any nested array/vlen of compound types.
+                 */
+                Datatype base = curType.getDatatypeBase();
+                while (base != null) {
+                    if (base.isCompound()) {
+                        nestedCompoundType = base;
+                        break;
+                    }
+                    else if (base.isArray()) {
+                        arrayDims = base.getArrayDims();
+                        for (int j = 0; j < arrayDims.length; j++) {
+                            arrSize *= arrayDims[j];
+                        }
+                    }
+
+                    base = base.getDatatypeBase();
+                }
+            }
+
+            if (nestedCompoundType != null) {
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(allSelectedTypes, nestedCompoundType);
+
+                /*
+                 * For Array/Vlen of Compound types, we repeat the compound members n times,
+                 * where n is the number of array elements of variable-length elements.
+                 * Therefore, we repeat our mapping for these types n times.
+                 */
+                for (int j = 0; j < arrSize; j++) {
+                    if (depth == 0)
+                        curStartIdx[0] = curMapIndex[0];
+
+                    buildRelColIdxToStartIdxMap(outMap, allSelectedTypes, cmpdSelectedTypes, curMapIndex, curStartIdx, depth + 1);
+                }
+            }
+            else if (curType.isCompound()) {
                 if (depth == 0)
                     curStartIdx[0] = curMapIndex[0];
 

@@ -1934,30 +1934,14 @@ public class H5Datatype extends Datatype {
         log.trace("extractCompoundInfo(): start: name={}", name);
 
         if (dtype.isArray()) {
-            /*
-             * TODO:
-             */
-            /* log.trace("extractCompoundInfo(): array type - extracting compound info from base datatype");
-
-            long[] arrayDims = dtype.getArrayDims();
-
-            for (int i = 0; i < arrayDims.length; i++) {
-                for (int k = 0; k < (int) arrayDims[i]; k++) {
-                    H5Datatype.extractCompoundInfo((H5Datatype) dtype.getDatatypeBase(), name, names, flatListTypes);
-                }
-            } */
-
+            log.trace("extractCompoundInfo(): array type - extracting compound info from base datatype");
             H5Datatype.extractCompoundInfo((H5Datatype) dtype.getDatatypeBase(), name, names, flatListTypes);
         }
-        else if (dtype.isVLEN()) {
+        else if (dtype.isVLEN() && !dtype.isVarStr()) {
             log.trace("extractCompoundInfo(): variable-length type - extracting compound info from base datatype");
-
-            /*
-             * TODO: additional logic for variable-length of compound?
-             */
             H5Datatype.extractCompoundInfo((H5Datatype) dtype.getDatatypeBase(), name, names, flatListTypes);
         }
-        else {
+        else if (dtype.isCompound()) {
             List<String> compoundMemberNames = dtype.getCompoundMemberNames();
             List<Datatype> compoundMemberTypes = dtype.getCompoundMemberTypes();
             Datatype mtype = null;
@@ -1994,33 +1978,25 @@ public class H5Datatype extends Datatype {
                     log.trace("extractCompoundInfo(): continue after recursive compound");
                     continue;
                 }
-                else {
-                    /*
-                     * Recursively detect any nested array/vlen of compound members
-                     */
-                    boolean compoundFound = false;
-
-                    Datatype base = mtype.getDatatypeBase();
-                    while (base != null) {
-                        if (base.isCompound())
-                            compoundFound = true;
-
-                        base = base.getDatatypeBase();
-                    }
-
-                    if (compoundFound) {
-                        /* H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.separator, names, flatListTypes);
-                        log.trace("extractCompoundInfo(): continue after recursive array/vlen of compound");
-
-                        continue; */
-                    }
-                }
 
                 if (names != null) {
                     names.add(mname);
                 }
 
                 flatListTypes.add(mtype);
+
+                /*
+                 * For ARRAY of COMPOUND and VLEN of COMPOUND types, we first add the top-level
+                 * array or vlen type to the list of datatypes, and then follow that with a
+                 * listing of the datatypes inside the nested compound.
+                 */
+                /*
+                 * TODO: Don't flatten variable-length types until true variable-length support
+                 * is implemented.
+                 */
+                if (mtype.isArray() /* || (mtype.isVLEN() && !mtype.isVarStr()) */) {
+                    H5Datatype.extractCompoundInfo((H5Datatype) mtype, mname + CompoundDS.SEPARATOR, names, flatListTypes);
+                }
             }
         }
 

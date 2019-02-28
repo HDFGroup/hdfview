@@ -227,6 +227,8 @@ public final class Tools {
             newfile.createImage(imgName, pgroup, type, dims, null, null, -1, 3, ScalarDS.INTERLACE_PIXEL, data);
             newfile.close();
         }
+
+        Runtime.getRuntime().gc();
     }
 
     /**
@@ -3120,7 +3122,7 @@ public final class Tools {
      *         otherwise.
      */
     public static boolean checkValidJavaArrayIndex(final long value) {
-        return (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE);
+        return (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE);
     }
 
     /**
