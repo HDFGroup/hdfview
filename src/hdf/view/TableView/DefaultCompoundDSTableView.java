@@ -15,9 +15,12 @@
 package hdf.view.TableView;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
@@ -33,6 +36,7 @@ import org.eclipse.nebula.widgets.nattable.group.ColumnGroupExpandCollapseLayer;
 import org.eclipse.nebula.widgets.nattable.group.ColumnGroupGroupHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.group.ColumnGroupHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.group.ColumnGroupModel;
+import org.eclipse.nebula.widgets.nattable.group.ColumnGroupModel.ColumnGroup;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
@@ -333,72 +337,128 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     private class CompoundDSColumnHeaderDataProvider implements IDataProvider {
         // Column names with CompoundDS SEPARATOR character '->' left intact.
-        // Used in CompoundDSNestedColumnHeader to provide correct nesting structure
-        private final String[] columnNamesFull;
+        // Used in CompoundDSNestedColumnHeader to provide correct nesting structure.
+        private final String[]          columnNamesFull;
 
         // Simplified base column names without separator character. Used to
-        // actually label the columns
-        private String[]       columnNames;
+        // actually label the columns.
+        private final ArrayList<String> columnNames;
 
-        private int            ncols;
-        private final int      groupSize;
+        private final int               ncols;
+        private final int               groupSize;
 
         public CompoundDSColumnHeaderDataProvider(DataFormat dataObject) {
             CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
 
-            int datasetWidth = (int) dataFormat.getWidth();
-            Datatype[] types = dataFormat.getSelectedMemberTypes();
-            groupSize = dataFormat.getSelectedMemberCount();
-            ncols = groupSize * datasetWidth;
+            List<Datatype> selectedTypes = Arrays.asList(dataFormat.getSelectedMemberTypes());
             final String[] datasetMemberNames = dataFormat.getMemberNames();
-            columnNames = new String[groupSize];
-            log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
 
-            // Copy selected dataset member names
-            int idx = 0;
-            for (int i = 0; i < datasetMemberNames.length; i++) {
-                if (dataFormat.isMemberSelected(i)) {
-                    // Copy the dataset member name reference, so changes to the column name
-                    // don't affect the dataset's internal member names
-                    columnNames[idx] = new String(datasetMemberNames[i]);
-                    columnNames[idx] = columnNames[idx].replaceAll(CompoundDS.SEPARATOR, "->");
+            columnNames = new ArrayList<String>(dataFormat.getSelectedMemberCount());
 
-                    if ((types[idx] != null) && (types[idx].isArray())) {
-                        Datatype baseType = types[idx].getDatatypeBase();
+            for (int i = 0, typesIdx = 0; i < datasetMemberNames.length; i++) {
+                if (!dataFormat.isMemberSelected(i))
+                    continue;
 
-                        if (baseType.isCompound()) {
-                            // If member is type array of compound, list member names in column header
-                            List<String> memberNames = baseType.getCompoundMemberNames();
+                Datatype curType = selectedTypes.get(typesIdx);
+                Datatype nestedCompoundType = null;
+                int arrSize = 1;
 
-                            columnNames[idx] += "\n\n[ ";
+                /*
+                 * Recursively detect any nested array/vlen of compound types and deal with them
+                 * by creating multiple copies of the member names.
+                 */
+                if (curType.isArray() /* || (curType.isVLEN() && !curType.isVarStr()) */ /* TODO: true variable-length support */) {
+                    long[] arrayDims = curType.getArrayDims();
+                    for (int j = 0; j < arrayDims.length; j++) {
+                        arrSize *= arrayDims[j];
+                    }
 
-                            for (int j = 0; j < memberNames.size(); j++) {
-                                columnNames[idx] += memberNames.get(j);
-                                if (j < memberNames.size() - 1) columnNames[idx] += ", ";
+                    Datatype base = curType.getDatatypeBase();
+                    while (base != null) {
+                        if (base.isCompound()) {
+                            nestedCompoundType = base;
+                            break;
+                        }
+                        else if (base.isArray()) {
+                            arrayDims = base.getArrayDims();
+                            for (int j = 0; j < arrayDims.length; j++) {
+                                arrSize *= arrayDims[j];
                             }
+                        }
 
-                            columnNames[idx] += " ]";
+                        base = base.getDatatypeBase();
+                    }
+                }
+
+                /*
+                 * For ARRAY of COMPOUND and VLEN of COMPOUND types, we repeat the compound
+                 * members n times, where n is the number of array or vlen elements.
+                 */
+                if (nestedCompoundType != null) {
+                    List<Datatype> selectedCmpdTypes = DataFactoryUtils.filterNonSelectedMembers(selectedTypes, nestedCompoundType);
+                    int nMembers = selectedCmpdTypes.size();
+                    StringBuilder sBuilder = new StringBuilder();
+
+                    /*
+                     * NOTE: this assumes that the member names of the ARRAY/VLEN of COMPOUND
+                     * directly follow the name of the top-level member itself and will break if
+                     * that assumption is not true.
+                     */
+                    for (int j = 0; j < arrSize; j++) {
+                        for (int k = 0; k < nMembers; k++) {
+                            sBuilder.setLength(0);
+
+                            // Copy the dataset member name reference, so changes to the column name
+                            // don't affect the dataset's internal member names.
+                            //
+                            // (i + 1) to skip the current member name since it is a container only.
+                            sBuilder.append(new String(datasetMemberNames[(i + 1) + k]).replaceAll(CompoundDS.SEPARATOR, "->"));
+
+                            /*
+                             * Add the index number to the member name so we can correctly setup nested
+                             * column grouping.
+                             */
+                            sBuilder.append("[" + j + "]");
+
+                            columnNames.add(sBuilder.toString());
                         }
                     }
 
-                    idx++;
+                    i += nMembers;
                 }
+                else {
+                    // Copy the dataset member name reference, so changes to the column name
+                    // don't affect the dataset's internal member names.
+                    String curName = new String(datasetMemberNames[i]);
+                    curName = curName.replaceAll(CompoundDS.SEPARATOR, "->");
+
+                    columnNames.add(curName);
+                }
+
+                typesIdx++;
             }
 
-            // Make a copy of column names so changes to column names don't affect the full column names
-            columnNamesFull = Arrays.copyOf(columnNames, columnNames.length);
+            // Make a copy of column names so changes to column names don't affect the full column names,
+            // which is used elsewhere.
+            columnNamesFull = Arrays.copyOf(columnNames.toArray(new String[0]), columnNames.size());
 
             // Simplify any nested field column names down to their base names. E.g., a
             // nested field with the full name 'nested_name->a_name' has a simplified column
             // name of 'a_name'
-            for (int j = 0; j < columnNames.length; j++) {
-                int nestingPosition = columnNames[j].lastIndexOf("->");
+            for (int j = 0; j < columnNames.size(); j++) {
+                String nestedName = columnNames.get(j);
+                int nestingPosition = nestedName.lastIndexOf("->");
 
                 // If this is a nested field, this column's name is whatever follows the last
                 // nesting character '->'
                 if (nestingPosition >= 0)
-                    columnNames[j] = columnNames[j].substring(nestingPosition + 2);
+                    columnNames.set(j, nestedName.substring(nestingPosition + 2));
             }
+
+            groupSize = columnNames.size();
+
+            ncols = columnNames.size() * (int) dataFormat.getWidth();
+            log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
         }
 
         @Override
@@ -413,7 +473,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            return columnNames[columnIndex % groupSize];
+            return columnNames.get(columnIndex % groupSize);
         }
 
         @Override
@@ -435,37 +495,85 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
 
             final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNamesFull;
-            final int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
+            final int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
             log.trace("CompoundDSNestedColumnHeaderLayer: groupSize={} -- allColumnNames={}", groupSize, allColumnNames);
 
             // Set up first-level column grouping
+            int[] indices = new int[groupSize];
             for (int i = 0; i < dataObject.getWidth(); i++) {
                 for (int j = 0; j < groupSize; j++) {
-                    this.addColumnsIndexesToGroup("" + i, (i * groupSize) + j);
+                    indices[j] = (i * groupSize) + j;
                 }
+
+                this.addColumnsIndexesToGroup(String.valueOf(i), indices);
             }
 
             // Set up any further-nested column groups
+            StringBuilder columnHeaderBuilder = new StringBuilder();
             for (int k = 0; k < dataObject.getWidth(); k++) {
                 for (int i = 0; i < allColumnNames.length; i++) {
                     int colindex = i + k * allColumnNames.length;
                     int nestingPosition = allColumnNames[i].lastIndexOf("->");
 
-                    if (nestingPosition >= 0) {
-                        String columnGroupName = columnGroupModel.getColumnGroupByIndex(colindex).getName();
-                        int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition);
+                    columnHeaderBuilder.setLength(0);
 
-                        if (groupTitleStartPosition == 0) {
-                            /* Singly nested member */
-                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(groupTitleStartPosition, nestingPosition) + "{" + columnGroupName + "}", colindex);
+                    if (nestingPosition >= 0) {
+                        ColumnGroup nestingGroup = columnGroupModel.getColumnGroupByIndex(colindex);
+                        if (nestingGroup != null) {
+                            String columnGroupName = nestingGroup.getName();
+                            int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition);
+                            String nestingName = allColumnNames[i].substring(nestingPosition + 2);
+                            String newGroupName;
+
+                            if (groupTitleStartPosition == 0) {
+                                /* Singly nested member */
+                                newGroupName = allColumnNames[i].substring(groupTitleStartPosition, nestingPosition);
+                            }
+                            else if (groupTitleStartPosition > 0) {
+                                /* Member nested at second level or beyond, skip past leading '->' */
+                                newGroupName = allColumnNames[i].substring(0, groupTitleStartPosition);
+                            }
+                            else {
+                                newGroupName = allColumnNames[i].substring(0, nestingPosition);
+                            }
+
+                            columnHeaderBuilder.append(newGroupName);
+                            columnHeaderBuilder.append("{").append(columnGroupName).append("}");
+
+                            /*
+                             * Special case for ARRAY of COMPOUND and VLEN of COMPOUND types.
+                             *
+                             * NOTE: This is a quick and dirty way of determining array/vlen of compound
+                             * members. It will probably cause weird column grouping behavior if a user uses
+                             * the "[number]" pattern in one of their member names, but for now we won't
+                             * worry about it.
+                             */
+                            if (nestingName.matches(".*\\[[0-9]*\\]")) {
+                                Pattern indexPattern = Pattern.compile(".*\\[([0-9]*)\\]");
+                                Matcher indexMatcher = indexPattern.matcher(nestingName);
+
+                                /*
+                                 * Group array/vlen of compounds members into array-indexed groups.
+                                 */
+                                if (indexMatcher.matches()) {
+                                    int containerIndex = 0;
+
+                                    try {
+                                        containerIndex = Integer.parseInt(indexMatcher.group(1));
+                                    }
+                                    catch (Exception ex) {
+                                        log.debug("CompoundDSNestedColumnHeaderLayer: error parsing array/vlen of compound index: ", ex);
+                                        break;
+                                    }
+
+                                    columnHeaderBuilder.append("[").append(containerIndex).append("]");
+                                }
+                            }
+
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(), colindex);
                         }
-                        else if (groupTitleStartPosition > 0) {
-                            /* Member nested at second level or beyond, skip past leading '->' */
-                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(0, groupTitleStartPosition) + "{" + columnGroupName + "}", colindex);
-                        }
-                        else {
-                            columnGroupHeaderLayer.addColumnsIndexesToGroup("" + allColumnNames[i].substring(0, nestingPosition) + "{" + columnGroupName + "}", colindex);
-                        }
+                        else
+                            log.debug("CompoundDSNestedColumnHeaderLayer: nesting group was null for index {}", colindex);
                     }
                 }
             }

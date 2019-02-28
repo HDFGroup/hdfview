@@ -147,14 +147,6 @@ public class DataValidatorFactory {
         }
 
         @Override
-        public boolean validate(ILayerCell cell, IConfigRegistry configRegistry, Object newValue) {
-            throwValidationFailedException(cell.getRowIndex(), cell.getColumnIndex(), newValue,
-                    "A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
-
-            return false;
-        }
-
-        @Override
         public boolean validate(int colIndex, int rowIndex, Object newValue) {
             throwValidationFailedException(rowIndex, colIndex, newValue,
                     "A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
@@ -243,11 +235,19 @@ public class DataValidatorFactory {
             log.trace("index maps built: baseValidatorIndexMap = {}, relColIdxMap = {}",
                     baseValidatorIndexMap.toString(), relCmpdStartIndexMap.toString());
 
-            nTotFields = baseValidatorIndexMap.size();
-            if (nTotFields == 0) {
-                log.debug("index mapping is invalid - size 0");
-                throw new Exception("CompoundDataValidator: invalid mapping of size 0 built");
+            if (baseValidatorIndexMap.size() == 0) {
+                log.debug("base DataValidator index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataValidator: invalid DataValidator mapping of size 0 built");
             }
+
+            if (relCmpdStartIndexMap.size() == 0) {
+                log.debug("compound field start index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataValidator: invalid compound field start index mapping of size 0 built");
+            }
+
+            nTotFields = baseValidatorIndexMap.size();
 
             log.trace("constructor: finish");
         }
@@ -379,10 +379,10 @@ public class DataValidatorFactory {
 
             log.trace("constructor: start");
 
-            if (!dtype.isVLEN()) {
-                log.debug("datatype is not a variable-length type");
+            if (!dtype.isVLEN() || dtype.isVarStr()) {
+                log.debug("datatype is not a variable-length type or is a variable-length string type (use StringDataValidator)");
                 log.trace("constructor: finish");
-                throw new Exception("VlenDataValidator: datatype is not a variable-length type");
+                throw new Exception("VlenDataValidator: datatype is not a variable-length type or is a variable-length string type (use StringDataValidator)");
             }
 
             Datatype baseType = dtype.getDatatypeBase();
