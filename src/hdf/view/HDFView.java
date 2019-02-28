@@ -1888,8 +1888,8 @@ public class HDFView implements DataViewManager {
         catch (Exception ex) {
             display.beep();
             Tools.showError(mainWindow, "Open", ex.getMessage());
-
-            return null;
+            // Want to call setCursor always
+            localFile = null;
         }
 
         mainWindow.setCursor(null);
