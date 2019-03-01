@@ -190,8 +190,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * Determines whether this datatype is a variable-length type.
      */
-    protected boolean is_VLEN = false;
-    protected boolean is_variable_str = false;
+    protected boolean isVLEN = false;
+    protected boolean isVariableStr = false;
 
     /**
      * The (name, value) pairs of enum members.
@@ -355,12 +355,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         enumMembers = null;
         baseType = tbase;
         arrayDims = null;
-        is_variable_str = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
-        is_VLEN = (datatypeClass == Datatype.CLASS_VLEN) || is_variable_str;
+        isVariableStr = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
+        isVLEN = (datatypeClass == Datatype.CLASS_VLEN) || isVariableStr;
 
-        compoundMemberNames = new ArrayList<String>();
-        compoundMemberTypes = new ArrayList<Datatype>();
-        compoundMemberOffsets = new ArrayList<Long>();
+        compoundMemberNames = new ArrayList<>();
+        compoundMemberTypes = new ArrayList<>();
+        compoundMemberOffsets = new ArrayList<>();
 
         log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
                 datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
@@ -522,7 +522,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         for (String entry : entries) {
             String[] keyValue = entry.split("=");
             enumMembers.put(keyValue[0].trim(), keyValue[1].trim());
-            log.trace("setEnumMembers: is_enum value={} name={}", keyValue[0].trim(), keyValue[1].trim());
+            if (log.isTraceEnabled())
+                log.trace("setEnumMembers: is_enum value={} name={}", keyValue[0].trim(), keyValue[1].trim());
         }
     }
 
@@ -560,19 +561,19 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             enumMembers.put("2", "1");
         }
 
-        String enumStr = new String();
+        StringBuilder enumStr = new StringBuilder();
         Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
         int i = enumMembers.size();
         while (entries.hasNext()) {
             Entry thisEntry = entries.next();
-            String memstr = (String) thisEntry.getKey();
-            String memname = (String) thisEntry.getValue();
-            enumStr += memstr + "=" + memname;
+            enumStr.append((String) thisEntry.getKey());
+            enumStr.append("=");
+            enumStr.append((String) thisEntry.getValue());
             i--;
             if (i > 0)
-                enumStr += ", ";
+                enumStr.append(", ");
         }
-        return enumStr;
+        return enumStr.toString();
     }
 
     /**
@@ -648,83 +649,83 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             return datatypeDescription;
         }
 
-        String description = null;
+        StringBuilder description = null;
 
         switch (datatypeClass) {
             case CLASS_CHAR:
-                description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                description = new StringBuilder("8-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
                 break;
             case CLASS_INTEGER:
                 if (datatypeSize == NATIVE)
-                    description = "native " + (isUnsigned() ? "unsigned " : "") + "integer";
+                    description = new StringBuilder("native " + (isUnsigned() ? "unsigned " : "") + "integer");
                 else
-                    description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
                 break;
             case CLASS_FLOAT:
                 if (datatypeSize == NATIVE)
-                    description = "native floating-point";
+                    description = new StringBuilder("native floating-point");
                 else
-                    description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit floating-point");
                 break;
             case CLASS_STRING:
-                description = "String";
+                description = new StringBuilder("String");
                 break;
             case CLASS_REFERENCE:
-                description = "Object reference";
+                description = new StringBuilder("Object reference");
                 break;
             case CLASS_OPAQUE:
                 if (datatypeSize == NATIVE)
-                    description = "native opaque";
+                    description = new StringBuilder("native opaque");
                 else
-                    description = String.valueOf(datatypeSize * 8) + "-bit opaque";
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit opaque");
                 break;
             case CLASS_BITFIELD:
                 if (datatypeSize == NATIVE)
-                    description = "native bitfield";
+                    description = new StringBuilder("native bitfield");
                 else
-                    description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit bitfield");
                 break;
             case CLASS_ENUM:
                 if (datatypeSize == NATIVE)
-                    description = "native enum";
+                    description = new StringBuilder("native enum");
                 else
-                    description = String.valueOf(datatypeSize * 8) + "-bit enum";
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit enum");
                 break;
             case CLASS_ARRAY:
-                description = "Array";
+                description = new StringBuilder("Array");
 
                 if (arrayDims != null) {
-                    description += " [";
+                    description.append(" [");
                     for (int i = 0; i < arrayDims.length; i++) {
-                        description += arrayDims[i];
+                        description.append(arrayDims[i]);
                         if (i < arrayDims.length - 1)
-                            description += " x ";
+                            description.append(" x ");
                     }
-                    description += "]";
+                    description.append("]");
                 }
 
                 if (baseType != null)
-                    description += " of " + baseType.getDescription();
+                    description.append(" of " + baseType.getDescription());
                 break;
             case CLASS_COMPOUND:
-                description = "Compound";
+                description = new StringBuilder("Compound");
                 break;
             case CLASS_VLEN:
-                description = "Variable-length";
+                description = new StringBuilder("Variable-length");
                 if (baseType != null)
-                    description += " of " + baseType.getDescription();
+                    description.append(" of " + baseType.getDescription());
                 break;
             default:
-                description = "Unknown";
+                description = new StringBuilder("Unknown");
                 break;
         }
 
         if (baseType != null) {
-            description += " of " + baseType.getDescription();
+            description.append(" of " + baseType.getDescription());
         }
 
         log.trace("getDescription(): finish");
-        return description;
+        return description.toString();
     }
 
     /**
@@ -738,17 +739,17 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             return baseType.isUnsigned();
         else {
             if (isCompound()) {
-                if ((compoundMemberTypes != null) && (compoundMemberTypes.size() > 0)) {
-                    boolean all_members_unsigned = true;
+                if ((compoundMemberTypes != null) && !compoundMemberTypes.isEmpty()) {
+                    boolean allMembersUnsigned = true;
 
-                    Iterator<Datatype> cmpd_type_list_it = compoundMemberTypes.iterator();
-                    while (cmpd_type_list_it.hasNext()) {
-                        Datatype next = cmpd_type_list_it.next();
+                    Iterator<Datatype> cmpdTypeListIT = compoundMemberTypes.iterator();
+                    while (cmpdTypeListIT.hasNext()) {
+                        Datatype next = cmpdTypeListIT.next();
 
-                        all_members_unsigned = all_members_unsigned && next.isUnsigned();
+                        allMembersUnsigned = allMembersUnsigned && next.isUnsigned();
                     }
 
-                    return all_members_unsigned;
+                    return allMembersUnsigned;
                 }
                 else {
                     log.debug("isUnsigned(): compoundMemberTypes is null");
@@ -787,7 +788,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return true if the datatype is variable-length string; false otherwise
      */
     public boolean isVarStr() {
-        return is_variable_str;
+        return isVariableStr;
     }
 
     /**
@@ -796,7 +797,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return true if the datatype is variable-length; false otherwise
      */
     public boolean isVLEN() {
-        return is_VLEN;
+        return isVLEN;
     }
 
     /**

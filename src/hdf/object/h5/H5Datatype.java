@@ -579,9 +579,9 @@ public class H5Datatype extends Datatype {
             try {
                 nativeClass = H5.H5Tget_class(tid);
                 tsize = H5.H5Tget_size(tid);
-                is_variable_str = H5.H5Tis_variable_str(tid);
-                is_VLEN = false;
-                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, is_VLEN);
+                isVariableStr = H5.H5Tis_variable_str(tid);
+                isVLEN = false;
+                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, isVLEN);
             }
             catch (Exception ex) {
                 log.debug("fromNative(): failure: ", ex);
@@ -591,7 +591,7 @@ public class H5Datatype extends Datatype {
             try {
                 isUchar = H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_UCHAR);
                 isChar = (H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_CHAR) || isUchar);
-                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, is_VLEN);
+                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, isVLEN);
             }
             catch (Exception ex) {
                 log.debug("fromNative(): native char type failure: ", ex);
@@ -752,8 +752,8 @@ public class H5Datatype extends Datatype {
             else if (nativeClass == HDF5Constants.H5T_STRING) {
                 datatypeClass = CLASS_STRING;
                 try {
-                    is_VLEN = H5.H5Tdetect_class(tid, HDF5Constants.H5T_VLEN) || is_variable_str;
-                    log.trace("fromNative(): H5T_STRING:var str type={}", is_VLEN);
+                    isVLEN = H5.H5Tdetect_class(tid, HDF5Constants.H5T_VLEN) || isVariableStr;
+                    log.trace("fromNative(): H5T_STRING:var str type={}", isVLEN);
                     nativeStrPad = H5.H5Tget_strpad(tid);
                 }
                 catch (Exception ex) {
@@ -841,7 +841,7 @@ public class H5Datatype extends Datatype {
             else if (nativeClass == HDF5Constants.H5T_VLEN) {
                 long tmptid = -1;
                 datatypeClass = CLASS_VLEN;
-                is_VLEN = true;
+                isVLEN = true;
                 try {
                     log.trace("fromNative(): vlen type");
                     tmptid = H5.H5Tget_super(tid);
@@ -878,7 +878,7 @@ public class H5Datatype extends Datatype {
                 log.debug("fromNative(): datatypeClass is unknown");
             }
 
-            datatypeSize = (is_VLEN && !is_variable_str) ? HDF5Constants.H5T_VL_T : tsize;
+            datatypeSize = (isVLEN && !isVariableStr) ? HDF5Constants.H5T_VL_T : tsize;
         }
         log.trace("fromNative(): datatypeClass={} baseType={} datatypeSize={}", datatypeClass, baseType, datatypeSize);
         log.trace("fromNative(): finish");
@@ -1171,9 +1171,9 @@ public class H5Datatype extends Datatype {
                 try {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
 
-                    H5.H5Tset_size(tid, (is_VLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
+                    H5.H5Tset_size(tid, (isVLEN || datatypeSize < 0) ? HDF5Constants.H5T_VARIABLE : datatypeSize);
 
-                    log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", is_VLEN, nativeStrPad,
+                    log.trace("createNative(): isVlenStr={} nativeStrPad={} nativeStrCSET={}", isVLEN, nativeStrPad,
                             nativeStrCSET);
 
                     H5.H5Tset_strpad(tid, (nativeStrPad >= 0) ? nativeStrPad : HDF5Constants.H5T_STR_NULLTERM);
@@ -1561,27 +1561,27 @@ public class H5Datatype extends Datatype {
             return datatypeDescription;
         }
 
-        StringBuilder description = new StringBuilder();
+        StringBuilder description = null;
         long tid = -1;
 
         switch (datatypeClass) {
             case CLASS_CHAR:
-                description.append("8-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
+                description = new StringBuilder("8-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
                 break;
             case CLASS_INTEGER:
                 if (datatypeSize == NATIVE)
-                    description.append("native " + (isUnsigned() ? "unsigned " : "") + "integer");
+                    description = new StringBuilder("native " + (isUnsigned() ? "unsigned " : "") + "integer");
                 else
-                    description.append(String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
                 break;
             case CLASS_FLOAT:
                 if (datatypeSize == NATIVE)
-                    description.append("native floating-point");
+                    description = new StringBuilder("native floating-point");
                 else
-                    description.append(String.valueOf(datatypeSize * 8) + "-bit floating-point");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit floating-point");
                 break;
             case CLASS_STRING:
-                description.append("String, length = " + (isVarStr() ? "variable" : datatypeSize));
+                description = new StringBuilder("String, length = " + (isVarStr() ? "variable" : datatypeSize));
 
                 try {
                     tid = createNative();
@@ -1626,15 +1626,15 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_BITFIELD:
                 if (datatypeSize == NATIVE)
-                    description.append("native bitfield");
+                    description = new StringBuilder("native bitfield");
                 else
-                    description.append(String.valueOf(datatypeSize * 8) + "-bit bitfield");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit bitfield");
                 break;
             case CLASS_OPAQUE:
                 if (datatypeSize == NATIVE)
-                    description.append("native Opaque");
+                    description = new StringBuilder("native Opaque");
                 else
-                    description.append(String.valueOf(datatypeSize) + "-byte Opaque");
+                    description = new StringBuilder(String.valueOf(datatypeSize) + "-byte Opaque");
 
                 if (opaqueTag != null) {
                     description.append(", tag = " + opaqueTag);
@@ -1642,7 +1642,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_COMPOUND:
-                description.append("Compound");
+                description = new StringBuilder("Compound");
 
                 if ((compoundMemberTypes != null) && !compoundMemberTypes.isEmpty()) {
                     Iterator<String> memberNames = null;
@@ -1669,7 +1669,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_REFERENCE:
-                description.append("Reference");
+                description = new StringBuilder("Reference");
 
                 try {
                     boolean isRegionType = false;
@@ -1679,10 +1679,10 @@ public class H5Datatype extends Datatype {
                         isRegionType = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
 
                         if (isRegionType) {
-                            description.append("Dataset region reference");
+                            description = new StringBuilder("Dataset region reference");
                         }
                         else {
-                            description.append("Object reference");
+                            description = new StringBuilder("Object reference");
                         }
                     }
                 }
@@ -1696,9 +1696,9 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_ENUM:
                 if (datatypeSize == NATIVE)
-                    description.append("native enum");
+                    description = new StringBuilder("native enum");
                 else
-                    description.append(String.valueOf(datatypeSize * 8) + "-bit enum");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit enum");
 
                 String members = getEnumMembersAsString();
                 if (members != null)
@@ -1706,7 +1706,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_VLEN:
-                description.append("Variable-length");
+                description = new StringBuilder("Variable-length");
 
                 if (baseType != null) {
                     description.append(" of " + baseType.getDescription());
@@ -1714,7 +1714,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_ARRAY:
-                description.append("Array");
+                description = new StringBuilder("Array");
 
                 if (arrayDims != null) {
                     description.append(" [");
@@ -1732,7 +1732,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             default:
-                description.append("Unknown");
+                description = new StringBuilder("Unknown");
                 break;
         }
 
