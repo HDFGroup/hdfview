@@ -1431,10 +1431,8 @@ public class DefaultImageView implements ImageView {
         }
 
         data = dataset.getData();
-        if (bitmask != null) {
-            if (Tools.applyBitmask(data, bitmask, bitmaskOP)) {
-                doAutoGainContrast = false;
-            }
+        if ((bitmask != null) && Tools.applyBitmask(data, bitmask, bitmaskOP)) {
+            doAutoGainContrast = false;
         }
 
         if (dataset.getDatatype().isInteger() || dataset.getDatatype().isChar()) {
@@ -1644,7 +1642,7 @@ public class DefaultImageView implements ImageView {
             return;
         }
 
-        double chartData[][] = new double[1][256];
+        double[][] chartData = new double[1][256];
         for (int i = 0; i < 256; i++) {
             chartData[0][i] = 0.0;
         }
@@ -1749,15 +1747,16 @@ public class DefaultImageView implements ImageView {
     private void setValueVisible(boolean b) {
         valueField.setVisible(b);
 
-        GridData data = (GridData) valueField.getLayoutData();
+        GridData gridData = (GridData) valueField.getLayoutData();
 
         if(!b) {
-            data.exclude = true;
-        } else {
-            data.exclude = false;
+            gridData.exclude = true;
+        }
+        else {
+            gridData.exclude = false;
         }
 
-        valueField.setLayoutData(data);
+        valueField.setLayoutData(gridData);
 
         valueField.getParent().pack();
 
@@ -2402,7 +2401,7 @@ public class DefaultImageView implements ImageView {
                     org.eclipse.swt.graphics.Color oldBackground = gc.getBackground();
 
                     for (int i = 0; i < 256; i++) {
-                        if (colors[i] != null)
+                        if ((colors != null) && (colors[i] != null))
                             gc.setBackground(colors[i]);
                         gc.fillRectangle(0, paintSize.height * i, paintSize.width,
                                 paintSize.height);
@@ -2580,7 +2579,9 @@ public class DefaultImageView implements ImageView {
 
             this.addMouseListener(new MouseListener() {
                 @Override
-                public void mouseDoubleClick(MouseEvent e) {}
+                public void mouseDoubleClick(MouseEvent e) {
+                    // Intentional
+                }
 
                 @Override
                 public void mouseDown(MouseEvent e) {
@@ -2890,7 +2891,7 @@ public class DefaultImageView implements ImageView {
         private int direction;
 
         /** pixel value */
-        private int raster[] = null;
+        private int[] raster = null;
 
         /** width & height */
         private int imageWidth;
@@ -2929,7 +2930,7 @@ public class DefaultImageView implements ImageView {
 
         @Override
         public void setPixels(int x, int y, int w, int h, ColorModel model,
-                byte pixels[], int off, int scansize) {
+                byte[] pixels, int off, int scansize) {
             int srcoff = off;
             int dstoff = y * imageWidth + x;
             for (int yc = 0; yc < h; yc++) {
@@ -3235,7 +3236,7 @@ public class DefaultImageView implements ImageView {
 
         @Override
         public void setPixels(int x, int y, int w, int h, ColorModel model,
-                byte pixels[], int off, int scansize) {
+                byte[] pixels, int off, int scansize) {
             int rgb = 0;
             int srcoff = off;
             int dstoff = y * imageWidth + x;
@@ -3278,7 +3279,7 @@ public class DefaultImageView implements ImageView {
                 return;
             }
 
-            int pixels[] = new int[imageWidth * imageHeight];
+            int[] pixels = new int[imageWidth * imageHeight];
             for (int z = 0; z < levels.length; z++) {
                 int currentLevel = levels[z];
                 int color = levelColors[z];
@@ -3287,7 +3288,7 @@ public class DefaultImageView implements ImageView {
                         imageHeight);
             }
 
-            int line[] = new int[imageWidth];
+            int[] line = new int[imageWidth];
             for (int y = 0; y < imageHeight; y++) {
                 for (int x = 0; x < imageWidth; x++) {
                     line[x] = pixels[y * imageWidth + x];
@@ -3730,14 +3731,15 @@ public class DefaultImageView implements ImageView {
         private Text maxField;
         final int nTICKS = 10;
         double tickRatio = 1;
-        final int W = 500, H = 400;
-        double[] minmax_current = {0, 0};
+        final int rangeW = 500;
+        final int rangeH = 400;
+        double[] rangeMinMaxCurrent = { 0, 0 };
         double min;
         double max;
-        double min_org;
-        double max_org;
-        final double[] minmax_previous = {0, 0};
-        final double[] minmax_dist = {0,0};
+        double minOrg;
+        double maxOrg;
+        final double[] minmaxPrevious = { 0, 0 };
+        final double[] minmaxDist = { 0, 0 };
 
         final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
 
@@ -3746,27 +3748,27 @@ public class DefaultImageView implements ImageView {
 
             super(parent, style);
 
-            Tools.findMinMax(dataDist, minmax_dist, null);
+            Tools.findMinMax(dataDist, minmaxDist, null);
 
             if ((minmaxCurrent == null) || (minmaxCurrent.length <= 1)) {
-                minmax_current[0] = 0;
-                minmax_current[1] = 255;
+                minmaxCurrent[0] = 0;
+                minmaxCurrent[1] = 255;
             }
             else {
                 if (minmaxCurrent[0] == minmaxCurrent[1]) {
                     Tools.findMinMax(data, minmaxCurrent, dataset.getFillValue());
                 }
 
-                minmax_current[0] = minmaxCurrent[0];
-                minmax_current[1] = minmaxCurrent[1];
+                minmaxCurrent[0] = minmaxCurrent[0];
+                minmaxCurrent[1] = minmaxCurrent[1];
             }
 
-            minmax_previous[0] = min = minmax_current[0];
-            minmax_previous[1] = max = minmax_current[1];
-            min_org = originalRange[0];
-            max_org = originalRange[1];
+            minmaxPrevious[0] = min = minmaxCurrent[0];
+            minmaxPrevious[1] = max = minmaxCurrent[1];
+            minOrg = originalRange[0];
+            maxOrg = originalRange[1];
 
-            tickRatio = (max_org - min_org) / nTICKS;
+            tickRatio = (maxOrg - minOrg) / nTICKS;
         }
 
         public void open() {
@@ -3796,8 +3798,8 @@ public class DefaultImageView implements ImageView {
 
                     gc.setFont(curFont);
 
-                    int h = H/3 -50;
-                    int w = W;
+                    int h = rangeH / 3 - 50;
+                    int w = rangeW;
                     int xnpoints = Math.min(10, numberOfPoints - 1);
 
                     // draw the X axis
@@ -3817,8 +3819,8 @@ public class DefaultImageView implements ImageView {
 
                     org.eclipse.swt.graphics.Color c = gc.getBackground();
                     double yp = 0;
-                    double ymin = minmax_dist[0];
-                    double dy = minmax_dist[1] - minmax_dist[0];
+                    double ymin = minmaxDist[0];
+                    double dy = minmaxDist[1] - minmaxDist[0];
                     if (dy <= 0)
                         dy =1;
 
@@ -3859,12 +3861,12 @@ public class DefaultImageView implements ImageView {
                     if (minSlider != null && minSlider.getEnabled()) {
                         double value = Double.parseDouble(((Text) e.widget).getText());
 
-                        if (value > max_org) {
-                            value = max_org;
+                        if (value > maxOrg) {
+                            value = maxOrg;
                             minField.setText(String.valueOf(value));
                         }
 
-                        minSlider.setSelection((int) ((value - min_org) / tickRatio));
+                        minSlider.setSelection((int) ((value - minOrg) / tickRatio));
                     }
                 }
             });
@@ -3886,7 +3888,7 @@ public class DefaultImageView implements ImageView {
                         minSlider.setSelection((int) value);
                     }
 
-                    minField.setText(String.valueOf(value * tickRatio + min_org));
+                    minField.setText(String.valueOf(value * tickRatio + minOrg));
                 }
             });
 
@@ -3907,12 +3909,12 @@ public class DefaultImageView implements ImageView {
                     if (maxSlider != null && maxSlider.getEnabled()) {
                         double value = Double.parseDouble(((Text) e.widget).getText());
 
-                        if (value < min_org) {
-                            value = min_org;
+                        if (value < minOrg) {
+                            value = minOrg;
                             maxField.setText(String.valueOf(value));
                         }
 
-                        maxSlider.setSelection((int) ((value-min_org)/tickRatio));
+                        maxSlider.setSelection((int) ((value - minOrg) / tickRatio));
                     }
                 }
             });
@@ -3934,7 +3936,7 @@ public class DefaultImageView implements ImageView {
                         maxSlider.setSelection((int) value);
                     }
 
-                    maxField.setText(String.valueOf(value * tickRatio + min_org));
+                    maxField.setText(String.valueOf(value * tickRatio + minOrg));
                 }
             });
 
@@ -3951,8 +3953,8 @@ public class DefaultImageView implements ImageView {
             okButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    minmax_current[0] = Double.valueOf(minField.getText());
-                    minmax_current[1] = Double.valueOf(maxField.getText());
+                    rangeMinMaxCurrent[0] = Double.valueOf(minField.getText());
+                    rangeMinMaxCurrent[1] = Double.valueOf(maxField.getText());
 
                     shell.dispose();
                 }
@@ -3965,10 +3967,10 @@ public class DefaultImageView implements ImageView {
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    minmax_current[0] = minmax_previous[0];
-                    minmax_current[1] = minmax_previous[1];
+                    rangeMinMaxCurrent[0] = minmaxPrevious[0];
+                    rangeMinMaxCurrent[1] = minmaxPrevious[1];
 
-                    applyDataRange(minmax_previous);
+                    applyDataRange(minmaxPrevious);
 
                     shell.dispose();
                 }
@@ -3981,14 +3983,14 @@ public class DefaultImageView implements ImageView {
             applyButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    minmax_previous[0] = minmax_current[0];
-                    minmax_previous[1] = minmax_current[1];
+                    minmaxPrevious[0] = rangeMinMaxCurrent[0];
+                    minmaxPrevious[1] = rangeMinMaxCurrent[1];
 
-                    minmax_current[0] = Double.valueOf(minField.getText());
-                    minmax_current[1] = Double.valueOf(maxField.getText());
+                    rangeMinMaxCurrent[0] = Double.valueOf(minField.getText());
+                    rangeMinMaxCurrent[1] = Double.valueOf(maxField.getText());
 
-                    applyDataRange(minmax_current);
-                    minmax_current[0] = minmax_current[1] = 0;
+                    applyDataRange(rangeMinMaxCurrent);
+                    rangeMinMaxCurrent[0] = rangeMinMaxCurrent[1] = 0;
                 }
             });
 
@@ -4017,7 +4019,7 @@ public class DefaultImageView implements ImageView {
         }
 
         public double[] getRange() {
-            return minmax_current;
+            return rangeMinMaxCurrent;
         }
     }
 
