@@ -1249,7 +1249,7 @@ public class H5ScalarDS extends ScalarDS {
                 filters = new StringBuilder("");
 
                 if (nfilt == 0) {
-                    filters = new StringBuilder("NONE");
+                    filters.append("NONE");
                 }
                 else {
                     for (int i = 0, k = 0; i < nfilt; i++) {
