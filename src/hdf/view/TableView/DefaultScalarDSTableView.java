@@ -921,7 +921,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             return; // no selection
         }
 
-        regStr = reg.substring(reg.indexOf('}') + 1);
+        // TODO: do we need to do something with what's past the closing bracket
+        // regStr = reg.substring(reg.indexOf('}') + 1);
 
         StringTokenizer st = new StringTokenizer(regStr);
         int nSelections = st.countTokens();
@@ -1160,7 +1161,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             strVal = null;
                         }
                         else {
-                            regStr = reg.substring(reg.indexOf('}') + 1);
+                            // TODO: do we need to do something with what's past the closing bracket
+                            // regStr = reg.substring(reg.indexOf('}') + 1);
 
                             StringTokenizer st = new StringTokenizer(regStr);
                             int nSelections = st.countTokens();
@@ -1193,8 +1195,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                 "ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() begin");
 
                                         int rank = dset.getRank();
-                                        long start[] = dset.getStartDims();
-                                        long count[] = dset.getSelectedDims();
+                                        long[] start = dset.getStartDims();
+                                        long[] count = dset.getSelectedDims();
                                         // long count[] = new long[rank];
 
                                         // set the selected dimension sizes
@@ -1411,7 +1413,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 }
                 else if (isObjRef) {
                     Long ref = (Long) val;
-                    long oid[] = { ref.longValue() };
+                    long[] oid = { ref.longValue() };
 
                     // decode object ID
                     try {
