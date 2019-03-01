@@ -705,9 +705,9 @@ public class H4GRImage extends ScalarDS
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
                     }
-                    storageLayout = new StringBuilder("CHUNKED: " + chunkSize[0]);
+                    storageLayout = new StringBuilder("CHUNKED: ").append(chunkSize[0]);
                     for (int i = 1; i < rank; i++) {
-                        storageLayout.append(" X " + chunkSize[i]);
+                        storageLayout.append(" X ").append(chunkSize[i]);
                     }
                 }
             }

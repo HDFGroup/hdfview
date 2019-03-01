@@ -1086,7 +1086,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             long[] dims = attr.getDims();
             attrSize = new StringBuilder(String.valueOf(dims[0]));
             for (int j = 1; j < dims.length; j++) {
-                attrSize.append(" x " + dims[j]);
+                attrSize.append(" x ").append(dims[j]);
             }
         }
 

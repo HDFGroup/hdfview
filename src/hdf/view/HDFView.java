@@ -550,7 +550,7 @@ public class HDFView implements DataViewManager {
                         urlBar.remove(filename);
                     }
                     catch (Exception ex) {
-                        log.trace("unable to remove urlBar");
+                        log.debug("unable to remove {} from urlBar", filename);
                     }
 
                     urlBar.add(filename, 0);
@@ -618,7 +618,7 @@ public class HDFView implements DataViewManager {
                         urlBar.remove(filename);
                     }
                     catch (Exception ex) {
-                        log.trace("unable to remove urlBar");
+                        log.debug("unable to remove {} from urlBar", filename);
                     }
 
                     urlBar.add(filename, 0);
@@ -655,7 +655,7 @@ public class HDFView implements DataViewManager {
                         treeView.closeFile(files.get(0));
                     }
                     catch (Exception ex) {
-                        log.trace("unable to close file in treeView");
+                        log.trace("unable to close {} in treeView", files.get(0));
                     }
                 }
 
@@ -1816,13 +1816,13 @@ public class HDFView implements DataViewManager {
                     urlBar.remove(chosenFile.getAbsolutePath());
                 }
                 catch (Exception ex) {
-                    log.trace("unable to remove from urlBar");
+                    log.trace("unable to remove {} from urlBar", chosenFile.getAbsolutePath());
                 }
 
                 urlBar.add(chosenFile.getAbsolutePath(), 0);
                 urlBar.select(0);
 
-                log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}", chosenFile.getAbsolutePath(), currentDir);
+                log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}", chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                 try {
                     treeView.openFile(chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                 }
@@ -2207,7 +2207,7 @@ public class HDFView implements DataViewManager {
 
             StringBuilder formats = new StringBuilder("\nSupported File Formats: \n");
             while (formatKeys.hasMoreElements()) {
-                formats.append("    " + formatKeys.nextElement() + "\n");
+                formats.append("    ").append(formatKeys.nextElement()).append("\n");
             }
             formats.append("\n");
 

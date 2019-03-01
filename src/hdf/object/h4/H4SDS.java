@@ -751,25 +751,25 @@ public class H4SDS extends ScalarDS
                 if (compInfo.ctype == HDFConstants.COMP_CODE_DEFLATE) {
                     HDFDeflateCompInfo comp = new HDFDeflateCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("GZIP(level="+comp.level+")");
+                    compression = new StringBuilder("GZIP(level=").append(comp.level).append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SZIP) {
                     HDFSZIPCompInfo comp = new HDFSZIPCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("SZIP(bits_per_pixel="+comp.bits_per_pixel+",options_mask="+comp.options_mask+
-                                  ",pixels="+comp.pixels+",pixels_per_block="+comp.pixels_per_block+
-                                  ",pixels_per_scanline="+comp.pixels_per_scanline+")");
+                    compression = new StringBuilder("SZIP(bits_per_pixel=").append(comp.bits_per_pixel).append(",options_mask=").append(comp.options_mask).append(",pixels=")
+                            .append(comp.pixels).append(",pixels_per_block=").append(comp.pixels_per_block).append(",pixels_per_scanline=").append(comp.pixels_per_scanline)
+                            .append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_JPEG) {
                     HDFJPEGCompInfo comp = new HDFJPEGCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("JPEG(quality="+comp.quality+",options_mask="+
-                                  ",force_baseline="+comp.force_baseline+")");
+                    compression = new StringBuilder("JPEG(quality=").append(comp.quality).append(",options_mask=").append(",force_baseline=").append(comp.force_baseline)
+                            .append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SKPHUFF) {
                     HDFSKPHUFFCompInfo comp = new HDFSKPHUFFCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("SKPHUFF(skp_size="+comp.skp_size+")");
+                    compression = new StringBuilder("SKPHUFF(skp_size=").append(comp.skp_size).append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_RLE) {
                     compression = new StringBuilder("RLE");
@@ -777,9 +777,8 @@ public class H4SDS extends ScalarDS
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_NBIT) {
                     HDFNBITCompInfo comp = new HDFNBITCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("NBIT(nt="+comp.nt+",bit_len="+comp.bit_len+",ctype="+comp.ctype+
-                                  ",fill_one="+comp.fill_one+",sign_ext="+comp.sign_ext+
-                                  ",start_bit="+comp.start_bit+")");
+                    compression = new StringBuilder("NBIT(nt=").append(comp.nt).append(",bit_len=").append(comp.bit_len).append(",ctype=").append(comp.ctype).append(",fill_one=")
+                            .append(comp.fill_one).append(",sign_ext=").append(comp.sign_ext).append(",start_bit=").append(comp.start_bit).append(")");
                 }
             }
             catch (Exception ex) {
@@ -807,9 +806,9 @@ public class H4SDS extends ScalarDS
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
                     }
-                    storageLayout = new StringBuilder("CHUNKED: " + chunkSize[0]);
+                    storageLayout = new StringBuilder("CHUNKED: ").append(chunkSize[0]);
                     for (int i = 1; i < rank; i++) {
-                        storageLayout.append(" X " + chunkSize[i]);
+                        storageLayout.append(" X ").append(chunkSize[i]);
                     }
                 }
             }

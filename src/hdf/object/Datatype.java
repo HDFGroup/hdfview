@@ -653,19 +653,19 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
         switch (datatypeClass) {
             case CLASS_CHAR:
-                description = new StringBuilder("8-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
+                description = new StringBuilder("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
                 break;
             case CLASS_INTEGER:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native " + (isUnsigned() ? "unsigned " : "") + "integer");
+                    description = new StringBuilder("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
                 break;
             case CLASS_FLOAT:
                 if (datatypeSize == NATIVE)
                     description = new StringBuilder("native floating-point");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit floating-point");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
                 break;
             case CLASS_STRING:
                 description = new StringBuilder("String");
@@ -677,19 +677,19 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 if (datatypeSize == NATIVE)
                     description = new StringBuilder("native opaque");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit opaque");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit opaque");
                 break;
             case CLASS_BITFIELD:
                 if (datatypeSize == NATIVE)
                     description = new StringBuilder("native bitfield");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit bitfield");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
                 break;
             case CLASS_ENUM:
                 if (datatypeSize == NATIVE)
                     description = new StringBuilder("native enum");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit enum");
+                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit enum");
                 break;
             case CLASS_ARRAY:
                 description = new StringBuilder("Array");

@@ -1438,9 +1438,9 @@ public class H5CompoundDS extends CompoundDS {
                     chunkSize = new long[rank];
                     H5.H5Pget_chunk(pcid, rank, chunkSize);
                     int n = chunkSize.length;
-                    storageLayout = new StringBuilder("CHUNKED: " + chunkSize[0]);
+                    storageLayout = new StringBuilder("CHUNKED: ").append(chunkSize[0]);
                     for (int i = 1; i < n; i++) {
-                        storageLayout.append(" X " + chunkSize[i]);
+                        storageLayout.append(" X ").append(chunkSize[i]);
                     }
 
                     if (nfilt > 0) {
@@ -1494,13 +1494,13 @@ public class H5CompoundDS extends CompoundDS {
                                 storageLayout.append("First Missing");
                             else
                                 storageLayout.append("Last Available");
-                            storageLayout.append("\nGAP : " + virtGap);
+                            storageLayout.append("\nGAP : ").append(virtGap);
                         }
                         catch (Exception err) {
                             log.debug("getMetadata(): vds error: ", err);
                             storageLayout.append("ERROR");
                         }
-                        storageLayout.append("\nMAPS : " + vmaps);
+                        storageLayout.append("\nMAPS : ").append(vmaps);
                         if (vmaps > 0) {
                             for (long next = 0; next < vmaps; next++) {
                                 try {
@@ -1508,7 +1508,7 @@ public class H5CompoundDS extends CompoundDS {
                                     H5.H5Pget_virtual_srcspace(pcid, next);
                                     String fname = H5.H5Pget_virtual_filename(pcid, next);
                                     String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
-                                    storageLayout.append("\n" + fname + " : " + dsetname);
+                                    storageLayout.append("\n").append(fname).append(" : ").append(dsetname);
                                 }
                                 catch (Exception err) {
                                     log.debug("getMetadata(): vds space[{}] error: ", next, err);
@@ -1575,17 +1575,17 @@ public class H5CompoundDS extends CompoundDS {
                         filters.append("Error detection filter");
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_SHUFFLE) {
-                        filters.append("SHUFFLE: Nbytes = " + cdValues[0]);
+                        filters.append("SHUFFLE: Nbytes = ").append(cdValues[0]);
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_NBIT) {
                         filters.append("NBIT");
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_SCALEOFFSET) {
-                        filters.append("SCALEOFFSET: MIN BITS = " + cdValues[0]);
+                        filters.append("SCALEOFFSET: MIN BITS = ").append(cdValues[0]);
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_SZIP) {
                         filters.append("SZIP");
-                        compression.append("SZIP: Pixels per block = " + cdValues[1]);
+                        compression.append("SZIP: Pixels per block = ").append(cdValues[1]);
                         k++;
                         int flag = -1;
                         try {
@@ -1605,7 +1605,7 @@ public class H5CompoundDS extends CompoundDS {
                         }
                     }
                     else {
-                        filters.append("USERDEFINED " + cdName[0] + "(" + filter + "): ");
+                        filters.append("USERDEFINED ").append(cdName[0]).append("(").append(filter).append("): ");
                         for (int j = 0; j < cdNelmts[0]; j++) {
                             if (j > 0)
                                 filters.append(", ");
@@ -1625,7 +1625,7 @@ public class H5CompoundDS extends CompoundDS {
                 }
                 log.trace("getMetadata(): filter information={}", filters);
 
-                storage = new StringBuilder("SIZE: " + storageSize);
+                storage = new StringBuilder("SIZE: ").append(storageSize);
                 try {
                     int[] at = { 0 };
                     H5.H5Pget_alloc_time(pcid, at);
