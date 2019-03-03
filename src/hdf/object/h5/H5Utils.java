@@ -62,9 +62,11 @@ public final class H5Utils {
 
         boolean isAllSelected = true;
         for (int i = 0; i < rank; i++) {
-            lsize *= selectedDims[i];
-            if (selectedDims[i] < dsetDims[i]) {
-                isAllSelected = false;
+            if (selectedDims != null) {
+                lsize *= selectedDims[i];
+                if (selectedDims[i] < dsetDims[i]) {
+                    isAllSelected = false;
+                }
             }
         }
 

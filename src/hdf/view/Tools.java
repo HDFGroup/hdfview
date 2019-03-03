@@ -381,7 +381,7 @@ public final class Tools {
 
         for (int i = 1; i < 210; i++) {
             p[0][i] = (byte) ((Math.sin((double) (i - 5) / 16) + 1) * 90);
-            p[1][i] = (byte) ((1 - Math.sin((double) (i - 30) / 12)) * 64 * (1 - (double) i / 255) + 128 - i / 2);
+            p[1][i] = (byte) ((1 - Math.sin((double) (i - 30) / 12)) * 64 * (1 - (double) i / 255) + 128 - (double) i / 2);
             p[2][i] = (byte) ((1 - Math.sin((double) (i - 8) / 9)) * 110 + 30);
         }
 
@@ -443,8 +443,6 @@ public final class Tools {
      */
     public static final byte[][] readPalette(String filename) {
         final int COLOR256 = 256;
-        BufferedReader in = null;
-        String line = null;
         int nentries = 0;
         int i = 0;
         int j = 0;
@@ -462,70 +460,62 @@ public final class Tools {
 
         if (filename == null) return null;
 
-        try {
-            in = new BufferedReader(new FileReader(filename));
-        }
-        catch (Exception ex) {
-            log.debug("input file:", ex);
-            in = null;
-        }
+        try (BufferedReader in = new BufferedReader(new FileReader(filename))) {
+            String line = null;
+            do {
+                try {
+                    line = in.readLine();
+                }
+                catch (Exception ex) {
+                    log.debug("input file:", ex);
+                    line = null;
+                }
 
-        if (in == null) return null;
-        do {
-            try {
-                line = in.readLine();
-            }
-            catch (Exception ex) {
-                log.debug("input file:", ex);
-                line = null;
-            }
+                if (line == null)
+                    continue;
 
-            if (line == null) continue;
+                StringTokenizer st = new StringTokenizer(line);
 
-            StringTokenizer st = new StringTokenizer(line);
+                // invalid line
+                if (st.countTokens() != 4) {
+                    continue;
+                }
 
-            // invalid line
-            if (st.countTokens() != 4) {
-                continue;
-            }
+                try {
+                    v = Float.valueOf(st.nextToken());
+                    r = Float.valueOf(st.nextToken());
+                    g = Float.valueOf(st.nextToken());
+                    b = Float.valueOf(st.nextToken());
+                }
+                catch (NumberFormatException ex) {
+                    log.debug("input file:", ex);
+                    continue;
+                }
 
-            try {
-                v = Float.valueOf(st.nextToken());
-                r = Float.valueOf(st.nextToken());
-                g = Float.valueOf(st.nextToken());
-                b = Float.valueOf(st.nextToken());
-            }
-            catch (NumberFormatException ex) {
-                log.debug("input file:", ex);
-                continue;
-            }
+                tbl[idx][0] = v;
+                tbl[idx][1] = r;
+                tbl[idx][2] = g;
+                tbl[idx][3] = b;
 
-            tbl[idx][0] = v;
-            tbl[idx][1] = r;
-            tbl[idx][2] = g;
-            tbl[idx][3] = b;
+                if (idx == 0) {
+                    maxV = minV = v;
+                    maxColor = minColor = r;
+                }
 
-            if (idx == 0) {
-                maxV = minV = v;
-                maxColor = minColor = r;
-            }
+                maxV = Math.max(maxV, v);
+                maxColor = Math.max(maxColor, r);
+                maxColor = Math.max(maxColor, g);
+                maxColor = Math.max(maxColor, b);
 
-            maxV = Math.max(maxV, v);
-            maxColor = Math.max(maxColor, r);
-            maxColor = Math.max(maxColor, g);
-            maxColor = Math.max(maxColor, b);
+                minV = Math.min(minV, v);
+                minColor = Math.min(minColor, r);
+                minColor = Math.min(minColor, g);
+                minColor = Math.min(minColor, b);
 
-            minV = Math.min(minV, v);
-            minColor = Math.min(minColor, r);
-            minColor = Math.min(minColor, g);
-            minColor = Math.min(minColor, b);
-
-            idx++;
-            if (idx >= COLOR256) break; /* only support to 256 colors */
-        } while (line != null);
-
-        try {
-            in.close();
+                idx++;
+                if (idx >= COLOR256)
+                    break; /* only support to 256 colors */
+            } while (line != null);
         }
         catch (Exception ex) {
             log.debug("input file:", ex);
@@ -568,9 +558,9 @@ public final class Tools {
 
                 if (j >= COLOR256) break; // nothing in the table to interpolating
 
-                float d1 = (p[0][j] - p[0][i - 1]) / (j - i);
-                float d2 = (p[1][j] - p[1][i - 1]) / (j - i);
-                float d3 = (p[2][j] - p[2][i - 1]) / (j - i);
+                float d1 = (p[0][j] - p[0][i - 1]) / (float) (j - i);
+                float d2 = (p[1][j] - p[1][i - 1]) / (float) (j - i);
+                float d3 = (p[2][j] - p[2][i - 1]) / (float) (j - i);
 
                 for (int k = i; k <= j; k++) {
                     p[0][k] = (int) (p[0][i - 1] + d1 * (k - i + 1));
@@ -668,9 +658,8 @@ public final class Tools {
     /**
      * Creates a true color image.
      * <p>
-     * DirectColorModel is used to construct the image from raw data. The
-     * DirectColorModel model is similar to an X11 TrueColor visual, which has
-     * the following parameters: <br>
+     * DirectColorModel is used to construct the image from raw data. The DirectColorModel model is
+     * similar to an X11 TrueColor visual, which has the following parameters: <br>
      *
      * <pre>
      * Number of bits:        32
@@ -684,9 +673,8 @@ public final class Tools {
      *             transferType:          DataBuffer.TYPE_INT
      * </pre>
      * <p>
-     * The data may be arranged in one of two ways: by pixel or by plane. In
-     * both cases, the dataset will have a dataspace with three dimensions,
-     * height, width, and components.
+     * The data may be arranged in one of two ways: by pixel or by plane. In both cases, the dataset
+     * will have a dataspace with three dimensions, height, width, and components.
      * <p>
      * For HDF4, the interlace modes specify orders for the dimensions as:
      *
@@ -705,7 +693,7 @@ public final class Tools {
      * @param imageData
      *            the byte array of the image data.
      * @param planeInterlace
-     *            flag if the image is plane intelace.
+     *            flag if the image is plane interlace.
      * @param w
      *            the width of the image.
      * @param h
@@ -724,7 +712,6 @@ public final class Tools {
         int b = 0;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                pixel = r = g = b = 0;
                 if (planeInterlace) {
                     r = imageData[idx];
                     g = imageData[(int)imgSize + idx];
@@ -1665,7 +1652,6 @@ public final class Tools {
      */
     public static int computeStatistics(Object data, double[] avgstd, Object fillValue) {
         int retval = 1;
-        int npoints = 0;
         double sum = 0;
         double avg = 0.0;
         double var = 0.0;
@@ -1683,7 +1669,7 @@ public final class Tools {
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
         log.trace("computeStatistics() cname={} : dname={}", cname, dname);
 
-        npoints = 0;
+        int npoints = 0;
         switch (dname) {
             case 'B':
                 byte[] b = (byte[]) data;
@@ -2561,7 +2547,9 @@ public final class Tools {
             try (BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(fout))) {
                 // skip the header of original file
                 try {
-                    bi.skip(offset);
+                    long count = bi.skip(offset);
+                    if (count != offset)
+                        log.debug("file skip actual:{} req:{}", count, offset);
                 }
                 catch (Exception ex) {
                     // Empty on purpose

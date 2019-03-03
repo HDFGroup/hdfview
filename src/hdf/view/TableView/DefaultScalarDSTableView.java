@@ -154,7 +154,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         catch (Exception ex) {
             Tools.showError(shell, "Load", "DefaultScalarDSTableView.loadData:" + ex.getMessage());
             log.debug("loadData(): ", ex);
-            log.trace("loadData(): finish");
+            log.trace("loadData(): exit");
             dataValue = null;
         }
 
@@ -385,7 +385,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                     if (fixedDataLength < 1) {
                         checkFixedDataLength.setSelection(false);
-                        return;
                     }
                 }
             });
@@ -673,7 +672,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             return dataValue;
         }
 
-        selectedData = null;
         if (isRegRef) {
             // reg. ref data are stored in strings
             selectedData = new String[size];
@@ -714,19 +712,19 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         int w = dataTable.getPreferredColumnCount() - 1;
         log.trace("getSelectedData(): getColumnCount={}", w);
-        int idx_src = 0;
-        int idx_dst = 0;
+        int idxSrc = 0;
+        int idxDst = 0;
         log.trace("getSelectedData(): Rows.length={} Cols.length={}", selectedRows.length,
                 selectedCols.length);
         for (int i = 0; i < selectedRows.length; i++) {
             for (int j = 0; j < selectedCols.length; j++) {
-                idx_src = selectedRows[i] * w + selectedCols[j];
+                idxSrc = selectedRows[i] * w + selectedCols[j];
                 log.trace("getSelectedData()[{},{}]: dataValue[{}]={} from r{} and c{}", i, j,
-                        idx_src, Array.get(dataValue, idx_src), selectedRows[i], selectedCols[j]);
-                Array.set(selectedData, idx_dst, Array.get(dataValue, idx_src));
-                log.trace("getSelectedData()[{},{}]: selectedData[{}]={}", i, j, idx_dst,
-                        Array.get(selectedData, idx_dst));
-                idx_dst++;
+                        idxSrc, Array.get(dataValue, idxSrc), selectedRows[i], selectedCols[j]);
+                Array.set(selectedData, idxDst, Array.get(dataValue, idxSrc));
+                log.trace("getSelectedData()[{},{}]: selectedData[{}]={}", i, j, idxDst,
+                        Array.get(selectedData, idxDst));
+                idxDst++;
             }
         }
 
@@ -781,12 +779,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
-            log.trace("showObjRefData(): finish");
+            log.trace("showObjRefData(): exit");
             return;
         }
 
         ScalarDS dset = (ScalarDS) obj;
-        ScalarDS dset_copy = null;
+        ScalarDS dsetCopy = null;
 
         // create an instance of the dataset constructor
         Constructor<? extends ScalarDS> constructor = null;
@@ -797,8 +795,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             Class[] paramClass = { FileFormat.class, String.class, String.class };
             constructor = dset.getClass().getConstructor(paramClass);
             paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
-            dset_copy = constructor.newInstance(paramObj);
-            data = dset_copy.getData();
+            dsetCopy = constructor.newInstance(paramObj);
+            data = dsetCopy.getData();
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): couldn't show data: ", ex);
@@ -863,7 +861,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         HashMap map = new HashMap(1);
-        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
+        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
         Object[] args = { viewer, map };
 
         try {
@@ -903,7 +901,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showRegRefData(): ref is null or invalid");
-            log.trace("showRegRefData(): finish");
+            log.trace("showRegRefData(): exit");
             return;
         }
 
@@ -919,18 +917,19 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (regStr == null || regStr.length() <= 0) {
             Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
-            log.trace("showRegRefData(): finish");
+            log.trace("showRegRefData(): exit");
             return; // no selection
         }
 
-        reg.substring(reg.indexOf('}') + 1);
+        // TODO: do we need to do something with what's past the closing bracket
+        // regStr = reg.substring(reg.indexOf('}') + 1);
 
         StringTokenizer st = new StringTokenizer(regStr);
         int nSelections = st.countTokens();
         if (nSelections <= 0) {
             Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
-            log.trace("showRegRefData(): finish");
+            log.trace("showRegRefData(): exit");
             return; // no selection
         }
         log.trace("showRegRefData(): nSelections={}", nSelections);
@@ -939,12 +938,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
-            log.debug("showRegRefData(): finish");
+            log.debug("showRegRefData(): exit");
             return;
         }
 
         ScalarDS dset = (ScalarDS) obj;
-        ScalarDS dset_copy = null;
+        ScalarDS dsetCopy = null;
 
         // create an instance of the dataset constructor
         Constructor<? extends ScalarDS> constructor = null;
@@ -967,20 +966,20 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         while (st.hasMoreTokens()) {
             log.trace("showRegRefData(): st.hasMoreTokens() begin");
             try {
-                dset_copy = constructor.newInstance(paramObj);
+                dsetCopy = constructor.newInstance(paramObj);
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): constructor newInstance failure: ", ex);
                 continue;
             }
 
-            if (dset_copy == null) {
+            if (dsetCopy == null) {
                 log.debug("showRegRefData(): continue after null dataset copy");
                 continue;
             }
 
             try {
-                dset_copy.init();
+                dsetCopy.init();
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): continue after copied dataset init failure: ",
@@ -988,9 +987,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 continue;
             }
 
-            dset_copy.getRank();
-            long start[] = dset_copy.getStartDims();
-            long count[] = dset_copy.getSelectedDims();
+            dsetCopy.getRank();
+            long[] start = dsetCopy.getStartDims();
+            long[] count = dsetCopy.getSelectedDims();
 
             // set the selected dimension sizes based on the region selection
             // info.
@@ -1037,7 +1036,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.trace("showRegRefData(): selection inited");
 
             try {
-                dset_copy.getData();
+                dsetCopy.getData();
             }
             catch (Exception ex) {
                 log.debug("showRegRefData(): getData failure: ", ex);
@@ -1096,7 +1095,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
 
             HashMap map = new HashMap(1);
-            map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dset_copy);
+            map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
             Object[] args = { viewer, map };
 
             try {
@@ -1108,10 +1107,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
 
             log.trace("showRegRefData(): st.hasMoreTokens() end");
-        } // while (st.hasMoreTokens())
+        } // (st.hasMoreTokens())
 
         log.trace("showRegRefData(): finish");
-    } // private void showRegRefData(String reg)
+    } // end of showRegRefData(String reg)
 
     /**
      * Update cell value label and cell value field when a cell is selected
@@ -1162,7 +1161,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             strVal = null;
                         }
                         else {
-                            reg.substring(reg.indexOf('}') + 1);
+                            // TODO: do we need to do something with what's past the closing bracket
+                            // regStr = reg.substring(reg.indexOf('}') + 1);
 
                             StringTokenizer st = new StringTokenizer(regStr);
                             int nSelections = st.countTokens();
@@ -1195,8 +1195,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                 "ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() begin");
 
                                         int rank = dset.getRank();
-                                        long start[] = dset.getStartDims();
-                                        long count[] = dset.getSelectedDims();
+                                        long[] start = dset.getStartDims();
+                                        long[] count = dset.getSelectedDims();
                                         // long count[] = new long[rank];
 
                                         // set the selected dimension sizes
@@ -1298,11 +1298,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         }
                                         else {
                                             // numerical values
-                                            boolean is_unsigned = dtype.isUnsigned();
+                                            boolean isUnsigned = dtype.isUnsigned();
                                             if (dtype.isArray())
-                                                is_unsigned = baseType.isUnsigned();
+                                                isUnsigned = baseType.isUnsigned();
                                             int n = Array.getLength(dbuf);
-                                            if (is_unsigned) {
+                                            if (isUnsigned) {
                                                 switch (runtimeTypeClass) {
                                                     case 'B':
                                                         byte[] barray = (byte[]) dbuf;
@@ -1400,7 +1400,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         dset.clearData();
                                         log.trace(
                                                 "ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
-                                    } // while (st.hasMoreTokens())
+                                    } // (st.hasMoreTokens())
                                     strVal = strvalSB.toString();
                                     log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
                                 }
@@ -1413,7 +1413,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 }
                 else if (isObjRef) {
                     Long ref = (Long) val;
-                    long oid[] = { ref.longValue() };
+                    long[] oid = { ref.longValue() };
 
                     // decode object ID
                     try {
@@ -1495,7 +1495,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-            return;
+            // intentional
         }
     }
 }
