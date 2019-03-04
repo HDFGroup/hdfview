@@ -84,8 +84,8 @@ public class NewAttributeDialog extends Dialog {
     private Text              lengthField;
 
     /** The Choice of the datatypes */
-    private Combo classChoice;
-    private Combo sizeChoice;
+    private Combo             classChoice;
+    private Combo             sizeChoice;
 
     /** The Choice of the object list */
     private Combo             objChoice;
