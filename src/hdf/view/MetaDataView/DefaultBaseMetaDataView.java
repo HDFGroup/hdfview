@@ -54,8 +54,10 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
+import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -253,6 +255,52 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
         });
 
+        if (isH5) {
+            long ocplID = -1;
+            long oid = -1;
+            int creationOrder = 0;
+            try {
+                oid = dataObject.open();
+                if (dataObject instanceof Group) {
+                    ocplID = H5.H5Gget_create_plist(oid);
+                    creationOrder = H5.H5Pget_link_creation_order(ocplID);
+                }
+                // else if (dataObject instanceof Dataset) {
+                // ocplID = H5.H5Dget_create_plist(oid);
+                // }
+                else if (dataObject instanceof Attribute) {
+                    ocplID = H5.H5Aget_create_plist(oid);
+                    creationOrder = H5.H5Pget_attr_creation_order(ocplID);
+                }
+                if (ocplID >= 0) {
+                    StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
+                    log.trace("createAttributeInfoPane(): creationOrder={}", creationOrder);
+                    if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
+                        objCreationStr.setLength(0);
+                        objCreationStr.append("Creation Order Tracked");
+                        if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_INDEXED) > 0)
+                            objCreationStr.append(" and Creation Order Indexed");
+                    }
+                    /* Creation order section */
+                    Label label;
+                    label = new Label(attributeInfoGroup, SWT.LEFT);
+                    label.setFont(curFont);
+                    label.setText("Creation Order: ");
+
+                    Text text;
+                    text = new Text(attributeInfoGroup, SWT.SINGLE | SWT.BORDER);
+                    text.setEditable(false);
+                    text.setFont(curFont);
+                    text.setText(objCreationStr.toString());
+                    text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+                }
+            }
+            finally {
+                H5.H5Pclose(ocplID);
+                dataObject.close(oid);
+            }
+        }
+
         attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         attrTable.setLinesVisible(true);
         attrTable.setHeaderVisible(true);
@@ -361,6 +409,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         FileFormat theFile = dataObject.getFileFormat();
         boolean isRoot = ((dataObject instanceof Group) && ((Group) dataObject).isRoot());
         String objTypeStr = "Unknown";
+        StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
         Label label;
         Text text;
 
@@ -411,13 +460,41 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             else if (dataObject instanceof Datatype) {
                 objTypeStr = "HDF5 Named Datatype";
             }
-            long fcplID = H5.H5Pcreate(HDF5Constants.H5P_FILE_CREATE);
+            long ocplID = -1;
             try {
-                H5.H5Pget_link_creation_order(fcplID);
-
+                int creationOrder = 0;
+                if (isRoot) {
+                    ocplID = H5.H5Fget_create_plist(dataObject.getFID());
+                    creationOrder = H5.H5Pget_link_creation_order(ocplID);
+                }
+                else {
+                    long oid = -1;
+                    try {
+                        oid = dataObject.open();
+                        if (dataObject instanceof Group) {
+                            ocplID = H5.H5Gget_create_plist(oid);
+                            creationOrder = H5.H5Pget_link_creation_order(ocplID);
+                        }
+                        // else if (dataObject instanceof Dataset) {
+                        // ocplID = H5.H5Dget_create_plist(oid);
+                        // }
+                    }
+                    finally {
+                        dataObject.close(oid);
+                    }
+                }
+                if (ocplID >= 0) {
+                    log.trace("createGeneralObjectInfoPane(): creationOrder={}", creationOrder);
+                    if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
+                        objCreationStr.setLength(0);
+                        objCreationStr.append("Creation Order Tracked");
+                        if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_INDEXED) > 0)
+                            objCreationStr.append(" and Creation Order Indexed");
+                    }
+                }
             }
-            catch (Exception err) {
-                // Empty catch
+            finally {
+                H5.H5Pclose(ocplID);
             }
         }
         else if (isH4) {
@@ -479,6 +556,18 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             text.setEditable(false);
             text.setFont(curFont);
             text.setText(oidStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        }
+        if (isH5) {
+            /* Creation order section */
+            label = new Label(generalInfoGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Creation Order: ");
+
+            text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText(objCreationStr.toString());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         }
 
@@ -567,7 +656,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
             if (isH5) {
                 log.trace("createGeneralObjectInfoPane(): get Library Version bounds info");
-
                 String libversion = dataObject.getFileFormat().getLibBoundsDescription();
 
                 if (libversion.length() > 0) {
