@@ -161,7 +161,7 @@
     <property name="sonar.sourceEncoding" value="UTF-8" />
     <property name="sonar.language" value="java" />
     <property name="sonar.core.codeCoveragePlugin" value="jacoco" />
-    <property name="sonar.jacoco.reportPath" value="${report.dir}/jacoco.exec" />
+    <property name="sonar.jacoco.reportPaths" value="${report.dir}/jacoco.exec" />
     <property name="sonar.dynamicAnalysis" value="reuseReports" />
 
     <path id="obj-classpath">
@@ -542,6 +542,10 @@
         </delete>
     </target>
 
+    <!--
+    <property name="agentvmparam" value="" />
+    -->
+
     <!-- Define jacoco Scanner for Ant Target -->
     <target name="jacoco">
         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" onerror="ignore">
@@ -550,8 +554,6 @@
 
         <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant" />
     </target>
-
-    <property name="agentvmparam" value="" />
 
     <target name="junit-single-test" depends="jar,compile-test,clean-junit-uitest,jacoco">
         <mkdir dir="${report.dir}" />
