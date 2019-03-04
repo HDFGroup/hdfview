@@ -7,9 +7,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
@@ -43,7 +40,6 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
 
         try {
-            final SWTBotShell maintableShell;
             String val;
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
@@ -61,13 +57,6 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             tableShell = bot.shells()[1];
             tableShell.activate();
-            maintableShell = tableShell;
-            Display.getDefault().syncExec(new Runnable() {
-                @Override
-                public void run() {
-                    maintableShell.widget.setMinimumSize(AbstractWindowTest.monitorBounds.width, AbstractWindowTest.monitorBounds.height);
-                }
-            });
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
             final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
