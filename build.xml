@@ -10,7 +10,7 @@
   <property file="build.properties" />
   <property file="package.properties" />
 
-  <record name="antoutput.log" action="start" append="false" loglevel="verbose" />
+  <record name="antoutput.log" action="start" append="${build.antoutput.append}" loglevel="verbose" />
 
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -449,7 +449,7 @@
   <target name="run" depends="jar" description="Runs the application">
     <mkdir dir="${jar.dir}/lib/ext" />
     <java fork="true" classname="${main-class}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.run}" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
@@ -473,7 +473,7 @@
       <fileset dir="${hdf5.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
     </copy>
     <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.run}" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
@@ -510,16 +510,16 @@
     <basename property="exdirrel.name" file="${exdir.rel}" />
     <echo message="Test example: ${exfile.name}"/>
     <java fork="true" classname="${exdirrel.name}/${exdir.name}/${exfile.name}" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
-      <jvmarg value="${XstartOnFirstThreadFlag}" />
-      <classpath>
-        <path refid="project-classpath" />
-        <path refid="log-classpath" />
-        <path refid="application" />
-        <pathelement path="${classes.dir}" />
-      </classpath>
-      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
-      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+        <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
+        <jvmarg value="${XstartOnFirstThreadFlag}" />
+        <classpath>
+          <path refid="project-classpath" />
+          <path refid="log-classpath" />
+          <path refid="application" />
+          <pathelement path="${classes.dir}" />
+        </classpath>
+        <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+        <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
     </java>
   </target>
 
@@ -598,7 +598,7 @@
   <target name="junit-single-test" depends="jar,compile-test,clean-junit-uitest">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <jvmarg line="${agentvmparam}"/>
       <classpath>
@@ -610,7 +610,7 @@
       </classpath>
       <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
       <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-      <test name="test.object.H5CompoundDSTest" todir="${report.dir}" outfile="TEST-test.object.H5CompoundDSTest">
+      <test name="${build.object.test}" todir="${report.dir}" outfile="TEST-${build.object.test}">
         <formatter type="plain" />
       </test>
     </junit>
@@ -620,7 +620,7 @@
           description="Runs the Object Library tests">
     <mkdir dir="${report.dir}" />
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <jvmarg line="${agentvmparam}"/>
       <classpath>
@@ -672,7 +672,7 @@
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <!-- Run in debug logging level because trace generates way too much output.
            We will run manually using trace logging output when there are UI test failures. -->
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <jvmarg line="${agentvmparam}"/>
       <classpath>
@@ -702,7 +702,7 @@
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <!-- Run in debug logging level because trace generates way too much output.
            We will run manually using trace logging output when there are UI test failures. -->
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <jvmarg line="${agentvmparam}"/>
       <classpath>
@@ -733,7 +733,7 @@
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <!-- Run in debug logging level because trace generates way too much output.
            We will run manually using trace logging output when there are UI test failures. -->
-      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
       <classpath>
         <path refid="project-classpath" />
