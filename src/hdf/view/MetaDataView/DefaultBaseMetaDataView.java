@@ -458,10 +458,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             long ocplID = -1;
             try {
-                int creationOrder = 0;
                 if (isRoot) {
                     ocplID = H5.H5Fget_create_plist(dataObject.getFID());
-                    creationOrder = H5.H5Pget_link_creation_order(ocplID);
                 }
                 else {
                     long oid = -1;
@@ -469,7 +467,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         oid = dataObject.open();
                         if (dataObject instanceof Group) {
                             ocplID = H5.H5Gget_create_plist(oid);
-                            creationOrder = H5.H5Pget_link_creation_order(ocplID);
                         }
                         // else if (dataObject instanceof Dataset) {
                         // ocplID = H5.H5Dget_create_plist(oid);
@@ -480,6 +477,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     }
                 }
                 if (ocplID >= 0) {
+                    int creationOrder = H5.H5Pget_link_creation_order(ocplID);
                     log.trace("createGeneralObjectInfoPane(): creationOrder={}", creationOrder);
                     if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
                         objCreationStr.setLength(0);
