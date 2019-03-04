@@ -468,9 +468,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         if (dataObject instanceof Group) {
                             ocplID = H5.H5Gget_create_plist(oid);
                         }
-                        // else if (dataObject instanceof Dataset) {
-                        // ocplID = H5.H5Dget_create_plist(oid);
-                        // }
                     }
                     finally {
                         dataObject.close(oid);
