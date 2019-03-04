@@ -265,15 +265,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     ocplID = H5.H5Gget_create_plist(oid);
                     creationOrder = H5.H5Pget_link_creation_order(ocplID);
                 }
-                // else if (dataObject instanceof Dataset) {
-                // ocplID = H5.H5Dget_create_plist(oid);
-                // }
-                else if (dataObject instanceof Attribute) {
-                    ocplID = H5.H5Aget_create_plist(oid);
-                    creationOrder = H5.H5Pget_attr_creation_order(ocplID);
+                else if (dataObject instanceof Dataset) {
+                    ocplID = H5.H5Dget_create_plist(oid);
                 }
                 if (ocplID >= 0) {
                     StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
+                    creationOrder = H5.H5Pget_attr_creation_order(ocplID);
                     log.trace("createAttributeInfoPane(): creationOrder={}", creationOrder);
                     if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
                         objCreationStr.setLength(0);
