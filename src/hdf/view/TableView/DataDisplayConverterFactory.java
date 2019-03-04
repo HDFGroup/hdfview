@@ -16,7 +16,6 @@ package hdf.view.TableView;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -214,13 +213,7 @@ public class DataDisplayConverterFactory {
 
             CompoundDataFormat compoundFormat = (CompoundDataFormat) dataFormatReference;
 
-            List<Datatype> allSelectedMemberTypes = Arrays.asList(compoundFormat.getSelectedMemberTypes());
-            if (allSelectedMemberTypes == null) {
-                log.debug("selected compound member datatype list is null");
-                throw new Exception("CompoundDataDisplayConverter: selected compound member datatype list is null");
-            }
-
-            List<Datatype> localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(allSelectedMemberTypes, dtype);
+            List<Datatype> localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
 
             log.trace("setting up {} base HDFDisplayConverters", localSelectedTypes.size());
 
@@ -248,7 +241,7 @@ public class DataDisplayConverterFactory {
             /*
              * Build necessary index maps.
              */
-            HashMap<Integer, Integer>[] maps = DataFactoryUtils.buildIndexMaps(allSelectedMemberTypes, localSelectedTypes);
+            HashMap<Integer, Integer>[] maps = DataFactoryUtils.buildIndexMaps(compoundFormat, localSelectedTypes);
             baseConverterIndexMap = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
             relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
 

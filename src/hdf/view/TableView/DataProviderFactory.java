@@ -14,7 +14,6 @@
 package hdf.view.TableView;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -516,13 +515,7 @@ public class DataProviderFactory {
             selectedMemberTypes = compoundFormat.getSelectedMemberTypes();
             selectedMemberOrders = compoundFormat.getSelectedMemberOrders();
 
-            List<Datatype> allSelectedMemberTypes = Arrays.asList(selectedMemberTypes);
-            if (allSelectedMemberTypes == null) {
-                log.debug("selected compound member datatype list is null");
-                throw new Exception("selected compound member datatype list is null");
-            }
-
-            List<Datatype> localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(allSelectedMemberTypes, dtype);
+            List<Datatype> localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
 
             log.trace("setting up {} base HDFDataProviders", localSelectedTypes.size());
 
@@ -542,7 +535,7 @@ public class DataProviderFactory {
             /*
              * Build necessary index maps.
              */
-            HashMap<Integer, Integer>[] maps = DataFactoryUtils.buildIndexMaps(allSelectedMemberTypes, localSelectedTypes);
+            HashMap<Integer, Integer>[] maps = DataFactoryUtils.buildIndexMaps(compoundFormat, localSelectedTypes);
             baseProviderIndexMap = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
             relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
 
@@ -806,6 +799,8 @@ public class DataProviderFactory {
         private final Object[]        arrayElements;
         private final long            arraySize;
 
+        private final int             nCols;
+
         ArrayDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
 
@@ -828,6 +823,11 @@ public class DataProviderFactory {
             }
 
             arrayElements = new Object[(int) arraySize];
+
+            if (baseTypeDataProvider instanceof CompoundDataProvider)
+                nCols = (int) arraySize * ((CompoundDataProvider) baseTypeDataProvider).nCols;
+            else
+                nCols = super.getColumnCount();
 
             log.trace("constructor: finish");
         }
@@ -1059,6 +1059,11 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int index, Object bufObject, Object newValue) {
             throw new UnsupportedOperationException("setDataValue(int, Object, Object) should not be called for ArrayDataProviders");
+        }
+
+        @Override
+        public int getColumnCount() {
+            return nCols;
         }
 
     }

@@ -10,7 +10,7 @@
   <property file="build.properties" />
   <property file="package.properties" />
 
-  <record name="antoutput.log" action="start" append="true" loglevel="verbose" />
+  <record name="antoutput.log" action="start" append="false" loglevel="verbose" />
 
   <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
   <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -22,9 +22,9 @@
     </filterchain>
   </loadfile>
 
-    <condition property="h4path" value="${hdf.lib.dir}">
-      <available file="${hdf.lib.dir}/libhdf4.settings" />
-    </condition>
+  <condition property="h4path" value="${hdf.lib.dir}">
+    <available file="${hdf.lib.dir}/libhdf4.settings" />
+  </condition>
 
   <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings" failonerror="false">
     <filterchain>
@@ -167,20 +167,21 @@
   <property name="sonar.jacoco.reportPath" value="${report.dir}/jacoco.exec" />
   <property name="sonar.dynamicAnalysis" value="reuseReports" />
 
-    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-            <classpath path="/opt/jacoco-0.8.3/lib/jacocoant.jar"/>
-    </taskdef>
+  <!--
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+    <classpath path="/opt/jacoco-0.8.3/lib/jacocoant.jar"/>
+  </taskdef>
+  -->
 
-    <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec"
-                                  xmlns:jacoco="antlib:org.jacoco.ant"/>
-    <!--
-    <property name="agentvmparam" value=""/>
-    -->
+  <!--
+  <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec"
+    xmlns:jacoco="antlib:org.jacoco.ant"/>
+  -->
+
+  <property name="agentvmparam" value=""/>
 
   <path id="obj-classpath">
-    <fileset dir="${lib.dir}"
-      includes="fits.jar netcdf.jar"
-      excludes="*sources.jar" />
+    <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
   </path>
   <path id="swt-classpath">
     <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
@@ -191,46 +192,36 @@
     <fileset dir="${hdf5.lib.dir}" includes="jarhdf5*.jar" />
   </path>
   <path id="slf4j-classpath">
-      <fileset dir="${lib.dir}"
-      includes="slf4j-api${version.slf4j}.jar"
-      excludes="*sources.jar" />
+    <fileset dir="${lib.dir}" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
   </path>
   <path id="log-classpath">
-    <fileset dir="${lib.dir}/extra"
-      includes="slf4j-simple${version.slf4j}.jar"
-      excludes="*sources.jar" />
+    <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
   </path>
   <path id="nop-classpath">
-      <fileset dir="${lib.dir}/extra"
-      includes="slf4j-nop${version.slf4j}.jar"
-      excludes="*sources.jar" />
+    <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
   </path>
   <path id="unit-classpath">
-    <fileset dir="${lib.dir}"
-      includes="extra/junit-4.11.jar extra/hamcrest-core-1.3.jar"
-      excludes="*sources.jar" />
+    <fileset dir="${lib.dir}" includes="extra/junit-4.11.jar extra/hamcrest-core-1.3.jar" excludes="*sources.jar" />
   </path>
   <path id="swtbot-classpath">
     <fileset dir="${lib.dir}/ext/swt/swtbot" includes="*swtbot*.jar *log4j*.jar" excludes="*sources.jar" />
   </path>
   <path id="ui-test-sources">
-    <fileset dir="${src.dir}/"
-      includes="**/uitest/*Test*.java"
-      excludes="**/uitest/*CLGeometry.java **/uitest/*All*.java" />
+    <fileset dir="${src.dir}/" includes="**/uitest/*Test*.java" excludes="**/uitest/*CLGeometry.java **/uitest/*All*.java" />
   </path>
   <path id="project-classpath">
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
-      <path refid="slf4j-classpath" />
-      <path refid="log-classpath" />
+    <path refid="slf4j-classpath" />
+    <path refid="log-classpath" />
   </path>
   <path id="jar-classpath">
     <path refid="obj-classpath" />
     <path refid="jni-classpath" />
     <path refid="swt-classpath" />
-      <path refid="slf4j-classpath" />
-      <path refid="nop-classpath" />
+    <path refid="slf4j-classpath" />
+    <path refid="nop-classpath" />
   </path>
 
   <property name="main-class" value="hdf.view.HDFView" />
@@ -292,127 +283,128 @@
     </copy>
   </target>
 
-    <target name="compileobj">
-      <mkdir dir="${classes.dir}" />
-      <mkdir dir="${classes.dir}/hdf" />
+  <target name="compileobj">
+    <mkdir dir="${classes.dir}" />
+    <mkdir dir="${classes.dir}/hdf" />
 
-        <!-- Store compile-time Version information -->
-        <copy todir="${build.dir}">
-          <fileset dir="${src.dir}/hdf" includes="HDFVersions.java" />
-        </copy>
-        <replace file="${build.dir}/HDFVersions.java" token="@HDF4_VERSION@" value='"${hdf4.version}"' />
-        <replace file="${build.dir}/HDFVersions.java" token="@HDF5_VERSION@" value='"${hdf5.version}"' />
-        <replace file="${build.dir}/HDFVersions.java" token="@HDFVIEW_VERSION@" value='"${app.version}"' />
-        <replace file="${build.dir}/HDFVersions.java" token="@HDFJAVA_VERSION@" value='"${hdfjava.version}"' />
+    <!-- Store compile-time Version information -->
+    <copy todir="${build.dir}">
+      <fileset dir="${src.dir}/hdf" includes="HDFVersions.java" />
+    </copy>
+    <replace file="${build.dir}/HDFVersions.java" token="@HDF4_VERSION@" value='"${hdf4.version}"' />
+    <replace file="${build.dir}/HDFVersions.java" token="@HDF5_VERSION@" value='"${hdf5.version}"' />
+    <replace file="${build.dir}/HDFVersions.java" token="@HDFVIEW_VERSION@" value='"${app.version}"' />
+    <replace file="${build.dir}/HDFVersions.java" token="@HDFJAVA_VERSION@" value='"${hdfjava.version}"' />
 
-        <!-- Generate Versions file -->
-        <javac srcdir="${build.dir}" destdir="${classes.dir}"
-          includes="HDFVersions.java"
-          includeantruntime="false"
-          debug="${build.debug}"
-        />
+    <!-- Generate Versions file -->
+    <javac srcdir="${build.dir}" destdir="${classes.dir}"
+      includes="HDFVersions.java"
+      includeantruntime="false"
+      debug="${build.debug}"
+    />
 
-      <javac srcdir="${src.dir}" destdir="${classes.dir}"
-        classpathref="project-classpath"
-        excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
-        includeantruntime="false"
-        debug="${build.debug}"
-      />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+      classpathref="project-classpath"
+      excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+      includeantruntime="false"
+      debug="${build.debug}"
+    />
 
-      <copy todir="${classes.dir}">
-        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
-      </copy>
-    </target>
+    <copy todir="${classes.dir}">
+      <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
+    </copy>
+  </target>
 
-    <target name="compilehdf4" depends="compileobj" if="h4path">
-      <mkdir dir="${classes.dir}" />
-      <mkdir dir="${classes.dir}/hdf" />
+  <target name="compilehdf4" depends="compileobj" if="h4path">
+    <mkdir dir="${classes.dir}" />
+    <mkdir dir="${classes.dir}/hdf" />
 
-      <javac srcdir="${src.dir}" destdir="${classes.dir}"
-        classpathref="project-classpath"
-        excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
-        includeantruntime="false"
-        debug="${build.debug}"
-      />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+      classpathref="project-classpath"
+      excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+      includeantruntime="false"
+      debug="${build.debug}"
+    />
 
-      <copy todir="${classes.dir}">
-        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
-      </copy>
-    </target>
+    <copy todir="${classes.dir}">
+      <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
+    </copy>
+  </target>
 
-    <target name="compilespc" depends="compileobj">
-      <mkdir dir="${classes.dir}" />
-      <mkdir dir="${classes.dir}/hdf" />
+  <target name="compilespc" depends="compileobj">
+    <mkdir dir="${classes.dir}" />
+    <mkdir dir="${classes.dir}/hdf" />
 
-      <javac srcdir="${src.dir}" destdir="${classes.dir}"
-        classpathref="project-classpath"
-        excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
-        includeantruntime="false"
-        debug="${build.debug}"
-      />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+      classpathref="project-classpath"
+      excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+      includeantruntime="false"
+      debug="${build.debug}"
+    />
 
-      <copy todir="${classes.dir}">
-        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/**  **/*.in **/*.java examples/** test/**" />
-      </copy>
-    </target>
+    <copy todir="${classes.dir}">
+      <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/**  **/*.in **/*.java examples/** test/**" />
+    </copy>
+  </target>
 
-    <target name="compilehdf5" depends="compileobj">
-      <mkdir dir="${classes.dir}" />
-      <mkdir dir="${classes.dir}/hdf" />
+  <target name="compilehdf5" depends="compileobj">
+    <mkdir dir="${classes.dir}" />
+    <mkdir dir="${classes.dir}/hdf" />
 
-      <javac srcdir="${src.dir}" destdir="${classes.dir}"
-        classpathref="project-classpath"
-        excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
-        includeantruntime="false"
-        debug="${build.debug}"
-      />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+      classpathref="project-classpath"
+      excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java"
+      includeantruntime="false"
+      debug="${build.debug}"
+    />
 
-      <copy todir="${classes.dir}">
-        <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** **/*.in **/*.java examples/** test/**" />
-      </copy>
-    </target>
+    <copy todir="${classes.dir}">
+      <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** **/*.in **/*.java examples/** test/**" />
+    </copy>
+  </target>
 
   <target name="objectjar" depends="compile">
     <mkdir dir="${jar.dir}" />
 
-      <pathconvert property="manifest.classpath" pathsep=" ">
-        <path refid="obj-classpath" />
-        <mapper>
-          <chainedmapper>
-            <flattenmapper />
-          </chainedmapper>
-        </mapper>
-      </pathconvert>
+    <pathconvert property="manifest.classpath" pathsep=" ">
+      <path refid="obj-classpath" />
+      <mapper>
+        <chainedmapper>
+          <flattenmapper />
+        </chainedmapper>
+      </mapper>
+    </pathconvert>
 
-      <jar destfile="${jar.dir}/hdfobject.jar"
-        basedir="${classes.dir}"
-        excludes="hdf/view/** examples/** test/** *.log *.h5 *.data">
-        <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
-        <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
+    <jar destfile="${jar.dir}/hdfobject.jar"
+      basedir="${classes.dir}"
+      excludes="hdf/view/** examples/** test/** *.log *.h5 *.data">
+      <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
+      <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
 
-        <manifest>
-          <attribute name="Main-Class" value="${main-class}" />
-          <attribute name="Class-Path" value="${manifest.classpath}" />
-        </manifest>
-      </jar>
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}" />
+        <attribute name="Class-Path" value="${manifest.classpath}" />
+      </manifest>
+    </jar>
   </target>
 
   <target name="modulejar" depends="compile-test">
     <mkdir dir="${testclasses.dir}/lib/ext" />
 
     <pathconvert property="manifest.classpath" pathsep=" ">
-        <path refid="jar-classpath" />
-        <mapper>
-          <chainedmapper>
-            <flattenmapper />
-          </chainedmapper>
-        </mapper>
+      <path refid="jar-classpath" />
+      <mapper>
+        <chainedmapper>
+          <flattenmapper />
+        </chainedmapper>
+      </mapper>
     </pathconvert>
 
     <jar destfile="${testclasses.dir}/lib/ext/test.modules.TestModuleLoading.jar"
-        basedir="${classes.dir}"
-        includes="test/modules/**"
-        excludes="Test*.java *.h5" />
+      basedir="${classes.dir}"
+      includes="test/modules/**"
+      excludes="Test*.java *.h5"
+    />
   </target>
 
   <target name="jar" depends="compile">
@@ -516,18 +508,18 @@
     <basename property="exfile.name" file="${exfile}" suffix=".class" />
     <property name="exdir.rel" value="${exclasses.dir}" relative="yes" />
     <basename property="exdirrel.name" file="${exdir.rel}" />
-      <echo message="Test example: ${exfile.name}"/>
+    <echo message="Test example: ${exfile.name}"/>
     <java fork="true" classname="${exdirrel.name}/${exdir.name}/${exfile.name}" dir="${classes.dir}">
-        <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
-        <jvmarg value="${XstartOnFirstThreadFlag}" />
-        <classpath>
-          <path refid="project-classpath" />
-          <path refid="log-classpath" />
-          <path refid="application" />
-          <pathelement path="${classes.dir}" />
-        </classpath>
-        <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
-        <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
+      <jvmarg value="${XstartOnFirstThreadFlag}" />
+      <classpath>
+        <path refid="project-classpath" />
+        <path refid="log-classpath" />
+        <path refid="application" />
+        <pathelement path="${classes.dir}" />
+      </classpath>
+      <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+      <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
     </java>
   </target>
 
@@ -608,7 +600,7 @@
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=trace" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
-        <jvmarg line="${agentvmparam}"/>
+      <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -630,7 +622,7 @@
     <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
-        <jvmarg line="${agentvmparam}"/>
+      <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -650,16 +642,16 @@
     </junit>
   </target>
 
-    <!-- Define SonarQube Scanner for Ant Target -->
-    <target name="sonar" depends="junit, junit-uitest">
-        <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
-            <!-- Update the following line, or put the "sonarqube-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
-            <classpath path="~/.ant/lib/sonarqube-ant-task-*.jar" />
-        </taskdef>
+  <!-- Define SonarQube Scanner for Ant Target -->
+  <target name="sonar" depends="junit, junit-uitest">
+    <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+      <!-- Update the following line, or put the "sonarqube-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
+      <classpath path="~/.ant/lib/sonarqube-ant-task-*.jar" />
+    </taskdef>
 
-        <!-- Execute SonarQube Scanner for Ant Analysis -->
-        <sonar:sonar />
-    </target>
+    <!-- Execute SonarQube Scanner for Ant Analysis -->
+    <sonar:sonar />
+  </target>
 
   <target name="ensure-test-name" unless="test">
     <!-- Capture the path as a delimited property using the refid attribute -->
@@ -682,7 +674,7 @@
            We will run manually using trace logging output when there are UI test failures. -->
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
-        <jvmarg line="${agentvmparam}"/>
+      <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -712,7 +704,7 @@
            We will run manually using trace logging output when there are UI test failures. -->
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" />
       <jvmarg value="${XstartOnFirstThreadFlag}" />
-        <jvmarg line="${agentvmparam}"/>
+      <jvmarg line="${agentvmparam}"/>
       <classpath>
         <path refid="project-classpath" />
         <path refid="log-classpath" />
@@ -885,8 +877,8 @@
       <fileset dir="${hdf5.lib.dir}/../bin" includes="hdf5.dll" />
     </copy>
     <copy todir="${release.dir}/lib/extra">
-        <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
-        <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
     </copy>
 
     <!-- Bundle jre -->
@@ -961,8 +953,8 @@
       </fileset>
     </copy>
     <copy todir="${release.dir}/lib/extra">
-        <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
-        <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+      <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
     </copy>
 
     <!-- Bundle jre -->
@@ -1105,21 +1097,21 @@
 
     <!-- Create .dmg file -->
     <exec dir="${dist.dir}" executable="hdiutil">
-        <arg value="create" />
-        <arg value="-volname" />
-        <arg value="${ant.project.name}Installer" />
-        <arg value="-srcfolder" />
-        <arg value="." />
-        <arg value="-ov" />
-        <arg value="-format" />
-        <arg value="UDZO" />
-        <arg value="${ant.project.name}-${app.version}.dmg" />
+      <arg value="create" />
+      <arg value="-volname" />
+      <arg value="${ant.project.name}Installer" />
+      <arg value="-srcfolder" />
+      <arg value="." />
+      <arg value="-ov" />
+      <arg value="-format" />
+      <arg value="UDZO" />
+      <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
     <exec dir="${dist.dir}" executable="hdiutil">
-        <arg value="internet-enable" />
-        <arg value="-yes" />
-        <arg value="${ant.project.name}-${app.version}.dmg" />
+      <arg value="internet-enable" />
+      <arg value="-yes" />
+      <arg value="${ant.project.name}-${app.version}.dmg" />
     </exec>
 
     <!-- sign .dmg file on 10.11.5 or higher -->
@@ -1359,8 +1351,8 @@
 
     <!-- Sign the app -->
     <exec executable="chmod">
-        <arg value="a+w" />
-        <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+      <arg value="a+w" />
+      <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
     </exec>
 
     <apply executable="codesign">
@@ -1438,11 +1430,11 @@
 
     <!-- verify gatekeeper -->
     <exec executable="spctl" dir="${dist.dir}" failonerror="true">
-        <arg value="-vvvv" />
-        <arg value="--assess" />
-        <arg value="--type" />
-        <arg value="execute" />
-        <arg value="${ant.project.name}.app" />
+      <arg value="-vvvv" />
+      <arg value="--assess" />
+      <arg value="--type" />
+      <arg value="execute" />
+      <arg value="${ant.project.name}.app" />
     </exec>
   </target>
 

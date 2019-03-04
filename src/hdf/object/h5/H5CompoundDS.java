@@ -897,7 +897,7 @@ public class H5CompoundDS extends CompoundDS {
 
                     if (!memberType.isCompound()) {
                         try {
-                            memberName = flatNameList.get(globalMemberIndex[0]);
+                            memberName = new String(flatNameList.get(globalMemberIndex[0]));
                         }
                         catch (Exception ex) {
                             log.debug("compoundTypeIO(): get member {} name failure: ", i, ex);
