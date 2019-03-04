@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -129,42 +128,42 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /** the root directory of the HDFView */
-    private static String rootDir = System.getProperty("user.dir");
+    private static String            rootDir = System.getProperty("user.dir");
 
     /** user's guide */
-    private static String usersGuide = "/UsersGuide/index.html";
+    private static String            usersGuide = "/UsersGuide/index.html";
 
     /** the font size */
-    private static int              fontSize               = 12;
+    private static int               fontSize               = 12;
 
     /** the font type */
-    private static String           fontType               = "Serif";
+    private static String            fontType               = "Serif";
 
     /** the full path of H4toH5 converter */
-    private static String           h4toh5                 = "";
+    private static String            h4toh5                 = "";
 
     /** data delimiter */
-    private static String           delimiter              = DELIMITER_TAB;
+    private static String            delimiter              = DELIMITER_TAB;
 
     /** image origin */
-    private static String           origin                 = ORIGIN_UL;
+    private static String            origin                 = ORIGIN_UL;
 
     /** default index type */
-    private static String           indexType              = "H5_INDEX_NAME";
+    private static String            indexType              = "H5_INDEX_NAME";
 
     /** default index order */
-    private static String           indexOrder             = "H5_ITER_INC";
+    private static String            indexOrder             = "H5_ITER_INC";
 
     /** a list of most recent files */
     private static ArrayList<String> recentFiles = new ArrayList<>(MAX_RECENT_FILES + 5);
 
     /** default starting file directory */
-    private static String workDir = "user.home";
+    private static String            workDir = "user.home";
 
     /** default HDF file extensions */
-    private static String           fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
+    private static String            fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
 
-    private static ClassLoader      extClassLoader         = null;
+    private static ClassLoader       extClassLoader         = null;
 
     /** a list of srb accounts */
     private static ArrayList<String[]> srbAccountList = new ArrayList<>(5);
@@ -173,43 +172,43 @@ public class ViewProperties extends PreferenceStore {
      * flag to indicate if auto contrast is used in image processing. Do not use
      * autocontrast by default (2.6 change).
      */
-    private static boolean          isAutoContrast         = false;
+    private static boolean           isAutoContrast         = false;
 
-    private static boolean          showImageValues        = false;
+    private static boolean           showImageValues        = false;
 
-    private static boolean          showRegRefValues       = false;
+    private static boolean           showRegRefValues       = false;
 
     /**
      * flag to indicate if default open file mode is read only. By default, use read
      * only to prevent accidental modifications to the file.
      */
-    private static boolean          isReadOnly             = true;
+    private static boolean           isReadOnly             = true;
 
-    private static String EarlyLib = "Latest";
+    private static String            EarlyLib = "Latest";
 
-    private static String LateLib = "Latest";
+    private static String            LateLib = "Latest";
 
     /** a list of palette files */
     private static ArrayList<String> paletteList = new ArrayList<>(5);
 
     /** flag to indicate if enum data is converted to strings */
-    private static boolean          convertEnum            = true;
+    private static boolean           convertEnum            = true;
 
     /** flag to indicate if data is 1-based index */
-    private static boolean          isIndexBase1           = false;
+    private static boolean           isIndexBase1           = false;
 
     /**
      * Current Java applications such as HDFView cannot handle files with a large
      * number of objects such as 1,000,000 objects. max_members defines the maximum
      * number of objects that will be loaded into memory.
      */
-    private static int              maxMembers            = Integer.MAX_VALUE;   // load all by default
+    private static int               maxMembers            = Integer.MAX_VALUE;   // load all by default
     /**
      * Current Java applications such as HDFView cannot handle files with a large
      * number of objects such 1,000,000 objects. start_members defines the
      * starting index of objects that will be loaded into memory.
      */
-    private static int              startMembers          = 0;
+    private static int               startMembers          = 0;
 
     private static Image        hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, largeHdfIcon, blankIcon, helpIcon, fileopenIcon,
     filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon, folderopenIcon, foldercloseIconA,
@@ -218,7 +217,7 @@ public class ViewProperties extends PreferenceStore {
     cutIcon, pasteIcon, previousIcon, nextIcon, firstIcon, lastIcon, animationIcon, datatypeIcon,
     datatypeIconA, linkIcon, iconAPPS, iconURL, iconVIDEO, iconXLS, iconPDF, iconAUDIO, questionIcon;
 
-    private static String propertyFile;
+    private static String            propertyFile;
 
     /** a list of treeview modules */
     private static ArrayList<String> moduleListTreeView = new ArrayList<>(5);

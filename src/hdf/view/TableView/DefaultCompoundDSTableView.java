@@ -18,7 +18,9 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -350,93 +352,13 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         public CompoundDSColumnHeaderDataProvider(DataFormat dataObject) {
             CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
 
-            List<Datatype> selectedTypes = Arrays.asList(dataFormat.getSelectedMemberTypes());
-            final String[] datasetMemberNames = dataFormat.getMemberNames();
+            Datatype cmpdType = dataObject.getDatatype();
+            List<Datatype> selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
+            final List<String> datasetMemberNames = Arrays.asList(dataFormat.getSelectedMemberNames());
 
             columnNames = new ArrayList<String>(dataFormat.getSelectedMemberCount());
 
-            for (int i = 0, typesIdx = 0; i < datasetMemberNames.length; i++) {
-                if (!dataFormat.isMemberSelected(i))
-                    continue;
-
-                Datatype curType = selectedTypes.get(typesIdx);
-                Datatype nestedCompoundType = null;
-                int arrSize = 1;
-
-                /*
-                 * Recursively detect any nested array/vlen of compound types and deal with them
-                 * by creating multiple copies of the member names.
-                 */
-                if (curType.isArray() /* || (curType.isVLEN() && !curType.isVarStr()) */ /* TODO: true variable-length support */) {
-                    long[] arrayDims = curType.getArrayDims();
-                    for (int j = 0; j < arrayDims.length; j++) {
-                        arrSize *= arrayDims[j];
-                    }
-
-                    Datatype base = curType.getDatatypeBase();
-                    while (base != null) {
-                        if (base.isCompound()) {
-                            nestedCompoundType = base;
-                            break;
-                        }
-                        else if (base.isArray()) {
-                            arrayDims = base.getArrayDims();
-                            for (int j = 0; j < arrayDims.length; j++) {
-                                arrSize *= arrayDims[j];
-                            }
-                        }
-
-                        base = base.getDatatypeBase();
-                    }
-                }
-
-                /*
-                 * For ARRAY of COMPOUND and VLEN of COMPOUND types, we repeat the compound
-                 * members n times, where n is the number of array or vlen elements.
-                 */
-                if (nestedCompoundType != null) {
-                    List<Datatype> selectedCmpdTypes = DataFactoryUtils.filterNonSelectedMembers(selectedTypes, nestedCompoundType);
-                    int nMembers = selectedCmpdTypes.size();
-                    StringBuilder sBuilder = new StringBuilder();
-
-                    /*
-                     * NOTE: this assumes that the member names of the ARRAY/VLEN of COMPOUND
-                     * directly follow the name of the top-level member itself and will break if
-                     * that assumption is not true.
-                     */
-                    for (int j = 0; j < arrSize; j++) {
-                        for (int k = 0; k < nMembers; k++) {
-                            sBuilder.setLength(0);
-
-                            // Copy the dataset member name reference, so changes to the column name
-                            // don't affect the dataset's internal member names.
-                            //
-                            // (i + 1) to skip the current member name since it is a container only.
-                            sBuilder.append(new String(datasetMemberNames[(i + 1) + k]).replaceAll(CompoundDS.SEPARATOR, "->"));
-
-                            /*
-                             * Add the index number to the member name so we can correctly setup nested
-                             * column grouping.
-                             */
-                            sBuilder.append("[" + j + "]");
-
-                            columnNames.add(sBuilder.toString());
-                        }
-                    }
-
-                    i += nMembers;
-                }
-                else {
-                    // Copy the dataset member name reference, so changes to the column name
-                    // don't affect the dataset's internal member names.
-                    String curName = new String(datasetMemberNames[i]);
-                    curName = curName.replaceAll(CompoundDS.SEPARATOR, "->");
-
-                    columnNames.add(curName);
-                }
-
-                typesIdx++;
-            }
+            recursiveColumnHeaderSetup(columnNames, dataFormat, cmpdType, datasetMemberNames, selectedTypes);
 
             // Make a copy of column names so changes to column names don't affect the full column names,
             // which is used elsewhere.
@@ -461,6 +383,152 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
         }
 
+        private void recursiveColumnHeaderSetup(List<String> outColNames, CompoundDataFormat dataFormat,
+                Datatype curDtype, List<String> memberNames, List<Datatype> memberTypes) {
+            log.trace("recursiveColumnHeaderSetup(): start");
+
+            if (curDtype.isArray()) {
+                log.trace("recursiveColumnHeaderSetup(): ARRAY type");
+
+                /*
+                 * ARRAY of COMPOUND type
+                 */
+                int arrSize = 1;
+                Datatype nestedCompoundType = curDtype;
+                while (nestedCompoundType != null) {
+                    if (nestedCompoundType.isCompound()) {
+                        break;
+                    }
+                    else if (nestedCompoundType.isArray()) {
+                        long[] arrayDims = nestedCompoundType.getArrayDims();
+                        for (int i = 0; i < arrayDims.length; i++) {
+                            arrSize *= arrayDims[i];
+                        }
+                    }
+
+                    nestedCompoundType = nestedCompoundType.getDatatypeBase();
+                }
+
+                log.trace("recursiveColumnHeaderSetup(): ARRAY size: {}", arrSize);
+
+                /*
+                 * TODO: Temporary workaround for top-level array of compound types.
+                 */
+                if (memberTypes.isEmpty()) {
+                    memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedCompoundType);
+                }
+
+                /*
+                 * Duplicate member names by the size of the array.
+                 *
+                 * NOTE: this assumes that the member names of the ARRAY/VLEN of COMPOUND
+                 * directly follow the name of the top-level member itself and will break if
+                 * that assumption is not true.
+                 */
+                StringBuilder sBuilder = new StringBuilder();
+                ArrayList<String> nestedMemberNames = new ArrayList<String>(arrSize * memberNames.size());
+                for (int i = 0; i < arrSize; i++) {
+                    for (int j = 0; j < memberNames.size(); j++) {
+                        sBuilder.setLength(0);
+
+                        // Copy the dataset member name reference, so changes to the column name
+                        // don't affect the dataset's internal member names.
+                        sBuilder.append(memberNames.get(j).replaceAll(CompoundDS.SEPARATOR, "->"));
+
+                        /*
+                         * Add the index number to the member name so we can correctly setup nested
+                         * column grouping.
+                         */
+                        sBuilder.append("[" + i + "]");
+
+                        nestedMemberNames.add(sBuilder.toString());
+                    }
+                }
+
+                recursiveColumnHeaderSetup(outColNames, dataFormat, nestedCompoundType, nestedMemberNames, memberTypes);
+            }
+            else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
+                /*
+                 * TODO:
+                 */
+            }
+            else if (curDtype.isCompound()) {
+                log.trace("recursiveColumnHeaderSetup(): COMPOUND type");
+
+                ListIterator<String> localIt = memberNames.listIterator();
+                while (localIt.hasNext()) {
+                    int curIdx = localIt.nextIndex();
+                    String curName = localIt.next();
+                    Datatype curType = memberTypes.get(curIdx % memberTypes.size());
+                    Datatype nestedArrayOfCompoundType = null;
+                    boolean nestedArrayOfCompound = false;
+
+                    /*
+                     * Recursively detect any nested array/vlen of compound types and deal with them
+                     * by creating multiple copies of the member names.
+                     */
+                    if (curType.isArray() /* || (curType.isVLEN() && !curType.isVarStr()) */ /* TODO: true variable-length support */) {
+                        Datatype base = curType.getDatatypeBase();
+                        while (base != null) {
+                            if (base.isCompound()) {
+                                nestedArrayOfCompound = true;
+                                nestedArrayOfCompoundType = base;
+                                break;
+                            }
+
+                            base = base.getDatatypeBase();
+                        }
+                    }
+
+                    /*
+                     * For ARRAY of COMPOUND and VLEN of COMPOUND types, we repeat the compound
+                     * members n times, where n is the number of array or vlen elements.
+                     */
+                    if (nestedArrayOfCompound) {
+                        List<Datatype> selTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedArrayOfCompoundType);
+                        List<String> selMemberNames = new ArrayList<String>(selTypes.size());
+
+                        int arrCmpdLen = calcArrayOfCompoundLen(selTypes);
+                        for (int i = 0; i < arrCmpdLen; i++) {
+                            selMemberNames.add(localIt.next());
+                        }
+
+                        recursiveColumnHeaderSetup(outColNames, dataFormat, curType, selMemberNames, selTypes);
+                    }
+                    else {
+                        // Copy the dataset member name reference, so changes to the column name
+                        // don't affect the dataset's internal member names.
+                        curName = new String(curName.replaceAll(CompoundDS.SEPARATOR, "->"));
+
+                        outColNames.add(curName);
+                    }
+                }
+            }
+
+            log.trace("recursiveColumnHeaderSetup(): finish");
+        }
+
+        private int calcArrayOfCompoundLen(List<Datatype> datatypes) {
+            int count = 0;
+            Iterator<Datatype> localIt = datatypes.iterator();
+            while (localIt.hasNext()) {
+                Datatype curType = localIt.next();
+
+                if (curType.isCompound()) {
+                    count += calcArrayOfCompoundLen(curType.getCompoundMemberTypes());
+                }
+                else if (curType.isArray()) {
+                    /*
+                     * TODO: nested array of compound length calculation
+                     */
+                }
+                else
+                    count++;
+            }
+
+            return count;
+        }
+
         @Override
         public int getColumnCount() {
             return ncols;
@@ -473,11 +541,19 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
-            return columnNames.get(columnIndex % groupSize);
+            try {
+                return columnNames.get(columnIndex % groupSize);
+            }
+            catch (Exception ex) {
+                log.debug("getDataValue({}, {}): ", rowIndex, columnIndex, ex);
+                return "*ERROR*";
+            }
         }
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
+            // Disable column header editing
+            return;
         }
     }
 
@@ -549,25 +625,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                              * worry about it.
                              */
                             if (nestingName.matches(".*\\[[0-9]*\\]")) {
-                                Pattern indexPattern = Pattern.compile(".*\\[([0-9]*)\\]");
-                                Matcher indexMatcher = indexPattern.matcher(nestingName);
-
-                                /*
-                                 * Group array/vlen of compounds members into array-indexed groups.
-                                 */
-                                if (indexMatcher.matches()) {
-                                    int containerIndex = 0;
-
-                                    try {
-                                        containerIndex = Integer.parseInt(indexMatcher.group(1));
-                                    }
-                                    catch (Exception ex) {
-                                        log.debug("CompoundDSNestedColumnHeaderLayer: error parsing array/vlen of compound index: ", ex);
-                                        break;
-                                    }
-
-                                    columnHeaderBuilder.append("[").append(containerIndex).append("]");
-                                }
+                                processArrayOfCompound(columnHeaderBuilder, nestingName);
                             }
 
                             columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(), colindex);
@@ -575,7 +633,38 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         else
                             log.debug("CompoundDSNestedColumnHeaderLayer: nesting group was null for index {}", colindex);
                     }
+                    else if (allColumnNames[i].matches(".*\\[[0-9]*\\]")) {
+                        /*
+                         * Top-level ARRAY of COMPOUND types.
+                         */
+                        columnHeaderBuilder.append("ARRAY");
+                        processArrayOfCompound(columnHeaderBuilder, allColumnNames[i]);
+
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(), colindex);
+                    }
                 }
+            }
+        }
+
+        private void processArrayOfCompound(StringBuilder curBuilder, String columnName) {
+            Pattern indexPattern = Pattern.compile(".*\\[([0-9]*)\\]");
+            Matcher indexMatcher = indexPattern.matcher(columnName);
+
+            /*
+             * Group array/vlen of compounds members into array-indexed groups.
+             */
+            if (indexMatcher.matches()) {
+                int containerIndex = 0;
+
+                try {
+                    containerIndex = Integer.parseInt(indexMatcher.group(1));
+                }
+                catch (Exception ex) {
+                    log.debug("processArrayOfCompound(): error parsing array/vlen of compound index: ", ex);
+                    return;
+                }
+
+                curBuilder.append("[").append(containerIndex).append("]");
             }
         }
     }

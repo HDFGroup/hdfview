@@ -14,10 +14,12 @@
 package hdf.view.TableView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import hdf.object.CompoundDataFormat;
 import hdf.object.Datatype;
 
 /**
@@ -31,6 +33,8 @@ import hdf.object.Datatype;
  */
 public class DataFactoryUtils {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataFactoryUtils.class);
+
     public static final String errStr = "*ERROR*";
     public static final String nullStr = "Null";
 
@@ -38,11 +42,17 @@ public class DataFactoryUtils {
     public static final int CMPD_START_IDX_MAP_INDEX = 1;
 
     /*
-     * Given a list of all the selected datatypes in a compound dataset, as well as
-     * a compound datatype, removes the non-selected datatypes from the List of
-     * datatypes inside the compound datatype and returns that as a new List.
+     * Given a CompoundDataFormat, as well as a compound datatype, removes the
+     * non-selected datatypes from the List of datatypes inside the compound
+     * datatype and returns that as a new List.
      */
-    public static List<Datatype> filterNonSelectedMembers(List<Datatype> allSelectedMembers, final Datatype compoundType) {
+    public static List<Datatype> filterNonSelectedMembers(CompoundDataFormat dataFormat, final Datatype compoundType) {
+        List<Datatype> allSelectedTypes = Arrays.asList(dataFormat.getSelectedMemberTypes());
+        if (allSelectedTypes == null) {
+            log.debug("filterNonSelectedMembers(): selected compound member datatype list is null");
+            return null;
+        }
+
         /*
          * Make sure to make a copy of the compound datatype's member list, as we will
          * make modifications to the list when members aren't selected.
@@ -65,7 +75,7 @@ public class DataFactoryUtils {
             if (curType.isCompound())
                 continue;
 
-            if (!allSelectedMembers.contains(curType))
+            if (!allSelectedTypes.contains(curType))
                 localIt.remove();
         }
 
@@ -76,13 +86,13 @@ public class DataFactoryUtils {
      * TODO: can potentially merge the two functions.
      */
     @SuppressWarnings("unchecked")
-    public static HashMap<Integer, Integer>[] buildIndexMaps(List<Datatype> allSelectedTypes, List<Datatype> localSelectedTypes) throws Exception {
+    public static HashMap<Integer, Integer>[] buildIndexMaps(CompoundDataFormat dataFormat, List<Datatype> localSelectedTypes) throws Exception {
         HashMap<Integer, Integer>[] maps = new HashMap[2];
         maps[COL_TO_BASE_CLASS_MAP_INDEX] = new HashMap<Integer, Integer>();
         maps[CMPD_START_IDX_MAP_INDEX] = new HashMap<Integer, Integer>();
 
-        buildColIdxToProviderMap(maps[COL_TO_BASE_CLASS_MAP_INDEX], allSelectedTypes, localSelectedTypes, new int[] { 0 }, new int[] { 0 }, 0);
-        buildRelColIdxToStartIdxMap(maps[CMPD_START_IDX_MAP_INDEX], allSelectedTypes, localSelectedTypes, new int[] { 0 }, new int[] { 0 }, 0);
+        buildColIdxToProviderMap(maps[COL_TO_BASE_CLASS_MAP_INDEX], dataFormat, localSelectedTypes, new int[] { 0 }, new int[] { 0 }, 0);
+        buildRelColIdxToStartIdxMap(maps[CMPD_START_IDX_MAP_INDEX], dataFormat, localSelectedTypes, new int[] { 0 }, new int[] { 0 }, 0);
 
         return maps;
     }
@@ -112,7 +122,7 @@ public class DataFactoryUtils {
      *
      * (0=0, 1=1, 2=2)
      */
-    private static void buildColIdxToProviderMap(HashMap<Integer, Integer> outMap, List<Datatype> allSelectedTypes,
+    private static void buildColIdxToProviderMap(HashMap<Integer, Integer> outMap, CompoundDataFormat dataFormat,
             List<Datatype> localSelectedTypes, int[] curMapIndex, int[] curProviderIndex, int depth) throws Exception {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
             Datatype curType = localSelectedTypes.get(i);
@@ -146,7 +156,7 @@ public class DataFactoryUtils {
             }
 
             if (nestedCompoundType != null) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(allSelectedTypes, nestedCompoundType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, nestedCompoundType);
 
                 /*
                  * For Array/Vlen of Compound types, we repeat the compound members n times,
@@ -154,13 +164,13 @@ public class DataFactoryUtils {
                  * Therefore, we repeat our mapping for these types n times.
                  */
                 for (int j = 0; j < arrSize; j++) {
-                    buildColIdxToProviderMap(outMap, allSelectedTypes, cmpdSelectedTypes, curMapIndex, curProviderIndex, depth + 1);
+                    buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curProviderIndex, depth + 1);
                 }
             }
             else if (curType.isCompound()) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(allSelectedTypes, curType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType);
 
-                buildColIdxToProviderMap(outMap, allSelectedTypes, cmpdSelectedTypes, curMapIndex, curProviderIndex, depth + 1);
+                buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curProviderIndex, depth + 1);
             }
             else
                 outMap.put(curMapIndex[0]++, curProviderIndex[0]);
@@ -212,7 +222,7 @@ public class DataFactoryUtils {
      *
      * (0=0, 1=1)
      */
-    private static void buildRelColIdxToStartIdxMap(HashMap<Integer, Integer> outMap, List<Datatype> allSelectedTypes,
+    private static void buildRelColIdxToStartIdxMap(HashMap<Integer, Integer> outMap, CompoundDataFormat dataFormat,
             List<Datatype> localSelectedTypes, int[] curMapIndex, int[] curStartIdx, int depth) throws Exception {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
             Datatype curType = localSelectedTypes.get(i);
@@ -246,7 +256,7 @@ public class DataFactoryUtils {
             }
 
             if (nestedCompoundType != null) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(allSelectedTypes, nestedCompoundType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, nestedCompoundType);
 
                 /*
                  * For Array/Vlen of Compound types, we repeat the compound members n times,
@@ -257,16 +267,16 @@ public class DataFactoryUtils {
                     if (depth == 0)
                         curStartIdx[0] = curMapIndex[0];
 
-                    buildRelColIdxToStartIdxMap(outMap, allSelectedTypes, cmpdSelectedTypes, curMapIndex, curStartIdx, depth + 1);
+                    buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curStartIdx, depth + 1);
                 }
             }
             else if (curType.isCompound()) {
                 if (depth == 0)
                     curStartIdx[0] = curMapIndex[0];
 
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(allSelectedTypes, curType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType);
 
-                buildRelColIdxToStartIdxMap(outMap, allSelectedTypes, cmpdSelectedTypes, curMapIndex, curStartIdx, depth + 1);
+                buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curStartIdx, depth + 1);
             }
             else {
                 if (depth == 0) {

@@ -15,7 +15,6 @@
 package hdf.view.TableView;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -202,13 +201,7 @@ public class DataValidatorFactory {
 
             CompoundDataFormat compoundFormat = (CompoundDataFormat) dataFormatReference;
 
-            List<Datatype> allSelectedMemberTypes = Arrays.asList(compoundFormat.getSelectedMemberTypes());
-            if (allSelectedMemberTypes == null) {
-                log.debug("selected compound member datatype list is null");
-                throw new Exception("CompoundDataValidator: selected compound member datatype list is null");
-            }
-
-            List<Datatype> localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(allSelectedMemberTypes, dtype);
+            List<Datatype> localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
 
             log.trace("setting up {} base HDFDataValidators", localSelectedTypes.size());
 
@@ -228,7 +221,7 @@ public class DataValidatorFactory {
             /*
              * Build necessary index maps.
              */
-            HashMap<Integer, Integer>[] maps = DataFactoryUtils.buildIndexMaps(allSelectedMemberTypes, localSelectedTypes);
+            HashMap<Integer, Integer>[] maps = DataFactoryUtils.buildIndexMaps(compoundFormat, localSelectedTypes);
             baseValidatorIndexMap = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
             relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
 

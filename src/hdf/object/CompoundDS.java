@@ -218,6 +218,29 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     }
 
     /**
+     * Returns an array of the names of the selected members of the compound dataset.
+     *
+     * @return an array of the names of the selected members of the compound dataset.
+     */
+    public final String[] getSelectedMemberNames() {
+        if (isMemberSelected == null) {
+            log.debug("getSelectedMemberNames(): isMemberSelected array is null");
+            log.trace("getSelectedMemberNames(): finish");
+            return memberNames;
+        }
+
+        int idx = 0;
+        String[] names = new String[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                names[idx++] = memberNames[i];
+            }
+        }
+
+        return names;
+    }
+
+    /**
      * Checks if a member of the compound dataset is selected for read/write.
      *
      * @param idx
