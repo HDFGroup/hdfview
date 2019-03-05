@@ -429,7 +429,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                         memberTIDs[i] = flatTypeList.get(i).createNative();
 
                         try {
-                            memberTypes[i] = new H5Datatype(memberTIDs[i]);
+                            memberTypes[i] = flatTypeList.get(i);
                         }
                         catch (Exception ex) {
                             log.debug("init(): failed to create datatype for member[{}]: ", i, ex);

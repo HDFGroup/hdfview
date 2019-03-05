@@ -1325,7 +1325,31 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             table.click(3, 2);
             val = tableShell.bot().text(0).getText();
-            assertTrue("openHDF5ArrayCompound() data did not match regex '3.0'", val.matches("3.0"));
+            assertTrue("openHDF5ArrayCompound() data did not match regex '0.0'", val.matches("0.0"));
+
+            table.click(4, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '10'", val.matches("10"));
+
+            table.click(4, 2);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '2.5'", val.matches("2.5"));
+
+            table.click(5, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '20'", val.matches("20"));
+
+            table.click(5, 2);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '5.0'", val.matches("5.0"));
+
+            table.click(6, 1);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '30'", val.matches("30"));
+
+            table.click(6, 2);
+            val = tableShell.bot().text(0).getText();
+            assertTrue("openHDF5ArrayCompound() data did not match regex '7.5'", val.matches("7.5"));
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));

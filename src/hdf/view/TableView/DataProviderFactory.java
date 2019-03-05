@@ -176,30 +176,43 @@ public class DataProviderFactory {
             log.trace("constructor: finish");
         }
 
+        /*
+         * A utility method used to translate a set of physical table coordinates to an
+         * index into a data buffer.
+         */
+        public int physicalLocationToBufIndex(int rowIndex, int columnIndex) {
+            log.trace("physicalLocationToBufIndex({}, {}): start", rowIndex, columnIndex);
+
+            long index = rowIndex * colCount + columnIndex;
+
+            if (rank > 1) {
+                log.trace("physicalLocationToBufIndex({}, {}): rank > 1; adjusting for multi-dimensional dataset", rowIndex, columnIndex);
+
+                if (isDataTransposed && isNaturalOrder)
+                    index = columnIndex * rowCount + rowIndex;
+                else if (!isDataTransposed && !isNaturalOrder)
+                    // Reshape Data
+                    index = rowIndex * colCount + columnIndex;
+                else if (isDataTransposed && !isNaturalOrder)
+                    // Transpose Data
+                    index = columnIndex * rowCount + rowIndex;
+                else
+                    index = rowIndex * colCount + columnIndex;
+            }
+
+            log.trace("physicalLocationToBufIndex({}, {})({}): finish", rowIndex, columnIndex, index);
+
+            return (int) index;
+        }
+
         @Override
         public Object getDataValue(int columnIndex, int rowIndex) {
             log.trace("getDataValue({}, {}): start", rowIndex, columnIndex);
 
             try {
-                long index = rowIndex * colCount + columnIndex;
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
-                if (rank > 1) {
-                    log.trace("getDataValue({}, {}): rank={} isDataTransposed={} isNaturalOrder={}",
-                            rowIndex, columnIndex, rank, isDataTransposed, isNaturalOrder);
-
-                    if (isDataTransposed && isNaturalOrder)
-                        index = columnIndex * rowCount + rowIndex;
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = rowIndex * colCount + columnIndex;
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = columnIndex * rowCount + rowIndex;
-                    else
-                        index = rowIndex * colCount + columnIndex;
-                }
-
-                theValue = Array.get(dataBuf, (int) index);
+                theValue = Array.get(dataBuf, bufIndex);
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
@@ -263,86 +276,10 @@ public class DataProviderFactory {
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
             log.trace("setDataValue({}, {}, {}): start", rowIndex, columnIndex, newValue);
 
-            if ((newValue == null) || ((newValue = ((String) newValue).trim()) == null)) {
-                log.debug("setDataValue({}, {}, {}): cell value not updated; new value is null", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
-                return;
-            }
-
-            // No need to update if values are the same
-            Object oldVal = this.getDataValue(columnIndex, rowIndex);
-            if ((oldVal != null) && newValue.equals(oldVal.toString())) {
-                log.debug("setDataValue({}, {}, {}): cell value not updated; new value same as old value", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
-                return;
-            }
-
             try {
-                long index = rowIndex * colCount + columnIndex;
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
-                if (rank > 1) {
-                    log.trace("setDataValue({}, {}, {}): rank={} isDataTransposed={} isNaturalOrder={}", rowIndex,
-                            columnIndex, newValue, rank, isDataTransposed, isNaturalOrder);
-
-                    if (isDataTransposed && isNaturalOrder)
-                        index = columnIndex * rowCount + rowIndex;
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = rowIndex * colCount + columnIndex;
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = columnIndex * rowCount + rowIndex;
-                    else
-                        index = rowIndex * colCount + columnIndex;
-                }
-
-                char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataBuf);
-
-                log.trace("setDataValue({}, {}, {}): runtimeTypeClass={}", rowIndex, columnIndex, newValue, runtimeTypeClass);
-
-                switch (runtimeTypeClass) {
-                    case 'B':
-                        byte bvalue = 0;
-                        bvalue = Byte.parseByte((String) newValue);
-                        Array.setByte(dataBuf, (int) index, bvalue);
-                        break;
-                    case 'S':
-                        short svalue = 0;
-                        svalue = Short.parseShort((String) newValue);
-                        Array.setShort(dataBuf, (int) index, svalue);
-                        break;
-                    case 'I':
-                        int ivalue = 0;
-                        ivalue = Integer.parseInt((String) newValue);
-                        Array.setInt(dataBuf, (int) index, ivalue);
-                        break;
-                    case 'J':
-                        long lvalue = 0;
-                        /*
-                         * TODO:
-                         */
-                        /* if (dname == 'J') {
-                            BigInteger big = new BigInteger((String) newValue);
-                            lvalue = big.longValue();
-                        }
-                        else */
-                            lvalue = Long.parseLong((String) newValue);
-                        Array.setLong(dataBuf, (int) index, lvalue);
-                        break;
-                    case 'F':
-                        float fvalue = 0;
-                        fvalue = Float.parseFloat((String) newValue);
-                        Array.setFloat(dataBuf, (int) index, fvalue);
-                        break;
-                    case 'D':
-                        double dvalue = 0;
-                        dvalue = Double.parseDouble((String) newValue);
-                        Array.setDouble(dataBuf, (int) index, dvalue);
-                        break;
-                    default:
-                        Array.set(dataBuf, (int) index, newValue);
-                        break;
-                }
+                updateAtomicValue(dataBuf, newValue, bufIndex);
 
                 isValueChanged = true;
             }
@@ -394,74 +331,80 @@ public class DataProviderFactory {
         public void setDataValue(int index, Object bufObject, Object newValue) {
             log.trace("setDataValue({}, {}, {}): start", index, bufObject, newValue);
 
-            if ((newValue == null) || ((newValue = ((String) newValue).trim()) == null)) {
-                log.debug("setDataValue({}, {}, {}): cell value not updated; new value is null", index, bufObject, newValue);
+            try {
+                updateAtomicValue(bufObject, newValue, index);
+
+                isValueChanged = true;
+            }
+            catch (Exception ex) {
+                log.debug("setDataValue({}, {}, {}): updateAtomicValue failure: ", index, bufObject, newValue, ex);
+            }
+            finally {
                 log.trace("setDataValue({}, {}, {}): finish", index, bufObject, newValue);
+            }
+        }
+
+        private void updateAtomicValue(Object bufObject, Object newValue, int bufIndex) {
+            if ((newValue == null) || ((newValue = ((String) newValue).trim()) == null)) {
+                log.debug("updateAtomicValue(): cell value not updated; new value is null");
+                log.trace("updateAtomicValue(): finish");
                 return;
             }
 
             // No need to update if values are the same
-            Object oldVal = this.getDataValue(bufObject, index);
+            Object oldVal = this.getDataValue(bufObject, bufIndex);
             if ((oldVal != null) && newValue.equals(oldVal.toString())) {
-                log.debug("setDataValue({}, {}, {}): cell value not updated; new value same as old value", index, bufObject, newValue);
-                log.trace("setDataValue({}, {}, {}): finish", index, bufObject, newValue);
+                log.debug("updateAtomicValue(): cell value not updated; new value same as old value");
+                log.trace("updateAtomicValue(): finish");
                 return;
             }
 
-            try {
-                char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(bufObject);
+            char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(bufObject);
 
-                log.trace("setDataValue({}, {}, {}): runtimeTypeClass={}", index, bufObject, newValue, runtimeTypeClass);
+            log.trace("updateAtomicValue(): runtimeTypeClass={}", runtimeTypeClass);
 
-                switch (runtimeTypeClass) {
-                    case 'B':
-                        byte bvalue = 0;
-                        bvalue = Byte.parseByte((String) newValue);
-                        Array.setByte(bufObject, index, bvalue);
-                        break;
-                    case 'S':
-                        short svalue = 0;
-                        svalue = Short.parseShort((String) newValue);
-                        Array.setShort(bufObject, index, svalue);
-                        break;
-                    case 'I':
-                        int ivalue = 0;
-                        ivalue = Integer.parseInt((String) newValue);
-                        Array.setInt(bufObject, index, ivalue);
-                        break;
-                    case 'J':
-                        long lvalue = 0;
-                        /*
-                         * TODO:
-                         */
-                        /* if (dname == 'J') {
-                            BigInteger big = new BigInteger((String) newValue);
-                            lvalue = big.longValue();
-                        }
-                        else */
-                            lvalue = Long.parseLong((String) newValue);
-                        Array.setLong(bufObject, index, lvalue);
-                        break;
-                    case 'F':
-                        float fvalue = 0;
-                        fvalue = Float.parseFloat((String) newValue);
-                        Array.setFloat(bufObject, index, fvalue);
-                        break;
-                    case 'D':
-                        double dvalue = 0;
-                        dvalue = Double.parseDouble((String) newValue);
-                        Array.setDouble(bufObject, index, dvalue);
-                        break;
-                    default:
-                        Array.set(bufObject, index, newValue);
-                        break;
-                }
-            }
-            catch (Exception ex) {
-                log.debug("setDataValue({}, {}, {}): failure: ", index, bufObject, newValue, ex);
-            }
-            finally {
-                log.trace("setDataValue({}, {}, {}): finish", index, bufObject, newValue);
+            switch (runtimeTypeClass) {
+                case 'B':
+                    byte bvalue = 0;
+                    bvalue = Byte.parseByte((String) newValue);
+                    Array.setByte(bufObject, bufIndex, bvalue);
+                    break;
+                case 'S':
+                    short svalue = 0;
+                    svalue = Short.parseShort((String) newValue);
+                    Array.setShort(bufObject, bufIndex, svalue);
+                    break;
+                case 'I':
+                    int ivalue = 0;
+                    ivalue = Integer.parseInt((String) newValue);
+                    Array.setInt(bufObject, bufIndex, ivalue);
+                    break;
+                case 'J':
+                    long lvalue = 0;
+                    /*
+                     * TODO:
+                     */
+                    /* if (dname == 'J') {
+                        BigInteger big = new BigInteger((String) newValue);
+                        lvalue = big.longValue();
+                    }
+                    else */
+                        lvalue = Long.parseLong((String) newValue);
+                    Array.setLong(bufObject, bufIndex, lvalue);
+                    break;
+                case 'F':
+                    float fvalue = 0;
+                    fvalue = Float.parseFloat((String) newValue);
+                    Array.setFloat(bufObject, bufIndex, fvalue);
+                    break;
+                case 'D':
+                    double dvalue = 0;
+                    dvalue = Double.parseDouble((String) newValue);
+                    Array.setDouble(bufObject, bufIndex, dvalue);
+                    break;
+                default:
+                    Array.set(bufObject, bufIndex, newValue);
+                    break;
             }
         }
 
@@ -837,45 +780,28 @@ public class DataProviderFactory {
             log.trace("getDataValue({}, {}): start", rowIndex, columnIndex);
 
             try {
-                long index = (rowIndex * colCount + columnIndex) * arraySize;
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
-                if (rank > 1) {
-                    log.trace("getDataValue({}, {}): rank={} isDataTransposed={} isNaturalOrder={}",
-                            rowIndex, columnIndex, rank, isDataTransposed, isNaturalOrder);
-
-                    if (isDataTransposed && isNaturalOrder)
-                        index = (columnIndex * rowCount + rowIndex) * arraySize;
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = (rowIndex * colCount + columnIndex) * arraySize;
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = (columnIndex * rowCount + rowIndex) * arraySize;
-                    else
-                        index = (rowIndex * colCount + columnIndex) * arraySize;
-                }
+                bufIndex *= arraySize;
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        /*
-                         * TODO: still valid?
-                         */
-                        /* arrayElements[i] = ((Object[]) dataBuf)[i]; */
-                        arrayElements[i] = baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index + i);
-                    }
+                    /*
+                     * Pass row and column indices down where they will be adjusted.
+                     */
+                    theValue = retrieveArrayOfCompoundElements(dataBuf, columnIndex, rowIndex);
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        arrayElements[i] = baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index + i);
-                    }
+                    /*
+                     * TODO: assign to global arrayElements.
+                     */
+                    theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else {
-                    for (int i = 0; i < arraySize; i++) {
-                        arrayElements[i] = baseTypeDataProvider.getDataValue(dataBuf, (int) index + i);
-                    }
+                    /*
+                     * TODO: assign to global arrayElements.
+                     */
+                    theValue = retrieveArrayOfAtomicElements(dataBuf, bufIndex);
                 }
-
-                theValue = arrayElements;
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
@@ -891,34 +817,20 @@ public class DataProviderFactory {
         public Object getDataValue(Object obj, int columnIndex, int rowIndex) {
             log.trace("getDataValue({}, {}, {}): start", obj, rowIndex, columnIndex);
 
-            /*
-             * TODO: can we get away without temp. array? Overwriting problem.
-             */
-            Object[] tempArray = new Object[(int) arraySize];
-
             try {
                 long index = rowIndex * arraySize;
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
                     /*
-                     * Since we flatten array of compound types, we only need to return a single
-                     * value.
+                     * Pass row and column indices down where they will be adjusted.
                      */
-                    theValue = new Object[] { baseTypeDataProvider.getDataValue(obj, columnIndex, (int) index) };
+                    theValue = retrieveArrayOfCompoundElements(obj, columnIndex, rowIndex);
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        tempArray[i] = baseTypeDataProvider.getDataValue(obj, columnIndex, (int) index + i);
-                    }
-
-                    theValue = tempArray;
+                    theValue = retrieveArrayOfArrayElements(obj, columnIndex, (int) index);
                 }
                 else {
-                    for (int i = 0; i < arraySize; i++) {
-                        tempArray[i] = baseTypeDataProvider.getDataValue(obj, (int) index + i);
-                    }
-
-                    theValue = tempArray;
+                    theValue = retrieveArrayOfAtomicElements(obj, (int) index);
                 }
             }
             catch (Exception ex) {
@@ -931,6 +843,38 @@ public class DataProviderFactory {
             return theValue;
         }
 
+        private Object[] retrieveArrayOfCompoundElements(Object objBuf, int columnIndex, int rowIndex) {
+            long adjustedRowIdx = (rowIndex * arraySize * colCount)
+                    + (columnIndex / ((CompoundDataProvider) baseTypeDataProvider).baseProviderIndexMap.size());
+            long adjustedColIdx = columnIndex % ((CompoundDataProvider) baseTypeDataProvider).baseProviderIndexMap.size();
+
+            /*
+             * Since we flatten array of compound types, we only need to return a single
+             * value.
+             */
+            return new Object[] { baseTypeDataProvider.getDataValue(objBuf, (int) adjustedColIdx, (int) adjustedRowIdx) };
+        }
+
+        private Object[] retrieveArrayOfArrayElements(Object objBuf, int columnIndex, int startRowIndex) {
+            Object[] tempArray = new Object[(int) arraySize];
+
+            for (int i = 0; i < arraySize; i++) {
+                tempArray[i] = baseTypeDataProvider.getDataValue(objBuf, columnIndex, startRowIndex + i);
+            }
+
+            return tempArray;
+        }
+
+        private Object[] retrieveArrayOfAtomicElements(Object objBuf, int rowStartIdx) {
+            Object[] tempArray = new Object[(int) arraySize];
+
+            for (int i = 0; i < arraySize; i++) {
+                tempArray[i] = baseTypeDataProvider.getDataValue(objBuf, rowStartIdx + i);
+            }
+
+            return tempArray;
+        }
+
         @Override
         public Object getDataValue(Object obj, int index) {
             throw new UnsupportedOperationException("getDataValue(Object, int) should not be called for ArrayDataProviders");
@@ -941,60 +885,11 @@ public class DataProviderFactory {
             log.trace("setDataValue({}, {}, {}): start", rowIndex, columnIndex, newValue);
 
             try {
-                long index = (rowIndex * colCount + columnIndex) * arraySize;
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
-                if (rank > 1) {
-                    log.trace("setDataValue({}, {}, {}): rank={} isDataTransposed={} isNaturalOrder={}",
-                            rowIndex, columnIndex, newValue, rank, isDataTransposed, isNaturalOrder);
+                bufIndex *= arraySize;
 
-                    if (isDataTransposed && isNaturalOrder)
-                        index = (columnIndex * rowCount + rowIndex) * arraySize;
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = (rowIndex * colCount + columnIndex) * arraySize;
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = (columnIndex * rowCount + rowIndex) * arraySize;
-                    else
-                        index = (rowIndex * colCount + columnIndex) * arraySize;
-                }
-
-                StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
-                if (st.countTokens() < arraySize) {
-                    /*
-                     * TODO:
-                     */
-                    /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
-                    log.debug("setDataValue({}, {}, {}): number of data points < array size {}", rowIndex, columnIndex, newValue, arraySize);
-                    log.trace("setDataValue({}, {}, {}): finish", rowIndex, columnIndex, newValue);
-                    return;
-                }
-
-                String token = "";
-
-                /*
-                 * TODO: should maybe be modified to multiply the index by the arraySize before
-                 * handing down?
-                 */
-                if (baseTypeDataProvider instanceof CompoundDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        List<?> cmpdDataList = (List<?>) ((Object[]) dataBuf)[i];
-                        token = st.nextToken().trim();
-                        baseTypeDataProvider.setDataValue(columnIndex, (int) index + i, cmpdDataList, token);
-                    }
-                }
-                else if (baseTypeDataProvider instanceof ArrayDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        token = st.nextToken().trim();
-                        baseTypeDataProvider.setDataValue(columnIndex, (int) index + i, dataBuf, token);
-                    }
-                }
-                else {
-                    for (int i = 0; i < arraySize; i++) {
-                        token = st.nextToken().trim();
-                        baseTypeDataProvider.setDataValue((int) index + i, dataBuf, token);
-                    }
-                }
+                updateArrayElements(dataBuf, newValue, columnIndex, bufIndex);
 
                 isValueChanged = true;
             }
@@ -1011,40 +906,9 @@ public class DataProviderFactory {
             log.trace("setDataValue({}, {}, {}, {}): start", rowIndex, columnIndex, bufObject, newValue);
 
             try {
-                long index = rowIndex * arraySize;
+                long bufIndex = rowIndex * arraySize;
 
-                StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
-                if (st.countTokens() < arraySize) {
-                    /*
-                     * TODO:
-                     */
-                    /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
-                    log.debug("setDataValue({}, {}, {}, {}): number of data points < array size {}", rowIndex, columnIndex, bufObject, newValue, arraySize);
-                    log.trace("setDataValue({}, {}, {}, {}): finish", rowIndex, columnIndex, bufObject, newValue);
-                    return;
-                }
-
-                String token = "";
-
-                if (baseTypeDataProvider instanceof CompoundDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        List<?> cmpdDataList = (List<?>) ((Object[]) bufObject)[i];
-                        token = st.nextToken().trim();
-                        baseTypeDataProvider.setDataValue(columnIndex, (int) index + i, cmpdDataList, token);
-                    }
-                }
-                else if (baseTypeDataProvider instanceof ArrayDataProvider) {
-                    for (int i = 0; i < arraySize; i++) {
-                        token = st.nextToken().trim();
-                        baseTypeDataProvider.setDataValue(columnIndex, (int) index + i, bufObject, token);
-                    }
-                }
-                else {
-                    for (int i = 0; i < arraySize; i++) {
-                        token = st.nextToken().trim();
-                        baseTypeDataProvider.setDataValue((int) index + i, bufObject, token);
-                    }
-                }
+                updateArrayElements(bufObject, newValue, columnIndex, (int) bufIndex);
 
                 isValueChanged = true;
             }
@@ -1059,6 +923,53 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int index, Object bufObject, Object newValue) {
             throw new UnsupportedOperationException("setDataValue(int, Object, Object) should not be called for ArrayDataProviders");
+        }
+
+        private void updateArrayElements(Object curBuf, Object newValue, int columnIndex, int bufStartIndex) {
+            log.trace("updateArrayElements(): start");
+
+            StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
+            if (st.countTokens() < arraySize) {
+                /*
+                 * TODO:
+                 */
+                /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
+                log.debug("updateArrayElements(): number of data points < array size {}", arraySize);
+                log.trace("updateArrayElements({}, {}, {}): finish", curBuf, newValue, bufStartIndex);
+                return;
+            }
+
+            if (baseTypeDataProvider instanceof CompoundDataProvider) {
+                updateArrayOfCompoundElements(st, curBuf, columnIndex, bufStartIndex);
+            }
+            else if (baseTypeDataProvider instanceof ArrayDataProvider) {
+                updateArrayOfArrayElements(st, curBuf, columnIndex, bufStartIndex);
+            }
+            else {
+                updateArrayOfAtomicElements(st, curBuf, bufStartIndex);
+            }
+
+            log.trace("updateArrayElements(): finish");
+        }
+
+        private void updateArrayOfCompoundElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
+            for (int i = 0; i < arraySize; i++) {
+                List<?> cmpdDataList = (List<?>) ((Object[]) curBuf)[i];
+                baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, cmpdDataList,
+                        tokenizer.nextToken().trim());
+            }
+        }
+
+        private void updateArrayOfArrayElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
+            for (int i = 0; i < arraySize; i++) {
+                baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+            }
+        }
+
+        private void updateArrayOfAtomicElements(StringTokenizer tokenizer, Object curBuf, int bufStartIndex) {
+            for (int i = 0; i < arraySize; i++) {
+                baseTypeDataProvider.setDataValue(bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+            }
         }
 
         @Override
@@ -1097,23 +1008,7 @@ public class DataProviderFactory {
             buffer.setLength(0);
 
             try {
-                long index = (rowIndex * colCount + columnIndex);
-
-                if (rank > 1) {
-                    log.trace("getDataValue({}, {}): rank={} isDataTransposed={} isNaturalOrder={}",
-                            rowIndex, columnIndex, rank, isDataTransposed, isNaturalOrder);
-
-                    if (isDataTransposed && isNaturalOrder)
-                        index = (columnIndex * rowCount + rowIndex);
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = (rowIndex * colCount + columnIndex);
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = (columnIndex * rowCount + rowIndex);
-                    else
-                        index = (rowIndex * colCount + columnIndex);
-                }
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
                     /*
@@ -1123,15 +1018,15 @@ public class DataProviderFactory {
                      * buffer.append(baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index));
                      */
                     if (dataBuf instanceof String[])
-                        buffer.append(Array.get(dataBuf, (int) index));
+                        buffer.append(Array.get(dataBuf, bufIndex));
                     else
                         buffer.append("*UNSUPPORTED*");
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
-                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index));
+                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, columnIndex, bufIndex));
                 }
                 else {
-                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, (int) index));
+                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, bufIndex));
                 }
 
                 theValue = buffer.toString();
@@ -1256,41 +1151,11 @@ public class DataProviderFactory {
             log.trace("setDataValue({}, {}, {}): start", rowIndex, columnIndex, newValue);
 
             try {
-                long index = (rowIndex * colCount + columnIndex);
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
-                if (rank > 1) {
-                    log.trace("setDataValue({}, {}, {}): rank={} isDataTransposed={} isNaturalOrder={}",
-                            rowIndex, columnIndex, newValue, rank, isDataTransposed, isNaturalOrder);
+                bufIndex *= typeSize;
 
-                    if (isDataTransposed && isNaturalOrder)
-                        index = (columnIndex * rowCount + rowIndex);
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = (rowIndex * colCount + columnIndex);
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = (columnIndex * rowCount + rowIndex);
-                    else
-                        index = (rowIndex * colCount + columnIndex);
-                }
-
-                // String data represented as a byte[]
-                int strlen = (int) typeSize;
-                byte[] bytes = ((String) newValue).getBytes();
-                byte[] bData = (byte[]) dataBuf;
-                int n = Math.min(strlen, bytes.length);
-
-                index *= strlen;
-
-                System.arraycopy(bytes, 0, bData, (int) index, n);
-
-                index += n;
-                n = strlen - bytes.length;
-
-                // space padding
-                for (int i = 0; i < n; i++) {
-                    bData[(int) index + i] = ' ';
-                }
+                updateStringBytes(dataBuf, newValue, bufIndex);
 
                 isValueChanged = true;
             }
@@ -1307,23 +1172,9 @@ public class DataProviderFactory {
             log.trace("setDataValue({}, {}, {}): start", index, bufObject, newValue);
 
             try {
-                // String data represented as a byte[]
-                int strlen = (int) typeSize;
-                byte[] bytes = ((String) newValue).getBytes();
-                byte[] bData = (byte[]) bufObject;
-                int n = Math.min(strlen, bytes.length);
+                index *= typeSize;
 
-                index *= strlen;
-
-                System.arraycopy(bytes, 0, bData, index, n);
-
-                index += n;
-                n = strlen - bytes.length;
-
-                // space padding
-                for (int i = 0; i < n; i++) {
-                    bData[index + i] = ' ';
-                }
+                updateStringBytes(bufObject, newValue, index);
 
                 isValueChanged = true;
             }
@@ -1332,6 +1183,24 @@ public class DataProviderFactory {
             }
             finally {
                 log.trace("setDataValue({}, {}, {}): finish", index, bufObject, newValue);
+            }
+        }
+
+        private void updateStringBytes(Object curBuf, Object newValue, int bufStartIndex) {
+            // Update String using data represented as a byte[]
+            int strLen = (int) typeSize;
+            byte[] newValueBytes = ((String) newValue).getBytes();
+            byte[] curBytes = (byte[]) curBuf;
+            int n = Math.min(strLen, newValueBytes.length);
+
+            System.arraycopy(newValueBytes, 0, curBytes, bufStartIndex, n);
+
+            bufStartIndex += n;
+            n = strLen - newValueBytes.length;
+
+            // space padding
+            for (int i = 0; i < n; i++) {
+                curBytes[bufStartIndex + i] = ' ';
             }
         }
 
@@ -1461,37 +1330,10 @@ public class DataProviderFactory {
             log.trace("getDataValue({}, {}): start", rowIndex, columnIndex);
 
             try {
-                long index = rowIndex * colCount + columnIndex;
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
-                if (rank > 1) {
-                    log.trace("getDataValue({}, {}): rank={} isDataTransposed={} isNaturalOrder={}",
-                            rowIndex, columnIndex, rank, isDataTransposed, isNaturalOrder);
-
-                    if (isDataTransposed && isNaturalOrder)
-                        index = columnIndex * rowCount + rowIndex;
-                    else if (!isDataTransposed && !isNaturalOrder)
-                        // Reshape Data
-                        index = rowIndex * colCount + columnIndex;
-                    else if (isDataTransposed && !isNaturalOrder)
-                        // Transpose Data
-                        index = columnIndex * rowCount + rowIndex;
-                    else
-                        index = rowIndex * colCount + columnIndex;
-                }
-
-                byte[] elements = new byte[(int) typeSize];
-
-                log.trace("getDataValue({}, {}): datatype size={}", rowIndex, columnIndex, typeSize);
-
-                index *= typeSize;
-
-                log.trace("getDataValue({}, {}): index={}", rowIndex, columnIndex, index);
-
-                for (int i = 0; i < typeSize; i++) {
-                    elements[i] = Array.getByte(dataBuf, (int) index + i);
-                }
-
-                theValue = elements;
+                bufIndex *= typeSize;
+                theValue = populateByteArray(dataBuf, bufIndex);
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
@@ -1507,19 +1349,28 @@ public class DataProviderFactory {
         public Object getDataValue(Object obj, int index) {
             log.trace("getDataValue({}, {}): start", obj, index);
 
-            byte[] elements = new byte[(int) typeSize];
-
-            index *= typeSize;
-
-            for (int i = 0; i < typeSize; i++) {
-                elements[i] = Array.getByte(obj, index + i);
+            try {
+                index *= typeSize;
+                theValue = populateByteArray(obj, index);
             }
-
-            theValue = elements;
+            catch (Exception ex) {
+                log.debug("getDataValue({}, {}): ", obj, index, ex);
+                theValue = DataFactoryUtils.errStr;
+            }
 
             log.trace("getDataValue({}, {})({}): finish", obj, index, theValue);
 
             return theValue;
+        }
+
+        private byte[] populateByteArray(Object byteBuf, int startIndex) {
+            byte[] byteElements = new byte[(int) typeSize];
+
+            for (int i = 0; i < typeSize; i++) {
+                byteElements[i] = Array.getByte(byteBuf, startIndex + i);
+            }
+
+            return byteElements;
         }
 
     }
@@ -1541,6 +1392,10 @@ public class DataProviderFactory {
      * Since compound type attributes are currently simply retrieved as a 1D array
      * of strings, we use a custom IDataProvider to provide data for the Compound
      * TableView from the array of strings.
+     */
+    /*
+     * TODO: Update after making compound attributes be read as real data instead of
+     * strings.
      */
     private static class CompoundAttributeDataProvider extends HDFDataProvider {
         private Object              theAttrValue;
