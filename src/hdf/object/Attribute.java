@@ -1048,11 +1048,35 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         if (!this.getFileFormat().equals(obj.getFileFormat())) return false;
 
-        if (!this.getDims().equals(((DataFormat) obj).getDims())) return false;
+        if (!Arrays.equals(this.getDims(), ((DataFormat) obj).getDims()))
+            return false;
 
-        if (!this.getParentObject().equals(((Attribute) obj).getParentObject())) return false;
+        return (this.getParentObject().equals(((Attribute) obj).getParentObject()));
+    }
 
-        return true;
+    @Override
+    public boolean equals(Object obj) {
+        // checking if both the object references are
+        // referring to the same object.
+        if (this == obj)
+            return true;
+
+        // it checks if the argument is of the
+        // type HObject by comparing the classes
+        // of the passed argument and this object.
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+
+        // comparing the state of argument with
+        // the state of 'this' Object.
+        return this.equals((HObject) obj);
+    }
+
+    @Override
+    public int hashCode() {
+
+        // We are returning the OID as a hashcode value.
+        return super.hashCode();
     }
 
     /**

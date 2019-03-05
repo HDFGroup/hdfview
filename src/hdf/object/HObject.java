@@ -440,22 +440,43 @@ public abstract class HObject implements Serializable {
     }
 
     /**
-     * Checks if the OID of the object is the same as the given object
-     * identifier within the same file.
+     * Returns the file that contains the object.
+     *
+     * @return The file that contains the object.
+     */
+    public final FileFormat getFileFormat() {
+        return fileFormat;
+    }
+
+    /**
+     * Returns a cloned copy of the object identifier.
      * <p>
-     * HDF4 and HDF5 data objects are identified by their unique OIDs. A data
-     * object in a file may have multiple logical names , which are represented
-     * in a graph structure as separate objects.
+     * The object OID cannot be modified once it is created. getOID() clones the object OID to ensure
+     * the object OID cannot be modified outside of this class.
+     *
+     * @return the cloned copy of the object OID.
+     */
+    public final long[] getOID() {
+        if (oid == null) {
+            return null;
+        }
+
+        return oid.clone();
+    }
+
+    /**
+     * Checks if the OID of the object is the same as the given object identifier within the same file.
      * <p>
-     * The HObject.equalsOID(long[] theID) can be used to check if two data
-     * objects with different names are pointed to the same object within the
-     * same file.
+     * HDF4 and HDF5 data objects are identified by their unique OIDs. A data object in a file may have
+     * multiple logical names , which are represented in a graph structure as separate objects.
+     * <p>
+     * The HObject.equalsOID(long[] theID) can be used to check if two data objects with different names
+     * are pointed to the same object within the same file.
      *
      * @param theID
      *            The list object identifiers.
      *
-     * @return true if the ID of the object equals the given OID; otherwise,
-     *         returns false.
+     * @return true if the ID of the object equals the given OID; otherwise, returns false.
      */
     public final boolean equalsOID(long[] theID) {
         if ((theID == null) || (oid == null)) {
@@ -477,32 +498,6 @@ public abstract class HObject implements Serializable {
         }
 
         return isMatched;
-    }
-
-    /**
-     * Returns the file that contains the object.
-     *
-     * @return The file that contains the object.
-     */
-    public final FileFormat getFileFormat() {
-        return fileFormat;
-    }
-
-    /**
-     * Returns a cloned copy of the object identifier.
-     * <p>
-     * The object OID cannot be modified once it is created. getOID() clones the
-     * object OID to ensure the object OID cannot be modified outside of this
-     * class.
-     *
-     * @return the cloned copy of the object OID.
-     */
-    public final long[] getOID() {
-        if (oid == null) {
-            return null;
-        }
-
-        return oid.clone();
     }
 
     /**
@@ -539,5 +534,30 @@ public abstract class HObject implements Serializable {
         if (name != null) return name;
 
         return super.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        // checking if both the object references are
+        // referring to the same object.
+        if (this == obj)
+            return true;
+
+        // it checks if the argument is of the
+        // type HObject by comparing the classes
+        // of the passed argument and this object.
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+
+        // comparing the state of argument with
+        // the state of 'this' Object.
+        return this.equals((HObject) obj);
+    }
+
+    @Override
+    public int hashCode() {
+
+        // We are returning the OID as a hashcode value.
+        return (int) oid[0];
     }
 }
