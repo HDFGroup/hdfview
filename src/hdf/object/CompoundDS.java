@@ -95,7 +95,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      * The i-th element of the Object[] is an integer array (int[]) that
      * contains the dimension sizes of the i-th member.
      */
-    protected Object[] memberDims;
+    protected transient Object[] memberDims;
 
     /**
      * The datatypes of compound members.

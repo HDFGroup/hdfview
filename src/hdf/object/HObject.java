@@ -501,19 +501,6 @@ public abstract class HObject implements Serializable {
     }
 
     /**
-     * Returns whether this HObject is equal to the specified HObject
-     * by comparing their OIDs.
-     *
-     * @param obj
-     *            The object
-     *
-     * @return true if the object is equal by OID
-     */
-    public boolean equals(HObject obj) {
-        return this.equalsOID(obj.getOID());
-    }
-
-    /**
      * Returns the name of the object.
      * <p>
      * This method overwrites the toString() method in the Java Object class
@@ -536,22 +523,29 @@ public abstract class HObject implements Serializable {
         return super.toString();
     }
 
+    /**
+     * Returns whether this HObject is equal to the specified HObject by comparing their OIDs.
+     *
+     * @param obj
+     *            The object
+     *
+     * @return true if the object is equal by OID
+     */
     @Override
     public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+
         // checking if both the object references are
         // referring to the same object.
         if (this == obj)
             return true;
-
-        // it checks if the argument is of the
-        // type HObject by comparing the classes
-        // of the passed argument and this object.
-        if (obj == null || obj.getClass() != this.getClass())
-            return false;
-
-        // comparing the state of argument with
-        // the state of 'this' Object.
-        return this.equals((HObject) obj);
+        if (obj instanceof HObject) {
+            // comparing the state of OID with
+            // the state of 'this' OID.
+            return this.equalsOID(((HObject) obj).getOID());
+        }
+        return false;
     }
 
     @Override

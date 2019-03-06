@@ -44,7 +44,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * The memory buffer that holds the raw data of the dataset.
      */
-    protected Object          data;
+    protected transient Object          data;
 
     /**
      * The number of dimensions of the dataset.
@@ -134,7 +134,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /** The compression information. */
     protected StringBuilder   compression;
-    public static final String compressionGzipTxt = "GZIP: level = ";
+    public static final String COMPRESSION_GZIP_TXT = "GZIP: level = ";
 
     /** The filters information. */
     protected StringBuilder   filters;
@@ -169,7 +169,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * The data buffer that contains the raw data directly reading from file
      * (before any data conversion).
      */
-    protected Object          originalBuf         = null;
+    protected transient Object originalBuf = null;
 
     /**
      * The array that holds the converted data of unsigned C-type integers.
@@ -179,7 +179,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * data is converted to an array of 32-bit singed integer. In that case, the
      * converted buffer is the array of 32-bit singed integer.
      */
-    protected Object          convertedBuf        = null;
+    protected transient Object convertedBuf = null;
 
     /**
      * Constructs a Dataset object with a given file, name and path.
