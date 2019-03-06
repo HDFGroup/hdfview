@@ -237,7 +237,7 @@ public class DefaultImageView implements ImageView {
     private boolean                 isUnsignedConverted = false;
 
     private double[]                dataRange;
-    private final double[]          originalRange = { 0, 0 };
+    private double[]                originalRange = { 0, 0 };
 
     private PaletteComponent        paletteComponent;
 
@@ -434,7 +434,7 @@ public class DefaultImageView implements ImageView {
         }
 
         if (image == null) {
-            getImage();
+            image = getImage();
         }
 
         if (image == null) {
@@ -3750,17 +3750,17 @@ public class DefaultImageView implements ImageView {
 
             Tools.findMinMax(dataDist, minmaxDist, null);
 
-            if ((minmaxCurrent == null) || (minmaxCurrent.length <= 1)) {
+            if ((minmaxOriginal == null) || (minmaxOriginal.length <= 1)) {
                 minmaxCurrent[0] = 0;
                 minmaxCurrent[1] = 255;
             }
             else {
-                if (minmaxCurrent[0] == minmaxCurrent[1]) {
-                    Tools.findMinMax(data, minmaxCurrent, dataset.getFillValue());
+                if (minmaxOriginal[0] == minmaxOriginal[1]) {
+                    Tools.findMinMax(data, minmaxOriginal, dataset.getFillValue());
                 }
 
-                minmaxCurrent[0] = minmaxCurrent[0];
-                minmaxCurrent[1] = minmaxCurrent[1];
+                minmaxCurrent[0] = minmaxOriginal[0];
+                minmaxCurrent[1] = minmaxOriginal[1];
             }
 
             minmaxPrevious[0] = min = minmaxCurrent[0];

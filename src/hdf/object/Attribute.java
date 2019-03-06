@@ -85,7 +85,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     protected HObject         parentObject;
 
     /** additional information and properties for the attribute */
-    private Map<String, Object>  properties;
+    private transient Map<String, Object> properties;
 
     /**
      * Flag to indicate is the original unsigned C data is converted.
@@ -160,7 +160,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * The i-th element of the Object[] is an integer array (int[]) that contains
      * the dimension sizes of the i-th member.
      */
-    protected Object[] memberDims = null;
+    protected transient Object[] memberDims = null;
 
     /**
      * The datatypes of the compound attribute's members.
@@ -1043,16 +1043,34 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * @return true if the object is equal
      */
     @Override
-    public boolean equals(HObject obj) {
-        if (!this.getFullName().equals(obj.getFullName())) return false;
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
 
-        if (!this.getFileFormat().equals(obj.getFileFormat())) return false;
+        // checking if both the object references are
+        // referring to the same object.
+        if (this == obj)
+            return true;
+        if (obj instanceof Attribute) {
+            if (!this.getFullName().equals(((Attribute) obj).getFullName()))
+                return false;
 
-        if (!this.getDims().equals(((DataFormat) obj).getDims())) return false;
+            if (!this.getFileFormat().equals(((Attribute) obj).getFileFormat()))
+                return false;
 
-        if (!this.getParentObject().equals(((Attribute) obj).getParentObject())) return false;
+            if (!Arrays.equals(this.getDims(), ((DataFormat) obj).getDims()))
+                return false;
 
-        return true;
+            return (this.getParentObject().equals(((Attribute) obj).getParentObject()));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+
+        // We are returning the OID as a hashcode value.
+        return super.hashCode();
     }
 
     /**
@@ -1119,9 +1137,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         // attribute value is an array
         StringBuilder sb = new StringBuilder();
         int n = Array.getLength(data);
-        if (maxItems > 0)
-            if (n > maxItems)
-                n = maxItems;
+        if ((maxItems > 0) && (n > maxItems))
+            n = maxItems;
 
         log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", getDatatype().isEnum(),
                 getDatatype().isUnsigned(), n);

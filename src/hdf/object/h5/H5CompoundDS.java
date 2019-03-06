@@ -1568,7 +1568,7 @@ public class H5CompoundDS extends CompoundDS {
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_DEFLATE) {
                         filters.append("GZIP");
-                        compression.append(compressionGzipTxt + cdValues[0]);
+                        compression.append(COMPRESSION_GZIP_TXT + cdValues[0]);
                         k++;
                     }
                     else if (filter == HDF5Constants.H5Z_FILTER_FLETCHER32) {
