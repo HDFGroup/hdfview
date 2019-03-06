@@ -195,7 +195,6 @@ public abstract class ScalarDS extends Dataset {
                     isFillValueConverted = true;
                 }
             }
-
         }
 
         log.trace("convertFromUnsignedC(): finish");
