@@ -244,6 +244,7 @@ public class H5ScalarDS extends ScalarDS {
         long did = -1;
         long tid = -1;
         long sid = -1;
+        long nativeTID = -1;
 
         did = open();
         if (did >= 0) {
@@ -302,44 +303,35 @@ public class H5ScalarDS extends ScalarDS {
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 tid = H5.H5Dget_type(did);
 
-                // Check if the datatype in the file is the native datatype
-                long tmptid = -1;
-                try {
-                    tmptid = H5.H5Tget_native_type(tid);
-                    isNativeDatatype = H5.H5Tequal(tid, tmptid);
-                    log.trace("init(): isNativeDatatype={}", isNativeDatatype);
-                }
-                catch (Exception ex) {
-                    log.debug("init(): check if native type failure: ", ex);
-                }
-                finally {
-                    try {
-                        H5.H5Tclose(tmptid);
-                    }
-                    catch (Exception ex) {
-                        log.debug("init(): H5.H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                    }
-                }
-
                 log.trace("init(): tid={} sid={} rank={}", tid, sid, rank);
 
                 try {
                     datatype = new H5Datatype(tid);
 
                     log.trace("init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
-                            tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
-                            ((H5Datatype) datatype).isRegRef());
+                            tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isVLEN(),
+                            datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
                     datatype = null;
                 }
 
-                /* see if fill value is defined */
+                // Check if the datatype in the file is the native datatype
+                try {
+                    nativeTID = H5.H5Tget_native_type(tid);
+                    isNativeDatatype = H5.H5Tequal(tid, nativeTID);
+                    log.trace("init(): isNativeDatatype={}", isNativeDatatype);
+                }
+                catch (Exception ex) {
+                    log.debug("init(): check if native type failure: ", ex);
+                }
+
                 try {
                     pid = H5.H5Dget_create_plist(did);
                     int[] fillStatus = { 0 };
                     if (H5.H5Pfill_value_defined(pid, fillStatus) >= 0) {
+                        // Check if fill value is user-defined before retrieving it.
                         if (fillStatus[0] == HDF5Constants.H5D_FILL_VALUE_USER_DEFINED) {
                             try {
                                 fillValue = H5Datatype.allocateArray((H5Datatype) datatype, 1);
@@ -355,11 +347,13 @@ public class H5ScalarDS extends ScalarDS {
 
                             log.trace("init(): fillValue={}", fillValue);
                             try {
-                                H5.H5Pget_fill_value(pid, tid, fillValue);
+                                H5.H5Pget_fill_value(pid, nativeTID, fillValue);
                                 log.trace("init(): H5Pget_fill_value={}", fillValue);
                                 if (fillValue != null) {
-                                    if (isFillValueConverted)
-                                        fillValue = ScalarDS.convertToUnsignedC(fillValue, null);
+                                    if (datatype.isUnsigned() && !isFillValueConverted) {
+                                        fillValue = ScalarDS.convertFromUnsignedC(fillValue, null);
+                                        isFillValueConverted = true;
+                                    }
 
                                     int n = Array.getLength(fillValue);
                                     for (int i = 0; i < n; i++)
@@ -405,6 +399,12 @@ public class H5ScalarDS extends ScalarDS {
                 log.debug("init(): ", ex);
             }
             finally {
+                try {
+                    H5.H5Tclose(nativeTID);
+                }
+                catch (Exception ex2) {
+                    log.debug("init(): H5Tclose(nativeTID {}) failure: ", nativeTID, ex2);
+                }
                 try {
                     H5.H5Tclose(tid);
                 }

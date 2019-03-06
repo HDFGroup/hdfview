@@ -1187,20 +1187,25 @@ public class DataProviderFactory {
         }
 
         private void updateStringBytes(Object curBuf, Object newValue, int bufStartIndex) {
-            // Update String using data represented as a byte[]
-            int strLen = (int) typeSize;
-            byte[] newValueBytes = ((String) newValue).getBytes();
-            byte[] curBytes = (byte[]) curBuf;
-            int n = Math.min(strLen, newValueBytes.length);
+            if (curBuf instanceof String[]) {
+                Array.set(curBuf, bufStartIndex, newValue);
+            }
+            else if (curBuf instanceof byte[]) {
+                // Update String using data represented as a byte[]
+                int strLen = (int) typeSize;
+                byte[] newValueBytes = ((String) newValue).getBytes();
+                byte[] curBytes = (byte[]) curBuf;
+                int n = Math.min(strLen, newValueBytes.length);
 
-            System.arraycopy(newValueBytes, 0, curBytes, bufStartIndex, n);
+                System.arraycopy(newValueBytes, 0, curBytes, bufStartIndex, n);
 
-            bufStartIndex += n;
-            n = strLen - newValueBytes.length;
+                bufStartIndex += n;
+                n = strLen - newValueBytes.length;
 
-            // space padding
-            for (int i = 0; i < n; i++) {
-                curBytes[bufStartIndex + i] = ' ';
+                // space padding
+                for (int i = 0; i < n; i++) {
+                    curBytes[bufStartIndex + i] = ' ';
+                }
             }
         }
 
