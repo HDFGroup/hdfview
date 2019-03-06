@@ -1043,33 +1043,27 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * @return true if the object is equal
      */
     @Override
-    public boolean equals(HObject obj) {
-        if (!this.getFullName().equals(obj.getFullName())) return false;
-
-        if (!this.getFileFormat().equals(obj.getFileFormat())) return false;
-
-        if (!Arrays.equals(this.getDims(), ((DataFormat) obj).getDims()))
+    public boolean equals(Object obj) {
+        if (obj == null)
             return false;
 
-        return (this.getParentObject().equals(((Attribute) obj).getParentObject()));
-    }
-
-    @Override
-    public boolean equals(Object obj) {
         // checking if both the object references are
         // referring to the same object.
         if (this == obj)
             return true;
+        if (obj instanceof Attribute) {
+            if (!this.getFullName().equals(((Attribute) obj).getFullName()))
+                return false;
 
-        // it checks if the argument is of the
-        // type HObject by comparing the classes
-        // of the passed argument and this object.
-        if (obj == null || obj.getClass() != this.getClass())
-            return false;
+            if (!this.getFileFormat().equals(((Attribute) obj).getFileFormat()))
+                return false;
 
-        // comparing the state of argument with
-        // the state of 'this' Object.
-        return this.equals((HObject) obj);
+            if (!Arrays.equals(this.getDims(), ((DataFormat) obj).getDims()))
+                return false;
+
+            return (this.getParentObject().equals(((Attribute) obj).getParentObject()));
+        }
+        return false;
     }
 
     @Override
