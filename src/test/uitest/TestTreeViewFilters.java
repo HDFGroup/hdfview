@@ -15,17 +15,15 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestTreeViewFilters extends AbstractWindowTest {
     @Test
     public void openHDF5Filters() {
-        String filename = "tfilters";
-        String file_ext = ".h5";
+        String filename = "tfilters.h5";
         String filtername = "fletcher32";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -34,7 +32,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5Filters()", "filetree wrong row count", "17", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==17);
-            assertTrue("openHDF5Filters() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5Filters() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5Filters() filetree is missing dataset '" + filtername + "'", items[0].getNode(9).getText().compareTo(filtername)==0);
 
             items[0].getNode(13).click();
@@ -120,10 +118,9 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
     @Test
     public void checkHDF5Filters() {
-        String filename = "tfilters";
-        String file_ext = ".h5";
+        String filename = "tfilters.h5";
         String filtername = "fletcher32";
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -131,7 +128,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5Filters()", "filetree wrong row count", "17", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==17);
-            assertTrue("checkHDF5Filters() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5Filters() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5Filters() filetree is missing dataset '" + filtername + "'", items[0].getNode(9).getText().compareTo(filtername)==0);
 
             items[0].getNode(10).setFocus();

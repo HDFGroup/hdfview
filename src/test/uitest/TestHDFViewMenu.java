@@ -159,7 +159,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         try {
             closeFile(hdf_file, false);
 
-            openFile(filename, true);
+            openFile(filename, FILE_MODE.READ_ONLY);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -552,7 +552,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             closeFile(hdf_file, false);
 
-            openFile(filename, false);
+            openFile(filename, FILE_MODE.READ_ONLY);
 
             SWTBotTreeItem group = bot.tree().getAllItems()[0].getNode(0);
             assertTrue("verifyMenuSave() filetree is missing group '" + groupname + "'", group.getText().compareTo(groupname) == 0);
@@ -630,7 +630,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             closeFile(hdf_file, true);
 
-            openFile(save_to_filename, false);
+            openFile(save_to_filename, FILE_MODE.READ_ONLY);
 
             SWTBotTreeItem group = bot.tree().getAllItems()[0].getNode(0);
             assertTrue("verifyMenuSaveAs() filetree is missing group '" + groupname + "'", group.getText().compareTo(groupname) == 0);
@@ -661,7 +661,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         File hdf_file = null;
 
         try {
-            hdf_file = openFile(filename, false);
+            hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();

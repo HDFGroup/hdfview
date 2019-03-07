@@ -31,14 +31,13 @@ import org.junit.Test;
  * @author Jordan Henderson
  */
 public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
-    private String filename = "tframeselection";
-    private String file_ext = ".h5";
+    private String filename = "tframeselection.h5";
     private String dataset_name = "test_dataset";
 
     @Test
     public void testNextFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -46,7 +45,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testNextFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("testNextFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testNextFrame() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("testNextFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
@@ -123,7 +122,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     @Test
     public void testPreviousFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -131,7 +130,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testPreviousFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("testPreviousFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testPreviousFrame() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("testPreviousFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
@@ -208,7 +207,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     @Test
     public void testFirstFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -216,7 +215,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testFirstFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("testFirstFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testFirstFrame() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("testFirstFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
@@ -299,7 +298,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     @Test
     public void testLastFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -307,7 +306,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testLastFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("testLastFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testLastFrame() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("testLastFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
@@ -384,7 +383,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     @Test
     public void testEnterFrame() {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -392,7 +391,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testEnterFrame()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("testEnterFrame() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testEnterFrame() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("testEnterFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();

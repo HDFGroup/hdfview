@@ -542,9 +542,7 @@
         </delete>
     </target>
 
-    <!--
     <property name="agentvmparam" value="" />
-    -->
 
     <!-- Define jacoco Scanner for Ant Target -->
     <target name="jacoco">
@@ -555,7 +553,7 @@
         <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant" />
     </target>
 
-    <target name="junit-single-test" depends="jar,compile-test,clean-junit-uitest,jacoco">
+    <target name="junit-single-test" depends="jar,compile-test,clean-junit-uitest">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -576,7 +574,7 @@
         </junit>
     </target>
 
-    <target name="junit" depends="objectjar,compile-test,clean-junit-uitest,jacoco" description="Runs the Object Library tests">
+    <target name="junit" depends="objectjar,compile-test,clean-junit-uitest" description="Runs the Object Library tests">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -602,7 +600,7 @@
     </target>
 
     <!-- Define SonarQube Scanner for Ant Target -->
-    <target name="sonar" depends="junit, junit-uitest">
+    <target name="sonar" depends="jacoco, junit, junit-uitest">
         <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml" onerror="ignore">
             <!-- Update the following line, or put the "sonarqube-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
             <classpath path="~/.ant/lib/sonarqube-ant-task-*.jar" />
@@ -625,11 +623,11 @@
         <fail message="You must run this target with -Dtest=TestName" />
     </target>
 
-    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test-name,jacoco">
+    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test-name">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <!-- Run in debug logging level because trace generates way too much output.
-           We will run manually using trace logging output when there are UI test failures. -->
+                 We will run manually using trace logging output when there are UI test failures. -->
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
             <jvmarg value="${XstartOnFirstThreadFlag}" />
             <jvmarg line="${agentvmparam}" />
@@ -654,11 +652,11 @@
         </junit>
     </target>
 
-    <target name="junit-uitest" depends="jar,compile-test,clean-junit-uitest,jacoco" description="Runs the UI tests">
+    <target name="junit-uitest" depends="jar,compile-test,clean-junit-uitest" description="Runs the UI tests">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <!-- Run in debug logging level because trace generates way too much output.
-           We will run manually using trace logging output when there are UI test failures. -->
+                 We will run manually using trace logging output when there are UI test failures. -->
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
             <jvmarg value="${XstartOnFirstThreadFlag}" />
             <jvmarg line="${agentvmparam}" />

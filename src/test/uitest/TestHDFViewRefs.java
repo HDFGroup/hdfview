@@ -12,8 +12,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
@@ -24,19 +22,18 @@ import org.junit.Test;
 public class TestHDFViewRefs extends AbstractWindowTest {
     @Test
     public void openTAttributeRegionReference() {
-        String filename = "tattrreg";
-        String file_ext = ".h5";
+        String filename = "tattrreg.h5";
         String dataset_name = "Dataset1";
         String dataset_name2 = "Dataset2";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttributeRegionReference()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==3);
-            assertTrue("openTAttributeRegionReference() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttributeRegionReference() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openTAttributeRegionReference() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttributeRegionReference() filetree is missing dataset '" + dataset_name2 + "'", items[0].getNode(1).getText().compareTo(dataset_name2)==0);
 
@@ -114,19 +111,18 @@ public class TestHDFViewRefs extends AbstractWindowTest {
 
     @Test
     public void openTDataRegionReference() {
-        String filename = "tdatareg";
-        String file_ext = ".h5";
+        String filename = "tdatareg.h5";
         String dataset_name = "Dataset1";
         String dataset_name2 = "Dataset2";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTDataRegionReference()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==3);
-            assertTrue("openTDataRegionReference() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTDataRegionReference() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openTDataRegionReference() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTDataRegionReference() filetree is missing dataset '" + dataset_name2 + "'", items[0].getNode(1).getText().compareTo(dataset_name2)==0);
 

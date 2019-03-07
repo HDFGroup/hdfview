@@ -22,10 +22,10 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Test;
 
 public class TestHDFViewTAttr2 extends AbstractWindowTest {
+    private static final String testFilename = "tattr2.h5";
+
     @Test
     public void openTAttr2GroupArray() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -33,14 +33,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "array2D";
         String datasetg2_name3 = "array3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupArray()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupArray() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupArray() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupArray() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupArray() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupArray() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -124,8 +124,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupBitfield() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -133,14 +131,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "bitfield2D";
         String datasetg2_name3 = "bitfield3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupBitfield()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupBitfield() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupBitfield() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupBitfield() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupBitfield() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupBitfield() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -224,8 +222,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupCompound() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -233,14 +229,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "compound2D";
         String datasetg2_name3 = "compound3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupCompound()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupCompound() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupCompound() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupCompound() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupCompound() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupCompound() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -325,8 +321,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupEnum() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -334,7 +328,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "enum2D";
         String datasetg2_name3 = "enum3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             // switch to ViewProperties Convert Enum
@@ -363,7 +357,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupEnum()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupEnum() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupEnum() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupEnum() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupEnum() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupEnum() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -448,8 +442,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupFloat() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -457,14 +449,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "float2D";
         String datasetg2_name3 = "float3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupFloat()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupFloat() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupFloat() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupFloat() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupFloat() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupFloat() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -549,8 +541,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupInteger() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -558,14 +548,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "integer2D";
         String datasetg2_name3 = "integer3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupInteger()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupInteger() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupInteger() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupInteger() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupInteger() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupInteger() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -650,8 +640,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupOpaque() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -659,14 +647,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "opaque2D";
         String datasetg2_name3 = "opaque3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupOpaque()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupOpaque() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupOpaque() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupOpaque() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupOpaque() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupOpaque() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -751,8 +739,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupReference() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -760,14 +746,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "reference2D";
         String datasetg2_name3 = "reference3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupReference()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupReference() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupReference() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupReference() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupReference() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupReference() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -852,8 +838,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupString() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -861,14 +845,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "string2D";
         String datasetg2_name3 = "string3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupString()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupString() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupString() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupString() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupString() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupString() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -955,8 +939,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupVlen() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
@@ -964,14 +946,14 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         String datasetg2_name2 = "vlen2D";
         String datasetg2_name3 = "vlen3D";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupVlen()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupVlen() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupVlen() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupVlen() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupVlen() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupVlen() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -1056,19 +1038,17 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2Attribute() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2Attribute()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2Attribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2Attribute() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2Attribute() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2Attribute() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2Attribute() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
@@ -1371,22 +1351,20 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
     @Test
     public void openTAttr2GroupReferenceAsTable() {
-        String filename = "tattr2";
-        String file_ext = ".h5";
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
         String datasetg2_name3 = "reference3D";
         SWTBotShell tableShell = null;
         SWTBotShell table2Shell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openTAttr2GroupReferenceAsTable()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
             assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
             assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
             assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);

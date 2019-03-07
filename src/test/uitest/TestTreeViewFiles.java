@@ -28,19 +28,18 @@ import org.junit.Test;
 public class TestTreeViewFiles extends AbstractWindowTest {
     @Test
     public void openHDF5ScalarGroup() {
-        String filename = "tscalarintsize";
-        String file_ext = ".h5";
+        String filename = "tscalarintsize.h5";
         String dataset_name = "DS08BITS";
         String dataset_name2 = "DU64BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             assertTrue(constructWrongValueMessage("openHDF5ScalarGroup()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==10);
-            assertTrue("openHDF5ScalarGroup() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5ScalarGroup() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5ScalarGroup() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
@@ -101,10 +100,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5ScalarAttribute() {
-        String filename = "tscalarattrintsize";
-        String file_ext = ".h5";
+        String filename = "tscalarattrintsize.h5";
         String[] attribute_names = {"DS08BITS", "DS16BITS", "DS32BITS", "DS64BITS", "DU08BITS", "DU16BITS", "DU32BITS", "DU64BITS"};
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -112,7 +110,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5ScalarAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("openHDF5ScalarAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5ScalarAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
 
@@ -156,11 +154,10 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5ScalarString() {
-        String filename = "tscalarstring";
-        String file_ext = ".h5";
+        String filename = "tscalarstring.h5";
         String datasetname = "the_str";
         String attr_name = "attr_str";
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -168,7 +165,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5ScalarString()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("openHDF5ScalarString() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5ScalarString() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5ScalarString() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].getNode(0).click();
@@ -225,12 +222,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openCreateOrderHDF5Group() {
-        String filename = "tordergr";
-        String file_ext = ".h5";
+        String filename = "tordergr.h5";
         String group1 = "1";
         String group2 = "2";
         String testgroup = "c";
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -238,7 +234,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openCreateOrderHDF5Group()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==3);
-            assertTrue("openCreateOrderHDF5Group() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openCreateOrderHDF5Group() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group1 + "'", items[0].getNode(0).getText().compareTo(group1)==0);
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group2 + "'", items[0].getNode(1).getText().compareTo(group2)==0);
 
@@ -258,7 +254,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openCreateOrderHDF5Group()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==3);
-            assertTrue("openCreateOrderHDF5Group() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openCreateOrderHDF5Group() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group2 + "'", items[0].getNode(0).getText().compareTo(group2)==0);
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group1 + "'", items[0].getNode(1).getText().compareTo(group1)==0);
 
@@ -279,7 +275,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             filetree.expandNode(items[0].getText(), true);
 
             assertTrue(constructWrongValueMessage("openCreateOrderHDF5Group()", "filetree wrong row count", "17", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==17);
-            assertTrue("openCreateOrderHDF5Group() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openCreateOrderHDF5Group() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group1 + "'", items[0].getNode(0).getText().compareTo(group1)==0);
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group2 + "'", items[0].getNode(1).getText().compareTo(group2)==0);
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + testgroup + "'", items[0].getNode(0).getNode(2).getText().compareTo(testgroup)==0);
@@ -304,10 +300,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5Attribute() {
-        String filename = "tattrintsize";
-        String file_ext = ".h5";
+        String filename = "tattrintsize.h5";
         String[] attrNames = {"DS08BITS", "DS16BITS", "DS32BITS", "DS64BITS", "DU08BITS", "DU16BITS", "DU32BITS", "DU64BITS"};
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -315,7 +310,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5Attribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("openHDF5Attribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5Attribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
 
@@ -359,10 +354,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5IntsAttribute() {
-        String filename = "tintsattrs";
-        String file_ext = ".h5";
+        String filename = "tintsattrs.h5";
         String datasetname = "DU64BITS";
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -370,7 +364,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5IntsAttribute()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("openHDF5IntsAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5IntsAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5IntsAttribute() filetree is missing dataset '" + datasetname + "'", items[0].getNode(7).getText().compareTo(datasetname)==0);
 
             items[0].getNode(7).click();
@@ -411,11 +405,10 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5CompoundDS() {
-        String filename = "tcmpdintsize";
-        String file_ext = ".h5";
+        String filename = "tcmpdintsize.h5";
         String datasetname = "CompoundIntSize";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -423,7 +416,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5CompoundDS()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("openHDF5CompoundDS() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5CompoundDS() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5CompoundDS() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].getNode(0).click();
@@ -497,14 +490,13 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5CompoundDSints() {
-        String filename = "tcmpdints";
-        String filename2 = "testintsfile2";
-        String file_ext = ".h5";
+        String filename = "tcmpdints.h5";
+        String filename2 = "testintsfile2.h5";
         String datasetname1 = "CompoundInts";
         String datasetname2 = "CompoundRInts";
         SWTBotShell tableShell = null;
-        openFile(filename, file_ext.equals(".h5") ? false : true);
-        File hdf_save_file = new File(workDir, filename2 + file_ext);
+        openFile(filename, FILE_MODE.READ_ONLY);
+        File hdf_save_file = new File(workDir, filename2);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -512,7 +504,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==3);
-            assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetname1 + "'", items[0].getNode(0).getText().compareTo(datasetname1)==0);
             assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetname2 + "'", items[0].getNode(1).getText().compareTo(datasetname2)==0);
 
@@ -623,11 +615,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             saveShell.activate();
             bot.waitUntil(Conditions.shellIsActive(saveShell.getText()));
 
-            saveShell.bot().text().setText(filename2 + file_ext);
+            saveShell.bot().text().setText(filename2);
 
             val = saveShell.bot().text().getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong file name", filename2 + file_ext, val),
-                    val.equals(filename2 + file_ext));
+            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong file name", filename2, val),
+                    val.equals(filename2));
 
             saveShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(saveShell));
@@ -636,10 +628,10 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==6);
-            assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetname1 + "'", items[0].getNode(0).getText().compareTo(datasetname1)==0);
             assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetname2 + "'", items[0].getNode(1).getText().compareTo(datasetname2)==0);
-            assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename2 + file_ext + "'", items[1].getText().compareTo(filename2 + file_ext)==0);
+            assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename2 + "'", items[1].getText().compareTo(filename2)==0);
             assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetname1 + "'", items[1].getNode(0).getText().compareTo(datasetname1)==0);
             assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetname2 + "'", items[1].getNode(1).getText().compareTo(datasetname2)==0);
 
@@ -758,10 +750,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5CompoundAttribute() {
-        String filename = "tcmpdattrintsize";
-        String file_ext = ".h5";
+        String filename = "tcmpdattrintsize.h5";
         String attr_name = "CompoundAttrIntSize";
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -769,7 +760,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5CompoundAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("openHDF5CompoundAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5CompoundAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
 
@@ -828,7 +819,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             ex.printStackTrace();
         }
 
-        File hdf_file = openFile(filename2, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename2, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -944,8 +935,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5CompoundBits() {
-        String filename = "tbitnopaque";
-        String file_ext = ".h5";
+        String filename = "tbitnopaque.h5";
         String groupname1 = "bittypetests";
         String groupname2 = "cmpdtypetests";
         String groupname3 = "opaquetypetests";
@@ -957,7 +947,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         String datasetname6 = "opaque_2";
         String datasetname7 = "compound_1";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -967,8 +957,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "4",
                     String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==4);
-            assertTrue("openHDF5CompoundBits() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("openHDF5CompoundBits() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
             assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname1 + "'",
                     items[0].getNode(0).getText().compareTo(groupname1) == 0);
             assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname2 + "'",
@@ -976,7 +966,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5CompoundBits() filetree is missing group '" + groupname3 + "'",
                     items[0].getNode(2).getText().compareTo(groupname3) == 0);
 
-            filetree.expandNode(filename + file_ext, true);
+            filetree.expandNode(filename, true);
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "filetree wrong row count", "11",
                     String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==11);
@@ -1228,11 +1218,10 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5ArrayString() {
-        String filename = "tstr";
-        String file_ext = ".h5";
+        String filename = "tstr.h5";
         String datasetname = "comp1";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -1241,7 +1230,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5ArrayString()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==6);
-            assertTrue("openHDF5ArrayString() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("openHDF5ArrayString() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("openHDF5ArrayString() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].getNode(0).click();
@@ -1292,11 +1281,10 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
     @Test
     public void openHDF5ArrayCompound() {
-        String filename = "tarray4";
-        String file_ext = ".h5";
+        String filename = "tarray4.h5";
         String datasetname = "Dataset1";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -1305,7 +1293,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5ArrayCompound()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 2);
-            assertTrue("openHDF5ArrayCompound() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("openHDF5ArrayCompound() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
             assertTrue("openHDF5ArrayCompound() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).click();

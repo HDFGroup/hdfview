@@ -159,11 +159,10 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
     @Test
     public void saveHDF5DatasetText() {
-        String fname = "tintsize";
-        String f_ext = ".h5";
+        String fname = "tintsize.h5";
         String groupsetname = "DS64BITS";
         SWTBotShell exportShell = null;
-        File hdf_file = openFile(fname, f_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(fname, FILE_MODE.READ_ONLY);
         File export_file = null;
 
         try {
@@ -180,7 +179,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("saveHDF5DatasetText()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("saveHDF5DatasetText() filetree is missing file '" + fname + f_ext + "'", items[0].getText().compareTo(fname + f_ext) == 0);
+            assertTrue("saveHDF5DatasetText() filetree is missing file '" + fname + "'", items[0].getText().compareTo(fname) == 0);
             assertTrue("saveHDF5DatasetText() filetree is missing group '" + groupsetname + "'", items[0].getNode(0).getText().compareTo("DS08BITS")==0);
 
             items[0].getNode(3).click();
@@ -225,11 +224,10 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
     @Test
     public void saveHDF5DatasetBinary() {
-        String fname = "tintsize";
-        String f_ext = ".h5";
+        String fname = "tintsize.h5";
         String groupsetname = "DU64BITS";
         SWTBotShell exportShell = null;
-        File hdf_file = openFile(fname, f_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(fname, FILE_MODE.READ_ONLY);
         File export_file = null;
 
         try {
@@ -246,7 +244,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("saveHDF5DatasetBinary()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("saveHDF5DatasetBinary() filetree is missing file '" + fname + f_ext + "'", items[0].getText().compareTo(fname + f_ext) == 0);
+            assertTrue("saveHDF5DatasetBinary() filetree is missing file '" + fname + "'", items[0].getText().compareTo(fname) == 0);
             assertTrue("saveHDF5DatasetBinary() filetree is missing group '" + groupsetname + "'", items[0].getNode(0).getText().compareTo("DS08BITS")==0);
 
             items[0].getNode(3).click();
