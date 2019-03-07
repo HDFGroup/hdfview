@@ -57,7 +57,7 @@ public abstract class AbstractWindowTest {
 
     private static final CyclicBarrier swtBarrier = new CyclicBarrier(2);
 
-    private static int TEST_DELAY = 10;
+    private static int TEST_DELAY = 0;
 
     private static int open_files = 0;
 
@@ -360,7 +360,9 @@ public abstract class AbstractWindowTest {
         // Disabled until Data conversion can be figured out
         // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
 
-        String errMsg = constructWrongValueMessage(funcName, "wrong value", expectedValRegex, val);
+        StringBuilder sb = new StringBuilder("wrong value at table position ");
+        sb.append("(").append(rowPosition).append(", ").append(columnPosition).append(")");
+        String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
         assertTrue(errMsg, val.matches(expectedValRegex));
     }
 
