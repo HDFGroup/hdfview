@@ -33,88 +33,66 @@ import org.junit.Test;
 public class TestHDFViewIntConversions extends AbstractWindowTest {
     @Test
     public void checkHDF5GroupDS08() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
-        String datasetname = "DS08BITS";
+        String[][] expectedData =
+            { { "-1", "-2", "-4", "-8", "-16", "-32", "-64", "-128" },
+              { "-2", "-4", "-8", "-16", "-32", "-64", "-128", "0" },
+              { "-4", "-8", "-16", "-32", "-64", "-128", "0", "0" },
+              { "-8", "-16", "-32", "-64", "-128", "0", "0", "0" },
+              { "-16", "-32", "-64", "-128", "0", "0", "0", "0" },
+              { "-32", "-64", "-128", "0", "0", "0", "0", "0" },
+              { "-64", "-128", "0", "0", "0", "0", "0", "0" },
+              { "-128", "0", "0", "0", "0", "0", "0", "0" } };
+        String[][] expectedDataHex =
+            { { "FF", "FE", "FC", "F8", "F0", "E0", "C0", "80" },
+              { "FE", "FC", "F8", "F0", "E0", "C0", "80", "00" },
+              { "FC", "F8", "F0", "E0", "C0", "80", "00", "00" },
+              { "F8", "F0", "E0", "C0", "80", "00", "00", "00" },
+              { "F0", "E0", "C0", "80", "00", "00", "00", "00" },
+              { "E0", "C0", "80", "00", "00", "00", "00", "00" },
+              { "C0", "80", "00", "00", "00", "00", "00", "00" },
+              { "80", "00", "00", "00", "00", "00", "00", "00" } };
+        String[][] expectedDataBinary =
+            { { "11111111", "11111110", "11111100", "11111000", "11110000", "11100000", "11000000", "10000000" },
+              { "11111110", "11111100", "11111000", "11110000", "11100000", "11000000", "10000000", "00000000" },
+              { "11111100", "11111000", "11110000", "11100000", "11000000", "10000000", "00000000", "00000000" },
+              { "11111000", "11110000", "11100000", "11000000", "10000000", "00000000", "00000000", "00000000" },
+              { "11110000", "11100000", "11000000", "10000000", "00000000", "00000000", "00000000", "00000000" },
+              { "11100000", "11000000", "10000000", "00000000", "00000000", "00000000", "00000000", "00000000" },
+              { "11000000", "10000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000" },
+              { "10000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", "00000000" } };
+        String[][] expectedDataSci =
+            { {  },
+              {  },
+              {  },
+              {  },
+              {  },
+              {  },
+              {  },
+              {  } };
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        final String filename = "tintsize.h5";
+        final String datasetName = "DS08BITS";
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
-            String val;
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS08() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
-            assertTrue("checkHDF5GroupDS08() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
+            checkFileTree(filetree, "checkHDF5GroupDS08()", 10, filename);
+            assertTrue("checkHDF5GroupDS08() filetree is missing dataset '" + datasetName + "'",
+                    items[0].getNode(0).getText().compareTo(datasetName) == 0);
 
             // Open dataset 'DS08BITS'
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            tableShell = openDataObject(filetree, filename, datasetName);
+            final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+            testAllTableLocations(dataTable, expectedData, "checkHDF5GroupDS08()");
 
             tableShell.bot().menu("Show Hexadecimal").click();
-
-            table.click(1, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "FF", val),
-                    val.equals("FF"));
-
-            table.click(8, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "80", val),
-                    val.equals("80"));
-
-            table.click(8, 8);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "00", val),
-                    val.equals("00"));
+            testAllTableLocations(dataTable, expectedDataHex, "checkHDF5GroupDS08()");
 
             tableShell.bot().menu("Show Binary").click();
-
-            table.click(1, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "11111111", val),
-                    val.equals("11111111"));
-
-            table.click(8, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "10000000", val),
-                    val.equals("10000000"));
-
-            table.click(8, 8);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "00000000", val),
-                    val.equals("00000000"));
-
-            // Reset view to normal integer display
-            tableShell.bot().menu("Show Binary").click();
-
-            table.click(1, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "-1", val),
-                    val.equals("-1"));
-
-            table.click(8, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "-128", val),
-                    val.equals("-128"));
-
-            table.click(8, 8);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("checkHDF5GroupDS08()", "wrong data", "0", val),
-                    val.equals("0"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            testAllTableLocations(dataTable, expectedDataBinary, "checkHDF5GroupDS08()");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -125,7 +103,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
+            /*
+             * TODO: refactor into common method.
+             */
+            if (tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
@@ -141,11 +122,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
     @Test
     public void checkHDF5GroupDU08() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String filename = "tintsize.h5";
         String datasetname = "DU08BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -154,7 +134,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU08()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU08() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU08() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5GroupDU08() filetree is missing dataset '" + datasetname + "'", items[0].getNode(4).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU08BITS'
@@ -249,11 +229,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
     @Test
     public void checkHDF5GroupDS16() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String filename = "tintsize.h5";
         String datasetname = "DS16BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -262,7 +241,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDS16()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS16() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDS16() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5GroupDS16() filetree is missing dataset '" + datasetname + "'", items[0].getNode(1).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS16BITS'
@@ -357,11 +336,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
     @Test
     public void checkHDF5GroupDU16() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String filename = "tintsize.h5";
         String datasetname = "DU16BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -370,7 +348,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU16()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU16() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU16() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5GroupDU16() filetree is missing dataset '" + datasetname + "'", items[0].getNode(5).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU16BITS'
@@ -465,11 +443,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
     @Test
     public void checkHDF5GroupDS32() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String filename = "tintsize.h5";
         String datasetname = "DS32BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -478,7 +455,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDS32()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS32() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDS32() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5GroupDS32() filetree is missing dataset '" + datasetname + "'", items[0].getNode(2).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS32BITS'
@@ -573,11 +550,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
     @Test
     public void checkHDF5GroupDU32() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String filename = "tintsize.h5";
         String datasetname = "DU32BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -586,7 +562,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU32()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU32() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU32() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5GroupDU32() filetree is missing dataset '" + datasetname + "'", items[0].getNode(6).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU32BITS'
@@ -684,11 +660,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
     @Test
     public void checkHDF5GroupDS64() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String filename = "tintsize.h5";
         String datasetname = "DS64BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -697,7 +672,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDS64()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDS64() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDS64() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5GroupDS64() filetree is missing dataset '" + datasetname + "'", items[0].getNode(3).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DS64BITS'
@@ -795,11 +770,10 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
     @Test
     public void checkHDF5GroupDU64() {
-        String filename = "tintsize";
-        String file_ext = ".h5";
+        String filename = "tintsize.h5";
         String datasetname = "DU64BITS";
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(filename, file_ext.equals(".h5") ? false : true);
+        File hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             String val;
@@ -808,7 +782,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("checkHDF5GroupDU64()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
-            assertTrue("checkHDF5GroupDU64() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("checkHDF5GroupDU64() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("checkHDF5GroupDU64() filetree is missing dataset '" + datasetname + "'", items[0].getNode(7).getText().compareTo(datasetname)==0);
 
             // Open dataset 'DU64BITS'

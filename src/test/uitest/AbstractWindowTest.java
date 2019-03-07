@@ -1,21 +1,29 @@
 package test.uitest;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRegex;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.nebula.nattable.finder.widgets.Position;
+import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -25,6 +33,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,6 +63,99 @@ public abstract class AbstractWindowTest {
 
     protected static Rectangle monitorBounds;
 
+    protected static enum FILE_MODE {
+        READ_ONLY, READ_WRITE
+    }
+
+    private static final String objectShellTitleRegex = ".*at.*\\[.*in.*\\]";
+
+    @Before
+    public final void setupSWTBot() throws InterruptedException, BrokenBarrierException {
+        // synchronize with the thread opening the shell
+        swtBarrier.await();
+        bot = new SWTBot();
+
+        SWTBotPreferences.PLAYBACK_DELAY = TEST_DELAY;
+    }
+
+    @After
+    public void closeShell() throws InterruptedException {
+        // close the shell
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                shell.close();
+            }
+        });
+    }
+
+    @BeforeClass
+    public static void setupApp() {
+        clearRemovePropertyFile();
+
+        if (uiThread == null) {
+            uiThread = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        Vector<File> fList = new Vector<>();
+                        String rootDir = System.getProperty("hdfview.workdir");
+                        if (rootDir == null) rootDir = System.getProperty("user.dir");
+
+                        int W = 800, H = 600, X = 0, Y = 0;
+
+                        while (true) {
+                            // open and layout the shell
+                            HDFView window = new HDFView(rootDir);
+
+                            // Set the testing state to handle the problem with testing
+                            // of native dialogs
+                            window.setTestState(true);
+
+                            shell = window.openMainWindow(fList, W, H, X, Y);
+
+                            // Force the HDFView window to open fullscreen on the active
+                            // monitor so that certain tests don't encounter weird issues
+                            // due to the window being too small
+                            Monitor[] monitors = shell.getDisplay().getMonitors();
+                            Monitor activeMonitor = null;
+
+                            Rectangle r = shell.getBounds();
+                            for (int i = 0; i < monitors.length; i++) {
+                                if (monitors[i].getBounds().intersects(r)) {
+                                    activeMonitor = monitors[i];
+                                }
+                            }
+
+                            monitorBounds = activeMonitor.getBounds();
+
+                            shell.setBounds(monitorBounds);
+
+                            // wait for the test setup
+                            swtBarrier.await();
+
+                            // run the event loop
+                            window.runMainWindow();
+                        }
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    Display.getDefault().syncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            shell.getDisplay().dispose();
+                        }
+                    });
+                }
+            });
+            uiThread.setDaemon(true);
+            uiThread.start();
+        }
+    }
+
     private static void clearRemovePropertyFile() {
         // the local property file name
         // look for the property file at the use home directory
@@ -65,45 +167,56 @@ public abstract class AbstractWindowTest {
         }
     }
 
-    protected File openFile(String name, boolean hdf4_type) {
-        String file_ext;
-        if (hdf4_type) {
-            file_ext = new String(".hdf");
-        }
-        else {
-            file_ext = new String(".h5");
-        }
-
-        File hdf_file = new File(workDir, name + file_ext);
+    protected File openFile(String name, FILE_MODE openMode) {
+        SWTBotShell fileNameShell = null;
+        File hdf_file = new File(workDir, name);
 
         try {
-            bot.menu("Open As").menu("Read/Write").click();
+            if (openMode == FILE_MODE.READ_ONLY)
+                bot.menu("Open As").menu("Read-Only").click();
+            else
+                bot.menu("Open As").menu("Read/Write").click();
 
-            SWTBotShell shell = bot.shell("Enter a file name");
-            shell.activate();
+            fileNameShell = bot.shell("Enter a file name");
+            fileNameShell.activate();
 
-            SWTBotText text = shell.bot().text();
+            SWTBotText text = fileNameShell.bot().text();
             text.setText(hdf_file.getName());
 
             String val = text.getText();
             assertTrue("openFile() wrong file name: expected '" + hdf_file.getName() + "' but was '" + val + "'",
                     val.equals(hdf_file.getName()));
 
-            shell.bot().button("   &OK   ").click();
-            bot.waitUntil(shellCloses(shell));
+            fileNameShell.bot().button("   &OK   ").click();
+            bot.waitUntil(shellCloses(fileNameShell));
 
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
+            bot.waitUntil(Conditions.treeHasRows(filetree, open_files + 1));
 
+            /*
+             * TODO: difference here between rowCount() and visibleRowCount(). Can't use
+             * checkFileTree().
+             */
+            assertTrue("openFile() filetree wrong row count: expected '" + String.valueOf(open_files) + "' but was '"
+                    + filetree.rowCount() + "'", filetree.rowCount() == open_files + 1);
+            assertTrue("openFile() filetree is missing file '" + hdf_file.getName() + "'",
+                    filetree.getAllItems()[open_files].getText().compareTo(hdf_file.getName()) == 0);
+
+            /*
+             * Increment the open_files value last, in case an error occurs when opening a
+             * file.
+             */
             open_files++;
-            assertTrue("openFile() filetree wrong row count: expected '" + String.valueOf(open_files) + "' but was '" + filetree.rowCount() + "'", filetree.rowCount() == open_files);
-            assertTrue("openFile() filetree is missing file '" + hdf_file.getName() + "'", items[open_files - 1].getText().compareTo(hdf_file.getName()) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+        }
+        finally {
+            if (fileNameShell != null && fileNameShell.isOpen())
+                fileNameShell.close();
         }
 
         return hdf_file;
@@ -163,32 +276,107 @@ public abstract class AbstractWindowTest {
         return createFile(name, false);
     }
 
-    protected void closeFile(File hdf_file, boolean delete_file) {
-        //TODO: re-implement to only close given file, not all files
+    protected void closeFile(File hdfFile, boolean deleteFile) {
         try {
+            SWTBotTree filetree = bot.tree();
+
+            filetree.getTreeItem(hdfFile.getName()).click();
+
             bot.shells()[0].activate();
             bot.waitUntil(Conditions.shellIsActive(bot.shells()[0].getText()));
 
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("Close All");
-            fileMenuItem.click();
+            bot.menu("File").menu("Close").click();
 
-            if(delete_file) {
-                if (hdf_file.exists()) {
-                    assertTrue("closeFile() File '" + hdf_file + "' not deleted", hdf_file.delete());
-                    assertFalse("closeFile() File '" + hdf_file + "' not gone", hdf_file.exists());
+            if (deleteFile) {
+                if (hdfFile.exists()) {
+                    assertTrue("closeFile() File '" + hdfFile + "' not deleted", hdfFile.delete());
+                    assertFalse("closeFile() File '" + hdfFile + "' not gone", hdfFile.exists());
                 }
             }
 
-            SWTBotTree filetree = bot.tree();
-            assertTrue("closeFile() filetree wrong row count: expected '0' but was '" + filetree.rowCount() + "'", filetree.rowCount() == 0);
+            assertTrue(constructWrongValueMessage("closeFile()", "filetree wrong row count", String.valueOf(open_files - 1), String.valueOf(filetree.rowCount())),
+                    filetree.rowCount() == open_files - 1);
 
-            open_files = 0;
+            open_files--;
         }
         catch (Exception ex) {
             ex.printStackTrace();
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+        }
+    }
+
+    protected void checkFileTree(SWTBotTree tree, String funcName, int expectedRowCount, String filename)
+            throws IllegalArgumentException, AssertionError {
+        if (tree == null)
+            throw new IllegalArgumentException("SWTBotTree parameter is null");
+        if (filename == null)
+            throw new IllegalArgumentException("file name parameter is null");
+
+        String expectedRowCountStr = String.valueOf(expectedRowCount);
+        int visibleRowCount = tree.visibleRowCount();
+        assertTrue(constructWrongValueMessage(funcName, "filetree wrong row count", expectedRowCountStr,
+                String.valueOf(visibleRowCount)), visibleRowCount == expectedRowCount);
+
+        String curFilename = tree.getAllItems()[0].getText();
+        assertTrue(constructWrongValueMessage(funcName, "filetree is missing file", filename, curFilename),
+                curFilename.compareTo(filename) == 0);
+    }
+
+    /*
+     * Utility function to compare a given table position against an expected value.
+     * Note that this is performed in terms of NAT Table "positions", or essentially
+     * 1-based offsets, with (1, 1) being the very top-left value in the table.
+     */
+    /*
+     * TODO:
+     */
+    protected void testTableLocation(SWTBotNatTable table, int rowPosition, int columnPosition, String expectedValRegex, String funcName)
+            throws IllegalArgumentException, AssertionError {
+        if (table == null)
+            throw new IllegalArgumentException("SWTBotNatTable parameter is null");
+        if (expectedValRegex == null)
+            throw new IllegalArgumentException("expected value string parameter is null");
+        if (funcName == null)
+            throw new IllegalArgumentException("function name parameter is null");
+
+        /*
+         * Most likely a mistake. The value at position (0, 0) should always be empty
+         * since this position represents the empty corner block between the row and
+         * column headers.
+         *
+         * However, values like (X >= 1, 0) and (0, X >= 1) can be used to test the
+         * String value of the row/column headers respectively.
+         */
+        if (rowPosition == 0 && columnPosition == 0)
+            throw new IllegalArgumentException("(0, 0) is an invalid table position");
+
+        // TODO: temporary workaround until the solution below works.
+        Position cellPos = table.scrollViewport(new Position(1, 1), rowPosition - 1, columnPosition - 1);
+        table.click(cellPos.row, cellPos.column);
+        String val = bot.shells()[1].bot().text(0).getText();
+
+        // Disabled until Data conversion can be figured out
+        // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
+
+        String errMsg = constructWrongValueMessage(funcName, "wrong value", expectedValRegex, val);
+        assertTrue(errMsg, val.matches(expectedValRegex));
+    }
+
+    /*
+     * Utility function wrapper around testTableLocation() for testing an entire
+     * table.
+     */
+    protected void testAllTableLocations(SWTBotNatTable table, String[][] expectedValRegexArray, String funcName)
+            throws IllegalArgumentException, AssertionError {
+        int arrLen = Array.getLength(expectedValRegexArray);
+        for (int i = 0; i < arrLen; i++) {
+            String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
+            int nestedLen = Array.getLength(nestedArray);
+
+            for (int j = 0; j < nestedLen; j++)
+                testTableLocation(table, i + 1, j + 1, (String) Array.get(nestedArray, j), funcName);
         }
     }
 
@@ -229,97 +417,54 @@ public abstract class AbstractWindowTest {
         }
     }
 
+    protected SWTBotShell openDataObject(SWTBotTree tree, String filename, String objectName) {
+        SWTBotTreeItem fileItem = tree.getTreeItem(filename);
+
+        SWTBotTreeItem foundObject = locateItemByName(fileItem, objectName);
+        foundObject.click();
+        foundObject.contextMenu("Open").click();
+
+        Matcher<Shell> classMatcher = widgetOfType(Shell.class);
+        Matcher<Shell> regexMatcher = withRegex(objectName + objectShellTitleRegex);
+        Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
+        bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+        final SWTBotShell botShell = new SWTBotShell(bot.widget(shellMatcher));
+
+        botShell.activate();
+        bot.waitUntil(Conditions.shellIsActive(botShell.getText()));
+
+        /*
+         * Due to testing issues where the values can't be retrieved from non-visible
+         * table columns, we ensure that the table Shell is always maximized.
+         */
+        // Display.getDefault().syncExec(new Runnable() {
+        // @Override
+        // public void run() {
+        // botShell.widget.setMaximized(true);
+        // }
+        // });
+
+        return botShell;
+    }
+
+    private SWTBotTreeItem locateItemByName(SWTBotTreeItem startNode, String objName) {
+        StringTokenizer st = new StringTokenizer(objName, "/");
+        SWTBotTreeItem node = startNode;
+
+        while (st.hasMoreTokens()) {
+            String nextToken = st.nextToken();
+            node = node.getNode(nextToken);
+        }
+
+        return node;
+    }
+
+    protected SWTBotNatTable getNatTable(SWTBotShell theShell) {
+        return new SWTBotNatTable(theShell.bot().widget(widgetOfType(NatTable.class)));
+    }
+
     protected String constructWrongValueMessage(String methodName, String message, String expected, String actual) {
         return methodName.concat(" " + message + ": expected '" + expected + "' but was '" + actual + "'");
-    }
-
-    @BeforeClass
-    public static void setupApp() {
-        clearRemovePropertyFile();
-
-        if (uiThread == null) {
-            uiThread = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        Vector<File> fList = new Vector<>();
-                        String rootDir = System.getProperty("hdfview.workdir");
-                        if(rootDir == null) rootDir = System.getProperty("user.dir");
-
-                        int W = 800,
-                            H = 600,
-                            X = 0,
-                            Y = 0;
-
-                        while (true) {
-                            // open and layout the shell
-                            HDFView window = new HDFView(rootDir);
-
-                            // Set the testing state to handle the problem with testing
-                            // of native dialogs
-                            window.setTestState(true);
-
-                            shell = window.openMainWindow(fList, W, H, X, Y);
-
-                            // Force the HDFView window to open fullscreen on the active
-                            // monitor so that certain tests don't encounter weird issues
-                            // due to the window being too small
-                            Monitor[] monitors = shell.getDisplay().getMonitors();
-                            Monitor activeMonitor = null;
-
-                            Rectangle r = shell.getBounds();
-                            for (int i = 0; i < monitors.length; i++) {
-                                if (monitors[i].getBounds().intersects(r)) {
-                                    activeMonitor = monitors[i];
-                                }
-                            }
-
-                            monitorBounds = activeMonitor.getBounds();
-
-                            shell.setBounds(monitorBounds);
-
-                            // wait for the test setup
-                            swtBarrier.await();
-
-                            // run the event loop
-                            window.runMainWindow();
-                        }
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    Display.getDefault().syncExec(new Runnable() {
-                        @Override
-                        public void run() {
-                            shell.getDisplay().dispose();
-                        }
-                    });
-                }
-            });
-            uiThread.setDaemon(true);
-            uiThread.start();
-        }
-    }
-
-    @Before
-    public final void setupSWTBot() throws InterruptedException, BrokenBarrierException {
-        // synchronize with the thread opening the shell
-        swtBarrier.await();
-        bot = new SWTBot(shell);
-
-        SWTBotPreferences.PLAYBACK_DELAY = TEST_DELAY;
-    }
-
-    @After
-    public void closeShell() throws InterruptedException {
-        // close the shell
-        Display.getDefault().syncExec(new Runnable() {
-            @Override
-            public void run() {
-                shell.close();
-            }
-        });
     }
 }

@@ -381,7 +381,7 @@ public class DefaultTreeView implements TreeView {
                     return;
                 }
 
-                if(theItem.equals(selectedItem)) return;
+                if (theItem.equals(selectedItem)) return;
 
                 FileFormat theFile = null;
 
