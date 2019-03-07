@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.Position;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.SWTBot;
@@ -30,6 +31,8 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCanvas;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -382,6 +385,44 @@ public abstract class AbstractWindowTest {
         }
     }
 
+    protected void testTableLocation(SWTBotTable table, int rowPosition, int columnPosition, String expectedValRegex, String funcName)
+            throws IllegalArgumentException, AssertionError {
+        if (table == null)
+            throw new IllegalArgumentException("SWTBotTable parameter is null");
+        if (expectedValRegex == null)
+            throw new IllegalArgumentException("expected value string parameter is null");
+        if (funcName == null)
+            throw new IllegalArgumentException("function name parameter is null");
+
+        /*
+         * Most likely a mistake. The value at position (0, 0) should always be empty
+         * since this position represents the empty corner block between the row and
+         * column headers.
+         *
+         * However, values like (X >= 1, 0) and (0, X >= 1) can be used to test the
+         * String value of the row/column headers respectively.
+         */
+        if (rowPosition == 0 && columnPosition == 0)
+            throw new IllegalArgumentException("(0, 0) is an invalid table position");
+
+        table.click(rowPosition - 1, columnPosition - 1);
+        String val = table.cell(rowPosition - 1, columnPosition - 1);
+
+        String errMsg = constructWrongValueMessage(funcName, "wrong value", expectedValRegex, val);
+        assertTrue(errMsg, val.matches(expectedValRegex));
+    }
+
+    protected void testAllTableLocations(SWTBotTable table, String[][] expectedValRegexArray, String funcName) throws IllegalArgumentException, AssertionError {
+        int arrLen = Array.getLength(expectedValRegexArray);
+        for (int i = 0; i < arrLen; i++) {
+            String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
+            int nestedLen = Array.getLength(nestedArray);
+
+            for (int j = 0; j < nestedLen; j++)
+                testTableLocation(table, i + 1, j + 1, (String) Array.get(nestedArray, j), funcName);
+        }
+    }
+
     protected void testSamplePixel(final int theX, final int theY, String requiredValue) {
         try {
             SWTBotShell botshell = bot.activeShell();
@@ -419,13 +460,44 @@ public abstract class AbstractWindowTest {
         }
     }
 
-    protected SWTBotShell openDataObject(SWTBotTree tree, String filename, String objectName) {
+    protected SWTBotTable openAttributeTable(SWTBotTree tree, String filename, String objectName) {
+        SWTBotTreeItem fileItem = tree.getTreeItem(filename);
+
+        SWTBotTreeItem foundObject = locateItemByPath(fileItem, objectName);
+        foundObject.click();
+
+        SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
+        tabItem.activate();
+
+        return new SWTBotTable(bot.widget(widgetOfType(Table.class)));
+    }
+
+    protected SWTBotTabItem openMetadataTab(SWTBotTree tree, String filename, String objectName, String tabName) {
+        SWTBotTreeItem fileItem = tree.getTreeItem(filename);
+
+        SWTBotTreeItem foundObject = locateItemByPath(fileItem, objectName);
+        foundObject.click();
+
+        return bot.tabItem(tabName);
+    }
+
+    protected SWTBotShell openAttributeObject(SWTBotTable attrTable, String objectName, int rowPosition) {
+        attrTable.doubleClick(rowPosition - 1, 0);
+
+        return openDataObject(objectName);
+    }
+
+    protected SWTBotShell openTreeviewObject(SWTBotTree tree, String filename, String objectName) {
         SWTBotTreeItem fileItem = tree.getTreeItem(filename);
 
         SWTBotTreeItem foundObject = locateItemByPath(fileItem, objectName);
         foundObject.click();
         foundObject.contextMenu("Open").click();
 
+        return openDataObject(objectName);
+    }
+
+    protected SWTBotShell openDataObject(String objectName) {
         String strippedObjectName = objectName;
         int slashLoc = objectName.lastIndexOf('/');
         if (slashLoc >= 0) {
