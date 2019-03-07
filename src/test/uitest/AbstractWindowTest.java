@@ -57,7 +57,7 @@ public abstract class AbstractWindowTest {
 
     private static final CyclicBarrier swtBarrier = new CyclicBarrier(2);
 
-    private static int TEST_DELAY = 0;
+    private static int TEST_DELAY = 10;
 
     private static int open_files = 0;
 
@@ -420,12 +420,18 @@ public abstract class AbstractWindowTest {
     protected SWTBotShell openDataObject(SWTBotTree tree, String filename, String objectName) {
         SWTBotTreeItem fileItem = tree.getTreeItem(filename);
 
-        SWTBotTreeItem foundObject = locateItemByName(fileItem, objectName);
+        SWTBotTreeItem foundObject = locateItemByPath(fileItem, objectName);
         foundObject.click();
         foundObject.contextMenu("Open").click();
 
+        String strippedObjectName = objectName;
+        int slashLoc = objectName.lastIndexOf('/');
+        if (slashLoc >= 0) {
+            strippedObjectName = objectName.substring(slashLoc + 1);
+        }
+
         Matcher<Shell> classMatcher = widgetOfType(Shell.class);
-        Matcher<Shell> regexMatcher = withRegex(objectName + objectShellTitleRegex);
+        Matcher<Shell> regexMatcher = withRegex(strippedObjectName + objectShellTitleRegex);
         Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
         bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -438,23 +444,25 @@ public abstract class AbstractWindowTest {
          * Due to testing issues where the values can't be retrieved from non-visible
          * table columns, we ensure that the table Shell is always maximized.
          */
-        // Display.getDefault().syncExec(new Runnable() {
-        // @Override
-        // public void run() {
-        // botShell.widget.setMaximized(true);
-        // }
-        // });
+//        Display.getDefault().syncExec(new Runnable() {
+//            @Override
+//            public void run() {
+//                botShell.widget.setMaximized(true);
+//            }
+//        });
 
         return botShell;
     }
 
-    private SWTBotTreeItem locateItemByName(SWTBotTreeItem startNode, String objName) {
-        StringTokenizer st = new StringTokenizer(objName, "/");
+    private SWTBotTreeItem locateItemByPath(SWTBotTreeItem startNode, String objPath) {
+        StringTokenizer st = new StringTokenizer(objPath, "/");
         SWTBotTreeItem node = startNode;
 
         while (st.hasMoreTokens()) {
             String nextToken = st.nextToken();
             node = node.getNode(nextToken);
+            if (node.getItems().length > 0)
+                node.expand();
         }
 
         return node;
