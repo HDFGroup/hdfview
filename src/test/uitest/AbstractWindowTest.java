@@ -383,7 +383,7 @@ public abstract class AbstractWindowTest {
         }
     }
 
-    protected void testAttributeTableLocation(SWTBotTable table, int rowPosition, int columnPosition, String expectedValRegex, String funcName)
+    protected void testTableLocation(SWTBotTable table, int rowPosition, int columnPosition, String expectedValRegex, String funcName)
             throws IllegalArgumentException, AssertionError {
         if (table == null)
             throw new IllegalArgumentException("SWTBotTable parameter is null");
@@ -410,14 +410,14 @@ public abstract class AbstractWindowTest {
         assertTrue(errMsg, val.matches(expectedValRegex));
     }
 
-    protected void testAllAttributeTableLocations(SWTBotTable table, String[][] expectedValRegexArray, String funcName) throws IllegalArgumentException, AssertionError {
+    protected void testAllTableLocations(SWTBotTable table, String[][] expectedValRegexArray, String funcName) throws IllegalArgumentException, AssertionError {
         int arrLen = Array.getLength(expectedValRegexArray);
         for (int i = 0; i < arrLen; i++) {
             String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
             int nestedLen = Array.getLength(nestedArray);
 
             for (int j = 0; j < nestedLen; j++)
-                testAttributeTableLocation(table, i + 1, j + 1, (String) Array.get(nestedArray, j), funcName);
+                testTableLocation(table, i + 1, j + 1, (String) Array.get(nestedArray, j), funcName);
         }
     }
 

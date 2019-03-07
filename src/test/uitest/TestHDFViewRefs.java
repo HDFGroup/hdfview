@@ -26,7 +26,7 @@ public class TestHDFViewRefs extends AbstractWindowTest {
                 { "NULL" }, { "NULL" } };
         SWTBotShell tableShell = null;
         String filename = "tattrreg.h5";
-        String datasetName = "Dataset1";
+        String datasetName = "/Dataset1";
         File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
@@ -37,7 +37,7 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             // Open dataset 'Dataset1' Attribute Table
             SWTBotTable attrTable = openAttributeTable(filetree, filename, datasetName);
 
-            testAllAttributeTableLocations(attrTable, expectedAttrData, "openTAttributeRegionReference()");
+            testAllTableLocations(attrTable, expectedAttrData, "openTAttributeRegionReference()");
 
             tableShell = openAttributeObject(attrTable, "Attribute1", 1);
             final SWTBotNatTable dataTable = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
