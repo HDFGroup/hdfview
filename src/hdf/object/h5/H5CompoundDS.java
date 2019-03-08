@@ -1426,19 +1426,22 @@ public class H5CompoundDS extends CompoundDS {
         if (did >= 0) {
             log.trace("getMetadata(): dataset opened");
             try {
-                compression = new StringBuilder("");
-
                 // get the compression and chunk information
                 pcid = H5.H5Dget_create_plist(did);
                 paid = H5.H5Dget_access_plist(did);
                 long storageSize = H5.H5Dget_storage_size(did);
                 int nfilt = H5.H5Pget_nfilters(pcid);
                 int layoutType = H5.H5Pget_layout(pcid);
+
+                storageLayout.setLength(0);
+                compression.setLength(0);
+
                 if (layoutType == HDF5Constants.H5D_CHUNKED) {
                     chunkSize = new long[rank];
                     H5.H5Pget_chunk(pcid, rank, chunkSize);
                     int n = chunkSize.length;
-                    storageLayout = new StringBuilder("CHUNKED: ").append(chunkSize[0]);
+
+                    storageLayout.append("CHUNKED: ").append(chunkSize[0]);
                     for (int i = 1; i < n; i++) {
                         storageLayout.append(" X ").append(chunkSize[i]);
                     }
@@ -1454,8 +1457,12 @@ public class H5CompoundDS extends CompoundDS {
                                 datumSize = H5.H5Tget_size(tmptid);
                             }
                             finally {
-                                try {H5.H5Tclose(tmptid);}
-                                catch (Exception ex2) {log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);}
+                                try {
+                                    H5.H5Tclose(tmptid);
+                                }
+                                catch (Exception ex2) {
+                                    log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
+                                }
                             }
                         }
 
@@ -1471,20 +1478,20 @@ public class H5CompoundDS extends CompoundDS {
                             DecimalFormat df = new DecimalFormat();
                             df.setMinimumFractionDigits(3);
                             df.setMaximumFractionDigits(3);
-                            compression.append(df.format(ratio) + ":1");
+                            compression.append(df.format(ratio)).append(":1");
                         }
                     }
                 }
                 else if (layoutType == HDF5Constants.H5D_COMPACT) {
-                    storageLayout = new StringBuilder("COMPACT");
+                    storageLayout.append("COMPACT");
                 }
                 else if (layoutType == HDF5Constants.H5D_CONTIGUOUS) {
-                    storageLayout = new StringBuilder("CONTIGUOUS");
+                    storageLayout.append("CONTIGUOUS");
                     if (H5.H5Pget_external_count(pcid) > 0)
                         storageLayout.append(" - EXTERNAL ");
                 }
                 else if (layoutType == HDF5Constants.H5D_VIRTUAL) {
-                    storageLayout = new StringBuilder("VIRTUAL - ");
+                    storageLayout.append("VIRTUAL - ");
                     try {
                         long vmaps = H5.H5Pget_virtual_count(pcid);
                         try {
@@ -1525,7 +1532,7 @@ public class H5CompoundDS extends CompoundDS {
                 }
                 else {
                     chunkSize = null;
-                    storageLayout = new StringBuilder("NONE");
+                    storageLayout.append("NONE");
                 }
 
                 int[] flags = { 0, 0 };
@@ -1535,97 +1542,102 @@ public class H5CompoundDS extends CompoundDS {
                 log.trace("getMetadata(): {} filters in pipeline", nfilt);
                 int filter = -1;
                 int[] filterConfig = { 1 };
-                filters = new StringBuilder("");
 
-                for (int i = 0, k = 0; i < nfilt; i++) {
-                    log.trace("getMetadata(): filter[{}]", i);
-                    if (i > 0) {
-                        filters.append(", ");
-                    }
-                    if (k > 0) {
-                        compression.append(", ");
-                    }
+                filters.setLength(0);
 
-                    try {
-                        cdNelmts[0] = 20;
-                        cdValues = new int[(int) cdNelmts[0]];
-                        cdValues = new int[(int) cdNelmts[0]];
-                        filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName, filterConfig);
-                        log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0], cdNelmts[0]);
-                        for (int j = 0; j < cdNelmts[0]; j++) {
-                            log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cdValues[j]);
+                if (nfilt == 0) {
+                    filters.append("NONE");
+                }
+                else {
+                    for (int i = 0, k = 0; i < nfilt; i++) {
+                        log.trace("getMetadata(): filter[{}]", i);
+                        if (i > 0) {
+                            filters.append(", ");
                         }
-                    }
-                    catch (Exception err) {
-                        log.debug("getMetadata(): filter[{}] error: ", i, err);
-                        log.trace("getMetadata(): filter[{}] continue", i);
-                        filters.append("ERROR");
-                        continue;
-                    }
+                        if (k > 0) {
+                            compression.append(", ");
+                        }
 
-                    if (filter == HDF5Constants.H5Z_FILTER_NONE) {
-                        filters.append("NONE");
-                    }
-                    else if (filter == HDF5Constants.H5Z_FILTER_DEFLATE) {
-                        filters.append("GZIP");
-                        compression.append(COMPRESSION_GZIP_TXT + cdValues[0]);
-                        k++;
-                    }
-                    else if (filter == HDF5Constants.H5Z_FILTER_FLETCHER32) {
-                        filters.append("Error detection filter");
-                    }
-                    else if (filter == HDF5Constants.H5Z_FILTER_SHUFFLE) {
-                        filters.append("SHUFFLE: Nbytes = ").append(cdValues[0]);
-                    }
-                    else if (filter == HDF5Constants.H5Z_FILTER_NBIT) {
-                        filters.append("NBIT");
-                    }
-                    else if (filter == HDF5Constants.H5Z_FILTER_SCALEOFFSET) {
-                        filters.append("SCALEOFFSET: MIN BITS = ").append(cdValues[0]);
-                    }
-                    else if (filter == HDF5Constants.H5Z_FILTER_SZIP) {
-                        filters.append("SZIP");
-                        compression.append("SZIP: Pixels per block = ").append(cdValues[1]);
-                        k++;
-                        int flag = -1;
                         try {
-                            flag = H5.H5Zget_filter_info(filter);
+                            cdNelmts[0] = 20;
+                            cdValues = new int[(int) cdNelmts[0]];
+                            cdValues = new int[(int) cdNelmts[0]];
+                            filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName, filterConfig);
+                            log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0], cdNelmts[0]);
+                            for (int j = 0; j < cdNelmts[0]; j++) {
+                                log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cdValues[j]);
+                            }
                         }
-                        catch (Exception ex) {
-                            log.debug("getMetadata(): H5Zget_filter_info failure: ", ex);
-                            flag = -1;
+                        catch (Exception err) {
+                            log.debug("getMetadata(): filter[{}] error: ", i, err);
+                            log.trace("getMetadata(): filter[{}] continue", i);
+                            filters.append("ERROR");
+                            continue;
                         }
-                        if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) {
-                            compression.append(": H5Z_FILTER_CONFIG_DECODE_ENABLED");
+
+                        if (filter == HDF5Constants.H5Z_FILTER_NONE) {
+                            filters.append("NONE");
                         }
-                        else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
-                                || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
-                                        + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED))) {
-                            compression.append(": H5Z_FILTER_CONFIG_ENCODE_ENABLED");
+                        else if (filter == HDF5Constants.H5Z_FILTER_DEFLATE) {
+                            filters.append("GZIP");
+                            compression.append(COMPRESSION_GZIP_TXT).append(cdValues[0]);
+                            k++;
                         }
-                    }
-                    else {
-                        filters.append("USERDEFINED ").append(cdName[0]).append("(").append(filter).append("): ");
-                        for (int j = 0; j < cdNelmts[0]; j++) {
-                            if (j > 0)
-                                filters.append(", ");
-                            filters.append(cdValues[j]);
+                        else if (filter == HDF5Constants.H5Z_FILTER_FLETCHER32) {
+                            filters.append("Error detection filter");
                         }
-                        log.debug("getMetadata(): filter[{}] is user defined compression", i);
-                    }
-                } //  (int i=0; i<nfilt; i++)
+                        else if (filter == HDF5Constants.H5Z_FILTER_SHUFFLE) {
+                            filters.append("SHUFFLE: Nbytes = ").append(cdValues[0]);
+                        }
+                        else if (filter == HDF5Constants.H5Z_FILTER_NBIT) {
+                            filters.append("NBIT");
+                        }
+                        else if (filter == HDF5Constants.H5Z_FILTER_SCALEOFFSET) {
+                            filters.append("SCALEOFFSET: MIN BITS = ").append(cdValues[0]);
+                        }
+                        else if (filter == HDF5Constants.H5Z_FILTER_SZIP) {
+                            filters.append("SZIP");
+                            compression.append("SZIP: Pixels per block = ").append(cdValues[1]);
+                            k++;
+                            int flag = -1;
+                            try {
+                                flag = H5.H5Zget_filter_info(filter);
+                            }
+                            catch (Exception ex) {
+                                log.debug("getMetadata(): H5Zget_filter_info failure: ", ex);
+                                flag = -1;
+                            }
+                            if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) {
+                                compression.append(": H5Z_FILTER_CONFIG_DECODE_ENABLED");
+                            }
+                            else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
+                                    || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
+                                            + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED))) {
+                                compression.append(": H5Z_FILTER_CONFIG_ENCODE_ENABLED");
+                            }
+                        }
+                        else {
+                            filters.append("USERDEFINED ").append(cdName[0]).append("(").append(filter).append("): ");
+                            for (int j = 0; j < cdNelmts[0]; j++) {
+                                if (j > 0)
+                                    filters.append(", ");
+                                filters.append(cdValues[j]);
+                            }
+                            log.debug("getMetadata(): filter[{}] is user defined compression", i);
+                        }
+                    } //  (int i=0; i<nfilt; i++)
+                }
 
                 if (compression.length() == 0) {
-                    compression = new StringBuilder("NONE");
+                    compression.append("NONE");
                 }
                 log.trace("getMetadata(): filter compression={}", compression);
 
-                if (filters.length() == 0) {
-                    filters = new StringBuilder("NONE");
-                }
                 log.trace("getMetadata(): filter information={}", filters);
 
-                storage = new StringBuilder("SIZE: ").append(storageSize);
+                storage.setLength(0);
+                storage.append("SIZE: ").append(storageSize);
+
                 try {
                     int[] at = { 0 };
                     H5.H5Pget_alloc_time(pcid, at);
@@ -1639,12 +1651,11 @@ public class H5CompoundDS extends CompoundDS {
                     else if (at[0] == HDF5Constants.H5D_ALLOC_TIME_LATE) {
                         storage.append("Late");
                     }
+                    else
+                        storage.append("Default");
                 }
                 catch (Exception ex) {
                     log.debug("getMetadata(): Storage allocation time:", ex);
-                }
-                if (storage.length() == 0) {
-                    storage = new StringBuilder("NONE");
                 }
                 log.trace("getMetadata(): storage={}", storage);
             }

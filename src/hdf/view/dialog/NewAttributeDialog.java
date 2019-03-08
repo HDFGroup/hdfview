@@ -922,11 +922,11 @@ public class NewAttributeDialog extends Dialog {
                     }
                     catch (Exception e) {
                         StringBuilder buff = new StringBuilder();
-                        buff.append("<html>");
-                        buff.append("<body>");
-                        buff.append("ERROR: cannot load help information.");
-                        buff.append("</body>");
-                        buff.append("</html>");
+                        buff.append("<html>")
+                            .append("<body>")
+                            .append("ERROR: cannot load help information.")
+                            .append("</body>")
+                            .append("</html>");
                         browser.setText(buff.toString(), true);
                     }
                 }
@@ -968,11 +968,11 @@ public class NewAttributeDialog extends Dialog {
                     }
                     catch (Exception e) {
                         StringBuilder buff = new StringBuilder();
-                        buff.append("<html>");
-                        buff.append("<body>");
-                        buff.append("ERROR: cannot load help information.");
-                        buff.append("</body>");
-                        buff.append("</html>");
+                        buff.append("<html>")
+                            .append("<body>")
+                            .append("ERROR: cannot load help information.")
+                            .append("</body>")
+                            .append("</html>");
                         browser.setText(buff.toString(), true);
                     }
                 }

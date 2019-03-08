@@ -18,14 +18,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
@@ -2203,6 +2201,12 @@ public class HDFView implements DataViewManager {
             dialog.setText("Supported File Formats");
             dialog.setLayout(new GridLayout(2, false));
 
+            Image hdfImage = ViewProperties.getLargeHdfIcon();
+
+            Label imageLabel = new Label(dialog, SWT.CENTER);
+            imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            imageLabel.setImage(hdfImage);
+
             Enumeration<?> formatKeys = FileFormat.getFileFormatKeys();
 
             StringBuilder formats = new StringBuilder("\nSupported File Formats: \n");
@@ -2210,12 +2214,6 @@ public class HDFView implements DataViewManager {
                 formats.append("    ").append(formatKeys.nextElement()).append("\n");
             }
             formats.append("\n");
-
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
-
-            Label imageLabel = new Label(dialog, SWT.CENTER);
-            imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            imageLabel.setImage(hdfImage);
 
             Label formatsLabel = new Label(dialog, SWT.LEFT);
             formatsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));

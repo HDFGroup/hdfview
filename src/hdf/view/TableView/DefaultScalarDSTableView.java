@@ -960,8 +960,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         // load each selection into a separate dataset and display it in
         // a separate spreadsheet
-        StringBuilder titleSB = new StringBuilder();
-        log.trace("showRegRefData(): titleSB created");
 
         while (st.hasMoreTokens()) {
             log.trace("showRegRefData(): st.hasMoreTokens() begin");
@@ -996,11 +994,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             int idx = 0;
             String sizeStr = null;
             String token = st.nextToken();
-
-            titleSB.setLength(0);
-            titleSB.append(token);
-            titleSB.append(" at ");
-            log.trace("showRegRefData(): titleSB={}", titleSB);
 
             token = token.replace('(', ' ');
             token = token.replace(')', ' ');
@@ -1182,17 +1175,13 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         dset.init();
                                     }
                                     catch (Exception ex) {
-                                        log.debug(
-                                                "ScalarDSCellSelectionListener:RegRef CellSelected: reference dset did not init()",
-                                                ex);
+                                        log.debug("ScalarDSCellSelectionListener:RegRef CellSelected: reference dset did not init()", ex);
                                     }
-                                    StringBuilder selectionSB = new StringBuilder();
                                     StringBuilder strvalSB = new StringBuilder();
 
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
-                                        log.trace(
-                                                "ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() begin");
+                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() begin");
 
                                         int rank = dset.getRank();
                                         long[] start = dset.getStartDims();
@@ -1204,11 +1193,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         // info.
                                         String sizeStr = null;
                                         String token = st.nextToken();
-
-                                        selectionSB.setLength(0);
-                                        selectionSB.append(token);
-                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: selectionSB={}",
-                                                selectionSB);
 
                                         token = token.replace('(', ' ');
                                         token = token.replace(')', ' ');
@@ -1226,12 +1210,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             // rectangle selection
                                             String startStr = token.substring(0, token.indexOf('-'));
                                             String endStr = token.substring(token.indexOf('-') + 1);
-                                            log.trace(
-                                                    "ScalarDSCellSelectionListener:RegRef CellSelected: rect sel with startStr={} endStr={}",
+                                            log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: rect sel with startStr={} endStr={}",
                                                     startStr, endStr);
                                             String[] tmp = startStr.split(",");
-                                            log.trace(
-                                                    "ScalarDSCellSelectionListener:RegRef CellSelected: tmp with length={} rank={}",
+                                            log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: tmp with length={} rank={}",
                                                     tmp.length, rank);
                                             for (int x = 0; x < tmp.length; x++) {
                                                 sizeStr = tmp[x].trim();
@@ -1243,10 +1225,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             for (int x = 0; x < tmp.length; x++) {
                                                 sizeStr = tmp[x].trim();
                                                 count[x] = Long.valueOf(sizeStr) - start[x] + 1;
-                                                log.trace(
-                                                        "ScalarDSCellSelectionListener:RegRef CellSelected: rect end={} count={}",
-                                                        tmp[x],
-                                                        count[x]);
+                                                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: rect end={} count={}",
+                                                        tmp[x], count[x]);
                                             }
                                         }
                                         log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: selection inited");
@@ -1261,8 +1241,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                                         /* Convert dbuf to a displayable string */
                                         char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dbuf);
-                                        log.trace(
-                                                "ScalarDSCellSelectionListener:RegRef CellSelected: cName={} runtimeTypeClass={}",
+                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: cName={} runtimeTypeClass={}",
                                                 dbuf.getClass().getName(), runtimeTypeClass);
 
                                         if (idx > 0) strvalSB.append(',');
@@ -1280,9 +1259,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         if ((dtype.isArray() && baseType.isChar())
                                                 && ((runtimeTypeClass == 'B') || (runtimeTypeClass == 'S'))) {
                                             int n = Array.getLength(dbuf);
-                                            log.trace(
-                                                    "ScalarDSCellSelectionListener:RegRef CellSelected charData length = {}",
-                                                    n);
+                                            log.trace("ScalarDSCellSelectionListener:RegRef CellSelected charData length = {}", n);
                                             char[] charData = new char[n];
                                             for (int i = 0; i < n; i++) {
                                                 if (runtimeTypeClass == 'B') {
@@ -1398,8 +1375,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                         }
                                         idx++;
                                         dset.clearData();
-                                        log.trace(
-                                                "ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
+                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
                                     } // (st.hasMoreTokens())
                                     strVal = strvalSB.toString();
                                     log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");

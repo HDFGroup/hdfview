@@ -54,7 +54,6 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -223,18 +222,64 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         attributeInfoGroup.setLayout(new GridLayout(3, false));
         attributeInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+        if (isH5) {
+            StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
+            long ocplID = -1;
+            long oid = -1;
+            int creationOrder = 0;
+            try {
+                oid = dataObject.open();
+                if (oid >= 0) {
+                    if (dataObject instanceof Group) {
+                        ocplID = H5.H5Gget_create_plist(oid);
+                    }
+                    else if (dataObject instanceof Dataset) {
+                        ocplID = H5.H5Dget_create_plist(oid);
+                    }
+                    if (ocplID >= 0) {
+                        creationOrder = H5.H5Pget_attr_creation_order(ocplID);
+                        log.trace("createAttributeInfoPane(): creationOrder={}", creationOrder);
+                        if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
+                            objCreationStr.setLength(0);
+                            objCreationStr.append("Creation Order Tracked");
+                            if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_INDEXED) > 0)
+                                objCreationStr.append(" and Indexed");
+                        }
+                    }
+                }
+            }
+            finally {
+                H5.H5Pclose(ocplID);
+                dataObject.close(oid);
+            }
+
+            /* Creation order section */
+            Label label;
+            label = new Label(attributeInfoGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Attribute Creation Order: ");
+            label.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+
+            Text text;
+            text = new Text(attributeInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText(objCreationStr.toString());
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+        }
+
         log.trace("createAttributeInfoPane(): numAttributes={}", numAttributes);
 
         attrNumberLabel = new Label(attributeInfoGroup, SWT.RIGHT);
         attrNumberLabel.setFont(curFont);
         attrNumberLabel.setText("Number of attributes = 0");
-        attrNumberLabel.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
+        attrNumberLabel.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
 
         Button addButton = new Button(attributeInfoGroup, SWT.PUSH);
         addButton.setFont(curFont);
         addButton.setText("Add Attribute");
         addButton.setEnabled(!(dataObject.getFileFormat().isReadOnly()));
-        addButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
+        addButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         addButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -247,55 +292,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         delButton.setFont(curFont);
         delButton.setText("Delete Attribute");
         delButton.setEnabled(isH5 && !(dataObject.getFileFormat().isReadOnly()));
-        delButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        delButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         delButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 deleteAttribute(dataObject);
             }
         });
-
-        if (isH5) {
-            long ocplID = -1;
-            long oid = -1;
-            int creationOrder = 0;
-            try {
-                oid = dataObject.open();
-                if (dataObject instanceof Group) {
-                    ocplID = H5.H5Gget_create_plist(oid);
-                }
-                else if (dataObject instanceof Dataset) {
-                    ocplID = H5.H5Dget_create_plist(oid);
-                }
-                if (ocplID >= 0) {
-                    StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
-                    creationOrder = H5.H5Pget_attr_creation_order(ocplID);
-                    log.trace("createAttributeInfoPane(): creationOrder={}", creationOrder);
-                    if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
-                        objCreationStr.setLength(0);
-                        objCreationStr.append("Creation Order Tracked");
-                        if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_INDEXED) > 0)
-                            objCreationStr.append(" and Creation Order Indexed");
-                    }
-                    /* Creation order section */
-                    Label label;
-                    label = new Label(attributeInfoGroup, SWT.LEFT);
-                    label.setFont(curFont);
-                    label.setText("Creation Order: ");
-
-                    Text text;
-                    text = new Text(attributeInfoGroup, SWT.SINGLE | SWT.BORDER);
-                    text.setEditable(false);
-                    text.setFont(curFont);
-                    text.setText(objCreationStr.toString());
-                    text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-                }
-            }
-            finally {
-                H5.H5Pclose(ocplID);
-                dataObject.close(oid);
-            }
-        }
 
         attrTable = new Table(attributeInfoGroup, SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         attrTable.setLinesVisible(true);
@@ -405,7 +408,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         FileFormat theFile = dataObject.getFileFormat();
         boolean isRoot = ((dataObject instanceof Group) && ((Group) dataObject).isRoot());
         String objTypeStr = "Unknown";
-        StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
         Label label;
         Text text;
 
@@ -455,37 +457,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             else if (dataObject instanceof Datatype) {
                 objTypeStr = "HDF5 Named Datatype";
-            }
-            long ocplID = -1;
-            try {
-                if (isRoot) {
-                    ocplID = H5.H5Fget_create_plist(dataObject.getFID());
-                }
-                else {
-                    long oid = -1;
-                    try {
-                        oid = dataObject.open();
-                        if (dataObject instanceof Group) {
-                            ocplID = H5.H5Gget_create_plist(oid);
-                        }
-                    }
-                    finally {
-                        dataObject.close(oid);
-                    }
-                }
-                if (ocplID >= 0) {
-                    int creationOrder = H5.H5Pget_link_creation_order(ocplID);
-                    log.trace("createGeneralObjectInfoPane(): creationOrder={}", creationOrder);
-                    if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
-                        objCreationStr.setLength(0);
-                        objCreationStr.append("Creation Order Tracked");
-                        if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_INDEXED) > 0)
-                            objCreationStr.append(" and Creation Order Indexed");
-                    }
-                }
-            }
-            finally {
-                H5.H5Pclose(ocplID);
             }
         }
         else if (isH4) {
@@ -547,18 +518,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             text.setEditable(false);
             text.setFont(curFont);
             text.setText(oidStr);
-            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        }
-        if (isH5) {
-            /* Creation order section */
-            label = new Label(generalInfoGroup, SWT.LEFT);
-            label.setFont(curFont);
-            label.setText("Creation Order: ");
-
-            text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
-            text.setEditable(false);
-            text.setFont(curFont);
-            text.setText(objCreationStr.toString());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         }
 
@@ -1139,7 +1098,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         String attrName = attr.getName();
         String attrType = attr.getDatatype().getDescription();
-        StringBuilder attrSize;
+        StringBuilder attrSize = new StringBuilder();
         String attrValue = attr.toString(", ", 50);
         String[] rowData = new String[attrTableColNames.length];
 
@@ -1159,11 +1118,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
 
         if (attr.isScalar()) {
-            attrSize = new StringBuilder("Scalar");
+            attrSize.append("Scalar");
         }
         else {
             long[] dims = attr.getDims();
-            attrSize = new StringBuilder(String.valueOf(dims[0]));
+            attrSize.append(String.valueOf(dims[0]));
             for (int j = 1; j < dims.length; j++) {
                 attrSize.append(" x ").append(dims[j]);
             }
@@ -1327,8 +1286,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     else if (intValue == 0) {
                         break; // null end
                     }
-                    sb.append(Integer.toString(intValue, radix));
-                    sb.append(" ");
+
+                    sb.append(Integer.toString(intValue, radix)).append(" ");
                 }
                 userBlockInfo = sb.toString();
             }

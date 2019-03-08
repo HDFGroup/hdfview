@@ -1131,15 +1131,16 @@ public class H5ScalarDS extends ScalarDS {
         if (did >= 0) {
             log.trace("getMetadata(): dataset opened");
             try {
-                storageLayout = new StringBuilder("");
-                compression = new StringBuilder("");
-
                 // get the compression and chunk information
                 pcid = H5.H5Dget_create_plist(did);
                 paid = H5.H5Dget_access_plist(did);
                 long storageSize = H5.H5Dget_storage_size(did);
                 int nfilt = H5.H5Pget_nfilters(pcid);
                 int layoutType = H5.H5Pget_layout(pcid);
+
+                storageLayout.setLength(0);
+                compression.setLength(0);
+
                 if (layoutType == HDF5Constants.H5D_CHUNKED) {
                     chunkSize = new long[rank];
                     H5.H5Pget_chunk(pcid, rank, chunkSize);
@@ -1156,10 +1157,10 @@ public class H5ScalarDS extends ScalarDS {
 
                         if (datumSize < 0) {
                             long tmptid = -1;
-                                try {
+                            try {
                                 tmptid = H5.H5Dget_type(did);
                                 datumSize = H5.H5Tget_size(tmptid);
-                                }
+                            }
                             finally {
                                 try {
                                     H5.H5Tclose(tmptid);
@@ -1167,8 +1168,8 @@ public class H5ScalarDS extends ScalarDS {
                                 catch (Exception ex2) {
                                     log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
                                 }
-                                }
                             }
+                        }
 
                         for (int i = 0; i < rank; i++) {
                             nelmts *= dims[i];
@@ -1196,7 +1197,7 @@ public class H5ScalarDS extends ScalarDS {
                 }
                 else if (layoutType == HDF5Constants.H5D_VIRTUAL) {
                     storageLayout.append("VIRTUAL - ");
-                        try {
+                    try {
                         long vmaps = H5.H5Pget_virtual_count(pcid);
                         try {
                             int virtView = H5.H5Pget_virtual_view(paid);
@@ -1211,6 +1212,7 @@ public class H5ScalarDS extends ScalarDS {
                             log.debug("getMetadata(): vds error: ", err);
                             storageLayout.append("ERROR");
                         }
+
                         storageLayout.append("\nMAPS : " + vmaps);
                         if (vmaps > 0) {
                             for (long next = 0; next < vmaps; next++) {
@@ -1228,12 +1230,12 @@ public class H5ScalarDS extends ScalarDS {
                                 }
                             }
                         }
-                        }
-                        catch (Exception err) {
-                        log.debug("getMetadata(): vds count error: ", err);
-                            storageLayout.append("ERROR");
-                        }
                     }
+                    catch (Exception err) {
+                        log.debug("getMetadata(): vds count error: ", err);
+                        storageLayout.append("ERROR");
+                    }
+                }
                 else {
                     chunkSize = null;
                     storageLayout.append("NONE");
@@ -1246,7 +1248,8 @@ public class H5ScalarDS extends ScalarDS {
                 log.trace("getMetadata(): {} filters in pipeline", nfilt);
                 int filter = -1;
                 int[] filterConfig = { 1 };
-                filters = new StringBuilder("");
+
+                filters.setLength(0);
 
                 if (nfilt == 0) {
                     filters.append("NONE");
@@ -1336,7 +1339,9 @@ public class H5ScalarDS extends ScalarDS {
                 log.trace("getMetadata(): filter compression={}", compression);
                 log.trace("getMetadata(): filter information={}", filters);
 
-                storage = new StringBuilder("SIZE: ").append(storageSize);
+                storage.setLength(0);
+                storage.append("SIZE: ").append(storageSize);
+
                 try {
                     int[] at = { 0 };
                     H5.H5Pget_alloc_time(pcid, at);
@@ -1351,7 +1356,7 @@ public class H5ScalarDS extends ScalarDS {
                         storage.append("Late");
                     }
                     else
-                        storage.append("NONE");
+                        storage.append("Default");
                 }
                 catch (Exception ex) {
                     log.debug("getMetadata(): Storage allocation time:", ex);

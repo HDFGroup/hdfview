@@ -325,6 +325,7 @@ public class DataDisplayConverterFactory {
             }
             catch (Exception ex) {
                 log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
                 buffer.append(DataFactoryUtils.errStr);
             }
 
@@ -478,6 +479,7 @@ public class DataDisplayConverterFactory {
             }
             catch (Exception ex) {
                 log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
                 buffer.append(DataFactoryUtils.errStr);
             }
 
@@ -697,6 +699,7 @@ public class DataDisplayConverterFactory {
             }
             catch (Exception ex) {
                 log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
                 buffer.append(DataFactoryUtils.errStr);
             }
 
@@ -771,6 +774,7 @@ public class DataDisplayConverterFactory {
             }
             catch (Exception ex) {
                 log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
                 buffer.append(DataFactoryUtils.errStr);
             }
 
@@ -834,6 +838,7 @@ public class DataDisplayConverterFactory {
             }
             catch (Exception ex) {
                 log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
                 buffer.append(DataFactoryUtils.errStr);
             }
 

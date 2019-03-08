@@ -668,24 +668,30 @@ public class H4GRImage extends ScalarDS
             try {
                 HDFCompInfo compInfo = new HDFCompInfo();
                 HDFLibrary.GRgetcompinfo(id, compInfo);
+
+                compression.setLength(0);
+
                 if (compInfo.ctype == HDFConstants.COMP_CODE_DEFLATE) {
-                    compression = new StringBuilder("GZIP");
+                    compression.append("GZIP");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SZIP) {
-                    compression = new StringBuilder("SZIP");
+                    compression.append("SZIP");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_JPEG) {
-                    compression = new StringBuilder("JPEG");
+                    compression.append("JPEG");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SKPHUFF) {
-                    compression = new StringBuilder("SKPHUFF");
+                    compression.append("SKPHUFF");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_RLE) {
-                    compression = new StringBuilder("RLE");
+                    compression.append("RLE");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_NBIT) {
-                    compression = new StringBuilder("NBIT");
+                    compression.append("NBIT");
                 }
+
+                if (compression.length() == 0)
+                    compression.append("NONE");
             }
             catch (Exception ex) {
                 log.debug("init(): get compression information failure: ", ex);
@@ -696,16 +702,20 @@ public class H4GRImage extends ScalarDS
                 HDFChunkInfo chunkInfo = new HDFChunkInfo();
                 int[] cflag = {HDFConstants.HDF_NONE};
                 HDFLibrary.GRgetchunkinfo(id, chunkInfo, cflag);
+
+                storageLayout.setLength(0);
+
                 if (cflag[0] == HDFConstants.HDF_NONE) {
                     chunkSize = null;
-                    storageLayout = new StringBuilder("NONE");
+                    storageLayout.append("NONE");
                 }
                 else {
                     chunkSize = new long[rank];
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
                     }
-                    storageLayout = new StringBuilder("CHUNKED: ").append(chunkSize[0]);
+
+                    storageLayout.append("CHUNKED: ").append(chunkSize[0]);
                     for (int i = 1; i < rank; i++) {
                         storageLayout.append(" X ").append(chunkSize[i]);
                     }

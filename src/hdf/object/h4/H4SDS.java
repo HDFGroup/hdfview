@@ -746,40 +746,46 @@ public class H4SDS extends ScalarDS
             // get compression information
             try {
                 HDFCompInfo compInfo = new HDFCompInfo();
-
                 HDFLibrary.SDgetcompinfo(id, compInfo);
+
+                compression.setLength(0);
+
                 if (compInfo.ctype == HDFConstants.COMP_CODE_DEFLATE) {
                     HDFDeflateCompInfo comp = new HDFDeflateCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("GZIP(level=").append(comp.level).append(")");
+                    compression.append("GZIP(level=").append(comp.level).append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SZIP) {
                     HDFSZIPCompInfo comp = new HDFSZIPCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("SZIP(bits_per_pixel=").append(comp.bits_per_pixel).append(",options_mask=").append(comp.options_mask).append(",pixels=")
-                            .append(comp.pixels).append(",pixels_per_block=").append(comp.pixels_per_block).append(",pixels_per_scanline=").append(comp.pixels_per_scanline)
-                            .append(")");
+                    compression.append("SZIP(bits_per_pixel=").append(comp.bits_per_pixel).append(",options_mask=")
+                            .append(comp.options_mask).append(",pixels=").append(comp.pixels).append(",pixels_per_block=")
+                            .append(comp.pixels_per_block).append(",pixels_per_scanline=").append(comp.pixels_per_scanline).append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_JPEG) {
                     HDFJPEGCompInfo comp = new HDFJPEGCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("JPEG(quality=").append(comp.quality).append(",options_mask=").append(",force_baseline=").append(comp.force_baseline)
-                            .append(")");
+                    compression.append("JPEG(quality=").append(comp.quality).append(",options_mask=")
+                            .append(",force_baseline=").append(comp.force_baseline).append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_SKPHUFF) {
                     HDFSKPHUFFCompInfo comp = new HDFSKPHUFFCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("SKPHUFF(skp_size=").append(comp.skp_size).append(")");
+                    compression.append("SKPHUFF(skp_size=").append(comp.skp_size).append(")");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_RLE) {
-                    compression = new StringBuilder("RLE");
+                    compression.append("RLE");
                 }
                 else if (compInfo.ctype == HDFConstants.COMP_CODE_NBIT) {
                     HDFNBITCompInfo comp = new HDFNBITCompInfo();
                     HDFLibrary.SDgetcompinfo(id, comp);
-                    compression = new StringBuilder("NBIT(nt=").append(comp.nt).append(",bit_len=").append(comp.bit_len).append(",ctype=").append(comp.ctype).append(",fill_one=")
-                            .append(comp.fill_one).append(",sign_ext=").append(comp.sign_ext).append(",start_bit=").append(comp.start_bit).append(")");
+                    compression.append("NBIT(nt=").append(comp.nt).append(",bit_len=").append(comp.bit_len)
+                            .append(",ctype=").append(comp.ctype).append(",fill_one=").append(comp.fill_one)
+                            .append(",sign_ext=").append(comp.sign_ext).append(",start_bit=").append(comp.start_bit).append(")");
                 }
+
+                if (compression.length() == 0)
+                    compression.append("NONE");
             }
             catch (Exception ex) {
                 log.debug("init(): get compression information failure: ", ex);
@@ -797,16 +803,18 @@ public class H4SDS extends ScalarDS
                     ex.printStackTrace();
                 }
 
+                storageLayout.setLength(0);
+
                 if (cflag[0] == HDFConstants.HDF_NONE) {
                     chunkSize = null;
-                    storageLayout = new StringBuilder("NONE");
+                    storageLayout.append("NONE");
                 }
                 else {
                     chunkSize = new long[rank];
                     for (int i=0; i<rank; i++) {
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
                     }
-                    storageLayout = new StringBuilder("CHUNKED: ").append(chunkSize[0]);
+                    storageLayout.append("CHUNKED: ").append(chunkSize[0]);
                     for (int i = 1; i < rank; i++) {
                         storageLayout.append(" X ").append(chunkSize[i]);
                     }

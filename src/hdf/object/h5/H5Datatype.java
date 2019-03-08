@@ -1561,34 +1561,34 @@ public class H5Datatype extends Datatype {
             return datatypeDescription;
         }
 
-        StringBuilder description = null;
+        StringBuilder description = new StringBuilder();
         long tid = -1;
 
         switch (datatypeClass) {
             case CLASS_CHAR:
-                description = new StringBuilder("8-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
+                description.append("8-bit ").append(isUnsigned() ? "unsigned " : "").append("integer");
                 break;
             case CLASS_INTEGER:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native " + (isUnsigned() ? "unsigned " : "") + "integer");
+                    description.append("native ").append(isUnsigned() ? "unsigned " : "").append("integer");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit ").append(isUnsigned() ? "unsigned " : "").append("integer");
                 break;
             case CLASS_FLOAT:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native floating-point");
+                    description.append("native floating-point");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit floating-point");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
                 break;
             case CLASS_STRING:
-                description = new StringBuilder("String, length = " + (isVarStr() ? "variable" : datatypeSize));
+                description.append("String, length = ").append(isVarStr() ? "variable" : datatypeSize);
 
                 try {
                     tid = createNative();
                     if (tid >= 0) {
                         String strPadType;
-                        int strPad = H5.H5Tget_strpad(tid);
                         String strCSETType;
+                        int strPad = H5.H5Tget_strpad(tid);
                         int strCSET = H5.H5Tget_cset(tid);
 
                         if (strPad == HDF5Constants.H5T_STR_NULLTERM)
@@ -1601,7 +1601,7 @@ public class H5Datatype extends Datatype {
                             strPadType = null;
 
                         if (strPadType != null)
-                            description.append(", padding = " + strPadType);
+                            description.append(", padding = ").append(strPadType);
 
                         if (strCSET == HDF5Constants.H5T_CSET_ASCII)
                             strCSETType = "H5T_CSET_ASCII";
@@ -1611,7 +1611,7 @@ public class H5Datatype extends Datatype {
                             strCSETType = null;
 
                         if (strCSETType != null)
-                            description.append(", cset = " + strCSETType);
+                            description.append(", cset = ").append(strCSETType);
                     }
                     else {
                         log.debug("createNative() failure");
@@ -1626,23 +1626,23 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_BITFIELD:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native bitfield");
+                    description.append("native bitfield");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit bitfield");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
                 break;
             case CLASS_OPAQUE:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native Opaque");
+                    description.append("native Opaque");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize) + "-byte Opaque");
+                    description.append(String.valueOf(datatypeSize)).append("-byte Opaque");
 
                 if (opaqueTag != null) {
-                    description.append(", tag = " + opaqueTag);
+                    description.append(", tag = ").append(opaqueTag);
                 }
 
                 break;
             case CLASS_COMPOUND:
-                description = new StringBuilder("Compound");
+                description.append("Compound");
 
                 if ((compoundMemberTypes != null) && !compoundMemberTypes.isEmpty()) {
                     Iterator<String> memberNames = null;
@@ -1655,7 +1655,7 @@ public class H5Datatype extends Datatype {
 
                     while (memberTypes.hasNext()) {
                         if (memberNames != null && memberNames.hasNext()) {
-                            description.append(memberNames.next() + " = ");
+                            description.append(memberNames.next()).append(" = ");
                         }
 
                         description.append(memberTypes.next().getDescription());
@@ -1669,7 +1669,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_REFERENCE:
-                description = new StringBuilder("Reference");
+                description.append("Reference");
 
                 try {
                     boolean isRegionType = false;
@@ -1678,11 +1678,12 @@ public class H5Datatype extends Datatype {
                     if (tid >= 0) {
                         isRegionType = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
 
+                        description.setLength(0);
                         if (isRegionType) {
-                            description = new StringBuilder("Dataset region reference");
+                            description.append("Dataset region reference");
                         }
                         else {
-                            description = new StringBuilder("Object reference");
+                            description.append("Object reference");
                         }
                     }
                 }
@@ -1696,25 +1697,25 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_ENUM:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native enum");
+                    description.append("native enum");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8) + "-bit enum");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit enum");
 
                 String members = getEnumMembersAsString();
                 if (members != null)
-                    description.append(" (" + members + ")");
+                    description.append(" (").append(members).append(")");
 
                 break;
             case CLASS_VLEN:
-                description = new StringBuilder("Variable-length");
+                description.append("Variable-length");
 
                 if (baseType != null) {
-                    description.append(" of " + baseType.getDescription());
+                    description.append(" of ").append(baseType.getDescription());
                 }
 
                 break;
             case CLASS_ARRAY:
-                description = new StringBuilder("Array");
+                description.append("Array");
 
                 if (arrayDims != null) {
                     description.append(" [");
@@ -1727,12 +1728,12 @@ public class H5Datatype extends Datatype {
                 }
 
                 if (baseType != null) {
-                    description.append(" of " + baseType.getDescription());
+                    description.append(" of ").append(baseType.getDescription());
                 }
 
                 break;
             default:
-                description = new StringBuilder("Unknown");
+                description.append("Unknown");
                 break;
         }
 
