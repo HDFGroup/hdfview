@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of the HDF Java Products distribution.                  *
+ * The full copyright notice, including terms governing use, modification,   *
+ * and redistribution, is contained in the files COPYING and Copyright.html. *
+ * COPYING can be found at the root of the source code distribution tree.    *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ ****************************************************************************/
+
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
@@ -28,6 +41,7 @@ import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCanvas;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -52,7 +66,7 @@ public abstract class AbstractWindowTest {
 
     protected static String workDir = System.getProperty("hdfview.workdir");
 
-    protected SWTBot bot;
+    protected static SWTBot bot;
 
     protected static Thread uiThread;
 
@@ -327,102 +341,6 @@ public abstract class AbstractWindowTest {
                 curFilename.compareTo(filename) == 0);
     }
 
-    /*
-     * Utility function to compare a given table position against an expected value.
-     * Note that this is performed in terms of NAT Table "positions", or essentially
-     * 1-based offsets, with (1, 1) being the very top-left value in the table.
-     */
-    /*
-     * TODO:
-     */
-    protected void testTableLocation(SWTBotNatTable table, int rowPosition, int columnPosition, String expectedValRegex, String funcName)
-            throws IllegalArgumentException, AssertionError {
-        if (table == null)
-            throw new IllegalArgumentException("SWTBotNatTable parameter is null");
-        if (expectedValRegex == null)
-            throw new IllegalArgumentException("expected value string parameter is null");
-        if (funcName == null)
-            throw new IllegalArgumentException("function name parameter is null");
-
-        /*
-         * Most likely a mistake. The value at position (0, 0) should always be empty
-         * since this position represents the empty corner block between the row and
-         * column headers.
-         *
-         * However, values like (X >= 1, 0) and (0, X >= 1) can be used to test the
-         * String value of the row/column headers respectively.
-         */
-        if (rowPosition == 0 && columnPosition == 0)
-            throw new IllegalArgumentException("(0, 0) is an invalid table position");
-
-        // TODO: temporary workaround until the solution below works.
-        Position cellPos = table.scrollViewport(new Position(1, 1), rowPosition - 1, columnPosition - 1);
-        table.click(cellPos.row, cellPos.column);
-        String val = bot.shells()[1].bot().text(0).getText();
-
-        // Disabled until Data conversion can be figured out
-        // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
-
-        StringBuilder sb = new StringBuilder("wrong value at table position ");
-        sb.append("(").append(rowPosition).append(", ").append(columnPosition).append(")");
-        String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
-        assertTrue(errMsg, val.matches(expectedValRegex));
-    }
-
-    /*
-     * Utility function wrapper around testTableLocation() for testing an entire
-     * table.
-     */
-    protected void testAllTableLocations(SWTBotNatTable table, String[][] expectedValRegexArray, String funcName)
-            throws IllegalArgumentException, AssertionError {
-        int arrLen = Array.getLength(expectedValRegexArray);
-        for (int i = 0; i < arrLen; i++) {
-            String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
-            int nestedLen = Array.getLength(nestedArray);
-
-            for (int j = 0; j < nestedLen; j++)
-                testTableLocation(table, i + 1, j + 1, (String) Array.get(nestedArray, j), funcName);
-        }
-    }
-
-    protected void testTableLocation(SWTBotTable table, int rowPosition, int columnPosition, String expectedValRegex, String funcName)
-            throws IllegalArgumentException, AssertionError {
-        if (table == null)
-            throw new IllegalArgumentException("SWTBotTable parameter is null");
-        if (expectedValRegex == null)
-            throw new IllegalArgumentException("expected value string parameter is null");
-        if (funcName == null)
-            throw new IllegalArgumentException("function name parameter is null");
-
-        /*
-         * Most likely a mistake. The value at position (0, 0) should always be empty
-         * since this position represents the empty corner block between the row and
-         * column headers.
-         *
-         * However, values like (X >= 1, 0) and (0, X >= 1) can be used to test the
-         * String value of the row/column headers respectively.
-         */
-        if (rowPosition == 0 && columnPosition == 0)
-            throw new IllegalArgumentException("(0, 0) is an invalid table position");
-
-        table.click(rowPosition - 1, columnPosition - 1);
-        String val = table.cell(rowPosition - 1, columnPosition - 1);
-
-        String errMsg = constructWrongValueMessage(funcName, "wrong value", expectedValRegex, val);
-        assertTrue(errMsg, val.matches(expectedValRegex));
-    }
-
-    protected void testAllTableLocations(SWTBotTable table, String[][] expectedValRegexArray, String funcName) throws IllegalArgumentException, AssertionError {
-        int arrLen = Array.getLength(expectedValRegexArray);
-        for (int i = 0; i < arrLen; i++) {
-            String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
-            int nestedLen = Array.getLength(nestedArray);
-
-            for (int j = 0; j < nestedLen; j++)
-                testTableLocation(table, i + 1, j + 1, (String) Array.get(nestedArray, j), funcName);
-        }
-    }
-
     protected void testSamplePixel(final int theX, final int theY, String requiredValue) {
         try {
             SWTBotShell botshell = bot.activeShell();
@@ -497,7 +415,7 @@ public abstract class AbstractWindowTest {
         return openDataObject(objectName);
     }
 
-    protected SWTBotShell openDataObject(String objectName) {
+    private SWTBotShell openDataObject(String objectName) {
         String strippedObjectName = objectName;
         int slashLoc = objectName.lastIndexOf('/');
         if (slashLoc >= 0) {
@@ -518,12 +436,12 @@ public abstract class AbstractWindowTest {
          * Due to testing issues where the values can't be retrieved from non-visible
          * table columns, we ensure that the table Shell is always maximized.
          */
-//        Display.getDefault().syncExec(new Runnable() {
-//            @Override
-//            public void run() {
-//                botShell.widget.setMaximized(true);
-//            }
-//        });
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                botShell.widget.setMaximized(true);
+            }
+        });
 
         return botShell;
     }
@@ -542,11 +460,123 @@ public abstract class AbstractWindowTest {
         return node;
     }
 
+    /*
+     * A factory class to return concrete instances of TableDataRetriever classes,
+     * which will retrieve the data value at the specified row and column position
+     * in the given Table object.
+     */
+    public static class DataRetrieverFactory {
+
+        public static TableDataRetriever getTableDataRetriever(AbstractSWTBot<?> tableObject, String funcName) {
+            if (tableObject == null)
+                throw new IllegalArgumentException("AbstractSWTBot parameter is null");
+            if (funcName == null)
+                throw new IllegalArgumentException("function name parameter is null");
+
+            if (tableObject instanceof SWTBotNatTable)
+                return new NatTableDataRetriever((SWTBotNatTable) tableObject, funcName);
+            else
+                return new SWTTableDataRetriever((SWTBotTable) tableObject, funcName);
+        }
+
+        public static class TableDataRetriever {
+
+            protected final StringBuilder sb;
+
+            protected final String funcName;
+
+            public TableDataRetriever(String funcName) {
+                this.funcName = funcName;
+
+                this.sb = new StringBuilder();
+            }
+
+            /*
+             * Utility function to compare a given table position against an expected value.
+             */
+            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
+                throw new UnsupportedOperationException("subclasses must implement testTableLocation()");
+            }
+
+            /*
+             * Utility function wrapper around testTableLocation() for testing an entire
+             * table.
+             */
+            public void testAllTableLocations(String[][] expectedValRegexArray) {
+                int arrLen = Array.getLength(expectedValRegexArray);
+                for (int i = 0; i < arrLen; i++) {
+                    String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
+                    int nestedLen = Array.getLength(nestedArray);
+
+                    for (int j = 0; j < nestedLen; j++)
+                        testTableLocation(i, j, (String) Array.get(nestedArray, j));
+                }
+            }
+
+        }
+
+        private static class NatTableDataRetriever extends TableDataRetriever {
+
+            private final SWTBotNatTable table;
+
+            NatTableDataRetriever(SWTBotNatTable tableObj, String funcName) {
+                super(funcName);
+
+                this.table = tableObj;
+            }
+
+            @Override
+            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
+                if (expectedValRegex == null)
+                    throw new IllegalArgumentException("expected value string parameter is null");
+
+                // TODO: temporary workaround until the solution below works.
+                Position cellPos = table.scrollViewport(new Position(1, 1), rowIndex, colIndex);
+                table.click(cellPos.row, cellPos.column);
+                String val = bot.shells()[1].bot().text(0).getText();
+
+                // Disabled until Data conversion can be figured out
+                // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
+
+                sb.setLength(0);
+                sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
+                String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
+                assertTrue(errMsg, val.matches(expectedValRegex));
+            }
+
+        }
+
+        private static class SWTTableDataRetriever extends TableDataRetriever {
+
+            private final SWTBotTable table;
+
+            SWTTableDataRetriever(SWTBotTable tableObj, String funcName) {
+                super(funcName);
+
+                this.table = tableObj;
+            }
+
+            @Override
+            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
+                if (expectedValRegex == null)
+                    throw new IllegalArgumentException("expected value string parameter is null");
+
+                table.click(rowIndex, colIndex);
+                String val = table.cell(rowIndex, colIndex);
+
+                sb.setLength(0);
+                sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
+                String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
+                assertTrue(errMsg, val.matches(expectedValRegex));
+            }
+        }
+    }
+
     protected SWTBotNatTable getNatTable(SWTBotShell theShell) {
         return new SWTBotNatTable(theShell.bot().widget(widgetOfType(NatTable.class)));
     }
 
-    protected String constructWrongValueMessage(String methodName, String message, String expected, String actual) {
+    protected static String constructWrongValueMessage(String methodName, String message, String expected, String actual) {
         return methodName.concat(" " + message + ": expected '" + expected + "' but was '" + actual + "'");
     }
 }

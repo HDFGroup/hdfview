@@ -15,6 +15,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.Test;
 
+import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+
 public class TestHDFViewRefs extends AbstractWindowTest {
     @Test
     public void openTAttributeRegionReference() {
@@ -37,12 +39,16 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             // Open dataset 'Dataset1' Attribute Table
             SWTBotTable attrTable = openAttributeTable(filetree, filename, datasetName);
 
-            testAllTableLocations(attrTable, expectedAttrData, "openTAttributeRegionReference()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(attrTable, "openTAttributeRegionReference()");
+
+            retriever.testAllTableLocations(expectedAttrData);
 
             tableShell = openAttributeObject(attrTable, "Attribute1", 1);
             final SWTBotNatTable dataTable = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            testAllTableLocations(dataTable, expectedData, "openTAttributeRegionReference()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTAttributeRegionReference()");
+
+            retriever.testAllTableLocations(expectedData);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -74,7 +80,7 @@ public class TestHDFViewRefs extends AbstractWindowTest {
                 { "NULL" }, { "NULL" } };
         SWTBotShell tableShell = null;
         String filename = "tdatareg.h5";
-        String datasetName = "Dataset1";
+        String datasetName = "/Dataset1";
         File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
@@ -102,7 +108,9 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            testAllTableLocations(dataTable, expectedData, "openTDataRegionReference()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTDataRegionReference()");
+
+            retriever.testAllTableLocations(expectedData);
         }
         catch (Exception ex) {
             ex.printStackTrace();
