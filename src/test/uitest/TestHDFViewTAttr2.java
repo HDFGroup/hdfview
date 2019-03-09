@@ -186,8 +186,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             { "\\(21, 22, 23\\)", "\\(27, 28, 29\\)", "\\(33, 34, 35\\)" },
             { "\\(40, 41, 42, 43\\)", "\\(48, 49, 50, 51\\)", "\\(56, 57, 58, 59\\)" } };
 
-    public void openTAttr2GroupTest(String testname, String datasetName, String[][] arrayExpectedData, String datasetName2, String[][] array2DExpectedData, String datasetName3,
-            String[][] array3DPage1ExpectedData, String[][] array3DPage2ExpectedData) {
+    public void openTAttr2GroupTest(String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData) {
         SWTBotShell tableShell = null;
         File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
 
@@ -202,7 +202,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.testAllTableLocations(arrayExpectedData);
+            retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -213,7 +213,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.testAllTableLocations(array2DExpectedData);
+            retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -225,11 +225,11 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
             retriever.setPagingActive(true);
 
-            retriever.testAllTableLocations(array3DPage1ExpectedData);
+            retriever.testAllTableLocations(test3DPage1ExpectedData);
 
             tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
 
-            retriever.testAllTableLocations(array3DPage2ExpectedData);
+            retriever.testAllTableLocations(test3DPage2ExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -257,8 +257,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         }
     }
 
-    public void openTAttr2GroupCompoundTest(String testname, String datasetName, String[][] arrayExpectedData, String datasetName2, String[][] array2DExpectedData, String datasetName3,
-            String[][] array3DPage1ExpectedData, String[][] array3DPage2ExpectedData) {
+    public void openTAttr2GroupCompoundTest(String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData) {
         SWTBotShell tableShell = null;
         File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
 
@@ -274,7 +274,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
             retriever.setContainerHeaderOffset(2);
-            retriever.testAllTableLocations(arrayExpectedData);
+            retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -286,7 +286,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
             retriever.setContainerHeaderOffset(2);
-            retriever.testAllTableLocations(array2DExpectedData);
+            retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -299,11 +299,11 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             retriever.setPagingActive(true);
             retriever.setContainerHeaderOffset(2);
 
-            retriever.testAllTableLocations(array3DPage1ExpectedData);
+            retriever.testAllTableLocations(test3DPage1ExpectedData);
 
             tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
 
-            retriever.testAllTableLocations(array3DPage2ExpectedData);
+            retriever.testAllTableLocations(test3DPage2ExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -412,7 +412,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         openTAttr2GroupTest("openTAttr2GroupString()", datasetg2Name, stringExpectedData, datasetg2Name2, string2DExpectedData, datasetg2Name3, string3DPage1ExpectedData, string3DPage2ExpectedData);
     }
 
-    @Ignore
+    @Test
     public void openTAttr2GroupVlen() {
         String datasetg2Name = "/g2/vlen";
         String datasetg2Name2 = "/g2/vlen2D";
@@ -421,8 +421,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         openTAttr2GroupTest("openTAttr2GroupVlen()", datasetg2Name, vlenExpectedData, datasetg2Name2, vlen2DExpectedData, datasetg2Name3, vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
     }
 
-    public void openTAttr2AttributeTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] arrayExpectedData, String attrName2, String[][] array2DExpectedData, String attrName3,
-            String[][] array3DPage1ExpectedData, String[][] array3DPage2ExpectedData)
+    public void openTAttr2AttributeTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData)
     {
         SWTBotShell tableShell = null;
         try {
@@ -432,7 +432,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.testAllTableLocations(arrayExpectedData);
+            retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -443,27 +443,28 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.testAllTableLocations(array2DExpectedData);
+            retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
+            //TODO: attribute 3D tables are different and don't page
             // Open attribute 3D
-            tableShell = openAttributeObject(attrTable, attrName3, rowIndex+2);
-            dataTable = getNatTable(tableShell);
-
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
-            retriever.setPagingActive(true);
-
-            retriever.testAllTableLocations(array3DPage1ExpectedData);
-
-            tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
-
-            retriever.testAllTableLocations(array3DPage2ExpectedData);
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-        }
+            /*
+             * tableShell = openAttributeObject(attrTable, attrName3, rowIndex+2); dataTable =
+             * getNatTable(tableShell);
+             *
+             * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+             * retriever.setPagingActive(true);
+             *
+             * retriever.testAllTableLocations(test3DPage1ExpectedData);
+             *
+             * tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
+             *
+             * retriever.testAllTableLocations(test3DPage2ExpectedData);
+             *
+             * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
+             */        }
         catch (Exception ex) {
             ex.printStackTrace();
             fail(ex.getMessage());
@@ -480,8 +481,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         }
     }
 
-    public void openTAttr2AttributeCompoundTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] arrayExpectedData, String attrName2, String[][] array2DExpectedData, String attrName3,
-            String[][] array3DPage1ExpectedData, String[][] array3DPage2ExpectedData) {
+    public void openTAttr2AttributeCompoundTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData) {
         SWTBotShell tableShell = null;
 
         try {
@@ -493,7 +494,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
             retriever.setContainerHeaderOffset(2);
-            retriever.testAllTableLocations(arrayExpectedData);
+            retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -505,28 +506,28 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
             retriever.setContainerHeaderOffset(2);
-            retriever.testAllTableLocations(array2DExpectedData);
+            retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
+            //TODO: attribute 3D tables are different and don't page
             // Open attribute 3D
-            tableShell = openAttributeObject(attrTable, attrName3, rowIndex+2);
-            dataTable = getNatTable(tableShell);
-
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
-            retriever.setPagingActive(true);
-            retriever.setContainerHeaderOffset(2);
-
-            retriever.testAllTableLocations(array3DPage1ExpectedData);
-
-            tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
-
-            retriever.testAllTableLocations(array3DPage2ExpectedData);
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-        }
+            /*
+             * tableShell = openAttributeObject(attrTable, attrName3, rowIndex+2); dataTable =
+             * getNatTable(tableShell);
+             *
+             * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+             * retriever.setPagingActive(true); retriever.setContainerHeaderOffset(2);
+             *
+             * retriever.testAllTableLocations(test3DPage1ExpectedData);
+             *
+             * tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
+             *
+             * retriever.testAllTableLocations(test3DPage2ExpectedData);
+             *
+             * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
+             */        }
         catch (Exception ex) {
             ex.printStackTrace();
             fail(ex.getMessage());
@@ -577,57 +578,6 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                 { "vlen2D", "Variable-length of 32-bit integer", "3 x 2", "\\(0\\), \\(1\\), \\(2, 3\\), \\(4, 5\\), \\(6, 7, 8\\), \\(9, 10, 11\\)" },
                 { "vlen3D", "Variable-length of 32-bit integer", "4 x 3 x 2", "\\(0\\), \\(1\\), \\(2\\), \\(3\\), \\(4\\), \\(5\\), \\(6, 7\\), \\(8, 9\\), \\(10, 11\\), \\(12, 13\\), \\(14, 15\\), \\(16, 17\\), \\(18, 19, 20\\), \\(21, 22, 23\\), \\(24, 25, 26\\), \\(27, 28, 29\\), \\(30, 31, 32\\), \\(33, 34, 35\\), \\(36, 37, 38, 39\\), \\(40, 41, 42, 43\\), \\(44, 45, 46, 47\\), \\(48, 49, 50, 51\\), \\(52, 53, 54, 55\\), \\(56, 57, 58, 59\\)" },
                 };
-        //TODO: attribute 3D tables are different and don't page
-        String[][] arrayA3DPage1ExpectedData = {
-                { "\\[1, 2, 3\\]", "\\[4, 5, 6\\]", "\\[7, 8, 9\\]" },
-                { "\\[10, 11, 12\\]", "\\[13, 14, 15\\]", "\\[16, 17, 18\\]" },
-                { "\\[19, 20, 21\\]", "\\[22, 23, 24\\]", "\\[25, 26, 27\\]" },
-                { "\\[28, 29, 30\\]", "\\[31, 32, 33\\]", "\\[34, 35, 36\\]" } };
-        String[][] bitfieldA3DPage1ExpectedData = {
-                { "01", "02", "03" },
-                { "04", "05", "06" },
-                { "07", "08", "09" },
-                { "0A", "0B", "0C" } };
-//        String[][] compoundA3DPage1ExpectedData = {
-//                { "1", "2.0", "5", "6.0", "9", "10.0" },
-//                { "13", "14.0", "17", "18.0", "21", "22.0" },
-//                { "25", "26.0", "29", "30.0", "33", "34.0" },
-//                { "37", "38.0", "41", "42.0", "45", "46.0" } };
-        String[][] enumA3DPage1ExpectedData = {
-                { "RED", "RED", "RED" },
-                { "RED", "RED", "RED" },
-                { "RED", "RED", "RED" },
-                { "RED", "RED", "RED" } };
-        String[][] floatA3DPage1ExpectedData = {
-                { "1.0", "2.0", "3.0" },
-                { "4.0", "5.0", "6.0" },
-                { "7.0", "8.0", "9.0" },
-                { "10.0", "11.0", "12.0" } };
-        String[][] integerA3DPage1ExpectedData = {
-                { "1", "2", "3" },
-                { "4", "5", "6" },
-                { "7", "8", "9" },
-                { "10", "11", "12" } };
-        String[][] opaqueA3DPage1ExpectedData = {
-                { "01", "02", "03" },
-                { "04", "05", "06" },
-                { "07", "08", "09" },
-                { "0A", "0B", "0C" } };
-        String[][] referenceA3DPage1ExpectedData = {
-                { "/dset", "/dset", "/dset" },
-                { "/dset", "/dset", "/dset" },
-                { "/dset", "/dset", "/dset" },
-                { "/dset", "/dset", "/dset" } };
-        String[][] stringA3DPage1ExpectedData = {
-                { "ab", "cd", "ef" },
-                { "gh", "ij", "kl" },
-                { "mn", "pq", "rs" },
-                { "tu", "vw", "xz" } };
-//        String[][] vlenA3DPage1ExpectedData = {
-//                { "\\(0\\)", "\\(2\\)", "\\(4\\)" },
-//                { "\\(6, 7\\)", "\\(10, 11\\)", "\\(14, 15\\)" },
-//                { "\\(18, 19, 20\\)", "\\(24, 25, 26\\)", "\\(30, 31, 32\\)" },
-//                { "\\(36, 37, 38, 39\\)", "\\(44, 45, 46, 47\\)", "\\(52, 53, 54, 55\\)" } };
         SWTBotShell tableShell = null;
         String datasetName = "dset";
         File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
@@ -644,16 +594,16 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedAttrData);
 
-            openTAttr2AttributeTest(attrTable, 1, "openTAttr2Attribute()", "array", arrayExpectedData,  "array2D", array2DExpectedData,  "array3D", arrayA3DPage1ExpectedData, arrayA3DPage1ExpectedData);
-            openTAttr2AttributeTest(attrTable, 2, "openTAttr2Attribute()", "bitfield", bitfieldExpectedData,  "bitfield2D", bitfield2DExpectedData,  "bitfieldA3D", bitfieldA3DPage1ExpectedData, bitfieldA3DPage1ExpectedData);
-//            openTAttr2AttributeCompoundTest(attrTable, 3, "openTAttr2Attribute()", "compound", compoundExpectedData,  "compound2D", compound2DExpectedData,  "compoundA3D", compoundA3DPage1ExpectedData, compoundA3DPage1ExpectedData);
-            openTAttr2AttributeTest(attrTable, 4, "openTAttr2Attribute()", "enum", enumExpectedData,  "enum2D", enum2DExpectedData,  "enum3D", enumA3DPage1ExpectedData, enumA3DPage1ExpectedData);
-            openTAttr2AttributeTest(attrTable, 5, "openTAttr2Attribute()", "float", floatExpectedData,  "float2D", float2DExpectedData,  "float3D", floatA3DPage1ExpectedData, floatA3DPage1ExpectedData);
-            openTAttr2AttributeTest(attrTable, 6, "openTAttr2Attribute()", "integer", integerExpectedData,  "integer2D", integer2DExpectedData,  "integer3D", integerA3DPage1ExpectedData, integerA3DPage1ExpectedData);
-            openTAttr2AttributeTest(attrTable, 7, "openTAttr2Attribute()", "opaque", opaqueExpectedData,  "opaque2D", opaque2DExpectedData,  "opaque3D", opaqueA3DPage1ExpectedData, opaqueA3DPage1ExpectedData);
-            openTAttr2AttributeTest(attrTable, 8, "openTAttr2Attribute()", "reference", referenceExpectedData,  "reference2D", reference2DExpectedData,  "reference3D", referenceA3DPage1ExpectedData, referenceA3DPage1ExpectedData);
-            openTAttr2AttributeTest(attrTable, 9, "openTAttr2Attribute()", "string", stringExpectedData,  "string2D", string2DExpectedData,  "string3D", stringA3DPage1ExpectedData, stringA3DPage1ExpectedData);
-//            openTAttr2AttributeTest(attrTable, 10, "openTAttr2Attribute()", "vlen", vlenExpectedData,  "vlen2D", vlen2DExpectedData,  "vlen3D", vlenA3DPage1ExpectedData, vlenA3DPage1ExpectedData);
+            openTAttr2AttributeTest(attrTable, 1, "openTAttr2Attribute()", "array", arrayExpectedData,  "array2D", array2DExpectedData,  "array3D", array3DPage1ExpectedData, array3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 2, "openTAttr2Attribute()", "bitfield", bitfieldExpectedData,  "bitfield2D", bitfield2DExpectedData,  "bitfield3D", bitfield3DPage1ExpectedData, bitfield3DPage2ExpectedData);
+            openTAttr2AttributeCompoundTest(attrTable, 3, "openTAttr2Attribute()", "compound", compoundExpectedData,  "compound2D", compound2DExpectedData,  "compound3D", compound3DPage1ExpectedData, compound3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 4, "openTAttr2Attribute()", "enum", enumExpectedData,  "enum2D", enum2DExpectedData,  "enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 5, "openTAttr2Attribute()", "float", floatExpectedData,  "float2D", float2DExpectedData,  "float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 6, "openTAttr2Attribute()", "integer", integerExpectedData,  "integer2D", integer2DExpectedData,  "integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 7, "openTAttr2Attribute()", "opaque", opaqueExpectedData,  "opaque2D", opaque2DExpectedData,  "opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 8, "openTAttr2Attribute()", "reference", referenceExpectedData,  "reference2D", reference2DExpectedData,  "reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 9, "openTAttr2Attribute()", "string", stringExpectedData,  "string2D", string2DExpectedData,  "string3D", string3DPage1ExpectedData, string3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 10, "openTAttr2Attribute()", "vlen", vlenExpectedData,  "vlen2D", vlen2DExpectedData,  "vlen3D", vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
