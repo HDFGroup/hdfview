@@ -542,7 +542,7 @@ public abstract class AbstractWindowTest {
                 if (pagingActive) textboxIndex = 2;
 
                 // TODO: temporary workaround until the solution below works.
-                Position cellPos = table.scrollViewport(new Position(1, 1), rowIndex + containerHeaderOffset, colIndex);
+                Position cellPos = table.scrollViewport(new Position(1 + containerHeaderOffset, 1), rowIndex, colIndex);
                 table.click(cellPos.row, cellPos.column);
                 String val = bot.shells()[1].bot().text(textboxIndex).getText();
 
