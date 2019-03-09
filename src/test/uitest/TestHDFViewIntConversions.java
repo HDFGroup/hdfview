@@ -81,16 +81,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS08()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -172,16 +172,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU08()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -260,16 +260,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS16()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -348,16 +348,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU16()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -460,16 +460,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS32()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -572,16 +572,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU32()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -741,7 +741,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
                 "11100000 00000000 00000000 00000000 00000000 00000000 00000000 00000000", "11000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000", "10000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000", "00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000" },
               { "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111100", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11110000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11100000",
                 "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 10000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111110 00000000",
-                "11111111 11111111 11111111 11111111 11111111 11111111 11111100 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11110000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11100000 00000000", 
+                "11111111 11111111 11111111 11111111 11111111 11111111 11111100 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11110000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11100000 00000000",
                 "11111111 11111111 11111111 11111111 11111111 11111111 11000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 10000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111110 00000000 00000000",
                 "11111111 11111111 11111111 11111111 11111111 11111100 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11110000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11100000 00000000 00000000",
                 "11111111 11111111 11111111 11111111 11111111 11000000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 10000000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 00000000 00000000 00000000", "11111111 11111111 11111111 11111111 11111110 00000000 00000000 00000000",
@@ -865,7 +865,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
                 "-2.7487791E11", "-5.4975581E11", "-1.0995116E12", "-2.1990233E12", "-4.3980465E12", "-8.796093E12", "-1.7592186E13", "-3.5184372E13", "-7.0368744E13", "-1.4073749E14", "-2.8147498E14", "-5.6294995E14", "-1.1258999E15", "-2.2517998E15", "-4.5035996E15", "-9.0071993E15",
                 "-1.8014399E16", "-3.6028797E16", "-7.2057594E16", "-1.4411519E17", "-2.8823038E17", "-5.7646075E17", "-1.1529215E18", "-2.305843E18", "-4.611686E18", "-9.223372E18", "0.0E0", "0.0E0", "0.0E0", "0.0E0", "0.0E0", "0.0E0" },
               { "-1.28E2", "-2.56E2", "-5.12E2", "-1.024E3", "-2.048E3", "-4.096E3", "-8.192E3", "-1.6384E4", "-3.2768E4", "-6.5536E4", "-1.31072E5", "-2.62144E5", "-5.24288E5", "-1.048576E6", "-2.097152E6", "-4.194304E6",
-                "-8.388608E6", "-1.6777216E7", "-3.3554432E7", "-6.7108864E7", "-1.3421773E8", "-2.6843546E8", "-5.3687091E8", "-1.0737418E9", "-2.1474836E9", "-4.2949673E9", "-8.5899346E9", "-1.7179869E10", "-3.4359738E10", "-6.8719477E10", "-1.3743895E11", "-2.7487791E11", 
+                "-8.388608E6", "-1.6777216E7", "-3.3554432E7", "-6.7108864E7", "-1.3421773E8", "-2.6843546E8", "-5.3687091E8", "-1.0737418E9", "-2.1474836E9", "-4.2949673E9", "-8.5899346E9", "-1.7179869E10", "-3.4359738E10", "-6.8719477E10", "-1.3743895E11", "-2.7487791E11",
                 "-5.4975581E11", "-1.0995116E12", "-2.1990233E12", "-4.3980465E12", "-8.796093E12", "-1.7592186E13", "-3.5184372E13", "-7.0368744E13", "-1.4073749E14", "-2.8147498E14", "-5.6294995E14", "-1.1258999E15", "-2.2517998E15", "-4.5035996E15", "-9.0071993E15", "-1.8014399E16",
                 "-3.6028797E16", "-7.2057594E16", "-1.4411519E17", "-2.8823038E17", "-5.7646075E17", "-1.1529215E18", "-2.305843E18", "-4.611686E18", "-9.223372E18", "0.0E0", "0.0E0", "0.0E0", "0.0E0", "0.0E0", "0.0E0", "0.0E0" } };
         SWTBotShell tableShell = null;
@@ -884,16 +884,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS64()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1085,7 +1085,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
                 "11100000 00000000 00000000 00000000 00000000 00000000 00000000 00000000", "11000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000", "10000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000", "00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000" },
               { "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111100", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11110000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11100000",
                 "11111111 11111111 11111111 11111111 11111111 11111111 11111111 11000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 10000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111111 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111110 00000000",
-                "11111111 11111111 11111111 11111111 11111111 11111111 11111100 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11110000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11100000 00000000", 
+                "11111111 11111111 11111111 11111111 11111111 11111111 11111100 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11111000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11110000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 11100000 00000000",
                 "11111111 11111111 11111111 11111111 11111111 11111111 11000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 10000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111111 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111110 00000000 00000000",
                 "11111111 11111111 11111111 11111111 11111111 11111100 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11111000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11110000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 11100000 00000000 00000000",
                 "11111111 11111111 11111111 11111111 11111111 11000000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 10000000 00000000 00000000", "11111111 11111111 11111111 11111111 11111111 00000000 00000000 00000000", "11111111 11111111 11111111 11111111 11111110 00000000 00000000 00000000",
@@ -1228,16 +1228,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU64()");
 
-            retriever.testAllTableLocations(expectedData);
+            retriever.testAllTableLocations(false, expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(expectedDataHex);
+            retriever.testAllTableLocations(false, expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(expectedDataBin);
+            retriever.testAllTableLocations(false, expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(expectedDataSci);
+            retriever.testAllTableLocations(false, expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();

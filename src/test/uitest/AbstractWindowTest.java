@@ -492,9 +492,16 @@ public abstract class AbstractWindowTest {
             }
 
             /*
+             * Utility function to offset the table row position for extra header info.
+             */
+            public void setContainerHeaderOffset(int containerHeaderOffset) {
+                throw new UnsupportedOperationException("subclasses must implement setContainerHeaderOffset()");
+            }
+
+            /*
              * Utility function to compare a given table position against an expected value.
              */
-            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
+            public void testTableLocation(int rowIndex, int colIndex, boolean pagingActive, String expectedValRegex) {
                 throw new UnsupportedOperationException("subclasses must implement testTableLocation()");
             }
 
@@ -502,14 +509,14 @@ public abstract class AbstractWindowTest {
              * Utility function wrapper around testTableLocation() for testing an entire
              * table.
              */
-            public void testAllTableLocations(String[][] expectedValRegexArray) {
+            public void testAllTableLocations(boolean pagingActive, String[][] expectedValRegexArray) {
                 int arrLen = Array.getLength(expectedValRegexArray);
                 for (int i = 0; i < arrLen; i++) {
                     String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
                     int nestedLen = Array.getLength(nestedArray);
 
                     for (int j = 0; j < nestedLen; j++)
-                        testTableLocation(i, j, (String) Array.get(nestedArray, j));
+                        testTableLocation(i, j, pagingActive, (String) Array.get(nestedArray, j));
                 }
             }
 
@@ -518,6 +525,7 @@ public abstract class AbstractWindowTest {
         private static class NatTableDataRetriever extends TableDataRetriever {
 
             private final SWTBotNatTable table;
+            private int containerHeaderOffset = 0;
 
             NatTableDataRetriever(SWTBotNatTable tableObj, String funcName) {
                 super(funcName);
@@ -526,14 +534,17 @@ public abstract class AbstractWindowTest {
             }
 
             @Override
-            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
+            public void testTableLocation(int rowIndex, int colIndex, boolean pagingActive, String expectedValRegex) {
                 if (expectedValRegex == null)
                     throw new IllegalArgumentException("expected value string parameter is null");
 
+                int textboxIndex = 0;
+                if (pagingActive) textboxIndex = 2;
+
                 // TODO: temporary workaround until the solution below works.
-                Position cellPos = table.scrollViewport(new Position(1, 1), rowIndex, colIndex);
+                Position cellPos = table.scrollViewport(new Position(1, 1), rowIndex + containerHeaderOffset, colIndex);
                 table.click(cellPos.row, cellPos.column);
-                String val = bot.shells()[1].bot().text(0).getText();
+                String val = bot.shells()[1].bot().text(textboxIndex).getText();
 
                 // Disabled until Data conversion can be figured out
                 // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
@@ -542,6 +553,11 @@ public abstract class AbstractWindowTest {
                 sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
                 String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
                 assertTrue(errMsg, val.matches(expectedValRegex));
+            }
+
+            @Override
+            public void setContainerHeaderOffset(int containerHeaderOffset) {
+                this.containerHeaderOffset = containerHeaderOffset;
             }
 
         }
@@ -557,7 +573,7 @@ public abstract class AbstractWindowTest {
             }
 
             @Override
-            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
+            public void testTableLocation(int rowIndex, int colIndex, boolean pagingActive, String expectedValRegex) {
                 if (expectedValRegex == null)
                     throw new IllegalArgumentException("expected value string parameter is null");
 
