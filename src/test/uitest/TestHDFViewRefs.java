@@ -41,14 +41,14 @@ public class TestHDFViewRefs extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(attrTable, "openTAttributeRegionReference()");
 
-            retriever.testAllTableLocations(false, expectedAttrData);
+            retriever.testAllTableLocations(expectedAttrData);
 
             tableShell = openAttributeObject(attrTable, "Attribute1", 1);
             final SWTBotNatTable dataTable = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTAttributeRegionReference()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -110,7 +110,7 @@ public class TestHDFViewRefs extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTDataRegionReference()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
         }
         catch (Exception ex) {
             ex.printStackTrace();

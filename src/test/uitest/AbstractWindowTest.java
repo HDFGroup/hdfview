@@ -498,10 +498,14 @@ public abstract class AbstractWindowTest {
                 throw new UnsupportedOperationException("subclasses must implement setContainerHeaderOffset()");
             }
 
+            public void setPagingActive(boolean pagingActive) {
+                throw new UnsupportedOperationException("subclasses must implement setPagingActive()");
+            }
+
             /*
              * Utility function to compare a given table position against an expected value.
              */
-            public void testTableLocation(int rowIndex, int colIndex, boolean pagingActive, String expectedValRegex) {
+            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
                 throw new UnsupportedOperationException("subclasses must implement testTableLocation()");
             }
 
@@ -509,14 +513,14 @@ public abstract class AbstractWindowTest {
              * Utility function wrapper around testTableLocation() for testing an entire
              * table.
              */
-            public void testAllTableLocations(boolean pagingActive, String[][] expectedValRegexArray) {
+            public void testAllTableLocations(String[][] expectedValRegexArray) {
                 int arrLen = Array.getLength(expectedValRegexArray);
                 for (int i = 0; i < arrLen; i++) {
                     String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
                     int nestedLen = Array.getLength(nestedArray);
 
                     for (int j = 0; j < nestedLen; j++)
-                        testTableLocation(i, j, pagingActive, (String) Array.get(nestedArray, j));
+                        testTableLocation(i, j, (String) Array.get(nestedArray, j));
                 }
             }
 
@@ -526,6 +530,7 @@ public abstract class AbstractWindowTest {
 
             private final SWTBotNatTable table;
             private int containerHeaderOffset = 0;
+            boolean pagingActive = false;
 
             NatTableDataRetriever(SWTBotNatTable tableObj, String funcName) {
                 super(funcName);
@@ -534,7 +539,7 @@ public abstract class AbstractWindowTest {
             }
 
             @Override
-            public void testTableLocation(int rowIndex, int colIndex, boolean pagingActive, String expectedValRegex) {
+            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
                 if (expectedValRegex == null)
                     throw new IllegalArgumentException("expected value string parameter is null");
 
@@ -556,6 +561,11 @@ public abstract class AbstractWindowTest {
             }
 
             @Override
+            public void setPagingActive(boolean pagingActive) {
+                this.pagingActive = pagingActive;
+            }
+
+            @Override
             public void setContainerHeaderOffset(int containerHeaderOffset) {
                 this.containerHeaderOffset = containerHeaderOffset;
             }
@@ -573,7 +583,7 @@ public abstract class AbstractWindowTest {
             }
 
             @Override
-            public void testTableLocation(int rowIndex, int colIndex, boolean pagingActive, String expectedValRegex) {
+            public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
                 if (expectedValRegex == null)
                     throw new IllegalArgumentException("expected value string parameter is null");
 

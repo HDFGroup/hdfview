@@ -81,16 +81,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS08()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -172,16 +172,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU08()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -260,16 +260,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS16()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -348,16 +348,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU16()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -460,16 +460,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS32()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -572,16 +572,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU32()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -884,16 +884,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS64()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1228,16 +1228,16 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU64()");
 
-            retriever.testAllTableLocations(false, expectedData);
+            retriever.testAllTableLocations(expectedData);
 
             tableShell.bot().menu("Show Hexadecimal").click();
-            retriever.testAllTableLocations(false, expectedDataHex);
+            retriever.testAllTableLocations(expectedDataHex);
 
             tableShell.bot().menu("Show Binary").click();
-            retriever.testAllTableLocations(false, expectedDataBin);
+            retriever.testAllTableLocations(expectedDataBin);
 
             tableShell.bot().menu("Show Scientific Notation").click();
-            retriever.testAllTableLocations(false, expectedDataSci);
+            retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
             ex.printStackTrace();
