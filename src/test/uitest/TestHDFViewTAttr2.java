@@ -210,7 +210,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         openTAttr2GroupTest("openTAttr2GroupBitfield()", datasetg2Name, arrayExpectedData, datasetg2Name2, array2DExpectedData, datasetg2Name3, array3DPage1ExpectedData, array3DPage2ExpectedData);
     }
 
-    @Ignore
+    @Test
     public void openTAttr2GroupCompound() {
         String[][] arrayExpectedData = {
                 { "1", "2.0" },
