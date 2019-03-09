@@ -566,9 +566,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         int i = enumMembers.size();
         while (entries.hasNext()) {
             Entry thisEntry = entries.next();
-            enumStr.append((String) thisEntry.getKey());
-            enumStr.append("=");
-            enumStr.append((String) thisEntry.getValue());
+            enumStr.append((String) thisEntry.getKey())
+                   .append("=")
+                   .append((String) thisEntry.getValue());
+
             i--;
             if (i > 0)
                 enumStr.append(", ");
@@ -649,50 +650,51 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             return datatypeDescription;
         }
 
-        StringBuilder description = null;
+        StringBuilder description = new StringBuilder();
 
         switch (datatypeClass) {
             case CLASS_CHAR:
-                description = new StringBuilder("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
+                description.append("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
                 break;
             case CLASS_INTEGER:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
+                    description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit ")
+                            .append((isUnsigned() ? "unsigned " : "")).append("integer");
                 break;
             case CLASS_FLOAT:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native floating-point");
+                    description.append("native floating-point");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
                 break;
             case CLASS_STRING:
-                description = new StringBuilder("String");
+                description.append("String");
                 break;
             case CLASS_REFERENCE:
-                description = new StringBuilder("Object reference");
+                description.append("Object reference");
                 break;
             case CLASS_OPAQUE:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native opaque");
+                    description.append("native opaque");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit opaque");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit opaque");
                 break;
             case CLASS_BITFIELD:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native bitfield");
+                    description.append("native bitfield");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
                 break;
             case CLASS_ENUM:
                 if (datatypeSize == NATIVE)
-                    description = new StringBuilder("native enum");
+                    description.append("native enum");
                 else
-                    description = new StringBuilder(String.valueOf(datatypeSize * 8)).append("-bit enum");
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit enum");
                 break;
             case CLASS_ARRAY:
-                description = new StringBuilder("Array");
+                description.append("Array");
 
                 if (arrayDims != null) {
                     description.append(" [");
@@ -704,19 +706,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                     description.append("]");
                 }
 
-                if (baseType != null)
-                    description.append(" of " + baseType.getDescription());
                 break;
             case CLASS_COMPOUND:
-                description = new StringBuilder("Compound");
+                description.append("Compound");
                 break;
             case CLASS_VLEN:
-                description = new StringBuilder("Variable-length");
-                if (baseType != null)
-                    description.append(" of " + baseType.getDescription());
+                description.append("Variable-length");
                 break;
             default:
-                description = new StringBuilder("Unknown");
+                description.append("Unknown");
                 break;
         }
 

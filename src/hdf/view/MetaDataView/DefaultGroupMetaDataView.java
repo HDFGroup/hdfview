@@ -24,7 +24,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.Group;
@@ -53,27 +56,85 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
 
         log.trace("addObjectSpecificContent(): group object extra info mlist size = {}", n);
 
+        Label label;
+
+        if (isH5) {
+            StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
+
+            long ocplID = -1;
+            try {
+                if (g.isRoot()) {
+                    ocplID = H5.H5Fget_create_plist(g.getFID());
+                }
+                else {
+                    long oid = -1;
+                    try {
+                        oid = g.open();
+                        ocplID = H5.H5Gget_create_plist(oid);
+                    }
+                    finally {
+                        g.close(oid);
+                    }
+                }
+                if (ocplID >= 0) {
+                    int creationOrder = H5.H5Pget_link_creation_order(ocplID);
+                    log.trace("createGeneralObjectInfoPane(): creationOrder={}", creationOrder);
+                    if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_TRACKED) > 0) {
+                        objCreationStr.setLength(0);
+                        objCreationStr.append("Creation Order Tracked");
+                        if ((creationOrder & HDF5Constants.H5P_CRT_ORDER_INDEXED) > 0)
+                            objCreationStr.append(" and Indexed");
+                    }
+                }
+            }
+            finally {
+                H5.H5Pclose(ocplID);
+            }
+
+            /* Creation order section */
+            label = new Label(generalObjectInfoPane, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Link Creation Order: ");
+
+            Text text = new Text(generalObjectInfoPane, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText(objCreationStr.toString());
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        }
+
+        org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
+        groupInfoGroup.setFont(curFont);
+        groupInfoGroup.setText("Group Members");
+        groupInfoGroup.setLayout(new GridLayout(1, true));
+        groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+        if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
+            label = new Label(groupInfoGroup, SWT.RIGHT);
+            label.setFont(curFont);
+            label.setText("Number of members: " + n);
+        }
+        else {
+            label = new Label(groupInfoGroup, SWT.RIGHT);
+            label.setFont(curFont);
+            label.setText("Number of members: " + n + " (in memory)," + "" + g.getNumberOfMembersInFile() + " (in file)");
+        }
+
+        String[] columnNames = { "Name", "Type" };
+
+        Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
+        memberTable.setLinesVisible(true);
+        memberTable.setHeaderVisible(true);
+        memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        memberTable.setFont(curFont);
+
+        for (int i = 0; i < columnNames.length; i++) {
+            TableColumn column = new TableColumn(memberTable, SWT.NONE);
+            column.setText(columnNames[i]);
+            column.setMoveable(false);
+        }
+
         if (mlist != null && n > 0) {
-            Label label;
-
-            org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
-            groupInfoGroup.setFont(curFont);
-            groupInfoGroup.setText("Group Members");
-            groupInfoGroup.setLayout(new GridLayout(1, true));
-            groupInfoGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-
-            if (g.getNumberOfMembersInFile() < ViewProperties.getMaxMembers()) {
-                label = new Label(groupInfoGroup, SWT.RIGHT);
-                label.setFont(curFont);
-                label.setText("Number of members: " + n);
-            }
-            else {
-                label = new Label(groupInfoGroup, SWT.RIGHT);
-                label.setFont(curFont);
-                label.setText(
-                        "Number of members: " + n + " (in memory)," + "" + g.getNumberOfMembersInFile() + " (in file)");
-            }
-
             String rowData[][] = new String[n][2];
             for (int i = 0; i < n; i++) {
                 HObject theObj = (HObject) mlist.get(i);
@@ -94,20 +155,6 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
                     rowData[i][1] = "Unknown";
             }
 
-            String[] columnNames = { "Name", "Type" };
-
-            Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
-            memberTable.setLinesVisible(true);
-            memberTable.setHeaderVisible(true);
-            memberTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            memberTable.setFont(curFont);
-
-            for (int i = 0; i < columnNames.length; i++) {
-                TableColumn column = new TableColumn(memberTable, SWT.NONE);
-                column.setText(columnNames[i]);
-                column.setMoveable(false);
-            }
-
             for (int i = 0; i < rowData.length; i++) {
                 TableItem item = new TableItem(memberTable, SWT.NONE);
                 item.setFont(curFont);
@@ -115,14 +162,14 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
                 item.setText(1, rowData[i][1]);
             }
 
-            for (int i = 0; i < columnNames.length; i++) {
-                memberTable.getColumn(i).pack();
-            }
-
             // set cell height for large fonts
             // int cellRowHeight = Math.max(16,
             // table.getFontMetrics(table.getFont()).getHeight());
             // table.setRowHeight(cellRowHeight);
+        }
+
+        for (int i = 0; i < columnNames.length; i++) {
+            memberTable.getColumn(i).pack();
         }
 
         log.trace("addObjectSpecificContent(): finish");

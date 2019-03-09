@@ -98,9 +98,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
 
             sb.append(dims[0]);
             if (hasDimNames) {
-                sb.append(" (");
-                sb.append(dimNames[0]);
-                sb.append(")");
+                sb.append(" (").append(dimNames[0]).append(")");
             }
 
             if (maxDims[0] < 0)
@@ -112,9 +110,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                 sb.append(" x ");
                 sb.append(dims[i]);
                 if (hasDimNames) {
-                    sb.append(" (");
-                    sb.append(dimNames[i]);
-                    sb.append(")");
+                    sb.append(" (").append(dimNames[i]).append(")");
                 }
 
                 sb2.append(" x ");

@@ -536,13 +536,13 @@ public abstract class DefaultBaseTableView implements TableView {
         StringBuilder sb = new StringBuilder(hObject.getName());
 
         if (((HObject) dataObject).getFileFormat() != null) {
-            sb.append("  at  ");
-            sb.append(hObject.getPath());
-            sb.append("  [");
-            sb.append(((HObject) dataObject).getFileFormat().getName());
-            sb.append("  in  ");
-            sb.append(((HObject) dataObject).getFileFormat().getParent());
-            sb.append("]");
+            sb.append("  at  ")
+              .append(hObject.getPath())
+              .append("  [")
+              .append(((HObject) dataObject).getFileFormat().getName())
+              .append("  in  ")
+              .append(((HObject) dataObject).getFileFormat().getParent())
+              .append("]");
         }
 
         shell.setText(sb.toString());
@@ -1245,8 +1245,7 @@ public abstract class DefaultBaseTableView implements TableView {
             for (int i = r0; i < r1; i++) {
                 sb.append(selectionLayer.getDataValueByPosition(c0, i).toString());
                 for (int j = c0 + 1; j < c1; j++) {
-                    sb.append("\t");
-                    sb.append(selectionLayer.getDataValueByPosition(j, i).toString());
+                    sb.append("\t").append(selectionLayer.getDataValueByPosition(j, i).toString());
                 }
                 sb.append("\n");
             }

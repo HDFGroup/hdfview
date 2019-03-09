@@ -448,13 +448,13 @@ public class DefaultImageView implements ImageView {
 
         // set title
         StringBuilder sb = new StringBuilder(hobject.getName());
-        sb.append("  at  ");
-        sb.append(hobject.getPath());
-        sb.append("  [");
-        sb.append(dataset.getFileFormat().getName());
-        sb.append("  in  ");
-        sb.append(dataset.getFileFormat().getParent());
-        sb.append("]");
+        sb.append("  at  ")
+          .append(hobject.getPath())
+          .append("  [")
+          .append(dataset.getFileFormat().getName())
+          .append("  in  ")
+          .append(dataset.getFileFormat().getParent())
+          .append("]");
 
         frameTitle = sb.toString();
         shell.setText(sb.toString());
@@ -2750,14 +2750,13 @@ public class DefaultImageView implements ImageView {
             }
 
             strBuff.setLength(0); // reset the string buffer
-            strBuff.append("x=");
-            strBuff.append(x + indexBase);
-            strBuff.append(",   y=");
-            strBuff.append(y + indexBase);
-            strBuff.append(",   value=");
+            strBuff.append("x=")
+                   .append(x + indexBase)
+                   .append(",   y=")
+                   .append(y + indexBase)
+                   .append(",   value=");
 
             if (isTrueColor) {
-                strBuff.append("(");
                 int i0, i1, i2;
                 String r, g, b;
 
@@ -2783,14 +2782,15 @@ public class DefaultImageView implements ImageView {
                     b = String.valueOf(Array.get(data, i2));
                 }
 
-                strBuff.append(r + ", " + g + ", " + b);
-                strBuff.append(")");
+                strBuff.append("(").append(r + ", " + g + ", " + b).append(")");
             } // (isTrueColor)
             else {
+                int idx;
 
-                int idx = y * w + x;
                 if (!dataset.isDefaultImageOrder())
                     idx = x * h + y;
+                else
+                    idx = y * w + x;
 
                 if (dataset.getDatatype().isUnsigned() && !isUnsignedConverted) {
                     strBuff.append(convertUnsignedPoint(idx));

@@ -420,13 +420,13 @@ public class NewDatasetDialog extends Dialog {
 
                     String currentStr = currentSizeField.getText();
                     int idx = currentStr.lastIndexOf('x');
-                    StringBuilder chunkStr = null;
+                    StringBuilder chunkStr = new StringBuilder();
 
                     if (rank <= 1) {
-                        chunkStr = new StringBuilder(currentStr);
+                        chunkStr.append(currentStr);
                     }
                     else {
-                        chunkStr = new StringBuilder("1");
+                        chunkStr.append("1");
                         for (int i = 1; i < rank - 1; i++) {
                             chunkStr.append(" x 1");
                         }
@@ -511,7 +511,7 @@ public class NewDatasetDialog extends Dialog {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
                     chunkSizeField.setEnabled(true);
-                    StringBuilder chunkStr = new StringBuilder("");
+                    StringBuilder chunkStr = new StringBuilder();
                     StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
                     int rank = rankChoice.getSelectionIndex() + 1;
                     while (st.hasMoreTokens()) {
@@ -545,16 +545,16 @@ public class NewDatasetDialog extends Dialog {
 
                     if (isCompressed && isH5) {
                         if (!checkChunked.getSelection()) {
+                            int rank = rankChoice.getSelectionIndex() + 1;
                             String currentStr = currentSizeField.getText();
                             int idx = currentStr.lastIndexOf('x');
-                            StringBuilder chunkStr = null;
+                            StringBuilder chunkStr = new StringBuilder();
 
-                            int rank = rankChoice.getSelectionIndex() + 1;
                             if (rank <= 1) {
-                                chunkStr = new StringBuilder(currentStr);
+                                chunkStr.append(currentStr);
                             }
                             else {
-                                chunkStr = new StringBuilder("1");
+                                chunkStr.append("1");
                                 for (int i = 1; i < rank - 1; i++) {
                                     chunkStr.append(" x 1");
                                 }
@@ -1257,11 +1257,11 @@ public class NewDatasetDialog extends Dialog {
                     }
                     catch (Exception e) {
                         StringBuilder buff = new StringBuilder();
-                        buff.append("<html>");
-                        buff.append("<body>");
-                        buff.append("ERROR: cannot load help information.");
-                        buff.append("</body>");
-                        buff.append("</html>");
+                        buff.append("<html>")
+                            .append("<body>")
+                            .append("ERROR: cannot load help information.")
+                            .append("</body>")
+                            .append("</html>");
                         browser.setText(buff.toString(), true);
                     }
                 }
@@ -1303,11 +1303,11 @@ public class NewDatasetDialog extends Dialog {
                     }
                     catch (Exception e) {
                         StringBuilder buff = new StringBuilder();
-                        buff.append("<html>");
-                        buff.append("<body>");
-                        buff.append("ERROR: cannot load help information.");
-                        buff.append("</body>");
-                        buff.append("</html>");
+                        buff.append("<html>")
+                            .append("<body>")
+                            .append("ERROR: cannot load help information.")
+                            .append("</body>")
+                            .append("</html>");
                         browser.setText(buff.toString(), true);
                     }
                 }

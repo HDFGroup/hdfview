@@ -2340,7 +2340,7 @@ public final class Tools {
      *         hexadecimal (base 16).
      */
     public static final String toHexString (BigInteger v, int nbytes) {
-        return String.format("%" + nbytes + "s", v.toString(16)).replace(" ", "0").toUpperCase();
+        return String.format("%" + (2 * nbytes) + "s", v.toString(16)).replace(" ", "0").toUpperCase();
     }
 
     /**

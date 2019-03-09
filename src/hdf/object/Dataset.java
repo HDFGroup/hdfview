@@ -223,6 +223,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         chunkSize = null;
         compression = new StringBuilder("NONE");
         filters = new StringBuilder("NONE");
+        storageLayout = new StringBuilder("NONE");
         storage = new StringBuilder("NONE");
         dimNames = null;
 
