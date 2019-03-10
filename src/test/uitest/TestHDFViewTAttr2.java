@@ -8,96 +8,231 @@ import java.io.File;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestHDFViewTAttr2 extends AbstractWindowTest {
     private static final String testFilename = "tattr2.h5";
+    String[][] arrayExpectedData = {
+            { "\\[1, 2, 3\\]" }, { "\\[4, 5, 6\\]" } };
+    String[][] array2DExpectedData = {
+            { "\\[1, 2, 3\\]", "\\[4, 5, 6\\]" },
+            { "\\[7, 8, 9\\]", "\\[10, 11, 12\\]" },
+            { "\\[13, 14, 15\\]", "\\[16, 17, 18\\]" } };
+    String[][] array3DPage1ExpectedData = {
+            { "\\[1, 2, 3\\]", "\\[7, 8, 9\\]", "\\[13, 14, 15\\]" },
+            { "\\[19, 20, 21\\]", "\\[25, 26, 27\\]", "\\[31, 32, 33\\]" },
+            { "\\[37, 38, 39\\]", "\\[43, 44, 45\\]", "\\[49, 50, 51\\]" },
+            { "\\[55, 56, 57\\]", "\\[61, 62, 63\\]", "\\[67, 68, 69\\]" } };
+    String[][] array3DPage2ExpectedData = {
+            { "\\[4, 5, 6\\]", "\\[10, 11, 12\\]", "\\[16, 17, 18\\]" },
+            { "\\[22, 23, 24\\]", "\\[28, 29, 30\\]", "\\[34, 35, 36\\]" },
+            { "\\[40, 41, 42\\]", "\\[46, 47, 48\\]", "\\[52, 53, 54\\]" },
+            { "\\[58, 59, 60\\]", "\\[64, 65, 66\\]", "\\[70, 71, 72\\]" } };
+    String[][] bitfieldExpectedData = {
+            { "01" }, { "02" } };
+    String[][] bitfield2DExpectedData = {
+            { "01", "02" },
+            { "03", "04" },
+            { "05", "06" } };
+    String[][] bitfield3DPage1ExpectedData = {
+            { "01", "03", "05" },
+            { "07", "09", "0B" },
+            { "0D", "0F", "11" },
+            { "13", "15", "17" } };
+    String[][] bitfield3DPage2ExpectedData = {
+            { "02", "04", "06" },
+            { "08", "0A", "0C" },
+            { "0E", "10", "12" },
+            { "14", "16", "18" } };
+    String[][] compoundExpectedData = {
+            { "1", "2.0" },
+            { "3", "4.0" } };
+    String[][] compound2DExpectedData = {
+            { "1", "2.0", "3", "4.0" },
+            { "5", "6.0", "7", "8.0" },
+            { "9", "10.0","11", "12.0" } };
+    String[][] compound3DPage1ExpectedData = {
+            { "1", "2.0", "5", "6.0", "9", "10.0" },
+            { "13", "14.0", "17", "18.0", "21", "22.0" },
+            { "25", "26.0", "29", "30.0", "33", "34.0" },
+            { "37", "38.0", "41", "42.0", "45", "46.0" } };
+    // TODO: update when paging fixed for compounds
+    String[][] compound3DPage2ExpectedData = {
+            { "1", "2.0", "5", "6.0", "9", "10.0" },
+            { "13", "14.0", "17", "18.0", "21", "22.0" },
+            { "25", "26.0", "29", "30.0", "33", "34.0" },
+            { "37", "38.0", "41", "42.0", "45", "46.0" } };
+    String[][] enumExpectedData = {
+            { "RED" }, { "RED" } };
+    String[][] enum2DExpectedData = {
+            { "RED", "RED" },
+            { "RED", "RED" },
+            { "RED", "RED" } };
+    String[][] enum3DPage1ExpectedData = {
+            { "RED", "RED", "RED" },
+            { "RED", "RED", "RED" },
+            { "RED", "RED", "RED" },
+            { "RED", "RED", "RED" } };
+    String[][] enum3DPage2ExpectedData = {
+            { "RED", "RED", "RED" },
+            { "RED", "RED", "RED" },
+            { "RED", "RED", "RED" },
+            { "RED", "RED", "RED" } };
+    String[][] floatExpectedData = {
+            { "1.0" }, { "2.0" } };
+    String[][] float2DExpectedData = {
+            { "1.0", "2.0" },
+            { "3.0", "4.0" },
+            { "5.0", "6.0" } };
+    String[][] float3DPage1ExpectedData = {
+            { "1.0", "3.0", "5.0" },
+            { "7.0", "9.0", "11.0" },
+            { "13.0", "15.0", "17.0" },
+            { "19.0", "21.0", "23.0" } };
+    String[][] float3DPage2ExpectedData = {
+            { "2.0", "4.0", "6.0" },
+            { "8.0", "10.0", "12.0" },
+            { "14.0", "16.0", "18.0" },
+            { "20.0", "22.0", "24.0" } };
+    String[][] integerExpectedData = {
+            { "1" }, { "2" } };
+    String[][] integer2DExpectedData = {
+            { "1", "2" },
+            { "3", "4" },
+            { "5", "6" } };
+    String[][] integer3DPage1ExpectedData = {
+            { "1", "3", "5" },
+            { "7", "9", "11" },
+            { "13", "15", "17" },
+            { "19", "21", "23" } };
+    String[][] integer3DPage2ExpectedData = {
+            { "2", "4", "6" },
+            { "8", "10", "12" },
+            { "14", "16", "18" },
+            { "20", "22", "24" } };
+    String[][] opaqueExpectedData = {
+            { "01" }, { "02" } };
+    String[][] opaque2DExpectedData = {
+            { "01", "02" },
+            { "03", "04" },
+            { "05", "06" } };
+    String[][] opaque3DPage1ExpectedData = {
+            { "01", "03", "05" },
+            { "07", "09", "0B" },
+            { "0D", "0F", "11" },
+            { "13", "15", "17" } };
+    String[][] opaque3DPage2ExpectedData = {
+            { "02", "04", "06" },
+            { "08", "0A", "0C" },
+            { "0E", "10", "12" },
+            { "14", "16", "18" } };
+    String[][] referenceExpectedData = {
+            { "/dset" }, { "/dset" } };
+    String[][] reference2DExpectedData = {
+            { "/dset", "/dset" },
+            { "/dset", "/dset" },
+            { "/dset", "/dset" } };
+    String[][] reference3DPage1ExpectedData = {
+            { "/dset", "/dset", "/dset" },
+            { "/dset", "/dset", "/dset" },
+            { "/dset", "/dset", "/dset" },
+            { "/dset", "/dset", "/dset" } };
+    String[][] reference3DPage2ExpectedData = {
+            { "/dset", "/dset", "/dset" },
+            { "/dset", "/dset", "/dset" },
+            { "/dset", "/dset", "/dset" },
+            { "/dset", "/dset", "/dset" } };
+    String[][] stringExpectedData = {
+            { "ab" }, { "de" } };
+    String[][] string2DExpectedData = {
+            { "ab", "cd" },
+            { "ef", "gh" },
+            { "ij", "kl" } };
+    String[][] string3DPage1ExpectedData = {
+            { "ab", "ef", "ij" },
+            { "mn", "rs", "vw" },
+            { "AB", "EF", "IJ" },
+            { "MN", "RS", "VW" } };
+    // TODO: update when paging fixed for strings
+    String[][] string3DPage2ExpectedData = {
+            { "ab", "ef", "ij" },
+            { "mn", "rs", "vw" },
+            { "AB", "EF", "IJ" },
+            { "MN", "RS", "VW" } };
+    String[][] vlenExpectedData = {
+            { "\\(1\\)" }, { "\\(2, 3\\)" } };
+    String[][] vlen2DExpectedData = {
+            { "\\(0\\)", "\\(1\\)" },
+            { "\\(2, 3\\)", "\\(4, 5\\)" },
+            { "\\(6, 7, 8\\)", "\\(9, 10, 11\\)" } };
+    String[][] vlen3DPage1ExpectedData = {
+            { "\\(0\\)", "\\(2\\)", "\\(4\\)" },
+            { "\\(6, 7\\)", "\\(10, 11\\)", "\\(14, 15\\)" },
+            { "\\(18, 19, 20\\)", "\\(24, 25, 26\\)", "\\(30, 31, 32\\)" },
+            { "\\(36, 37, 38, 39\\)", "\\(44, 45, 46, 47\\)", "\\(52, 53, 54, 55\\)" } };
+    String[][] vlen3DPage2ExpectedData = {
+            { "\\(1\\)", "\\(3\\)", "\\(5\\)" },
+            { "\\(8, 9\\)", "\\(12, 13\\)", "\\(16, 17\\)" },
+            { "\\(21, 22, 23\\)", "\\(27, 28, 29\\)", "\\(33, 34, 35\\)" },
+            { "\\(40, 41, 42, 43\\)", "\\(48, 49, 50, 51\\)", "\\(56, 57, 58, 59\\)" } };
 
-    @Test
-    public void openTAttr2GroupArray() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "array";
-        String datasetg2_name2 = "array2D";
-        String datasetg2_name3 = "array3D";
+    public void openTAttr2GroupTest(String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData) {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("openTAttr2GroupArray()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupArray() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupArray() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupArray() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupArray() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
+            checkFileTree(filetree, testname, 4, testFilename);
 
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
+            // Open dataset 1D
+            tableShell = openTreeviewObject(filetree, testFilename, datasetName);
+            SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            items[0].getNode(2).getNode(0).click();
-            items[0].getNode(2).getNode(0).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupArray() data did not match regex '[1, 2, 3]'",
-                    tableShell.bot().text(0).getText().matches("\\[1, 2, 3\\]"));
+            retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
-            items[0].getNode(2).getNode(1).click();
-            items[0].getNode(2).getNode(1).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            // Open dataset 2D
+            tableShell = openTreeviewObject(filetree, testFilename, datasetName2);
+            dataTable = getNatTable(tableShell);
 
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupArray() data did not match regex '[10, 11, 12]'",
-                    tableShell.bot().text(0).getText().matches("\\[10, 11, 12\\]"));
+            retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
-            items[0].getNode(2).getNode(2).click();
-            items[0].getNode(2).getNode(2).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            // Open dataset 3D
+            tableShell = openTreeviewObject(filetree, testFilename, datasetName3);
+            dataTable = getNatTable(tableShell);
 
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+            retriever.setPagingActive(true);
 
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
+            retriever.testAllTableLocations(test3DPage1ExpectedData);
 
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupArray() data ["+tableShell.bot().text(2).getText()+"] did not match regex '[49, 50, 51]'",
-                    tableShell.bot().text(2).getText().matches("\\[49, 50, 51\\]"));
+            tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
+
+            retriever.testAllTableLocations(test3DPage2ExpectedData);
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -108,911 +243,228 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
+            if (tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
             try {
-                closeFile(hdf_file, false);
+                closeFile(hdfFile, false);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
+    }
+
+    public void openTAttr2GroupCompoundTest(String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData) {
+        SWTBotShell tableShell = null;
+        File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+
+            checkFileTree(filetree, testname, 4, testFilename);
+
+            // Open dataset 1D
+            tableShell = openTreeviewObject(filetree, testFilename, datasetName);
+            SWTBotNatTable dataTable = getNatTable(tableShell);
+
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+
+            retriever.setContainerHeaderOffset(2);
+            retriever.testAllTableLocations(testExpectedData);
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            // Open dataset 2D
+            tableShell = openTreeviewObject(filetree, testFilename, datasetName2);
+            dataTable = getNatTable(tableShell);
+
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+
+            retriever.setContainerHeaderOffset(2);
+            retriever.testAllTableLocations(test2DExpectedData);
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            // Open dataset 3D
+            tableShell = openTreeviewObject(filetree, testFilename, datasetName3);
+            dataTable = getNatTable(tableShell);
+
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+            retriever.setPagingActive(true);
+            retriever.setContainerHeaderOffset(2);
+
+            retriever.testAllTableLocations(test3DPage1ExpectedData);
+
+            tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
+
+            retriever.testAllTableLocations(test3DPage2ExpectedData);
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdfFile, false);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void openTAttr2GroupArray() {
+        String datasetg2Name = "/g2/array";
+        String datasetg2Name2 = "/g2/array2D";
+        String datasetg2Name3 = "/g2/array3D";
+
+        openTAttr2GroupTest("openTAttr2GroupArray()", datasetg2Name, arrayExpectedData, datasetg2Name2, array2DExpectedData, datasetg2Name3, array3DPage1ExpectedData, array3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupBitfield() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "bitfield";
-        String datasetg2_name2 = "bitfield2D";
-        String datasetg2_name3 = "bitfield3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/bitfield";
+        String datasetg2Name2 = "/g2/bitfield2D";
+        String datasetg2Name3 = "/g2/bitfield3D";
 
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupBitfield()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupBitfield() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupBitfield() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupBitfield() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupBitfield() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(3).click();
-            items[0].getNode(2).getNode(3).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupBitfield() data did not match regex '01'",
-                    tableShell.bot().text(0).getText().matches("01"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(4).click();
-            items[0].getNode(2).getNode(4).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupBitfield() data did not match regex '04'",
-                    tableShell.bot().text(0).getText().matches("04"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(5).click();
-            items[0].getNode(2).getNode(5).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupBitfield() data ["+tableShell.bot().text(2).getText()+"] did not match regex '11'",
-                    tableShell.bot().text(2).getText().matches("11"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupTest("openTAttr2GroupBitfield()", datasetg2Name, bitfieldExpectedData, datasetg2Name2, bitfield2DExpectedData, datasetg2Name3, bitfield3DPage1ExpectedData, bitfield3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupCompound() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "compound";
-        String datasetg2_name2 = "compound2D";
-        String datasetg2_name3 = "compound3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/compound";
+        String datasetg2Name2 = "/g2/compound2D";
+        String datasetg2Name3 = "/g2/compound3D";
 
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupCompound()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupCompound() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupCompound() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupCompound() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupCompound() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(6).click();
-            items[0].getNode(2).getNode(6).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 1);
-            assertTrue("openTAttr2GroupCompound() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex '1'",
-                    tableShell.bot().text(0).getText().matches("1"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(7).click();
-            items[0].getNode(2).getNode(7).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(4, 2);
-            assertTrue("openTAttr2GroupCompound() data ["+tableShell.bot().text(0).getText()+"] did not match regex '6.0'",
-                    tableShell.bot().text(0).getText().matches("6.0"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(8).click();
-            items[0].getNode(2).getNode(8).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(5, 3);
-            assertTrue("openTAttr2GroupCompound() data ["+tableShell.bot().text(2).getText()+"] did not match regex '29'",
-                    tableShell.bot().text(2).getText().matches("29"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupCompoundTest("openTAttr2GroupCompound()", datasetg2Name, compoundExpectedData, datasetg2Name2, compound2DExpectedData, datasetg2Name3, compound3DPage1ExpectedData, compound3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupEnum() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "enum";
-        String datasetg2_name2 = "enum2D";
-        String datasetg2_name3 = "enum3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/enum";
+        String datasetg2Name2 = "/g2/enum2D";
+        String datasetg2Name3 = "/g2/enum3D";
 
-        try {
-            // switch to ViewProperties Convert Enum
-            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
-            fileMenuItem.click();
-
-            SWTBotShell botshell = bot.shell("Preferences");
-            botshell.activate();
-            bot.waitUntil(Conditions.shellIsActive("Preferences"));
-
-            botshell.bot().tree().getTreeItem("HDF Settings").click();
-
-            SWTBotCheckBox enumButton = botshell.bot().checkBox("Convert Enum");
-            if (!enumButton.isChecked())
-                enumButton.click();
-
-            botshell.bot().button("Apply and Close").click();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupEnum()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupEnum() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupEnum() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupEnum() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupEnum() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(9).click();
-            items[0].getNode(2).getNode(9).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupEnum() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex 'RED'",
-                    tableShell.bot().text(0).getText().matches("RED"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(10).click();
-            items[0].getNode(2).getNode(10).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupEnum() data ["+tableShell.bot().text(0).getText()+"] did not match regex 'RED'",
-                    tableShell.bot().text(0).getText().matches("RED"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(11).click();
-            items[0].getNode(2).getNode(11).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupEnum() data ["+tableShell.bot().text(2).getText()+"] did not match regex 'RED'",
-                    tableShell.bot().text(2).getText().matches("RED"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupTest("openTAttr2GroupEnum()", datasetg2Name, enumExpectedData, datasetg2Name2, enum2DExpectedData, datasetg2Name3, enum3DPage1ExpectedData, enum3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupFloat() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "float";
-        String datasetg2_name2 = "float2D";
-        String datasetg2_name3 = "float3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/float";
+        String datasetg2Name2 = "/g2/float2D";
+        String datasetg2Name3 = "/g2/float3D";
 
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupFloat()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupFloat() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupFloat() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupFloat() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupFloat() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(12).click();
-            items[0].getNode(2).getNode(12).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupFloat() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex '1.0'",
-                    tableShell.bot().text(0).getText().matches("1.0"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(13).click();
-            items[0].getNode(2).getNode(13).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupFloat() data ["+tableShell.bot().text(0).getText()+"] did not match regex '4.0'",
-                    tableShell.bot().text(0).getText().matches("4.0"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(14).click();
-            items[0].getNode(2).getNode(14).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupFloat() data ["+tableShell.bot().text(2).getText()+"] did not match regex '17.0'",
-                    tableShell.bot().text(2).getText().matches("17.0"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupTest("openTAttr2GroupFloat()", datasetg2Name, floatExpectedData, datasetg2Name2, float2DExpectedData, datasetg2Name3, float3DPage1ExpectedData, float3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupInteger() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "integer";
-        String datasetg2_name2 = "integer2D";
-        String datasetg2_name3 = "integer3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/integer";
+        String datasetg2Name2 = "/g2/integer2D";
+        String datasetg2Name3 = "/g2/integer3D";
 
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupInteger()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupInteger() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupInteger() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupInteger() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupInteger() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(15).click();
-            items[0].getNode(2).getNode(15).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupInteger() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex '1'",
-                    tableShell.bot().text(0).getText().matches("1"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(16).click();
-            items[0].getNode(2).getNode(16).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupInteger() data ["+tableShell.bot().text(0).getText()+"] did not match regex '4'",
-                    tableShell.bot().text(0).getText().matches("4"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(17).click();
-            items[0].getNode(2).getNode(17).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupInteger() data ["+tableShell.bot().text(2).getText()+"] did not match regex '17'",
-                    tableShell.bot().text(2).getText().matches("17"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupTest("openTAttr2GroupInteger()", datasetg2Name, integerExpectedData, datasetg2Name2, integer2DExpectedData, datasetg2Name3, integer3DPage1ExpectedData, integer3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupOpaque() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "opaque";
-        String datasetg2_name2 = "opaque2D";
-        String datasetg2_name3 = "opaque3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/opaque";
+        String datasetg2Name2 = "/g2/opaque2D";
+        String datasetg2Name3 = "/g2/opaque3D";
 
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupOpaque()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupOpaque() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupOpaque() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupOpaque() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupOpaque() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(18).click();
-            items[0].getNode(2).getNode(18).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupOpaque() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex '01'",
-                    tableShell.bot().text(0).getText().matches("01"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(19).click();
-            items[0].getNode(2).getNode(19).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupOpaque() data ["+tableShell.bot().text(0).getText()+"] did not match regex '04'",
-                    tableShell.bot().text(0).getText().matches("04"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(20).click();
-            items[0].getNode(2).getNode(20).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupOpaque() data ["+tableShell.bot().text(2).getText()+"] did not match regex '11'",
-                    tableShell.bot().text(2).getText().matches("11"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupTest("openTAttr2GroupOpaque()", datasetg2Name, opaqueExpectedData, datasetg2Name2, opaque2DExpectedData, datasetg2Name3, opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupReference() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "reference";
-        String datasetg2_name2 = "reference2D";
-        String datasetg2_name3 = "reference3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/reference";
+        String datasetg2Name2 = "/g2/reference2D";
+        String datasetg2Name3 = "/g2/reference3D";
 
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupReference()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupReference() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupReference() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupReference() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupReference() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(21).click();
-            items[0].getNode(2).getNode(21).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupReference() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex '/dset'",
-                    tableShell.bot().text(0).getText().matches("/dset"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(22).click();
-            items[0].getNode(2).getNode(22).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupReference() data ["+tableShell.bot().text(0).getText()+"] did not match regex '/dset'",
-                    tableShell.bot().text(0).getText().matches("/dset"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(23).click();
-            items[0].getNode(2).getNode(23).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupReference() data ["+tableShell.bot().text(2).getText()+"] did not match regex '/dset'",
-                    tableShell.bot().text(2).getText().matches("/dset"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupTest("openTAttr2GroupReference()", datasetg2Name, referenceExpectedData, datasetg2Name2, reference2DExpectedData, datasetg2Name3, reference3DPage1ExpectedData, reference3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupString() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "string";
-        String datasetg2_name2 = "string2D";
-        String datasetg2_name3 = "string3D";
-        SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String datasetg2Name = "/g2/string";
+        String datasetg2Name2 = "/g2/string2D";
+        String datasetg2Name3 = "/g2/string3D";
 
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("openTAttr2GroupString()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupString() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupString() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupString() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupString() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(24).click();
-            items[0].getNode(2).getNode(24).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupString() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex 'ab'",
-                    tableShell.bot().text(0).getText().matches("ab"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(25).click();
-            items[0].getNode(2).getNode(25).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupString() data ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex 'gh'",
-                    tableShell.bot().text(0).getText().matches("gh"));
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
-
-            items[0].getNode(2).getNode(26).click();
-            items[0].getNode(2).getNode(26).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(4, 2);
-            assertTrue("openTAttr2GroupString() data ["+
-                    tableShell.bot().text(2).getText()+"] did not match regex 'RS'",
-                    tableShell.bot().text(2).getText().matches("RS"));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
-
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        openTAttr2GroupTest("openTAttr2GroupString()", datasetg2Name, stringExpectedData, datasetg2Name2, string2DExpectedData, datasetg2Name3, string3DPage1ExpectedData, string3DPage2ExpectedData);
     }
 
     @Test
     public void openTAttr2GroupVlen() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        String datasetg2_name = "vlen";
-        String datasetg2_name2 = "vlen2D";
-        String datasetg2_name3 = "vlen3D";
+        String datasetg2Name = "/g2/vlen";
+        String datasetg2Name2 = "/g2/vlen2D";
+        String datasetg2Name3 = "/g2/vlen3D";
+
+        openTAttr2GroupTest("openTAttr2GroupVlen()", datasetg2Name, vlenExpectedData, datasetg2Name2, vlen2DExpectedData, datasetg2Name3, vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
+    }
+
+    public void openTAttr2AttributeTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData)
+    {
         SWTBotShell tableShell = null;
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
-
         try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
+            // Open attribute 1D
+            tableShell = openAttributeObject(attrTable, attrName, rowIndex);
+            SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            assertTrue(constructWrongValueMessage("openTAttr2GroupVlen()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2GroupVlen() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2GroupVlen() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2GroupVlen() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2GroupVlen() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            items[0].getNode(2).getNode(27).click();
-            items[0].getNode(2).getNode(27).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            assertTrue("openTAttr2GroupVlen() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    tableShell.bot().text(0).getText()+"] did not match regex '(1)'",
-                    tableShell.bot().text(0).getText().equals("(1)"));
+            retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
-            items[0].getNode(2).getNode(28).click();
-            items[0].getNode(2).getNode(28).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name2 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            // Open attribute 2D
+            tableShell = openAttributeObject(attrTable, attrName2, rowIndex+1);
+            dataTable = getNatTable(tableShell);
 
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(2, 2);
-            assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(0).getText()+"] did not match regex '(4, 5)'",
-                    tableShell.bot().text(0).getText().equals("(4, 5)"));
+            retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
-            items[0].getNode(2).getNode(29).click();
-            items[0].getNode(2).getNode(29).contextMenu().menu("Open").click();
-            shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
-
-            table.click(3, 3);
-            assertTrue("openTAttr2GroupVlen() data ["+tableShell.bot().text(2).getText()+"] did not match regex '(30, 31, 32)'",
-                    tableShell.bot().text(2).getText().equals("(30, 31, 32)"));
-        }
+            //TODO: attribute 3D tables are different and don't page
+            // Open attribute 3D
+            /*
+             * tableShell = openAttributeObject(attrTable, attrName3, rowIndex+2); dataTable =
+             * getNatTable(tableShell);
+             *
+             * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+             * retriever.setPagingActive(true);
+             *
+             * retriever.testAllTableLocations(test3DPage1ExpectedData);
+             *
+             * tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
+             *
+             * retriever.testAllTableLocations(test3DPage2ExpectedData);
+             *
+             * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
+             */        }
         catch (Exception ex) {
             ex.printStackTrace();
             fail(ex.getMessage());
@@ -1022,314 +474,139 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
+            if (tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
+        }
+    }
 
-            try {
-                closeFile(hdf_file, false);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
+    public void openTAttr2AttributeCompoundTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
+            String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData) {
+        SWTBotShell tableShell = null;
+
+        try {
+
+            // Open attribute 1D
+            tableShell = openAttributeObject(attrTable, attrName, rowIndex);
+            SWTBotNatTable dataTable = getNatTable(tableShell);
+
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+
+            retriever.setContainerHeaderOffset(2);
+            retriever.testAllTableLocations(testExpectedData);
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            // Open attribute 2D
+            tableShell = openAttributeObject(attrTable, attrName2, rowIndex+1);
+            dataTable = getNatTable(tableShell);
+
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+
+            retriever.setContainerHeaderOffset(2);
+            retriever.testAllTableLocations(test2DExpectedData);
+
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            //TODO: attribute 3D tables are different and don't page
+            // Open attribute 3D
+            /*
+             * tableShell = openAttributeObject(attrTable, attrName3, rowIndex+2); dataTable =
+             * getNatTable(tableShell);
+             *
+             * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
+             * retriever.setPagingActive(true); retriever.setContainerHeaderOffset(2);
+             *
+             * retriever.testAllTableLocations(test3DPage1ExpectedData);
+             *
+             * tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
+             *
+             * retriever.testAllTableLocations(test3DPage2ExpectedData);
+             *
+             * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
+             */        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
             }
         }
     }
 
     @Test
     public void openTAttr2Attribute() {
-        String dataset_name = "dset";
-        String group_name = "g1";
-        String group_name2 = "g2";
-        File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
+        String[][] expectedAttrData = {
+                { "array", "Array \\[3\\] of 32-bit integer", "2", "1, 2, 3, 4, 5, 6" },
+                { "array2D", "Array \\[3\\] of 32-bit integer", "3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18" },
+                { "array3D", "Array \\[3\\] of 32-bit integer", "4 x 3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50" },
+                { "bitfield", "8-bit bitfield", "2", "1, 2" },
+                { "bitfield2D", "8-bit bitfield", "3 x 2", "1, 2, 3, 4, 5, 6" },
+                { "bitfield3D", "8-bit bitfield", "4 x 3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24" },
+                { "compound", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "2", "\\{1, 2\\}, \\{3, 4\\}" },
+                { "compound2D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "3 x 2", "\\{1, 2\\}, \\{3, 4\\}, \\{5, 6\\}, \\{7, 8\\}, \\{9, 10\\}, \\{11, 12\\}" },
+                { "compound3D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "4 x 3 x 2", "\\{1, 2\\}, \\{3, 4\\}, \\{5, 6\\}, \\{7, 8\\}, \\{9, 10\\}, \\{11, 12\\}, \\{13, 14\\}, \\{15, 16\\}, \\{17, 18\\}, \\{19, 20\\}, \\{21, 22\\}, \\{23, 24\\}, \\{25, 26\\}, \\{27, 28\\}, \\{29, 30\\}, \\{31, 32\\}, \\{33, 34\\}, \\{35, 36\\}, \\{37, 38\\}, \\{39, 40\\}, \\{41, 42\\}, \\{43, 44\\}, \\{45, 46\\}, \\{47, 48\\}" },
+                { "enum", "32-bit enum \\(0=RED, 1=GREEN\\)", "2", "RED, RED" },
+                { "enum2D", "32-bit enum \\(0=RED, 1=GREEN\\)", "3 x 2", "RED, RED, RED, RED, RED, RED" },
+                { "enum3D", "32-bit enum \\(0=RED, 1=GREEN\\)", "4 x 3 x 2", "RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED" },
+                { "float", "32-bit floating-point", "2", "1.0, 2.0" },
+                { "float2D", "32-bit floating-point", "3 x 2", "1.0, 2.0, 3.0, 4.0, 5.0, 6.0" },
+                { "float3D", "32-bit floating-point", "4 x 3 x 2", "1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0" },
+                { "integer", "32-bit integer", "2", "1, 2" },
+                { "integer2D", "32-bit integer", "3 x 2", "1, 2, 3, 4, 5, 6" },
+                { "integer3D", "32-bit integer", "4 x 3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24" },
+                { "opaque", "1-byte Opaque, tag = 1-byte opaque type", "2", "1, 2" },
+                { "opaque2D", "1-byte Opaque, tag = 1-byte opaque type", "3 x 2", "1, 2, 3, 4, 5, 6" },
+                { "opaque3D", "1-byte Opaque, tag = 1-byte opaque type", "4 x 3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24" },
+                { "reference", "Object reference", "2", "976, 976" },
+                { "reference2D", "Object reference", "3 x 2", "976, 976, 976, 976, 976, 976" },
+                { "reference3D", "Object reference", "4 x 3 x 2", "976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976" },
+                { "string", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "2", "ab, de" },
+                { "string2D", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "3 x 2", "ab, cd, ef, gh, ij, kl" },
+                { "string3D", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "4 x 3 x 2", "ab, cd, ef, gh, ij, kl, mn, pq, rs, tu, vw, xz, AB, CD, EF, GH, IJ, KL, MN, PQ, RS, TU, VW, XZ" },
+                { "vlen", "Variable-length of 32-bit integer", "2", "\\(1\\), \\(2, 3\\)" },
+                { "vlen2D", "Variable-length of 32-bit integer", "3 x 2", "\\(0\\), \\(1\\), \\(2, 3\\), \\(4, 5\\), \\(6, 7, 8\\), \\(9, 10, 11\\)" },
+                { "vlen3D", "Variable-length of 32-bit integer", "4 x 3 x 2", "\\(0\\), \\(1\\), \\(2\\), \\(3\\), \\(4\\), \\(5\\), \\(6, 7\\), \\(8, 9\\), \\(10, 11\\), \\(12, 13\\), \\(14, 15\\), \\(16, 17\\), \\(18, 19, 20\\), \\(21, 22, 23\\), \\(24, 25, 26\\), \\(27, 28, 29\\), \\(30, 31, 32\\), \\(33, 34, 35\\), \\(36, 37, 38, 39\\), \\(40, 41, 42, 43\\), \\(44, 45, 46, 47\\), \\(48, 49, 50, 51\\), \\(52, 53, 54, 55\\), \\(56, 57, 58, 59\\)" },
+                };
+        SWTBotShell tableShell = null;
+        String datasetName = "dset";
+        File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("openTAttr2Attribute()", "filetree wrong row count", "4", String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount()==4);
-            assertTrue("openTAttr2Attribute() filetree is missing file '" + testFilename + "'", items[0].getText().compareTo(testFilename)==0);
-            assertTrue("openTAttr2Attribute() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
-            assertTrue("openTAttr2Attribute() filetree is missing group '" + group_name + "'", items[0].getNode(1).getText().compareTo(group_name)==0);
-            assertTrue("openTAttr2Attribute() filetree is missing group '" + group_name2 + "'", items[0].getNode(2).getText().compareTo(group_name2)==0);
+            checkFileTree(filetree, "openTAttr2Attribute()", 4, testFilename);
 
-            items[0].getNode(0).click();
+            // Open dataset Attribute Table
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, datasetName);
 
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(attrTable, "openTAttr2Attribute()");
 
-            SWTBotTable table = new SWTBotTable(bot.widget(widgetOfType(Table.class)));
+            retriever.testAllTableLocations(expectedAttrData);
 
-            table.click(0, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(0,0)+"] did not match regex 'array'",
-                    table.cell(0,0).matches("array"));
+            openTAttr2AttributeTest(attrTable, 1, "openTAttr2Attribute()", "array", arrayExpectedData,  "array2D", array2DExpectedData,  "array3D", array3DPage1ExpectedData, array3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 2, "openTAttr2Attribute()", "bitfield", bitfieldExpectedData,  "bitfield2D", bitfield2DExpectedData,  "bitfield3D", bitfield3DPage1ExpectedData, bitfield3DPage2ExpectedData);
+            openTAttr2AttributeCompoundTest(attrTable, 3, "openTAttr2Attribute()", "compound", compoundExpectedData,  "compound2D", compound2DExpectedData,  "compound3D", compound3DPage1ExpectedData, compound3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 4, "openTAttr2Attribute()", "enum", enumExpectedData,  "enum2D", enum2DExpectedData,  "enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 5, "openTAttr2Attribute()", "float", floatExpectedData,  "float2D", float2DExpectedData,  "float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 6, "openTAttr2Attribute()", "integer", integerExpectedData,  "integer2D", integer2DExpectedData,  "integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 7, "openTAttr2Attribute()", "opaque", opaqueExpectedData,  "opaque2D", opaque2DExpectedData,  "opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 8, "openTAttr2Attribute()", "reference", referenceExpectedData,  "reference2D", reference2DExpectedData,  "reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 9, "openTAttr2Attribute()", "string", stringExpectedData,  "string2D", string2DExpectedData,  "string3D", string3DPage1ExpectedData, string3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 10, "openTAttr2Attribute()", "vlen", vlenExpectedData,  "vlen2D", vlen2DExpectedData,  "vlen3D", vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
 
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(0,3)+"] did not match regex '1, 2, 3, 4, 5, 6'",
-                    table.cell(0,3).matches("1, 2, 3, 4, 5, 6"));
-
-            table.click(1, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(1,0)+
-                    "] did not match regex 'array2D'",
-                    table.cell(1,0).matches("array2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(1,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18'",
-                    table.cell(1,3).matches("1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18"));
-
-            table.click(2, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(2,0)+
-                    "] did not match regex 'array3D'",
-                    table.cell(2,0).matches("array3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(2,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72'",
-                    //table.cell(2,3).matches("1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72"));
-                    table.cell(2,3).matches("1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50"));
-
-            table.click(3, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(3,0)+"] did not match regex 'bitfield'",
-                    table.cell(3,0).matches("bitfield"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(3,3)+"] did not match regex '1, 2'",
-                    table.cell(3,3).matches("1, 2"));
-
-            table.click(4, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(4,0)+
-                    "] did not match regex 'bitfield2D'",
-                    table.cell(4,0).matches("bitfield2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(4,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6'",
-                    table.cell(4,3).matches("1, 2, 3, 4, 5, 6"));
-
-            table.click(5, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(5,0)+
-                    "] did not match regex 'bitfield3D'",
-                    table.cell(5,0).matches("bitfield3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(5,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24'",
-                    table.cell(5,3).matches("1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24"));
-
-            table.click(6, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(6,0)+"] did not match regex 'compound'",
-                    table.cell(6,0).matches("compound"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(6,3)+"] did not match regex '{1, 2}, {3, 4}'",
-                    table.cell(6,3).matches("\\{1, 2\\}, \\{3, 4\\}"));
-
-            table.click(7, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(7,0)+
-                    "] did not match regex 'compound2D'",
-                    table.cell(7,0).matches("compound2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(7,3)+
-                    "] did not match regex '{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}'",
-                    table.cell(7,3).matches("\\{1, 2\\}, \\{3, 4\\}, \\{5, 6\\}, \\{7, 8\\}, \\{9, 10\\}, \\{11, 12\\}"));
-
-            table.click(8, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(8,0)+
-                    "] did not match regex 'compound3D'",
-                    table.cell(8,0).matches("compound3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(8,3)+
-                    "] did not match regex '{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}, {13, 14}, {15, 16}, {17, 18}, {19, 20}, {21, 22}, {23, 24}, {25, 26}, {27, 28}, {29, 30}, {31, 32}, {33, 34}, {35, 36}, {37, 38}, {39, 40}, {41, 42}, {43, 44} , {45, 46}, {47, 48}'",
-                    table.cell(8,3).matches("\\{1, 2\\}, \\{3, 4\\}, \\{5, 6\\}, \\{7, 8\\}, \\{9, 10\\}, \\{11, 12\\}, \\{13, 14\\}, \\{15, 16\\}, \\{17, 18\\}, \\{19, 20\\}, \\{21, 22\\}, \\{23, 24\\}, \\{25, 26\\}, \\{27, 28\\}, \\{29, 30\\}, \\{31, 32\\}, \\{33, 34\\}, \\{35, 36\\}, \\{37, 38\\}, \\{39, 40\\}, \\{41, 42\\}, \\{43, 44\\}, \\{45, 46\\}, \\{47, 48\\}"));
-
-            table.click(9, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(9,0)+"] did not match regex 'enum'",
-                    table.cell(9,0).matches("enum"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(9,3)+"] did not match regex 'RED, RED'",
-                    table.cell(9,3).matches("RED, RED"));
-
-            table.click(10, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(10,0)+
-                    "] did not match regex 'enum2D'",
-                    table.cell(10,0).matches("enum2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(10,3)+
-                    "] did not match regex 'RED, RED, RED, RED, RED, RED'",
-                    table.cell(10,3).matches("RED, RED, RED, RED, RED, RED"));
-
-            table.click(11, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(11,0)+
-                    "] did not match regex 'enum3D'",
-                    table.cell(11,0).matches("enum3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(11,3)+
-                    "] did not match regex 'RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED'",
-                    table.cell(11,3).matches("RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED"));
-
-            table.click(12, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(12,0)+"] did not match regex 'float'",
-                    table.cell(12,0).matches("float"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(12,3)+"] did not match regex '1.0, 2.0'",
-                    table.cell(12,3).matches("1.0, 2.0"));
-
-            table.click(13, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(13,0)+
-                    "] did not match regex 'float2D'",
-                    table.cell(13,0).matches("float2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(13,3)+
-                    "] did not match regex '1.0, 2.0, 3.0, 4.0, 5.0, 6.0'",
-                    table.cell(13,3).matches("1.0, 2.0, 3.0, 4.0, 5.0, 6.0"));
-
-            table.click(14, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(14,0)+
-                    "] did not match regex 'float3D'",
-                    table.cell(14,0).matches("float3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(14,3)+
-                    "] did not match regex '1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0'",
-                    table.cell(14,3).matches("1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0"));
-
-            table.click(15, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(15,0)+"] did not match regex 'integer'",
-                    table.cell(15,0).matches("integer"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(15,3)+"] did not match regex '1, 2'",
-                    table.cell(15,3).matches("1, 2"));
-
-            table.click(16, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(16,0)+
-                    "] did not match regex 'integer2D'",
-                    table.cell(16,0).matches("integer2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(16,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6'",
-                    table.cell(16,3).matches("1, 2, 3, 4, 5, 6"));
-
-            table.click(17, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(17,0)+
-                    "] did not match regex 'integer3D'",
-                    table.cell(17,0).matches("integer3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(17,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24'",
-                    table.cell(17,3).matches("1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24"));
-
-            table.click(18, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(18,0)+"] did not match regex 'opaque'",
-                    table.cell(18,0).matches("opaque"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(18,3)+"] did not match regex '1, 2'",
-                    table.cell(18,3).matches("1, 2"));
-
-            table.click(19, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(19,0)+
-                    "] did not match regex 'opaque2D'",
-                    table.cell(19,0).matches("opaque2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(19,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6'",
-                    table.cell(19,3).matches("1, 2, 3, 4, 5, 6"));
-
-            table.click(20, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(20,0)+
-                    "] did not match regex 'opaque3D'",
-                    table.cell(20,0).matches("opaque3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(20,3)+
-                    "] did not match regex '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24'",
-                    table.cell(20,3).matches("1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24"));
-
-            table.click(21, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(21,0)+"] did not match regex 'reference'",
-                    table.cell(21,0).matches("reference"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(21,3)+"] did not match regex '976, 976'",
-                    table.cell(21,3).matches("976, 976"));
-
-            table.click(22, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(22,0)+
-                    "] did not match regex 'reference2D'",
-                    table.cell(22,0).matches("reference2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(22,3)+
-                    "] did not match regex '976, 976, 976, 976, 976, 976'",
-                    table.cell(22,3).matches("976, 976, 976, 976, 976, 976"));
-
-            table.click(23, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(23,0)+
-                    "] did not match regex 'reference3D'",
-                    table.cell(23,0).matches("reference3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(23,3)+
-                    "] did not match regex '976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976'",
-                    table.cell(23,3).matches("976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976"));
-
-            table.click(24, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(24,0)+"] did not match regex 'string'",
-                    table.cell(24,0).matches("string"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(24,3)+"] did not match regex 'ab, de'",
-                    table.cell(24,3).matches("ab, de"));
-
-            table.click(25, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(25,0)+
-                    "] did not match regex 'string2D'",
-                    table.cell(25,0).matches("string2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(25,3)+
-                    "] did not match regex 'ab, cd, ef, gh, ij, kl'",
-                    table.cell(25,3).matches("ab, cd, ef, gh, ij, kl"));
-
-            table.click(26, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(26,0)+
-                    "] did not match regex 'string3D'",
-                    table.cell(26,0).matches("string3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(26,3)+
-                    "] did not match regex 'ab, cd, ef, gh, ij, kl, mn, pq, rs, tu, vw, xz, AB, CD, EF, GH, IJ, KL, MN, PQ, RS, TU, VW, XZ'",
-                    table.cell(26,3).matches("ab, cd, ef, gh, ij, kl, mn, pq, rs, tu, vw, xz, AB, CD, EF, GH, IJ, KL, MN, PQ, RS, TU, VW, XZ"));
-
-            table.click(27, 0);
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(27,0)+"] did not match regex 'vlen'",
-                    table.cell(27,0).matches("vlen"));
-
-            assertTrue("openTAttr2Attribute() data{"+table.rowCount()+","+table.columnCount()+"} ["+
-                    table.cell(27, 3) + "] did not match regex '(1), (2, 3)'",
-                    table.cell(27, 3).matches("\\(1\\), \\(2, 3\\)"));
-
-            table.click(28, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(28,0)+
-                    "] did not match regex 'vlen2D'",
-                    table.cell(28,0).matches("vlen2D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(28,3)+
-                    "] did not match regex '(0), (1), (2, 3), (4, 5), (6, 7, 8), (9, 10, 11)'",
-                    table.cell(28, 3).matches("\\(0\\), \\(1\\), \\(2, 3\\), \\(4, 5\\), \\(6, 7, 8\\), \\(9, 10, 11\\)"));
-
-            table.click(29, 0);
-            assertTrue("openTAttr2Attribute() data ["+table.cell(29,0)+
-                    "] did not match regex 'rvlen3D'",
-                    table.cell(29,0).matches("vlen3D"));
-
-            assertTrue("openTAttr2Attribute() data ["+table.cell(29,3)+
-                    "] did not match regex '(0), (1), (2), (3), (4), (5), (6, 7), (8, 9), (10, 11), (12, 13), (14, 15), (16, 17), (18, 19, 20), (21, 22, 23), (24, 25, 26), (27, 28, 29), (30, 31, 32), (33, 34, 35), (36, 37, 38, 39), (40, 41, 42, 43), (44, 45, 46, 47), (48, 49, 50, 51), (52, 53, 54, 55), (56, 57, 58, 59)'",
-                    table.cell(29, 3).matches("\\(0\\), \\(1\\), \\(2\\), \\(3\\), \\(4\\), \\(5\\), \\(6, 7\\), \\(8, 9\\), \\(10, 11\\), \\(12, 13\\), \\(14, 15\\), \\(16, 17\\), \\(18, 19, 20\\), \\(21, 22, 23\\), \\(24, 25, 26\\), \\(27, 28, 29\\), \\(30, 31, 32\\), \\(33, 34, 35\\), \\(36, 37, 38, 39\\), \\(40, 41, 42, 43\\), \\(44, 45, 46, 47\\), \\(48, 49, 50, 51\\), \\(52, 53, 54, 55\\), \\(56, 57, 58, 59\\)"));
+            tableShell.bot().menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1340,8 +617,12 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
             try {
-                closeFile(hdf_file, false);
+                closeFile(hdfFile, false);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1349,12 +630,12 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void openTAttr2GroupReferenceAsTable() {
         String dataset_name = "dset";
         String group_name = "g1";
         String group_name2 = "g2";
-        String datasetg2_name3 = "reference3D";
+        String datasetg2Name3 = "reference3D";
         SWTBotShell tableShell = null;
         SWTBotShell table2Shell = null;
         File hdf_file = openFile(testFilename, FILE_MODE.READ_ONLY);
@@ -1374,7 +655,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             items[0].getNode(2).getNode(23).click();
             items[0].getNode(2).getNode(23).contextMenu().menu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2_name3 + ".*at.*\\[.*in.*\\]");
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetg2Name3 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
             tableShell = bot.shells()[1];

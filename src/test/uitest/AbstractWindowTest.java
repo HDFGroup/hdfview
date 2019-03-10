@@ -492,6 +492,17 @@ public abstract class AbstractWindowTest {
             }
 
             /*
+             * Utility function to offset the table row position for extra header info.
+             */
+            public void setContainerHeaderOffset(int containerHeaderOffset) {
+                throw new UnsupportedOperationException("subclasses must implement setContainerHeaderOffset()");
+            }
+
+            public void setPagingActive(boolean pagingActive) {
+                throw new UnsupportedOperationException("subclasses must implement setPagingActive()");
+            }
+
+            /*
              * Utility function to compare a given table position against an expected value.
              */
             public void testTableLocation(int rowIndex, int colIndex, String expectedValRegex) {
@@ -518,6 +529,8 @@ public abstract class AbstractWindowTest {
         private static class NatTableDataRetriever extends TableDataRetriever {
 
             private final SWTBotNatTable table;
+            private int containerHeaderOffset = 0;
+            boolean pagingActive = false;
 
             NatTableDataRetriever(SWTBotNatTable tableObj, String funcName) {
                 super(funcName);
@@ -530,10 +543,13 @@ public abstract class AbstractWindowTest {
                 if (expectedValRegex == null)
                     throw new IllegalArgumentException("expected value string parameter is null");
 
+                int textboxIndex = 0;
+                if (pagingActive) textboxIndex = 2;
+
                 // TODO: temporary workaround until the solution below works.
-                Position cellPos = table.scrollViewport(new Position(1, 1), rowIndex, colIndex);
+                Position cellPos = table.scrollViewport(new Position(1 + containerHeaderOffset, 1), rowIndex, colIndex);
                 table.click(cellPos.row, cellPos.column);
-                String val = bot.shells()[1].bot().text(0).getText();
+                String val = bot.shells()[1].bot().text(textboxIndex).getText();
 
                 // Disabled until Data conversion can be figured out
                 // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
@@ -542,6 +558,16 @@ public abstract class AbstractWindowTest {
                 sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
                 String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
                 assertTrue(errMsg, val.matches(expectedValRegex));
+            }
+
+            @Override
+            public void setPagingActive(boolean pagingActive) {
+                this.pagingActive = pagingActive;
+            }
+
+            @Override
+            public void setContainerHeaderOffset(int containerHeaderOffset) {
+                this.containerHeaderOffset = containerHeaderOffset;
             }
 
         }
