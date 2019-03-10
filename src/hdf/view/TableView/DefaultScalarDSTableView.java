@@ -140,7 +140,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 isReadOnly = true;
                 String opName = "Bits ";
 
-                if (bitmaskOP == ViewProperties.BITMASK_OP.AND) opName = "Bitwise AND ";
+                if (bitmaskOP == ViewProperties.BITMASK_OP.AND)
+                    opName = "Bitwise AND ";
 
                 String title = indexBaseGroup.getText();
                 title += ", " + opName + bitmask;
@@ -152,10 +153,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             dataValue = dataObject.getData();
         }
         catch (Exception ex) {
-            Tools.showError(shell, "Load", "DefaultScalarDSTableView.loadData:" + ex.getMessage());
             log.debug("loadData(): ", ex);
             log.trace("loadData(): exit");
             dataValue = null;
+            throw ex;
         }
 
         if (dataValue == null) {
@@ -750,12 +751,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         return new EditableRule() {
             @Override
             public boolean isEditable(int columnIndex, int rowIndex) {
-                if (isReadOnly || isDisplayTypeChar || showAsBin || showAsHex) {
-                    return false;
-                }
-                else {
-                    return true;
-                }
+                /*
+                 * TODO: Should be able to edit character-displayed types and datasets when
+                 * displayed as hex/binary.
+                 */
+                return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
             }
         };
     }

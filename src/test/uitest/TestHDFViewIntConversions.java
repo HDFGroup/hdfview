@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
-import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.Test;
@@ -101,13 +100,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            /*
-             * TODO: refactor into common method.
-             */
-            if (tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);
@@ -192,10 +185,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);
@@ -280,10 +270,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);
@@ -368,10 +355,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);
@@ -480,10 +464,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);
@@ -592,10 +573,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);
@@ -904,10 +882,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);
@@ -1248,10 +1223,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);

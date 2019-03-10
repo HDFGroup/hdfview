@@ -602,6 +602,13 @@ public abstract class AbstractWindowTest {
         return new SWTBotNatTable(theShell.bot().widget(widgetOfType(NatTable.class)));
     }
 
+    protected void closeShell(SWTBotShell theShell) {
+        if (theShell == null) return;
+
+        theShell.bot().menu("Close").click();
+        bot.waitUntil(Conditions.shellCloses(theShell));
+    }
+
     protected static String constructWrongValueMessage(String methodName, String message, String expected, String actual) {
         return methodName.concat(" " + message + ": expected '" + expected + "' but was '" + actual + "'");
     }

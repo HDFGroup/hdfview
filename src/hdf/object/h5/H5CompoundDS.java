@@ -769,12 +769,6 @@ public class H5CompoundDS extends CompoundDS {
 
                 data = compoundTypeIO(ioType, did, spaceIDs, (int) totalSelectedSpacePoints, dsDatatype, writeBuf, new int[]{0});
             }
-            catch (Exception ex) {
-                /*
-                 * TODO: will prevent exceptions from going up.
-                 */
-                log.debug("compoundDatasetCommonIO(): failure: ", ex);
-            }
             finally {
                 if (HDF5Constants.H5S_ALL != spaceIDs[0]) {
                     try {

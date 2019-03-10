@@ -372,9 +372,10 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dims == null) {
             log.debug("data object has null dimensions");
             log.trace("exit");
-            Tools.showError(shell, "Error", "Could not open data object '" + ((HObject) dataObject).getName()
-                    + "'. Data object has null dimensions.");
+            viewer.showStatus("Error: Data object '" + ((HObject) dataObject).getName() + "' has null dimensions.");
             shell.dispose();
+            Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
+                    + "'. Data object has null dimensions.");
             return;
         }
 
@@ -387,9 +388,10 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
             log.debug("data object has dimension of size 0");
             log.trace("exit");
-            Tools.showError(shell, "Error", "Could not open data object '" + ((HObject) dataObject).getName()
-                    + "'. Data object has dimension of size 0.");
+            viewer.showStatus("Error: Data object '" + ((HObject) dataObject).getName() + "' has dimension of size 0.");
             shell.dispose();
+            Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
+                    + "'. Data object has dimension of size 0.");
             return;
         }
 
@@ -482,9 +484,9 @@ public abstract class DefaultBaseTableView implements TableView {
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);
             log.trace("exit");
-            viewer.showStatus("Error: unable to load table data - see log for more info");
-            Tools.showError(shell, "Open", "An error occurred while loading data for the Table");
+            viewer.showStatus("Error: unable to load table data");
             shell.dispose();
+            Tools.showError(display.getActiveShell(), "Open", "An error occurred while loading data for the table:\n\n" + ex.getMessage());
             return;
         }
 
@@ -513,6 +515,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 log.trace("exit");
                 viewer.showStatus("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
                 shell.dispose();
+                Tools.showError(display.getActiveShell(), "Open", "Failed to create Table object");
                 return;
             }
         }
@@ -994,11 +997,10 @@ public abstract class DefaultBaseTableView implements TableView {
                 log.trace("loadData(): data object inited");
             }
             catch (Exception ex) {
-                Tools.showError(shell, "Load", "DefaultBaseTable.loadData:" + ex.getMessage());
                 dataValue = null;
                 log.debug("loadData(): ", ex);
                 log.trace("loadData(): finish");
-                return;
+                throw ex;
             }
         }
 
@@ -1019,9 +1021,10 @@ public abstract class DefaultBaseTableView implements TableView {
             dataValue = dataObject.getData();
         }
         catch (Exception ex) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Load", "DefaultBaseTable.loadData: " + ex.getMessage());
+            dataValue = null;
             log.debug("loadData(): ", ex);
+            log.trace("loadData(): finish");
+            throw ex;
         }
 
         log.trace("loadData(): finish");
@@ -1213,6 +1216,8 @@ public abstract class DefaultBaseTableView implements TableView {
         finally {
             shell.setCursor(null);
         }
+
+        dataProvider.updateDataBuffer(dataValue);
 
         dataTable.doCommand(new VisualRefreshCommand());
     }

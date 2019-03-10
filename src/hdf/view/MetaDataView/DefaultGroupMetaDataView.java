@@ -70,7 +70,9 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
                     long oid = -1;
                     try {
                         oid = g.open();
-                        ocplID = H5.H5Gget_create_plist(oid);
+                        if (oid >= 0) {
+                            ocplID = H5.H5Gget_create_plist(oid);
+                        }
                     }
                     finally {
                         g.close(oid);

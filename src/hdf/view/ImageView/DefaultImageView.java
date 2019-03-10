@@ -1600,7 +1600,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Exception ex) {
             log.debug("showColorTable(): error occurred while instantiating PaletteView factory class", ex);
-            viewer.showStatus("Error occurred while instantiating PaletteView factory class - see log for more info");
+            viewer.showStatus("Error occurred while instantiating PaletteView factory class");
             return;
         }
 
@@ -1615,8 +1615,8 @@ public class DefaultImageView implements ImageView {
 
             if (theView == null) {
                 log.debug("showColorTable(): error occurred while instantiating PaletteView class");
-                viewer.showStatus("Error occurred while instantiating PaletteView class - see log for more info");
-                Tools.showError(shell, "Show Palette", "Error occurred while instantiating PaletteView class - see log for more info");
+                viewer.showStatus("Error occurred while instantiating PaletteView class");
+                Tools.showError(shell, "Show Palette", "Error occurred while instantiating PaletteView class");
             }
         }
         catch (ClassNotFoundException ex) {
