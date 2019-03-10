@@ -9,7 +9,6 @@ import java.io.File;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Test;
@@ -17,34 +16,18 @@ import org.junit.Test;
 public class TestHDFViewLibBounds extends AbstractWindowTest {
     @Test
     public void testLibVersion() {
-        String filename = "test_libversion";
-        String file_ext = ".h5";
-        File hdf_file = createHDF5File(filename);
+        String testFilename = "test_libversion.h5";
+        String baseFilename = "test_libversion";
+        File hdfFile = createHDF5File(baseFilename);
 
         try {
-            closeFile(hdf_file, false);
+            closeFile(hdfFile, false);
+            hdfFile = openFile(testFilename, FILE_MODE.READ_WRITE);
 
-            bot.menu("Open As").menu("Read/Write").click();
+            SWTBotTree filetree = bot.tree();
 
-            SWTBotShell shell = bot.shell("Enter a file name");
-            shell.activate();
-
-            SWTBotText text = shell.bot().text();
-            text.setText(filename + file_ext);
-
-            String val = text.getText();
-            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong file name", filename + file_ext, val),
-                    val.equals(filename + file_ext));
-
-            shell.bot().button("   &OK   ").click();
-            bot.waitUntil(shellCloses(shell));
-
-            final SWTBotTree filetree = bot.tree();
+            checkFileTree(filetree, "testLibVersion()", 1, testFilename);
             SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testLibVersion()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("testLibVersion() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext) == 0);
 
             items[0].click();
             items[0].contextMenu("Set Lib version bounds").click();
@@ -61,7 +44,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             SWTBotTabItem tabItem = bot.tabItem("General Object Info");
             tabItem.activate();
 
-            val = bot.textWithLabel("Library version bounds: ").getText();
+            String val = bot.textWithLabel("Library version bounds: ").getText();
             assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and V18", val),
                     val.equals("Earliest and V18"));
 
@@ -92,7 +75,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
         }
         finally {
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
