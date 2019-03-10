@@ -817,7 +817,7 @@ public class H5ScalarDS extends ScalarDS {
         }
         catch (Exception ex) {
             log.debug("read(): failed to read scalar dataset: ", ex);
-            throw new Exception("failed to read scalar dataset: " + ex.getMessage(), ex);
+            throw new Exception("Failed to read scalar dataset: " + ex.getMessage(), ex);
         }
 
         log.trace("read(): finish");
@@ -849,7 +849,7 @@ public class H5ScalarDS extends ScalarDS {
         }
         catch (Exception ex) {
             log.debug("write(): failed to write to scalar dataset: ", ex);
-            throw new Exception("failed to write to scalar dataset: " + ex.getMessage(), ex);
+            throw new Exception("Failed to write to scalar dataset: " + ex.getMessage(), ex);
         }
 
         log.trace("write(): finish");
@@ -951,7 +951,7 @@ public class H5ScalarDS extends ScalarDS {
                         catch (Exception ex) {
                             log.debug("scalarDatasetCommonIO(): read failure: ", ex);
                             log.trace("scalarDatasetCommonIO(): exit");
-                            throw new Exception("failed to read dataset: " + ex.getMessage(), ex);
+                            throw new Exception(ex.getMessage(), ex);
                         }
                         finally {
                             dsDatatype.close(tid);
@@ -1030,18 +1030,12 @@ public class H5ScalarDS extends ScalarDS {
                     catch (Exception ex) {
                         log.debug("scalarDatasetCommonIO(): write failure: ", ex);
                         log.trace("scalarDatasetCommonIO(): exit");
-                        throw new Exception("failed to write to scalar dataset: " + ex.getMessage());
+                        throw new Exception(ex.getMessage());
                     }
                     finally {
                         dsDatatype.close(tid);
                     }
                 } // IO_TYPE.WRITE
-            }
-            catch (Exception ex) {
-                /*
-                 * TODO: will prevent exceptions from going up.
-                 */
-                log.debug("scalarDatasetCommonIO(): failure: ", ex);
             }
             finally {
                 if (HDF5Constants.H5S_ALL != spaceIDs[0]) {

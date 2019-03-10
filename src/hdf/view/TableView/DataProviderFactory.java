@@ -121,7 +121,12 @@ public class DataProviderFactory {
 
         protected org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDataProvider.class);
 
-        protected final Object     dataBuf;
+        /*
+         * In order to support 3-dimensional datasets, which may need to update the data
+         * buffer object after flipping through a 'page', this field is not marked as
+         * final. However, it is important that subclasses DO NOT override this field.
+         */
+        protected Object           dataBuf;
 
         protected Object           theValue;
 
@@ -166,12 +171,9 @@ public class DataProviderFactory {
             theValue = null;
             isValueChanged = false;
 
-            if (   this instanceof CompoundDataProvider
-                || this instanceof ArrayDataProvider
-                || this instanceof VlenDataProvider)
-                isContainerType = true;
-            else
-                isContainerType = false;
+            isContainerType = (this instanceof CompoundDataProvider
+                            || this instanceof ArrayDataProvider
+                            || this instanceof VlenDataProvider);
 
             log.trace("constructor: finish");
         }
@@ -280,8 +282,6 @@ public class DataProviderFactory {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
                 updateAtomicValue(dataBuf, newValue, bufIndex);
-
-                isValueChanged = true;
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}): cell value update failure: ", rowIndex, columnIndex, newValue, ex);
@@ -333,8 +333,6 @@ public class DataProviderFactory {
 
             try {
                 updateAtomicValue(bufObject, newValue, index);
-
-                isValueChanged = true;
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}): updateAtomicValue failure: ", index, bufObject, newValue, ex);
@@ -406,6 +404,8 @@ public class DataProviderFactory {
                     Array.set(bufObject, bufIndex, newValue);
                     break;
             }
+
+            isValueChanged = true;
         }
 
         @Override
@@ -424,6 +424,15 @@ public class DataProviderFactory {
 
         public final boolean getIsValueChanged() {
             return isValueChanged;
+        }
+
+        /*
+         * Update the data buffer for this HDFDataProvider. This is necessary for when
+         * the data that has been read is invalidated, such as when flipping through
+         * 'pages' in a > 2-dimensional dataset.
+         */
+        public final void updateDataBuffer(Object newBuf) {
+            this.dataBuf = newBuf;
         }
 
     }
@@ -890,8 +899,6 @@ public class DataProviderFactory {
                 bufIndex *= arraySize;
 
                 updateArrayElements(dataBuf, newValue, columnIndex, bufIndex);
-
-                isValueChanged = true;
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}): cell value update failure: ", rowIndex, columnIndex, newValue, ex);
@@ -909,8 +916,6 @@ public class DataProviderFactory {
                 long bufIndex = rowIndex * arraySize;
 
                 updateArrayElements(bufObject, newValue, columnIndex, (int) bufIndex);
-
-                isValueChanged = true;
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}, {}): cell value update failure: ", rowIndex, columnIndex, bufObject, newValue, ex);
@@ -934,7 +939,7 @@ public class DataProviderFactory {
                  * TODO:
                  */
                 /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
-                log.debug("updateArrayElements(): number of data points < array size {}", arraySize);
+                log.debug("updateArrayElements(): number of data points ({}) < array size {}", st.countTokens(), arraySize);
                 log.trace("updateArrayElements({}, {}, {}): finish", curBuf, newValue, bufStartIndex);
                 return;
             }
@@ -957,18 +962,24 @@ public class DataProviderFactory {
                 List<?> cmpdDataList = (List<?>) ((Object[]) curBuf)[i];
                 baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, cmpdDataList,
                         tokenizer.nextToken().trim());
+                isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
         }
 
         private void updateArrayOfArrayElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
             for (int i = 0; i < arraySize; i++) {
+                /*
+                 * TODO: not quite right.
+                 */
                 baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+                isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
         }
 
         private void updateArrayOfAtomicElements(StringTokenizer tokenizer, Object curBuf, int bufStartIndex) {
             for (int i = 0; i < arraySize; i++) {
                 baseTypeDataProvider.setDataValue(bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+                isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
         }
 
@@ -1156,8 +1167,6 @@ public class DataProviderFactory {
                 bufIndex *= typeSize;
 
                 updateStringBytes(dataBuf, newValue, bufIndex);
-
-                isValueChanged = true;
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}): cell value update failure: ", rowIndex, columnIndex, newValue, ex);
@@ -1175,8 +1184,6 @@ public class DataProviderFactory {
                 index *= typeSize;
 
                 updateStringBytes(bufObject, newValue, index);
-
-                isValueChanged = true;
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}): cell value update failure: ", index, bufObject, newValue, ex);
@@ -1207,6 +1214,8 @@ public class DataProviderFactory {
                     curBytes[bufStartIndex + i] = ' ';
                 }
             }
+
+            isValueChanged = true;
         }
 
     }

@@ -21,24 +21,21 @@ import hdf.view.MetaDataView.MetaDataView;
 public class MetaDataViewModule implements MetaDataView {
 
     public MetaDataViewModule() {
-        // TODO Auto-generated constructor stub
+
     }
 
     @Override
     public HObject getDataObject() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Attribute addAttribute(HObject obj) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Attribute deleteAttribute(HObject obj) {
-        // TODO Auto-generated method stub
         return null;
     }
 

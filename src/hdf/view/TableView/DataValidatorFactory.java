@@ -24,9 +24,11 @@ import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
 import org.eclipse.nebula.widgets.nattable.data.validate.ValidationFailedException;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 
+import hdf.hdf5lib.HDF5Constants;
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
+import hdf.object.h5.H5Datatype;
 
 /**
  * A Factory class to return a DataValidator class for a NatTable instance based
@@ -440,6 +442,8 @@ public class DataValidatorFactory {
 
         private final Datatype datasetDatatype;
 
+        private final boolean isH5String;
+
         StringDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
 
@@ -457,6 +461,8 @@ public class DataValidatorFactory {
 
             this.datasetDatatype = dtype;
 
+            this.isH5String = (dtype instanceof H5Datatype);
+
             log.trace("constructor: finish");
         }
 
@@ -471,15 +477,30 @@ public class DataValidatorFactory {
                  * If this is a fixed-length string type, check to make sure that the data
                  * length does not exceed the datatype size.
                  */
-                /*
-                 * TODO: Add warning about overwriting NULL-terminator for NULLTERM type strings
-                 */
                 if (!datasetDatatype.isVarStr()) {
                     long lenDiff = ((String) newValue).length() - datasetDatatype.getDatatypeSize();
 
                     if (lenDiff > 0)
                         throw new Exception("string size larger than datatype size by " + lenDiff
                             + ((lenDiff > 1) ? " bytes." : " byte."));
+
+                    /*
+                     * TODO: Add Warning about overwriting NULL-terminator character.
+                     */
+                    if (lenDiff == 0 && isH5String) {
+                        H5Datatype h5Type = (H5Datatype) datasetDatatype;
+                        int strPad = h5Type.getNativeStrPad();
+
+                        if (strPad == HDF5Constants.H5T_STR_NULLTERM) {
+
+                        }
+                        else if (strPad == HDF5Constants.H5T_STR_NULLPAD) {
+
+                        }
+                        else if (strPad == HDF5Constants.H5T_STR_SPACEPAD) {
+
+                        }
+                    }
                 }
             }
             catch (Exception ex) {
@@ -496,14 +517,54 @@ public class DataValidatorFactory {
 
     private static class CharDataValidator extends HDFDataValidator {
 
-        CharDataValidator(final Datatype dtype) {
+        private final Datatype datasetDatatype;
+
+        CharDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(CharDataValidator.class);
 
             log.trace("constructor: start");
 
+            if (!dtype.isChar()) {
+                log.debug("datatype is not a Character type");
+                log.trace("constructor: finish");
+                throw new Exception("CharDataValidator: datatype is not a Character type");
+            }
+
+            this.datasetDatatype = dtype;
+
             log.trace("constructor: finish");
+        }
+
+        @Override
+        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
+
+            try {
+                if (datasetDatatype.isUnsigned()) {
+                    /*
+                     * First try to parse as a larger type in order to catch a NumberFormatException
+                     */
+                    Short shortValue = Short.parseShort((String) newValue);
+                    if (shortValue < 0)
+                        throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                    if (shortValue > (Byte.MAX_VALUE * 2) + 1)
+                        throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                }
+                else {
+                    Byte.parseByte((String) newValue);
+                }
+            }
+            catch (Exception ex) {
+                super.throwValidationFailedException(rowIndex, colIndex, newValue, ex.toString());
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
+            }
+
+            return true;
         }
 
     }

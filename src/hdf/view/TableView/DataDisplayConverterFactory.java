@@ -335,11 +335,6 @@ public class DataDisplayConverterFactory {
         }
 
         @Override
-        public Object displayToCanonicalValue(Object value) {
-            return value;
-        }
-
-        @Override
         public void setNumberFormat(NumberFormat format) {
             super.setNumberFormat(format);
 
@@ -626,6 +621,11 @@ public class DataDisplayConverterFactory {
             log.trace("constructor: finish");
         }
 
+        @Override
+        public Object displayToCanonicalValue(Object value) {
+            char charValue = ((String) value).charAt(0);
+            return (int) charValue;
+        }
     }
 
     private static class NumericalDataDisplayConverter extends HDFDisplayConverter {

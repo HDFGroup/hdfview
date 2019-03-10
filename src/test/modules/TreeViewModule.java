@@ -29,84 +29,71 @@ import hdf.view.TreeView.TreeView;
 public class TreeViewModule implements TreeView {
 
     public TreeViewModule() {
-        // TODO Auto-generated constructor stub
+
     }
 
     @Override
     public FileFormat openFile(String filename, int accessID) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FileFormat reopenFile(FileFormat theFile, int newFileAccessMode) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void closeFile(FileFormat file) throws Exception {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void saveFile(FileFormat file) throws Exception {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void setDefaultDisplayMode(boolean displaymode) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public FileFormat getSelectedFile() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public HObject getCurrentObject() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public DataView showDataContent(HObject dataObject) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public MetaDataView showMetaData(HObject dataObject) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public TreeItem addObject(HObject newObject, Group parentGroup) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Tree getTree() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public List<FileFormat> getCurrentFiles() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public TreeItem findTreeItem(HObject obj) {
-        // TODO Auto-generated method stub
         return null;
     }
 

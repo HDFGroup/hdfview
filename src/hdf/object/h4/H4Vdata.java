@@ -171,6 +171,9 @@ public class H4Vdata extends CompoundDS
     @Override
     public Datatype getDatatype()
     {
+        if (!inited)
+            init();
+
         if (datatype == null) {
             try {
                 datatype = new H4Datatype(-1);

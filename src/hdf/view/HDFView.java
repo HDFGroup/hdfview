@@ -1213,7 +1213,7 @@ public class HDFView implements DataViewManager {
         }
         catch (Exception ex) {
             log.debug("createContentArea(): error occurred while instantiating TreeView factory class", ex);
-            this.showStatus("Error occurred while instantiating TreeView factory class - see log for more info");
+            this.showStatus("Error occurred while instantiating TreeView factory class");
             return;
         }
 
@@ -1227,7 +1227,7 @@ public class HDFView implements DataViewManager {
 
             if (treeView == null) {
                 log.debug("createContentArea(): error occurred while instantiating TreeView class");
-                this.showStatus("Error occurred while instantiating TreeView class - see log for more info");
+                this.showStatus("Error occurred while instantiating TreeView class");
                 return;
             }
         }
@@ -1300,6 +1300,8 @@ public class HDFView implements DataViewManager {
         }
 
         status.append(msg);
+        if (log.isDebugEnabled())
+            status.append(" - see log for more info");
         status.append("\n");
     }
 
@@ -1317,7 +1319,7 @@ public class HDFView implements DataViewManager {
         }
         catch (Exception ex) {
             log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
-            this.showStatus("Error occurred while instantiating MetaDataView factory class - see log for more info");
+            this.showStatus("Error occurred while instantiating MetaDataView factory class");
             return;
         }
 
@@ -1332,7 +1334,7 @@ public class HDFView implements DataViewManager {
 
             if (theView == null) {
                 log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
-                this.showStatus("Error occurred while instantiating MetaDataView class - see log for more info");
+                this.showStatus("Error occurred while instantiating MetaDataView class");
                 return;
             }
         }

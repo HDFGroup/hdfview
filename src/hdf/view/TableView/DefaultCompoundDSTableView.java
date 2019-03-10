@@ -449,7 +449,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
                 /*
-                 * TODO:
+                 * TODO: empty until we have true variable-length support.
                  */
             }
             else if (curDtype.isCompound()) {

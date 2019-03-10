@@ -791,12 +791,6 @@ public class DataOptionDialog extends Dialog {
         charCheckbox.setText("Show As &Char");
         charCheckbox.setSelection(false);
         charCheckbox.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-        charCheckbox.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                // TODO: what?
-            }
-        });
 
         if (dataObject.getDatatype().isChar()
                 || (dataObject.getDatatype().isInteger() && dataObject.getDatatype().getDatatypeSize() == 1)) {

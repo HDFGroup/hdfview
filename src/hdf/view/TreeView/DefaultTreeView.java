@@ -2327,8 +2327,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (UnsatisfiedLinkError e) {
                     log.debug("openFile({}): HDF4 library link error:", filename, e);
-                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
-                            + "': HDF4 library linking error - see log for more info");
+                    viewer.showStatus("Unable to open file '" + filename + "': HDF4 library linking error");
                 }
                 catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
@@ -2346,8 +2345,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (UnsatisfiedLinkError e) {
                     log.debug("openFile({}): HDF5 library link error:", filename, e);
-                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
-                            + "': HDF5 library linking error - see log for more info");
+                    viewer.showStatus("Unable to open file '" + filename + "': HDF5 library linking error");
                 }
                 catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
@@ -2728,7 +2726,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 log.debug("showDataContent(): error occurred while instantiating ImageView factory class", ex);
-                viewer.showStatus("Error occurred while instantiating ImageView factory class - see log for more info");
+                viewer.showStatus("Error occurred while instantiating ImageView factory class");
                 return null;
             }
 
@@ -2742,8 +2740,8 @@ public class DefaultTreeView implements TreeView {
 
                 if (theView == null) {
                     log.debug("showDataContent(): error occurred while instantiating ImageView class");
-                    viewer.showStatus("Error occurred while instantiating ImageView class - see log for more info");
-                    Tools.showError(shell, "Show Data", "Error occurred while instantiating ImageView class - see log for more info");
+                    viewer.showStatus("Error occurred while instantiating ImageView class");
+                    Tools.showError(shell, "Show Data", "Error occurred while instantiating ImageView class");
                 }
             }
             catch (ClassNotFoundException ex) {
@@ -2760,7 +2758,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 log.debug("showDataContent(): error occurred while instantiating TableView factory class", ex);
-                viewer.showStatus("Error occurred while instantiating TableView factory class - see log for more info");
+                viewer.showStatus("Error occurred while instantiating TableView factory class");
                 return null;
             }
 
@@ -2774,8 +2772,8 @@ public class DefaultTreeView implements TreeView {
 
                 if (theView == null) {
                     log.debug("showDataContent(): error occurred while instantiating TableView class");
-                    viewer.showStatus("Error occurred while instantiating TableView class - see log for more info");
-                    Tools.showError(shell, "Show Data", "Error occurred while instantiating TableView class - see log for more info");
+                    viewer.showStatus("Error occurred while instantiating TableView class");
+                    Tools.showError(shell, "Show Data", "Error occurred while instantiating TableView class");
                 }
             }
             catch (ClassNotFoundException ex) {
@@ -2815,7 +2813,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
-            viewer.showStatus("Error occurred while instantiating MetaDataView factory class - see log for more info");
+            viewer.showStatus("Error occurred while instantiating MetaDataView factory class");
             return null;
         }
 
@@ -2831,7 +2829,7 @@ public class DefaultTreeView implements TreeView {
 
             if (theView == null) {
                 log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
-                viewer.showStatus("Error occurred while instantiating MetaDataView class - see log for more info");
+                viewer.showStatus("Error occurred while instantiating MetaDataView class");
                 return null;
             }
         }
