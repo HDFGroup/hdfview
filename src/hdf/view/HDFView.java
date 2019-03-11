@@ -824,6 +824,7 @@ public class HDFView implements DataViewManager {
                 // Open the dialog
                 userOptionDialog.open();
 
+                //TODO: why overwrite currentDir always?
                 //if (userOptionDialog.isWorkDirChanged())
                 currentDir = ViewProperties.getWorkDir();
 
@@ -1612,16 +1613,14 @@ public class HDFView implements DataViewManager {
         // Return if main window (shell) is the only open shell
         if (sList.length <= 1) return;
 
-        int x = 2;
-        int y = 2;
         Shell shell = null;
 
         Rectangle bounds = Display.getCurrent().getPrimaryMonitor().getClientArea();
         int w = Math.max(50, bounds.width - 100);
         int h = Math.max(50, bounds.height - 100);
 
-        x = bounds.x;
-        y = bounds.y;
+        int x = bounds.x;
+        int y = bounds.y;
 
         for (int i = 0; i < sList.length; i++) {
             shell = sList[i];
@@ -1747,7 +1746,9 @@ public class HDFView implements DataViewManager {
             try {
                 urlBar.remove(filename);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                log.trace("unable to remove {} from urlBar", filename);
+            }
 
             urlBar.add(filename, 0);
             urlBar.select(0);
@@ -1789,7 +1790,9 @@ public class HDFView implements DataViewManager {
                     try {
                         urlBar.remove(chosenFiles[i].getAbsolutePath());
                     }
-                    catch (Exception ex) {}
+                    catch (Exception ex) {
+                        log.trace("unable to remove {} from urlBar", chosenFiles[i].getAbsolutePath());
+                    }
 
                     urlBar.add(chosenFiles[i].getAbsolutePath(), 0);
                     urlBar.select(0);
@@ -1956,7 +1959,7 @@ public class HDFView implements DataViewManager {
                     urlBar.remove(filename);
                 }
                 catch (Exception ex) {
-                    log.trace("unable to remove from urlBar");
+                    log.trace("unable to remove {} from urlBar", filename);
                 }
 
                 urlBar.add(filename, 0);
