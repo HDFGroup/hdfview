@@ -160,7 +160,6 @@
     <property name="sonar.projectVersion" value="1.0" />
     <property name="sonar.sources" value="${src.dir}/hdf" />
     <property name="sonar.tests" value="${test.dir}" />
-    <property name="sonar.java.binaries" value="${classes.dir}" />
     <property name="sonar.sourceEncoding" value="UTF-8" />
     <property name="sonar.language" value="java" />
     <property name="sonar.core.codeCoveragePlugin" value="jacoco" />
@@ -552,15 +551,20 @@
         </delete>
     </target>
 
-    <property name="agentvmparam" value="" />
+    <target name="jacoco" depends="jacoco-skip, jacoco-run">
+    </target>
 
     <!-- Define jacoco Scanner for Ant Target -->
-    <target name="jacoco">
+    <target name="jacoco-run" if="${build.jacoco}">
         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" onerror="ignore">
             <classpath path="/opt/jacoco-0.8.3/lib/jacocoant.jar" />
         </taskdef>
 
         <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant" />
+    </target>
+
+    <target name="jacoco-skip" unless="${build.jacoco}">
+        <property name="agentvmparam" value="" />
     </target>
 
     <target name="junit-single-test" depends="jar,compile-test,clean-junit-uitest">
@@ -677,10 +681,10 @@
         </sequential>
     </macrodef>
 
-    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test-name">
+    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test-name, jacoco">
         <mkdir dir="${report.dir}" />
 
-        <run-junit 
+        <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest"
             includes="**/uitest/${test}*"
@@ -738,7 +742,7 @@
     <target name="-hdfview-ui-tests" depends="jar, compile-test, clean-junit-uitest">
         <mkdir dir="${report.dir}" />
 
-        <run-junit 
+        <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest"
             includes="test/uitest/*Test*.class"
