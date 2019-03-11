@@ -409,7 +409,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             createNewGroup();
             createNewDataset();
 
-            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF5DeleteAttribute()", 3, testFilename);
+            checkFileTree(filetree, "testHDF5DeleteAttribute()", 3, testFilename);
 
             /* Add an attribute to the newly-created group */
             SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
@@ -429,6 +429,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /* Now test deletion of attributes by using the popup menu */
 
             /* Reload the file for good measure */
+            SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].click();
             items[0].contextMenu().menu("&Reload File As").menu("Read/Write").click();
 
@@ -482,7 +483,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             createNewGroup();
             createNewDataset();
 
-            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF5RenameAttribute()", 3, testFilename);
+            checkFileTree(filetree, "testHDF5RenameAttribute()", 3, testFilename);
 
             /* Add an attribute to the newly-created group */
             SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
@@ -528,7 +529,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = checkFileTree(filetree, "testOpenHDF4ScalarAttribute()", 1, testFilename);
+            checkFileTree(filetree, "testOpenHDF4ScalarAttribute()", 1, testFilename);
 
             createNewGroup();
             createNewDataset();
@@ -553,6 +554,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /* Test open of attribute by popup menu */
 
             /* Reload file for good measure */
+            SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].click();
             items[0].contextMenu("Reload File").click();
 
@@ -601,7 +603,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = checkFileTree(filetree, "testOpenHDF5ScalarAttribute()", 1, testFilename);
+            checkFileTree(filetree, "testOpenHDF5ScalarAttribute()", 1, testFilename);
 
             createNewGroup();
             createNewDataset();
@@ -626,6 +628,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /* Test open of attribute by popup menu */
 
             /* Reload file for good measure */
+            SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].click();
             items[0].contextMenu("Reload File").click();
 
@@ -784,7 +787,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             createNewGroup();
             createNewDataset();
 
-            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF4RenameAttributeFunctionDisabled()", 3, testFilename);
+            checkFileTree(filetree, "testHDF4RenameAttributeFunctionDisabled()", 3, testFilename);
 
             /* Add an attribute to the newly-created group */
             SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
@@ -838,7 +841,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             createNewGroup();
             createNewDataset();
 
-            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF4DeleteAttributeFunctionDisabled()", 3, testFilename);
+            checkFileTree(filetree, "testHDF4DeleteAttributeFunctionDisabled()", 3, testFilename);
 
             /* Add an attribute to the newly-created group */
             SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);

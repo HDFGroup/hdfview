@@ -319,7 +319,7 @@ public abstract class AbstractWindowTest {
         }
     }
 
-    protected SWTBotTreeItem[] checkFileTree(SWTBotTree tree, String funcName, int expectedRowCount, String filename)
+    protected void checkFileTree(SWTBotTree tree, String funcName, int expectedRowCount, String filename)
             throws IllegalArgumentException, AssertionError {
         if (tree == null)
             throw new IllegalArgumentException("SWTBotTree parameter is null");
@@ -334,7 +334,6 @@ public abstract class AbstractWindowTest {
         String curFilename = tree.getAllItems()[0].getText();
         assertTrue(constructWrongValueMessage(funcName, "filetree is missing file", filename, curFilename),
                 curFilename.compareTo(filename) == 0);
-        return tree.getAllItems();
     }
 
     protected void testSamplePixel(final int theX, final int theY, String requiredValue) {
